@@ -72,7 +72,7 @@ export default function DateRangePicker({ value, onChange }: Props) {
             disabled={{ before: new Date() }}
             numberOfMonths={2}
             formatters={{
-              formatMonthCaption: (d) => `${HE_MONTHS[d.getMonth()]} ${d.getFullYear()}`,
+              formatCaption: (d) => `${HE_MONTHS[d.getMonth()]} ${d.getFullYear()}`,
               formatWeekdayName: (d) => HE_DAYS[d.getDay()],
             }}
             classNames={{
