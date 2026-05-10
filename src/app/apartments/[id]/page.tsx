@@ -2,6 +2,8 @@
 import { Suspense, useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import type { Apartment } from "@/types";
+import { calcTotalForRange, getEffectivePrice } from "@/lib/pricing";
+import type { PricingRule } from "@/lib/pricing";
 import {
   IconMountain, IconSkis, IconBus, IconPlane, IconShield, IconUser, IconBot,
   IconCheck, IconStar, IconCalendar, IconChevronLeft, IconWifi, IconFire,
@@ -126,6 +128,7 @@ function ApartmentPage() {
   const guests     = parseInt(params.get("guests") ?? "2");
 
   const [apt,      setApt]      = useState<Apartment | null>(null);
+  const [rules,    setRules]    = useState<PricingRule[]>([]);
   const [loading,  setLoading]  = useState(true);
 
   // Add-ons
@@ -142,10 +145,14 @@ function ApartmentPage() {
     ? Math.round((new Date(checkout).getTime() - new Date(checkin).getTime()) / 86400000) : 7;
 
   useEffect(() => {
-    fetch(`/api/apartments/${id}`)
-      .then(r => r.json())
-      .then(d => { setApt(d); setLoading(false); })
-      .catch(() => setLoading(false));
+    Promise.all([
+      fetch(`/api/apartments/${id}`).then(r => r.json()),
+      fetch(`/api/pricing-rules?apartment_id=${id}`).then(r => r.json()),
+    ]).then(([d, r]) => {
+      setApt(d);
+      setRules(Array.isArray(r) ? r : []);
+      setLoading(false);
+    }).catch(() => setLoading(false));
   }, [id]);
 
   /* ── Flight URLs with actual dates ─────────────────────── */
@@ -159,7 +166,14 @@ function ApartmentPage() {
     : `https://www.skyscanner.co.il/transport/flights/tlv/gva/`;
 
   /* ── Price calculation ──────────────────────────────────── */
-  const aptTotal      = apt ? apt.price_per_night * nights : 0;
+  const basePrice     = apt?.price_per_night ?? 0;
+  const aptTotal      = apt
+    ? (checkin && checkout ? calcTotalForRange(checkin, checkout, basePrice, rules) : basePrice * nights)
+    : 0;
+  /* Effective nightly price for display (first night or base) */
+  const displayNightlyPrice = apt
+    ? (checkin ? getEffectivePrice(new Date(checkin + "T12:00:00"), basePrice, rules) : basePrice)
+    : 0;
   const skiTotal      = skiPass  ? SKI_DAY_PRICE * nights * guests : 0;
   const trTotal       = transfer ? TRANSFER_PRICE : 0;
   const flexExtra     = cancel   === "flexible" ? FLEXIBLE_EXTRA * guests : 0;
@@ -294,9 +308,12 @@ function ApartmentPage() {
                 {/* Price header */}
                 <div className="px-6 pt-6 pb-4 bg-gradient-to-br from-gray-50 to-blue-50 border-b border-gray-100">
                   <div className="text-3xl font-black text-gray-900">
-                    €{apt.price_per_night.toLocaleString()}
+                    €{displayNightlyPrice.toLocaleString()}
                     <span className="text-base font-medium text-gray-400"> / לילה</span>
                   </div>
+                  {displayNightlyPrice !== basePrice && (
+                    <p className="text-xs text-blue-600 font-medium mt-0.5">מחיר מיוחד לתאריכים אלו</p>
+                  )}
                   {checkin && checkout && (
                     <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
                       <IconCalendar size={14} />
@@ -388,7 +405,7 @@ function ApartmentPage() {
                     <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">סיכום מחיר</div>
                     <div className="flex flex-col gap-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-500">€{apt.price_per_night} × {nights} לילות</span>
+                        <span className="text-gray-500">לינה × {nights} לילות</span>
                         <span className="font-semibold text-gray-800">€{aptTotal.toLocaleString()}</span>
                       </div>
                       {skiPass && (

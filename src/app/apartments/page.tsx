@@ -1,9 +1,9 @@
 "use client";
 import { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import type { Apartment } from "@/types";
 import {
-  IconMountain, IconCheck, IconStar, IconBed, IconSearch,
+  IconMountain, IconCheck, IconStar, IconBed, IconSearch, IconCalendar,
 } from "@/components/Icons";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
@@ -92,8 +92,51 @@ function ApartmentCard({ apt, checkin, checkout, guests }: {
   );
 }
 
+/* ── Date picker banner ──────────────────────────────────── */
+function DateBanner({ onSet }: { onSet: (checkin: string, checkout: string, guests: number) => void }) {
+  const [ci, setCi]   = useState("");
+  const [co, setCo]   = useState("");
+  const [g,  setG]    = useState(2);
+
+  const apply = () => { if (ci && co) onSet(ci, co, g); };
+
+  return (
+    <div className="bg-blue-600 text-white px-4 py-4" dir="rtl">
+      <div className="max-w-6xl mx-auto">
+        <p className="text-sm font-bold mb-3 flex items-center gap-2">
+          <span>📅</span> בחר תאריכים לראות מחירים נכונים ותאימות
+        </p>
+        <div className="flex flex-wrap gap-2 items-end">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-blue-200 font-bold">צ׳ק-אין</label>
+            <input type="date" value={ci} onChange={e=>setCi(e.target.value)}
+              className="bg-white/20 border border-white/30 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/60 focus:outline-none focus:bg-white/30" dir="ltr" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-blue-200 font-bold">צ׳ק-אאוט</label>
+            <input type="date" value={co} onChange={e=>setCo(e.target.value)}
+              className="bg-white/20 border border-white/30 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:bg-white/30" dir="ltr" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-blue-200 font-bold">אנשים</label>
+            <select value={g} onChange={e=>setG(+e.target.value)}
+              className="bg-white/20 border border-white/30 rounded-lg px-3 py-2 text-sm text-white focus:outline-none">
+              {[1,2,3,4,5,6,7,8].map(n => <option key={n} value={n} className="text-gray-900">{n}</option>)}
+            </select>
+          </div>
+          <button onClick={apply} disabled={!ci || !co}
+            className="bg-white text-blue-700 font-black px-5 py-2 rounded-lg text-sm hover:bg-blue-50 transition-colors disabled:opacity-50">
+            עדכן ←
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ApartmentsPage() {
   const params   = useSearchParams();
+  const router   = useRouter();
   const checkin  = params.get("checkin")  ?? "";
   const checkout = params.get("checkout") ?? "";
   const guests   = parseInt(params.get("guests") ?? "2");
@@ -101,6 +144,12 @@ function ApartmentsPage() {
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [loading,    setLoading]    = useState(true);
   const [filter,     setFilter]     = useState<Filter>("all");
+
+  const noDates = !checkin || !checkout;
+
+  const applyDates = (ci: string, co: string, g: number) => {
+    router.replace(`/apartments?checkin=${ci}&checkout=${co}&guests=${g}`);
+  };
 
   useEffect(() => {
     fetch("/api/apartments")
@@ -115,6 +164,9 @@ function ApartmentsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50" dir="rtl">
+
+      {/* ── Date banner ──────────────────────────────────────── */}
+      {noDates && <DateBanner onSet={applyDates} />}
 
       {/* ── Nav ──────────────────────────────────────────────── */}
       <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
