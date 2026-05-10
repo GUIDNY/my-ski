@@ -120,28 +120,28 @@ export default function Home() {
       <Navbar />
 
       {/* ── HERO ─────────────────────────────────────────── */}
-      <section className="relative flex flex-col items-center justify-center" style={{ height: "88vh", minHeight: 620 }}>
+      <section className="relative flex flex-col items-center justify-center" style={{ height: "100vh", minHeight: 640 }}>
         <img
           src="/hero-ski.jpg"
           alt="Val Thorens"
           className="absolute inset-0 w-full h-full object-cover object-center"
+          style={{ zIndex: 0 }}
         />
-        {/* Very light dark overlay + bottom fade to page bg */}
         <div className="absolute inset-0" style={{
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.08) 55%, rgba(247,249,251,1) 100%)"
+          zIndex: 1,
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.15) 60%, rgba(0,0,0,0.55) 100%)"
         }} />
-
-        <div className="relative z-10 flex flex-col items-center gap-8 px-4 text-center w-full max-w-4xl mx-auto">
-          <h1
-            className="font-display text-5xl md:text-7xl font-black text-gray-900 leading-tight"
-            style={{ textShadow: "0 1px 4px rgba(255,255,255,0.6)" }}
-          >
-            בנה את החבילה שלך<br />שלב אחר שלב
+        <div className="relative z-10 flex flex-col items-center gap-7 px-4 text-center w-full max-w-4xl mx-auto">
+          <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-white leading-tight" style={{ textShadow: "0 2px 20px rgba(0,0,0,0.4)" }}>
+            Val Thorens
           </h1>
-          <p className="text-lg md:text-xl text-gray-700 font-medium" style={{ textShadow: "0 1px 3px rgba(255,255,255,0.5)" }}>
-            רק מה שרוצה, בלי תוספות מיותרות
+          <p className="text-xl md:text-2xl text-white/90 font-medium" style={{ textShadow: "0 1px 10px rgba(0,0,0,0.3)" }}>
+            כל מה שאתה צריך נמצא כאן
           </p>
           <SearchWidget />
+          <button className="flex items-center gap-2.5 px-6 py-3 rounded-full text-white text-sm font-medium transition-all hover:bg-white/20" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.25)" }}>
+            ✨ תכנון חכם — בנה את החבילה שלך ←
+          </button>
         </div>
       </section>
 
