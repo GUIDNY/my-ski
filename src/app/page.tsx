@@ -187,10 +187,10 @@ export default function Home() {
           </div>
           <div className="w-full md:w-2/5 md:pr-10">
             <h2 className="font-display text-3xl md:text-4xl font-black text-gray-900 mb-6">
-              יוקרה בכל פרט
+              גמישות במחירים נוחים
             </h2>
             <p className="text-lg text-gray-500 leading-relaxed mb-8">
-              סקי מתי שרוצים במחירים נוחים — אצלנו דואגים לך גם לתאריכים שיתאימו לך וגם לנוחות המרבית באתר Val Thorens. תוכל להחליט בעצמך מה לסגור דרכינו ומה לסגור עצמאית.
+              אצלנו תוכלו לבחור חופשה בוואל טורנס באיזה תאריכים שתרצו, עם מחירים נוחים ועם רשות לסגור מה שתרצו באופן עצמאי.
             </p>
             <div className="flex items-center gap-4 py-4 border-t border-b border-gray-100">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
