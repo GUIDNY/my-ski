@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 /* ── Types ───────────────────────────────────────────────── */
@@ -10,13 +10,13 @@ type PricingRule = { id: string; label: string; type: string; start_date?: strin
 type IcalSource = { id: string; platform: string; ical_url: string; last_synced?: string };
 
 /* ── Helpers ─────────────────────────────────────────────── */
-const MONTHS_HE = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
-const DAYS_HE   = ["א'","ב'","ג'","ד'","ה'","ו'","ש'"];
-const WEEKDAYS_HE = ["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"];
-const MONTH_NAMES_HE = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
+const MONTHS_HE    = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
+const DAYS_HE      = ["א'","ב'","ג'","ד'","ה'","ו'","ש'"];
+const WEEKDAYS_HE  = ["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"];
+const MONTH_NAMES_HE = MONTHS_HE;
 
 function fmtDate(s: string) {
-  const d = new Date(s); return `${d.getDate()} ${MONTHS_HE[d.getMonth()]}`;
+  const d = new Date(s + "T12:00:00"); return `${d.getDate()} ${MONTHS_HE[d.getMonth()]}`;
 }
 function isoMonth(y: number, m: number) { return `${y}-${String(m+1).padStart(2,"0")}`; }
 
@@ -33,18 +33,39 @@ function getEffectivePrice(date: Date, basePrice: number, rules: PricingRule[]) 
   return basePrice;
 }
 
+/* Ski season: start at December */
+function getSkiSeasonStart() {
+  const now = new Date();
+  const m = now.getMonth();
+  if (m >= 11) return { year: now.getFullYear(),     month: 11 };
+  if (m <= 4)  return { year: now.getFullYear() - 1, month: 11 };
+  return { year: now.getFullYear(), month: 11 };
+}
+
 /* ── Tabs ────────────────────────────────────────────────── */
 type Tab = "calendar" | "pricing" | "bookings" | "sync";
 
 /* ── Calendar ────────────────────────────────────────────── */
-function CalendarTab({ aptId, basePrice, rules }: { aptId: string; basePrice: number; rules: PricingRule[] }) {
-  const now   = new Date();
-  const [year, setYear]   = useState(now.getFullYear());
-  const [month, setMonth] = useState(now.getMonth());
-  const [blocks, setBlocks]   = useState<Block[]>([]);
+function CalendarTab({ aptId, basePrice, rules, reloadRules }: {
+  aptId: string; basePrice: number; rules: PricingRule[]; reloadRules: () => void;
+}) {
+  const def = getSkiSeasonStart();
+  const [year,  setYear]    = useState(def.year);
+  const [month, setMonth]   = useState(def.month);
+  const [blocks,   setBlocks]   = useState<Block[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loading, setLoading]  = useState(false);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [loading,  setLoading]  = useState(false);
+
+  /* Range selection */
+  const [rangeStart, setRangeStart] = useState<string | null>(null);
+  const [rangeEnd,   setRangeEnd]   = useState<string | null>(null);
+
+  /* Action panel */
+  const [panel,       setPanel]      = useState<"block"|"unblock"|"price"|null>(null);
+  const [priceVal,    setPriceVal]   = useState("");
+  const [priceLabel,  setPriceLabel] = useState("");
+  const [saving,      setSaving]     = useState(false);
+  const [saveMsg,     setSaveMsg]    = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -58,54 +79,114 @@ function CalendarTab({ aptId, basePrice, rules }: { aptId: string; basePrice: nu
   useEffect(() => { load(); }, [load]);
 
   const blockMap = Object.fromEntries(blocks.map(b => [b.date, b]));
-  const bookedDates = new Set<string>();
-  bookings.forEach(b => {
-    const s = new Date(b.check_in), e = new Date(b.check_out);
-    for (let d = new Date(s); d < e; d.setDate(d.getDate()+1))
-      bookedDates.add(d.toISOString().split("T")[0]);
-  });
+  const bookedDates = useMemo(() => {
+    const s = new Set<string>();
+    bookings.forEach(b => {
+      for (let d = new Date(b.check_in); d < new Date(b.check_out); d.setDate(d.getDate()+1))
+        s.add(d.toISOString().split("T")[0]);
+    });
+    return s;
+  }, [bookings]);
 
-  const firstDay = new Date(year, month, 1).getDay();
+  /* Build selected range set */
+  const selectedRange = useMemo(() => {
+    const s = new Set<string>();
+    if (!rangeStart) return s;
+    const a = rangeEnd && rangeEnd < rangeStart ? rangeEnd : rangeStart;
+    const b = rangeEnd && rangeEnd < rangeStart ? rangeStart : (rangeEnd ?? rangeStart);
+    for (let d = new Date(a + "T12:00:00"); d.toISOString().split("T")[0] <= b; d.setDate(d.getDate()+1))
+      s.add(d.toISOString().split("T")[0]);
+    return s;
+  }, [rangeStart, rangeEnd]);
+
+  const firstDay    = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month+1, 0).getDate();
   const cells: (number|null)[] = [...Array(firstDay).fill(null), ...Array.from({length:daysInMonth},(_,i)=>i+1)];
   while (cells.length % 7) cells.push(null);
 
-  const toggleDate = async (dayNum: number) => {
+  const handleDayClick = (dayNum: number) => {
     const iso = `${year}-${String(month+1).padStart(2,"0")}-${String(dayNum).padStart(2,"0")}`;
-    if (bookedDates.has(iso)) return;
-    if (blockMap[iso]) {
-      await fetch(`/api/availability?apartment_id=${aptId}&date=${iso}`, { method: "DELETE" });
+    const today = new Date().toISOString().split("T")[0];
+    if (iso < today || bookedDates.has(iso) || blockMap[iso]?.source !== "manual" && blockMap[iso]?.status === "booked_external") return;
+
+    if (!rangeStart) {
+      setRangeStart(iso); setRangeEnd(null); setPanel(null);
+    } else if (!rangeEnd) {
+      if (iso === rangeStart) { setRangeStart(null); }
+      else { setRangeEnd(iso); }
     } else {
-      await fetch("/api/availability", { method: "POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ apartment_id: aptId, date: iso, status: "blocked" }) });
+      /* Start new range */
+      setRangeStart(iso); setRangeEnd(null); setPanel(null); setSaveMsg("");
     }
-    load();
   };
 
-  const navPrev = () => { if (month === 0) { setYear(y=>y-1); setMonth(11); } else setMonth(m=>m-1); };
-  const navNext = () => { if (month === 11) { setYear(y=>y+1); setMonth(0); } else setMonth(m=>m+1); };
+  const clearSelection = () => { setRangeStart(null); setRangeEnd(null); setPanel(null); setSaveMsg(""); setPriceVal(""); setPriceLabel(""); };
+
+  const applyBlockToggle = async (status: "blocked"|"free") => {
+    setSaving(true);
+    for (const iso of selectedRange) {
+      if (bookedDates.has(iso)) continue;
+      if (status === "free") {
+        await fetch(`/api/availability?apartment_id=${aptId}&date=${iso}`, { method: "DELETE" });
+      } else {
+        await fetch("/api/availability", { method:"POST", headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({ apartment_id:aptId, date:iso, status:"blocked" }) });
+      }
+    }
+    setSaving(false); clearSelection(); load();
+  };
+
+  const applyPrice = async () => {
+    if (!priceVal || isNaN(parseFloat(priceVal))) return;
+    setSaving(true);
+    const sorted = [...selectedRange].sort();
+    const label = priceLabel.trim() || `מחיר מיוחד ${fmtDate(sorted[0])}–${fmtDate(sorted[sorted.length-1])}`;
+    await fetch("/api/pricing-rules", { method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ apartment_id:aptId, label, type:"date_range",
+        start_date: sorted[0], end_date: sorted[sorted.length-1],
+        price: parseFloat(priceVal), priority: 10 }) });
+    setSaving(false); setSaveMsg(`נשמר: €${priceVal} לתאריכים אלו`); reloadRules();
+    clearSelection(); load();
+  };
+
+  const navPrev = () => {
+    if (month === 0) { setYear(y=>y-1); setMonth(11); } else setMonth(m=>m-1);
+    clearSelection();
+  };
+  const navNext = () => {
+    if (month === 11) { setYear(y=>y+1); setMonth(0); } else setMonth(m=>m+1);
+    clearSelection();
+  };
+
+  const showPanel = rangeEnd !== null;
 
   return (
-    <div>
+    <div className="pb-48">
       {/* Month nav */}
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center justify-between mb-4">
         <button onClick={navPrev} className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 text-gray-600">→</button>
         <h3 className="font-black text-gray-900 text-lg">{MONTHS_HE[month]} {year}</h3>
         <button onClick={navNext} className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 text-gray-600">←</button>
       </div>
 
       {/* Legend */}
-      <div className="flex gap-4 mb-4 flex-wrap">
-        {[["bg-white border-gray-200","פנוי"],["bg-red-100 border-red-200","חסום"],["bg-blue-100 border-blue-200","הזמנה פנימית"],["bg-orange-100 border-orange-200","Airbnb/Booking"]].map(([cls,lbl]) => (
-          <div key={lbl} className="flex items-center gap-1.5 text-xs text-gray-500">
-            <div className={`w-3.5 h-3.5 rounded border ${cls}`} />
+      <div className="flex gap-3 mb-4 flex-wrap text-xs text-gray-500">
+        {[["bg-white border-gray-200","פנוי"],["bg-red-100 border-red-200","חסום"],["bg-blue-100 border-blue-200","הזמנה"],["bg-orange-100 border-orange-200","Airbnb/Booking"],["bg-indigo-100 border-indigo-300","נבחר"]].map(([cls,lbl]) => (
+          <div key={lbl} className="flex items-center gap-1">
+            <div className={`w-3 h-3 rounded border ${cls}`} />
             {lbl}
           </div>
         ))}
       </div>
 
+      {/* Instruction */}
+      <p className="text-xs text-gray-400 mb-3 text-center">
+        {!rangeStart ? "לחץ על יום התחלה לבחירת טווח" : !rangeEnd ? "לחץ על יום סיום" : `${selectedRange.size} ימים נבחרו — בחר פעולה`}
+      </p>
+
       {/* Grid */}
       {loading ? <div className="h-48 flex items-center justify-center text-gray-400 text-sm">טוען...</div> : (
-        <div className="border border-gray-100 rounded-xl overflow-hidden">
+        <div className="border border-gray-100 rounded-xl overflow-hidden select-none">
           <div className="grid grid-cols-7 bg-gray-50 border-b border-gray-100">
             {DAYS_HE.map(d => <div key={d} className="py-2 text-center text-xs font-bold text-gray-400">{d}</div>)}
           </div>
@@ -113,27 +194,36 @@ function CalendarTab({ aptId, basePrice, rules }: { aptId: string; basePrice: nu
             {cells.map((day, i) => {
               if (!day) return <div key={i} className="h-14 md:h-16 border-b border-l border-gray-50 bg-gray-50/30" />;
               const iso = `${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+              const today   = new Date().toISOString().split("T")[0];
+              const isPast  = iso < today;
               const isBooked   = bookedDates.has(iso);
-              const isExternal = blockMap[iso]?.source !== "manual" && blockMap[iso];
-              const isBlocked  = blockMap[iso] && !isBooked;
-              const price = getEffectivePrice(new Date(iso), basePrice, rules);
-              const today = new Date().toISOString().split("T")[0];
-              const isPast = iso < today;
+              const isExternal = blockMap[iso]?.status === "booked_external";
+              const isBlocked  = !!blockMap[iso] && !isBooked && !isExternal;
+              const inRange    = selectedRange.has(iso);
+              const isStart    = iso === rangeStart;
+              const price = getEffectivePrice(new Date(iso + "T12:00:00"), basePrice, rules);
+              const isClickable = !isPast && !isBooked && !isExternal;
 
               let bg = "bg-white hover:bg-gray-50";
-              if (isBooked)                       bg = "bg-blue-50 hover:bg-blue-100";
-              else if (isExternal)                bg = "bg-orange-50";
-              else if (isBlocked)                 bg = "bg-red-50 hover:bg-red-100";
+              if (inRange)     bg = "bg-indigo-100 hover:bg-indigo-200";
+              else if (isBooked)    bg = "bg-blue-50";
+              else if (isExternal) bg = "bg-orange-50";
+              else if (isBlocked)  bg = "bg-red-50 hover:bg-red-100";
 
               return (
                 <div key={i}
-                  onClick={() => !isPast && !isBooked && !isExternal && toggleDate(day)}
-                  className={`h-14 md:h-16 border-b border-l border-gray-100 p-1 flex flex-col justify-between transition-colors ${bg} ${!isPast && !isBooked && !isExternal ? "cursor-pointer" : "cursor-default"} ${isPast ? "opacity-40" : ""}`}
+                  onClick={() => isClickable && handleDayClick(day)}
+                  className={`h-14 md:h-16 border-b border-l border-gray-100 p-1 flex flex-col justify-between transition-colors
+                    ${bg} ${isClickable ? "cursor-pointer" : "cursor-default"} ${isPast ? "opacity-35" : ""}
+                    ${isStart && !rangeEnd ? "ring-2 ring-indigo-400 ring-inset" : ""}`}
                 >
                   <span className={`text-xs font-bold ${iso === today ? "text-blue-600" : "text-gray-700"}`}>{day}</span>
-                  <span className="text-[9px] text-gray-400 font-medium">€{price}</span>
-                  {isBlocked && !isBooked && <span className="text-[8px] text-red-400 font-bold leading-none">חסום</span>}
-                  {isBooked  && <span className="text-[8px] text-blue-500 font-bold leading-none">הזמנה</span>}
+                  <div className="flex flex-col items-end gap-px">
+                    <span className="text-[9px] text-gray-400 font-medium">€{price}</span>
+                    {isBlocked  && <span className="text-[8px] text-red-400 font-bold">חסום</span>}
+                    {isBooked   && <span className="text-[8px] text-blue-500 font-bold">הזמנה</span>}
+                    {isExternal && <span className="text-[8px] text-orange-500 font-bold">חיצוני</span>}
+                  </div>
                 </div>
               );
             })}
@@ -141,30 +231,82 @@ function CalendarTab({ aptId, basePrice, rules }: { aptId: string; basePrice: nu
         </div>
       )}
 
-      <p className="text-xs text-gray-400 mt-3 text-center">לחץ על יום כדי לחסום / לשחרר. ימים עם הזמנה נעולים.</p>
+      {saveMsg && <p className="text-green-600 text-xs font-medium text-center mt-2">{saveMsg}</p>}
+
+      {/* Action panel — slides up when range selected */}
+      {showPanel && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-2xl rounded-t-2xl" dir="rtl">
+          <div className="max-w-2xl mx-auto px-4 pt-4 pb-6">
+            {/* Handle */}
+            <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
+
+            <div className="flex items-center justify-between mb-4">
+              <p className="font-black text-gray-900 text-sm">
+                {selectedRange.size} ימים · {fmtDate([...selectedRange].sort()[0])} – {fmtDate([...selectedRange].sort().pop()!)}
+              </p>
+              <button onClick={clearSelection} className="text-gray-400 text-xl leading-none hover:text-gray-600">×</button>
+            </div>
+
+            {panel === null && (
+              <div className="grid grid-cols-3 gap-2">
+                <button onClick={() => applyBlockToggle("blocked")} disabled={saving}
+                  className="py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-black transition-colors disabled:opacity-50">
+                  חסום ימים
+                </button>
+                <button onClick={() => applyBlockToggle("free")} disabled={saving}
+                  className="py-3 rounded-xl bg-green-500 hover:bg-green-600 text-white text-xs font-black transition-colors disabled:opacity-50">
+                  שחרר ימים
+                </button>
+                <button onClick={() => { setPanel("price"); setPriceVal(""); setPriceLabel(""); }}
+                  className="py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black transition-colors">
+                  קבע מחיר
+                </button>
+              </div>
+            )}
+
+            {panel === "price" && (
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-bold text-gray-500 block mb-1">שם החוק (אופציונלי)</label>
+                  <input value={priceLabel} onChange={e=>setPriceLabel(e.target.value)}
+                    placeholder='למשל: "פסח 2026"'
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-500 block mb-1">מחיר ללילה (€)</label>
+                  <input type="number" value={priceVal} onChange={e=>setPriceVal(e.target.value)}
+                    placeholder="0" dir="ltr"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={applyPrice} disabled={saving || !priceVal}
+                    className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-black transition-colors">
+                    {saving ? "שומר..." : "שמור מחיר"}
+                  </button>
+                  <button onClick={() => setPanel(null)}
+                    className="px-4 py-3 border border-gray-200 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-50">
+                    חזרה
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 /* ── Pricing ─────────────────────────────────────────────── */
-function PricingTab({ aptId, basePrice }: { aptId: string; basePrice: number }) {
-  const [rules, setRules]   = useState<PricingRule[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [form, setForm]     = useState({ label:"", type:"date_range", start_date:"", end_date:"", months:[] as number[], weekdays:[] as number[], price:"", priority:"5" });
+function PricingTab({ aptId, basePrice, rules, reload }: { aptId: string; basePrice: number; rules: PricingRule[]; reload: () => void }) {
+  const [loading,  setLoading]  = useState(false);
+  const [form, setForm]         = useState({ label:"", type:"date_range", start_date:"", end_date:"", months:[] as number[], weekdays:[] as number[], price:"", priority:"5" });
   const [showForm, setShowForm] = useState(false);
-  const [saving, setSaving]   = useState(false);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    const res = await fetch(`/api/pricing-rules?apartment_id=${aptId}`);
-    setRules(await res.json());
-    setLoading(false);
-  }, [aptId]);
-  useEffect(() => { load(); }, [load]);
+  const [saving,   setSaving]   = useState(false);
 
   const del = async (id: string) => {
     await fetch(`/api/pricing-rules?id=${id}`, { method: "DELETE" });
-    load();
+    reload();
   };
 
   const save = async () => {
@@ -178,7 +320,7 @@ function PricingTab({ aptId, basePrice }: { aptId: string; basePrice: number }) 
     setShowForm(false);
     setForm({ label:"", type:"date_range", start_date:"", end_date:"", months:[], weekdays:[], price:"", priority:"5" });
     setSaving(false);
-    load();
+    reload();
   };
 
   const toggleArr = (arr: number[], val: number) => arr.includes(val) ? arr.filter(x=>x!==val) : [...arr, val];
@@ -194,7 +336,6 @@ function PricingTab({ aptId, basePrice }: { aptId: string; basePrice: number }) 
 
   return (
     <div>
-      {/* Base price card */}
       <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-5 flex items-center justify-between">
         <div>
           <p className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-0.5">מחיר בסיס</p>
@@ -203,7 +344,6 @@ function PricingTab({ aptId, basePrice }: { aptId: string; basePrice: number }) 
         <p className="text-xs text-blue-400 max-w-[160px] text-left">שינוי מחיר הבסיס בדף ניהול הדירה הראשי</p>
       </div>
 
-      {/* Rules list */}
       {loading ? <p className="text-sm text-gray-400 text-center py-8">טוען...</p> : (
         <div className="space-y-2.5 mb-5">
           {rules.length === 0 && <p className="text-sm text-gray-400 text-center py-8 bg-gray-50 rounded-xl">אין חוקי מחיר מיוחדים</p>}
@@ -221,7 +361,6 @@ function PricingTab({ aptId, basePrice }: { aptId: string; basePrice: number }) 
         </div>
       )}
 
-      {/* Add rule */}
       {!showForm ? (
         <button onClick={() => setShowForm(true)} className="w-full py-3 border-2 border-dashed border-gray-200 rounded-xl text-sm font-bold text-gray-400 hover:border-blue-300 hover:text-blue-500 transition-colors">
           + הוסף חוק מחיר
@@ -311,7 +450,7 @@ function PricingTab({ aptId, basePrice }: { aptId: string; basePrice: number }) 
 
 /* ── Bookings ────────────────────────────────────────────── */
 function BookingsTab({ aptId }: { aptId: string }) {
-  const [bookings, setBookings] = useState<(Booking & { id: string; total_price: number; customer_email: string; customer_phone?: string; add_ons?: Record<string,unknown> })[]>([]);
+  const [bookings, setBookings] = useState<(Booking & { id: string; total_price: number; customer_email: string; customer_phone?: string })[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -410,7 +549,6 @@ function SyncTab({ aptId }: { aptId: string }) {
         <p className="text-xs leading-relaxed">העתק את קישור ה-iCal מהפלטפורמה (ב-Airbnb: ניהול נכסים → לוח שנה → ייצוא) והכנס אותו כאן. כל לחיצה על "סנכרן" תמשוך את ההזמנות העדכניות.</p>
       </div>
 
-      {/* Existing sources */}
       {loading ? <p className="text-sm text-gray-400 text-center py-4">טוען...</p> : sources.length > 0 && (
         <div className="space-y-2.5 mb-5">
           {sources.map(s => {
@@ -427,7 +565,6 @@ function SyncTab({ aptId }: { aptId: string }) {
         </div>
       )}
 
-      {/* Add source */}
       <div className="space-y-3 mb-5">
         <div className="flex gap-2">
           <select value={platform} onChange={e=>setPlatform(e.target.value)} className="border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shrink-0">
@@ -442,7 +579,6 @@ function SyncTab({ aptId }: { aptId: string }) {
         </div>
       </div>
 
-      {/* Sync button */}
       <button onClick={sync} disabled={syncing||sources.length===0}
         className="w-full py-3.5 rounded-xl font-black text-sm text-white bg-blue-600 hover:bg-blue-700 transition-colors disabled:opacity-40 flex items-center justify-center gap-2">
         {syncing ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> מסנכרן...</> : "↻ סנכרן עכשיו"}
@@ -456,10 +592,16 @@ function SyncTab({ aptId }: { aptId: string }) {
 export default function ApartmentAdmin() {
   const { id } = useParams<{ id: string }>();
   const router  = useRouter();
-  const [apt,      setApt]      = useState<Apt | null>(null);
-  const [rules,    setRules]    = useState<PricingRule[]>([]);
-  const [tab,      setTab]      = useState<Tab>("calendar");
-  const [loading,  setLoading]  = useState(true);
+  const [apt,     setApt]     = useState<Apt | null>(null);
+  const [rules,   setRules]   = useState<PricingRule[]>([]);
+  const [tab,     setTab]     = useState<Tab>("calendar");
+  const [loading, setLoading] = useState(true);
+
+  const loadRules = useCallback(async () => {
+    const r = await fetch(`/api/pricing-rules?apartment_id=${id}`);
+    const data = await r.json();
+    setRules(Array.isArray(data) ? data : []);
+  }, [id]);
 
   useEffect(() => {
     Promise.all([
@@ -504,7 +646,6 @@ export default function ApartmentAdmin() {
           </div>
         </div>
 
-        {/* Tab bar */}
         <div className="max-w-2xl mx-auto px-4 flex border-t border-gray-100 overflow-x-auto">
           {tabs.map(t => (
             <button key={t.key} onClick={() => setTab(t.key)}
@@ -520,8 +661,8 @@ export default function ApartmentAdmin() {
 
       {/* Content */}
       <div className="max-w-2xl mx-auto px-4 py-6">
-        {tab === "calendar" && apt && <CalendarTab aptId={id} basePrice={apt.price_per_night} rules={rules} />}
-        {tab === "pricing"  && apt && <PricingTab  aptId={id} basePrice={apt.price_per_night} />}
+        {tab === "calendar" && apt && <CalendarTab aptId={id} basePrice={apt.price_per_night} rules={rules} reloadRules={loadRules} />}
+        {tab === "pricing"  && apt && <PricingTab  aptId={id} basePrice={apt.price_per_night} rules={rules} reload={loadRules} />}
         {tab === "bookings" && <BookingsTab aptId={id} />}
         {tab === "sync"     && <SyncTab aptId={id} />}
       </div>
