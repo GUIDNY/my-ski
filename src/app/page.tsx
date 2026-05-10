@@ -2,14 +2,50 @@ import Navbar from "@/components/Navbar";
 import SearchWidget from "@/components/SearchWidget";
 import FlightSearch from "@/components/FlightSearch";
 import Footer from "@/components/Footer";
-import { IconHome, IconSkis, IconBus, IconPlane, IconShield, IconUser, IconMountain } from "@/components/Icons";
+import { IconShield, IconUser, IconMountain } from "@/components/Icons";
+
+/* ── Step icons ───────────────────────────────────────────── */
+const IcoBed = () => (
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/>
+    <path d="M2 14h20"/>
+    <path d="M7 14v-3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/>
+    <path d="M2 20h20"/>
+    <path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/>
+  </svg>
+);
+
+const IcoTicket = () => (
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/>
+    <line x1="9" y1="9" x2="9" y2="15" strokeDasharray="2 2"/>
+    <line x1="15" y1="9" x2="15" y2="15" strokeDasharray="2 2"/>
+  </svg>
+);
+
+const IcoVan = () => (
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h11l4 4v4a2 2 0 0 1-2 2h-1"/>
+    <circle cx="7" cy="17" r="2"/>
+    <circle cx="15" cy="17" r="2"/>
+    <path d="M9 11V7"/>
+    <path d="M14 11V8l3 3"/>
+  </svg>
+);
+
+const IcoPlane = () => (
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/>
+  </svg>
+);
 
 /* ── Data ─────────────────────────────────────────────────── */
 
 const steps = [
   {
-    iconEl: <IconHome size={26} className="text-white" />,
+    iconEl: <IcoBed />,
     iconBg: "bg-gray-900",
+    iconColor: "text-white",
     label: "שלב 01",
     title: "בחר דירה",
     desc: "דירות מנוהלות ב-Val Thorens לכל גודל קבוצה ותקציב.",
@@ -17,8 +53,9 @@ const steps = [
     href: "/apartments",
   },
   {
-    iconEl: <IconSkis size={26} className="text-blue-800" />,
-    iconBg: "bg-blue-100",
+    iconEl: <IcoTicket />,
+    iconBg: "bg-blue-600",
+    iconColor: "text-white",
     label: "שלב 02",
     title: "הוסף סקי פס",
     desc: "Trois Vallées — 600 ק״מ מסלולים, הרשת הגדולה בעולם.",
@@ -26,8 +63,9 @@ const steps = [
     href: "/apartments",
   },
   {
-    iconEl: <IconBus size={26} className="text-amber-700" />,
-    iconBg: "bg-amber-100",
+    iconEl: <IcoVan />,
+    iconBg: "bg-amber-500",
+    iconColor: "text-white",
     label: "שלב 03",
     title: "הוסף הסעה",
     desc: "שאטל ישיר משדה התעופה לאתר הסקי.",
@@ -35,8 +73,9 @@ const steps = [
     href: "/apartments",
   },
   {
-    iconEl: <IconPlane size={26} className="text-white" />,
-    iconBg: "bg-indigo-900",
+    iconEl: <IcoPlane />,
+    iconBg: "bg-indigo-600",
+    iconColor: "text-white",
     label: "שלב 04",
     title: "הוסף טיסה",
     desc: "חיפוש טיסות דרך Skyscanner, ובעתיד — טיסות פרטיות שלנו.",
@@ -154,7 +193,7 @@ export default function Home() {
                 key={i}
                 className="group flex flex-col gap-6 p-8 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-500"
               >
-                <div className={`w-16 h-16 flex items-center justify-center rounded-full ${step.iconBg}`}>
+                <div className={`w-16 h-16 flex items-center justify-center rounded-full ${step.iconBg} ${step.iconColor}`}>
                   {step.iconEl}
                 </div>
                 <div className="flex-1">
