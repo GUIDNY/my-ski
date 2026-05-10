@@ -2,10 +2,12 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase-client";
 import type { User } from "@supabase/supabase-js";
+import AuthModal from "./AuthModal";
 
 export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-  const [user,     setUser]     = useState<User | null>(null);
+  const [scrolled,   setScrolled]   = useState(false);
+  const [user,       setUser]       = useState<User | null>(null);
+  const [showAuth,   setShowAuth]   = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 80);
@@ -19,6 +21,13 @@ export default function Navbar() {
   const isAdmin = user?.user_metadata?.role === "admin" || user?.email === "bd12123@gmail.com";
 
   return (
+    <>
+    {showAuth && (
+      <AuthModal
+        onClose={() => setShowAuth(false)}
+        onAuth={() => supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user ?? null))}
+      />
+    )}
     <nav
       dir="rtl"
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
@@ -73,7 +82,8 @@ export default function Navbar() {
               האזור שלי
             </a>
           ) : (
-            <a href="/auth"
+            <button
+              onClick={() => setShowAuth(true)}
               className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold transition-all"
               style={{
                 background: scrolled ? "#1d4ed8" : "rgba(255,255,255,0.18)",
@@ -81,10 +91,11 @@ export default function Navbar() {
                 border: scrolled ? "none" : "1px solid rgba(255,255,255,0.35)",
               }}>
               כניסה / הרשמה
-            </a>
+            </button>
           )}
         </div>
       </div>
     </nav>
+    </>
   );
 }
