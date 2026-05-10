@@ -190,7 +190,7 @@ export default function Home() {
               יוקרה בכל פרט
             </h2>
             <p className="text-lg text-gray-500 leading-relaxed mb-8">
-              אנחנו ב-MY-SKI מאמינים שחופשת הסקי שלכם צריכה להיות מושלמת. החל מהדירות המפוארות ביותר ועד לשירותי קרקע שחוסכים לכם כל דאגה.
+              סקי מתי שרוצים במחירים נוחים — אצלנו דואגים לך גם לתאריכים שיתאימו לך וגם לנוחות המרבית באתר Val Thorens. תוכל להחליט בעצמך מה לסגור דרכינו ומה לסגור עצמאית.
             </p>
             <div className="flex items-center gap-4 py-4 border-t border-b border-gray-100">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
