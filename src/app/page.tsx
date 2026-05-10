@@ -75,11 +75,12 @@ export default function Home() {
 
         {/* Content */}
         <div className="relative z-10 flex flex-col items-center gap-7 px-4 text-center w-full max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-white leading-tight" style={{ textShadow: "0 2px 20px rgba(0,0,0,0.4)" }}>
-            חופשות סקי ללא הגבלה
-            <br />
-            מחירים שלא מתחרים
+          <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-white leading-tight" style={{ textShadow: "0 2px 20px rgba(0,0,0,0.4)" }}>
+            Val Thorens
           </h1>
+          <p className="text-xl md:text-2xl text-white/90 font-medium" style={{ textShadow: "0 1px 10px rgba(0,0,0,0.3)" }}>
+            כל מה שאתה צריך נמצא כאן
+          </p>
 
           <SearchWidget />
 
