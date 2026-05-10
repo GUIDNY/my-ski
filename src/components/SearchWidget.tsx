@@ -1,22 +1,28 @@
 "use client";
 import { useState } from "react";
+import { DateRange } from "react-day-picker";
+import DateRangePicker from "./DateRangePicker";
 
 export default function SearchWidget() {
-  const [dates, setDates] = useState("שבוע — כל הזמנים '26");
-  const [guests, setGuests] = useState("2 אנשים");
+  const [range, setRange] = useState<DateRange | undefined>();
+  const [guests, setGuests] = useState(2);
+
+  const nights = range?.from && range?.to
+    ? Math.round((range.to.getTime() - range.from.getTime()) / 86400000)
+    : null;
 
   return (
     <div
       dir="rtl"
-      className="bg-white w-full max-w-3xl flex items-stretch overflow-hidden"
+      className="bg-white w-full max-w-3xl flex items-stretch overflow-visible"
       style={{ borderRadius: "16px", boxShadow: "0 8px 40px rgba(0,0,0,0.18)" }}
     >
       {/* Destination */}
-      <button className="flex-1 px-6 py-5 text-right hover:bg-gray-50 transition-colors group">
+      <button className="flex-1 px-6 py-5 text-right hover:bg-gray-50 transition-colors rounded-r-2xl">
         <div className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-1">יעד</div>
         <div className="flex items-center gap-2">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2">
-            <path d="M3 17l3-8 3 4 4-6 3 5 3-3" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M3 17l3-8 3 4 4-6 3 5 3-3" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           <span className="text-gray-900 font-semibold text-[15px]">Val Thorens</span>
         </div>
@@ -24,36 +30,38 @@ export default function SearchWidget() {
 
       <div className="w-px bg-gray-200 my-4" />
 
-      {/* Dates */}
-      <button className="flex-1 px-6 py-5 text-right hover:bg-gray-50 transition-colors">
-        <div className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-1">תאריכים</div>
-        <div className="flex items-center gap-2">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2">
-            <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
-          </svg>
-          <span className="text-gray-600 font-medium text-[15px]">{dates}</span>
-        </div>
-      </button>
+      {/* Calendar date picker */}
+      <div className="flex-[1.6] px-6 py-5 hover:bg-gray-50 transition-colors relative">
+        <DateRangePicker value={range} onChange={setRange} />
+        {nights && (
+          <div className="absolute top-2 left-3 text-xs text-blue-500 font-semibold">
+            {nights} לילות
+          </div>
+        )}
+      </div>
 
       <div className="w-px bg-gray-200 my-4" />
 
       {/* Guests */}
-      <button className="flex-1 px-6 py-5 text-right hover:bg-gray-50 transition-colors">
-        <div className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-1">אנשים</div>
-        <div className="flex items-center gap-2">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
-          </svg>
-          <span className="text-gray-600 font-medium text-[15px]">{guests}</span>
+      <div className="flex items-center px-4 py-5 hover:bg-gray-50 transition-colors gap-0">
+        <div className="w-full">
+          <div className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-1">אנשים</div>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setGuests(Math.max(1, guests - 1))} className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:border-gray-500 hover:text-gray-900 transition-colors font-bold text-sm">−</button>
+            <span className="font-bold text-gray-900 text-[15px] w-5 text-center">{guests}</span>
+            <button onClick={() => setGuests(Math.min(12, guests + 1))} className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:border-gray-500 hover:text-gray-900 transition-colors font-bold text-sm">+</button>
+          </div>
         </div>
-      </button>
+      </div>
 
       {/* Search button */}
       <div className="flex items-center px-3">
-        <button className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold px-7 py-4 transition-all flex items-center gap-2.5 text-[15px]" style={{ borderRadius: "12px" }}>
+        <button
+          className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold px-7 py-4 transition-all flex items-center gap-2.5 text-[15px]"
+          style={{ borderRadius: "12px" }}
+        >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
           </svg>
           חפש
         </button>

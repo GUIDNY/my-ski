@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import SearchWidget from "@/components/SearchWidget";
+import FlightSearch from "@/components/FlightSearch";
 import Footer from "@/components/Footer";
 
 /* ─── Data ─────────────────────────────────────────────────── */
@@ -144,6 +145,18 @@ export default function Home() {
               ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ── FLIGHTS ──────────────────────────────────────── */}
+      <section className="py-16 px-4 bg-white border-t border-gray-100">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-8">
+            <p className="text-blue-600 font-semibold text-sm tracking-widest uppercase mb-2">חיפוש טיסות</p>
+            <h2 className="text-3xl font-black text-gray-900">מצא טיסה ל-Val Thorens</h2>
+            <p className="text-gray-500 mt-2">אנחנו מחפשים עבורך ב-Google Flights ו-Skyscanner</p>
+          </div>
+          <FlightSearch destination="Val Thorens" guests={2} />
         </div>
       </section>
 
