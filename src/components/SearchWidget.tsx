@@ -140,7 +140,7 @@ export default function SearchWidget() {
     if (from) p.set("checkin",  from.toISOString().split("T")[0]);
     if (to)   p.set("checkout", to.toISOString().split("T")[0]);
     p.set("guests", String(guests));
-    window.location.href = `/book?${p.toString()}`;
+    window.location.href = `/search?${p.toString()}`;
   };
 
   const navBtn = (disabled: boolean, onClick: () => void, children: React.ReactNode) => (

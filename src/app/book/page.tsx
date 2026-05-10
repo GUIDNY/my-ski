@@ -12,7 +12,7 @@ type Extras = {
 };
 type Details = { name: string; email: string; phone: string; notes: string };
 
-const STEPS = ["דירה", "תוספות", "פרטים", "סיכום"];
+const STEPS = ["תוספות", "פרטים", "סיכום"];
 
 const TRANSFER_PRICE = 55;
 const INSURANCE_RATE = 0.08;
@@ -240,13 +240,16 @@ function StepDetails({ details, setDetails }: { details: Details; setDetails: (d
 /* ─── Main page ──────────────────────────────────────────── */
 export default function BookPage() {
   const router = useRouter();
-  const [step, setStep]             = useState(0);
+  const searchParams = typeof window !== "undefined"
+    ? new URLSearchParams(window.location.search) : null;
+
+  const [step, setStep]             = useState(1); // skip apt selection — comes from /search
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [skiPasses, setSkiPasses]   = useState<SkiPass[]>([]);
-  const [aptId, setAptId]           = useState<string | null>(null);
-  const [checkin, setCheckin]       = useState("");
-  const [checkout, setCheckout]     = useState("");
-  const [guests, setGuests]         = useState(2);
+  const [aptId, setAptId]           = useState<string | null>(searchParams?.get("apartment") ?? null);
+  const [checkin, setCheckin]       = useState(searchParams?.get("checkin") ?? "");
+  const [checkout, setCheckout]     = useState(searchParams?.get("checkout") ?? "");
+  const [guests, setGuests]         = useState(parseInt(searchParams?.get("guests") ?? "2"));
   const [extras, setExtras]         = useState<Extras>({ skiPassId: null, transfer: false, insurance: false, agent: false });
   const [details, setDetails]       = useState<Details>({ name: "", email: "", phone: "", notes: "" });
   const [submitting, setSubmitting] = useState(false);
@@ -268,8 +271,9 @@ export default function BookPage() {
   const insPrice = extras.insurance ? Math.round(subtotal * INSURANCE_RATE) : 0;
   const total    = subtotal + insPrice;
 
+  // step 1=extras, 2=details, 3=summary
   const canNext = [
-    aptId && checkin && checkout && n > 0,
+    null,
     true,
     details.name && details.email,
     true,
@@ -325,24 +329,27 @@ export default function BookPage() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-8">
-        {/* Stepper */}
+        {/* Stepper — steps are 1,2,3 */}
         <div className="flex items-center gap-0 mb-8">
-          {STEPS.map((s, i) => (
-            <div key={i} className="flex items-center flex-1">
-              <div className={`flex items-center gap-2 ${i <= step ? "text-blue-600" : "text-gray-300"}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black border-2 transition-all ${
-                  i < step  ? "bg-blue-600 border-blue-600 text-white" :
-                  i === step ? "border-blue-600 text-blue-600" :
-                               "border-gray-200 text-gray-300"}`}>
-                  {i < step ? "✓" : i + 1}
+          {STEPS.map((s, i) => {
+            const si = i + 1; // actual step index (1,2,3)
+            return (
+              <div key={i} className="flex items-center flex-1">
+                <div className={`flex items-center gap-2 ${si <= step ? "text-blue-600" : "text-gray-300"}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black border-2 transition-all ${
+                    si < step  ? "bg-blue-600 border-blue-600 text-white" :
+                    si === step ? "border-blue-600 text-blue-600" :
+                                  "border-gray-200 text-gray-300"}`}>
+                    {si < step ? "✓" : si}
+                  </div>
+                  <span className={`text-xs font-bold hidden md:block ${si === step ? "text-blue-600" : si < step ? "text-gray-600" : "text-gray-300"}`}>{s}</span>
                 </div>
-                <span className={`text-xs font-bold hidden md:block ${i === step ? "text-blue-600" : i < step ? "text-gray-600" : "text-gray-300"}`}>{s}</span>
+                {i < STEPS.length - 1 && (
+                  <div className={`flex-1 h-0.5 mx-2 ${si < step ? "bg-blue-600" : "bg-gray-200"}`} />
+                )}
               </div>
-              {i < STEPS.length - 1 && (
-                <div className={`flex-1 h-0.5 mx-2 ${i < step ? "bg-blue-600" : "bg-gray-200"}`} />
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Price banner */}
@@ -355,11 +362,6 @@ export default function BookPage() {
 
         {/* Step content */}
         <div className="mb-6">
-          {step === 0 && (
-            <StepApartment apartments={apartments} selected={aptId} onSelect={setAptId}
-              checkin={checkin} checkout={checkout} guests={guests}
-              setCheckin={setCheckin} setCheckout={setCheckout} setGuests={setGuests} />
-          )}
           {step === 1 && (
             <StepExtras extras={extras} setExtras={setExtras} skiPasses={skiPasses} guests={guests} />
           )}
@@ -426,11 +428,15 @@ export default function BookPage() {
 
         {/* Navigation */}
         <div className="flex gap-3">
-          {step > 0 && (
+          {step > 1 ? (
             <button onClick={() => setStep(step - 1)}
               className="px-6 py-3.5 border border-gray-200 rounded-xl font-semibold text-gray-600 hover:bg-gray-50 transition-colors">
               ← חזור
             </button>
+          ) : (
+            <a href="/search" className="px-6 py-3.5 border border-gray-200 rounded-xl font-semibold text-gray-600 hover:bg-gray-50 transition-colors text-center">
+              ← בחר דירה אחרת
+            </a>
           )}
           {step < 3 ? (
             <button onClick={() => setStep(step + 1)} disabled={!canNext}
