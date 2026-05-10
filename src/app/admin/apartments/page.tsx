@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import type { Apartment } from "@/types";
 
 const EMPTY: Partial<Apartment> = {
@@ -270,7 +271,11 @@ export default function ApartmentsAdmin() {
                     </span>
                   </td>
                   <td className="px-4 py-4">
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 items-center">
+                      <Link href={`/admin/apartments/${apt.id}`}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-3 py-1.5 rounded-lg transition-colors">
+                        ניהול דירה →
+                      </Link>
                       <button onClick={() => edit(apt)} className="text-blue-600 hover:text-blue-800 font-medium text-xs">עריכה</button>
                       <button onClick={() => remove(apt.id)} className="text-red-500 hover:text-red-700 font-medium text-xs">מחיקה</button>
                     </div>
