@@ -75,7 +75,7 @@ function ApartmentCard({ apt, nights, guests, checkin, checkout }: {
         </div>
 
         {/* Price + CTA */}
-        <div className="flex md:flex-col items-center md:items-end justify-between md:justify-center gap-4 md:min-w-[160px] border-t md:border-t-0 md:border-r border-gray-100 pt-4 md:pt-0 md:pr-6">
+        <div className="flex md:flex-col items-center md:items-end justify-between md:justify-center gap-4 md:min-w-[160px] border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6">
           <div className="text-right">
             <div className="text-2xl font-black text-gray-900">€{apt.price_per_night.toLocaleString()}</div>
             <div className="text-xs text-gray-400">ללילה</div>
@@ -87,7 +87,7 @@ function ApartmentCard({ apt, nights, guests, checkin, checkout }: {
             )}
           </div>
           <div className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl text-sm transition-colors whitespace-nowrap">
-            בחר דירה →
+            ← בחר דירה
           </div>
         </div>
       </div>
@@ -128,8 +128,13 @@ function SearchPage() {
       {/* ── Sticky search bar ───────────────────────────────── */}
       <div className="sticky top-0 z-40 bg-white border-b border-gray-100 shadow-sm">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-3 flex-wrap">
-          <a href="/" className="flex items-center gap-1.5 font-black text-gray-900 text-lg ml-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white text-sm">⛷</div>
+          <a href="/" className="flex items-center gap-2 font-black text-gray-900 text-lg">
+            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+              <svg width="18" height="16" viewBox="0 0 32 28" fill="none">
+                <polygon points="16,2 30,26 2,26" fill="white" stroke="white" strokeWidth="1.5" strokeLinejoin="round"/>
+                <polygon points="16,10 23,26 9,26" fill="#2563eb" strokeLinejoin="round"/>
+              </svg>
+            </div>
             MySki
           </a>
           <div className="flex-1 flex items-center gap-2 bg-gray-50 rounded-xl px-4 py-2.5 border border-gray-100">

@@ -90,7 +90,7 @@ function StepApartment({
                       ))}
                     </div>
                   </div>
-                  <div className="text-left flex-shrink-0 mr-2">
+                  <div className="text-right flex-shrink-0 ml-2">
                     <div className="text-lg font-black text-gray-900">€{total.toLocaleString()}</div>
                     <div className="text-xs text-gray-400">{n} לילות</div>
                     <div className="text-xs text-gray-500">€{apt.price_per_night}/לילה</div>
@@ -140,7 +140,7 @@ function StepExtras({ extras, setExtras, skiPasses, guests }: {
                 <div className="font-semibold text-gray-900">{pass.name}</div>
                 <div className="text-xs text-gray-500">{pass.duration_days} ימי סקי</div>
               </div>
-              <div className="text-left">
+              <div className="text-right">
                 <div className="font-black text-gray-900">€{(pass.price * guests).toLocaleString()}</div>
                 <div className="text-xs text-gray-400">€{pass.price} × {guests}</div>
               </div>
@@ -431,17 +431,17 @@ export default function BookPage() {
           {step > 1 ? (
             <button onClick={() => setStep(step - 1)}
               className="px-6 py-3.5 border border-gray-200 rounded-xl font-semibold text-gray-600 hover:bg-gray-50 transition-colors">
-              ← חזור
+              חזור →
             </button>
           ) : (
             <a href="/search" className="px-6 py-3.5 border border-gray-200 rounded-xl font-semibold text-gray-600 hover:bg-gray-50 transition-colors text-center">
-              ← בחר דירה אחרת
+              בחר דירה אחרת →
             </a>
           )}
           {step < 3 ? (
             <button onClick={() => setStep(step + 1)} disabled={!canNext}
               className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black py-3.5 rounded-xl transition-colors text-lg">
-              המשך →
+              ← המשך
             </button>
           ) : (
             <button onClick={submit} disabled={submitting}

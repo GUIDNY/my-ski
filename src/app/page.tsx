@@ -86,7 +86,7 @@ export default function Home() {
 
           {/* AI / extra action */}
           <button className="flex items-center gap-2.5 px-6 py-3 rounded-full text-white text-sm font-medium transition-all hover:bg-white/20" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.25)" }}>
-            ✨ תכנון חכם — בנה את החבילה שלך →
+            ✨ תכנון חכם — בנה את החבילה שלך ←
           </button>
         </div>
 
@@ -155,7 +155,7 @@ export default function Home() {
               <p className="text-blue-600 font-semibold text-sm tracking-widest uppercase mb-2">אכשנ ב-Val Thorens</p>
               <h2 className="text-4xl font-black text-gray-900">דירות נבחרות</h2>
             </div>
-            <a href="#" className="text-blue-600 font-semibold text-sm hover:underline hidden md:block">כל הדירות →</a>
+            <a href="#" className="text-blue-600 font-semibold text-sm hover:underline hidden md:block">← כל הדירות</a>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -194,7 +194,7 @@ export default function Home() {
                     ))}
                   </div>
                   <a href={`/book?apartment=${apt.name}`} className="block w-full py-3 rounded-xl font-bold text-sm transition-colors bg-gray-900 text-white hover:bg-blue-600 text-center">
-                    הזמן עכשיו →
+                    ← הזמן עכשיו
                   </a>
                 </div>
               </div>
