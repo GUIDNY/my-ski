@@ -10,7 +10,7 @@ const AIRPORTS = [
 ];
 
 const DEST_AIRPORTS: Record<string, string> = {
-  "Val Thorens": "CDG", // Paris CDG — closest major airport
+  "Val Thorens": "GVA", // Geneva — closest major airport (2.5h drive)
 };
 
 type Props = {
@@ -56,18 +56,25 @@ export default function FlightSearch({ destination = "Val Thorens", defaultRange
   const buildSkyscannerUrl = () => {
     const from = range?.from;
     const to = range?.to;
-    const fmtSkyscanner = (d: Date) =>
-      `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+    // Skyscanner uses 6-digit YYMMDD format
+    const fmtSky = (d: Date) =>
+      `${String(d.getFullYear()).slice(2)}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
 
-    if (!from) return `https://www.skyscanner.co.il/transport/flights/${origin.toLowerCase()}/${destCode.toLowerCase()}/`;
-    const outbound = fmtSkyscanner(from);
-    const inbound = to ? fmtSkyscanner(to) : "";
-    return `https://www.skyscanner.co.il/transport/flights/${origin.toLowerCase()}/${destCode.toLowerCase()}/${outbound}/${inbound}/?adults=${pax}`;
+    if (!from) return `https://www.skyscanner.co.il/flights/${origin.toLowerCase()}/${destCode.toLowerCase()}/`;
+    const outbound = fmtSky(from);
+    const inbound = to ? fmtSky(to) : "";
+    const paxSeg = `${pax}adults`;
+    return `https://www.skyscanner.co.il/flights/${origin.toLowerCase()}/${destCode.toLowerCase()}/${outbound}/${inbound}/${paxSeg}/`;
   };
 
-  const handleSearch = (provider: "google" | "skyscanner") => {
+  const handleSearch = (provider: "google" | "skyscanner" | "elal") => {
     setSearching(true);
-    const url = provider === "google" ? buildGoogleFlightsUrl() : buildSkyscannerUrl();
+    let url: string;
+    if (provider === "elal") {
+      url = "https://www.elal.com/heb/israel/";
+    } else {
+      url = provider === "google" ? buildGoogleFlightsUrl() : buildSkyscannerUrl();
+    }
     window.open(url, "_blank");
     setTimeout(() => setSearching(false), 1000);
   };
@@ -78,7 +85,7 @@ export default function FlightSearch({ destination = "Val Thorens", defaultRange
         <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-xl">✈️</div>
         <div>
           <h3 className="font-black text-gray-900">חיפוש טיסות</h3>
-          <p className="text-sm text-gray-500">לעבר {destination} — שדה התעופה הקרוב: Geneva / Paris</p>
+          <p className="text-sm text-gray-500">לעבר {destination} — Geneva (GVA) · 2.5 שעות נסיעה</p>
         </div>
       </div>
 
@@ -101,7 +108,7 @@ export default function FlightSearch({ destination = "Val Thorens", defaultRange
         <div>
           <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1.5">יעד</label>
           <div className="border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-800">Paris CDG / Geneva GVA</span>
+            <span className="text-sm font-medium text-gray-800">Geneva (GVA)</span>
             <span className="text-xs text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full">קרוב לVT</span>
           </div>
         </div>
@@ -123,28 +130,38 @@ export default function FlightSearch({ destination = "Val Thorens", defaultRange
       </div>
 
       {/* Search buttons */}
-      <div className="flex gap-3">
+      <div className="flex gap-2.5">
         <button
           onClick={() => handleSearch("google")}
           disabled={searching}
-          className="flex-1 flex items-center justify-center gap-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-bold py-3.5 rounded-xl text-sm transition-all"
+          className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-bold py-3.5 rounded-xl text-sm transition-all"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
             <path d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972a6.033 6.033 0 110-12.064c1.498 0 2.866.549 3.921 1.453l2.814-2.814A9.969 9.969 0 0012.545 2C7.021 2 2.543 6.477 2.543 12s4.478 10 10.002 10c8.396 0 10.249-7.85 9.426-11.748l-9.426-.013z"/>
           </svg>
-          Google Flights
+          Google
         </button>
         <button
           onClick={() => handleSearch("skyscanner")}
           disabled={searching}
-          className="flex-1 flex items-center justify-center gap-2.5 bg-cyan-500 hover:bg-cyan-600 disabled:opacity-60 text-white font-bold py-3.5 rounded-xl text-sm transition-all"
+          className="flex-1 flex items-center justify-center gap-2 bg-cyan-500 hover:bg-cyan-600 disabled:opacity-60 text-white font-bold py-3.5 rounded-xl text-sm transition-all"
         >
-          ✈ Skyscanner
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21 4 19.5 2.5S18 2 16.5 3.5L13 7 4.8 5.2l-2 2 7.5 3.5L7.8 14l-1.4 1.4-.7 2.1 2.1-.7 1.4-1.4 3.5 7.5z"/>
+          </svg>
+          Skyscanner
+        </button>
+        <button
+          onClick={() => handleSearch("elal")}
+          disabled={searching}
+          className="flex-1 flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-700 disabled:opacity-60 text-white font-bold py-3.5 rounded-xl text-sm transition-all"
+        >
+          אלעל ישיר
         </button>
       </div>
 
       <p className="text-xs text-gray-400 text-center mt-3">
-        פותח את חיפוש הטיסות בחלון חדש עם הפרמטרים שלך
+        אלעל — טיסה ישירה TLV → Geneva · Val Thorens 2.5h
       </p>
     </div>
   );
