@@ -102,6 +102,18 @@ function SearchPage() {
   const [loading,    setLoading]    = useState(true);
   const [filter,     setFilter]     = useState<Filter>("all");
 
+  /* Inline date picker */
+  const [dateOpen,  setDateOpen]  = useState(!checkin || !checkout);
+  const [draftCi,   setDraftCi]   = useState(checkin);
+  const [draftCo,   setDraftCo]   = useState(checkout);
+  const [draftG,    setDraftG]    = useState(guests);
+
+  const applyDates = () => {
+    if (!draftCi || !draftCo) return;
+    router.replace(`/search?checkin=${draftCi}&checkout=${draftCo}&guests=${draftG}`);
+    setDateOpen(false);
+  };
+
   const nights = checkin && checkout
     ? Math.round((new Date(checkout).getTime() - new Date(checkin).getTime()) / 86400000) : 0;
 
@@ -127,15 +139,17 @@ function SearchPage() {
             MySki
           </a>
 
-          {/* Search summary pill */}
-          <div className="flex-1 flex items-center gap-2 bg-gray-50 rounded-xl px-4 py-2 border border-gray-100 min-w-0 overflow-hidden">
+          {/* Search summary pill — click to edit dates */}
+          <button onClick={() => setDateOpen(o => !o)}
+            className={`flex-1 flex items-center gap-2 rounded-xl px-4 py-2 border min-w-0 overflow-hidden text-right transition-colors
+              ${dateOpen ? "bg-blue-50 border-blue-300" : "bg-gray-50 border-gray-100 hover:border-blue-200"}`}>
             <span className="flex items-center gap-1.5 text-sm font-bold text-gray-700 whitespace-nowrap">
               <IconMountain size={13} className="text-blue-500 flex-shrink-0" /> Val Thorens
             </span>
             <span className="text-gray-200 text-xs hidden sm:block">|</span>
-            <span className="hidden sm:flex items-center gap-1.5 text-sm text-gray-500 whitespace-nowrap">
+            <span className={`hidden sm:flex items-center gap-1.5 text-sm whitespace-nowrap ${checkin && checkout ? "text-gray-700 font-semibold" : "text-blue-500 font-bold"}`}>
               <IconCalendar size={13} />
-              {checkin && checkout ? `${fmtDate(checkin)} — ${fmtDate(checkout)}` : "בחר תאריכים"}
+              {checkin && checkout ? `${fmtDate(checkin)} — ${fmtDate(checkout)}` : "← לחץ לבחירת תאריכים"}
             </span>
             <span className="text-gray-200 text-xs hidden sm:block">|</span>
             <span className="hidden sm:flex items-center gap-1.5 text-sm text-gray-500">
@@ -146,13 +160,50 @@ function SearchPage() {
                 {nights} לילות
               </span>
             )}
-          </div>
+          </button>
 
           <button onClick={() => router.push("/")}
             className="text-sm text-blue-600 font-semibold hover:underline whitespace-nowrap flex-shrink-0">
             שנה חיפוש
           </button>
         </div>
+
+        {/* Inline date picker — expands below header */}
+        {dateOpen && (
+          <div className="border-t border-blue-100 bg-blue-50 px-4 py-4" dir="rtl">
+            <div className="max-w-5xl mx-auto flex flex-wrap gap-3 items-end">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-blue-600">צ׳ק-אין</label>
+                <input type="date" value={draftCi} onChange={e => setDraftCi(e.target.value)}
+                  className="bg-white border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" dir="ltr" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-blue-600">צ׳ק-אאוט</label>
+                <input type="date" value={draftCo} onChange={e => setDraftCo(e.target.value)}
+                  className="bg-white border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" dir="ltr" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-blue-600">אנשים</label>
+                <select value={draftG} onChange={e => setDraftG(+e.target.value)}
+                  className="bg-white border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                  {[1,2,3,4,5,6,7,8].map(n => <option key={n} value={n}>{n}</option>)}
+                </select>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={applyDates} disabled={!draftCi || !draftCo}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-black px-5 py-2 rounded-lg text-sm transition-colors disabled:opacity-50">
+                  עדכן תוצאות ←
+                </button>
+                {checkin && checkout && (
+                  <button onClick={() => setDateOpen(false)}
+                    className="bg-white border border-blue-200 text-blue-600 font-bold px-4 py-2 rounded-lg text-sm hover:bg-blue-50">
+                    ביטול
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="max-w-5xl mx-auto px-4 py-8">
