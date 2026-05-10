@@ -89,20 +89,6 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Trustpilot bar */}
-        <div className="absolute bottom-0 left-0 right-0 z-10">
-          <div className="bg-white/95 backdrop-blur-sm py-4 px-6 flex items-center justify-center gap-3">
-            <span className="text-gray-700 font-semibold text-sm">מצוין</span>
-            <div className="flex gap-0.5">
-              {[1,2,3,4,5].map(i => (
-                <svg key={i} width="20" height="20" viewBox="0 0 24 24" fill="#00b67a">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                </svg>
-              ))}
-            </div>
-            <span className="text-gray-500 text-sm">4,162 ביקורות ב-Trustpilot</span>
-          </div>
-        </div>
       </section>
 
       {/* ── HOW IT WORKS ─────────────────────────────────── */}
