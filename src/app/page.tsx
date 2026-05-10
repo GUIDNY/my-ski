@@ -3,6 +3,8 @@ import SearchWidget from "@/components/SearchWidget";
 import FlightSearch from "@/components/FlightSearch";
 import Footer from "@/components/Footer";
 import { IconShield, IconUser, IconMountain } from "@/components/Icons";
+import { createServerClient } from "@/lib/supabase-server";
+import type { Apartment } from "@/types";
 
 /* ── Step icons ───────────────────────────────────────────── */
 const IcoBed = () => (
@@ -121,39 +123,28 @@ const features = [
   { title: "ביטול חינם", desc: "מדיניות ביטול שקופה עד 30 יום לפני" },
 ];
 
-const apartments = [
-  {
-    name: "Chalet Blanc",
-    type: "שאלה פרטי",
-    beds: 6, baths: 3, sqm: 180,
-    price: 1200, rating: 4.97, reviews: 84,
-    tag: "מומלץ ביותר", tagColor: "#f59e0b",
-    image: "/apt1.jpg",
-    amenities: ["ג'קוזי", "אח", "נוף להרים", "מטבח"],
-  },
-  {
-    name: "Studio Alpine",
-    type: "סטודיו זוגי",
-    beds: 1, baths: 1, sqm: 45,
-    price: 320, rating: 4.91, reviews: 132,
-    tag: "הכי משתלם", tagColor: "#10b981",
-    image: "/apt2.jpg",
-    amenities: ["מרפסת", "WiFi", "נוף להרים"],
-  },
-  {
-    name: "Penthouse Summit",
-    type: "פנטהאוס יוקרה",
-    beds: 8, baths: 4, sqm: 280,
-    price: 2100, rating: 5.0, reviews: 31,
-    tag: "יוקרה", tagColor: "#8b5cf6",
-    image: "/apt3.jpg",
-    amenities: ["ג'קוזי", "אח", "גג פנורמי", "חניה"],
-  },
-];
+/* apartments fetched server-side below */
+
+/* ── Tag helper ───────────────────────────────────────────── */
+function aptTag(apts: Apartment[], apt: Apartment): { label: string; color: string } {
+  const prices = apts.map(a => Number(a.price_per_night));
+  const p = Number(apt.price_per_night);
+  if (p === Math.max(...prices)) return { label: "יוקרה",          color: "#8b5cf6" };
+  if (p === Math.min(...prices)) return { label: "הכי משתלם",      color: "#10b981" };
+  return                                { label: "מומלץ ביותר",    color: "#f59e0b" };
+}
 
 /* ── Page ─────────────────────────────────────────────────── */
 
-export default function Home() {
+export default async function Home() {
+  const db = createServerClient();
+  const { data: featuredApts } = await db
+    .from("apartments")
+    .select("*")
+    .eq("available", true)
+    .order("price_per_night", { ascending: false })
+    .limit(3);
+  const apartments: Apartment[] = featuredApts ?? [];
   return (
     <div className="min-h-screen" style={{ background: "#f7f9fb" }} dir="rtl">
       <Navbar />
@@ -301,53 +292,54 @@ export default function Home() {
             </a>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {apartments.map((apt, i) => (
-              <div key={i} className="bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
-                <div className="relative h-52 overflow-hidden">
-                  <img src={apt.image} alt={apt.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                  <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.3) 0%, transparent 60%)" }} />
-                  <div
-                    className="absolute top-3 right-3 text-white text-xs font-bold px-3 py-1 rounded-full"
-                    style={{ background: apt.tagColor }}
-                  >
-                    {apt.tag}
-                  </div>
-                  <div className="absolute bottom-3 left-3 text-white text-sm font-bold px-3 py-1.5 rounded-lg" style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)" }}>
-                    €{apt.price.toLocaleString()} / לילה
-                  </div>
-                </div>
-                <div className="p-5">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h3 className="font-display font-black text-gray-900 text-lg">{apt.name}</h3>
-                      <p className="text-gray-400 text-sm">{apt.type}</p>
+            {apartments.map((apt) => {
+              const tag = aptTag(apartments, apt);
+              return (
+                <a key={apt.id} href={`/apartments/${apt.id}`}
+                  className="bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group block">
+                  <div className="relative h-52 overflow-hidden">
+                    <img src={apt.images?.[0] ?? "/hero-ski.jpg"} alt={apt.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.3) 0%, transparent 60%)" }} />
+                    <div className="absolute top-3 right-3 text-white text-xs font-bold px-3 py-1 rounded-full"
+                      style={{ background: tag.color }}>
+                      {tag.label}
                     </div>
-                    <div className="text-left">
-                      <div className="text-sm font-bold text-gray-900">★ {apt.rating}</div>
-                      <div className="text-xs text-gray-400">{apt.reviews} ביקורות</div>
+                    <div className="absolute bottom-3 left-3 text-white text-sm font-bold px-3 py-1.5 rounded-lg"
+                      style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)" }}>
+                      €{Number(apt.price_per_night).toLocaleString()} / לילה
                     </div>
                   </div>
-                  <div className="flex gap-3 text-xs text-gray-400 py-3 border-t border-gray-100 mb-4">
-                    <span>{apt.beds} חדרים</span>
-                    <span>·</span>
-                    <span>{apt.baths} אמבטיות</span>
-                    <span>·</span>
-                    <span>{apt.sqm} מ״ר</span>
+                  <div className="p-5">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h3 className="font-display font-black text-gray-900 text-lg">{apt.name}</h3>
+                        <p className="text-gray-400 text-sm">{apt.type}</p>
+                      </div>
+                      <div className="text-left">
+                        <div className="text-sm font-bold text-gray-900">★ 4.9</div>
+                        <div className="text-xs text-gray-400">Val Thorens</div>
+                      </div>
+                    </div>
+                    <div className="flex gap-3 text-xs text-gray-400 py-3 border-t border-gray-100 mb-4">
+                      <span>{apt.beds} חדרים</span>
+                      <span>·</span>
+                      <span>{apt.baths} אמבטיות</span>
+                      <span>·</span>
+                      <span>{apt.sqm} מ״ר</span>
+                    </div>
+                    <div className="flex gap-1.5 flex-wrap mb-4">
+                      {apt.amenities?.slice(0, 4).map((a, j) => (
+                        <span key={j} className="text-xs bg-gray-50 text-gray-500 px-2.5 py-1 rounded-full border border-gray-100">{a}</span>
+                      ))}
+                    </div>
+                    <div className="block w-full py-3 rounded-lg font-black text-sm text-white text-center transition-colors bg-gray-900 group-hover:bg-gray-700">
+                      ← הזמן עכשיו
+                    </div>
                   </div>
-                  <div className="flex gap-1.5 flex-wrap mb-4">
-                    {apt.amenities.map((a, j) => (
-                      <span key={j} className="text-xs bg-gray-50 text-gray-500 px-2.5 py-1 rounded-full border border-gray-100">{a}</span>
-                    ))}
-                  </div>
-                  <a
-                    href={`/book?apartment=${apt.name}`}
-                    className="block w-full py-3 rounded-lg font-black text-sm text-white text-center transition-colors bg-gray-900 hover:bg-gray-700"
-                  >
-                    ← הזמן עכשיו
-                  </a>
-                </div>
-              </div>
-            ))}
+                </a>
+              );
+            })}
           </div>
         </div>
       </section>
