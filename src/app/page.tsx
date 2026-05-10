@@ -57,7 +57,7 @@ export default function Home() {
       <Navbar />
 
       {/* ── HERO ─────────────────────────────────────────── */}
-      <section className="relative flex flex-col items-center justify-center overflow-hidden" style={{ height: "100vh", minHeight: "640px" }}>
+      <section className="relative flex flex-col items-center justify-center" style={{ height: "100vh", minHeight: "640px" }}>
 
         {/* Photo */}
         <img
