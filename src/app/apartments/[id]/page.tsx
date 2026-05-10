@@ -169,6 +169,7 @@ function ApartmentPage() {
   /* ── Book URL ───────────────────────────────────────────── */
   const buildBookUrl = () => {
     const p = new URLSearchParams({
+      apartment_id: id,
       apartment: apt?.name ?? id,
       checkin, checkout,
       guests: String(guests),
