@@ -206,9 +206,9 @@ export default function Home() {
                       <span key={j} className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full">{a}</span>
                     ))}
                   </div>
-                  <button className="w-full py-3 rounded-xl font-bold text-sm transition-colors bg-gray-900 text-white hover:bg-blue-600">
-                    בחר דירה זו
-                  </button>
+                  <a href={`/book?apartment=${apt.name}`} className="block w-full py-3 rounded-xl font-bold text-sm transition-colors bg-gray-900 text-white hover:bg-blue-600 text-center">
+                    הזמן עכשיו →
+                  </a>
                 </div>
               </div>
             ))}
