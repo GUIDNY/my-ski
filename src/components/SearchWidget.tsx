@@ -22,7 +22,7 @@ export default function SearchWidget() {
         <div className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-1">יעד</div>
         <div className="flex items-center gap-2">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2">
-            <path d="M3 17l3-8 3 4 4-6 3 5 3-3" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M3 20l4.5-9L12 15l3.5-7L20 20H3Z" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           <span className="text-gray-900 font-semibold text-[15px]">Val Thorens</span>
         </div>

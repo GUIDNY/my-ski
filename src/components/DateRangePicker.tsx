@@ -1,13 +1,18 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { DayPicker, DateRange } from "react-day-picker";
-import { he } from "date-fns/locale";
 import "react-day-picker/style.css";
 
 type Props = {
   value: DateRange | undefined;
   onChange: (range: DateRange | undefined) => void;
 };
+
+const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
+const HE_DAYS  = ["א׳","ב׳","ג׳","ד׳","ה׳","ו׳","ש׳"];
+
+const fmt = (d?: Date) =>
+  d ? `${d.getDate()} ${HE_MONTHS[d.getMonth()]}` : null;
 
 export default function DateRangePicker({ value, onChange }: Props) {
   const [open, setOpen] = useState(false);
@@ -21,8 +26,10 @@ export default function DateRangePicker({ value, onChange }: Props) {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const fmt = (d?: Date) =>
-    d ? d.toLocaleDateString("he-IL", { day: "numeric", month: "short" }) : null;
+  const nights =
+    value?.from && value?.to
+      ? Math.round((value.to.getTime() - value.from.getTime()) / 86400000)
+      : null;
 
   const label = value?.from
     ? value.to
@@ -30,17 +37,9 @@ export default function DateRangePicker({ value, onChange }: Props) {
       : fmt(value.from)!
     : "בחר תאריכים";
 
-  const nights =
-    value?.from && value?.to
-      ? Math.round((value.to.getTime() - value.from.getTime()) / 86400000)
-      : null;
-
   return (
     <div className="relative" ref={ref}>
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full text-right"
-      >
+      <button onClick={() => setOpen(!open)} className="w-full text-right">
         <div className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-1">תאריכים</div>
         <div className="flex items-center gap-2">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2">
@@ -61,7 +60,7 @@ export default function DateRangePicker({ value, onChange }: Props) {
       {open && (
         <div
           className="absolute top-full mt-3 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 p-4"
-          style={{ right: "-20px", minWidth: "340px" }}
+          style={{ right: "-120px" }}
         >
           <DayPicker
             mode="range"
@@ -70,23 +69,27 @@ export default function DateRangePicker({ value, onChange }: Props) {
               onChange(r);
               if (r?.from && r?.to) setOpen(false);
             }}
-            locale={he}
-            dir="rtl"
             disabled={{ before: new Date() }}
             numberOfMonths={2}
-            showOutsideDays
-            styles={{
-              months: { display: "flex", gap: "16px" },
+            formatters={{
+              formatMonthCaption: (d) => `${HE_MONTHS[d.getMonth()]} ${d.getFullYear()}`,
+              formatWeekdayName: (d) => HE_DAYS[d.getDay()],
             }}
             classNames={{
-              today: "font-black text-blue-600",
-              selected: "bg-blue-600 text-white rounded-lg",
-              range_middle: "bg-blue-50 text-blue-900 rounded-none",
-              range_start: "bg-blue-600 text-white rounded-r-lg rounded-l-none",
-              range_end: "bg-blue-600 text-white rounded-l-lg rounded-r-none",
-              day_button: "w-9 h-9 text-sm font-medium hover:bg-blue-50 rounded-lg transition-colors",
+              today:        "font-black !text-blue-600",
+              selected:     "!bg-blue-600 !text-white rounded-lg",
+              range_middle: "!bg-blue-50 !text-blue-900",
+              range_start:  "!bg-blue-600 !text-white rounded-lg",
+              range_end:    "!bg-blue-600 !text-white rounded-lg",
+              day_button:   "w-9 h-9 text-sm hover:bg-blue-50 rounded-lg transition-colors cursor-pointer",
+              months:       "flex gap-6",
+              nav:          "flex items-center justify-between mb-2",
             }}
           />
+          <div className="flex justify-between items-center pt-3 border-t border-gray-100 mt-2">
+            <button onClick={() => { onChange(undefined); }} className="text-sm text-gray-400 hover:text-gray-600">נקה</button>
+            {nights && <span className="text-sm font-bold text-blue-600">{nights} לילות נבחרו</span>}
+          </div>
         </div>
       )}
     </div>
