@@ -1,116 +1,63 @@
 "use client";
 import { useState } from "react";
 
-const ADDONS = [
-  { id: "skipass", icon: "🎿", label: "סקי פס" },
-  { id: "transfer", icon: "🚌", label: "הסעה" },
-  { id: "flight", icon: "✈️", label: "טיסה" },
-  { id: "insurance", icon: "🛡️", label: "ביטוח" },
-];
-
 export default function SearchWidget() {
-  const [checkin, setCheckin] = useState("");
-  const [checkout, setCheckout] = useState("");
-  const [guests, setGuests] = useState(2);
-  const [addons, setAddons] = useState<string[]>(["skipass"]);
-
-  const toggleAddon = (id: string) => {
-    setAddons((prev) =>
-      prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]
-    );
-  };
+  const [dates, setDates] = useState("שבוע — כל הזמנים '26");
+  const [guests, setGuests] = useState("2 אנשים");
 
   return (
-    <div id="search" className="glass-white rounded-3xl shadow-2xl p-6 md:p-8 w-full max-w-4xl" dir="rtl">
-      {/* Destination badge */}
-      <div className="flex items-center gap-2 mb-5">
-        <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-xl px-4 py-2">
-          <span className="text-lg">📍</span>
-          <span className="font-bold text-blue-700 text-sm">Val Thorens, צרפת</span>
-          <span className="text-xs text-blue-400 mr-1">2,300 מ׳ גובה</span>
+    <div
+      dir="rtl"
+      className="bg-white w-full max-w-3xl flex items-stretch overflow-hidden"
+      style={{ borderRadius: "16px", boxShadow: "0 8px 40px rgba(0,0,0,0.18)" }}
+    >
+      {/* Destination */}
+      <button className="flex-1 px-6 py-5 text-right hover:bg-gray-50 transition-colors group">
+        <div className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-1">יעד</div>
+        <div className="flex items-center gap-2">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2">
+            <path d="M3 17l3-8 3 4 4-6 3 5 3-3" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          <span className="text-gray-900 font-semibold text-[15px]">Val Thorens</span>
         </div>
-        <div className="flex items-center gap-1.5 bg-green-50 border border-green-100 rounded-xl px-3 py-2">
-          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse inline-block" />
-          <span className="text-xs font-semibold text-green-700">שלג טרי</span>
-        </div>
-      </div>
-
-      {/* Date + guests row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-bold text-gray-400 tracking-wider uppercase">הגעה</label>
-          <div className="relative">
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">📅</span>
-            <input
-              type="date"
-              value={checkin}
-              onChange={(e) => setCheckin(e.target.value)}
-              className="w-full border border-gray-200 rounded-2xl pr-9 pl-4 py-3.5 text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors"
-            />
-          </div>
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-bold text-gray-400 tracking-wider uppercase">יציאה</label>
-          <div className="relative">
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">📅</span>
-            <input
-              type="date"
-              value={checkout}
-              onChange={(e) => setCheckout(e.target.value)}
-              className="w-full border border-gray-200 rounded-2xl pr-9 pl-4 py-3.5 text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors"
-            />
-          </div>
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-bold text-gray-400 tracking-wider uppercase">אנשים</label>
-          <div className="flex items-center border border-gray-200 rounded-2xl bg-gray-50 hover:bg-white transition-colors overflow-hidden">
-            <button
-              onClick={() => setGuests(Math.max(1, guests - 1))}
-              className="px-4 py-3.5 text-gray-500 hover:text-gray-900 font-bold text-lg transition-colors"
-            >
-              −
-            </button>
-            <span className="flex-1 text-center font-bold text-gray-800">{guests}</span>
-            <button
-              onClick={() => setGuests(Math.min(12, guests + 1))}
-              className="px-4 py-3.5 text-gray-500 hover:text-gray-900 font-bold text-lg transition-colors"
-            >
-              +
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Addons */}
-      <div className="mb-5">
-        <p className="text-xs font-bold text-gray-400 tracking-wider uppercase mb-3">מה רוצים להוסיף לחבילה?</p>
-        <div className="flex flex-wrap gap-2">
-          {ADDONS.map((addon) => {
-            const active = addons.includes(addon.id);
-            return (
-              <button
-                key={addon.id}
-                onClick={() => toggleAddon(addon.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
-                  active
-                    ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-200"
-                    : "bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600"
-                }`}
-              >
-                <span>{addon.icon}</span>
-                {addon.label}
-                {active && <span className="text-xs opacity-70">✓</span>}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Search CTA */}
-      <button className="w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-bold py-4 rounded-2xl text-lg transition-all shadow-xl shadow-blue-300/40 flex items-center justify-center gap-2">
-        <span>🔍</span>
-        חפש חבילות זמינות
       </button>
+
+      <div className="w-px bg-gray-200 my-4" />
+
+      {/* Dates */}
+      <button className="flex-1 px-6 py-5 text-right hover:bg-gray-50 transition-colors">
+        <div className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-1">תאריכים</div>
+        <div className="flex items-center gap-2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+          </svg>
+          <span className="text-gray-600 font-medium text-[15px]">{dates}</span>
+        </div>
+      </button>
+
+      <div className="w-px bg-gray-200 my-4" />
+
+      {/* Guests */}
+      <button className="flex-1 px-6 py-5 text-right hover:bg-gray-50 transition-colors">
+        <div className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-1">אנשים</div>
+        <div className="flex items-center gap-2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          <span className="text-gray-600 font-medium text-[15px]">{guests}</span>
+        </div>
+      </button>
+
+      {/* Search button */}
+      <div className="flex items-center px-3">
+        <button className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold px-7 py-4 transition-all flex items-center gap-2.5 text-[15px]" style={{ borderRadius: "12px" }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          חפש
+        </button>
+      </div>
     </div>
   );
 }
