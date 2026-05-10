@@ -18,10 +18,14 @@ html {
 }
 
 body {
-  background: #FFFFFF;
-  color: #0F172A;
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  background: #f7f9fb;
+  color: #191c1e;
+  font-family: var(--font-inter), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+.font-display {
+  font-family: var(--font-montserrat), Montserrat, system-ui, sans-serif;
 }
 
 @keyframes snowfall {
