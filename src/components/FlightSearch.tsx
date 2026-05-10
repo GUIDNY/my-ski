@@ -60,11 +60,12 @@ export default function FlightSearch({ destination = "Val Thorens", defaultRange
     const fmtSky = (d: Date) =>
       `${String(d.getFullYear()).slice(2)}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
 
-    if (!from) return `https://www.skyscanner.co.il/flights/${origin.toLowerCase()}/${destCode.toLowerCase()}/`;
+    const base = `https://www.skyscanner.co.il/transport/flights/${origin.toLowerCase()}/${destCode.toLowerCase()}/`;
+    if (!from) return base;
     const outbound = fmtSky(from);
-    const inbound = to ? fmtSky(to) : "";
-    const paxSeg = `${pax}adults`;
-    return `https://www.skyscanner.co.il/flights/${origin.toLowerCase()}/${destCode.toLowerCase()}/${outbound}/${inbound}/${paxSeg}/`;
+    const inbound  = to ? fmtSky(to) : outbound;
+    const qs = `?adultsv2=${pax}&cabinclass=economy&childrenv2=&rtn=1`;
+    return `${base}${outbound}/${inbound}/${qs}`;
   };
 
   const handleSearch = (provider: "google" | "skyscanner") => {

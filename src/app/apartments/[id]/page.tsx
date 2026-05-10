@@ -155,8 +155,8 @@ function ApartmentPage() {
     return `${String(d.getFullYear()).slice(2)}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;
   };
   const skyscannerUrl = checkin && checkout
-    ? `https://www.skyscanner.co.il/flights/tlv/gva/${fmtSky(checkin)}/${fmtSky(checkout)}/${guests}adults/`
-    : `https://www.skyscanner.co.il/flights/tlv/gva/`;
+    ? `https://www.skyscanner.co.il/transport/flights/tlv/gva/${fmtSky(checkin)}/${fmtSky(checkout)}/?adultsv2=${guests}&cabinclass=economy&childrenv2=&rtn=1`
+    : `https://www.skyscanner.co.il/transport/flights/tlv/gva/`;
 
   /* ── Price calculation ──────────────────────────────────── */
   const aptTotal      = apt ? apt.price_per_night * nights : 0;
