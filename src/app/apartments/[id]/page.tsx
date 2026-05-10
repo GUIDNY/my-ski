@@ -155,9 +155,8 @@ function ApartmentPage() {
     return `${String(d.getFullYear()).slice(2)}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;
   };
   const skyscannerUrl = checkin && checkout
-    ? `https://www.skyscanner.co.il/flights/tlv/lys/${fmtSky(checkin)}/${fmtSky(checkout)}/${guests}adults/`
-    : `https://www.skyscanner.co.il/flights/tlv/lys/`;
-  const elalUrl = `https://www.elal.com/heb/israel/`;
+    ? `https://www.skyscanner.co.il/flights/tlv/gva/${fmtSky(checkin)}/${fmtSky(checkout)}/${guests}adults/`
+    : `https://www.skyscanner.co.il/flights/tlv/gva/`;
 
   /* ── Price calculation ──────────────────────────────────── */
   const aptTotal      = apt ? apt.price_per_night * nights : 0;
@@ -326,31 +325,15 @@ function ApartmentPage() {
                         checked={transfer} onChange={setTransfer}
                       />
                     </div>
-                    {/* Flight options */}
-                    <div className="mt-2 flex flex-col gap-2">
-                      <a href={skyscannerUrl} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-2.5 p-3.5 rounded-xl border border-gray-100 bg-white hover:border-blue-200 hover:bg-blue-50 transition-all">
-                        <span className="text-gray-400 flex-shrink-0"><IconPlane size={17} /></span>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-semibold text-gray-800">כל חברות התעופה</div>
-                          <div className="text-xs text-gray-400">TLV → Lyon · {checkin ? `${fmtDate(checkin)}` : "תאריך הטיסה"}</div>
-                        </div>
-                        <span className="text-xs font-bold text-blue-600 flex-shrink-0">Skyscanner ←</span>
-                      </a>
-                      <a href={elalUrl} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-2.5 p-3.5 rounded-xl border border-gray-100 bg-white hover:border-amber-200 hover:bg-amber-50 transition-all">
-                        <div className="w-[17px] h-[17px] flex-shrink-0 flex items-center justify-center">
-                          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
-                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                          </svg>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-semibold text-gray-800">אלעל ישיר · TLV → Geneva</div>
-                          <div className="text-xs text-gray-400">ג׳נבה — 2.5 שעות נסיעה מ-Val Thorens</div>
-                        </div>
-                        <span className="text-xs font-bold text-amber-600 flex-shrink-0">elal.com ←</span>
-                      </a>
-                    </div>
+                    <a href={skyscannerUrl} target="_blank" rel="noopener noreferrer"
+                      className="mt-2 flex items-center gap-2.5 p-3.5 rounded-xl border border-gray-100 bg-white hover:border-blue-200 hover:bg-blue-50 transition-all">
+                      <span className="text-gray-400 flex-shrink-0"><IconPlane size={17} /></span>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-semibold text-gray-800">טיסה ל-Geneva (GVA)</div>
+                        <div className="text-xs text-gray-400">TLV → Geneva · {checkin ? fmtDate(checkin) : "בחר תאריך"} · 2.5h מ-Val Thorens</div>
+                      </div>
+                      <span className="text-xs font-bold text-blue-600 flex-shrink-0">Skyscanner ←</span>
+                    </a>
                   </div>
 
                   {/* ── Cancellation policy ───────────────────────── */}

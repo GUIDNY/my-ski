@@ -67,14 +67,9 @@ export default function FlightSearch({ destination = "Val Thorens", defaultRange
     return `https://www.skyscanner.co.il/flights/${origin.toLowerCase()}/${destCode.toLowerCase()}/${outbound}/${inbound}/${paxSeg}/`;
   };
 
-  const handleSearch = (provider: "google" | "skyscanner" | "elal") => {
+  const handleSearch = (provider: "google" | "skyscanner") => {
     setSearching(true);
-    let url: string;
-    if (provider === "elal") {
-      url = "https://www.elal.com/heb/israel/";
-    } else {
-      url = provider === "google" ? buildGoogleFlightsUrl() : buildSkyscannerUrl();
-    }
+    const url = provider === "google" ? buildGoogleFlightsUrl() : buildSkyscannerUrl();
     window.open(url, "_blank");
     setTimeout(() => setSearching(false), 1000);
   };
@@ -151,17 +146,10 @@ export default function FlightSearch({ destination = "Val Thorens", defaultRange
           </svg>
           Skyscanner
         </button>
-        <button
-          onClick={() => handleSearch("elal")}
-          disabled={searching}
-          className="flex-1 flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-700 disabled:opacity-60 text-white font-bold py-3.5 rounded-xl text-sm transition-all"
-        >
-          אלעל ישיר
-        </button>
       </div>
 
       <p className="text-xs text-gray-400 text-center mt-3">
-        אלעל — טיסה ישירה TLV → Geneva · Val Thorens 2.5h
+        פותח חיפוש טיסות TLV → Geneva (GVA) בחלון חדש
       </p>
     </div>
   );
