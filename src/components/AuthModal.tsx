@@ -2,42 +2,40 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase-client";
 
-/* ── Snow ──────────────────────────────────────────────────── */
-const FLAKES = Array.from({ length: 48 }, (_, i) => ({
+/* ── Stars ─────────────────────────────────────────────────── */
+const STARS = Array.from({ length: 90 }, (_, i) => ({
   id: i,
-  left:     `${Math.random() * 100}%`,
-  size:      Math.random() * 5 + 3,
-  dur:       Math.random() * 6 + 5,
-  delay:    -Math.random() * 12,
-  opacity:   Math.random() * 0.55 + 0.25,
-  sway:      Math.random() * 40 - 20,
+  left:    `${Math.random() * 100}%`,
+  top:     `${Math.random() * 72}%`,
+  size:     Math.random() * 1.8 + 0.4,
+  opacity:  Math.random() * 0.65 + 0.2,
+  dur:      Math.random() * 4 + 2,
+  delay:    Math.random() * 4,
 }));
 
-function Snow() {
+function Stars() {
   return (
     <>
       <style>{`
-        @keyframes snowfall {
-          0%   { transform: translateY(-20px) translateX(0px) rotate(0deg); }
-          50%  { transform: translateY(50vh) translateX(var(--sway)) rotate(180deg); }
-          100% { transform: translateY(110vh) translateX(0px) rotate(360deg); }
+        @keyframes twinkle {
+          0%, 100% { opacity: var(--star-op); }
+          50%       { opacity: calc(var(--star-op) * 0.25); }
         }
       `}</style>
-      <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
-        {FLAKES.map(f => (
-          <div key={f.id} style={{
-            position: "absolute",
-            left: f.left,
-            top: 0,
-            width: f.size,
-            height: f.size,
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {STARS.map(s => (
+          <div key={s.id} style={{
+            position:     "absolute",
+            left:          s.left,
+            top:           s.top,
+            width:         s.size,
+            height:        s.size,
             borderRadius: "50%",
-            background: "white",
-            opacity: f.opacity,
-            // @ts-expect-error css var
-            "--sway": `${f.sway}px`,
-            animation: `snowfall ${f.dur}s ${f.delay}s linear infinite`,
-          }} />
+            background:   "white",
+            "--star-op":   s.opacity,
+            opacity:       s.opacity,
+            animation:    `twinkle ${s.dur}s ${s.delay}s ease-in-out infinite`,
+          } as React.CSSProperties} />
         ))}
       </div>
     </>
@@ -47,14 +45,11 @@ function Snow() {
 /* ── Mountain silhouette ───────────────────────────────────── */
 function Mountains() {
   return (
-    <svg viewBox="0 0 800 160" preserveAspectRatio="xMidYMax slice"
-      className="absolute bottom-0 left-0 right-0 w-full" style={{ height: 160 }}>
-      {/* Back range */}
-      <polygon points="0,160 120,60 200,110 300,30 400,90 520,20 620,80 720,40 800,70 800,160" fill="rgba(255,255,255,0.06)" />
-      {/* Mid range */}
-      <polygon points="0,160 80,90 180,130 280,55 380,100 480,40 580,100 680,60 780,85 800,70 800,160" fill="rgba(255,255,255,0.09)" />
-      {/* Front range */}
-      <polygon points="0,160 60,110 160,140 240,80 340,125 440,70 540,120 640,85 740,115 800,90 800,160" fill="rgba(255,255,255,0.13)" />
+    <svg viewBox="0 0 1200 280" preserveAspectRatio="xMidYMax slice"
+      className="absolute bottom-0 left-0 right-0 w-full pointer-events-none" style={{ height: 280 }}>
+      <polygon points="0,280 160,110 300,170 430,70 570,145 700,55 840,125 1000,65 1120,130 1200,85 1200,280" fill="#0e2a42" />
+      <polygon points="0,280 110,155 230,195 340,105 470,165 600,82 730,155 870,95 1010,152 1140,105 1200,130 1200,280" fill="#091f33" />
+      <polygon points="0,280 80,205 200,238 310,162 420,215 530,145 650,205 780,155 900,212 1050,168 1160,200 1200,178 1200,280" fill="#061525" />
     </svg>
   );
 }
@@ -73,7 +68,6 @@ export default function AuthModal({ onClose, onAuth }: Props) {
   const [success,  setSuccess]  = useState("");
   const backdropRef = useRef<HTMLDivElement>(null);
 
-  // Close on Escape
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", handler);
@@ -100,59 +94,70 @@ export default function AuthModal({ onClose, onAuth }: Props) {
       options: { data: { full_name: name, role: "user" } },
     });
     if (e) { setError(e.message); setLoading(false); return; }
-    setSuccess("נרשמת! אמת את האימייל שלך ואז התחבר.");
+    setSuccess("נרשמת! תוכל להתחבר עכשיו.");
     setLoading(false);
   };
 
-  const inp = "w-full border border-white/20 rounded-xl px-4 py-3 text-sm bg-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/40 backdrop-blur-sm";
+  const inp = "w-full bg-white border border-gray-200 rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all";
 
   return (
     <div
       ref={backdropRef}
       onClick={e => { if (e.target === backdropRef.current) onClose(); }}
-      className="fixed inset-0 z-[100] flex items-center justify-center px-4"
-      style={{ background: "rgba(6, 15, 45, 0.88)", backdropFilter: "blur(8px)" }}
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center"
+      style={{
+        background: "linear-gradient(160deg, #060f1e 0%, #0a1e35 35%, #0b2535 65%, #07141f 100%)",
+      }}
     >
-      {/* Snow */}
-      <Snow />
+      {/* Stars */}
+      <Stars />
+
       {/* Mountains */}
       <Mountains />
 
       {/* Card */}
       <div
-        className="relative z-10 w-full max-w-md rounded-3xl overflow-hidden shadow-2xl"
+        className="relative z-10 w-full max-w-sm mx-4 rounded-2xl overflow-hidden"
         style={{
-          background: "linear-gradient(145deg, rgba(14,30,74,0.95) 0%, rgba(20,44,100,0.92) 100%)",
-          border: "1px solid rgba(255,255,255,0.15)",
-          backdropFilter: "blur(20px)",
+          background:     "rgba(10, 22, 45, 0.82)",
+          border:         "1px solid rgba(255,255,255,0.1)",
+          backdropFilter: "blur(24px)",
+          boxShadow:      "0 32px 80px rgba(0,0,0,0.6)",
         }}
         onClick={e => e.stopPropagation()}
       >
-        {/* Top decoration */}
-        <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, #3b82f6, #60a5fa, #93c5fd, #60a5fa, #3b82f6)" }} />
+        <div className="px-8 pt-8 pb-7">
 
-        <div className="px-8 pt-8 pb-8">
+          {/* Close */}
+          <button onClick={onClose}
+            className="absolute top-4 left-4 w-8 h-8 rounded-full flex items-center justify-center text-white/30 hover:text-white hover:bg-white/10 transition-all">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+
           {/* Logo */}
           <div className="text-center mb-7">
             <div className="inline-flex items-center gap-2.5 mb-2">
-              <div className="w-11 h-11 bg-white/15 rounded-2xl flex items-center justify-center border border-white/20">
-                <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+              <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center border border-white/15">
+                <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
                   <path d="M4 24L12 8L20 18L25 12L28 24H4Z" fill="white" />
                 </svg>
               </div>
-              <span className="text-2xl font-black text-white tracking-tight">MY·SKI</span>
+              <span className="text-2xl font-black text-white tracking-tight">MY-SKI</span>
             </div>
-            <p className="text-white/50 text-xs tracking-widest uppercase">Val Thorens · Trois Vallées</p>
+            <p className="text-white/35 text-[10px] tracking-[0.2em] uppercase">Val Thorens · Trois Vallées</p>
           </div>
 
           {/* Tabs */}
-          <div className="flex mb-6 bg-white/5 rounded-2xl p-1 border border-white/10">
+          <div className="flex mb-6 rounded-xl overflow-hidden border border-white/10">
             {(["login", "signup"] as const).map(t => (
               <button key={t} onClick={() => { setTab(t); reset(); }}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all
-                  ${tab === t
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : "text-white/50 hover:text-white/80"}`}>
+                className={`flex-1 py-2.5 text-sm font-bold transition-all ${
+                  tab === t
+                    ? "bg-blue-600 text-white"
+                    : "text-white/40 hover:text-white/70 bg-transparent"
+                }`}>
                 {t === "login" ? "כניסה" : "הרשמה"}
               </button>
             ))}
@@ -166,21 +171,28 @@ export default function AuthModal({ onClose, onAuth }: Props) {
             )}
             <input type="email" value={email} onChange={e => setEmail(e.target.value)}
               placeholder="כתובת אימייל" className={inp} dir="ltr" />
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-              placeholder="סיסמה" className={inp} dir="ltr" />
+            <div>
+              <input type="password" value={password} onChange={e => setPassword(e.target.value)}
+                placeholder="סיסמה" className={inp} dir="ltr" />
+              {tab === "login" && (
+                <button className="text-xs text-white/35 hover:text-white/60 mt-1.5 mr-1 transition-colors">
+                  שכחת סיסמה?
+                </button>
+              )}
+            </div>
             {tab === "signup" && (
               <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)}
                 placeholder="אימות סיסמה" className={inp} dir="ltr" />
             )}
 
-            {error   && <div className="text-red-300 text-xs bg-red-500/15 rounded-xl px-4 py-2.5 border border-red-400/20">{error}</div>}
-            {success && <div className="text-green-300 text-xs bg-green-500/15 rounded-xl px-4 py-2.5 border border-green-400/20">{success}</div>}
+            {error   && <div className="text-red-300 text-xs bg-red-500/15 rounded-xl px-4 py-2.5 border border-red-400/20 text-right">{error}</div>}
+            {success && <div className="text-green-300 text-xs bg-green-500/15 rounded-xl px-4 py-2.5 border border-green-400/20 text-right">{success}</div>}
 
             <button
               onClick={tab === "login" ? login : signup}
               disabled={loading || !email || !password}
-              className="w-full py-3.5 rounded-xl font-black text-sm transition-all mt-1
-                bg-blue-500 hover:bg-blue-400 disabled:opacity-40 disabled:cursor-not-allowed text-white shadow-lg"
+              className="w-full py-3.5 rounded-xl font-black text-sm transition-all mt-1 text-white shadow-lg disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)" }}
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -191,15 +203,34 @@ export default function AuthModal({ onClose, onAuth }: Props) {
             </button>
           </div>
 
-          {/* Close */}
-          <button onClick={onClose}
-            className="absolute top-4 left-4 w-8 h-8 rounded-full flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
+          {/* Social divider */}
+          <div className="mt-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex-1 h-px bg-white/10" />
+              <span className="text-white/30 text-xs">או המשך באמצעות</span>
+              <div className="flex-1 h-px bg-white/10" />
+            </div>
+            <div className="flex gap-3">
+              <button className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-white/10 text-white/50 hover:text-white hover:border-white/25 transition-all text-xs font-bold"
+                style={{ background: "rgba(255,255,255,0.04)" }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                iOS
+              </button>
+              <button className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-white/10 text-white/50 hover:text-white hover:border-white/25 transition-all text-xs font-bold"
+                style={{ background: "rgba(255,255,255,0.04)" }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+                Google
+              </button>
+            </div>
+          </div>
+
         </div>
       </div>
+
+      {/* Footer */}
+      <p className="relative z-10 mt-8 text-white/20 text-[10px] tracking-widest uppercase">
+        MY-SKI LUXURY TRAVEL. ALL RIGHTS RESERVED 2024 ©
+      </p>
     </div>
   );
 }
