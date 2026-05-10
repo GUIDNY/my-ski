@@ -131,12 +131,15 @@ export default function Home() {
           zIndex: 1,
           background: "linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.15) 60%, rgba(0,0,0,0.55) 100%)"
         }} />
-        <div className="relative z-10 flex flex-col items-center gap-7 px-4 text-center w-full max-w-4xl mx-auto">
-          <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-white leading-tight" style={{ textShadow: "0 2px 20px rgba(0,0,0,0.4)" }}>
-            Val Thorens
+        <div className="relative z-10 flex flex-col items-center gap-6 px-4 text-center w-full max-w-4xl mx-auto">
+          <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-black text-white leading-tight" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.5)" }}>
+            סקי מתי שרוצים,<br />במחירים נוחים
           </h1>
-          <p className="text-xl md:text-2xl text-white/90 font-medium" style={{ textShadow: "0 1px 10px rgba(0,0,0,0.3)" }}>
-            כל מה שאתה צריך נמצא כאן
+          <p className="text-base md:text-xl text-white/90 font-medium max-w-2xl leading-relaxed" style={{ textShadow: "0 1px 10px rgba(0,0,0,0.4)" }}>
+            אצלנו דואגים לך גם לתאריכים שיתאימו לך וגם לנוחות המרבית באתר Val Thorens
+          </p>
+          <p className="text-sm md:text-base text-white/70 font-medium" style={{ textShadow: "0 1px 8px rgba(0,0,0,0.4)" }}>
+            תוכל להחליט בעצמך מה לסגור דרכינו ומה לסגור עצמאית
           </p>
           <SearchWidget />
           <button className="flex items-center gap-2.5 px-6 py-3 rounded-full text-white text-sm font-medium transition-all hover:bg-white/20" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.25)" }}>
@@ -180,7 +183,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-10 items-center">
           <div className="w-full md:w-3/5 rounded-xl overflow-hidden shadow-2xl">
             <img
-              src="/apt1.jpg"
+              src="/chalet-interior.jpg"
               alt="יוקרה בכל פרט"
               className="w-full h-[500px] object-cover hover:scale-[1.03] transition-transform duration-700"
             />
