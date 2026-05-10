@@ -16,13 +16,16 @@ function gridDays(y: number, m: number): (Date | null)[] {
   return out;
 }
 
+// Season: Dec 2026 – May 2027
+const SEASON_START = new Date(2026, 11, 1);   // 1 Dec 2026
+const SEASON_END   = new Date(2027,  4, 31);  // 31 May 2027
+
 /* ── Single month grid ─────────────────────────────────────── */
 function MonthGrid({
-  year, month, from, to, hov, today, onEnter, onLeave, onClick,
+  year, month, from, to, hov, onEnter, onLeave, onClick,
 }: {
   year: number; month: number;
   from: Date | null; to: Date | null; hov: Date | null;
-  today: Date;
   onEnter(d: Date): void; onLeave(): void; onClick(d: Date): void;
 }) {
   const cells = gridDays(year, month);
@@ -55,20 +58,19 @@ function MonthGrid({
         {cells.map((date, i) => {
           if (!date) return <div key={i} className="h-11" />;
 
-          const past    = date < today;
-          const isStart = !!(eff.s && same(date, eff.s));
-          const isEnd   = !!(eff.e && same(date, eff.e));
-          const between = !!(eff.s && eff.e && date > eff.s && date < eff.e);
-          const isToday = same(date, today);
+          const disabled = date < SEASON_START || date > SEASON_END;
+          const isStart  = !!(eff.s && same(date, eff.s));
+          const isEnd    = !!(eff.e && same(date, eff.e));
+          const between  = !!(eff.s && eff.e && date > eff.s && date < eff.e);
           const hasRange = !!(eff.s && eff.e);
 
           return (
             <div
               key={i}
-              className={`relative h-11 flex items-center justify-center ${past ? "pointer-events-none" : "cursor-pointer"}`}
-              onMouseEnter={() => !past && onEnter(date)}
+              className={`relative h-11 flex items-center justify-center ${disabled ? "pointer-events-none" : "cursor-pointer"}`}
+              onMouseEnter={() => !disabled && onEnter(date)}
               onMouseLeave={onLeave}
-              onClick={() => !past && onClick(date)}
+              onClick={() => !disabled && onClick(date)}
             >
               {/* Range background strip */}
               {between   && <div className="absolute top-1.5 bottom-1.5 left-0 right-0 bg-blue-50" />}
@@ -78,10 +80,9 @@ function MonthGrid({
               {/* Circle */}
               <div className={[
                 "relative z-10 w-9 h-9 flex items-center justify-center rounded-full text-sm select-none transition-colors",
-                past ? "text-gray-300" : "",
-                !past && !isStart && !isEnd ? "hover:bg-blue-100 hover:text-blue-700 text-gray-800 font-medium" : "",
+                disabled ? "text-gray-300" : "",
+                !disabled && !isStart && !isEnd ? "hover:bg-blue-100 hover:text-blue-700 text-gray-800 font-medium" : "",
                 isStart || isEnd ? "bg-blue-600 text-white font-bold shadow" : "",
-                isToday && !isStart && !isEnd ? "font-black text-blue-600 ring-2 ring-blue-400 ring-offset-1" : "",
               ].join(" ")}>
                 {date.getDate()}
               </div>
@@ -103,12 +104,13 @@ export default function SearchWidget() {
   const [guests,   setGuests]   = useState(2);
   const [open,     setOpen]     = useState(false);
   const [picking,  setPicking]  = useState<"from" | "to">("from");
-  const [base,     setBase]     = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
+  const [base,     setBase]     = useState(() => new Date(2026, 11, 1)); // Dec 2026
   const ref = useRef<HTMLDivElement>(null);
 
-  const next = new Date(base.getFullYear(), base.getMonth() + 1, 1);
-  const nights = from && to ? Math.round((to.getTime() - from.getTime()) / 86400000) : null;
-  const canPrev = base > new Date(today.getFullYear(), today.getMonth(), 1);
+  const next     = new Date(base.getFullYear(), base.getMonth() + 1, 1);
+  const nights   = from && to ? Math.round((to.getTime() - from.getTime()) / 86400000) : null;
+  const canPrev  = base > SEASON_START;
+  const canNext  = next < new Date(SEASON_END.getFullYear(), SEASON_END.getMonth(), 1);
 
   useEffect(() => {
     const h = (e: MouseEvent) => {
@@ -243,8 +245,8 @@ export default function SearchWidget() {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15 18 9 12 15 6"/></svg>
             </button>
             <button
-              onClick={() => setBase(new Date(base.getFullYear(), base.getMonth() + 1, 1))}
-              className="absolute left-0 top-0 w-8 h-8 flex items-center justify-center rounded-full border border-gray-200 hover:border-blue-400 hover:text-blue-600 text-gray-600 transition-colors z-10"
+              onClick={() => canNext && setBase(new Date(base.getFullYear(), base.getMonth() + 1, 1))}
+              className={`absolute left-0 top-0 w-8 h-8 flex items-center justify-center rounded-full border border-gray-200 transition-colors z-10 ${canNext ? "hover:border-blue-400 hover:text-blue-600 text-gray-600" : "text-gray-200 cursor-not-allowed"}`}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
@@ -254,13 +256,13 @@ export default function SearchWidget() {
               <MonthGrid
                 year={base.getFullYear()} month={base.getMonth()}
                 from={from} to={to} hov={picking === "to" ? hov : null}
-                today={today} onEnter={setHov} onLeave={() => setHov(null)} onClick={handleDay}
+                onEnter={setHov} onLeave={() => setHov(null)} onClick={handleDay}
               />
               <div className="w-px bg-gray-100 self-stretch" />
               <MonthGrid
                 year={next.getFullYear()} month={next.getMonth()}
                 from={from} to={to} hov={picking === "to" ? hov : null}
-                today={today} onEnter={setHov} onLeave={() => setHov(null)} onClick={handleDay}
+                onEnter={setHov} onLeave={() => setHov(null)} onClick={handleDay}
               />
             </div>
           </div>
