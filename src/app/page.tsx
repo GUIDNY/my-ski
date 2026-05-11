@@ -2,7 +2,7 @@ import Navbar from "@/components/Navbar";
 import SearchWidget from "@/components/SearchWidget";
 import FlightSearch from "@/components/FlightSearch";
 import Footer from "@/components/Footer";
-import { IconShield, IconUser, IconMountain } from "@/components/Icons";
+import { IconMountain } from "@/components/Icons";
 import { createServerClient } from "@/lib/supabase-server";
 import type { Apartment } from "@/types";
 
@@ -83,34 +83,6 @@ const steps = [
     desc: "חיפוש טיסות דרך Skyscanner, ובעתיד — טיסות פרטיות שלנו.",
     cta: "חפש טיסה",
     href: "/search",
-  },
-];
-
-const addOns = [
-  {
-    iconEl: <IconShield size={32} className="text-gray-900" />,
-    title: "ביטוח סקי",
-    desc: "כיסוי ייעודי לסקי וסנובורד כולל ציוד וביטול נסיעה.",
-  },
-  {
-    iconEl: <IconUser size={32} className="text-gray-900" />,
-    title: "נציג אישי",
-    desc: "ליווי צמוד מהנחיתה ועד ההמראה, לכל שאלה או בקשה.",
-  },
-  {
-    iconEl: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-900">
-        <path d="M12 22C6.5 22 2 17.5 2 12S6.5 2 12 2s10 4.5 10 10-4.5 10-10 10z" />
-        <line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
-      </svg>
-    ),
-    title: "ביטוח רפואי",
-    desc: 'כיסוי רפואי רחב בחו"ל עם הטסה רפואית במידת הצורך.',
-  },
-  {
-    iconEl: <IconMountain size={32} className="text-gray-900" />,
-    title: "חילוץ הר",
-    desc: "שירות חילוץ וסיוע ופינוי מהיר מכל נקודה באתר הסקי.",
   },
 ];
 
@@ -209,10 +181,17 @@ export default async function Home() {
       <section className="py-20 px-6" style={{ background: "#f7f9fb" }}>
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-10 items-center">
           <div className="w-full md:w-3/5 rounded-xl overflow-hidden shadow-2xl">
+            {/* Desktop image */}
             <img
               src="/chalet-interior.jpg"
               alt="יוקרה בכל פרט"
-              className="w-full h-[500px] object-cover hover:scale-[1.03] transition-transform duration-700"
+              className="hidden md:block w-full h-[500px] object-cover hover:scale-[1.03] transition-transform duration-700"
+            />
+            {/* Mobile image — portrait-friendly ski shot */}
+            <img
+              src="/hero-ski.jpg"
+              alt="Val Thorens"
+              className="block md:hidden w-full h-72 object-cover object-top"
             />
           </div>
           <div className="w-full md:w-2/5 md:pr-10">
@@ -228,41 +207,6 @@ export default async function Home() {
               </svg>
               <span className="text-xs font-bold tracking-widest uppercase text-gray-900">בלעדיות מובטחת ב-Val Thorens</span>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── ADD-ONS ──────────────────────────────────────── */}
-      <section className="py-28 px-6 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-14 gap-6">
-            <div>
-              <h2 className="font-display text-3xl md:text-4xl font-black text-gray-900 mb-3">
-                אחרי ההזמנה — הוסף גם:
-              </h2>
-              <p className="text-gray-500 max-w-xl text-base leading-relaxed">
-                השלימו את החוויה עם שירותי הפרימיום המשלימים שלנו לביטחון מקסימלי על ההר.
-              </p>
-            </div>
-            <div className="flex gap-3 flex-shrink-0">
-              <button className="w-11 h-11 border border-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:border-gray-900 hover:text-gray-900 transition-colors text-lg">←</button>
-              <button className="w-11 h-11 border border-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:border-gray-900 hover:text-gray-900 transition-colors text-lg">→</button>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-            {addOns.map((item, i) => (
-              <div
-                key={i}
-                className="flex flex-col p-8 border border-gray-100 rounded-xl bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
-              >
-                <div className="mb-5">{item.iconEl}</div>
-                <h4 className="font-display text-lg font-black text-gray-900 mb-2">{item.title}</h4>
-                <p className="text-gray-500 text-sm leading-relaxed mb-6 flex-1">{item.desc}</p>
-                <button className="text-xs font-bold text-gray-900 uppercase tracking-widest border-b border-gray-900 pb-0.5 self-start hover:opacity-50 transition-opacity">
-                  הוסף כעת
-                </button>
-              </div>
-            ))}
           </div>
         </div>
       </section>
