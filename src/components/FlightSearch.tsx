@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
-import { DateRange } from "react-day-picker";
-import DateRangePicker from "./DateRangePicker";
+import SkiCalendar from "./SkiCalendar";
 
 const AIRPORTS = [
   { code: "TLV", label: "תל אביב (TLV)" },
@@ -16,69 +15,56 @@ const DEST_OPTIONS = [
 
 type Props = {
   destination?: string;
-  defaultRange?: DateRange;
+  defaultCheckin?: string;
+  defaultCheckout?: string;
   guests?: number;
 };
 
-/* Local-time ISO string — avoids UTC midnight → previous day shift */
-const toLocalIso = (d: Date) =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-
 /*
- * Build the Google Flights `tfs` query parameter (protobuf-encoded).
- * Structure reverse-engineered from real Google Flights URLs:
- *   header: 08 01 10 02
- *   each leg (field 3, 30 bytes):
- *     12 0a <10-char date>
- *     6a 07 08 01 12 03 <3-char origin>
- *     72 07 08 01 12 03 <3-char dest>
+ * Build Google Flights `tfs` query parameter (protobuf-encoded round trip).
+ * Structure reverse-engineered from real Google Flights URLs.
  */
 function buildTfs(outDate: string, retDate: string, origin: string, dest: string): string {
   const enc = (s: string) => s.split("").map(c => c.charCodeAt(0));
   const makeLeg = (date: string, from: string, to: string) => {
     const leg = [
-      0x12, 0x0a, ...enc(date),                           // date field (12 bytes)
-      0x6a, 0x07, 0x08, 0x01, 0x12, 0x03, ...enc(from),  // origin airport (9 bytes)
-      0x72, 0x07, 0x08, 0x01, 0x12, 0x03, ...enc(to),    // dest airport (9 bytes)
+      0x12, 0x0a, ...enc(date),
+      0x6a, 0x07, 0x08, 0x01, 0x12, 0x03, ...enc(from),
+      0x72, 0x07, 0x08, 0x01, 0x12, 0x03, ...enc(to),
     ];
     return [0x1a, leg.length, ...leg];
   };
-  const bytes = [
-    0x08, 0x01, 0x10, 0x02,
-    ...makeLeg(outDate, origin, dest),
-    ...makeLeg(retDate, dest, origin),
-  ];
+  const bytes = [0x08, 0x01, 0x10, 0x02, ...makeLeg(outDate, origin, dest), ...makeLeg(retDate, dest, origin)];
   return btoa(String.fromCharCode(...bytes));
 }
 
-export default function FlightSearch({ destination = "Val Thorens", defaultRange, guests = 2 }: Props) {
-  const [origin,   setOrigin]   = useState("TLV");
-  const [dest,     setDest]     = useState("GVA");
-  const [range,    setRange]    = useState<DateRange | undefined>(defaultRange);
-  const [pax,      setPax]      = useState(guests);
+export default function FlightSearch({ destination = "Val Thorens", defaultCheckin, defaultCheckout, guests = 2 }: Props) {
+  const [origin,    setOrigin]    = useState("TLV");
+  const [dest,      setDest]      = useState("GVA");
+  const [checkin,   setCheckin]   = useState(defaultCheckin  ?? "");
+  const [checkout,  setCheckout]  = useState(defaultCheckout ?? "");
+  const [pax,       setPax]       = useState(guests);
   const [searching, setSearching] = useState(false);
 
   const destInfo = DEST_OPTIONS.find(d => d.code === dest) ?? DEST_OPTIONS[0];
 
   const buildGoogleFlightsUrl = () => {
-    const from = range?.from;
-    const to   = range?.to;
-    if (from && to) {
-      const tfs = buildTfs(toLocalIso(from), toLocalIso(to), origin, dest);
+    if (checkin && checkout) {
+      const tfs = buildTfs(checkin, checkout, origin, dest);
       return `https://www.google.com/travel/flights?hl=iw&gl=il&curr=EUR&tfs=${tfs}`;
     }
     return `https://www.google.com/travel/flights?hl=iw&gl=il&curr=EUR&q=flights+from+${origin}+to+${dest}`;
   };
 
   const buildSkyscannerUrl = () => {
-    const from = range?.from;
-    const to   = range?.to;
-    const fmtSky = (d: Date) =>
-      `${String(d.getFullYear()).slice(2)}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+    const fmtSky = (iso: string) => {
+      const d = new Date(iso + "T12:00:00");
+      return `${String(d.getFullYear()).slice(2)}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+    };
     const base = `https://www.skyscanner.co.il/transport/flights/${origin.toLowerCase()}/${dest.toLowerCase()}/`;
-    if (!from) return base;
+    if (!checkin) return base;
     const qs = `?adultsv2=${pax}&cabinclass=economy&childrenv2=&rtn=1`;
-    return `${base}${fmtSky(from)}/${to ? fmtSky(to) : fmtSky(from)}/${qs}`;
+    return `${base}${fmtSky(checkin)}/${checkout ? fmtSky(checkout) : fmtSky(checkin)}/${qs}`;
   };
 
   const handleSearch = (provider: "google" | "skyscanner") => {
@@ -86,6 +72,9 @@ export default function FlightSearch({ destination = "Val Thorens", defaultRange
     window.open(provider === "google" ? buildGoogleFlightsUrl() : buildSkyscannerUrl(), "_blank");
     setTimeout(() => setSearching(false), 1000);
   };
+
+  const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
+  const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s + "T12:00:00"); return `${d.getDate()} ${HE_MONTHS[d.getMonth()]}`; };
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6" dir="rtl">
@@ -109,7 +98,7 @@ export default function FlightSearch({ destination = "Val Thorens", defaultRange
           </select>
         </div>
 
-        {/* Destination — selectable */}
+        {/* Destination */}
         <div>
           <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1.5">יעד</label>
           <select value={dest} onChange={e => setDest(e.target.value)}
@@ -131,9 +120,22 @@ export default function FlightSearch({ destination = "Val Thorens", defaultRange
         </div>
       </div>
 
-      {/* Date picker */}
-      <div className="border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 mb-5">
-        <DateRangePicker value={range} onChange={setRange} />
+      {/* Date summary pill (shown after selection) */}
+      {checkin && checkout && (
+        <div className="flex items-center justify-between bg-blue-50 border border-blue-100 rounded-xl px-4 py-2.5 mb-3 text-sm">
+          <span className="font-bold text-gray-800">{fmtDate(checkin)} — {fmtDate(checkout)}</span>
+          <button onClick={() => { setCheckin(""); setCheckout(""); }}
+            className="text-xs text-gray-400 hover:text-gray-600">נקה ×</button>
+        </div>
+      )}
+
+      {/* SkiCalendar */}
+      <div className="mb-5">
+        <SkiCalendar
+          initialFrom={checkin || undefined}
+          initialTo={checkout || undefined}
+          onSelect={(from, to) => { setCheckin(from); setCheckout(to); }}
+        />
       </div>
 
       {/* Search buttons */}
