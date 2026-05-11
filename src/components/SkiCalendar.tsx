@@ -137,9 +137,9 @@ export default function SkiCalendar({ initialFrom, initialTo, onSelect, onCancel
 
       {/* Nav + grids */}
       <div className="flex items-center justify-between mb-3">
-        {navBtn(canPrev, () => setBase(new Date(base.getFullYear(), base.getMonth() - 1, 1)), <IconChevL />)}
+        {navBtn(canPrev, () => setBase(new Date(base.getFullYear(), base.getMonth() - 1, 1)), <IconChevR />)}
         <div className="flex-1" />
-        {navBtn(canNext, () => setBase(new Date(base.getFullYear(), base.getMonth() + 1, 1)), <IconChevR />)}
+        {navBtn(canNext, () => setBase(new Date(base.getFullYear(), base.getMonth() + 1, 1)), <IconChevL />)}
       </div>
 
       <div className="flex gap-6">

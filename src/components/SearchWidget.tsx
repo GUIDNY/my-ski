@@ -267,9 +267,9 @@ export default function SearchWidget() {
           {/* Navigation + grids */}
           <div className="relative">
             <div className="flex items-center justify-between mb-1">
-              {navBtn(canPrev, () => setBase(new Date(base.getFullYear(), base.getMonth() - 1, 1)), <IconChevL />)}
+              {navBtn(canPrev, () => setBase(new Date(base.getFullYear(), base.getMonth() - 1, 1)), <IconChevR />)}
               <div className="flex-1" />
-              {navBtn(canNext, () => setBase(new Date(base.getFullYear(), base.getMonth() + 1, 1)), <IconChevR />)}
+              {navBtn(canNext, () => setBase(new Date(base.getFullYear(), base.getMonth() + 1, 1)), <IconChevL />)}
             </div>
 
             {/* Desktop: 2 months | Mobile: 1 month */}
