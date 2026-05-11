@@ -1,10 +1,11 @@
 "use client";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { Apartment } from "@/types";
 import {
-  IconMountain, IconCheck, IconStar, IconBed, IconSearch, IconCalendar,
+  IconMountain, IconCheck, IconStar, IconBed, IconSearch,
 } from "@/components/Icons";
+import SkiCalendar from "@/components/SkiCalendar";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s); return `${d.getDate()} ${HE_MONTHS[d.getMonth()]}`; };
@@ -31,7 +32,6 @@ function ApartmentCard({ apt, checkin, checkout, guests }: {
     <a href={`/apartments/${apt.id}?${query}`}
       className="group bg-white rounded-2xl border border-gray-100 hover:border-blue-200 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col">
 
-      {/* Image */}
       <div className="relative h-52 overflow-hidden flex-shrink-0">
         <img
           src={apt.images?.[0] ?? "/apt1.jpg"} alt={apt.name}
@@ -48,7 +48,6 @@ function ApartmentCard({ apt, checkin, checkout, guests }: {
         </div>
       </div>
 
-      {/* Info */}
       <div className="p-5 flex flex-col flex-1 text-right" dir="rtl">
         <div className="flex justify-between items-start mb-2">
           <div className="min-w-0">
@@ -61,7 +60,6 @@ function ApartmentCard({ apt, checkin, checkout, guests }: {
           </div>
         </div>
 
-        {/* Stats row */}
         <div className="flex gap-3 text-xs text-gray-400 py-3 border-t border-gray-100 mb-3">
           <span className="flex items-center gap-1"><IconBed size={12} /> {apt.beds} חד׳</span>
           <span>·</span>
@@ -70,7 +68,6 @@ function ApartmentCard({ apt, checkin, checkout, guests }: {
           <span>{apt.sqm} מ״ר</span>
         </div>
 
-        {/* Amenities */}
         <div className="flex gap-1.5 flex-wrap mb-4">
           {apt.amenities?.slice(0, 3).map((a, i) => (
             <span key={i} className="flex items-center gap-1 text-xs text-gray-600 bg-gray-50 px-2 py-0.5 rounded-full">
@@ -92,42 +89,61 @@ function ApartmentCard({ apt, checkin, checkout, guests }: {
   );
 }
 
-/* ── Date picker banner ──────────────────────────────────── */
-function DateBanner({ onSet }: { onSet: (checkin: string, checkout: string, guests: number) => void }) {
-  const [ci, setCi]   = useState("");
-  const [co, setCo]   = useState("");
-  const [g,  setG]    = useState(2);
+/* ── Calendar overlay ─────────────────────────────────── */
+function CalendarOverlay({ guests, onApply, onClose }: {
+  guests: number;
+  onApply: (ci: string, co: string, g: number) => void;
+  onClose: () => void;
+}) {
+  const [g, setG] = useState(guests);
+  const cardRef   = useRef<HTMLDivElement>(null);
 
-  const apply = () => { if (ci && co) onSet(ci, co, g); };
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (cardRef.current && !cardRef.current.contains(e.target as Node)) onClose();
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [onClose]);
 
   return (
-    <div className="bg-blue-600 text-white px-4 py-4" dir="rtl">
-      <div className="max-w-6xl mx-auto">
-        <p className="text-sm font-bold mb-3 flex items-center gap-2">
-          <span>📅</span> בחר תאריכים לראות מחירים נכונים ותאימות
-        </p>
-        <div className="flex flex-wrap gap-2 items-end">
-          <div className="flex flex-col gap-1">
-            <label className="text-xs text-blue-200 font-bold">צ׳ק-אין</label>
-            <input type="date" value={ci} onChange={e=>setCi(e.target.value)}
-              className="bg-white/20 border border-white/30 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/60 focus:outline-none focus:bg-white/30" dir="ltr" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(3px)" }}>
+      <div ref={cardRef} className="w-full max-w-2xl" dir="rtl">
+        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+          <div className="px-6 pt-5 pb-2 border-b border-gray-100 flex items-center justify-between">
+            <div>
+              <h2 className="font-black text-gray-900 text-lg">בחר תאריכי שהייה</h2>
+              <p className="text-sm text-gray-400 mt-0.5">עונת סקי: דצמבר 2026 – מאי 2027</p>
+            </div>
+            <button onClick={onClose}
+              className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors text-lg font-light">
+              ✕
+            </button>
           </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-xs text-blue-200 font-bold">צ׳ק-אאוט</label>
-            <input type="date" value={co} onChange={e=>setCo(e.target.value)}
-              className="bg-white/20 border border-white/30 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:bg-white/30" dir="ltr" />
+
+          <div className="p-5">
+            <SkiCalendar
+              onSelect={(from, to) => onApply(from, to, g)}
+              onCancel={onClose}
+            />
+
+            <div className="mt-4 pt-4 border-t border-gray-100 flex items-center gap-4" dir="rtl">
+              <label className="text-sm font-semibold text-gray-700 whitespace-nowrap">מספר אנשים</label>
+              <div className="flex items-center gap-2">
+                <button onClick={() => setG(v => Math.max(1, v - 1))}
+                  className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors font-bold">
+                  −
+                </button>
+                <span className="w-8 text-center font-bold text-gray-900">{g}</span>
+                <button onClick={() => setG(v => Math.min(8, v + 1))}
+                  className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors font-bold">
+                  +
+                </button>
+              </div>
+              <span className="text-sm text-gray-400">{g === 1 ? "אדם אחד" : `${g} אנשים`}</span>
+            </div>
           </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-xs text-blue-200 font-bold">אנשים</label>
-            <select value={g} onChange={e=>setG(+e.target.value)}
-              className="bg-white/20 border border-white/30 rounded-lg px-3 py-2 text-sm text-white focus:outline-none">
-              {[1,2,3,4,5,6,7,8].map(n => <option key={n} value={n} className="text-gray-900">{n}</option>)}
-            </select>
-          </div>
-          <button onClick={apply} disabled={!ci || !co}
-            className="bg-white text-blue-700 font-black px-5 py-2 rounded-lg text-sm hover:bg-blue-50 transition-colors disabled:opacity-50">
-            עדכן ←
-          </button>
         </div>
       </div>
     </div>
@@ -144,11 +160,21 @@ function ApartmentsPage() {
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [loading,    setLoading]    = useState(true);
   const [filter,     setFilter]     = useState<Filter>("all");
+  const [showCal,    setShowCal]    = useState(false);
 
   const noDates = !checkin || !checkout;
 
+  const autoOpened = useRef(false);
+  useEffect(() => {
+    if (noDates && !autoOpened.current) {
+      autoOpened.current = true;
+      setShowCal(true);
+    }
+  }, [noDates]);
+
   const applyDates = (ci: string, co: string, g: number) => {
     router.replace(`/apartments?checkin=${ci}&checkout=${co}&guests=${g}`);
+    setShowCal(false);
   };
 
   useEffect(() => {
@@ -165,8 +191,13 @@ function ApartmentsPage() {
   return (
     <div className="min-h-screen bg-gray-50" dir="rtl">
 
-      {/* ── Date banner ──────────────────────────────────────── */}
-      {noDates && <DateBanner onSet={applyDates} />}
+      {showCal && (
+        <CalendarOverlay
+          guests={guests || 2}
+          onApply={applyDates}
+          onClose={() => setShowCal(false)}
+        />
+      )}
 
       {/* ── Nav ──────────────────────────────────────────────── */}
       <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
@@ -177,14 +208,19 @@ function ApartmentsPage() {
             </div>
             MySki
           </a>
-          {checkin && checkout && (
-            <>
-              <span className="text-gray-200">/</span>
-              <span className="text-sm text-gray-500 flex items-center gap-1.5">
-                <span>{fmtDate(checkin)} — {fmtDate(checkout)}</span>
-                {nights > 0 && <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">{nights} לילות</span>}
-              </span>
-            </>
+          <span className="text-gray-200">/</span>
+          {checkin && checkout ? (
+            <button onClick={() => setShowCal(true)}
+              className="text-sm text-gray-600 flex items-center gap-1.5 hover:text-blue-600 transition-colors">
+              <span>{fmtDate(checkin)} — {fmtDate(checkout)}</span>
+              {nights > 0 && <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">{nights} לילות</span>}
+              <span className="text-xs text-gray-400 hover:text-blue-500">✏️</span>
+            </button>
+          ) : (
+            <button onClick={() => setShowCal(true)}
+              className="text-sm font-semibold text-blue-600 flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-full transition-colors">
+              📅 בחר תאריכים
+            </button>
           )}
           <div className="flex-1" />
           <a href={`/search?checkin=${checkin}&checkout=${checkout}&guests=${guests}`}
@@ -208,7 +244,6 @@ function ApartmentsPage() {
             )}
           </div>
 
-          {/* Filter pills */}
           <div className="flex gap-2">
             {FILTERS.map(f => (
               <button key={f.key} onClick={() => setFilter(f.key)}
