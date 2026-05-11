@@ -2,6 +2,8 @@
 import { Suspense, useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { Apartment } from "@/types";
+import { getEffectivePrice, calcTotalForRange } from "@/lib/pricing";
+import type { PricingRule } from "@/lib/pricing";
 import {
   IconMountain, IconCheck, IconStar, IconBed, IconSearch,
 } from "@/components/Icons";
@@ -19,12 +21,24 @@ const FILTERS: { key: Filter; label: string }[] = [
   { key: "premium", label: "Premium Trip" },
 ];
 
-function ApartmentCard({ apt, checkin, checkout, guests }: {
-  apt: Apartment; checkin: string; checkout: string; guests: number;
+function ApartmentCard({ apt, checkin, checkout, guests, rules }: {
+  apt: Apartment; checkin: string; checkout: string; guests: number; rules: PricingRule[];
 }) {
   const nights = checkin && checkout
     ? Math.round((new Date(checkout).getTime() - new Date(checkin).getTime()) / 86400000) : 0;
-  const total  = apt.price_per_night * nights;
+  const total = checkin && checkout && nights > 0
+    ? calcTotalForRange(checkin, checkout, apt.price_per_night, rules)
+    : apt.price_per_night * nights;
+
+  const minNightlyPrice = (() => {
+    if (!checkin || !checkout) return apt.price_per_night;
+    const end = new Date(checkout + "T12:00:00");
+    let min = Infinity;
+    for (let d = new Date(checkin + "T12:00:00"); d < end; d.setDate(d.getDate() + 1))
+      min = Math.min(min, getEffectivePrice(new Date(d), apt.price_per_night, rules));
+    return min === Infinity ? apt.price_per_night : min;
+  })();
+
   const cat    = getCategory(apt);
   const query  = new URLSearchParams({ checkin, checkout, guests: String(guests) }).toString();
 
@@ -44,7 +58,10 @@ function ApartmentCard({ apt, checkin, checkout, guests }: {
         </div>
         <div className="absolute bottom-3 left-3 text-white text-sm font-bold px-3 py-1.5 rounded-lg"
           style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)" }}>
-          €{apt.price_per_night.toLocaleString()} / לילה
+          {checkin && checkout
+            ? <>החל מ €{minNightlyPrice.toLocaleString()} / לילה</>
+            : <>€{apt.price_per_night.toLocaleString()} / לילה</>
+          }
         </div>
       </div>
 
@@ -161,6 +178,7 @@ function ApartmentsPage() {
   const [loading,    setLoading]    = useState(true);
   const [filter,     setFilter]     = useState<Filter>("all");
   const [showCal,    setShowCal]    = useState(false);
+  const [rulesMap,   setRulesMap]   = useState<Record<string, PricingRule[]>>({});
 
   const noDates = !checkin || !checkout;
 
@@ -182,6 +200,17 @@ function ApartmentsPage() {
       .then(r => r.json())
       .then(d => { setApartments(Array.isArray(d) ? d : []); setLoading(false); });
   }, []);
+
+  useEffect(() => {
+    if (apartments.length === 0) return;
+    Promise.all(
+      apartments.map(apt =>
+        fetch(`/api/pricing-rules?apartment_id=${apt.id}`)
+          .then(r => r.json())
+          .then(r => [apt.id, Array.isArray(r) ? r : []] as [string, PricingRule[]])
+      )
+    ).then(entries => setRulesMap(Object.fromEntries(entries)));
+  }, [apartments]);
 
   const shown = filter === "all" ? apartments : apartments.filter(a => getCategory(a) === filter);
 
@@ -279,7 +308,7 @@ function ApartmentsPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {shown.map(apt => (
-              <ApartmentCard key={apt.id} apt={apt} checkin={checkin} checkout={checkout} guests={guests} />
+              <ApartmentCard key={apt.id} apt={apt} checkin={checkin} checkout={checkout} guests={guests} rules={rulesMap[apt.id] ?? []} />
             ))}
           </div>
         )}

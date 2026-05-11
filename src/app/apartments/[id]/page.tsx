@@ -127,9 +127,10 @@ function ApartmentPage() {
   const checkout   = params.get("checkout") ?? "";
   const guests     = parseInt(params.get("guests") ?? "2");
 
-  const [apt,      setApt]      = useState<Apartment | null>(null);
-  const [rules,    setRules]    = useState<PricingRule[]>([]);
-  const [loading,  setLoading]  = useState(true);
+  const [apt,           setApt]           = useState<Apartment | null>(null);
+  const [rules,         setRules]         = useState<PricingRule[]>([]);
+  const [loading,       setLoading]       = useState(true);
+  const [showBreakdown, setShowBreakdown] = useState(false);
 
   // Add-ons
   const [skiPass,  setSkiPass]  = useState(false);
@@ -166,14 +167,22 @@ function ApartmentPage() {
     : `https://www.skyscanner.co.il/transport/flights/tlv/gva/`;
 
   /* ── Price calculation ──────────────────────────────────── */
-  const basePrice     = apt?.price_per_night ?? 0;
-  const aptTotal      = apt
+  const basePrice = apt?.price_per_night ?? 0;
+  const aptTotal  = apt
     ? (checkin && checkout ? calcTotalForRange(checkin, checkout, basePrice, rules) : basePrice * nights)
     : 0;
-  /* Effective nightly price for display (first night or base) */
-  const displayNightlyPrice = apt
-    ? (checkin ? getEffectivePrice(new Date(checkin + "T12:00:00"), basePrice, rules) : basePrice)
-    : 0;
+
+  /* Per-night breakdown for the collapsible panel */
+  const breakdown = (() => {
+    if (!apt || !checkin || !checkout) return [] as { date: Date; price: number }[];
+    const out: { date: Date; price: number }[] = [];
+    const end = new Date(checkout + "T12:00:00");
+    for (let d = new Date(checkin + "T12:00:00"); d < end; d.setDate(d.getDate() + 1))
+      out.push({ date: new Date(d), price: getEffectivePrice(new Date(d), basePrice, rules) });
+    return out;
+  })();
+
+  const avgNightlyPrice = breakdown.length > 0 ? Math.round(aptTotal / nights) : basePrice;
   const skiTotal      = skiPass  ? SKI_DAY_PRICE * nights * guests : 0;
   const trTotal       = transfer ? TRANSFER_PRICE : 0;
   const flexExtra     = cancel   === "flexible" ? FLEXIBLE_EXTRA * guests : 0;
@@ -307,15 +316,49 @@ function ApartmentPage() {
 
                 {/* Price header */}
                 <div className="px-6 pt-6 pb-4 bg-gradient-to-br from-gray-50 to-blue-50 border-b border-gray-100">
-                  <div className="text-3xl font-black text-gray-900">
-                    €{displayNightlyPrice.toLocaleString()}
-                    <span className="text-base font-medium text-gray-400"> / לילה</span>
+                  <div className="flex items-end justify-between gap-2">
+                    <div>
+                      <div className="text-3xl font-black text-gray-900">
+                        €{avgNightlyPrice.toLocaleString()}
+                        <span className="text-base font-medium text-gray-400">
+                          {breakdown.length > 1 ? " / לילה ממוצע" : " / לילה"}
+                        </span>
+                      </div>
+                    </div>
+                    {breakdown.length > 0 && (
+                      <button
+                        onClick={() => setShowBreakdown(v => !v)}
+                        className="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap flex-shrink-0"
+                      >
+                        פירוט מחיר {showBreakdown ? "▲" : "▼"}
+                      </button>
+                    )}
                   </div>
-                  {displayNightlyPrice !== basePrice && (
-                    <p className="text-xs text-blue-600 font-medium mt-0.5">מחיר מיוחד לתאריכים אלו</p>
+
+                  {/* Per-night breakdown panel */}
+                  {showBreakdown && breakdown.length > 0 && (
+                    <div className="mt-3 bg-white rounded-xl border border-blue-100 overflow-hidden">
+                      <div className="max-h-52 overflow-y-auto divide-y divide-gray-50">
+                        {breakdown.map(({ date, price }, i) => (
+                          <div key={i} className="flex justify-between items-center px-4 py-2 text-sm">
+                            <span className="text-gray-500">{fmtDate(date.toISOString().split("T")[0])}</span>
+                            <span className={`font-semibold ${price !== basePrice ? "text-blue-600" : "text-gray-800"}`}>
+                              €{price.toLocaleString()}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      {breakdown.length > 1 && (
+                        <div className="flex justify-between items-center px-4 py-2.5 bg-blue-50 border-t border-blue-100 text-sm font-bold">
+                          <span className="text-gray-600">ממוצע ללילה</span>
+                          <span className="text-blue-700">€{avgNightlyPrice.toLocaleString()}</span>
+                        </div>
+                      )}
+                    </div>
                   )}
+
                   {checkin && checkout && (
-                    <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
+                    <div className="flex items-center gap-2 mt-3 text-sm text-gray-500">
                       <IconCalendar size={14} />
                       {fmtDate(checkin)} — {fmtDate(checkout)} · {nights} לילות · {guests} אנשים
                     </div>
