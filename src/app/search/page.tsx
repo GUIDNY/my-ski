@@ -26,9 +26,16 @@ function AptCard({ apt, nights, checkin, checkout, guests, rules }: {
   const total = checkin && checkout && nights > 0
     ? calcTotalForRange(checkin, checkout, apt.price_per_night, rules)
     : apt.price_per_night * nights;
-  const effectiveNightly = checkin && checkout && nights > 0
-    ? Math.round(total / nights)
-    : apt.price_per_night;
+
+  // Minimum single-night price in the selected period
+  const minNightly = (() => {
+    if (!checkin || !checkout || nights === 0) return apt.price_per_night;
+    const end = new Date(checkout + "T12:00:00");
+    let min = Infinity;
+    for (let d = new Date(checkin + "T12:00:00"); d < end; d.setDate(d.getDate() + 1))
+      min = Math.min(min, getEffectivePrice(new Date(d), apt.price_per_night, rules));
+    return min === Infinity ? apt.price_per_night : min;
+  })();
   const cat   = getCategory(apt);
   const query = new URLSearchParams({ checkin, checkout, guests: String(guests) }).toString();
 
@@ -77,11 +84,14 @@ function AptCard({ apt, nights, checkin, checkout, guests, rules }: {
         {/* Price + CTA */}
         <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 sm:min-w-[130px] border-t sm:border-t-0 border-gray-100 pt-4 sm:pt-0">
           <div className="text-right">
+            {checkin && checkout && nights > 0 && (
+              <div className="text-xs text-gray-400 font-semibold mb-0.5">החל מ</div>
+            )}
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-black text-gray-900">€{effectiveNightly.toLocaleString()}</span>
+              <span className="text-2xl font-black text-gray-900">€{minNightly.toLocaleString()}</span>
               <span className="text-xs text-gray-400">/ לילה</span>
             </div>
-            {effectiveNightly !== apt.price_per_night && (
+            {minNightly !== apt.price_per_night && (
               <div className="text-xs text-gray-400 line-through">€{apt.price_per_night}</div>
             )}
             {nights > 0 && (
@@ -152,13 +162,16 @@ function SearchPage() {
 
   const shown = filter === "all" ? apartments : apartments.filter(a => getCategory(a) === filter);
 
-  /* Average nightly price across the period, minimum across all apartments */
+  /* Cheapest single night across all apartments for the selected period */
   const minPrice = apartments.length
     ? Math.min(...apartments.map(a => {
         const rules = rulesMap[a.id] ?? [];
-        return checkin && checkout && nights > 0
-          ? Math.round(calcTotalForRange(checkin, checkout, Number(a.price_per_night), rules) / nights)
-          : Number(a.price_per_night);
+        if (!checkin || !checkout || nights === 0) return Number(a.price_per_night);
+        const end = new Date(checkout + "T12:00:00");
+        let min = Infinity;
+        for (let d = new Date(checkin + "T12:00:00"); d < end; d.setDate(d.getDate() + 1))
+          min = Math.min(min, getEffectivePrice(new Date(d), Number(a.price_per_night), rules));
+        return min === Infinity ? Number(a.price_per_night) : min;
       }))
     : null;
 
