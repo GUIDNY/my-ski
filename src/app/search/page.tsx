@@ -7,6 +7,8 @@ import {
   IconCalendar, IconUser, IconSearch, IconBed,
 } from "@/components/Icons";
 import SkiCalendar from "@/components/SkiCalendar";
+import { getEffectivePrice, calcTotalForRange } from "@/lib/pricing";
+import type { PricingRule } from "@/lib/pricing";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s); return `${d.getDate()} ${HE_MONTHS[d.getMonth()]}`; };
@@ -14,14 +16,21 @@ const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s); retur
 const getCategory = (apt: Apartment) => apt.price_per_night < 600 ? "cozy" : "premium";
 
 type Filter = "all" | "cozy" | "premium";
+type RulesMap = Record<string, PricingRule[]>;
 
 /* ── Apartment card ───────────────────────────────────────── */
-function AptCard({ apt, nights, checkin, checkout, guests }: {
+function AptCard({ apt, nights, checkin, checkout, guests, rules }: {
   apt: Apartment; nights: number; checkin: string; checkout: string; guests: number;
+  rules: PricingRule[];
 }) {
-  const total  = apt.price_per_night * nights;
-  const cat    = getCategory(apt);
-  const query  = new URLSearchParams({ checkin, checkout, guests: String(guests) }).toString();
+  const effectiveNightly = checkin
+    ? getEffectivePrice(new Date(checkin + "T12:00:00"), apt.price_per_night, rules)
+    : apt.price_per_night;
+  const total = checkin && checkout && nights > 0
+    ? calcTotalForRange(checkin, checkout, apt.price_per_night, rules)
+    : effectiveNightly * nights;
+  const cat   = getCategory(apt);
+  const query = new URLSearchParams({ checkin, checkout, guests: String(guests) }).toString();
 
   return (
     <a href={`/apartments/${apt.id}?${query}`}
@@ -69,9 +78,12 @@ function AptCard({ apt, nights, checkin, checkout, guests }: {
         <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 sm:min-w-[130px] border-t sm:border-t-0 border-gray-100 pt-4 sm:pt-0">
           <div className="text-right">
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-black text-gray-900">€{apt.price_per_night.toLocaleString()}</span>
+              <span className="text-2xl font-black text-gray-900">€{effectiveNightly.toLocaleString()}</span>
               <span className="text-xs text-gray-400">/ לילה</span>
             </div>
+            {effectiveNightly !== apt.price_per_night && (
+              <div className="text-xs text-gray-400 line-through">€{apt.price_per_night}</div>
+            )}
             {nights > 0 && (
               <div className="text-sm font-bold text-blue-600 mt-0.5">€{total.toLocaleString()} סה״כ</div>
             )}
@@ -98,6 +110,7 @@ function SearchPage() {
   const guests   = parseInt(params.get("guests") ?? "2");
 
   const [apartments, setApartments] = useState<Apartment[]>([]);
+  const [rulesMap,   setRulesMap]   = useState<RulesMap>({});
   const [loading,    setLoading]    = useState(true);
   const [filter,     setFilter]     = useState<Filter>("all");
   const [dateOpen,   setDateOpen]   = useState(!checkin || !checkout);
@@ -107,9 +120,25 @@ function SearchPage() {
   const nights = checkin && checkout
     ? Math.round((new Date(checkout).getTime() - new Date(checkin).getTime()) / 86400000) : 0;
 
+  /* Load apartments, then fetch pricing rules for all in parallel */
   useEffect(() => {
-    fetch("/api/apartments").then(r => r.json())
-      .then(d => { setApartments(Array.isArray(d) ? d : []); setLoading(false); });
+    fetch("/api/apartments").then(r => r.json()).then((apts: Apartment[]) => {
+      const list = Array.isArray(apts) ? apts : [];
+      setApartments(list);
+      setLoading(false);
+      if (!list.length) return;
+      Promise.all(
+        list.map(apt =>
+          fetch(`/api/pricing-rules?apartment_id=${apt.id}`)
+            .then(r => r.json())
+            .then(rules => ({ id: apt.id, rules: Array.isArray(rules) ? rules : [] }))
+        )
+      ).then(results => {
+        const map: RulesMap = {};
+        results.forEach(({ id, rules }) => { map[id] = rules; });
+        setRulesMap(map);
+      });
+    });
   }, []);
 
   /* Close calendar on outside click */
@@ -122,7 +151,16 @@ function SearchPage() {
   }, [dateOpen]);
 
   const shown = filter === "all" ? apartments : apartments.filter(a => getCategory(a) === filter);
-  const minPrice = apartments.length ? Math.min(...apartments.map(a => Number(a.price_per_night))) : null;
+
+  /* Effective minimum price for selected check-in date (or base price if no dates) */
+  const minPrice = apartments.length
+    ? Math.min(...apartments.map(a => {
+        const rules = rulesMap[a.id] ?? [];
+        return checkin
+          ? getEffectivePrice(new Date(checkin + "T12:00:00"), Number(a.price_per_night), rules)
+          : Number(a.price_per_night);
+      }))
+    : null;
 
   const applyDates = (ci: string, co: string) => {
     router.replace(`/search?checkin=${ci}&checkout=${co}&guests=${gDraft}`);
@@ -265,7 +303,8 @@ function SearchPage() {
           <div className="flex flex-col gap-4">
             {shown.map(apt => (
               <AptCard key={apt.id} apt={apt} nights={nights}
-                checkin={checkin} checkout={checkout} guests={guests} />
+                checkin={checkin} checkout={checkout} guests={guests}
+                rules={rulesMap[apt.id] ?? []} />
             ))}
           </div>
         )}
