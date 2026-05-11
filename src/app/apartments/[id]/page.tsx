@@ -385,6 +385,13 @@ function ApartmentPage() {
                         price={`+€${TRANSFER_PRICE}`}
                         checked={transfer} onChange={setTransfer}
                       />
+                      {transfer && (
+                        <a href={`/transfers?checkin=${checkin}&checkout=${checkout}&guests=${guests}&apartment=${encodeURIComponent(apt.name)}&apartment_id=${apt.id}`}
+                          className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-colors text-sm">
+                          <span className="text-blue-700 font-semibold">מלא פרטי טיסה להסעה ←</span>
+                          <span className="text-xs text-blue-400">מספר טיסה · שעה · תאריך</span>
+                        </a>
+                      )}
                     </div>
                     <a href={skyscannerUrl} target="_blank" rel="noopener noreferrer"
                       className="mt-2 flex items-center gap-2.5 p-3.5 rounded-xl border border-gray-100 bg-white hover:border-blue-200 hover:bg-blue-50 transition-all">
