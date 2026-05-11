@@ -44,7 +44,8 @@ export default function FlightSearch({ destination = "Val Thorens", defaultCheck
   const [checkin,   setCheckin]   = useState(defaultCheckin  ?? "");
   const [checkout,  setCheckout]  = useState(defaultCheckout ?? "");
   const [pax,       setPax]       = useState(guests);
-  const [searching, setSearching] = useState(false);
+  const [searching,  setSearching]  = useState(false);
+  const [calOpen,    setCalOpen]    = useState(false);
 
   const destInfo = DEST_OPTIONS.find(d => d.code === dest) ?? DEST_OPTIONS[0];
 
@@ -120,23 +121,37 @@ export default function FlightSearch({ destination = "Val Thorens", defaultCheck
         </div>
       </div>
 
-      {/* Date summary pill (shown after selection) */}
-      {checkin && checkout && (
-        <div className="flex items-center justify-between bg-blue-50 border border-blue-100 rounded-xl px-4 py-2.5 mb-3 text-sm">
-          <span className="font-bold text-gray-800">{fmtDate(checkin)} — {fmtDate(checkout)}</span>
-          <button onClick={() => { setCheckin(""); setCheckout(""); }}
-            className="text-xs text-gray-400 hover:text-gray-600">נקה ×</button>
+      {/* Date pill — click to open calendar */}
+      <button
+        onClick={() => setCalOpen(o => !o)}
+        className={`w-full flex items-center justify-between rounded-xl px-4 py-3 mb-3 border text-sm transition-colors
+          ${calOpen ? "bg-blue-50 border-blue-300" : "bg-gray-50 border-gray-200 hover:border-blue-300"}`}
+      >
+        <span className={checkin && checkout ? "font-bold text-gray-800" : "text-gray-400"}>
+          {checkin && checkout ? `${fmtDate(checkin)} — ${fmtDate(checkout)}` : "בחר תאריכים"}
+        </span>
+        <div className="flex items-center gap-2">
+          {checkin && checkout && (
+            <span
+              onClick={e => { e.stopPropagation(); setCheckin(""); setCheckout(""); setCalOpen(false); }}
+              className="text-xs text-gray-400 hover:text-gray-600 px-1"
+            >נקה ×</span>
+          )}
+          <span className="text-gray-400 text-xs">{calOpen ? "▲" : "▼"}</span>
+        </div>
+      </button>
+
+      {/* SkiCalendar — only when open */}
+      {calOpen && (
+        <div className="mb-5">
+          <SkiCalendar
+            initialFrom={checkin || undefined}
+            initialTo={checkout || undefined}
+            onSelect={(from, to) => { setCheckin(from); setCheckout(to); setCalOpen(false); }}
+            onCancel={() => setCalOpen(false)}
+          />
         </div>
       )}
-
-      {/* SkiCalendar */}
-      <div className="mb-5">
-        <SkiCalendar
-          initialFrom={checkin || undefined}
-          initialTo={checkout || undefined}
-          onSelect={(from, to) => { setCheckin(from); setCheckout(to); }}
-        />
-      </div>
 
       {/* Search buttons */}
       <div className="flex gap-2.5">
