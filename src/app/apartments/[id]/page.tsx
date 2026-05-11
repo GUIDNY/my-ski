@@ -341,7 +341,7 @@ function ApartmentPage() {
                       <div className="max-h-52 overflow-y-auto divide-y divide-gray-50">
                         {breakdown.map(({ date, price }, i) => (
                           <div key={i} className="flex justify-between items-center px-4 py-2 text-sm">
-                            <span className="text-gray-500">{fmtDate(date.toISOString().split("T")[0])}</span>
+                            <span className="text-gray-500">{fmtDate(`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`)}</span>
                             <span className={`font-semibold ${price !== basePrice ? "text-blue-600" : "text-gray-800"}`}>
                               €{price.toLocaleString()}
                             </span>

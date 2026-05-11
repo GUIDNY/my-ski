@@ -137,8 +137,10 @@ export default function SearchWidget() {
 
   const handleSearch = () => {
     const p = new URLSearchParams();
-    if (from) p.set("checkin",  from.toISOString().split("T")[0]);
-    if (to)   p.set("checkout", to.toISOString().split("T")[0]);
+    const toIso = (d: Date) =>
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    if (from) p.set("checkin",  toIso(from));
+    if (to)   p.set("checkout", toIso(to));
     p.set("guests", String(guests));
     window.location.href = `/search?${p.toString()}`;
   };

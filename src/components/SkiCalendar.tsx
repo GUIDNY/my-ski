@@ -8,7 +8,8 @@ export const SEASON_START = new Date(2026, 11, 1);  // Dec 2026
 export const SEASON_END   = new Date(2027,  4, 31); // May 2027
 
 const same = (a: Date, b: Date) => a.toDateString() === b.toDateString();
-const toIso = (d: Date) => d.toISOString().split("T")[0];
+const toIso = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
 function gridDays(y: number, m: number): (Date | null)[] {
   const pad  = new Date(y, m, 1).getDay();
