@@ -1,11 +1,12 @@
 "use client";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { Apartment } from "@/types";
 import {
   IconMountain, IconHome, IconDiamond, IconCheck, IconStar,
   IconCalendar, IconUser, IconSearch, IconBed,
 } from "@/components/Icons";
+import SkiCalendar from "@/components/SkiCalendar";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s); return `${d.getDate()} ${HE_MONTHS[d.getMonth()]}`; };
@@ -28,7 +29,7 @@ function AptCard({ apt, nights, checkin, checkout, guests }: {
 
       {/* Image */}
       <div className="relative sm:w-56 h-48 sm:h-auto flex-shrink-0 overflow-hidden">
-        <img src={apt.images?.[0] ?? "/apt1.jpg"} alt={apt.name}
+        <img src={apt.images?.[0] ?? "/hero-ski.jpg"} alt={apt.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.2) 0%, transparent 50%)" }} />
         <div className={`absolute top-3 right-3 text-xs font-bold px-2.5 py-1 rounded-full text-white
@@ -47,7 +48,6 @@ function AptCard({ apt, nights, checkin, checkout, guests }: {
             Val Thorens, Trois Vallées
           </p>
 
-          {/* Amenities */}
           <div className="flex flex-wrap gap-1.5 mb-3">
             {apt.amenities?.slice(0, 4).map((a, i) => (
               <span key={i} className="flex items-center gap-1 text-xs text-gray-600 bg-gray-50 px-2.5 py-1 rounded-full">
@@ -56,7 +56,6 @@ function AptCard({ apt, nights, checkin, checkout, guests }: {
             ))}
           </div>
 
-          {/* Stats */}
           <div className="flex items-center gap-3 text-xs text-gray-400">
             <span className="flex items-center gap-1"><IconBed size={12} /> {apt.beds} חד׳</span>
             <span>·</span>
@@ -101,18 +100,9 @@ function SearchPage() {
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [loading,    setLoading]    = useState(true);
   const [filter,     setFilter]     = useState<Filter>("all");
-
-  /* Inline date picker */
-  const [dateOpen,  setDateOpen]  = useState(!checkin || !checkout);
-  const [draftCi,   setDraftCi]   = useState(checkin);
-  const [draftCo,   setDraftCo]   = useState(checkout);
-  const [draftG,    setDraftG]    = useState(guests);
-
-  const applyDates = () => {
-    if (!draftCi || !draftCo) return;
-    router.replace(`/search?checkin=${draftCi}&checkout=${draftCo}&guests=${draftG}`);
-    setDateOpen(false);
-  };
+  const [dateOpen,   setDateOpen]   = useState(!checkin || !checkout);
+  const [gDraft,     setGDraft]     = useState(guests);
+  const calendarRef  = useRef<HTMLDivElement>(null);
 
   const nights = checkin && checkout
     ? Math.round((new Date(checkout).getTime() - new Date(checkin).getTime()) / 86400000) : 0;
@@ -122,9 +112,22 @@ function SearchPage() {
       .then(d => { setApartments(Array.isArray(d) ? d : []); setLoading(false); });
   }, []);
 
-  const shown = filter === "all"
-    ? apartments
-    : apartments.filter(a => getCategory(a) === filter);
+  /* Close calendar on outside click */
+  useEffect(() => {
+    const h = (e: MouseEvent) => {
+      if (calendarRef.current && !calendarRef.current.contains(e.target as Node)) setDateOpen(false);
+    };
+    if (dateOpen) document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, [dateOpen]);
+
+  const shown = filter === "all" ? apartments : apartments.filter(a => getCategory(a) === filter);
+  const minPrice = apartments.length ? Math.min(...apartments.map(a => Number(a.price_per_night))) : null;
+
+  const applyDates = (ci: string, co: string) => {
+    router.replace(`/search?checkin=${ci}&checkout=${co}&guests=${gDraft}`);
+    setDateOpen(false);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50" dir="rtl">
@@ -139,24 +142,23 @@ function SearchPage() {
             MySki
           </a>
 
-          {/* Search summary pill — click to edit dates */}
+          {/* Clickable search pill */}
           <button onClick={() => setDateOpen(o => !o)}
-            className={`flex-1 flex items-center gap-2 rounded-xl px-4 py-2 border min-w-0 overflow-hidden text-right transition-colors
+            className={`flex-1 flex items-center gap-2 rounded-xl px-4 py-2.5 border min-w-0 overflow-hidden transition-colors text-right
               ${dateOpen ? "bg-blue-50 border-blue-300" : "bg-gray-50 border-gray-100 hover:border-blue-200"}`}>
-            <span className="flex items-center gap-1.5 text-sm font-bold text-gray-700 whitespace-nowrap">
-              <IconMountain size={13} className="text-blue-500 flex-shrink-0" /> Val Thorens
-            </span>
+            <IconMountain size={13} className="text-blue-500 flex-shrink-0" />
+            <span className="text-sm font-bold text-gray-700 whitespace-nowrap hidden sm:inline">Val Thorens</span>
             <span className="text-gray-200 text-xs hidden sm:block">|</span>
             <span className={`hidden sm:flex items-center gap-1.5 text-sm whitespace-nowrap ${checkin && checkout ? "text-gray-700 font-semibold" : "text-blue-500 font-bold"}`}>
               <IconCalendar size={13} />
-              {checkin && checkout ? `${fmtDate(checkin)} — ${fmtDate(checkout)}` : "← לחץ לבחירת תאריכים"}
+              {checkin && checkout ? `${fmtDate(checkin)} — ${fmtDate(checkout)}` : "לחץ לבחירת תאריכים ←"}
             </span>
             <span className="text-gray-200 text-xs hidden sm:block">|</span>
             <span className="hidden sm:flex items-center gap-1.5 text-sm text-gray-500">
               <IconUser size={13} /> {guests} אנשים
             </span>
             {nights > 0 && (
-              <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full flex-shrink-0">
+              <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full flex-shrink-0 border border-blue-100">
                 {nights} לילות
               </span>
             )}
@@ -168,39 +170,32 @@ function SearchPage() {
           </button>
         </div>
 
-        {/* Inline date picker — expands below header */}
+        {/* ── Calendar dropdown ─────────────────────────────── */}
         {dateOpen && (
-          <div className="border-t border-blue-100 bg-blue-50 px-4 py-4" dir="rtl">
-            <div className="max-w-5xl mx-auto flex flex-wrap gap-3 items-end">
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-blue-600">צ׳ק-אין</label>
-                <input type="date" value={draftCi} onChange={e => setDraftCi(e.target.value)}
-                  className="bg-white border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" dir="ltr" />
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-blue-600">צ׳ק-אאוט</label>
-                <input type="date" value={draftCo} onChange={e => setDraftCo(e.target.value)}
-                  className="bg-white border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" dir="ltr" />
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-blue-600">אנשים</label>
-                <select value={draftG} onChange={e => setDraftG(+e.target.value)}
-                  className="bg-white border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                  {[1,2,3,4,5,6,7,8].map(n => <option key={n} value={n}>{n}</option>)}
-                </select>
-              </div>
-              <div className="flex gap-2">
-                <button onClick={applyDates} disabled={!draftCi || !draftCo}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-black px-5 py-2 rounded-lg text-sm transition-colors disabled:opacity-50">
-                  עדכן תוצאות ←
-                </button>
+          <div className="absolute top-full left-0 right-0 z-50 px-4 pt-2 pb-4 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-lg">
+            <div className="max-w-5xl mx-auto" ref={calendarRef}>
+              {/* Guests row above calendar */}
+              <div className="flex items-center justify-between mb-3 pt-1">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold text-gray-500">אנשים:</span>
+                  <div className="flex items-center gap-2">
+                    <button type="button" onClick={() => setGDraft(g => Math.max(1, g - 1))}
+                      className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold text-sm transition-colors">−</button>
+                    <span className="font-bold text-gray-900 w-5 text-center text-sm">{gDraft}</span>
+                    <button type="button" onClick={() => setGDraft(g => Math.min(12, g + 1))}
+                      className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold text-sm transition-colors">+</button>
+                  </div>
+                </div>
                 {checkin && checkout && (
-                  <button onClick={() => setDateOpen(false)}
-                    className="bg-white border border-blue-200 text-blue-600 font-bold px-4 py-2 rounded-lg text-sm hover:bg-blue-50">
-                    ביטול
-                  </button>
+                  <button onClick={() => setDateOpen(false)} className="text-sm text-gray-400 hover:text-gray-600">סגור ×</button>
                 )}
               </div>
+              <SkiCalendar
+                initialFrom={checkin || undefined}
+                initialTo={checkout || undefined}
+                onSelect={applyDates}
+                onCancel={checkin && checkout ? () => setDateOpen(false) : undefined}
+              />
             </div>
           </div>
         )}
@@ -214,9 +209,15 @@ function SearchPage() {
             <h1 className="text-2xl font-black text-gray-900">
               {loading ? "טוען דירות..." : `${shown.length} דירות זמינות`}
             </h1>
-            {nights > 0 && !loading && (
-              <p className="text-sm text-gray-400 mt-0.5">{nights} לילות · {guests} {guests === 1 ? "אדם" : "אנשים"}</p>
-            )}
+            <p className="text-sm text-gray-400 mt-1 flex items-center gap-2 flex-wrap">
+              {nights > 0 && <span>{nights} לילות · {guests} {guests === 1 ? "אדם" : "אנשים"}</span>}
+              {!loading && minPrice !== null && (
+                <span className="flex items-center gap-1">
+                  {nights > 0 && <span className="text-gray-300">·</span>}
+                  <span className="font-bold text-gray-700">החל מ <span className="text-blue-600">€{minPrice}</span> ללילה</span>
+                </span>
+              )}
+            </p>
           </div>
 
           {/* Category pills */}
