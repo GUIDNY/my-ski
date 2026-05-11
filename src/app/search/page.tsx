@@ -11,7 +11,7 @@ import { getEffectivePrice, calcTotalForRange } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
-const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s); return `${d.getDate()} ${HE_MONTHS[d.getMonth()]}`; };
+const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s + "T12:00:00"); return `${d.getDate()} ${HE_MONTHS[d.getMonth()]}`; };
 
 const getCategory = (apt: Apartment) => apt.price_per_night < 600 ? "cozy" : "premium";
 
@@ -23,12 +23,12 @@ function AptCard({ apt, nights, checkin, checkout, guests, rules }: {
   apt: Apartment; nights: number; checkin: string; checkout: string; guests: number;
   rules: PricingRule[];
 }) {
-  const effectiveNightly = checkin
-    ? getEffectivePrice(new Date(checkin + "T12:00:00"), apt.price_per_night, rules)
-    : apt.price_per_night;
   const total = checkin && checkout && nights > 0
     ? calcTotalForRange(checkin, checkout, apt.price_per_night, rules)
-    : effectiveNightly * nights;
+    : apt.price_per_night * nights;
+  const effectiveNightly = checkin && checkout && nights > 0
+    ? Math.round(total / nights)
+    : apt.price_per_night;
   const cat   = getCategory(apt);
   const query = new URLSearchParams({ checkin, checkout, guests: String(guests) }).toString();
 
@@ -152,12 +152,12 @@ function SearchPage() {
 
   const shown = filter === "all" ? apartments : apartments.filter(a => getCategory(a) === filter);
 
-  /* Effective minimum price for selected check-in date (or base price if no dates) */
+  /* Average nightly price across the period, minimum across all apartments */
   const minPrice = apartments.length
     ? Math.min(...apartments.map(a => {
         const rules = rulesMap[a.id] ?? [];
-        return checkin
-          ? getEffectivePrice(new Date(checkin + "T12:00:00"), Number(a.price_per_night), rules)
+        return checkin && checkout && nights > 0
+          ? Math.round(calcTotalForRange(checkin, checkout, Number(a.price_per_night), rules) / nights)
           : Number(a.price_per_night);
       }))
     : null;
