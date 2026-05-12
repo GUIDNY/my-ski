@@ -233,8 +233,10 @@ function BookPage() {
   // Transfer details
   const [tAirportIn,  setTAirportIn]  = useState("GVA");
   const [tArrival,    setTArrival]    = useState("");
+  const [tFlightIn,   setTFlightIn]   = useState("");
   const [tAirportOut, setTAirportOut] = useState("GVA");
   const [tDeparture,  setTDeparture]  = useState("");
+  const [tFlightOut,  setTFlightOut]  = useState("");
 
   // Personal details
   const [name,  setName]  = useState("");
@@ -286,7 +288,7 @@ function BookPage() {
   /* ── Price ───────────────────────────────────────────────── */
   const skiPass    = skiPasses.find(p => p.id === selectedPass);
   const aptPrice   = apt ? apt.price_per_night * nights : 0;
-  const skiPrice   = skiPass ? skiPass.price * guests : 0;
+  const skiPrice   = 0; // Coming soon — price not yet available
   const trPrice    = transfer ? TRANSFER_PP * guests : 0;
   const flexPrice  = cancel === "flexible" ? FLEXIBLE_PP * guests : 0;
   const aiDisc     = service === "ai" ? -(AI_DISC_PP * guests) : 0;
@@ -326,8 +328,10 @@ function BookPage() {
             transfer,
             transfer_airport_in: transfer ? tAirportIn : null,
             transfer_arrival: transfer ? tArrival : null,
+            transfer_flight_in: transfer ? tFlightIn : null,
             transfer_airport_out: transfer ? tAirportOut : null,
             transfer_departure: transfer ? tDeparture : null,
+            transfer_flight_out: transfer ? tFlightOut : null,
             insurance,
             cancel_policy: cancel,
             service_level: service,
@@ -434,8 +438,7 @@ function BookPage() {
                       <div className="text-xs text-gray-400">{pass.duration_days} ימי סקי</div>
                     </div>
                     <div className="text-right">
-                      <div className="font-black text-gray-900">€{(pass.price * guests).toLocaleString()}</div>
-                      <div className="text-xs text-gray-400">€{pass.price} × {guests}</div>
+                      <span className="text-xs font-bold bg-amber-100 text-amber-700 px-2 py-1 rounded-full">בקרוב</span>
                     </div>
                   </button>
                 ))}
@@ -475,6 +478,12 @@ function BookPage() {
                       <input type="time" value={tArrival} onChange={e => setTArrival(e.target.value)}
                         className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" />
                     </div>
+                    <div className="col-span-2">
+                      <label className="text-xs font-bold text-gray-500 block mb-1">מספר טיסה — הגעה</label>
+                      <input type="text" value={tFlightIn} onChange={e => setTFlightIn(e.target.value.toUpperCase())}
+                        placeholder="LY323 / FR1234"
+                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono" dir="ltr" />
+                    </div>
                     <div>
                       <label className="text-xs font-bold text-gray-500 block mb-1">שדה תעופה — חזרה</label>
                       <select value={tAirportOut} onChange={e => setTAirportOut(e.target.value)}
@@ -487,6 +496,12 @@ function BookPage() {
                       <label className="text-xs font-bold text-gray-500 block mb-1">שעת המראה (חזור)</label>
                       <input type="time" value={tDeparture} onChange={e => setTDeparture(e.target.value)}
                         className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="text-xs font-bold text-gray-500 block mb-1">מספר טיסה — חזרה</label>
+                      <input type="text" value={tFlightOut} onChange={e => setTFlightOut(e.target.value.toUpperCase())}
+                        placeholder="LY324 / FR1235"
+                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono" dir="ltr" />
                     </div>
                   </div>
                   <div className="text-xs text-blue-600 bg-white rounded-lg px-3 py-2 border border-blue-200">
@@ -648,7 +663,7 @@ function BookPage() {
                     {skiPass && (
                       <div className="flex justify-between">
                         <span className="text-gray-500">{skiPass.name} × {guests}</span>
-                        <span className="font-semibold">€{skiPrice.toLocaleString()}</span>
+                        <span className="text-xs font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">בקרוב</span>
                       </div>
                     )}
                     {transfer && (

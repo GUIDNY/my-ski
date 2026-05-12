@@ -183,7 +183,7 @@ function ApartmentPage() {
   })();
 
   const avgNightlyPrice = breakdown.length > 0 ? Math.round(aptTotal / nights) : basePrice;
-  const skiTotal      = skiPass  ? SKI_DAY_PRICE * nights * guests : 0;
+  const skiTotal      = 0; // Coming soon — price not yet available
   const trTotal       = transfer ? TRANSFER_PRICE : 0;
   const flexExtra     = cancel   === "flexible" ? FLEXIBLE_EXTRA * guests : 0;
   const aiDiscount    = service  === "ai"       ? -(AI_DISCOUNT  * guests) : 0;
@@ -375,7 +375,7 @@ function ApartmentPage() {
                         icon={<IconSkis size={18} />}
                         label="סקי פס · Trois Vallées"
                         sublabel="600 ק״מ מסלולים · כל הרמות"
-                        price={`+€${SKI_DAY_PRICE}/יום/אדם`}
+                        price="מחיר בקרוב"
                         checked={skiPass} onChange={setSkiPass}
                       />
                       <ToggleRow
@@ -459,9 +459,9 @@ function ApartmentPage() {
                         <span className="font-semibold text-gray-800">€{aptTotal.toLocaleString()}</span>
                       </div>
                       {skiPass && (
-                        <div className="flex justify-between">
+                        <div className="flex justify-between items-center">
                           <span className="text-gray-500">סקי פס × {guests} × {nights} ימים</span>
-                          <span className="font-semibold text-gray-800">€{skiTotal.toLocaleString()}</span>
+                          <span className="text-xs font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">בקרוב</span>
                         </div>
                       )}
                       {transfer && (
