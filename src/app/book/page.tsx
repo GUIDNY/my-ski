@@ -232,6 +232,8 @@ function BookPage() {
 
   // Transfer details
   const [isElAlChecked, setIsElAlChecked] = useState(false);
+  const [tDirection,  setTDirection]  = useState<"both"|"outbound"|"return">("both");
+  const [tPassengers, setTPassengers] = useState(guests);
   const [tAirportIn,  setTAirportIn]  = useState("GVA");
   const [tArrival,    setTArrival]    = useState("");
   const [tFlightIn,   setTFlightIn]   = useState("");
@@ -290,8 +292,8 @@ function BookPage() {
   const skiPass    = skiPasses.find(p => p.id === selectedPass);
   const aptPrice   = apt ? apt.price_per_night * nights : 0;
   const skiPrice   = 0; // price TBD — quoted separately
-  // El Al: €90/person × 2 directions (round trip). Non-El Al: quoted separately.
-  const trPrice    = transfer && isElAlChecked ? TRANSFER_PP * 2 * guests : 0;
+  const tDirs      = tDirection === "both" ? 2 : 1;
+  const trPrice    = transfer && isElAlChecked ? TRANSFER_PP * tDirs * tPassengers : 0;
   const flexPrice  = cancel === "flexible" ? FLEXIBLE_PP * guests : 0;
   const aiDisc     = service === "ai" ? -(AI_DISC_PP * guests) : 0;
   const subtotal   = aptPrice + skiPrice + trPrice + flexPrice + aiDisc;
@@ -450,10 +452,9 @@ function BookPage() {
               <div className="flex items-center justify-between mb-3">
                 <div>
                   <div className="text-sm font-semibold text-gray-700">שאטל ישיר Geneva/Lyon → Val Thorens</div>
-                  <div className="text-xs text-gray-400 mt-0.5">הלוך-חזור · €{TRANSFER_PP} לאדם לכיוון</div>
+                  <div className="text-xs text-gray-400 mt-0.5">€{TRANSFER_PP} לאדם לכיוון</div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="font-black text-gray-900">€{(TRANSFER_PP * guests).toLocaleString()}</span>
                   <button onClick={() => setTransfer(!transfer)}
                     className={`w-12 h-6 rounded-full transition-all relative flex-shrink-0 ${transfer ? "bg-blue-600" : "bg-gray-200"}`}>
                     <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${transfer ? "right-0.5" : "left-0.5"}`} />
@@ -462,72 +463,117 @@ function BookPage() {
               </div>
 
               {transfer && (
-                <div className="bg-blue-50 rounded-xl p-4 space-y-3 border border-blue-100">
-                  <div className="text-xs font-bold text-blue-700 mb-2">פרטי הטיסה להסעה</div>
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-4 space-y-4 border border-blue-100">
 
                   {/* El Al checkbox */}
-                  <label className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all
-                    ${isElAlChecked ? "border-green-400 bg-green-50" : "border-gray-200 bg-white"}`}>
-                    <div onClick={() => setIsElAlChecked(v => !v)}
-                      className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all
-                        ${isElAlChecked ? "bg-green-500 border-green-500" : "border-gray-300"}`}>
-                      {isElAlChecked && <IconCheck size={12} className="text-white" />}
+                  <button onClick={() => setIsElAlChecked(v => !v)}
+                    className={`w-full flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all text-right
+                      ${isElAlChecked ? "border-green-400 bg-green-50 shadow-sm" : "border-gray-200 bg-white hover:border-blue-300"}`}>
+                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all
+                      ${isElAlChecked ? "bg-green-500 border-green-500" : "border-gray-300"}`}>
+                      {isElAlChecked && <IconCheck size={13} className="text-white" />}
                     </div>
                     <div className="flex-1">
-                      <div className="text-sm font-bold text-gray-800">זוהי טיסת אל על ישירה</div>
+                      <div className="text-sm font-bold text-gray-800">✈️ זוהי טיסת אל על ישירה</div>
                       <div className="text-xs text-gray-500 mt-0.5">מחיר מאושר: €{TRANSFER_PP} לאדם לכיוון</div>
                     </div>
-                    {isElAlChecked && (
-                      <span className="text-xs font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">✓ אל על</span>
-                    )}
-                  </label>
+                    {isElAlChecked
+                      ? <span className="text-xs font-black text-green-700 bg-green-100 px-2.5 py-1 rounded-full">✓ אל על</span>
+                      : <span className="text-xs text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full">לא מסומן</span>
+                    }
+                  </button>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-xs font-bold text-gray-500 block mb-1">שדה תעופה — הגעה</label>
-                      <select value={tAirportIn} onChange={e => setTAirportIn(e.target.value)}
-                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="GVA">Geneva (GVA)</option>
-                        <option value="LYS">Lyon (LYS)</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-xs font-bold text-gray-500 block mb-1">שעת נחיתה</label>
-                      <input type="time" value={tArrival} onChange={e => setTArrival(e.target.value)}
-                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" />
-                    </div>
-                    <div className="col-span-2">
-                      <label className="text-xs font-bold text-gray-500 block mb-1">מספר טיסה — הגעה</label>
-                      <input type="text" value={tFlightIn} onChange={e => setTFlightIn(e.target.value.toUpperCase())}
-                        placeholder="LY323 / FR1234"
-                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono" dir="ltr" />
-                    </div>
-                    <div>
-                      <label className="text-xs font-bold text-gray-500 block mb-1">שדה תעופה — חזרה</label>
-                      <select value={tAirportOut} onChange={e => setTAirportOut(e.target.value)}
-                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="GVA">Geneva (GVA)</option>
-                        <option value="LYS">Lyon (LYS)</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-xs font-bold text-gray-500 block mb-1">שעת המראה (חזור)</label>
-                      <input type="time" value={tDeparture} onChange={e => setTDeparture(e.target.value)}
-                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" />
-                    </div>
-                    <div className="col-span-2">
-                      <label className="text-xs font-bold text-gray-500 block mb-1">מספר טיסה — חזרה</label>
-                      <input type="text" value={tFlightOut} onChange={e => setTFlightOut(e.target.value.toUpperCase())}
-                        placeholder="LY324 / FR1235"
-                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono" dir="ltr" />
+                  {/* Direction */}
+                  <div>
+                    <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">כיוון נסיעה</div>
+                    <div className="flex gap-2">
+                      {([["both","הלוך וחזור"],["outbound","הלוך בלבד"],["return","חזור בלבד"]] as const).map(([k,label]) => (
+                        <button key={k} onClick={() => setTDirection(k)}
+                          className={`flex-1 py-2 rounded-xl border-2 text-xs font-bold transition-all
+                            ${tDirection === k ? "border-blue-500 bg-blue-50 text-blue-700" : "border-gray-200 bg-white text-gray-500 hover:border-blue-200"}`}>
+                          {label}
+                        </button>
+                      ))}
                     </div>
                   </div>
+
+                  {/* Passengers */}
+                  <div>
+                    <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">נוסעים</div>
+                    <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-4 py-2 w-fit">
+                      <button onClick={() => setTPassengers(v => Math.max(1, v - 1))}
+                        className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center font-bold text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors">−</button>
+                      <span className="font-black text-gray-900 text-lg w-6 text-center">{tPassengers}</span>
+                      <button onClick={() => setTPassengers(v => Math.min(20, v + 1))}
+                        className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center font-bold text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors">+</button>
+                      <span className="text-sm text-gray-400">{tPassengers === 1 ? "אדם" : "אנשים"}</span>
+                    </div>
+                  </div>
+
+                  {/* Inbound fields */}
+                  {(tDirection === "both" || tDirection === "outbound") && (
+                    <div className="bg-white rounded-xl p-3 border border-blue-100 space-y-2">
+                      <div className="text-xs font-bold text-gray-500 mb-1">✈️ טיסת הלוך — נחיתה בשדה התעופה</div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-xs text-gray-400 block mb-1">שדה תעופה</label>
+                          <select value={tAirportIn} onChange={e => setTAirportIn(e.target.value)}
+                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value="GVA">Geneva (GVA)</option>
+                            <option value="LYS">Lyon (LYS)</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-xs text-gray-400 block mb-1">שעת נחיתה</label>
+                          <input type="time" value={tArrival} onChange={e => setTArrival(e.target.value)}
+                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                        </div>
+                        <div className="col-span-2">
+                          <label className="text-xs text-gray-400 block mb-1">מספר טיסה</label>
+                          <input type="text" value={tFlightIn} onChange={e => setTFlightIn(e.target.value.toUpperCase())}
+                            placeholder="LY323 / FR1234"
+                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono" dir="ltr" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Outbound fields */}
+                  {(tDirection === "both" || tDirection === "return") && (
+                    <div className="bg-white rounded-xl p-3 border border-blue-100 space-y-2">
+                      <div className="text-xs font-bold text-gray-500 mb-1">✈️ טיסת חזור — המראה משדה התעופה</div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-xs text-gray-400 block mb-1">שדה תעופה</label>
+                          <select value={tAirportOut} onChange={e => setTAirportOut(e.target.value)}
+                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value="GVA">Geneva (GVA)</option>
+                            <option value="LYS">Lyon (LYS)</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-xs text-gray-400 block mb-1">שעת המראה</label>
+                          <input type="time" value={tDeparture} onChange={e => setTDeparture(e.target.value)}
+                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                        </div>
+                        <div className="col-span-2">
+                          <label className="text-xs text-gray-400 block mb-1">מספר טיסה</label>
+                          <input type="text" value={tFlightOut} onChange={e => setTFlightOut(e.target.value.toUpperCase())}
+                            placeholder="LY324 / FR1235"
+                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono" dir="ltr" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Price note */}
                   {isElAlChecked ? (
-                    <div className="text-xs text-green-700 bg-green-50 rounded-lg px-3 py-2 border border-green-200 font-semibold">
-                      ✓ מחיר מאושר: €{TRANSFER_PP} × {guests} × 2 כיוונים = €{TRANSFER_PP * 2 * guests}
+                    <div className="text-sm text-green-700 bg-green-50 rounded-xl px-4 py-3 border border-green-200 font-semibold flex justify-between items-center">
+                      <span>✓ מחיר מאושר — אל על ישיר</span>
+                      <span className="font-black">€{TRANSFER_PP} × {tDirs} × {tPassengers} = €{trPrice}</span>
                     </div>
                   ) : (
-                    <div className="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2 border border-amber-200">
+                    <div className="text-xs text-amber-700 bg-amber-50 rounded-xl px-3 py-2.5 border border-amber-200">
                       ⚠ הצעת מחיר להסעה תשלח בהקדם (מחיר ממוצע ~€{TRANSFER_PP} לאדם לכיוון)
                     </div>
                   )}
@@ -692,7 +738,7 @@ function BookPage() {
                     )}
                     {transfer && (
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-500">הסעה × {guests} × 2</span>
+                        <span className="text-gray-500">הסעה × {tPassengers} × {tDirs} כיוונות</span>
                         {isElAlChecked
                           ? <span className="font-semibold">€{trPrice.toLocaleString()}</span>
                           : <span className="text-xs font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">הצעת מחיר בנפרד</span>

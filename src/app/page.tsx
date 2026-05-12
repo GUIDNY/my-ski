@@ -72,7 +72,7 @@ const steps = [
     title: "הוסף הסעה",
     desc: "שאטל ישיר משדה התעופה לאתר הסקי.",
     cta: "בחר הסעה",
-    href: "/apartments",
+    href: "/transfers",
   },
   {
     iconEl: <IcoPlane />,
