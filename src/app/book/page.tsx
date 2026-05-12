@@ -286,10 +286,15 @@ function BookPage() {
   };
 
   /* ── Price ───────────────────────────────────────────────── */
+  const isElAlFlight = (f: string) => f.trim().toUpperCase().startsWith("LY");
+  const transferIsElAl = transfer
+    && tFlightIn.trim() !== "" && tFlightOut.trim() !== ""
+    && isElAlFlight(tFlightIn) && isElAlFlight(tFlightOut);
+
   const skiPass    = skiPasses.find(p => p.id === selectedPass);
   const aptPrice   = apt ? apt.price_per_night * nights : 0;
-  const skiPrice   = 0; // Coming soon — price not yet available
-  const trPrice    = transfer ? TRANSFER_PP * guests : 0;
+  const skiPrice   = 0; // price TBD — quoted separately
+  const trPrice    = transferIsElAl ? TRANSFER_PP * guests : 0; // non-ElAl quoted separately
   const flexPrice  = cancel === "flexible" ? FLEXIBLE_PP * guests : 0;
   const aiDisc     = service === "ai" ? -(AI_DISC_PP * guests) : 0;
   const subtotal   = aptPrice + skiPrice + trPrice + flexPrice + aiDisc;
@@ -430,17 +435,14 @@ function BookPage() {
                   {selectedPass === null && <IconCheck size={15} className="text-blue-600" />}
                 </button>
                 {skiPasses.map(pass => (
-                  <button key={pass.id} onClick={() => setSelectedPass(pass.id)}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 text-sm transition-all
-                      ${selectedPass === pass.id ? "border-blue-500 bg-blue-50" : "border-gray-100 hover:border-gray-200"}`}>
+                  <div key={pass.id}
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 border-gray-100 text-sm opacity-50 cursor-not-allowed select-none">
                     <div className="text-right">
-                      <div className="font-semibold text-gray-900">{pass.name}</div>
+                      <div className="font-semibold text-gray-500">{pass.name}</div>
                       <div className="text-xs text-gray-400">{pass.duration_days} ימי סקי</div>
                     </div>
-                    <div className="text-right">
-                      <span className="text-xs font-bold bg-amber-100 text-amber-700 px-2 py-1 rounded-full">בקרוב</span>
-                    </div>
-                  </button>
+                    <span className="text-xs font-bold bg-amber-100 text-amber-700 px-2 py-1 rounded-full">הצעת מחיר בנפרד</span>
+                  </div>
                 ))}
               </div>
             </Section>
@@ -504,9 +506,15 @@ function BookPage() {
                         className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono" dir="ltr" />
                     </div>
                   </div>
-                  <div className="text-xs text-blue-600 bg-white rounded-lg px-3 py-2 border border-blue-200">
-                    ⏰ הצעת מחיר להסעה תשלח תוך 24 שעות לאחר אישור ההזמנה
-                  </div>
+                  {transferIsElAl ? (
+                    <div className="text-xs text-green-700 bg-green-50 rounded-lg px-3 py-2 border border-green-200 font-semibold">
+                      ✓ טיסת אל על ישירה — מחיר מאושר: €{TRANSFER_PP} × {guests} = €{TRANSFER_PP * guests}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2 border border-amber-200">
+                      ⚠ עבור טיסות שאינן אל על ישירות, הצעת מחיר להסעה תשלח בנפרד תוך עד 5 ימי עסקים
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -661,15 +669,18 @@ function BookPage() {
                       <span className="font-semibold">€{aptPrice.toLocaleString()}</span>
                     </div>
                     {skiPass && (
-                      <div className="flex justify-between">
+                      <div className="flex justify-between items-center">
                         <span className="text-gray-500">{skiPass.name} × {guests}</span>
-                        <span className="text-xs font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">בקרוב</span>
+                        <span className="text-xs font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">הצעת מחיר בנפרד</span>
                       </div>
                     )}
                     {transfer && (
-                      <div className="flex justify-between">
+                      <div className="flex justify-between items-center">
                         <span className="text-gray-500">הסעה × {guests}</span>
-                        <span className="font-semibold">€{trPrice.toLocaleString()}</span>
+                        {transferIsElAl
+                          ? <span className="font-semibold">€{trPrice.toLocaleString()}</span>
+                          : <span className="text-xs font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">הצעת מחיר בנפרד</span>
+                        }
                       </div>
                     )}
                     {cancel === "flexible" && (
