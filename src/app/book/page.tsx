@@ -8,7 +8,6 @@ import { IconMountain, IconSkis, IconBus, IconPlane, IconShield, IconUser, IconB
 const TRANSFER_PP  = 90; // per person per direction
 const FLEXIBLE_PP  = 100;
 const AI_DISC_PP   = 50;
-const INSURANCE_R  = 0.08;
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const fmtDate  = (s: string) => { if (!s) return ""; const d = new Date(s); return `${d.getDate()} ${HE_MONTHS[d.getMonth()]} ${d.getFullYear()}`; };
@@ -226,7 +225,6 @@ function BookPage() {
   // Selections
   const [selectedPass, setSelectedPass]   = useState<string | null>(null);
   const [transfer,     setTransfer]       = useState(params.get("transfer") === "true");
-  const [insurance,    setInsurance]      = useState(false);
   const [cancel,       setCancel]         = useState<"none" | "flexible">(initCancel);
   const [service,      setService]        = useState<"human" | "ai">(initService);
 
@@ -297,8 +295,7 @@ function BookPage() {
   const flexPrice  = cancel === "flexible" ? FLEXIBLE_PP * guests : 0;
   const aiDisc     = service === "ai" ? -(AI_DISC_PP * guests) : 0;
   const subtotal   = aptPrice + skiPrice + trPrice + flexPrice + aiDisc;
-  const insPrice   = insurance ? Math.round(subtotal * INSURANCE_R) : 0;
-  const total      = subtotal + insPrice;
+  const total      = subtotal;
 
   /* ── Card formatting ─────────────────────────────────────── */
   const fmtCard   = (v: string) => v.replace(/\D/g,"").slice(0,16).replace(/(.{4})/g,"$1 ").trim();
@@ -337,7 +334,6 @@ function BookPage() {
             transfer_airport_out: transfer ? tAirportOut : null,
             transfer_departure: transfer ? tDeparture : null,
             transfer_flight_out: transfer ? tFlightOut : null,
-            insurance,
             cancel_policy: cancel,
             service_level: service,
           },
@@ -671,23 +667,6 @@ function BookPage() {
               </div>
             </Section>
 
-            {/* Insurance */}
-            <Section title="ביטוח" icon={<IconShield size={18} />}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-semibold text-gray-700">ביטוח סקי + נסיעות</div>
-                  <div className="text-xs text-gray-400 mt-0.5">ביטול, רפואי, ציוד, חילוץ הר</div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm text-gray-500">8% מהחבילה</span>
-                  <button onClick={() => setInsurance(!insurance)}
-                    className={`w-12 h-6 rounded-full transition-all relative ${insurance ? "bg-blue-600" : "bg-gray-200"}`}>
-                    <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${insurance ? "right-0.5" : "left-0.5"}`} />
-                  </button>
-                </div>
-              </div>
-            </Section>
-
             {/* Personal Details */}
             <Section title="פרטים אישיים" icon={<IconUser size={18} />}>
               <div className="space-y-3">
@@ -755,12 +734,6 @@ function BookPage() {
                       <div className="flex justify-between">
                         <span className="text-gray-500">הנחת AI × {guests}</span>
                         <span className="font-semibold text-indigo-600">−€{Math.abs(aiDisc).toLocaleString()}</span>
-                      </div>
-                    )}
-                    {insurance && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">ביטוח (8%)</span>
-                        <span className="font-semibold">€{insPrice.toLocaleString()}</span>
                       </div>
                     )}
                   </div>
