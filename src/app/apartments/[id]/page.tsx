@@ -1,6 +1,6 @@
 "use client";
 import { Suspense, useEffect, useState } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import type { Apartment } from "@/types";
 import { calcTotalForRange, getEffectivePrice } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
@@ -123,6 +123,7 @@ function Gallery({ images, name }: { images: string[]; name: string }) {
 function ApartmentPage() {
   const { id }     = useParams<{ id: string }>();
   const params     = useSearchParams();
+  const router     = useRouter();
   const checkin    = params.get("checkin")  ?? "";
   const checkout   = params.get("checkout") ?? "";
   const guests     = parseInt(params.get("guests") ?? "2");
@@ -131,6 +132,7 @@ function ApartmentPage() {
   const [rules,         setRules]         = useState<PricingRule[]>([]);
   const [loading,       setLoading]       = useState(true);
   const [showBreakdown, setShowBreakdown] = useState(false);
+  const [creatingQuote, setCreatingQuote] = useState(false);
 
   // Add-ons
   const [skiPass,  setSkiPass]  = useState(false);
@@ -204,7 +206,7 @@ function ApartmentPage() {
     return `/book?${p}`;
   };
 
-  /* ── Quote URL for sharing price offer ──────────────────── */
+  /* ── Long fallback quote URL (works without DB) ─────────── */
   const buildQuoteUrl = () => {
     const p = new URLSearchParams({
       apartment_id: id,
@@ -217,13 +219,38 @@ function ApartmentPage() {
       service,
       nights: String(nights),
       apt_total: String(aptTotal),
-      tr_total: String(trTotal),
-      flex_extra: String(flexExtra),
-      ai_discount: String(aiDiscount),
       grand_total: String(grandTotal),
-      avg_nightly: String(avgNightlyPrice),
     });
     return `/quote?${p}`;
+  };
+
+  /* ── Pretty slug: apartment name → URL-friendly segment ── */
+  const nameSlug = (apt?.name ?? "quote").trim().replace(/\s+/g, "-").replace(/[/?#&]/g, "");
+
+  /* ── Create a short shareable quote link, fall back to long URL ── */
+  const handleSendQuote = async () => {
+    setCreatingQuote(true);
+    try {
+      const res = await fetch("/api/quotes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          apartment_id: id,
+          apartment: apt?.name ?? id,
+          checkin, checkout, guests, nights,
+          ski_pass: skiPass, transfer, cancel, service,
+          apt_total: aptTotal, grand_total: grandTotal,
+        }),
+      });
+      if (!res.ok) throw new Error("no table");
+      const { id: shortId } = await res.json();
+      router.push(`/q/${encodeURIComponent(nameSlug)}/${shortId}`);
+    } catch {
+      // DB/table not ready → use the long URL so nothing breaks
+      router.push(buildQuoteUrl());
+    } finally {
+      setCreatingQuote(false);
+    }
   };
 
   if (loading) return (
@@ -517,10 +544,10 @@ function ApartmentPage() {
                     ← המשך להזמנה
                   </a>
 
-                  <a href={buildQuoteUrl()}
-                    className="block w-full py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-800 font-bold text-center text-sm transition-colors">
-                    📋 שלח הצעת מחיר
-                  </a>
+                  <button onClick={handleSendQuote} disabled={creatingQuote}
+                    className="block w-full py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-800 font-bold text-center text-sm transition-colors disabled:opacity-60">
+                    {creatingQuote ? "יוצר הצעה…" : "📋 שלח הצעת מחיר"}
+                  </button>
 
                   <p className="text-center text-xs text-gray-400">
                     {cancel === "flexible" ? "80% החזר עד 48 שעות לפני" : "לא ניתן לביטול לאחר ההזמנה"}
