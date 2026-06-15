@@ -4,8 +4,10 @@ import type { Apartment } from "@/types";
 import {
   IconMountain, IconCalendar, IconChevronLeft, IconCheck, IconPlus, IconImage,
   IconTicket, IconSkis, IconBus, IconBank, IconCreditCard,
-  IconUsers, IconUser, IconMoon,
+  IconUsers, IconUser, IconMoon, IconWhatsApp,
 } from "@/components/Icons";
+
+const WHATSAPP_URL = "https://wa.me/message/LRY3FLCSANJCC1";
 
 export type QuoteData = {
   apartmentId: string;
@@ -57,8 +59,6 @@ export default function QuoteView({ q }: { q: QuoteData }) {
 
   const imgs = apt?.images?.length ? apt.images : ["/apt1.jpg", "/apt2.jpg", "/apt3.jpg"];
   const avgNightly = nights > 0 ? Math.round(aptTotal / nights) : aptTotal;
-
-  const bookUrl = `/book?apartment_id=${apartmentId}&apartment=${encodeURIComponent(apartment)}&checkin=${checkin}&checkout=${checkout}&guests=${guests}&ski_pass=${skiPass}&transfer=${transfer}&cancel=${cancel}&service=${service}`;
 
   const bank = {
     name:    process.env.NEXT_PUBLIC_BANK_NAME    || "בנק הפועלים (12)",
@@ -279,10 +279,11 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             </div>
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
               <div className="divide-y divide-slate-100">{breakdownRows}</div>
-              <a href={bookUrl} className="mt-4 block w-full bg-blue-600 hover:bg-blue-700 text-white font-display font-bold py-3.5 rounded-xl text-center transition shadow-sm shadow-blue-600/20">
-                המשך להזמנה ←
+              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
+                className="mt-4 flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-bold py-3.5 rounded-xl text-center transition shadow-sm shadow-emerald-600/20">
+                <IconWhatsApp size={20} /> צור קשר עם נציג להזמנה
               </a>
-              <p className="text-center text-xs text-slate-400 mt-3">לחיצה על הכפתור תוביל אותך לעמוד תשלום מאובטח</p>
+              <p className="text-center text-xs text-slate-400 mt-3">נציג ישראלי יחזור אליך בוואטסאפ לסגירת ההזמנה</p>
             </div>
           </aside>
 
@@ -332,8 +333,9 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             <p className="text-[11px] text-slate-400 leading-none mb-0.5">סה״כ</p>
             <p className="font-display font-black text-slate-900 text-lg leading-none">€{grandTotal.toLocaleString()}</p>
           </div>
-          <a href={bookUrl} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-display font-bold py-3.5 rounded-xl text-center transition shadow-sm shadow-blue-600/20">
-            המשך לתשלום ←
+          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
+            className="flex-1 flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-bold py-3.5 rounded-xl text-center transition shadow-sm shadow-emerald-600/20">
+            <IconWhatsApp size={18} /> צור קשר להזמנה
           </a>
         </div>
       </div>
