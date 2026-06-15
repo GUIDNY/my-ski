@@ -4,8 +4,8 @@ import { useSearchParams } from "next/navigation";
 import type { Apartment } from "@/types";
 import {
   IconMountain, IconCalendar, IconChevronLeft, IconCheck, IconPlus, IconImage,
-  IconTicket, IconSkis, IconShield, IconBus, IconBank, IconCreditCard,
-  IconUsers, IconMoon,
+  IconTicket, IconSkis, IconBus, IconBank, IconCreditCard,
+  IconUsers, IconUser, IconMoon,
 } from "@/components/Icons";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
@@ -20,10 +20,10 @@ const FLEXIBLE_EXTRA = 100;
 const AI_DISCOUNT = 50;
 
 const ADDONS = [
-  { icon: <IconTicket size={20} />, title: "סקי פס",      sub: "6 ימים · כל אזור Trois Vallées", price: "€280" },
-  { icon: <IconSkis   size={20} />, title: "השכרת ציוד",  sub: "סט מלא · רמת פרימיום",            price: "€150" },
-  { icon: <IconShield size={20} />, title: "ביטוח סקי",   sub: "כיסוי מלא כולל חילוץ",            price: "€45"  },
-  { icon: <IconBus    size={20} />, title: "הסעות",       sub: "משדה התעופה וחזרה",               price: "€80"  },
+  { icon: <IconTicket size={20} />, title: "סקי פס",            sub: "6 ימים · כל אזור Trois Vallées", price: "€280" },
+  { icon: <IconSkis   size={20} />, title: "השכרת ציוד",        sub: "סט מלא · רמת פרימיום",            price: "€150" },
+  { icon: <IconBus    size={20} />, title: "הסעות",             sub: "משדה התעופה וחזרה",               price: "€80"  },
+  { icon: <IconUser   size={20} />, title: "שיעורי סקי / סנובורד", sub: "מדריך מוסמך · כל הרמות",        soon: true   },
 ];
 
 function QuotePage() {
@@ -90,7 +90,9 @@ function QuotePage() {
             <p className="text-sm font-semibold text-slate-800 truncate">{a.title}</p>
             <p className="text-xs text-slate-400 truncate">{a.sub}</p>
           </div>
-          <span className="text-sm font-bold text-blue-600 flex-shrink-0">{a.price}</span>
+          {a.soon
+            ? <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full flex-shrink-0">בקרוב</span>
+            : <span className="text-sm font-bold text-blue-600 flex-shrink-0">{a.price}</span>}
         </div>
       ))}
     </div>
@@ -225,25 +227,68 @@ function QuotePage() {
       {/* ════════════════════ DESKTOP LAYOUT ════════════════════ */}
       <div className="hidden lg:block">
         {/* Hero banner */}
-        <section className="relative w-full h-80 bg-slate-900 overflow-hidden">
+        <section className="relative w-full h-[460px] bg-slate-900 overflow-hidden">
           {imgs.map((src, i) => (
             <img key={i} src={src} alt={apartment}
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === imgIdx ? "opacity-100" : "opacity-0"}`} />
+              className={`absolute inset-0 w-full h-full object-cover transition-all duration-[1200ms] ease-out ${i === imgIdx ? "opacity-100 scale-105" : "opacity-0 scale-100"}`} />
           ))}
-          <div className="absolute inset-0 bg-gradient-to-l from-slate-900/70 via-slate-900/20 to-transparent" />
-          <div className="absolute bottom-8 right-10 text-white text-right">
-            <h1 className="font-display text-5xl font-black leading-none">{apartment}</h1>
-            <p className="flex items-center gap-1.5 justify-end text-sm opacity-90 mt-2"><IconMountain size={14} /> Val Thorens, France</p>
+          {/* layered cinematic overlays */}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-900/15 to-slate-900/35" />
+          <div className="absolute inset-0 bg-gradient-to-l from-slate-950/60 via-transparent to-slate-950/20" />
+          <div className="absolute inset-0" style={{ boxShadow: "inset 0 0 180px rgba(2,6,23,0.55)" }} />
+
+          {/* arrows */}
+          {imgs.length > 1 && (
+            <>
+              <button onClick={() => setImgIdx(i => (i - 1 + imgs.length) % imgs.length)}
+                className="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/25 backdrop-blur-md text-white flex items-center justify-center transition">
+                <IconChevronLeft size={20} className="rotate-180" />
+              </button>
+              <button onClick={() => setImgIdx(i => (i + 1) % imgs.length)}
+                className="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/25 backdrop-blur-md text-white flex items-center justify-center transition">
+                <IconChevronLeft size={20} />
+              </button>
+            </>
+          )}
+
+          {/* title block */}
+          <div className="absolute bottom-10 right-10 left-10 flex items-end justify-between gap-8">
+            <div className="text-white text-right">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-semibold tracking-widest uppercase mb-4">
+                הצעת מחיר בלעדית
+              </div>
+              <h1 className="font-display text-6xl font-black leading-none drop-shadow-lg">{apartment}</h1>
+              <p className="flex items-center gap-1.5 justify-start text-sm text-white/80 mt-3"><IconMountain size={14} /> Val Thorens · Trois Vallées · France</p>
+            </div>
+
+            {/* glass info chip */}
+            <div className="hidden xl:flex flex-col gap-3 px-6 py-5 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/15 text-white text-right min-w-[200px]">
+              <div className="flex items-center justify-between gap-6">
+                <span className="text-xs text-white/60">תאריכים</span>
+                <span className="font-display font-bold text-sm">{fmtDate(checkin)} — {fmtDate(checkout)}</span>
+              </div>
+              <div className="h-px bg-white/15" />
+              <div className="flex items-center justify-between gap-6">
+                <span className="text-xs text-white/60">סה״כ</span>
+                <span className="font-display font-black text-xl text-emerald-300">€{grandTotal.toLocaleString()}</span>
+              </div>
+            </div>
           </div>
+
           {/* thumbnails */}
           {imgs.length > 1 && (
-            <div className="absolute bottom-6 left-10 flex gap-2">
+            <div className="absolute top-6 left-10 flex gap-2">
               {imgs.slice(0, 6).map((src, i) => (
                 <button key={i} onClick={() => setImgIdx(i)}
-                  className={`w-14 h-14 rounded-lg overflow-hidden ring-2 transition ${i === imgIdx ? "ring-white" : "ring-white/30"}`}>
+                  className={`w-12 h-12 rounded-lg overflow-hidden ring-2 transition-all hover:scale-105 ${i === imgIdx ? "ring-white scale-105" : "ring-white/25"}`}>
                   <img src={src} alt="" className="w-full h-full object-cover" />
                 </button>
               ))}
+              {imgs.length > 6 && (
+                <div className="w-12 h-12 rounded-lg bg-white/10 backdrop-blur-md ring-2 ring-white/25 flex items-center justify-center text-white text-xs font-bold">
+                  +{imgs.length - 6}
+                </div>
+              )}
             </div>
           )}
         </section>
