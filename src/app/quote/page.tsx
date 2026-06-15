@@ -3,7 +3,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { Apartment } from "@/types";
 import {
-  IconMountain, IconBed, IconCalendar, IconCheck, IconChevronLeft, IconMail, IconPhone,
+  IconMountain, IconCalendar, IconChevronLeft, IconCheck,
 } from "@/components/Icons";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
@@ -11,6 +11,11 @@ const fmtDate = (s: string) => {
   if (!s) return "";
   const d = new Date(s + "T12:00:00");
   return `${d.getDate()} ${HE_MONTHS[d.getMonth()]}`;
+};
+const fmtFull = (s: string) => {
+  if (!s) return "";
+  const d = new Date(s + "T12:00:00");
+  return `${d.getDate()} ${HE_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 };
 
 const TRANSFER_PRICE = 180;
@@ -35,227 +40,197 @@ function QuotePage() {
   const service = params.get("service") ?? "human";
 
   const aptTotal = parseInt(params.get("apt_total") ?? "0");
-  const trTotal = parseInt(params.get("tr_total") ?? "0");
   const flexExtra = parseInt(params.get("flex_extra") ?? "0");
-  const aiDiscount = parseInt(params.get("ai_discount") ?? "0");
   const grandTotal = parseInt(params.get("grand_total") ?? "0");
 
   useEffect(() => {
     if (!apartmentId) return;
     fetch(`/api/apartments/${apartmentId}`)
       .then(r => r.json())
-      .then(data => setApt(data))
+      .then(setApt)
       .catch(() => {});
   }, [apartmentId]);
 
   const imgs = apt?.images?.length ? apt.images : ["/apt1.jpg", "/apt2.jpg", "/apt3.jpg"];
+  const avgNightly = nights > 0 ? Math.round(aptTotal / nights) : aptTotal;
+
+  const lineItems = [
+    { label: "לינה", sub: `${avgNightly.toLocaleString()} € × ${nights} לילות`, amount: aptTotal, show: true },
+    { label: "הסעה הלוך־חזור", sub: "שאטל פרטי משדה התעופה", amount: TRANSFER_PRICE, show: transfer },
+    { label: "מדיניות ביטול גמישה", sub: `80% החזר · ${guests} אורחים`, amount: FLEXIBLE_EXTRA * guests, show: cancel === "flexible" },
+    { label: "הנחת ניהול עצמאי", sub: "AI concierge", amount: -(AI_DISCOUNT * guests), show: service === "ai" },
+  ].filter(i => i.show);
+
+  const bank = {
+    name: process.env.NEXT_PUBLIC_BANK_NAME || "בנק הפועלים",
+    iban: process.env.NEXT_PUBLIC_BANK_IBAN || "IL62012673000000026026",
+    swift: process.env.NEXT_PUBLIC_BANK_SWIFT || "POALILIT",
+    account: process.env.NEXT_PUBLIC_BANK_ACCOUNT || "SKISHARE - GUINDY IDAN AND MIZRAHI AMIT",
+  };
 
   return (
-    <div className="min-h-screen bg-white" dir="rtl">
-      {/* Header */}
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
-          <button onClick={() => router.back()} className="text-gray-500 hover:text-gray-900 transition">← חזור</button>
-          <h1 className="text-xl font-black text-gray-900">הצעת מחיר מותאמת</h1>
-          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
-            <IconMountain size={16} className="text-white" />
+    <div className="min-h-screen bg-[#fafafa] pb-28" dir="rtl">
+
+      {/* ── Top bar ─────────────────────────────────────────── */}
+      <header className="absolute top-0 inset-x-0 z-30 px-5 md:px-8 py-5 flex items-center justify-between">
+        <button onClick={() => router.back()}
+          className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md text-white flex items-center justify-center transition">
+          <IconChevronLeft size={18} className="rotate-180" />
+        </button>
+        <div className="flex items-center gap-2 text-white font-display font-bold tracking-tight">
+          MY·SKI
+          <div className="w-7 h-7 rounded-lg bg-white/20 backdrop-blur-md flex items-center justify-center">
+            <IconMountain size={14} className="text-white" />
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Hero Image Section */}
-      {apt && (
-        <div className="relative w-full h-96 md:h-[500px] bg-gray-200 overflow-hidden group">
-          <img
-            src={imgs[imgIdx]}
-            alt={apartment}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          />
+      {/* ── Hero ────────────────────────────────────────────── */}
+      <section className="relative w-full h-[58vh] min-h-[420px] bg-slate-900 overflow-hidden">
+        {imgs.map((src, i) => (
+          <img key={i} src={src} alt={apartment}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === imgIdx ? "opacity-100" : "opacity-0"}`} />
+        ))}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/85 via-slate-900/15 to-slate-900/30" />
 
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+        {/* arrows */}
+        {imgs.length > 1 && (
+          <>
+            <button onClick={() => setImgIdx(i => (i - 1 + imgs.length) % imgs.length)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/15 hover:bg-white/30 backdrop-blur-md text-white flex items-center justify-center transition">
+              <IconChevronLeft size={18} className="rotate-180" />
+            </button>
+            <button onClick={() => setImgIdx(i => (i + 1) % imgs.length)}
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/15 hover:bg-white/30 backdrop-blur-md text-white flex items-center justify-center transition">
+              <IconChevronLeft size={18} />
+            </button>
+          </>
+        )}
 
-          {/* Image Counter */}
-          {imgs.length > 1 && (
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-              {imgs.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setImgIdx(i)}
-                  className={`transition-all ${
-                    i === imgIdx
-                      ? 'bg-white w-8 h-2'
-                      : 'bg-white/50 w-2 h-2 hover:bg-white/80'
-                  } rounded-full`}
-                />
-              ))}
+        {/* title */}
+        <div className="absolute bottom-0 inset-x-0 p-6 md:p-10">
+          <div className="max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-1.5 text-white/80 text-xs font-medium tracking-widest uppercase mb-3">
+              <IconMountain size={13} /> Val Thorens · France
             </div>
-          )}
+            <h1 className="font-display text-4xl md:text-6xl font-black text-white leading-none">{apartment}</h1>
+            <p className="text-white/60 text-sm mt-3">הצעת מחיר אישית · נשלחה {fmtFull(new Date().toISOString().slice(0,10))}</p>
+          </div>
+        </div>
+      </section>
 
-          {/* Navigation Arrows */}
-          {imgs.length > 1 && (
-            <>
-              <button
-                onClick={() => setImgIdx(i => (i - 1 + imgs.length) % imgs.length)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 hover:bg-white/40 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition"
-              >
-                <IconChevronLeft size={20} className="rotate-180" />
+      {/* thumbnails */}
+      {imgs.length > 1 && (
+        <div className="max-w-3xl mx-auto px-6 md:px-10 -mt-8 relative z-20">
+          <div className="flex gap-2 overflow-x-auto scrollbar-thin pb-1">
+            {imgs.map((src, i) => (
+              <button key={i} onClick={() => setImgIdx(i)}
+                className={`flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden ring-2 transition ${i === imgIdx ? "ring-blue-500" : "ring-white"} shadow-md`}>
+                <img src={src} alt="" className="w-full h-full object-cover" />
               </button>
-              <button
-                onClick={() => setImgIdx(i => (i + 1) % imgs.length)}
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 hover:bg-white/40 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition"
-              >
-                <IconChevronLeft size={20} />
-              </button>
-            </>
-          )}
-
-          {/* Title Overlay */}
-          <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-            <p className="text-sm font-semibold opacity-90 mb-2">Val Thorens, France</p>
-            <h2 className="text-5xl font-black">{apartment}</h2>
-            <p className="text-base opacity-80 mt-2">הצעת מחיר בלעדית ומותאמת</p>
+            ))}
           </div>
         </div>
       )}
 
-      {/* Content */}
-      <div className="max-w-5xl mx-auto px-4 md:px-8 py-12 space-y-8">
+      <main className="max-w-3xl mx-auto px-6 md:px-10 mt-10 space-y-5">
 
-        {/* Booking Summary Card */}
-        <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-8 border border-slate-200">
-          <h3 className="text-2xl font-black text-gray-900 mb-6">📅 סיכום ההזמנה</h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div>
-              <p className="text-sm font-semibold text-gray-600 mb-2">תאריך כניסה</p>
-              <p className="text-xl font-black text-gray-900">{fmtDate(checkin)}</p>
+        {/* ── Stay details ──────────────────────────────────── */}
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
+          <div className="grid grid-cols-3 divide-x divide-x-reverse divide-slate-100">
+            <div className="p-5 text-center">
+              <p className="text-xs text-slate-400 font-medium mb-1.5">כניסה</p>
+              <p className="font-display font-bold text-slate-900">{fmtDate(checkin)}</p>
             </div>
-            <div>
-              <p className="text-sm font-semibold text-gray-600 mb-2">תאריך יציאה</p>
-              <p className="text-xl font-black text-gray-900">{fmtDate(checkout)}</p>
+            <div className="p-5 text-center">
+              <p className="text-xs text-slate-400 font-medium mb-1.5">יציאה</p>
+              <p className="font-display font-bold text-slate-900">{fmtDate(checkout)}</p>
             </div>
-            <div>
-              <p className="text-sm font-semibold text-gray-600 mb-2">מספר לילות</p>
-              <p className="text-xl font-black text-gray-900">{nights} לילות</p>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-gray-600 mb-2">מספר אנשים</p>
-              <p className="text-xl font-black text-gray-900">{guests} {guests === 1 ? "אדם" : "אנשים"}</p>
+            <div className="p-5 text-center">
+              <p className="text-xs text-slate-400 font-medium mb-1.5">אורחים</p>
+              <p className="font-display font-bold text-slate-900">{guests} · {nights} לילות</p>
             </div>
           </div>
         </div>
 
-        {/* Pricing Breakdown */}
-        <div className="space-y-4">
-          <h3 className="text-2xl font-black text-gray-900">💰 פירוט המחיר</h3>
-
-          <div className="space-y-3">
-            {/* Accommodation */}
-            <div className="bg-white border border-gray-200 rounded-xl p-4 flex justify-between items-center hover:shadow-md transition">
-              <div>
-                <p className="font-bold text-gray-900">לינה</p>
-                <p className="text-sm text-gray-600">× {nights} לילות</p>
-              </div>
-              <p className="text-2xl font-black text-blue-600">€{aptTotal.toLocaleString()}</p>
-            </div>
-
-            {/* Transfer */}
-            {transfer && (
-              <div className="bg-white border border-gray-200 rounded-xl p-4 flex justify-between items-center hover:shadow-md transition">
+        {/* ── Price breakdown ───────────────────────────────── */}
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.04)] p-6 md:p-8">
+          <h2 className="font-display text-lg font-bold text-slate-900 mb-5">פירוט מחיר</h2>
+          <div className="space-y-1">
+            {lineItems.map((item, i) => (
+              <div key={i} className="flex items-center justify-between py-3 border-b border-slate-50 last:border-0">
                 <div>
-                  <p className="font-bold text-gray-900">🚐 הסעה הלוך-חזור</p>
-                  <p className="text-sm text-gray-600">משדה התעופה ישירות</p>
+                  <p className="font-medium text-slate-800">{item.label}</p>
+                  <p className="text-xs text-slate-400 mt-0.5">{item.sub}</p>
                 </div>
-                <p className="text-2xl font-black text-blue-600">€{TRANSFER_PRICE}</p>
+                <p className={`font-display font-bold tabular-nums ${item.amount < 0 ? "text-emerald-600" : "text-slate-900"}`}>
+                  {item.amount < 0 ? "−" : ""}€{Math.abs(item.amount).toLocaleString()}
+                </p>
               </div>
-            )}
-
-            {/* Cancellation */}
-            {cancel === "flexible" && (
-              <div className="bg-white border border-gray-200 rounded-xl p-4 flex justify-between items-center hover:shadow-md transition">
+            ))}
+            {skiPass && (
+              <div className="flex items-center justify-between py-3 border-b border-slate-50">
                 <div>
-                  <p className="font-bold text-gray-900">✅ מדיניות גמישה</p>
-                  <p className="text-sm text-gray-600">80% החזר עד 48 שעות לפני</p>
+                  <p className="font-medium text-slate-800">סקי פס · Trois Vallées</p>
+                  <p className="text-xs text-slate-400 mt-0.5">600 ק״מ מסלולים</p>
                 </div>
-                <p className="text-2xl font-black text-green-600">+€{(FLEXIBLE_EXTRA * guests).toLocaleString()}</p>
-              </div>
-            )}
-
-            {/* AI Discount */}
-            {service === "ai" && (
-              <div className="bg-white border border-gray-200 rounded-xl p-4 flex justify-between items-center hover:shadow-md transition">
-                <div>
-                  <p className="font-bold text-gray-900">🤖 הנחת AI</p>
-                  <p className="text-sm text-gray-600">ניהול עצמאי חכם</p>
-                </div>
-                <p className="text-2xl font-black text-indigo-600">−€{(AI_DISCOUNT * guests).toLocaleString()}</p>
+                <span className="text-xs font-semibold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full">מחיר בקרוב</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* Total Section */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white shadow-lg">
-          <p className="text-sm font-semibold opacity-90 mb-2">סה״כ לתשלום</p>
-          <div className="flex items-end justify-between">
+        {/* ── Total ─────────────────────────────────────────── */}
+        <div className="rounded-2xl bg-slate-900 p-6 md:p-8 text-white relative overflow-hidden">
+          <div className="absolute -left-12 -top-12 w-48 h-48 rounded-full bg-blue-500/10 blur-2xl" />
+          <div className="relative flex items-end justify-between">
             <div>
-              <p className="text-base opacity-80">עבור {guests} {guests === 1 ? "אדם" : "אנשים"} · {nights} לילות</p>
+              <p className="text-white/50 text-sm mb-1">סה״כ לתשלום</p>
+              <p className="text-white/40 text-xs">{guests} אורחים · {nights} לילות · ~€{Math.round(grandTotal / nights)}/לילה</p>
             </div>
-            <div className="text-right">
-              <p className="text-6xl font-black">€{grandTotal.toLocaleString()}</p>
-              <p className="text-lg font-semibold opacity-80 mt-1">~€{Math.round(grandTotal / nights)}/לילה ממוצע</p>
-            </div>
+            <p className="font-display text-5xl md:text-6xl font-black leading-none tabular-nums">€{grandTotal.toLocaleString()}</p>
           </div>
         </div>
 
-        {/* Bank Details */}
-        <div className="space-y-4">
-          <h3 className="text-2xl font-black text-gray-900">🏦 פרטי תשלום</h3>
-          <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl p-8 border border-amber-200 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <p className="text-sm font-semibold text-amber-900 mb-1">בנק</p>
-                <p className="text-lg font-black text-amber-950">{process.env.NEXT_PUBLIC_BANK_NAME || "בנק הפועלים"}</p>
+        {/* ── Bank details ──────────────────────────────────── */}
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.04)] p-6 md:p-8">
+          <h2 className="font-display text-lg font-bold text-slate-900 mb-1">תשלום בהעברה בנקאית</h2>
+          <p className="text-sm text-slate-400 mb-6">לאחר קבלת ההעברה נאשר את ההזמנה והדירה תהיה שמורה עבורך.</p>
+
+          <div className="space-y-px rounded-xl overflow-hidden border border-slate-100">
+            {[
+              ["בנק", bank.name],
+              ["IBAN", bank.iban],
+              ["SWIFT", bank.swift],
+              ["מוטב", bank.account],
+            ].map(([k, v], i) => (
+              <div key={i} className="flex items-center justify-between gap-4 px-4 py-3.5 bg-slate-50/60 odd:bg-white">
+                <span className="text-sm text-slate-400 flex-shrink-0">{k}</span>
+                <span className={`text-sm font-semibold text-slate-800 text-left ${k === "IBAN" || k === "SWIFT" ? "font-mono tracking-tight" : ""}`}>{v}</span>
               </div>
-              <div>
-                <p className="text-sm font-semibold text-amber-900 mb-1">SWIFT</p>
-                <p className="text-lg font-black text-amber-950">{process.env.NEXT_PUBLIC_BANK_SWIFT || "POALILIT"}</p>
-              </div>
-              <div className="md:col-span-2">
-                <p className="text-sm font-semibold text-amber-900 mb-1">IBAN</p>
-                <p className="text-lg font-mono font-black text-amber-950">{process.env.NEXT_PUBLIC_BANK_IBAN || "IL62012673000000026026"}</p>
-              </div>
-              <div className="md:col-span-2">
-                <p className="text-sm font-semibold text-amber-900 mb-1">בעל החשבון</p>
-                <p className="text-lg font-black text-amber-950">{process.env.NEXT_PUBLIC_BANK_ACCOUNT || "MySki Ltd"}</p>
-              </div>
-            </div>
-            <div className="bg-amber-200/50 border border-amber-300 rounded-lg p-4 mt-6">
-              <p className="text-sm text-amber-950 font-semibold">
-                ✓ בעד קבלת ההעברה, אנחנו נאשר את ההזמנה והדירה תהיה שלך
-              </p>
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* CTA Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <a href={`/book?apartment_id=${apartmentId}&apartment=${apartment}&checkin=${checkin}&checkout=${checkout}&guests=${guests}&ski_pass=${skiPass}&transfer=${transfer}&cancel=${cancel}&service=${service}`}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-black py-4 px-6 rounded-xl transition text-center text-lg shadow-lg">
-            ← המשך להזמנה
-          </a>
-          <a href={`mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'skishareteam@gmail.com'}`}
-            className="bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-black py-4 px-6 rounded-xl transition text-center text-lg">
-            📧 שלח שאלה
+        {/* trust note */}
+        <div className="flex items-center gap-2 justify-center text-xs text-slate-400 pt-2">
+          <IconCheck size={13} className="text-emerald-500" />
+          הצעה תקפה ל־30 יום · MySki · Val Thorens
+        </div>
+      </main>
+
+      {/* ── Sticky CTA ────────────────────────────────────── */}
+      <div className="fixed bottom-0 inset-x-0 z-40 bg-white/90 backdrop-blur-md border-t border-slate-100 px-5 py-3.5">
+        <div className="max-w-3xl mx-auto flex items-center gap-3">
+          <div className="flex-shrink-0">
+            <p className="text-[11px] text-slate-400 leading-none mb-0.5">סה״כ</p>
+            <p className="font-display font-black text-slate-900 text-lg leading-none">€{grandTotal.toLocaleString()}</p>
+          </div>
+          <a href={`/book?apartment_id=${apartmentId}&apartment=${encodeURIComponent(apartment)}&checkin=${checkin}&checkout=${checkout}&guests=${guests}&ski_pass=${skiPass}&transfer=${transfer}&cancel=${cancel}&service=${service}`}
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-display font-bold py-3.5 rounded-xl text-center transition shadow-sm shadow-blue-600/20">
+            המשך להזמנה ←
           </a>
         </div>
-
-        {/* Footer */}
-        <div className="text-center py-8 border-t border-gray-200">
-          <p className="text-gray-600 text-sm mb-1">הצעה זו תקפה ל-30 יום</p>
-          <p className="text-gray-400 text-xs">MySki © 2026 · Val Thorens, France</p>
-        </div>
-
       </div>
     </div>
   );
@@ -264,7 +239,7 @@ function QuotePage() {
 export default function QuotePageWrapper() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-[#fafafa]">
         <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
       </div>
     }>
