@@ -204,6 +204,28 @@ function ApartmentPage() {
     return `/book?${p}`;
   };
 
+  /* ── Quote URL for sharing price offer ──────────────────── */
+  const buildQuoteUrl = () => {
+    const p = new URLSearchParams({
+      apartment_id: id,
+      apartment: apt?.name ?? id,
+      checkin, checkout,
+      guests: String(guests),
+      ski_pass: String(skiPass),
+      transfer: String(transfer),
+      cancel,
+      service,
+      nights: String(nights),
+      apt_total: String(aptTotal),
+      tr_total: String(trTotal),
+      flex_extra: String(flexExtra),
+      ai_discount: String(aiDiscount),
+      grand_total: String(grandTotal),
+      avg_nightly: String(avgNightlyPrice),
+    });
+    return `/quote?${p}`;
+  };
+
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
@@ -493,6 +515,11 @@ function ApartmentPage() {
                   <a href={buildBookUrl()}
                     className="block w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-center text-base transition-colors shadow-sm">
                     ← המשך להזמנה
+                  </a>
+
+                  <a href={buildQuoteUrl()}
+                    className="block w-full py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-800 font-bold text-center text-sm transition-colors">
+                    📋 שלח הצעת מחיר
                   </a>
 
                   <p className="text-center text-xs text-gray-400">
