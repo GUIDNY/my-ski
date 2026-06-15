@@ -64,11 +64,17 @@ INSERT INTO ski_passes (name, duration_days, price, type) VALUES
 
 -- ============================================================
 -- RLS (Row Level Security) — חשוב לאבטחה
+-- כל הכתיבה/קריאה מהאדמין עוברת דרך service role (מתעלם מ-RLS)
+-- RLS חוסם גישה ישירה דרך anon key לטבלאות רגישות
 -- ============================================================
 
 ALTER TABLE apartments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ski_passes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE transfers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE availability_blocks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE pricing_rules ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ical_sources ENABLE ROW LEVEL SECURITY;
 
 -- כולם יכולים לקרוא דירות זמינות
 CREATE POLICY "apartments_public_read" ON apartments
@@ -78,6 +84,5 @@ CREATE POLICY "apartments_public_read" ON apartments
 CREATE POLICY "ski_passes_public_read" ON ski_passes
   FOR SELECT USING (available = true);
 
--- כולם יכולים ליצור הזמנה
-CREATE POLICY "bookings_public_insert" ON bookings
-  FOR INSERT WITH CHECK (true);
+-- הזמנות, העברות, availability, pricing, ical — גישה דרך service role בלבד
+-- אין צורך ב-anon policies; ה-API routes משתמשות ב-SUPABASE_SERVICE_ROLE_KEY
