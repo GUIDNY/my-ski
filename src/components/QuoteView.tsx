@@ -48,6 +48,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
 
   const [apt, setApt] = useState<Apartment | null>(null);
   const [imgIdx, setImgIdx] = useState(0);
+  const [lightbox, setLightbox] = useState<number | null>(null);
 
   useEffect(() => {
     if (!apartmentId) return;
@@ -221,66 +222,52 @@ export default function QuoteView({ q }: { q: QuoteData }) {
 
       {/* DESKTOP LAYOUT */}
       <div className="hidden lg:block">
-        <section className="relative w-full h-[460px] bg-slate-900 overflow-hidden">
-          {imgs.map((src, i) => (
-            <img key={i} src={src} alt={apartment}
-              className={`absolute inset-0 w-full h-full object-cover transition-all duration-[1200ms] ease-out ${i === imgIdx ? "opacity-100 scale-105" : "opacity-0 scale-100"}`} />
-          ))}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-900/15 to-slate-900/35" />
-          <div className="absolute inset-0 bg-gradient-to-l from-slate-950/60 via-transparent to-slate-950/20" />
-          <div className="absolute inset-0" style={{ boxShadow: "inset 0 0 180px rgba(2,6,23,0.55)" }} />
-
-          {imgs.length > 1 && (
-            <>
-              <button onClick={() => setImgIdx(i => (i - 1 + imgs.length) % imgs.length)}
-                className="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/25 backdrop-blur-md text-white flex items-center justify-center transition">
-                <IconChevronLeft size={20} className="rotate-180" />
-              </button>
-              <button onClick={() => setImgIdx(i => (i + 1) % imgs.length)}
-                className="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/25 backdrop-blur-md text-white flex items-center justify-center transition">
-                <IconChevronLeft size={20} />
-              </button>
-            </>
-          )}
-
-          <div className="absolute bottom-10 right-10 left-10 flex items-end justify-between gap-8">
-            <div className="text-white text-right">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-semibold tracking-widest uppercase mb-4">
+        <div className="max-w-6xl mx-auto px-8 pt-10">
+          {/* clean header */}
+          <div className="flex items-end justify-between gap-8 mb-6">
+            <div className="text-right">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-bold tracking-widest uppercase mb-3">
                 הצעת מחיר בלעדית
               </div>
-              <h1 className="font-display text-6xl font-black leading-none drop-shadow-lg">{apartment}</h1>
-              <p className="flex items-center gap-1.5 justify-start text-sm text-white/80 mt-3"><IconMountain size={14} /> Val Thorens · Trois Vallées · France</p>
+              <h1 className="font-display text-5xl font-black text-slate-900 leading-none">{apartment}</h1>
+              <p className="flex items-center gap-1.5 text-sm text-slate-500 mt-3"><IconMountain size={14} className="text-blue-500" /> Val Thorens · Trois Vallées · France</p>
             </div>
-
-            <div className="hidden xl:flex flex-col gap-3 px-6 py-5 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/15 text-white text-right min-w-[200px]">
-              <div className="flex items-center justify-between gap-6">
-                <span className="text-xs text-white/60">תאריכים</span>
-                <span className="font-display font-bold text-sm">{fmtDate(checkin)} — {fmtDate(checkout)}</span>
-              </div>
-              <div className="h-px bg-white/15" />
-              <div className="flex items-center justify-between gap-6">
-                <span className="text-xs text-white/60">סה״כ</span>
-                <span className="font-display font-black text-xl text-emerald-300">€{grandTotal.toLocaleString()}</span>
-              </div>
+            <div className="text-left flex-shrink-0">
+              <p className="text-xs text-slate-400 mb-0.5">סה״כ לתשלום</p>
+              <p className="font-display text-3xl font-black text-slate-900 leading-none">€{grandTotal.toLocaleString()}</p>
+              <p className="text-xs text-slate-400 mt-1">{fmtDate(checkin)} — {fmtDate(checkout)}</p>
             </div>
           </div>
 
-          {imgs.length > 1 && (
-            <div className="absolute top-6 left-10 flex gap-2">
-              {imgs.slice(0, 6).map((src, i) => (
-                <button key={i} onClick={() => setImgIdx(i)}
-                  className={`w-12 h-12 rounded-lg overflow-hidden ring-2 transition-all hover:scale-105 ${i === imgIdx ? "ring-white scale-105" : "ring-white/25"}`}>
-                  <img src={src} alt="" className="w-full h-full object-cover" />
+          {/* framed gallery — Airbnb-style grid */}
+          <div className="relative rounded-3xl overflow-hidden ring-1 ring-slate-200/80 shadow-[0_18px_50px_-12px_rgba(2,6,23,0.25)] h-[460px]">
+            {imgs.length >= 5 ? (
+              <div className="grid grid-cols-4 grid-rows-2 gap-2 h-full">
+                <button onClick={() => setLightbox(0)}
+                  className="col-span-2 row-span-2 relative group overflow-hidden">
+                  <img src={imgs[0]} alt={apartment} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition" />
                 </button>
-              ))}
-              {imgs.length > 6 && (
-                <div className="w-12 h-12 rounded-lg bg-white/10 backdrop-blur-md ring-2 ring-white/25 flex items-center justify-center text-white text-xs font-bold">
-                  +{imgs.length - 6}
-                </div>
-              )}
-            </div>
-          )}
-        </section>
+                {imgs.slice(1, 5).map((src, i) => (
+                  <button key={i} onClick={() => setLightbox(i + 1)} className="relative group overflow-hidden">
+                    <img src={src} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition" />
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <button onClick={() => setLightbox(0)} className="block w-full h-full group overflow-hidden">
+                <img src={imgs[0]} alt={apartment} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              </button>
+            )}
+
+            {/* show-all button */}
+            <button onClick={() => setLightbox(0)}
+              className="absolute bottom-4 left-4 flex items-center gap-2 px-4 py-2 rounded-full bg-white/95 hover:bg-white text-slate-800 text-sm font-bold shadow-md backdrop-blur transition">
+              <IconImage size={15} /> כל התמונות{imgs.length > 1 ? ` (${imgs.length})` : ""}
+            </button>
+          </div>
+        </div>
 
         <div className="max-w-6xl mx-auto px-8 py-10 grid grid-cols-[340px_1fr] gap-8 items-start">
           <aside className="sticky top-24 space-y-4">
@@ -350,6 +337,37 @@ export default function QuoteView({ q }: { q: QuoteData }) {
           </a>
         </div>
       </div>
+
+      {/* LIGHTBOX */}
+      {lightbox !== null && (
+        <div className="fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-sm flex items-center justify-center"
+          onClick={() => setLightbox(null)}>
+          <button onClick={() => setLightbox(null)}
+            className="absolute top-5 left-5 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-2xl transition">✕</button>
+          <span className="absolute top-6 right-6 text-white/70 text-sm font-semibold">{lightbox + 1} / {imgs.length}</span>
+
+          <button onClick={(e) => { e.stopPropagation(); setLightbox(v => ((v! - 1 + imgs.length) % imgs.length)); }}
+            className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition">
+            <IconChevronLeft size={22} className="rotate-180" />
+          </button>
+          <img src={imgs[lightbox]} alt="" onClick={(e) => e.stopPropagation()}
+            className="max-w-[90vw] max-h-[85vh] object-contain rounded-xl shadow-2xl" />
+          <button onClick={(e) => { e.stopPropagation(); setLightbox(v => ((v! + 1) % imgs.length)); }}
+            className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition">
+            <IconChevronLeft size={22} />
+          </button>
+
+          {/* thumbnail strip */}
+          <div className="absolute bottom-5 inset-x-0 flex justify-center gap-2 px-4 overflow-x-auto" onClick={(e) => e.stopPropagation()}>
+            {imgs.map((src, i) => (
+              <button key={i} onClick={() => setLightbox(i)}
+                className={`w-14 h-14 rounded-lg overflow-hidden ring-2 flex-shrink-0 transition ${i === lightbox ? "ring-white" : "ring-white/20 opacity-60 hover:opacity-100"}`}>
+                <img src={src} alt="" className="w-full h-full object-cover" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
