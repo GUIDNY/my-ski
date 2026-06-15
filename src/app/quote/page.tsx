@@ -1,8 +1,9 @@
 "use client";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import type { Apartment } from "@/types";
 import {
-  IconMountain, IconBed, IconCalendar, IconCheck,
+  IconMountain, IconBed, IconCalendar, IconCheck, IconChevronLeft,
 } from "@/components/Icons";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
@@ -18,7 +19,10 @@ const AI_DISCOUNT = 50;
 
 function QuotePage() {
   const params = useSearchParams();
+  const [apt, setApt] = useState<Apartment | null>(null);
+  const [imgIdx, setImgIdx] = useState(0);
 
+  const apartmentId = params.get("apartment_id") ?? "";
   const apartment = params.get("apartment") ?? "דירה";
   const checkin = params.get("checkin") ?? "";
   const checkout = params.get("checkout") ?? "";
@@ -34,202 +38,219 @@ function QuotePage() {
   const flexExtra = parseInt(params.get("flex_extra") ?? "0");
   const aiDiscount = parseInt(params.get("ai_discount") ?? "0");
   const grandTotal = parseInt(params.get("grand_total") ?? "0");
-  const avgNightly = parseInt(params.get("avg_nightly") ?? "0");
 
-  const today = new Date();
-  const dateStr = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
+  useEffect(() => {
+    if (!apartmentId) return;
+    fetch(`/api/apartments/${apartmentId}`)
+      .then(r => r.json())
+      .then(data => setApt(data))
+      .catch(() => {});
+  }, [apartmentId]);
+
+  const imgs = apt?.images?.length ? apt.images : ["/apt1.jpg", "/apt2.jpg", "/apt3.jpg"];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4" dir="rtl">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-gray-50" dir="rtl">
 
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
-              <IconMountain size={20} className="text-white" />
+      {/* Top Nav */}
+      <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+          <a href="/" className="flex items-center gap-2 font-black text-gray-900">
+            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+              <IconMountain size={16} className="text-white" />
             </div>
-            <h1 className="text-2xl font-black text-gray-900">MySki</h1>
-          </div>
-          <p className="text-gray-500 text-sm">הצעת מחיר ל-{apartment}</p>
+            MySki
+          </a>
+          <span className="text-sm text-gray-600 font-semibold">הצעת מחיר</span>
         </div>
+      </div>
 
-        {/* Quote Card */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200 mb-6">
+      {/* Hero with Images */}
+      {apt && (
+        <div className="relative w-full h-80 md:h-96 bg-gray-200 overflow-hidden">
+          <img
+            src={imgs[imgIdx]}
+            alt={apartment}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.3) 100%)" }} />
 
-          {/* Header Section */}
-          <div className="bg-gradient-to-r from-blue-50 to-blue-100 border-b border-gray-200 p-6">
-            <div className="flex items-start justify-between mb-4 flex-wrap gap-4">
+          {/* Image Counter */}
+          {imgs.length > 1 && (
+            <>
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                {imgs.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setImgIdx(i)}
+                    className={`w-2 h-2 rounded-full transition-all ${i === imgIdx ? "bg-white scale-125" : "bg-white/50 hover:bg-white/80"}`}
+                  />
+                ))}
+              </div>
+
+              {/* Nav Arrows */}
+              <button
+                onClick={() => setImgIdx(i => (i - 1 + imgs.length) % imgs.length)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition-all"
+              >
+                <IconChevronLeft size={18} className="rotate-180" />
+              </button>
+              <button
+                onClick={() => setImgIdx(i => (i + 1) % imgs.length)}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition-all"
+              >
+                <IconChevronLeft size={18} />
+              </button>
+            </>
+          )}
+
+          {/* Title Overlay */}
+          <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+            <p className="text-sm font-semibold opacity-90 mb-1">Val Thorens, France</p>
+            <h1 className="text-4xl font-black">{apartment}</h1>
+          </div>
+        </div>
+      )}
+
+      <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+
+        {/* Booking Details */}
+        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+          <div className="p-6 border-b border-gray-100">
+            <h2 className="text-lg font-black text-gray-900 mb-4">פרטי ההזמנה</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Dates */}
               <div>
-                <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">הצעת מחיר</p>
-                <h2 className="text-2xl font-black text-gray-900">{apartment}</h2>
-                <p className="text-sm text-gray-600 mt-1 flex items-center gap-1">
-                  <IconMountain size={14} className="text-blue-500" />
-                  Val Thorens, France
-                </p>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">תאריכים</p>
+                <p className="text-base font-black text-gray-900">{fmtDate(checkin)} — {fmtDate(checkout)}</p>
+                <p className="text-sm text-gray-600 mt-1">{nights} לילות</p>
               </div>
-              <div className="text-right">
-                <p className="text-xs text-gray-500 mb-1">מתאריך</p>
-                <p className="text-sm font-bold text-gray-800">{dateStr}</p>
-              </div>
-            </div>
 
-            {/* Dates & Guests */}
-            <div className="bg-white rounded-xl p-4 border border-blue-100">
-              <div className="flex items-center gap-2 text-sm text-gray-700 mb-2">
-                <IconCalendar size={14} className="text-blue-500" />
-                <span className="font-semibold">{fmtDate(checkin)} — {fmtDate(checkout)}</span>
+              {/* Guests */}
+              <div>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">הרכב</p>
+                <p className="text-base font-black text-gray-900">{guests} {guests === 1 ? "אדם" : "אנשים"}</p>
               </div>
-              <div className="flex items-center gap-4 text-sm text-gray-600">
-                <span className="flex items-center gap-1">
-                  <span className="font-bold">{nights}</span>
-                  <span>לילות</span>
-                </span>
-                <span className="text-gray-300">·</span>
-                <span className="flex items-center gap-1">
-                  <span className="font-bold">{guests}</span>
-                  <span>{guests === 1 ? "אדם" : "אנשים"}</span>
-                </span>
+
+              {/* Price Per Night */}
+              <div>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">מחיר ממוצע</p>
+                <p className="text-base font-black text-blue-600">€{Math.round(aptTotal / nights)}/לילה</p>
               </div>
             </div>
           </div>
 
-          {/* Pricing Breakdown */}
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-black text-gray-900 mb-4">פירוט מחיר</h3>
-
+          {/* Price Breakdown */}
+          <div className="p-6 bg-gray-50 border-t border-gray-100">
+            <h3 className="text-sm font-black text-gray-900 mb-4 uppercase tracking-wider">פירוט מחיר</h3>
             <div className="space-y-3">
-              {/* Accommodation */}
-              <div className="flex justify-between items-center pb-3 border-b border-gray-100">
-                <span className="text-gray-700">
-                  <span className="font-semibold">לינה</span>
-                  <span className="text-sm text-gray-500 mr-1">× {nights} לילות</span>
-                </span>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-700">לינה × {nights} לילות</span>
                 <span className="font-bold text-gray-900">€{aptTotal.toLocaleString()}</span>
               </div>
-
-              {/* Ski Pass */}
-              {skiPass && (
-                <div className="flex justify-between items-center pb-3 border-b border-gray-100">
-                  <span className="text-gray-700">
-                    <span className="font-semibold">סקי פס</span>
-                    <span className="text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full mr-2">בקרוב</span>
-                  </span>
-                  <span className="text-xs font-semibold text-amber-600">לא כלול בהצעה</span>
-                </div>
-              )}
-
-              {/* Transfer */}
               {transfer && (
-                <div className="flex justify-between items-center pb-3 border-b border-gray-100">
-                  <span className="text-gray-700 font-semibold">הסעה הלוך-חזור</span>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-700">הסעה הלוך-חזור</span>
                   <span className="font-bold text-gray-900">€{TRANSFER_PRICE}</span>
                 </div>
               )}
-
-              {/* Cancellation */}
               {cancel === "flexible" && (
-                <div className="flex justify-between items-center pb-3 border-b border-gray-100">
-                  <span className="text-gray-700">
-                    <span className="font-semibold">מדיניות גמישה</span>
-                    <span className="text-sm text-green-600 mr-1">80% החזר</span>
-                  </span>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-700">מדיניות גמישה × {guests}</span>
                   <span className="font-bold text-gray-900">€{(FLEXIBLE_EXTRA * guests).toLocaleString()}</span>
                 </div>
               )}
-
-              {/* Service */}
               {service === "ai" && (
-                <div className="flex justify-between items-center pb-3 border-b border-gray-100">
-                  <span className="text-gray-700 font-semibold">הנחת AI</span>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-700">הנחת AI × {guests}</span>
                   <span className="font-bold text-indigo-600">−€{(AI_DISCOUNT * guests).toLocaleString()}</span>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Selected Options */}
-          {(skiPass || transfer || cancel !== "none" || service !== "human") && (
-            <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-              <p className="text-xs font-bold text-gray-600 uppercase tracking-wider mb-3">בחירות</p>
-              <div className="flex flex-wrap gap-2">
-                {skiPass && (
-                  <span className="inline-flex items-center gap-1 text-xs bg-white border border-gray-200 rounded-full px-2 py-1">
-                    <IconCheck size={12} className="text-green-500" />
-                    סקי פס
-                  </span>
-                )}
-                {transfer && (
-                  <span className="inline-flex items-center gap-1 text-xs bg-white border border-gray-200 rounded-full px-2 py-1">
-                    <IconCheck size={12} className="text-green-500" />
-                    הסעה הלוך-חזור
-                  </span>
-                )}
-                {cancel === "flexible" && (
-                  <span className="inline-flex items-center gap-1 text-xs bg-white border border-gray-200 rounded-full px-2 py-1">
-                    <IconCheck size={12} className="text-green-500" />
-                    ביטול גמיש
-                  </span>
-                )}
-                {service === "ai" && (
-                  <span className="inline-flex items-center gap-1 text-xs bg-white border border-gray-200 rounded-full px-2 py-1">
-                    <IconCheck size={12} className="text-green-500" />
-                    AI בלבד
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
-
           {/* Total */}
-          <div className="px-6 py-6 bg-gradient-to-br from-gray-900 to-gray-800">
-            <div className="flex items-end justify-between">
-              <div>
-                <p className="text-white/70 text-sm mb-1">סה״כ</p>
-                <p className="text-white text-xs font-semibold">עבור {guests} {guests === 1 ? "אדם" : "אנשים"} · {nights} לילות</p>
-              </div>
-              <div className="text-right">
-                <p className="text-4xl font-black text-white mb-1">€{grandTotal.toLocaleString()}</p>
-                <p className="text-white/60 text-sm">~€{Math.round(grandTotal / nights)} / לילה</p>
-              </div>
+          <div className="p-6 bg-gray-900 text-white flex justify-between items-end">
+            <div>
+              <p className="text-sm opacity-70 mb-1">סה״כ לתשלום</p>
+              <p className="text-xs opacity-60">עבור {guests} {guests === 1 ? "אדם" : "אנשים"} · {nights} לילות</p>
+            </div>
+            <div className="text-right">
+              <p className="text-5xl font-black">€{grandTotal.toLocaleString()}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Add-ons Available */}
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+          <h3 className="text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
+            ➕ תוספות זמינות
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 hover:border-blue-300 transition-colors">
+              <p className="font-semibold text-gray-900">סקי פס</p>
+              <p className="text-sm text-gray-600 mt-1">6 ימים, כל אזור Trois Vallées</p>
+              <p className="text-lg font-black text-blue-600 mt-2">€280</p>
+            </div>
+            <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 hover:border-blue-300 transition-colors">
+              <p className="font-semibold text-gray-900">השכרת ציוד</p>
+              <p className="text-sm text-gray-600 mt-1">סט מלא - רמת פרימיום</p>
+              <p className="text-lg font-black text-blue-600 mt-2">€150</p>
+            </div>
+            <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 hover:border-blue-300 transition-colors">
+              <p className="font-semibold text-gray-900">ביטוח סקי</p>
+              <p className="text-sm text-gray-600 mt-1">כיסוי מלא כולל חילוץ</p>
+              <p className="text-lg font-black text-blue-600 mt-2">€45</p>
+            </div>
+            <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 hover:border-blue-300 transition-colors">
+              <p className="font-semibold text-gray-900">הסעות</p>
+              <p className="text-sm text-gray-600 mt-1">משדה התעופה וחזרה</p>
+              <p className="text-lg font-black text-blue-600 mt-2">€80</p>
             </div>
           </div>
         </div>
 
         {/* Bank Details */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 mb-6">
-          <h3 className="text-lg font-black text-gray-900 mb-4">עלויות התשלום</h3>
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
+          <h3 className="text-lg font-black text-gray-900">💳 דרכי תשלום</h3>
 
-          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 border border-gray-200 space-y-3">
-            <div className="flex justify-between items-start">
-              <span className="text-gray-600 font-medium">בנק</span>
-              <span className="font-semibold text-gray-900 text-right">{process.env.NEXT_PUBLIC_BANK_NAME || "בנק הפועלים"}</span>
+          <div className="space-y-4">
+            {/* Bank Transfer */}
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 border border-gray-200">
+              <p className="font-bold text-gray-900 mb-3">העברה בנקאית</p>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">בנק</span>
+                  <span className="font-semibold text-gray-900">{process.env.NEXT_PUBLIC_BANK_NAME || "בנק הפועלים"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">IBAN</span>
+                  <span className="font-mono font-bold text-gray-900">{process.env.NEXT_PUBLIC_BANK_IBAN || "IL62012673000000026026"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">SWIFT</span>
+                  <span className="font-semibold text-gray-900">{process.env.NEXT_PUBLIC_BANK_SWIFT || "POALILIT"}</span>
+                </div>
+                <div className="flex justify-between pt-2 border-t border-gray-300">
+                  <span className="text-gray-600">בעל חשבון</span>
+                  <span className="font-semibold text-gray-900">{process.env.NEXT_PUBLIC_BANK_ACCOUNT || "MySki Ltd"}</span>
+                </div>
+              </div>
             </div>
-            <div className="flex justify-between items-start">
-              <span className="text-gray-600 font-medium">IBAN</span>
-              <span className="font-mono font-bold text-gray-900 text-right text-sm">{process.env.NEXT_PUBLIC_BANK_IBAN || "IL62012673000000026026"}</span>
-            </div>
-            <div className="flex justify-between items-start">
-              <span className="text-gray-600 font-medium">SWIFT</span>
-              <span className="font-semibold text-gray-900 text-right">{process.env.NEXT_PUBLIC_BANK_SWIFT || "POALILIT"}</span>
-            </div>
-            <div className="flex justify-between items-start pt-3 border-t border-gray-300">
-              <span className="text-gray-600 font-medium">בעל חשבון</span>
-              <span className="font-semibold text-gray-900 text-right">{process.env.NEXT_PUBLIC_BANK_ACCOUNT || "Account Holder"}</span>
+
+            {/* Security Notice */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+              <p className="text-sm text-blue-900">
+                ✓ בעד קבלת ההעברה, אנחנו נאשר את ההזמנה והדירה תהיה שלך
+              </p>
             </div>
           </div>
-
-          <p className="text-xs text-gray-500 mt-4">
-            ✓ בעד קבלת ההעברה, אנחנו נאשר את ההזמנה והדירה תהיה שלך
-          </p>
         </div>
 
         {/* Footer */}
-        <div className="text-center py-4 border-t border-gray-200">
+        <div className="text-center py-6 border-t border-gray-200">
           <p className="text-sm text-gray-600 mb-1">הצעה זו תקפה ל-30 יום</p>
-          <p className="text-xs text-gray-400">
-            MySki © 2026 · Val Thorens
-          </p>
+          <p className="text-xs text-gray-400">MySki © 2026 · Val Thorens</p>
         </div>
 
       </div>
