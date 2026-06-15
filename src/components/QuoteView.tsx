@@ -7,7 +7,8 @@ import {
   IconUsers, IconUser, IconMoon, IconWhatsApp,
 } from "@/components/Icons";
 
-const WHATSAPP_URL = "https://wa.me/message/LRY3FLCSANJCC1";
+// WhatsApp phone in international format (no +, no leading 0). 0547701899 → 972547701899
+const WHATSAPP_PHONE = process.env.NEXT_PUBLIC_WHATSAPP_PHONE || "972547701899";
 
 export type QuoteData = {
   apartmentId: string;
@@ -51,6 +52,9 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const [apt, setApt] = useState<Apartment | null>(null);
   const [imgIdx, setImgIdx] = useState(0);
   const [lightbox, setLightbox] = useState<number | null>(null);
+  const [pageUrl, setPageUrl] = useState("");
+
+  useEffect(() => { setPageUrl(window.location.href); }, []);
 
   useEffect(() => {
     if (!apartmentId) return;
@@ -68,6 +72,24 @@ export default function QuoteView({ q }: { q: QuoteData }) {
     swift:   process.env.NEXT_PUBLIC_BANK_SWIFT   || "POALILIT",
     holder:  process.env.NEXT_PUBLIC_BANK_ACCOUNT || "SKISHARE - GUINDY IDAN & MIZRAHI AMIT",
   };
+
+  /* ── WhatsApp link with pre-filled booking summary ──────── */
+  const waMessage = [
+    "היי! 👋 אני מעוניין/ת בהצעת המחיר הבאה:",
+    "",
+    `🏔️ דירה: ${apartment}`,
+    `📅 תאריכים: ${fmtDate(checkin)} — ${fmtDate(checkout)} (${nights} לילות)`,
+    `👥 אורחים: ${guests}`,
+    transfer ? "🚐 כולל הסעה הלוך-חזור" : null,
+    cancel === "flexible" ? "✅ מדיניות ביטול גמישה" : null,
+    skiPass ? "🎿 מעוניין/ת גם בסקי פס" : null,
+    service === "ai" ? "🤖 ניהול עצמאי (AI)" : null,
+    "",
+    `💰 סה״כ: €${grandTotal.toLocaleString()}`,
+    pageUrl ? `\n🔗 ההצעה: ${pageUrl}` : null,
+  ].filter(Boolean).join("\n");
+
+  const waHref = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(waMessage)}`;
 
   const breakdownRows = (
     <>
@@ -279,7 +301,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             </div>
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
               <div className="divide-y divide-slate-100">{breakdownRows}</div>
-              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
+              <a href={waHref} target="_blank" rel="noopener noreferrer"
                 className="mt-4 flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-bold py-3.5 rounded-xl text-center transition shadow-sm shadow-emerald-600/20">
                 <IconWhatsApp size={20} /> צור קשר עם נציג להזמנה
               </a>
@@ -333,7 +355,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             <p className="text-[11px] text-slate-400 leading-none mb-0.5">סה״כ</p>
             <p className="font-display font-black text-slate-900 text-lg leading-none">€{grandTotal.toLocaleString()}</p>
           </div>
-          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
+          <a href={waHref} target="_blank" rel="noopener noreferrer"
             className="flex-1 flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-bold py-3.5 rounded-xl text-center transition shadow-sm shadow-emerald-600/20">
             <IconWhatsApp size={18} /> צור קשר להזמנה
           </a>
