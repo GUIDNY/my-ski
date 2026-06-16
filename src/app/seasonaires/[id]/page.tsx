@@ -62,9 +62,7 @@ export default function SeasonRentalDetail() {
       <header className="sticky top-0 z-40 bg-white border-b border-slate-100">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
           <a href="/seasonaires" className="text-slate-500 hover:text-slate-900 text-sm transition">→ אזור הסזונרים</a>
-          <a href="/" className="flex items-center gap-2 font-display font-black text-slate-900">SkiShare
-            <span className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center"><IconMountain size={16} className="text-white" /></span>
-          </a>
+          <a href="/"><img src="/skishare-logo.png" alt="SkiShare" className="h-9 w-auto" /></a>
         </div>
       </header>
 

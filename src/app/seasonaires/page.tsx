@@ -83,14 +83,11 @@ export default function SeasonairesPage() {
 
       {/* Hero */}
       <section className="relative h-[440px] bg-slate-900 overflow-hidden">
-        <img src="/apt3.jpg" alt="Season" className="absolute inset-0 w-full h-full object-cover opacity-70" />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-900/40 to-slate-900/50" />
+        <img src="/view.jpg" alt="Val Thorens" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-900/45 to-slate-900/55" />
         <div className="relative max-w-5xl mx-auto px-6 h-full flex flex-col justify-end pb-12 text-white">
-          <a href="/" className="absolute top-6 right-6 flex items-center gap-2 font-display font-black text-white text-lg">
-            SkiShare
-            <svg width="34" height="24" viewBox="0 0 48 32" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 28 L15 11 L21 19" /><path d="M17 23 L29 6 L45 28" />
-            </svg>
+          <a href="/" className="absolute top-6 right-6">
+            <img src="/skishare-logo.png" alt="SkiShare" className="h-12 w-auto" style={{ filter: "brightness(0) invert(1)" }} />
           </a>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-bold tracking-widest uppercase mb-4 w-fit">
             ❄️ אזור הסזונרים

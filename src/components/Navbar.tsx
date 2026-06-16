@@ -39,15 +39,10 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
-        <a href="/" className="flex items-center gap-2.5">
-          <svg width="40" height="28" viewBox="0 0 48 32" fill="none"
-            stroke={scrolled ? "#111" : "white"} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 28 L15 11 L21 19" />
-            <path d="M17 23 L29 6 L45 28" />
-          </svg>
-          <span className="text-xl font-black tracking-tight" style={{ color: scrolled ? "#111" : "white" }}>
-            SkiShare
-          </span>
+        <a href="/" className="flex items-center">
+          <img src="/skishare-logo.png" alt="SkiShare"
+            className="h-11 w-auto transition-all"
+            style={{ filter: scrolled ? "none" : "brightness(0) invert(1)" }} />
         </a>
 
         {/* Center nav */}

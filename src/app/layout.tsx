@@ -17,6 +17,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "SkiShare — Val Thorens",
   description: "הזמן את חופשת הסקי שלך ב-Val Thorens — דירה, סקי פס, הסעות וטיסות",
+  icons: { icon: "/skishare-logo.png" },
 };
 
 export default function RootLayout({
