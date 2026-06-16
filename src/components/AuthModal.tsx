@@ -1,4 +1,5 @@
 "use client";
+import Logo from "@/components/Logo";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase-client";
 
@@ -138,13 +139,8 @@ export default function AuthModal({ onClose, onAuth }: Props) {
 
           {/* Logo */}
           <div className="text-center mb-7">
-            <div className="inline-flex items-center gap-2.5 mb-2">
-              <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center border border-white/15">
-                <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
-                  <path d="M4 24L12 8L20 18L25 12L28 24H4Z" fill="white" />
-                </svg>
-              </div>
-              <span className="text-2xl font-black text-white tracking-tight">SkiShare</span>
+            <div className="inline-flex items-center justify-center mb-2">
+              <Logo className="h-12" white />
             </div>
             <p className="text-white/35 text-[10px] tracking-[0.2em] uppercase">Val Thorens · Trois Vallées</p>
           </div>

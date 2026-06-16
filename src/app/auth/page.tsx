@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase-client";
 import { IconMountain } from "@/components/Icons";
+import Logo from "@/components/Logo";
 
 export default function AuthPage() {
   const router = useRouter();
@@ -41,12 +42,7 @@ export default function AuthPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4" dir="rtl">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <a href="/" className="inline-flex items-center gap-2 font-black text-gray-900 text-xl">
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-              <IconMountain size={20} className="text-white" />
-            </div>
-            SkiShare
-          </a>
+          <a href="/" className="flex items-center"><Logo className="h-9" /></a>
           <p className="text-gray-500 text-sm mt-2">Val Thorens · חבילות סקי מנוהלות</p>
         </div>
 

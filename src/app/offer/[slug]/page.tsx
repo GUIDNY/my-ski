@@ -7,6 +7,7 @@ import {
   IconMountain, IconBed, IconCheck, IconWifi, IconFire,
   IconParking, IconSnowflake, IconChevronLeft, IconMail, IconPhone,
 } from "@/components/Icons";
+import Logo from "@/components/Logo";
 
 const AMENITY_ICONS: Record<string, React.ReactNode> = {
   "WiFi":       <IconWifi size={15} />,
@@ -92,12 +93,7 @@ function OfferPage() {
       {/* Header */}
       <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center gap-3">
-          <a href="/" className="flex items-center gap-2 font-black text-gray-900 hover:text-blue-600 transition-colors">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
-              <IconMountain size={16} className="text-white" />
-            </div>
-            SkiShare
-          </a>
+          <a href="/" className="flex items-center"><Logo className="h-9" /></a>
           <span className="text-gray-200">/</span>
           <span className="text-sm text-gray-700 font-semibold truncate">{apt.name}</span>
         </div>

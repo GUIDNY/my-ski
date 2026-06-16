@@ -8,6 +8,7 @@ import {
   IconMountain, IconCheck, IconStar, IconBed, IconSearch,
 } from "@/components/Icons";
 import SkiCalendar from "@/components/SkiCalendar";
+import Logo from "@/components/Logo";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s + "T12:00:00"); return `${d.getDate()} ${HE_MONTHS[d.getMonth()]}`; };
@@ -231,12 +232,7 @@ function ApartmentsPage() {
       {/* ── Nav ──────────────────────────────────────────────── */}
       <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3 flex-wrap">
-          <a href="/" className="flex items-center gap-2 font-black text-gray-900">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
-              <IconMountain size={16} className="text-white" />
-            </div>
-            SkiShare
-          </a>
+          <a href="/" className="flex items-center"><Logo className="h-9" /></a>
           <span className="text-gray-200">/</span>
           {checkin && checkout ? (
             <button onClick={() => setShowCal(true)}

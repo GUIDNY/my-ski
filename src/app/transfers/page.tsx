@@ -2,6 +2,7 @@
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { IconMountain, IconBus, IconCheck, IconPlane } from "@/components/Icons";
+import Logo from "@/components/Logo";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s + "T12:00:00"); return `${d.getDate()} ${HE_MONTHS[d.getMonth()]}`; };
@@ -185,12 +186,7 @@ function TransfersPage() {
       {/* Nav */}
       <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-3">
-          <a href="/" className="flex items-center gap-2 font-black text-gray-900">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
-              <IconMountain size={16} className="text-white" />
-            </div>
-            SkiShare
-          </a>
+          <a href="/" className="flex items-center"><Logo className="h-9" /></a>
           <span className="text-gray-200">/</span>
           <span className="text-sm text-gray-600 font-semibold flex items-center gap-1.5">
             <IconBus size={14} className="text-blue-500" /> הזמנת הסעה

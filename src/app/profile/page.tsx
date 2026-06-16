@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase-client";
 import type { User } from "@supabase/supabase-js";
 import type { Booking } from "@/types";
 import { IconMountain, IconCalendar, IconUser } from "@/components/Icons";
+import Logo from "@/components/Logo";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s); return `${d.getDate()} ${HE_MONTHS[d.getMonth()]} ${d.getFullYear()}`; };
@@ -56,12 +57,7 @@ export default function ProfilePage() {
       {/* Nav */}
       <div className="bg-white border-b border-gray-100 sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center gap-3">
-          <a href="/" className="flex items-center gap-2 font-black text-gray-900">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <IconMountain size={16} className="text-white" />
-            </div>
-            SkiShare
-          </a>
+          <a href="/" className="flex items-center"><Logo className="h-9" /></a>
           <div className="flex-1" />
           {user && isAdmin(user) && (
             <a href="/admin" className="text-sm font-semibold text-purple-600 hover:underline">ניהול</a>

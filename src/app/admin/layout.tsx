@@ -17,9 +17,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Sidebar */}
         <aside className="w-56 bg-gray-900 min-h-screen flex flex-col fixed right-0 top-0 z-40">
           <div className="px-5 py-6 border-b border-gray-800">
-            <a href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-sm">⛷</div>
-              <span className="text-white font-black text-lg">SkiShare</span>
+            <a href="/" className="flex items-center">
+              <img src="/skishare-logo.png" alt="SkiShare" className="h-10 w-auto" style={{ filter: "brightness(0) invert(1)" }} />
             </a>
             <div className="text-gray-500 text-xs mt-1 mr-10">אזור ניהול</div>
           </div>

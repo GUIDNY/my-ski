@@ -10,6 +10,7 @@ import {
   IconParking, IconBed, IconSnowflake, IconWhatsApp,
 } from "@/components/Icons";
 import { buildWaHref } from "@/lib/whatsapp";
+import Logo from "@/components/Logo";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s + "T12:00:00"); return `${d.getDate()} ${HE_MONTHS[d.getMonth()]}`; };
@@ -272,12 +273,7 @@ function ApartmentPage() {
       {/* ── Top nav ──────────────────────────────────────────── */}
       <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
-          <a href="/" className="flex items-center gap-2 font-black text-gray-900">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
-              <IconMountain size={16} className="text-white" />
-            </div>
-            SkiShare
-          </a>
+          <a href="/" className="flex items-center"><Logo className="h-9" /></a>
           <span className="text-gray-200 text-lg font-light">/</span>
           <a href={`/search?checkin=${checkin}&checkout=${checkout}&guests=${guests}`}
             className="text-sm text-gray-500 hover:text-blue-600 transition-colors">תוצאות חיפוש</a>

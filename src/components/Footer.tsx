@@ -1,3 +1,5 @@
+import Logo from "@/components/Logo";
+
 export default function Footer() {
   return (
     <footer className="bg-white border-t border-gray-100" dir="rtl">
@@ -5,7 +7,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-14">
           {/* Brand */}
           <div className="md:col-span-2">
-            <span className="font-display text-xl font-black text-gray-900 block mb-4">SKISHARE</span>
+            <Logo className="h-11 mb-4" />
             <p className="text-sm text-gray-500 leading-relaxed max-w-xs">
               מובילים את תרבות חופשות הסקי בישראל עם סטנדרטים בינלאומיים של שירות ואיכות.
             </p>

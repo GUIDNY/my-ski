@@ -6,6 +6,7 @@ import {
   IconMountain, IconHome, IconDiamond, IconCheck, IconStar,
   IconCalendar, IconUser, IconSearch, IconBed,
 } from "@/components/Icons";
+import Logo from "@/components/Logo";
 import SkiCalendar from "@/components/SkiCalendar";
 import { getEffectivePrice, calcTotalForRange } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
@@ -186,12 +187,7 @@ function SearchPage() {
       {/* ── Sticky header ─────────────────────────────────── */}
       <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-3 flex-wrap">
-          <a href="/" className="flex items-center gap-2 font-black text-gray-900">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
-              <IconMountain size={16} className="text-white" />
-            </div>
-            SkiShare
-          </a>
+          <a href="/" className="flex-shrink-0"><Logo className="h-9" /></a>
 
           {/* Clickable search pill */}
           <button onClick={() => setDateOpen(o => !o)}
