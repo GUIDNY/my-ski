@@ -43,3 +43,20 @@ export type SkiPass = {
   type: "adult" | "child" | "senior";
   available: boolean;
 };
+
+export type SeasonRental = {
+  id: string;
+  name: string;
+  area: string;
+  beds: number;
+  sleeps: number;
+  price_per_month: number;
+  min_months: number;
+  available_from: string | null;
+  available_to: string | null;
+  images: string[];
+  amenities: string[];
+  description: string;
+  available: boolean;
+  created_at: string;
+};

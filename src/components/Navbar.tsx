@@ -52,13 +52,21 @@ export default function Navbar() {
 
         {/* Center nav */}
         <div className="hidden md:flex items-center gap-1">
-          {["אתרי סקי", "אזורי סקי", "חופשות סקי", "מדריכי סקי"].map(item => (
-            <a key={item} href="#"
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-              style={{ color: scrolled ? "#374151" : "rgba(255,255,255,0.9)" }}>
-              {item}
-            </a>
-          ))}
+          <a href="/apartments"
+            className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            style={{ color: scrolled ? "#374151" : "rgba(255,255,255,0.9)" }}>
+            דירות
+          </a>
+          <a href="/transfers"
+            className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            style={{ color: scrolled ? "#374151" : "rgba(255,255,255,0.9)" }}>
+            הסעות
+          </a>
+          <a href="/seasonaires"
+            className="px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-1"
+            style={{ color: scrolled ? "#1d4ed8" : "white" }}>
+            ❄️ אזור הסזונרים
+          </a>
         </div>
 
         {/* Right side */}
