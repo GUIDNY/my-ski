@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "../globals.css";
 
-export const metadata: Metadata = { title: "MySki — ניהול" };
+export const metadata: Metadata = { title: "SkiShare — ניהול" };
 
 const navLinks = [
   { href: "/admin", label: "📊 דשבורד" },
@@ -18,7 +18,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="px-5 py-6 border-b border-gray-800">
             <a href="/" className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-sm">⛷</div>
-              <span className="text-white font-black text-lg">MySki</span>
+              <span className="text-white font-black text-lg">SkiShare</span>
             </a>
             <div className="text-gray-500 text-xs mt-1 mr-10">אזור ניהול</div>
           </div>

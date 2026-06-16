@@ -6,9 +6,7 @@ import {
   IconTicket, IconSkis, IconBus, IconBank, IconCreditCard,
   IconUsers, IconUser, IconMoon, IconWhatsApp,
 } from "@/components/Icons";
-
-// WhatsApp phone in international format (no +, no leading 0). 0547701899 → 972547701899
-const WHATSAPP_PHONE = process.env.NEXT_PUBLIC_WHATSAPP_PHONE || "972547701899";
+import { buildWaHref } from "@/lib/whatsapp";
 
 export type QuoteData = {
   apartmentId: string;
@@ -74,22 +72,20 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   };
 
   /* ── WhatsApp link with pre-filled booking summary ──────── */
-  const waMessage = [
-    "היי! 👋 אני מעוניין/ת בהצעת המחיר הבאה:",
-    "",
-    `🏔️ דירה: ${apartment}`,
-    `📅 תאריכים: ${fmtDate(checkin)} — ${fmtDate(checkout)} (${nights} לילות)`,
-    `👥 אורחים: ${guests}`,
-    transfer ? "🚐 כולל הסעה הלוך-חזור" : null,
-    cancel === "flexible" ? "✅ מדיניות ביטול גמישה" : null,
-    skiPass ? "🎿 מעוניין/ת גם בסקי פס" : null,
-    service === "ai" ? "🤖 ניהול עצמאי (AI)" : null,
-    "",
-    `💰 סה״כ: €${grandTotal.toLocaleString()}`,
-    pageUrl ? `\n🔗 ההצעה: ${pageUrl}` : null,
-  ].filter(Boolean).join("\n");
-
-  const waHref = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(waMessage)}`;
+  const waHref = buildWaHref({
+    intro: "היי! 👋 אני מעוניין/ת בהצעת המחיר הבאה:",
+    lines: [
+      `🏔️ דירה: ${apartment}`,
+      `📅 תאריכים: ${fmtDate(checkin)} — ${fmtDate(checkout)} (${nights} לילות)`,
+      `👥 אורחים: ${guests}`,
+      transfer ? "🚐 כולל הסעה הלוך-חזור" : null,
+      cancel === "flexible" ? "✅ מדיניות ביטול גמישה" : null,
+      skiPass ? "🎿 מעוניין/ת גם בסקי פס" : null,
+      service === "ai" ? "🤖 ניהול עצמאי (AI)" : null,
+    ],
+    total: grandTotal,
+    pageUrl: pageUrl ? `ההצעה: ${pageUrl}` : undefined,
+  });
 
   const breakdownRows = (
     <>
@@ -169,14 +165,14 @@ export default function QuoteView({ q }: { q: QuoteData }) {
       {/* DESKTOP TOP NAV */}
       <header className="hidden lg:flex sticky top-0 z-50 bg-white border-b border-slate-100 px-8 h-16 items-center justify-between">
         <a href="/" className="flex items-center gap-2 font-display font-black text-slate-900 text-lg">
-          MySki <span className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center"><IconMountain size={16} className="text-white" /></span>
+          SkiShare <span className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center"><IconMountain size={16} className="text-white" /></span>
         </a>
         <span className="text-sm font-semibold text-slate-400">הצעת מחיר אישית · {apartment}</span>
       </header>
 
       {/* MOBILE HEADER */}
       <header className="lg:hidden absolute top-0 inset-x-0 z-30 px-4 py-4 flex items-center justify-between">
-        <a href="/" className="font-display font-black text-white text-lg drop-shadow">MySki</a>
+        <a href="/" className="font-display font-black text-white text-lg drop-shadow">SkiShare</a>
         <div className="flex items-center gap-2">
           <a href="#addons" className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-white text-xs font-semibold"><IconPlus size={13} /> תוספות</a>
           <button onClick={() => setImgIdx(i => (i + 1) % imgs.length)} className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-white text-xs font-semibold"><IconImage size={13} /> תמונות</button>
@@ -237,7 +233,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
           </div>
 
           <p className="flex items-center gap-1.5 justify-center text-xs text-slate-400 pt-2">
-            <IconCheck size={13} className="text-emerald-500" /> הצעה תקפה ל־30 יום · MySki · Val Thorens
+            <IconCheck size={13} className="text-emerald-500" /> הצעה תקפה ל־30 יום · SkiShare · Val Thorens
           </p>
         </div>
       </div>
@@ -336,14 +332,14 @@ export default function QuoteView({ q }: { q: QuoteData }) {
 
         <footer className="bg-slate-100 border-t border-slate-200 py-10 mt-6">
           <div className="max-w-6xl mx-auto px-8 text-center">
-            <a href="/" className="font-display font-black text-blue-600 text-xl">MySki</a>
+            <a href="/" className="font-display font-black text-blue-600 text-xl">SkiShare</a>
             <div className="flex items-center justify-center gap-6 text-sm text-slate-500 mt-4">
               <a href={`mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'skishareteam@gmail.com'}`} className="hover:text-blue-600">צור קשר</a>
               <span>·</span><span>פרטי בנק</span>
               <span>·</span><span>מדיניות פרטיות</span>
               <span>·</span><span>תנאי שימוש</span>
             </div>
-            <p className="text-xs text-slate-400 mt-4">© 2026 MySki Premium Travel · Val Thorens, France</p>
+            <p className="text-xs text-slate-400 mt-4">© 2026 SkiShare Premium Travel · Val Thorens, France</p>
           </div>
         </footer>
       </div>

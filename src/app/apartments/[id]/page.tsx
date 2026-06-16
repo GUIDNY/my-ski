@@ -7,8 +7,9 @@ import type { PricingRule } from "@/lib/pricing";
 import {
   IconMountain, IconSkis, IconBus, IconPlane, IconShield, IconUser, IconBot,
   IconCheck, IconStar, IconCalendar, IconChevronLeft, IconWifi, IconFire,
-  IconParking, IconBed, IconSnowflake,
+  IconParking, IconBed, IconSnowflake, IconWhatsApp,
 } from "@/components/Icons";
+import { buildWaHref } from "@/lib/whatsapp";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s + "T12:00:00"); return `${d.getDate()} ${HE_MONTHS[d.getMonth()]}`; };
@@ -191,21 +192,6 @@ function ApartmentPage() {
   const aiDiscount    = service  === "ai"       ? -(AI_DISCOUNT  * guests) : 0;
   const grandTotal    = aptTotal + skiTotal + trTotal + flexExtra + aiDiscount;
 
-  /* ── Book URL ───────────────────────────────────────────── */
-  const buildBookUrl = () => {
-    const p = new URLSearchParams({
-      apartment_id: id,
-      apartment: apt?.name ?? id,
-      checkin, checkout,
-      guests: String(guests),
-      ski_pass: String(skiPass),
-      transfer: String(transfer),
-      cancel,
-      service,
-    });
-    return `/book?${p}`;
-  };
-
   /* ── Long fallback quote URL (works without DB) ─────────── */
   const buildQuoteUrl = () => {
     const p = new URLSearchParams({
@@ -226,6 +212,21 @@ function ApartmentPage() {
 
   /* ── Pretty slug: apartment name → URL-friendly segment ── */
   const nameSlug = (apt?.name ?? "quote").trim().replace(/\s+/g, "-").replace(/[/?#&]/g, "");
+
+  /* ── WhatsApp booking link with full configuration ──────── */
+  const waBookHref = buildWaHref({
+    intro: "היי! 👋 אני רוצה להזמין את החבילה הבאה:",
+    lines: [
+      `🏔️ דירה: ${apt?.name ?? ""}`,
+      checkin && checkout ? `📅 תאריכים: ${fmtDate(checkin)} — ${fmtDate(checkout)} (${nights} לילות)` : `🗓️ ${nights} לילות`,
+      `👥 אורחים: ${guests}`,
+      transfer ? "🚐 כולל הסעה הלוך-חזור" : null,
+      cancel === "flexible" ? "✅ מדיניות ביטול גמישה" : null,
+      skiPass ? "🎿 מעוניין/ת גם בסקי פס" : null,
+      service === "ai" ? "🤖 ניהול עצמאי (AI)" : null,
+    ],
+    total: grandTotal,
+  });
 
   /* ── Create a short shareable quote link, fall back to long URL ── */
   const handleSendQuote = async () => {
@@ -275,7 +276,7 @@ function ApartmentPage() {
             <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
               <IconMountain size={16} className="text-white" />
             </div>
-            MySki
+            SkiShare
           </a>
           <span className="text-gray-200 text-lg font-light">/</span>
           <a href={`/search?checkin=${checkin}&checkout=${checkout}&guests=${guests}`}
@@ -539,9 +540,9 @@ function ApartmentPage() {
                   </div>
 
                   {/* ── CTA ───────────────────────────────────────── */}
-                  <a href={buildBookUrl()}
-                    className="block w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-center text-base transition-colors shadow-sm">
-                    ← המשך להזמנה
+                  <a href={waBookHref} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-[#25D366] hover:bg-[#1ebe5a] text-white font-black text-center text-base transition-colors shadow-sm">
+                    <IconWhatsApp size={20} /> צור קשר עם נציג להזמנה
                   </a>
 
                   <button onClick={handleSendQuote} disabled={creatingQuote}

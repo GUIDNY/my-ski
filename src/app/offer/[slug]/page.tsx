@@ -96,7 +96,7 @@ function OfferPage() {
             <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
               <IconMountain size={16} className="text-white" />
             </div>
-            MySki
+            SkiShare
           </a>
           <span className="text-gray-200">/</span>
           <span className="text-sm text-gray-700 font-semibold truncate">{apt.name}</span>

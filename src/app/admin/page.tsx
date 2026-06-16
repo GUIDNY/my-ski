@@ -36,7 +36,7 @@ export default async function AdminDashboard() {
     <div>
       <div className="mb-8">
         <h1 className="text-2xl font-black text-gray-900">דשבורד</h1>
-        <p className="text-gray-500 text-sm mt-1">סקירה כללית של MySki</p>
+        <p className="text-gray-500 text-sm mt-1">סקירה כללית של SkiShare</p>
       </div>
 
       {/* Stats */}

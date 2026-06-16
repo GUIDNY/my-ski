@@ -190,7 +190,7 @@ function SearchPage() {
             <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
               <IconMountain size={16} className="text-white" />
             </div>
-            MySki
+            SkiShare
           </a>
 
           {/* Clickable search pill */}

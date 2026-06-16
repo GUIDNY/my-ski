@@ -45,7 +45,7 @@ export default function AuthPage() {
             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
               <IconMountain size={20} className="text-white" />
             </div>
-            MySki
+            SkiShare
           </a>
           <p className="text-gray-500 text-sm mt-2">Val Thorens · חבילות סקי מנוהלות</p>
         </div>
@@ -99,7 +99,7 @@ export default function AuthPage() {
         <p className="text-center text-xs text-gray-400 mt-4">
           בכניסה לאתר אתה מסכים ל
           <a href="/cancellation-policy" className="text-blue-600 hover:underline mx-1">תנאי השירות</a>
-          של MySki
+          של SkiShare
         </p>
       </div>
     </div>

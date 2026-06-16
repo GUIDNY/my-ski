@@ -33,7 +33,7 @@ export default function CancellationPolicy() {
 
           <div className="bg-amber-50 rounded-2xl p-5 border border-amber-200 text-sm text-amber-800">
             <div className="font-bold mb-1">הערה חשובה</div>
-            מדיניות ביטול גמישה כוללת שירות אנושי מלא — לא ניתן לשלבה עם שירות AI בלבד. לשאלות נוספות: info@myski.co.il
+            מדיניות ביטול גמישה כוללת שירות אנושי מלא — לא ניתן לשלבה עם שירות AI בלבד. לשאלות נוספות: skishareteam@gmail.com
           </div>
         </div>
       </div>

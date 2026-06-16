@@ -144,7 +144,7 @@ export default function AuthModal({ onClose, onAuth }: Props) {
                   <path d="M4 24L12 8L20 18L25 12L28 24H4Z" fill="white" />
                 </svg>
               </div>
-              <span className="text-2xl font-black text-white tracking-tight">MY-SKI</span>
+              <span className="text-2xl font-black text-white tracking-tight">SkiShare</span>
             </div>
             <p className="text-white/35 text-[10px] tracking-[0.2em] uppercase">Val Thorens · Trois Vallées</p>
           </div>
@@ -229,7 +229,7 @@ export default function AuthModal({ onClose, onAuth }: Props) {
 
       {/* Footer */}
       <p className="relative z-10 mt-8 text-white/20 text-[10px] tracking-widest uppercase">
-        MY-SKI LUXURY TRAVEL. ALL RIGHTS RESERVED 2024 ©
+        SKISHARE. ALL RIGHTS RESERVED 2024 ©
       </p>
     </div>
   );

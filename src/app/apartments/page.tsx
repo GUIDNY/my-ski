@@ -235,7 +235,7 @@ function ApartmentsPage() {
             <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
               <IconMountain size={16} className="text-white" />
             </div>
-            MySki
+            SkiShare
           </a>
           <span className="text-gray-200">/</span>
           {checkin && checkout ? (

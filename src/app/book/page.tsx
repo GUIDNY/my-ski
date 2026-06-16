@@ -118,7 +118,7 @@ function Confirmation({ bookingId, apt, checkin, checkout, guests, nights, skiPa
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-5">
           {/* Header */}
           <div className="bg-blue-600 px-6 py-4 text-white">
-            <div className="text-sm opacity-80 mb-0.5">MySki · Val Thorens</div>
+            <div className="text-sm opacity-80 mb-0.5">SkiShare · Val Thorens</div>
             <div className="text-xl font-black">{apt?.name ?? "דירה"}</div>
             <div className="text-sm opacity-90 mt-1">{fmtShort(checkin)} — {fmtShort(checkout)} · {nights} לילות · {guests} אנשים</div>
           </div>
@@ -177,7 +177,7 @@ function Confirmation({ bookingId, apt, checkin, checkout, guests, nights, skiPa
         {/* Notes */}
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-sm text-amber-800 mb-4">
           <div className="font-bold mb-1">⏰ הצעת מחיר תקפה ל-24 שעות</div>
-          <div>תוך 24 שעות תקבל אישור מסודר ואישור הזמנה סופי מנציג MySki.</div>
+          <div>תוך 24 שעות תקבל אישור מסודר ואישור הזמנה סופי מנציג SkiShare.</div>
         </div>
 
         {/* Flight suggestion */}
@@ -375,7 +375,7 @@ function BookPage() {
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <IconMountain size={16} className="text-white" />
             </div>
-            MySki
+            SkiShare
           </a>
           <div className="text-sm text-gray-500 flex items-center gap-1.5">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -793,7 +793,7 @@ function BookPage() {
                   <span className="text-xs text-gray-600 leading-relaxed">
                     קראתי ואני מאשר את{" "}
                     <a href="/cancellation-policy" target="_blank" className="text-blue-600 hover:underline">תנאי השירות ומדיניות הביטול</a>
-                    {" "}של MySki
+                    {" "}של SkiShare
                   </span>
                 </label>
 

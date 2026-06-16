@@ -15,7 +15,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "MY-SKI — Val Thorens",
+  title: "SkiShare — Val Thorens",
   description: "הזמן את חופשת הסקי שלך ב-Val Thorens — דירה, סקי פס, הסעות וטיסות",
 };
 

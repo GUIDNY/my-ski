@@ -292,7 +292,7 @@ export default async function Home() {
       <section className="py-24 px-6" style={{ background: "#f7f9fb" }}>
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
-            <span className="text-xs font-bold tracking-widest uppercase text-gray-400 block mb-3">למה MY-SKI</span>
+            <span className="text-xs font-bold tracking-widest uppercase text-gray-400 block mb-3">למה SkiShare</span>
             <h2 className="font-display text-3xl md:text-4xl font-black text-gray-900">שקיפות מלאה. שירות אמיתי.</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">

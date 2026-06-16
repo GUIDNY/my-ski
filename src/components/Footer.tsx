@@ -5,7 +5,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-14">
           {/* Brand */}
           <div className="md:col-span-2">
-            <span className="font-display text-xl font-black text-gray-900 block mb-4">MY-SKI LUXURY TRAVEL</span>
+            <span className="font-display text-xl font-black text-gray-900 block mb-4">SKISHARE</span>
             <p className="text-sm text-gray-500 leading-relaxed max-w-xs">
               מובילים את תרבות חופשות הסקי בישראל עם סטנדרטים בינלאומיים של שירות ואיכות.
             </p>
@@ -43,7 +43,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="pt-8 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4">
           <span className="text-xs font-bold tracking-widest uppercase text-gray-400">
-            © 2026 MY-SKI LUXURY TRAVEL. ALL RIGHTS RESERVED.
+            © 2026 SKISHARE. ALL RIGHTS RESERVED.
           </span>
           <div className="flex gap-6">
             <span className="text-xs text-gray-400">Alpine Zen — Design System</span>

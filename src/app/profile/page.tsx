@@ -60,7 +60,7 @@ export default function ProfilePage() {
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <IconMountain size={16} className="text-white" />
             </div>
-            MySki
+            SkiShare
           </a>
           <div className="flex-1" />
           {user && isAdmin(user) && (
