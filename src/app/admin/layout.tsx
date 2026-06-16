@@ -6,6 +6,7 @@ export const metadata: Metadata = { title: "SkiShare — ניהול" };
 const navLinks = [
   { href: "/admin", label: "📊 דשבורד" },
   { href: "/admin/apartments", label: "🏠 דירות" },
+  { href: "/admin/season-rentals", label: "❄️ דירות סזונרים" },
   { href: "/admin/bookings", label: "📋 הזמנות" },
 ];
 
