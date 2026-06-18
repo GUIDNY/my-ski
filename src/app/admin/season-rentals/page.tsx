@@ -201,8 +201,8 @@ export default function SeasonRentalsAdmin() {
           <div className="text-gray-500">אין דירות סזונרים עדיין — הוסף את הראשונה</div>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
+          <table className="w-full text-sm min-w-[680px]">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
                 {["תמונה", "שם", "אזור", "חדרים", "מחיר/חודש", "מינ׳", "זמין", "פעולות"].map(h => (

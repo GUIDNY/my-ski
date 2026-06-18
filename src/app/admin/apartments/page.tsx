@@ -240,8 +240,8 @@ export default function ApartmentsAdmin() {
           <div className="text-gray-500">אין דירות עדיין — הוסף את הראשונה</div>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
+          <table className="w-full text-sm min-w-[600px]">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
                 {["תמונה", "שם", "סוג", "חדרים", "מחיר/לילה", "זמין", "פעולות"].map(h => (

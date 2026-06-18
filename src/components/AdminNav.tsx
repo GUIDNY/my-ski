@@ -16,14 +16,14 @@ const links = [
   { href: "/admin/bookings", label: "הזמנות", icon: <IconCalendar size={18} /> },
 ];
 
-export default function AdminNav() {
+export default function AdminNav({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   return (
     <nav className="flex-1 py-4 px-3 space-y-1">
       {links.map((link) => {
         const active = link.href === "/admin" ? pathname === "/admin" : pathname.startsWith(link.href);
         return (
-          <a key={link.href} href={link.href}
+          <a key={link.href} href={link.href} onClick={onNavigate}
             className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all
               ${active
                 ? "bg-blue-600 text-white shadow-sm shadow-blue-600/30"
