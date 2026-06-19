@@ -309,6 +309,35 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* ── SEASONAIRES ──────────────────────────────────── */}
+      <section className="relative py-24 px-6 overflow-hidden">
+        <img src="/view.jpg" alt="" className="absolute inset-0 w-full h-full object-cover object-center" />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(120deg, rgba(8,18,40,0.92) 0%, rgba(8,18,40,0.75) 55%, rgba(8,18,40,0.6) 100%)" }} />
+        <div className="relative z-10 max-w-5xl mx-auto">
+          <div className="max-w-2xl text-right">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-white text-xs font-bold tracking-widest uppercase mb-5">
+              ❄️ אזור הסזונרים
+            </span>
+            <h2 className="font-display text-4xl md:text-5xl font-black text-white leading-tight mb-5">
+              עושים עונה שלמה על ההרים?
+            </h2>
+            <p className="text-white/75 text-base md:text-lg leading-relaxed mb-4">
+              הצטרפו לקהילת הסזונרים של SkiShare — אנשים שבאים לחיות עונת סקי מלאה ב-Val Thorens.
+              דירות לטווח ארוך (חודשיים+), סקי פס עונתי (€1,070), עבודה עם דרכון אירופאי, וקהילה תומכת מכל העולם.
+            </p>
+            <ul className="text-white/70 text-sm space-y-1.5 mb-8">
+              <li>🏔️ לוח דירות לטווח ארוך — מתעדכן כל הזמן</li>
+              <li>💬 קבוצת וואטסאפ של הקהילה</li>
+              <li>🎿 סקי פס עונתי · עבודה על ההר · אירועים</li>
+            </ul>
+            <a href="/seasonaires"
+              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-display font-black px-8 py-4 rounded-xl text-base transition-colors shadow-lg shadow-blue-900/40">
+              לחצו כאן לקהילת הסזונרים ←
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* ── CTA ──────────────────────────────────────────── */}
       <section className="relative py-28 px-6 overflow-hidden">
         <img src="/hero-ski.jpg" alt="" className="absolute inset-0 w-full h-full object-cover object-center" />
