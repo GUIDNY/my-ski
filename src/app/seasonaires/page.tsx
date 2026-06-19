@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import type { SeasonRental } from "@/types";
 import {
-  IconBed, IconUsers, IconCalendar, IconWhatsApp,
+  IconBed, IconUsers, IconCalendar, IconWhatsApp, IconSnowflake, IconParty, IconBriefcase,
 } from "@/components/Icons";
 import { buildWaHref } from "@/lib/whatsapp";
 
@@ -62,11 +62,11 @@ function SectionHead({ kicker, title, sub }: { kicker: string; title: string; su
   );
 }
 
-function ComingSoon({ emoji, title, desc }: { emoji: string; title: string; desc: string }) {
+function ComingSoon({ icon, tint, title, desc }: { icon: React.ReactNode; tint: string; title: string; desc: string }) {
   return (
     <div className="relative bg-white rounded-2xl border border-dashed border-slate-200 p-8 text-center overflow-hidden">
       <span className="absolute top-4 left-4 text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full">בקרוב · Coming soon</span>
-      <div className="text-5xl mb-4 opacity-80">{emoji}</div>
+      <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl ${tint} mb-4`}>{icon}</div>
       <h3 className="font-display text-xl font-black text-slate-800 mb-2">{title}</h3>
       <p className="text-slate-500 text-sm max-w-md mx-auto leading-relaxed">{desc}</p>
     </div>
@@ -101,7 +101,7 @@ export default function SeasonairesPage() {
             <img src="/skishare-logo.png" alt="SkiShare" className="h-12 w-auto" style={{ filter: "brightness(0) invert(1)" }} />
           </a>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-bold tracking-widest uppercase mb-4 w-fit">
-            ❄️ קהילת הסזונרים
+            <IconSnowflake size={13} /> קהילת הסזונרים
           </div>
           <h1 className="font-display text-5xl md:text-6xl font-black leading-none">אזור הסזונרים</h1>
           <p className="text-white/80 text-lg mt-4 max-w-2xl">
@@ -110,50 +110,21 @@ export default function SeasonairesPage() {
         </div>
       </section>
 
-      {/* Community hub — big tiles */}
-      <section className="max-w-5xl mx-auto px-6 -mt-12 relative z-10">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-
-          {/* WhatsApp group */}
-          <a href={WHATSAPP_GROUP_URL} target="_blank" rel="noopener noreferrer"
-            className="group bg-[#25D366] rounded-2xl p-5 shadow-lg shadow-emerald-600/20 hover:-translate-y-1 transition-transform text-white flex flex-col">
-            <IconWhatsApp size={30} />
-            <p className="font-display font-black text-lg mt-4 leading-tight">קבוצת וואטסאפ</p>
-            <p className="text-white/85 text-xs mt-1">הצטרפו לקהילה</p>
-            <span className="mt-3 text-xs font-bold inline-flex items-center gap-1">הצטרפו עכשיו ←</span>
-          </a>
-
-          {/* Apartments board */}
-          <a href="#board"
-            className="group bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:-translate-y-1 hover:shadow-md transition-all flex flex-col">
-            <span className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"><IconBed size={24} /></span>
-            <p className="font-display font-black text-lg mt-4 text-slate-900 leading-tight">לוח דירות</p>
-            <p className="text-slate-400 text-xs mt-1">לטווח ארוך · חודשי</p>
-            <span className="mt-3 text-xs font-bold text-blue-600">לצפייה ←</span>
-          </a>
-
-          {/* Events */}
-          <a href="#events"
-            className="group bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:-translate-y-1 hover:shadow-md transition-all flex flex-col">
-            <span className="w-12 h-12 rounded-xl bg-violet-50 flex items-center justify-center text-2xl">🎉</span>
-            <p className="font-display font-black text-lg mt-4 text-slate-900 leading-tight">אירועים</p>
-            <p className="text-slate-400 text-xs mt-1">מפגשים וטריפים</p>
-            <span className="mt-3 text-xs font-bold text-amber-600">בקרוב</span>
-          </a>
-
-          {/* Jobs */}
-          <a href="#jobs"
-            className="group bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:-translate-y-1 hover:shadow-md transition-all flex flex-col">
-            <span className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-2xl">💼</span>
-            <p className="font-display font-black text-lg mt-4 text-slate-900 leading-tight">עבודות</p>
-            <p className="text-slate-400 text-xs mt-1">משרות על ההר</p>
-            <span className="mt-3 text-xs font-bold text-amber-600">בקרוב</span>
-          </a>
-        </div>
+      {/* WhatsApp community banner */}
+      <section className="max-w-5xl mx-auto px-6 -mt-10 relative z-10">
+        <a href={WHATSAPP_GROUP_URL} target="_blank" rel="noopener noreferrer"
+          className="group flex items-center gap-4 bg-[#25D366] rounded-2xl p-5 md:p-6 shadow-lg shadow-emerald-600/20 hover:-translate-y-0.5 transition-transform text-white">
+          <span className="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center flex-shrink-0"><IconWhatsApp size={28} /></span>
+          <div className="flex-1 min-w-0">
+            <p className="font-display font-black text-lg md:text-xl leading-tight">הצטרפו לקבוצת הוואטסאפ של הסזונרים</p>
+            <p className="text-white/85 text-sm mt-0.5">דירות, טיפים, אירועים ועבודות — כל הקהילה במקום אחד</p>
+          </div>
+          <span className="font-bold flex-shrink-0 group-hover:-translate-x-1 transition-transform">הצטרפו ←</span>
+        </a>
       </section>
 
       {/* Long-term apartments board */}
-      <section id="board" className="max-w-5xl mx-auto px-6 pt-16 scroll-mt-6">
+      <section id="board" className="max-w-5xl mx-auto px-6 pt-14 scroll-mt-6">
         <SectionHead kicker="לוח דירות" title="דירות לטווח ארוך" sub="חודשיים ומעלה · מחיר חודשי · מתעדכן כל הזמן" />
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -171,16 +142,18 @@ export default function SeasonairesPage() {
       </section>
 
       {/* Events — coming soon */}
-      <section id="events" className="max-w-5xl mx-auto px-6 pt-16 scroll-mt-6">
+      <section id="events" className="max-w-5xl mx-auto px-6 pt-14 scroll-mt-6">
         <SectionHead kicker="קהילה" title="אירועים קרובים" />
-        <ComingSoon emoji="🎉" title="אירועי קהילה בדרך"
+        <ComingSoon icon={<IconParty size={28} className="text-violet-600" />} tint="bg-violet-50"
+          title="אירועי קהילה בדרך"
           desc="מפגשי סזונרים, ערבי אפטר-סקי, טריפים וחוויות משותפות. הצטרפו לקבוצת הוואטסאפ כדי להיות הראשונים לדעת." />
       </section>
 
       {/* Jobs — coming soon */}
-      <section id="jobs" className="max-w-5xl mx-auto px-6 pt-16 pb-16 scroll-mt-6">
+      <section id="jobs" className="max-w-5xl mx-auto px-6 pt-14 pb-16 scroll-mt-6">
         <SectionHead kicker="עבודה על ההר" title="חיפוש עבודות" />
-        <ComingSoon emoji="💼" title="לוח דרושים לסזונרים בדרך"
+        <ComingSoon icon={<IconBriefcase size={28} className="text-amber-600" />} tint="bg-amber-50"
+          title="לוח דרושים לסזונרים בדרך"
           desc="משרות באתר הסקי — מסעדות, בארים, חנויות ציוד, בתי מלון ועוד. עם דרכון אירופאי אפשר לעבוד ולממן את העונה. הלוח ייפתח בקרוב." />
       </section>
 
