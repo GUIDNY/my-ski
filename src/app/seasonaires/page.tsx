@@ -123,6 +123,20 @@ export default function SeasonairesPage() {
         </a>
       </section>
 
+      {/* Game banner */}
+      <section className="max-w-5xl mx-auto px-6 pt-4">
+        <a href="/game"
+          className="group flex items-center gap-4 rounded-2xl p-5 md:p-6 text-white overflow-hidden relative transition-transform hover:-translate-y-0.5"
+          style={{ background: "linear-gradient(110deg,#1e3a8a,#2563eb)" }}>
+          <span className="text-4xl flex-shrink-0">🎿</span>
+          <div className="flex-1 min-w-0">
+            <p className="font-display font-black text-lg md:text-xl leading-tight">סקישר ראן — אספו מטבעות 🪙</p>
+            <p className="text-white/80 text-sm mt-0.5">שחקו, אספו מטבעות והחליפו אותם במתנות בחנות הקהילה</p>
+          </div>
+          <span className="font-bold flex-shrink-0 group-hover:-translate-x-1 transition-transform">שחקו ←</span>
+        </a>
+      </section>
+
       {/* Long-term apartments board */}
       <section id="board" className="max-w-5xl mx-auto px-6 pt-14 scroll-mt-6">
         <SectionHead kicker="לוח דירות" title="דירות לטווח ארוך" sub="חודשיים ומעלה · מחיר חודשי · מתעדכן כל הזמן" />
