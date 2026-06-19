@@ -11,8 +11,15 @@ const COIN_KEY = "skishare_coins";
 
 const laneX = (i: number) => ROAD_X + (ROAD_W * (i + 0.5)) / LANES;
 
-type Entity = { lane: number; y: number; type: "coin" | "tree" | "rock"; done?: boolean };
+type Entity = { lane: number; y: number; type: "coin" | "tree" | "rock" | "snow"; done?: boolean };
 type SideTree = { side: 0 | 1; y: number; s: number };
+
+const ASSETS: Record<string, string> = {
+  player: "/kenney_tiny-ski/Tiles/tile_0010.png",
+  tree:   "/kenney_platformer-art-winter/Tiles/pineSapling.png",
+  rock:   "/kenney_platformer-art-winter/Tiles/rock.png",
+  snow:   "/kenney_platformer-art-winter/Tiles/snowBall.png",
+};
 
 const SHOP = [
   { id: "socks", name: "גרבי SkiShare", cost: 1500, icon: "🧦", desc: "גרביים חמים לעונה" },
@@ -101,6 +108,16 @@ export default function GamePage() {
     speed: 200, spawnT: 0, dist: 0, coins: 0, raf: 0, last: 0, running: false,
   });
 
+  // preload sprite images
+  const sprites = useRef<Record<string, HTMLImageElement>>({});
+  useEffect(() => {
+    Object.entries(ASSETS).forEach(([k, src]) => {
+      const img = new Image();
+      img.src = src;
+      sprites.current[k] = img;
+    });
+  }, []);
+
   useEffect(() => {
     const v = Number(localStorage.getItem(COIN_KEY) || 0);
     setWallet(Number.isFinite(v) ? v : 0);
@@ -151,7 +168,8 @@ export default function GamePage() {
       s.spawnT = Math.max(0.4, 0.8 - s.dist / 12000);
       const lane = Math.floor(Math.random() * LANES);
       const isCoin = Math.random() < 0.34;            // fewer coins
-      s.entities.push({ lane, y: -40, type: isCoin ? "coin" : (Math.random() < 0.5 ? "tree" : "rock") });
+      const obs = (["tree", "rock", "snow"] as const)[Math.floor(Math.random() * 3)];
+      s.entities.push({ lane, y: -40, type: isCoin ? "coin" : obs });
     }
     for (const e of s.entities) e.y += s.speed * dt;
 
@@ -189,17 +207,42 @@ export default function GamePage() {
     for (let i = 1; i < LANES; i++) { const x = ROAD_X + (ROAD_W * i) / LANES; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
     ctx.setLineDash([]);
 
+    // sprite helper (falls back to vector drawing until the image loads)
+    const sp = sprites.current;
+    const ok = (k: string) => sp[k]?.complete && sp[k].naturalWidth > 0;
+    const blit = (k: string, x: number, y: number, size: number) => {
+      ctx.drawImage(sp[k], x - size / 2, y - size / 2, size, size);
+    };
+
     // side forest
-    for (const d of s.sides) drawTree(ctx, d.side === 0 ? ROAD_X * 0.5 : ROAD_X + ROAD_W + ROAD_X * 0.5, d.y, d.s);
+    for (const d of s.sides) {
+      const x = d.side === 0 ? ROAD_X * 0.5 : ROAD_X + ROAD_W + ROAD_X * 0.5;
+      if (ok("tree")) blit("tree", x, d.y, 46 * d.s); else drawTree(ctx, x, d.y, d.s);
+    }
 
     // entities
     for (const e of s.entities) {
-      if (e.type === "coin") drawCoin(ctx, laneX(e.lane), e.y, t);
-      else if (e.type === "tree") drawTree(ctx, laneX(e.lane), e.y, 1);
-      else drawRock(ctx, laneX(e.lane), e.y);
+      const x = laneX(e.lane);
+      if (e.type === "coin") { drawCoin(ctx, x, e.y, t); continue; }
+      if (ok(e.type)) blit(e.type, x, e.y, e.type === "tree" ? 54 : 46);
+      else if (e.type === "tree") drawTree(ctx, x, e.y, 1);
+      else drawRock(ctx, x, e.y);
     }
-    // player
-    drawSkier(ctx, s.px, PLAYER_Y, s.tilt);
+
+    // player (pixel-art skier — crisp scaling, tilts into turns)
+    if (ok("player")) {
+      ctx.save();
+      ctx.imageSmoothingEnabled = false;
+      ctx.translate(s.px, PLAYER_Y - 4);
+      ctx.rotate(s.tilt * 0.2);
+      // shadow
+      ctx.fillStyle = "rgba(15,23,42,0.18)";
+      ctx.beginPath(); ctx.ellipse(0, 26, 17, 5, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.drawImage(sp.player, -24, -24, 48, 48);
+      ctx.restore();
+    } else {
+      drawSkier(ctx, s.px, PLAYER_Y, s.tilt);
+    }
 
     s.raf = requestAnimationFrame(loop);
   }, [endGame]);
