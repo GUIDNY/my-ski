@@ -6,8 +6,8 @@ import {
 } from "@/components/Icons";
 import { buildWaHref } from "@/lib/whatsapp";
 
-// Community WhatsApp group — TODO: replace with the real chat.whatsapp.com invite link
-const WHATSAPP_GROUP_URL = "https://wa.me/972547701899";
+// Community WhatsApp group invite
+const WHATSAPP_GROUP_URL = "https://chat.whatsapp.com/HBxs0bCitS4FYxSSKlSlsF?mode=ac_t";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const fmtDate = (s: string | null) => {

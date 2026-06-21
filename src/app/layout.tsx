@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat, Inter } from "next/font/google";
 import "./globals.css";
+import MobileTabBar from "@/components/MobileTabBar";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -52,7 +53,10 @@ export default function RootLayout({
       lang="he"
       className={`${montserrat.variable} ${inter.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <MobileTabBar />
+      </body>
     </html>
   );
 }
