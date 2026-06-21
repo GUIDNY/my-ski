@@ -132,9 +132,9 @@ export default async function Home() {
             כל מה שאתה צריך נמצא כאן
           </p>
           <SearchWidget />
-          <button className="flex items-center gap-2.5 px-6 py-3 rounded-full text-white text-sm font-medium transition-all hover:bg-white/20" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.25)" }}>
-            ✨ תכנון חכם — בנה את החבילה שלך ←
-          </button>
+          <a href="/seasonaires" className="flex items-center gap-2.5 px-6 py-3 rounded-full text-white text-sm font-bold transition-all hover:bg-white/20" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.25)" }}>
+            ❄️ אזור הסזונרים ←
+          </a>
         </div>
       </section>
 
