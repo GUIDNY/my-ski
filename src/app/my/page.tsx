@@ -321,17 +321,17 @@ function MyOrder() {
 
       <main className="md:mr-64 max-w-5xl mx-auto px-5 py-8 space-y-10">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row-reverse sm:items-end justify-between gap-4">
-          <div className="text-right">
-            <p className="text-[#43474f]">שלום, {name} 👋</p>
-            <h1 className="font-display text-4xl font-black tracking-tight" style={{ color: C.primary }}>האזור האישי שלי</h1>
-          </div>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="text-center px-4"><div className="font-display text-2xl font-black" style={{ color: C.accent }}>{orders.length}</div><div className="text-xs text-[#43474f]">הזמנות</div></div>
-            <div className="text-center px-4 border-r border-[#c3c6d0]/40"><div className="font-display text-2xl font-black" style={{ color: C.accent }}>{saved.length}</div><div className="text-xs text-[#43474f]">שמורות</div></div>
             <a href="/apartments" className="text-white px-5 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:opacity-90 transition active:scale-95" style={{ background: C.primary }}>
               <Ico d={ICONS.add} /> הזמנה חדשה
             </a>
+            <div className="text-center px-4"><div className="font-display text-2xl font-black" style={{ color: C.accent }}>{orders.length}</div><div className="text-xs text-[#43474f]">הזמנות</div></div>
+            <div className="text-center px-4 border-r border-[#c3c6d0]/40"><div className="font-display text-2xl font-black" style={{ color: C.accent }}>{saved.length}</div><div className="text-xs text-[#43474f]">שמורות</div></div>
+          </div>
+          <div className="text-right">
+            <p className="text-[#43474f]">שלום, {name} 👋</p>
+            <h1 className="font-display text-4xl font-black tracking-tight" style={{ color: C.primary }}>האזור האישי שלי</h1>
           </div>
         </div>
 
