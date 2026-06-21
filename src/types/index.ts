@@ -44,6 +44,28 @@ export type SkiPass = {
   available: boolean;
 };
 
+export type Order = {
+  id: string;
+  code: string;
+  apartment_id: string | null;
+  apartment_name: string;
+  area: string;
+  checkin: string | null;
+  checkout: string | null;
+  guests: number;
+  nights: number;
+  ski_pass: boolean;
+  transfer: boolean;
+  cancel: string;
+  service: string;
+  total_eur: number;
+  status: "awaiting" | "hold" | "approved" | "cancelled";
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  created_at: string;
+};
+
 export type SeasonRental = {
   id: string;
   name: string;

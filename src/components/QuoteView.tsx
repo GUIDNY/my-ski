@@ -61,10 +61,21 @@ export default function QuoteView({ q }: { q: QuoteData }) {
     if (!agreed) return;
     setPaying(true);
     try {
+      // 1) create an order record (gets a personal-area code)
+      const orderRes = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          apartment_id: apartmentId, apartment, checkin, checkout, guests, nights,
+          ski_pass: skiPass, transfer, cancel, service, grand_total: grandTotal,
+        }),
+      });
+      const order = await orderRes.json();
+      // 2) create the PayPlus link, carrying the order code so the callback can match it
       const res = await fetch("/api/payplus/create-link", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: grandTotal, description: `${apartment} · ${nights} לילות` }),
+        body: JSON.stringify({ amount: grandTotal, description: `${apartment} · ${nights} לילות`, order_code: order.code }),
       });
       const data = await res.json();
       if (data.url) { window.location.href = data.url; return; }

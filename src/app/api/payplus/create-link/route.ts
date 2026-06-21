@@ -67,6 +67,7 @@ export async function POST(req: NextRequest) {
     refURL_cancel: `${origin}/pay/failure`,
     refURL_callback: `${origin}/api/payplus/callback`,
     more_info: desc,
+    ...(b.order_code ? { more_info_1: String(b.order_code) } : {}),
     customer: {
       customer_name: b.name || undefined,
       email: b.email || undefined,
