@@ -50,26 +50,26 @@ const ICONS = {
 };
 
 function SideLink({ icon, label, href, active, onClick }: { icon: string; label: string; href?: string; active?: boolean; onClick?: () => void }) {
-  const cls = `flex flex-row-reverse items-center gap-3 px-4 py-3 rounded-xl transition-all w-full text-right ${active ? "bg-[#64a8fe] text-[#003c70] font-bold" : "text-[#43474f] hover:bg-[#dce9ff]"}`;
+  const cls = `flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full text-right ${active ? "bg-[#64a8fe] text-[#003c70] font-bold" : "text-[#43474f] hover:bg-[#dce9ff]"}`;
   const inner = <><Ico d={icon} fill={active} /><span className="text-[16px]">{label}</span></>;
   return onClick ? <button onClick={onClick} className={cls}>{inner}</button> : <a href={href} className={cls}>{inner}</a>;
 }
 
-function OrderCard({ o }: { o: OrderView }) {
+function OrderCard({ o, onMore }: { o: OrderView; onMore?: (o: OrderView) => void }) {
   const d = daysUntil(o.checkin);
   const approved = o.status === "approved";
   const img = o.apartment?.images?.[0] ?? "/view.jpg";
   return (
     <div className="rounded-2xl overflow-hidden bg-white border border-[#c3c6d0]/40 shadow-[0_4px_20px_rgba(14,53,102,0.05)] group hover:-translate-y-1 transition-all duration-300">
-      <div className="flex flex-col sm:flex-row-reverse h-full">
+      <div className="flex flex-col sm:flex-row h-full">
         <div className="relative sm:w-2/5 h-44 sm:h-auto">
           <img src={img} alt={o.apartment_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-          <span className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm backdrop-blur"
+          <span className="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm backdrop-blur"
             style={{ background: "rgba(255,255,255,0.92)", color: approved ? "#0e3566" : "#92400e" }}>
             <Ico d={approved ? ICONS.check : ICONS.cal} /> {approved ? "מאושר" : "ממתין לאישור"}
           </span>
           {d != null && d >= 0 && (
-            <span className="absolute bottom-3 left-3 bg-[#0e3566]/90 text-white rounded-xl px-3 py-1.5 text-center backdrop-blur">
+            <span className="absolute bottom-3 right-3 bg-[#0e3566]/90 text-white rounded-xl px-3 py-1.5 text-center backdrop-blur">
               <span className="font-display text-lg font-black leading-none">{d}</span>
               <span className="text-[10px] block opacity-80">{d === 0 ? "היום!" : "ימים"}</span>
             </span>
@@ -85,9 +85,12 @@ function OrderCard({ o }: { o: OrderView }) {
               <Row icon={ICONS.pay} text={`€${Number(o.total_eur).toLocaleString()}`} bold />
             </div>
           </div>
-          <div className="flex items-center justify-between pt-4 mt-3 border-t border-gray-100">
-            <span className="text-xs font-mono text-gray-400">קוד {o.code}</span>
-            {approved && <span className="text-emerald-600 text-xs font-bold flex items-center gap-1"><Ico d={ICONS.check} /> שולם</span>}
+          <div className="flex items-center justify-between pt-4 mt-3 border-t border-gray-100 gap-2">
+            <button onClick={() => onMore?.(o)} className="text-sm font-bold px-3 py-1.5 rounded-lg border border-[#c3c6d0]/60 hover:bg-[#eff4ff] transition" style={{ color: C.primary }}>מידע נוסף</button>
+            <div className="flex items-center gap-2">
+              {approved && <span className="text-emerald-600 text-xs font-bold flex items-center gap-1"><Ico d={ICONS.check} /> שולם</span>}
+              <span className="text-xs font-mono text-gray-400">קוד {o.code}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -95,8 +98,64 @@ function OrderCard({ o }: { o: OrderView }) {
   );
 }
 const Row = ({ icon, text, bold }: { icon: string; text: string; bold?: boolean }) => (
-  <div className={`flex flex-row-reverse items-center gap-2 ${bold ? "font-bold" : "text-[#43474f]"}`} style={bold ? { color: C.primary } : {}}>
+  <div className={`flex items-center gap-2 ${bold ? "font-bold" : "text-[#43474f]"}`} style={bold ? { color: C.primary } : {}}>
     <Ico d={icon} /><span className="text-[15px]">{text}</span>
+  </div>
+);
+
+function OrderModal({ o, onClose }: { o: OrderView; onClose: () => void }) {
+  const approved = o.status === "approved";
+  const img = o.apartment?.images?.[0] ?? "/view.jpg";
+  const addons = [
+    { label: "סקי פס", on: o.ski_pass },
+    { label: "העברות (טרנספר)", on: o.transfer },
+  ];
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={onClose} dir="rtl">
+      <div className="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+        <div className="relative h-44">
+          <img src={img} alt={o.apartment_name} className="w-full h-full object-cover rounded-t-3xl" />
+          <button onClick={onClose} className="absolute top-3 left-3 w-9 h-9 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow text-gray-700">✕</button>
+          <span className="absolute bottom-3 right-3 px-3 py-1 rounded-full text-xs font-bold shadow-sm" style={{ background: "rgba(255,255,255,0.92)", color: approved ? "#0e3566" : "#92400e" }}>
+            {approved ? "✓ מאושר ושולם" : "ממתין לאישור"}
+          </span>
+        </div>
+        <div className="p-6 text-right">
+          <h3 className="font-display text-2xl font-black" style={{ color: C.primary }}>{o.apartment_name}</h3>
+          <p className="text-[#43474f] text-sm mb-5">{o.area}</p>
+
+          <div className="grid grid-cols-2 gap-3 mb-5">
+            <Info label="צ׳ק-אין" value={fmt(o.checkin)} />
+            <Info label="צ׳ק-אאוט" value={fmt(o.checkout)} />
+            <Info label="אורחים" value={`${o.guests}`} />
+            <Info label="לילות" value={`${o.nights}`} />
+          </div>
+
+          <p className="font-bold text-sm mb-2" style={{ color: C.primary }}>תוספות בהזמנה</p>
+          <div className="space-y-2 mb-5">
+            {addons.map(a => (
+              <div key={a.label} className="flex items-center justify-between bg-[#f8f9ff] rounded-xl px-4 py-2.5">
+                <span className="text-sm text-[#43474f]">{a.label}</span>
+                <span className={`text-sm font-bold ${a.on ? "text-emerald-600" : "text-gray-300"}`}>{a.on ? "✓ כלול" : "לא כלול"}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between rounded-xl px-4 py-3.5 text-white" style={{ background: C.primary }}>
+            <span className="font-bold">סה״כ ששולם</span>
+            <span className="font-display text-2xl font-black">€{Number(o.total_eur).toLocaleString()}</span>
+          </div>
+
+          <p className="text-center text-xs text-gray-400 mt-4">קוד הזמנה: <span className="font-mono">{o.code}</span></p>
+        </div>
+      </div>
+    </div>
+  );
+}
+const Info = ({ label, value }: { label: string; value: string }) => (
+  <div className="bg-[#f8f9ff] rounded-xl px-4 py-3">
+    <p className="text-xs text-gray-400 mb-0.5">{label}</p>
+    <p className="font-bold text-sm" style={{ color: C.primary }}>{value}</p>
   </div>
 );
 
@@ -125,11 +184,10 @@ function SavedCard({ s, onRemove }: { s: Saved; onRemove: (id: string) => void }
   );
 }
 
-function SectionHead({ icon, title, muted }: { icon: string; title: string; muted?: boolean }) {
+function SectionHead({ title, muted }: { icon?: string; title: string; muted?: boolean }) {
   return (
-    <div className="flex flex-row-reverse items-center gap-3 mb-5 border-b border-[#c3c6d0]/40 pb-3">
-      <span style={{ color: muted ? "#43474f" : C.primary }}><Ico d={icon} fill /></span>
-      <h2 className="font-display text-2xl font-black" style={{ color: muted ? "#43474f" : C.primary }}>{title}</h2>
+    <div className="mb-5 border-b border-[#c3c6d0]/40 pb-3">
+      <h2 className="font-display text-2xl font-black text-right" style={{ color: muted ? "#43474f" : C.primary }}>{title}</h2>
     </div>
   );
 }
@@ -144,6 +202,7 @@ function MyOrder() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState<number | null>(null);
+  const [modalOrder, setModalOrder] = useState<OrderView | null>(null);
 
   const loadMine = useCallback(async (u: User) => {
     const [o, s] = await Promise.all([
@@ -225,7 +284,8 @@ function MyOrder() {
             <SkierAvatar size={64} />
             <div><p className="text-[#43474f] text-sm">ההזמנה שלך</p><h1 className="font-display text-xl font-black" style={{ color: C.primary }}>{single.apartment_name}</h1></div>
           </div>
-          <OrderCard o={single} />
+          <OrderCard o={single} onMore={setModalOrder} />
+          {modalOrder && <OrderModal o={modalOrder} onClose={() => setModalOrder(null)} />}
           <div className="rounded-2xl p-5 text-center" style={{ background: "#e5eeff", border: "1px solid #d3e4fe" }}>
             <p className="text-sm mb-3" style={{ color: C.primary }}>רוצה לשמור את ההזמנה ולגשת אליה תמיד? התחבר/הירשם עם המייל שלך.</p>
             <a href="/auth" className="inline-block text-white font-bold px-6 py-2.5 rounded-xl transition" style={{ background: C.primary }}>התחברות / הרשמה</a>
@@ -243,12 +303,9 @@ function MyOrder() {
 
       {/* Desktop sidebar */}
       <aside className="fixed top-0 right-0 h-screen w-64 z-40 bg-white border-l border-[#c3c6d0]/30 shadow-xl hidden md:flex flex-col py-8 px-4 pt-24">
-        <div className="mb-8 px-2 flex flex-row-reverse items-center gap-3">
-          <SkierAvatar size={48} />
-          <div className="text-right min-w-0">
-            <p className="font-bold truncate" style={{ color: C.primary }}>{name}</p>
-            <p className="text-[#43474f] text-xs truncate">{user!.email}</p>
-          </div>
+        <div className="mb-8 px-2 text-right">
+          <p className="font-bold truncate text-lg" style={{ color: C.primary }}>{name}</p>
+          <p className="text-[#43474f] text-xs truncate" dir="ltr">{user!.email}</p>
         </div>
         <nav className="flex-1 space-y-1.5">
           <SideLink icon={ICONS.dash} label="לוח בקרה" active />
@@ -280,14 +337,14 @@ function MyOrder() {
         {/* Orders */}
         {orders.length > 0 && (
           <section>
-            <SectionHead icon={ICONS.cal} title="ההזמנות שלי" />
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">{orders.map(o => <OrderCard key={o.code} o={o} />)}</div>
+            <SectionHead title="ההזמנות שלי" />
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">{orders.map(o => <OrderCard key={o.code} o={o} onMore={setModalOrder} />)}</div>
           </section>
         )}
 
         {/* Saved */}
         <section>
-          <SectionHead icon={ICONS.compass} title="החופשות השמורות שלי ❤️" muted={saved.length === 0} />
+          <SectionHead title="החופשות השמורות שלי ❤️" muted={saved.length === 0} />
           {saved.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">{saved.map(s => <SavedCard key={s.id} s={s} onRemove={removeSaved} />)}</div>
           ) : (
@@ -321,6 +378,8 @@ function MyOrder() {
       <a href={wa} target="_blank" rel="noopener noreferrer" className="fixed bottom-24 left-6 md:bottom-8 md:left-8 w-14 h-14 rounded-full flex items-center justify-center shadow-2xl z-40 hover:scale-110 active:scale-95 transition-transform text-white" style={{ background: C.accent }}>
         <IconWhatsApp size={26} />
       </a>
+
+      {modalOrder && <OrderModal o={modalOrder} onClose={() => setModalOrder(null)} />}
     </div>
   );
 }
