@@ -1,4 +1,5 @@
 import { createServerClient } from "@/lib/supabase-server";
+import { blockDatesForOrder } from "@/lib/inventory";
 import { NextRequest, NextResponse } from "next/server";
 
 // Captures (charges) a held J5 deposit via PayPlus, then marks the order
@@ -35,8 +36,9 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // 2) mark approved + fire confirmation email
+  // 2) mark approved + reserve dates + fire confirmation email
   const { data: updated } = await db.from("orders").update({ status: "approved" }).eq("id", order_id).select().single();
+  if (updated) await blockDatesForOrder(db, updated);
 
   const hook = process.env.N8N_WEBHOOK_URL;
   if (hook && updated) {

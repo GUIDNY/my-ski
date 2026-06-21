@@ -1,4 +1,5 @@
 import { createServerClient } from "@/lib/supabase-server";
+import { blockDatesForOrder } from "@/lib/inventory";
 import { NextRequest, NextResponse } from "next/server";
 
 // PayPlus server-to-server callback (IPN). State machine:
@@ -42,6 +43,8 @@ export async function POST(req: NextRequest) {
           const { data } = await db.from("orders").update(patch).eq("id", existing.id).select().single();
           order = data;
         } else { order = existing; }
+        // deposit taken → reserve the dates on the calendar
+        if (sendEmail && order) await blockDatesForOrder(db, order);
       }
     } catch { /* ignore */ }
   }
