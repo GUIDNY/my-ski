@@ -11,6 +11,7 @@ import {
 } from "@/components/Icons";
 import { buildWaHref } from "@/lib/whatsapp";
 import CardPaymentButton from "@/components/CardPaymentButton";
+import SaveTripButton from "@/components/SaveTripButton";
 import Logo from "@/components/Logo";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
@@ -551,6 +552,10 @@ function ApartmentPage() {
                     className="block w-full py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-800 font-bold text-center text-sm transition-colors disabled:opacity-60">
                     {creatingQuote ? "יוצר הצעה…" : "📋 שלח הצעת מחיר"}
                   </button>
+
+                  <SaveTripButton apartmentId={id} checkin={checkin} checkout={checkout} guests={guests}
+                    label="שמור לחופשות שלי"
+                    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-gray-200 bg-white hover:bg-red-50 hover:border-red-200 text-gray-700 font-bold text-center text-sm transition-colors" />
 
                   <p className="text-center text-xs text-gray-400">
                     {cancel === "flexible" ? "80% החזר עד 48 שעות לפני" : "לא ניתן לביטול לאחר ההזמנה"}

@@ -74,7 +74,7 @@ export default function Navbar() {
             </a>
           )}
           {user ? (
-            <a href="/profile"
+            <a href="/my"
               className="flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm font-semibold transition-all"
               style={{
                 borderColor: scrolled ? "#d1d5db" : "rgba(255,255,255,0.4)",
