@@ -63,6 +63,8 @@ export type Order = {
   customer_name: string;
   customer_email: string;
   customer_phone: string;
+  payplus_transaction_uid?: string | null;
+  amount_ils?: number | null;
   created_at: string;
 };
 

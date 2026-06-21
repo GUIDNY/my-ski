@@ -24,22 +24,26 @@ export default function OrdersAdmin() {
   };
   useEffect(() => { load(); }, []);
 
-  const setStatus = async (o: Order, status: string) => {
-    if (status === "approved") {
-      if (!o.customer_email) {
-        alert("⚠️ אין מייל ללקוח בהזמנה הזו — לא יישלח אישור. (כנראה הזמנת בדיקה ישנה.)");
-        return;
-      }
-      if (!confirm(`לאשר את ההזמנה של ${o.customer_name || o.code}?\nיישלח מייל אישור עם קוד אישי אל: ${o.customer_email}`)) return;
-    }
+  const approve = async (o: Order) => {
+    if (!o.customer_email) { alert("⚠️ אין מייל ללקוח בהזמנה — לא יישלח אישור."); return; }
+    const charges = !!o.payplus_transaction_uid;
+    const msg = charges
+      ? `לחייב את הפיקדון ולאשר את ההזמנה של ${o.customer_name || o.code}?\nהכרטיס יחויב בפועל ויישלח מייל אישור אל: ${o.customer_email}`
+      : `לאשר את ההזמנה של ${o.customer_name || o.code}? (אין פיקדון מקושר — רק אישור + מייל)\nמייל יישלח אל: ${o.customer_email}`;
+    if (!confirm(msg)) return;
     setBusy(o.id);
-    const res = await fetch(`/api/orders/${o.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
+    const res = await fetch("/api/payplus/capture", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ order_id: o.id }) });
+    const j = await res.json().catch(() => ({}));
     setBusy(null);
-    if (status === "approved") {
-      if (res.ok) alert(`✓ ההזמנה אושרה. מייל אישור נשלח אל ${o.customer_email}`);
-      else alert("שגיאה באישור ההזמנה. נסה שוב.");
-    }
+    if (res.ok) alert(`✓ ${charges ? "הפיקדון חויב ו" : ""}ההזמנה אושרה. מייל אישור נשלח אל ${o.customer_email}`);
+    else alert(`שגיאה: ${j.error || "לא הצלחנו לאשר"}`);
     load();
+  };
+
+  const setStatus = async (o: Order, status: string) => {
+    setBusy(o.id);
+    await fetch(`/api/orders/${o.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
+    setBusy(null); load();
   };
 
   const remove = async (o: Order) => {
@@ -80,9 +84,9 @@ export default function OrdersAdmin() {
                 </div>
                 <div className="flex gap-2 flex-shrink-0">
                   {o.status !== "approved" && (
-                    <button onClick={() => setStatus(o, "approved")} disabled={busy === o.id}
+                    <button onClick={() => approve(o)} disabled={busy === o.id}
                       className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-bold text-sm px-4 py-2 rounded-xl transition">
-                      {busy === o.id ? "מאשר…" : "אשר ושלח מייל"}
+                      {busy === o.id ? "מעבד…" : (o.payplus_transaction_uid ? "אשר וחייב פיקדון" : "אשר ושלח מייל")}
                     </button>
                   )}
                   {o.status !== "cancelled" && (

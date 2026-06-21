@@ -20,37 +20,33 @@ export async function POST(req: NextRequest) {
   const origin = req.headers.get("origin") || `https://${req.headers.get("host")}`;
   const hook = process.env.N8N_WEBHOOK_URL;
 
-  // explicit capture signal from PayPlus (charge), if present in the payload
-  const typeStr = String(t.transaction_type || t.type || t.method || "").toLowerCase();
-  const looksCaptured = /charge|חיוב|captur|commit/.test(typeStr);
-
   let order: Record<string, unknown> | null = null;
-  let event: "received" | "approved" = "received";
+  let sendEmail = false;
 
   if (orderCode) {
     try {
       const db = createServerClient();
       const { data: existing } = await db.from("orders").select("*").eq("code", orderCode).single();
-
       if (existing) {
-        if (existing.status === "approved") {
-          return NextResponse.json({ ok: true }); // already done — ignore duplicate IPNs
-        }
-        // capture event = order already on hold OR PayPlus says it's a charge
-        event = existing.status === "hold" || looksCaptured ? "approved" : "received";
-
-        const patch: Record<string, unknown> = { status: event === "approved" ? "approved" : "hold" };
-        if (email) patch.customer_email = email;
-        if (name) patch.customer_name = name;
-        if (phone) patch.customer_phone = phone;
-        if (txUid) patch.payplus_transaction_uid = txUid;
-        const { data } = await db.from("orders").update(patch).eq("id", existing.id).select().single();
-        order = data;
+        // record the deposit transaction once; first time → 'hold' + "received" email.
+        // duplicate IPNs (or after approval) are ignored. Approval+charge is done from admin.
+        const patch: Record<string, unknown> = {};
+        if (existing.status === "awaiting") { patch.status = "hold"; sendEmail = true; }
+        if (email && !existing.customer_email) patch.customer_email = email;
+        if (name && !existing.customer_name) patch.customer_name = name;
+        if (phone && !existing.customer_phone) patch.customer_phone = phone;
+        if (txUid && !existing.payplus_transaction_uid) patch.payplus_transaction_uid = txUid;
+        const ils = Number(t.amount);
+        if (ils > 0 && !existing.amount_ils) patch.amount_ils = ils;
+        if (Object.keys(patch).length) {
+          const { data } = await db.from("orders").update(patch).eq("id", existing.id).select().single();
+          order = data;
+        } else { order = existing; }
       }
     } catch { /* ignore */ }
   }
 
-  if (hook) {
+  if (hook && sendEmail) {
     const o = order || {};
     try {
       await fetch(hook, {
@@ -58,7 +54,7 @@ export async function POST(req: NextRequest) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           source: "payplus",
-          type: event, // "received" or "approved"
+          type: "received",
           order_code: orderCode,
           order: order ? {
             code: o.code, customer_email: o.customer_email, customer_name: o.customer_name,
