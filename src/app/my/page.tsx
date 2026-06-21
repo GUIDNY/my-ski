@@ -13,9 +13,11 @@ type OrderView = {
   ski_pass: boolean; transfer: boolean; total_eur: number; status: string; customer_name: string;
   apartment?: { images?: string[] } | null;
 };
+type Apt = { id: string; name: string; type: string; images: string[]; price_per_night: number; beds: number; baths: number; sqm: number };
 type Saved = {
   id: string; checkin: string | null; checkout: string | null; guests: number;
-  apartment: { id: string; name: string; type: string; images: string[]; price_per_night: number; beds: number; baths: number; sqm: number } | null;
+  apartment: Apt | null;
+  extra_apartment?: Apt | null;
 };
 
 const HE = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
@@ -163,22 +165,29 @@ const Info = ({ label, value }: { label: string; value: string }) => (
 function SavedCard({ s, onRemove }: { s: Saved; onRemove: (id: string) => void }) {
   const a = s.apartment;
   if (!a) return null;
-  const q = s.checkin && s.checkout ? `?checkin=${s.checkin}&checkout=${s.checkout}&guests=${s.guests}` : "";
+  const b = s.extra_apartment;
+  const dates = s.checkin && s.checkout ? `${s.checkin}&checkout=${s.checkout}&guests=${s.guests}` : "";
+  const href = b
+    ? `/combo?a=${a.id}&b=${b.id}${dates ? `&checkin=${dates}` : ""}`
+    : `/apartments/${a.id}${dates ? `?checkin=${dates}` : ""}`;
+  const price = b ? a.price_per_night + b.price_per_night : a.price_per_night;
   return (
     <div className="group bg-white rounded-2xl border border-[#c3c6d0]/40 hover:shadow-lg transition overflow-hidden flex flex-col">
-      <div className="relative h-40 overflow-hidden">
-        <img src={a.images?.[0] ?? "/view.jpg"} alt={a.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+      <div className="relative h-40 overflow-hidden flex">
+        <img src={a.images?.[0] ?? "/view.jpg"} alt={a.name} className={`${b ? "w-1/2" : "w-full"} h-full object-cover group-hover:scale-105 transition-transform duration-500`} />
+        {b && <img src={b.images?.[0] ?? "/view.jpg"} alt={b.name} className="w-1/2 h-full object-cover group-hover:scale-105 transition-transform duration-500" />}
+        {b && <span className="absolute top-2 right-2 bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">חבילה משולבת</span>}
         <button onClick={() => onRemove(s.id)} title="הסר מהשמורים"
           className="absolute top-2 left-2 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-red-500 flex items-center justify-center shadow">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="#ef4444"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
         </button>
       </div>
       <div className="p-4 flex flex-col flex-1 text-right">
-        <h3 className="font-display font-black" style={{ color: C.primary }}>{a.name}</h3>
+        <h3 className="font-display font-black" style={{ color: C.primary }}>{b ? `${a.name} + ${b.name}` : a.name}</h3>
         <p className="text-xs text-gray-400 mt-0.5">{s.checkin && s.checkout ? `${fmtShort(s.checkin)}–${fmtShort(s.checkout)} · ${s.guests} אורחים` : "ללא תאריכים"}</p>
         <div className="mt-auto flex items-end justify-between pt-3">
-          <span className="font-display text-lg font-black" style={{ color: C.primary }}>€{a.price_per_night.toLocaleString()}<span className="text-xs font-medium text-gray-400">/לילה</span></span>
-          <a href={`/apartments/${a.id}${q}`} className="text-white text-sm font-bold px-4 py-2 rounded-xl transition" style={{ background: C.accent }}>הזמן עכשיו ←</a>
+          <span className="font-display text-lg font-black" style={{ color: C.primary }}>€{price.toLocaleString()}<span className="text-xs font-medium text-gray-400">/לילה</span></span>
+          <a href={href} className="text-white text-sm font-bold px-4 py-2 rounded-xl transition" style={{ background: C.accent }}>הזמן עכשיו ←</a>
         </div>
       </div>
     </div>

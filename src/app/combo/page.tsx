@@ -5,6 +5,7 @@ import type { Apartment } from "@/types";
 import { calcTotalForRange, getEffectivePrice } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
 import CardPaymentButton from "@/components/CardPaymentButton";
+import SaveTripButton from "@/components/SaveTripButton";
 import { buildWaHref } from "@/lib/whatsapp";
 import { IconMountain, IconUser, IconBed, IconCheck, IconWhatsApp, IconStar, IconSkis, IconBus, IconPlane, IconShield, IconBot } from "@/components/Icons";
 import Logo from "@/components/Logo";
@@ -298,6 +299,9 @@ function ComboInner() {
                 className="block w-full py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-800 font-bold text-center text-sm transition-colors">
                 {copied ? "✓ הקישור הועתק" : "📋 שלח הצעת מחיר (העתק קישור)"}
               </button>
+              <SaveTripButton apartmentId={a.id} extraApartmentId={b.id} checkin={checkin} checkout={checkout} guests={guests}
+                label="שמור לחופשות שלי"
+                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-gray-200 bg-white hover:bg-red-50 hover:border-red-200 text-gray-700 font-bold text-center text-sm transition-colors" />
               <p className="text-center text-xs text-gray-400">הזמנה אחת לשתי הדירות · תשלום מאובטח PayPlus</p>
             </div>
           </div>

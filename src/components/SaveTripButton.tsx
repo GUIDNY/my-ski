@@ -4,8 +4,8 @@ import { supabase } from "@/lib/supabase-client";
 
 // Heart button — saves an apartment (+ optional dates) to the user's personal area.
 export default function SaveTripButton({
-  apartmentId, checkin, checkout, guests, className, label,
-}: { apartmentId: string; checkin?: string; checkout?: string; guests?: number; className?: string; label?: string }) {
+  apartmentId, extraApartmentId, checkin, checkout, guests, className, label,
+}: { apartmentId: string; extraApartmentId?: string; checkin?: string; checkout?: string; guests?: number; className?: string; label?: string }) {
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -20,7 +20,7 @@ export default function SaveTripButton({
     }
     await fetch("/api/saved", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: session.user.id, apartment_id: apartmentId, checkin, checkout, guests }),
+      body: JSON.stringify({ user_id: session.user.id, apartment_id: apartmentId, extra_apartment_id: extraApartmentId, checkin, checkout, guests }),
     });
     setSaved(true); setBusy(false);
   };
