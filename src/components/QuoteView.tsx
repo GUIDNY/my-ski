@@ -52,8 +52,27 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const [imgIdx, setImgIdx] = useState(0);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const [pageUrl, setPageUrl] = useState("");
+  const [paying, setPaying] = useState(false);
 
   useEffect(() => { setPageUrl(window.location.href); }, []);
+
+  const payByCard = async () => {
+    setPaying(true);
+    try {
+      const res = await fetch("/api/payplus/create-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: grandTotal, description: `${apartment} · ${nights} לילות` }),
+      });
+      const data = await res.json();
+      if (data.url) { window.location.href = data.url; return; }
+      alert("התשלום בכרטיס עדיין לא פעיל. אפשר לסגור בוואטסאפ 🙏");
+    } catch {
+      alert("שגיאה ביצירת התשלום. נסו שוב או דברו איתנו בוואטסאפ.");
+    } finally {
+      setPaying(false);
+    }
+  };
 
   useEffect(() => {
     if (!apartmentId) return;
@@ -296,11 +315,15 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             </div>
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
               <div className="divide-y divide-slate-100">{breakdownRows}</div>
+              <button onClick={payByCard} disabled={paying}
+                className="mt-4 flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-display font-bold py-3.5 rounded-xl text-center transition shadow-sm shadow-blue-600/20">
+                <IconCreditCard size={20} /> {paying ? "מעביר לתשלום…" : "תשלום מאובטח בכרטיס"}
+              </button>
               <a href={waHref} target="_blank" rel="noopener noreferrer"
-                className="mt-4 flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-bold py-3.5 rounded-xl text-center transition shadow-sm shadow-emerald-600/20">
-                <IconWhatsApp size={20} /> צור קשר עם נציג להזמנה
+                className="mt-2 flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-bold py-3.5 rounded-xl text-center transition shadow-sm shadow-emerald-600/20">
+                <IconWhatsApp size={20} /> צור קשר עם נציג
               </a>
-              <p className="text-center text-xs text-slate-400 mt-3">נציג ישראלי יחזור אליך בוואטסאפ לסגירת ההזמנה</p>
+              <p className="text-center text-xs text-slate-400 mt-3">תשלום מאובטח · PayPlus · או סגירה בוואטסאפ</p>
             </div>
           </aside>
 
