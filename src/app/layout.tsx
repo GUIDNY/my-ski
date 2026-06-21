@@ -15,9 +15,31 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://skisharebook.com"),
   title: "SkiShare — Val Thorens",
-  description: "הזמן את חופשת הסקי שלך ב-Val Thorens — דירה, סקי פס, הסעות וטיסות",
-  icons: { icon: "/skishare-logo.png" },
+  description: "חופשות וסקי בוואל טורנס — דירות, סקי פס, הסעות, ואזור הסזונרים. SkiShare.",
+  icons: {
+    icon: [
+      { url: "/favicon.png", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+  openGraph: {
+    type: "website",
+    siteName: "SkiShare",
+    url: "https://skisharebook.com",
+    title: "SkiShare — חופשות סקי בוואל טורנס",
+    description: "דירות, סקי פס, הסעות ואזור הסזונרים — חופשת הסקי המושלמת ב-Val Thorens.",
+    locale: "he_IL",
+    images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "SkiShare · Val Thorens" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SkiShare — חופשות סקי בוואל טורנס",
+    description: "דירות, סקי פס, הסעות ואזור הסזונרים ב-Val Thorens.",
+    images: ["/og.jpg"],
+  },
 };
 
 export default function RootLayout({
