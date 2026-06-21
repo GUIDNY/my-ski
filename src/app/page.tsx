@@ -86,15 +86,6 @@ const steps = [
   },
 ];
 
-const features = [
-  { title: "הנקודה הגבוהה ביותר", desc: "2,300 מ׳ — שלג מובטח מנובמבר עד מאי" },
-  { title: "חבילה מודולרית", desc: "שלם רק על מה שרוצה, הוסף ותסיר בקלות" },
-  { title: "ביטוח מותאם", desc: "סקי, ביטול, רפואי — עם או בלי נציג" },
-  { title: "שירות בעברית", desc: "צוות ישראלי זמין לפני, במהלך ואחרי" },
-  { title: "תשלום גמיש", desc: "כרטיס, העברה, או תשלומים ללא ריבית" },
-  { title: "ביטול חינם", desc: "מדיניות ביטול שקופה עד 30 יום לפני" },
-];
-
 /* apartments fetched server-side below */
 
 /* ── Tag helper ───────────────────────────────────────────── */
@@ -177,40 +168,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ── LUXURY MID-PAGE ──────────────────────────────── */}
-      <section className="py-20 px-6" style={{ background: "#f7f9fb" }}>
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-10 items-center">
-          <div className="w-full md:w-3/5 rounded-xl overflow-hidden shadow-2xl">
-            {/* Desktop image */}
-            <img
-              src="/chalet-interior.jpg"
-              alt="יוקרה בכל פרט"
-              className="hidden md:block w-full h-[500px] object-cover hover:scale-[1.03] transition-transform duration-700"
-            />
-            {/* Mobile image — portrait-friendly ski shot */}
-            <img
-              src="/hero-ski.jpg"
-              alt="Val Thorens"
-              className="block md:hidden w-full h-72 object-cover object-top"
-            />
-          </div>
-          <div className="w-full md:w-2/5 md:pr-10">
-            <h2 className="font-display text-3xl md:text-4xl font-black text-gray-900 mb-6">
-              גמישות במחירים נוחים
-            </h2>
-            <p className="text-lg text-gray-500 leading-relaxed mb-8">
-              אצלנו תוכלו לבחור חופשה בוואל טורנס באיזה תאריכים שתרצו, עם מחירים נוחים ועם רשות לסגור מה שתרצו באופן עצמאי.
-            </p>
-            <div className="flex items-center gap-4 py-4 border-t border-b border-gray-100">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-              <span className="text-xs font-bold tracking-widest uppercase text-gray-900">בלעדיות מובטחת ב-Val Thorens</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* ── FLIGHTS ──────────────────────────────────────── */}
       <section className="py-20 px-6" style={{ background: "#f7f9fb", borderTop: "1px solid #e5e7eb" }}>
         <div className="max-w-3xl mx-auto">
@@ -284,27 +241,6 @@ export default async function Home() {
                 </a>
               );
             })}
-          </div>
-        </div>
-      </section>
-
-      {/* ── WHY US ───────────────────────────────────────── */}
-      <section className="py-24 px-6" style={{ background: "#f7f9fb" }}>
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <span className="text-xs font-bold tracking-widest uppercase text-gray-400 block mb-3">למה SkiShare</span>
-            <h2 className="font-display text-3xl md:text-4xl font-black text-gray-900">שקיפות מלאה. שירות אמיתי.</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {features.map((f, i) => (
-              <div key={i} className="p-8 rounded-xl bg-white border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center mb-5">
-                  <span className="text-white text-sm font-black">{String(i + 1).padStart(2, "0")}</span>
-                </div>
-                <h3 className="font-display font-black text-gray-900 mb-2">{f.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>
