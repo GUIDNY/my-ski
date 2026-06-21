@@ -25,10 +25,21 @@ export default function OrdersAdmin() {
   useEffect(() => { load(); }, []);
 
   const setStatus = async (o: Order, status: string) => {
-    if (status === "approved" && !confirm(`לאשר את ההזמנה של ${o.customer_name || o.code}? יישלח מייל אישור עם קוד לאזור האישי.`)) return;
+    if (status === "approved") {
+      if (!o.customer_email) {
+        alert("⚠️ אין מייל ללקוח בהזמנה הזו — לא יישלח אישור. (כנראה הזמנת בדיקה ישנה.)");
+        return;
+      }
+      if (!confirm(`לאשר את ההזמנה של ${o.customer_name || o.code}?\nיישלח מייל אישור עם קוד אישי אל: ${o.customer_email}`)) return;
+    }
     setBusy(o.id);
-    await fetch(`/api/orders/${o.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
-    setBusy(null); load();
+    const res = await fetch(`/api/orders/${o.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
+    setBusy(null);
+    if (status === "approved") {
+      if (res.ok) alert(`✓ ההזמנה אושרה. מייל אישור נשלח אל ${o.customer_email}`);
+      else alert("שגיאה באישור ההזמנה. נסה שוב.");
+    }
+    load();
   };
 
   const remove = async (o: Order) => {
