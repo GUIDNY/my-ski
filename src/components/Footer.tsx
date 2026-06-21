@@ -15,11 +15,16 @@ export default function Footer() {
 
           {/* Explore */}
           <div>
-            <h5 className="text-xs font-bold tracking-widest uppercase text-gray-900 mb-6">Explore</h5>
+            <h5 className="text-xs font-bold tracking-widest uppercase text-gray-900 mb-6">מידע ותקנון</h5>
             <ul className="flex flex-col gap-3.5">
-              {["תנאי שירות", "מדיניות פרטיות", "מדיניות ביטול", "צור קשר"].map((item) => (
-                <li key={item}>
-                  <a href="#" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">{item}</a>
+              {[
+                { label: "תקנון, הזמנות וביטולים", href: "/terms" },
+                { label: "מדיניות פרטיות", href: "/privacy" },
+                { label: "הצהרת נגישות", href: "/accessibility" },
+                { label: "צור קשר", href: "mailto:skishareteam@gmail.com" },
+              ].map((item) => (
+                <li key={item.href}>
+                  <a href={item.href} className="text-sm text-gray-500 hover:text-gray-900 transition-colors">{item.label}</a>
                 </li>
               ))}
             </ul>

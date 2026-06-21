@@ -53,10 +53,12 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const [lightbox, setLightbox] = useState<number | null>(null);
   const [pageUrl, setPageUrl] = useState("");
   const [paying, setPaying] = useState(false);
+  const [agreed, setAgreed] = useState(false);
 
   useEffect(() => { setPageUrl(window.location.href); }, []);
 
   const payByCard = async () => {
+    if (!agreed) return;
     setPaying(true);
     try {
       const res = await fetch("/api/payplus/create-link", {
@@ -315,8 +317,19 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             </div>
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
               <div className="divide-y divide-slate-100">{breakdownRows}</div>
-              <button onClick={payByCard} disabled={paying}
-                className="mt-4 flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-display font-bold py-3.5 rounded-xl text-center transition shadow-sm shadow-blue-600/20">
+
+              {/* required terms approval before payment */}
+              <label className="flex items-start gap-2 mt-4 cursor-pointer">
+                <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 flex-shrink-0 accent-blue-600" />
+                <span className="text-xs text-slate-500 leading-relaxed">
+                  קראתי ואני מאשר/ת את <a href="/terms" target="_blank" className="text-blue-600 font-semibold underline">התקנון ומדיניות הביטולים</a>.
+                  המחירים מוצגים ב-€ והחיוב בפועל בש״ח לפי שער המרה.
+                </span>
+              </label>
+
+              <button onClick={payByCard} disabled={paying || !agreed}
+                className="mt-3 flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-display font-bold py-3.5 rounded-xl text-center transition shadow-sm shadow-blue-600/20">
                 <IconCreditCard size={20} /> {paying ? "מעביר לתשלום…" : "תשלום מאובטח בכרטיס"}
               </button>
               <a href={waHref} target="_blank" rel="noopener noreferrer"
