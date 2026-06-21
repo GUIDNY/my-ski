@@ -8,6 +8,7 @@ import {
 } from "@/components/Icons";
 import { buildWaHref } from "@/lib/whatsapp";
 import Logo from "@/components/Logo";
+import CardPaymentButton from "@/components/CardPaymentButton";
 
 export type QuoteData = {
   apartmentId: string;
@@ -52,40 +53,8 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const [imgIdx, setImgIdx] = useState(0);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const [pageUrl, setPageUrl] = useState("");
-  const [paying, setPaying] = useState(false);
-  const [agreed, setAgreed] = useState(false);
 
   useEffect(() => { setPageUrl(window.location.href); }, []);
-
-  const payByCard = async () => {
-    if (!agreed) return;
-    setPaying(true);
-    try {
-      // 1) create an order record (gets a personal-area code)
-      const orderRes = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          apartment_id: apartmentId, apartment, checkin, checkout, guests, nights,
-          ski_pass: skiPass, transfer, cancel, service, grand_total: grandTotal,
-        }),
-      });
-      const order = await orderRes.json();
-      // 2) create the PayPlus link, carrying the order code so the callback can match it
-      const res = await fetch("/api/payplus/create-link", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: grandTotal, description: `${apartment} · ${nights} לילות`, order_code: order.code }),
-      });
-      const data = await res.json();
-      if (data.url) { window.location.href = data.url; return; }
-      alert("התשלום בכרטיס עדיין לא פעיל. אפשר לסגור בוואטסאפ 🙏");
-    } catch {
-      alert("שגיאה ביצירת התשלום. נסו שוב או דברו איתנו בוואטסאפ.");
-    } finally {
-      setPaying(false);
-    }
-  };
 
   useEffect(() => {
     if (!apartmentId) return;
@@ -329,20 +298,11 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
               <div className="divide-y divide-slate-100">{breakdownRows}</div>
 
-              {/* required terms approval before payment */}
-              <label className="flex items-start gap-2 mt-4 cursor-pointer">
-                <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 flex-shrink-0 accent-blue-600" />
-                <span className="text-xs text-slate-500 leading-relaxed">
-                  קראתי ואני מאשר/ת את <a href="/terms" target="_blank" className="text-blue-600 font-semibold underline">התקנון ומדיניות הביטולים</a>.
-                  המחירים מוצגים ב-€ והחיוב בפועל בש״ח לפי שער המרה.
-                </span>
-              </label>
-
-              <button onClick={payByCard} disabled={paying || !agreed}
-                className="mt-3 flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-display font-bold py-3.5 rounded-xl text-center transition shadow-sm shadow-blue-600/20">
-                <IconCreditCard size={20} /> {paying ? "מעביר לתשלום…" : "תשלום מאובטח בכרטיס"}
-              </button>
+              <div className="mt-4">
+                <CardPaymentButton apartmentId={apartmentId} apartment={apartment} checkin={checkin} checkout={checkout}
+                  guests={guests} nights={nights} skiPass={skiPass} transfer={transfer} cancel={cancel} service={service}
+                  grandTotal={grandTotal} />
+              </div>
               <a href={waHref} target="_blank" rel="noopener noreferrer"
                 className="mt-2 flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-bold py-3.5 rounded-xl text-center transition shadow-sm shadow-emerald-600/20">
                 <IconWhatsApp size={20} /> צור קשר עם נציג

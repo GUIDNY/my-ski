@@ -10,6 +10,7 @@ import {
   IconParking, IconBed, IconSnowflake, IconWhatsApp,
 } from "@/components/Icons";
 import { buildWaHref } from "@/lib/whatsapp";
+import CardPaymentButton from "@/components/CardPaymentButton";
 import Logo from "@/components/Logo";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
@@ -536,8 +537,13 @@ function ApartmentPage() {
                   </div>
 
                   {/* ── CTA ───────────────────────────────────────── */}
+                  <CardPaymentButton apartmentId={id} apartment={apt?.name ?? ""} checkin={checkin} checkout={checkout}
+                    guests={guests} nights={nights} skiPass={skiPass} transfer={transfer} cancel={cancel} service={service}
+                    grandTotal={grandTotal}
+                    className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-center text-base transition-colors shadow-sm" />
+
                   <a href={waBookHref} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-[#25D366] hover:bg-[#1ebe5a] text-white font-black text-center text-base transition-colors shadow-sm">
+                    className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-[#25D366] hover:bg-[#1ebe5a] text-white font-black text-center text-base transition-colors shadow-sm">
                     <IconWhatsApp size={20} /> צור קשר עם נציג להזמנה
                   </a>
 

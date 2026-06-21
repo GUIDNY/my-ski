@@ -27,6 +27,9 @@ export async function POST(req: NextRequest) {
     cancel:         b.cancel || "none",
     service:        b.service || "human",
     total_eur:      Number(b.grand_total ?? b.total_eur ?? 0),
+    customer_name:  b.customer_name || "",
+    customer_email: (b.customer_email || "").toLowerCase(),
+    customer_phone: b.customer_phone || "",
   };
   for (let i = 0; i < 5; i++) {
     const c = code();
