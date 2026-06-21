@@ -56,7 +56,8 @@ export async function POST(req: NextRequest) {
   const payload: Record<string, unknown> = {
     payment_page_uid: PAGE_UID,
     ...(process.env.PAYPLUS_TERMINAL_UID ? { terminal_uid: process.env.PAYPLUS_TERMINAL_UID } : {}),
-    charge_method: 1, // 1 = charge
+    // 1 = charge now · 2 = approval/J2 (hold, captured manually later)
+    charge_method: Number(process.env.PAYPLUS_CHARGE_METHOD || "1"),
     amount,
     currency_code: CURRENCY,
     sendEmailApproval: true,

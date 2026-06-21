@@ -1,0 +1,50 @@
+{
+  "name": "SkiShare — אישור הזמנה במייל",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "skishare-booking",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook (from SkiShare)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "skishare-booking"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the PayPlus payload forwarded by the site\nconst body = $input.first().json.body || $input.first().json;\nconst d = body.data || body;\nconst t = d.transaction || d.data || d;\n\nconst email  = t.customer_email || t.email || d.customer_email || '';\nconst name   = t.customer_name || t.full_name || d.customer_name || 'לקוח/ה יקר/ה';\nconst amount = t.amount || d.amount || '';\nconst currency = t.currency_code || d.currency || 'ILS';\nconst info   = t.more_info || d.more_info || 'חבילת SkiShare';\nconst ref    = t.transaction_uid || t.uid || d.page_request_uid || '';\n\nconst html = `\n<div dir=\"rtl\" style=\"font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:auto;background:#f7f9fb;padding:0\">\n  <div style=\"background:#0b1f3a;padding:28px;text-align:center\">\n    <div style=\"color:#fff;font-size:26px;font-weight:800\">SkiShare</div>\n    <div style=\"color:#9fb3d1;font-size:13px;margin-top:4px\">Val Thorens · France</div>\n  </div>\n  <div style=\"background:#fff;padding:28px;color:#1f2937\">\n    <h1 style=\"font-size:22px;margin:0 0 6px\">היי ${name}, קיבלנו את ההזמנה! 🎿</h1>\n    <p style=\"color:#6b7280;font-size:14px;line-height:1.6;margin:0 0 20px\">תודה שבחרת ב-SkiShare. להלן פרטי ההזמנה. נציג שלנו יאשר אותה סופית ויצור קשר.</p>\n    <table style=\"width:100%;border-collapse:collapse;font-size:14px\">\n      <tr><td style=\"padding:10px 0;color:#6b7280\">חבילה</td><td style=\"padding:10px 0;font-weight:700;text-align:left\">${info}</td></tr>\n      <tr><td style=\"padding:10px 0;color:#6b7280;border-top:1px solid #eef2f7\">סכום</td><td style=\"padding:10px 0;font-weight:700;text-align:left;border-top:1px solid #eef2f7\">${amount} ${currency}</td></tr>\n      <tr><td style=\"padding:10px 0;color:#6b7280;border-top:1px solid #eef2f7\">אסמכתא</td><td style=\"padding:10px 0;text-align:left;border-top:1px solid #eef2f7\">${ref}</td></tr>\n    </table>\n    <div style=\"background:#eff6ff;border:1px solid #dbeafe;border-radius:12px;padding:14px;margin-top:20px;font-size:13px;color:#1e3a8a\">הסכום נשמר כפיקדון. החיוב בפועל יבוצע רק לאחר אישור ההזמנה ע״י נציג SkiShare.</div>\n    <p style=\"color:#9ca3af;font-size:12px;margin-top:24px\">שאלות? וואטסאפ 054-7701899 · skishareteam@gmail.com</p>\n  </div>\n  <div style=\"text-align:center;color:#9ca3af;font-size:11px;padding:16px\">© SkiShare · סקי שר בע״מ · הזוהר 12, קיסריה</div>\n</div>`;\n\nreturn [{ json: { to: email, subject: 'אישור הזמנה — SkiShare 🎿', html, name, amount, currency, info, ref } }];"
+      },
+      "id": "build",
+      "name": "Build confirmation email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 300]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "html",
+        "message": "={{ $json.html }}",
+        "options": {}
+      },
+      "id": "gmail",
+      "name": "Send email (Gmail)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [800, 300],
+      "credentials": {}
+    }
+  ],
+  "connections": {
+    "Webhook (from SkiShare)": { "main": [[{ "node": "Build confirmation email", "type": "main", "index": 0 }]] },
+    "Build confirmation email": { "main": [[{ "node": "Send email (Gmail)", "type": "main", "index": 0 }]] }
+  },
+  "settings": {},
+  "active": false
+}
