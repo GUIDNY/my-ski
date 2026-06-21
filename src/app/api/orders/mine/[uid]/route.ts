@@ -16,9 +16,18 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ uid:
 
   const { data, error } = await db
     .from("orders")
-    .select("code, apartment_name, area, checkin, checkout, guests, nights, ski_pass, transfer, total_eur, status, customer_name, apartment:apartments(images)")
+    .select("code, apartment_id, apartment_name, area, checkin, checkout, guests, nights, ski_pass, transfer, total_eur, status, customer_name")
     .eq("user_id", uid)
     .order("created_at", { ascending: false });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+
+  // attach apartment images via a separate query (no FK relationship to join on)
+  const ids = Array.from(new Set((data ?? []).map(o => o.apartment_id).filter(Boolean)));
+  let imgMap: Record<string, string[]> = {};
+  if (ids.length) {
+    const { data: apts } = await db.from("apartments").select("id, images").in("id", ids);
+    imgMap = Object.fromEntries((apts ?? []).map(a => [a.id, a.images || []]));
+  }
+  const enriched = (data ?? []).map(o => ({ ...o, apartment: { images: imgMap[o.apartment_id] || [] } }));
+  return NextResponse.json(enriched);
 }
