@@ -8,9 +8,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ uid:
   const { uid } = await params;
   const email = req.nextUrl.searchParams.get("email");
 
+  // A verified login email proves ownership: (re)link every order whose
+  // customer_email matches — even if it was linked to a stale/old account id.
   if (email) {
-    await db.from("orders").update({ user_id: uid })
-      .ilike("customer_email", email).is("user_id", null);
+    await db.from("orders").update({ user_id: uid }).ilike("customer_email", email);
   }
 
   const { data, error } = await db
