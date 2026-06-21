@@ -6,13 +6,16 @@ import { calcTotalForRange } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
 import CardPaymentButton from "@/components/CardPaymentButton";
 import { buildWaHref } from "@/lib/whatsapp";
-import { IconMountain, IconUser, IconBed, IconCheck, IconWhatsApp, IconStar, IconSkis, IconBus } from "@/components/Icons";
+import { IconMountain, IconUser, IconBed, IconCheck, IconWhatsApp, IconStar, IconSkis, IconBus, IconPlane, IconShield, IconBot } from "@/components/Icons";
 import Logo from "@/components/Logo";
 
 const HE = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const fmt = (s: string) => { if (!s) return ""; const d = new Date(s + "T12:00:00"); return `${d.getDate()} ${HE[d.getMonth()]} ${d.getFullYear()}`; };
+const fmtSky = (s: string) => { if (!s) return ""; const d = new Date(s); return `${String(d.getFullYear()).slice(2)}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`; };
 const capacity = (a: Apartment) => a.max_guests || a.beds * 2 || 2;
 const TRANSFER_PRICE = 180;
+const FLEXIBLE_EXTRA = 100; // per person
+const AI_DISCOUNT = 50;     // per person
 
 function Gallery({ images, alt }: { images: string[]; alt: string }) {
   const imgs = images?.length ? images : ["/hero-ski.jpg"];
@@ -87,6 +90,23 @@ function AddonCard({ icon, label, sublabel, price, checked, onChange }: {
   );
 }
 
+function RadioOption({ icon, label, sublabel, badge, badgeColor, selected, onClick }: {
+  icon: React.ReactNode; label: string; sublabel: string; badge?: string; badgeColor?: string; selected: boolean; onClick: () => void;
+}) {
+  return (
+    <button type="button" onClick={onClick}
+      className={`w-full flex items-center gap-3 p-3.5 rounded-xl border transition-all text-right ${selected ? "border-blue-500 bg-blue-50" : "border-gray-100 bg-white hover:border-blue-200"}`}>
+      <span className={`flex-shrink-0 ${selected ? "text-blue-600" : "text-gray-400"}`}>{icon}</span>
+      <div className="flex-1 min-w-0">
+        <div className="text-sm font-semibold text-gray-800">{label}</div>
+        <div className="text-xs text-gray-400">{sublabel}</div>
+      </div>
+      {badge && <span className="text-xs font-bold px-2 py-0.5 rounded-full text-white flex-shrink-0" style={{ background: badgeColor }}>{badge}</span>}
+      <span className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${selected ? "border-blue-600 bg-blue-600 ring-2 ring-blue-200" : "border-gray-300"}`} />
+    </button>
+  );
+}
+
 function ComboInner() {
   const params = useSearchParams();
   const aId = params.get("a") || "", bId = params.get("b") || "";
@@ -101,6 +121,8 @@ function ComboInner() {
   const [loading, setLoading] = useState(true);
   const [skiPass, setSkiPass] = useState(false);
   const [transfer, setTransfer] = useState(false);
+  const [cancel, setCancel] = useState<"none" | "flexible">("none");
+  const [service, setService] = useState<"human" | "ai">("human");
 
   useEffect(() => {
     Promise.all([
@@ -123,15 +145,21 @@ function ComboInner() {
   const totalA = nights > 0 ? calcTotalForRange(checkin, checkout, Number(a.price_per_night), rulesA) : Number(a.price_per_night);
   const totalB = nights > 0 ? calcTotalForRange(checkin, checkout, Number(b.price_per_night), rulesB) : Number(b.price_per_night);
   const trTotal = transfer ? TRANSFER_PRICE : 0;
-  const total = totalA + totalB + trTotal;           // ski pass: price coming soon → not charged
+  const flexExtra = cancel === "flexible" ? FLEXIBLE_EXTRA * guests : 0;
+  const aiDiscount = service === "ai" ? -(AI_DISCOUNT * guests) : 0;
+  const total = totalA + totalB + trTotal + flexExtra + aiDiscount;   // ski pass: price coming soon → not charged
   const comboName = `${a.name} + ${b.name}`;
   const avgNightly = nights > 0 ? Math.round((totalA + totalB) / nights) : Number(a.price_per_night) + Number(b.price_per_night);
+  const skyscannerUrl = checkin && checkout
+    ? `https://www.skyscanner.co.il/transport/flights/tlv/gva/${fmtSky(checkin)}/${fmtSky(checkout)}/?adultsv2=${guests}&cabinclass=economy&childrenv2=&rtn=1`
+    : `https://www.skyscanner.co.il/transport/flights/tlv/gva/`;
 
   const wa = buildWaHref({
     intro: "היי! מעוניין/ת בחבילה משולבת של שתי דירות 🎿",
     lines: [
       `דירות: ${comboName}`, `תאריכים: ${fmt(checkin)}–${fmt(checkout)}`, `${guests} אורחים · ${nights} לילות`,
       skiPass ? "🎿 מעוניין/ת גם בסקי פס" : "", transfer ? "🚐 כולל הסעה" : "",
+      cancel === "flexible" ? "✅ מדיניות ביטול גמישה" : "", service === "ai" ? "🤖 ניהול עצמאי (AI)" : "",
     ].filter(Boolean),
     total,
   });
@@ -177,6 +205,31 @@ function ComboInner() {
                   <AddonCard icon={<IconSkis size={18} />} label="סקי פס · Trois Vallées" sublabel="600 ק״מ מסלולים · כל הרמות" price="מחיר בקרוב" checked={skiPass} onChange={setSkiPass} />
                   <AddonCard icon={<IconBus size={18} />} label="הסעה הלוך-חזור" sublabel="שאטל ישיר משדה התעופה" price={`+€${TRANSFER_PRICE}`} checked={transfer} onChange={setTransfer} />
                 </div>
+                <a href={skyscannerUrl} target="_blank" rel="noopener noreferrer"
+                  className="mt-2 flex items-center gap-2.5 p-3.5 rounded-xl border border-gray-100 bg-white hover:border-blue-200 hover:bg-blue-50 transition-all">
+                  <span className="text-gray-400 flex-shrink-0"><IconPlane size={17} /></span>
+                  <div className="flex-1 min-w-0 text-right">
+                    <div className="text-sm font-semibold text-gray-800">טיסה ל-Geneva (GVA)</div>
+                    <div className="text-xs text-gray-400">TLV → Geneva · {checkin ? fmt(checkin) : "בחר תאריך"} · 2.5h מ-Val Thorens</div>
+                  </div>
+                  <span className="text-xs font-bold text-blue-600 flex-shrink-0">Skyscanner ←</span>
+                </a>
+              </div>
+
+              <div>
+                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">מדיניות ביטול</div>
+                <div className="flex flex-col gap-2">
+                  <RadioOption icon={<IconShield size={18} />} label="לא ניתן לביטול" sublabel="מחיר מוזל — אין החזר כספי" selected={cancel === "none"} onClick={() => setCancel("none")} />
+                  <RadioOption icon={<IconShield size={18} />} label="מדיניות גמישה" sublabel="80% החזר עד 48 שעות לפני" badge={`+€${FLEXIBLE_EXTRA}/אדם`} badgeColor="#10b981" selected={cancel === "flexible"} onClick={() => setCancel("flexible")} />
+                </div>
+              </div>
+
+              <div>
+                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">רמת שירות</div>
+                <div className="flex flex-col gap-2">
+                  <RadioOption icon={<IconUser size={18} />} label="שירות אנושי מלא" sublabel="נציג ישראלי זמין לפני, במהלך ואחרי" selected={service === "human"} onClick={() => setService("human")} />
+                  <RadioOption icon={<IconBot size={18} />} label="AI בלבד" sublabel="ניהול עצמאי עם תמיכת צ'אטבוט" badge={`-€${AI_DISCOUNT}/אדם`} badgeColor="#6366f1" selected={service === "ai"} onClick={() => setService("ai")} />
+                </div>
               </div>
 
               <div className="border-t border-gray-100 pt-4 space-y-2">
@@ -184,6 +237,8 @@ function ComboInner() {
                 <Row label={b.name} value={`€${totalB.toLocaleString()}`} muted />
                 {transfer && <Row label="הסעה הלוך-חזור" value={`€${trTotal}`} muted />}
                 {skiPass && <Row label="סקי פס" value="מחיר בקרוב" muted />}
+                {cancel === "flexible" && <Row label="מדיניות ביטול גמישה" value={`€${flexExtra.toLocaleString()}`} muted />}
+                {service === "ai" && <Row label="הנחת ניהול עצמאי (AI)" value={`-€${(AI_DISCOUNT * guests).toLocaleString()}`} muted />}
               </div>
               <div className="flex items-center justify-between border-t border-gray-100 pt-3">
                 <span className="font-black text-gray-900 text-lg">סה״כ</span>
@@ -194,7 +249,7 @@ function ComboInner() {
                 apartmentId={a.id} apartment={comboName}
                 extraApartmentId={b.id} extraApartmentName={b.name}
                 checkin={checkin} checkout={checkout} guests={guests} nights={nights}
-                skiPass={skiPass} transfer={transfer} grandTotal={total} cancel="none" service="human"
+                skiPass={skiPass} transfer={transfer} grandTotal={total} cancel={cancel} service={service}
                 label="תשלום מאובטח בכרטיס" />
               <a href={wa} target="_blank" rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-bold py-3.5 rounded-xl transition">
