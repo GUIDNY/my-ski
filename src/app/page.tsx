@@ -139,30 +139,32 @@ export default async function Home() {
       </section>
 
       {/* ── STEPS ────────────────────────────────────────── */}
-      <section className="py-28 px-6 bg-white">
+      <section className="py-12 md:py-28 px-5 md:px-6 bg-white">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="text-center mb-7 md:mb-12" dir="rtl">
+            <span className="text-xs font-bold tracking-widest uppercase text-blue-600">איך זה עובד</span>
+            <h2 className="font-display text-2xl md:text-4xl font-black text-gray-900 mt-1">בונים חבילה ב-4 שלבים</h2>
+            <p className="text-gray-500 text-sm mt-1">בוחרים דירה, מוסיפים מה שצריך — והכל מסודר 🎿</p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6" dir="rtl">
             {steps.map((step, i) => (
-              <div
+              <a
                 key={i}
-                className="group flex flex-col gap-6 p-8 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-500"
+                href={step.href}
+                className="group flex flex-col gap-3 md:gap-6 p-4 md:p-8 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-right"
               >
-                <div className={`w-16 h-16 flex items-center justify-center rounded-full ${step.iconBg} ${step.iconColor}`}>
+                <div className={`w-11 h-11 md:w-16 md:h-16 flex items-center justify-center rounded-xl md:rounded-full ${step.iconBg} ${step.iconColor} flex-shrink-0`}>
                   {step.iconEl}
                 </div>
                 <div className="flex-1">
-                  <span className="text-xs font-bold tracking-widest uppercase text-gray-400 block mb-2">{step.label}</span>
-                  <h3 className="font-display text-xl font-black text-gray-900 mb-3">{step.title}</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">{step.desc}</p>
+                  <span className="text-[10px] md:text-xs font-bold tracking-widest uppercase text-gray-400 block mb-1 md:mb-2">{step.label}</span>
+                  <h3 className="font-display text-sm md:text-xl font-black text-gray-900 leading-tight md:mb-3">{step.title}</h3>
+                  <p className="hidden md:block text-gray-500 text-sm leading-relaxed">{step.desc}</p>
                 </div>
-                <a
-                  href={step.href}
-                  className="flex items-center gap-2 text-gray-900 text-sm font-bold group-hover:gap-4 transition-all duration-300"
-                >
-                  <span>{step.cta}</span>
-                  <span>←</span>
-                </a>
-              </div>
+                <span className="hidden md:flex items-center gap-2 text-gray-900 text-sm font-bold group-hover:gap-4 transition-all duration-300">
+                  {step.cta} ←
+                </span>
+              </a>
             ))}
           </div>
         </div>
