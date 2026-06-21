@@ -5,6 +5,8 @@ import { IconCreditCard } from "@/components/Icons";
 type Props = {
   apartmentId?: string;
   apartment: string;
+  extraApartmentId?: string;
+  extraApartmentName?: string;
   checkin?: string;
   checkout?: string;
   guests: number;
@@ -37,7 +39,9 @@ export default function CardPaymentButton(p: Props) {
       const order = await fetch("/api/orders", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          apartment_id: p.apartmentId, apartment: p.apartment, checkin: p.checkin, checkout: p.checkout,
+          apartment_id: p.apartmentId, apartment: p.apartment,
+          extra_apartment_id: p.extraApartmentId, extra_apartment_name: p.extraApartmentName,
+          checkin: p.checkin, checkout: p.checkout,
           guests: p.guests, nights: p.nights, ski_pass: p.skiPass, transfer: p.transfer,
           cancel: p.cancel, service: p.service, grand_total: p.grandTotal,
           customer_name: name, customer_email: email, customer_phone: phone,

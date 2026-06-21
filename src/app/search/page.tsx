@@ -15,6 +15,7 @@ const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","�
 const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s + "T12:00:00"); return `${d.getDate()} ${HE_MONTHS[d.getMonth()]}`; };
 
 const getCategory = (apt: Apartment) => apt.price_per_night < 600 ? "cozy" : "premium";
+const capacity = (apt: Apartment) => apt.max_guests || apt.beds * 2 || 2;
 
 type Filter = "all" | "cozy" | "premium";
 type RulesMap = Record<string, PricingRule[]>;
@@ -112,6 +113,47 @@ function AptCard({ apt, nights, checkin, checkout, guests, rules }: {
   );
 }
 
+/* ── Combo card (two apartments together) ─────────────────── */
+function ComboCard({ a, b, total, cap, checkin, checkout, guests, nights }: {
+  a: Apartment; b: Apartment; total: number; cap: number;
+  checkin: string; checkout: string; guests: number; nights: number;
+}) {
+  const query = new URLSearchParams({ a: a.id, b: b.id, checkin, checkout, guests: String(guests) }).toString();
+  return (
+    <div className="bg-white rounded-2xl border border-blue-200 shadow-sm overflow-hidden" dir="rtl">
+      <div className="flex flex-col sm:flex-row">
+        {/* two thumbnails */}
+        <div className="relative sm:w-56 h-40 sm:h-auto flex-shrink-0 flex">
+          <img src={a.images?.[0] ?? "/hero-ski.jpg"} alt={a.name} className="w-1/2 h-full object-cover" />
+          <img src={b.images?.[0] ?? "/hero-ski.jpg"} alt={b.name} className="w-1/2 h-full object-cover" />
+          <span className="absolute top-2 right-2 bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow">חבילה משולבת</span>
+        </div>
+        <div className="flex-1 p-5 flex flex-col sm:flex-row gap-4">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-black text-gray-900 mb-1">{a.name} + {b.name}</h3>
+            <p className="text-xs text-gray-400 mb-3 flex items-center gap-1"><IconMountain size={12} className="text-blue-400" /> Val Thorens · 2 דירות צמודות</p>
+            <div className="flex items-center gap-3 text-xs text-gray-500">
+              <span className="flex items-center gap-1 font-bold text-blue-600"><IconUser size={12} /> עד {cap} אורחים</span>
+              <span>·</span>
+              <span className="flex items-center gap-1"><IconBed size={12} /> {a.beds + b.beds} חד׳ סה״כ</span>
+            </div>
+          </div>
+          <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 sm:min-w-[150px] border-t sm:border-t-0 border-gray-100 pt-4 sm:pt-0">
+            <div className="text-right">
+              {nights > 0 && <div className="text-xs text-gray-400 font-semibold mb-0.5">{nights} לילות · 2 דירות</div>}
+              <div className="text-2xl font-black text-blue-600">€{total.toLocaleString()}</div>
+              <div className="text-xs text-gray-400">סה״כ לשתי הדירות</div>
+            </div>
+            <a href={`/combo?${query}`} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-colors whitespace-nowrap">
+              ← המשך להזמנה
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Main page ────────────────────────────────────────────── */
 function SearchPage() {
   const params   = useSearchParams();
@@ -172,7 +214,22 @@ function SearchPage() {
   }, [dateOpen]);
 
   const available = apartments.filter(a => !blocked.includes(a.id));
-  const shown = filter === "all" ? available : available.filter(a => getCategory(a) === filter);
+  const fits = available.filter(a => capacity(a) >= guests);          // single apt holds the group
+  const shown = filter === "all" ? fits : fits.filter(a => getCategory(a) === filter);
+
+  const priceFor = (a: Apartment) =>
+    checkin && checkout && nights > 0
+      ? calcTotalForRange(checkin, checkout, Number(a.price_per_night), rulesMap[a.id] ?? [])
+      : Number(a.price_per_night) * Math.max(nights, 1);
+
+  // No single apartment is big enough → suggest combinations of two
+  const maxSingleCap = available.length ? Math.max(...available.map(capacity)) : 0;
+  const combos = (fits.length === 0 && guests > maxSingleCap)
+    ? available.flatMap((a, i) => available.slice(i + 1)
+        .filter(b => capacity(a) + capacity(b) >= guests)
+        .map(b => ({ a, b, total: priceFor(a) + priceFor(b), cap: capacity(a) + capacity(b) })))
+        .sort((x, y) => x.total - y.total)
+    : [];
 
   /* Cheapest single night across all apartments for the selected period */
   const minPrice = apartments.length
@@ -308,12 +365,25 @@ function SearchPage() {
               <div key={i} className="h-44 bg-white rounded-2xl border border-gray-100 animate-pulse" />
             ))}
           </div>
+        ) : combos.length > 0 ? (
+          <div dir="rtl">
+            <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 mb-5 text-center">
+              <p className="font-black text-blue-900 text-lg mb-1">אין דירה בודדת ל-{guests} אורחים — אבל יש פתרון! 🎿</p>
+              <p className="text-blue-700 text-sm">שילבנו עבורכם שתי דירות צמודות שמתאימות יחד לכל הקבוצה. מחיר כולל, הזמנה אחת.</p>
+            </div>
+            <div className="flex flex-col gap-4">
+              {combos.map(c => (
+                <ComboCard key={c.a.id + c.b.id} a={c.a} b={c.b} total={c.total} cap={c.cap}
+                  checkin={checkin} checkout={checkout} guests={guests} nights={nights} />
+              ))}
+            </div>
+          </div>
         ) : shown.length === 0 ? (
           <div className="text-center py-24">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gray-100 mb-4">
               <IconSearch size={24} className="text-gray-400" />
             </div>
-            <p className="text-gray-500 text-lg font-medium">לא נמצאו דירות</p>
+            <p className="text-gray-500 text-lg font-medium">לא נמצאו דירות מתאימות{guests > 1 ? ` ל-${guests} אורחים` : ""}</p>
             <button onClick={() => setFilter("all")}
               className="mt-3 text-sm text-blue-600 font-semibold hover:underline">
               הצג את כל הדירות

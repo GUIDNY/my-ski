@@ -57,7 +57,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const db = createServerClient();
   const { id } = await params;
-  const { data: order } = await db.from("orders").select("apartment_id, code").eq("id", id).single();
+  const { data: order } = await db.from("orders").select("apartment_id, extra_apartment_id, code").eq("id", id).single();
   if (order) await freeDatesForOrder(db, order);
   const { error } = await db.from("orders").delete().eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

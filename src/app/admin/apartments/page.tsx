@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { Apartment } from "@/types";
 
 const EMPTY: Partial<Apartment> = {
-  name: "", type: "דירה", beds: 2, baths: 1, sqm: 60,
+  name: "", type: "דירה", beds: 2, baths: 1, sqm: 60, max_guests: 4,
   price_per_night: 0, amenities: [], description: "", available: true, images: [],
 };
 
@@ -186,6 +186,13 @@ export default function ApartmentsAdmin() {
                 <input type="number" placeholder="מ״ר" value={form.sqm ?? ""}
                   onChange={e => setForm(f => ({ ...f, sqm: +e.target.value }))}
                   className="border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1.5">מספר אנשים מקסימלי בדירה</label>
+                <input type="number" min={1} placeholder="לדוגמה: 4" value={form.max_guests ?? ""}
+                  onChange={e => setForm(f => ({ ...f, max_guests: +e.target.value }))}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
 
               <div className="relative">

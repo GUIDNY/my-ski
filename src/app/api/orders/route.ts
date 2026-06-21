@@ -17,6 +17,8 @@ export async function POST(req: NextRequest) {
   const row = {
     apartment_id:   b.apartment_id || null,
     apartment_name: b.apartment || b.apartment_name || "",
+    extra_apartment_id:   b.extra_apartment_id || null,
+    extra_apartment_name: b.extra_apartment_name || null,
     area:           b.area || "Val Thorens",
     checkin:        b.checkin || null,
     checkout:       b.checkout || null,
