@@ -7,7 +7,7 @@ const config: CapacitorConfig = {
   // live site (API routes, DB and server components all run on Vercel).
   webDir: "public",
   server: {
-    url: "https://my-ski.vercel.app",
+    url: "https://skisharebook.com",
     cleartext: false,
   },
   ios: {
