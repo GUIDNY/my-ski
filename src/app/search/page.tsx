@@ -249,6 +249,16 @@ function SearchPage() {
     setDateOpen(false);
   };
 
+  // apply the current draft (guest count + existing dates) — for guest-only changes
+  const applySearch = () => {
+    const q = new URLSearchParams();
+    if (checkin) q.set("checkin", checkin);
+    if (checkout) q.set("checkout", checkout);
+    q.set("guests", String(gDraft));
+    router.replace(`/search?${q.toString()}`);
+    setDateOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50" dir="rtl">
 
@@ -301,9 +311,15 @@ function SearchPage() {
                       className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold text-sm transition-colors">+</button>
                   </div>
                 </div>
-                {checkin && checkout && (
-                  <button onClick={() => setDateOpen(false)} className="text-sm text-gray-400 hover:text-gray-600">סגור ×</button>
-                )}
+                <div className="flex items-center gap-3">
+                  <button onClick={applySearch}
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-5 py-2 rounded-xl transition-colors shadow-sm">
+                    שמור חיפוש ←
+                  </button>
+                  {checkin && checkout && (
+                    <button onClick={() => setDateOpen(false)} className="text-sm text-gray-400 hover:text-gray-600">סגור ×</button>
+                  )}
+                </div>
               </div>
               <SkiCalendar
                 initialFrom={checkin || undefined}
