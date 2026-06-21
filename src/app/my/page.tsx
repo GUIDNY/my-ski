@@ -47,6 +47,7 @@ const ICONS = {
   logout: "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9",
   check: "M22 11.1V12a10 10 0 1 1-5.9-9.1M22 4 12 14.1l-3-3",
   add: "M12 5v14M5 12h14",
+  home: "M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",
 };
 
 function SideLink({ icon, label, href, active, onClick }: { icon: string; label: string; href?: string; active?: boolean; onClick?: () => void }) {
@@ -388,10 +389,13 @@ function TopBar({ onLogout, initials }: { onLogout?: () => void; initials?: stri
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#c3c6d0]/30">
       <div className="max-w-5xl mx-auto px-5 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <a href="/" className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-bold transition border border-[#c3c6d0]/60 hover:bg-[#eff4ff]" style={{ color: C.primary }}>
+            <Ico d={ICONS.home} /> דף הבית
+          </a>
           {onLogout && (
-            <button onClick={onLogout} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-bold transition hover:bg-[#dce9ff]" style={{ color: C.primary }}>
-              <Ico d={ICONS.logout} /> יציאה
+            <button onClick={onLogout} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-bold transition text-red-600 hover:bg-red-50">
+              <Ico d={ICONS.logout} /> התנתק
             </button>
           )}
           {initials && <div className="w-9 h-9 rounded-full bg-[#d6e3ff] flex items-center justify-center text-sm font-bold" style={{ color: C.primary }}>{initials}</div>}
