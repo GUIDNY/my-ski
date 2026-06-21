@@ -15,7 +15,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ uid:
 
   const { data, error } = await db
     .from("orders")
-    .select("code, apartment_name, area, checkin, checkout, guests, nights, ski_pass, transfer, total_eur, status, customer_name")
+    .select("code, apartment_name, area, checkin, checkout, guests, nights, ski_pass, transfer, total_eur, status, customer_name, apartment:apartments(images)")
     .eq("user_id", uid)
     .order("created_at", { ascending: false });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
