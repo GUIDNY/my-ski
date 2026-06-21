@@ -180,6 +180,7 @@ function ApartmentsPage() {
   const [filter,     setFilter]     = useState<Filter>("all");
   const [showCal,    setShowCal]    = useState(false);
   const [rulesMap,   setRulesMap]   = useState<Record<string, PricingRule[]>>({});
+  const [blocked,    setBlocked]    = useState<string[]>([]);
 
   const noDates = !checkin || !checkout;
 
@@ -213,7 +214,16 @@ function ApartmentsPage() {
     ).then(entries => setRulesMap(Object.fromEntries(entries)));
   }, [apartments]);
 
-  const shown = filter === "all" ? apartments : apartments.filter(a => getCategory(a) === filter);
+  useEffect(() => {
+    if (!checkin || !checkout) { setBlocked([]); return; }
+    fetch(`/api/availability/blocked?checkin=${checkin}&checkout=${checkout}`)
+      .then(r => r.json())
+      .then(d => setBlocked(Array.isArray(d.blocked) ? d.blocked : []))
+      .catch(() => setBlocked([]));
+  }, [checkin, checkout]);
+
+  const available = apartments.filter(a => !blocked.includes(a.id));
+  const shown = filter === "all" ? available : available.filter(a => getCategory(a) === filter);
 
   const nights = checkin && checkout
     ? Math.round((new Date(checkout).getTime() - new Date(checkin).getTime()) / 86400000) : 0;

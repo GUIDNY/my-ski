@@ -126,6 +126,7 @@ function SearchPage() {
   const [filter,     setFilter]     = useState<Filter>("all");
   const [dateOpen,   setDateOpen]   = useState(!checkin || !checkout);
   const [gDraft,     setGDraft]     = useState(guests);
+  const [blocked,    setBlocked]    = useState<string[]>([]);
   const calendarRef  = useRef<HTMLDivElement>(null);
 
   const nights = checkin && checkout
@@ -152,6 +153,15 @@ function SearchPage() {
     });
   }, []);
 
+  /* Which apartments are booked/unavailable for the selected dates */
+  useEffect(() => {
+    if (!checkin || !checkout) { setBlocked([]); return; }
+    fetch(`/api/availability/blocked?checkin=${checkin}&checkout=${checkout}`)
+      .then(r => r.json())
+      .then(d => setBlocked(Array.isArray(d.blocked) ? d.blocked : []))
+      .catch(() => setBlocked([]));
+  }, [checkin, checkout]);
+
   /* Close calendar on outside click */
   useEffect(() => {
     const h = (e: MouseEvent) => {
@@ -161,7 +171,8 @@ function SearchPage() {
     return () => document.removeEventListener("mousedown", h);
   }, [dateOpen]);
 
-  const shown = filter === "all" ? apartments : apartments.filter(a => getCategory(a) === filter);
+  const available = apartments.filter(a => !blocked.includes(a.id));
+  const shown = filter === "all" ? available : available.filter(a => getCategory(a) === filter);
 
   /* Cheapest single night across all apartments for the selected period */
   const minPrice = apartments.length
