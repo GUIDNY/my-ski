@@ -1,10 +1,11 @@
 "use client";
 import { usePathname } from "next/navigation";
-import { IconHome, IconSnowflake, IconBed, IconUser } from "@/components/Icons";
+import { IconHome, IconBed, IconUser } from "@/components/Icons";
+import IconCommunity from "@/components/IconCommunity";
 
 const tabs = [
   { href: "/",            label: "ראשי",    icon: IconHome },
-  { href: "/seasonaires", label: "סזונרים", icon: IconSnowflake },
+  { href: "/seasonaires", label: "סזונרים", icon: IconCommunity },
   { href: "/apartments",  label: "דירות",   icon: IconBed },
   { href: "/profile",     label: "פרופיל",  icon: IconUser },
 ];
