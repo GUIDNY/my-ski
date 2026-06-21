@@ -322,11 +322,11 @@ function MyOrder() {
       <main className="md:mr-64 max-w-5xl mx-auto px-5 py-8 space-y-10">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <div className="text-right order-1 sm:order-2">
+          <div className="text-right">
             <p className="text-[#43474f]">שלום, {name} 👋</p>
             <h1 className="font-display text-3xl sm:text-4xl font-black tracking-tight" style={{ color: C.primary }}>האזור האישי שלי</h1>
           </div>
-          <div className="flex items-center gap-3 order-2 sm:order-1">
+          <div className="flex items-center gap-3">
             <a href="/apartments" className="text-white px-5 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:opacity-90 transition active:scale-95" style={{ background: C.primary }}>
               <Ico d={ICONS.add} /> הזמנה חדשה
             </a>
