@@ -6,6 +6,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const db = createServerClient();
   const { id } = await params;
   const body = await req.json();
+
+  // read the current status first so we only act on real transitions
+  const { data: prev } = await db.from("orders").select("status").eq("id", id).single();
   const { data, error } = await db.from("orders").update(body).eq("id", id).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
@@ -15,8 +18,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     else if (body.status === "approved" || body.status === "hold") await blockDatesForOrder(db, data);
   }
 
-  // when an order is approved → fire the "confirmed" email via n8n
-  if (body.status === "approved" && data) {
+  // when an order TRANSITIONS to approved → fire the "confirmed" email once
+  const newlyApproved = body.status === "approved" && prev?.status !== "approved";
+  if (newlyApproved && data) {
     const hook = process.env.N8N_WEBHOOK_URL;
     if (hook) {
       const origin = req.headers.get("origin") || `https://${req.headers.get("host")}`;
