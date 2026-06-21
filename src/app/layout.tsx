@@ -18,7 +18,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL("https://skisharebook.com"),
   title: "SkiShare — Val Thorens",
-  description: "חופשות וסקי בוואל טורנס — דירות, סקי פס, הסעות, ואזור הסזונרים. SkiShare.",
+  description: "חופשות וסקי בוואל טורנס — דירות, סקי פס, הסעות, ואזור הסיזיונרים. SkiShare.",
   icons: {
     icon: [
       { url: "/favicon.png", type: "image/png" },
@@ -31,14 +31,14 @@ export const metadata: Metadata = {
     siteName: "SkiShare",
     url: "https://skisharebook.com",
     title: "SkiShare — חופשות סקי בוואל טורנס",
-    description: "דירות, סקי פס, הסעות ואזור הסזונרים — חופשת הסקי המושלמת ב-Val Thorens.",
+    description: "דירות, סקי פס, הסעות ואזור הסיזיונרים — חופשת הסקי המושלמת ב-Val Thorens.",
     locale: "he_IL",
     images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "SkiShare · Val Thorens" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "SkiShare — חופשות סקי בוואל טורנס",
-    description: "דירות, סקי פס, הסעות ואזור הסזונרים ב-Val Thorens.",
+    description: "דירות, סקי פס, הסעות ואזור הסיזיונרים ב-Val Thorens.",
     images: ["/og.jpg"],
   },
 };

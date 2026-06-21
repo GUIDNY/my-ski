@@ -107,8 +107,8 @@ export default function SeasonRentalsAdmin() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-black text-gray-900">דירות סזונרים</h1>
-          <p className="text-gray-500 text-sm mt-1">ניהול דירות לטווח ארוך · אזור הסזונרים</p>
+          <h1 className="text-2xl font-black text-gray-900">דירות סיזיונרים</h1>
+          <p className="text-gray-500 text-sm mt-1">ניהול דירות לטווח ארוך · אזור הסיזיונרים</p>
         </div>
         <button onClick={openNew}
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-colors">
@@ -198,7 +198,7 @@ export default function SeasonRentalsAdmin() {
         <div className="text-center py-20 text-gray-400">טוען...</div>
       ) : !rentals.length ? (
         <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
-          <div className="text-gray-500">אין דירות סזונרים עדיין — הוסף את הראשונה</div>
+          <div className="text-gray-500">אין דירות סיזיונרים עדיין — הוסף את הראשונה</div>
         </div>
       ) : (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">

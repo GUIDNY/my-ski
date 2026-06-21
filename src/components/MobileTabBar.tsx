@@ -5,7 +5,7 @@ import IconCommunity from "@/components/IconCommunity";
 
 const tabs = [
   { href: "/",            label: "ראשי",    icon: IconHome },
-  { href: "/seasonaires", label: "סזונרים", icon: IconCommunity },
+  { href: "/seasonaires", label: "סיזיונרים", icon: IconCommunity },
   { href: "/apartments",  label: "דירות",   icon: IconBed },
   { href: "/profile",     label: "פרופיל",  icon: IconUser },
 ];

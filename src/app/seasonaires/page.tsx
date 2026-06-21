@@ -85,7 +85,7 @@ export default function SeasonairesPage() {
   }, []);
 
   const waContact = buildWaHref({
-    intro: "היי! 👋 אני מתעניין/ת בעונת סקי שלמה (סזונר) ב-Val Thorens.",
+    intro: "היי! 👋 אני מתעניין/ת בעונת סקי שלמה (סיזיונר) ב-Val Thorens.",
     lines: ["אשמח לקבל פרטים על דירות לטווח ארוך, סקי פס עונתי ואפשרויות עבודה."],
   });
 
@@ -101,9 +101,9 @@ export default function SeasonairesPage() {
             <img src="/skishare-logo.png" alt="SkiShare" className="h-12 w-auto" style={{ filter: "brightness(0) invert(1)" }} />
           </a>
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-xs font-bold tracking-widest uppercase mb-4 w-fit">
-            <img src="/community.svg" alt="" className="w-5 h-5" style={{ filter: "brightness(0) invert(1)" }} /> קהילת הסזונרים
+            <img src="/community.svg" alt="" className="w-5 h-5" style={{ filter: "brightness(0) invert(1)" }} /> קהילת הסיזיונרים
           </div>
-          <h1 className="font-display text-5xl md:text-6xl font-black leading-none">אזור הסזונרים</h1>
+          <h1 className="font-display text-5xl md:text-6xl font-black leading-none">אזור הסיזיונרים</h1>
           <p className="text-white/80 text-lg mt-4 max-w-2xl">
             הבית של מי שעושה עונה שלמה ב-Val Thorens — קהילה, לוח דירות לטווח ארוך, אירועים, עבודות ומידע. הכל במקום אחד.
           </p>
@@ -116,7 +116,7 @@ export default function SeasonairesPage() {
           className="group flex items-center gap-4 bg-[#25D366] rounded-2xl p-5 md:p-6 shadow-lg shadow-emerald-600/20 hover:-translate-y-0.5 transition-transform text-white">
           <span className="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center flex-shrink-0"><IconWhatsApp size={28} /></span>
           <div className="flex-1 min-w-0">
-            <p className="font-display font-black text-lg md:text-xl leading-tight">הצטרפו לקבוצת הוואטסאפ של הסזונרים</p>
+            <p className="font-display font-black text-lg md:text-xl leading-tight">הצטרפו לקבוצת הוואטסאפ של הסיזיונרים</p>
             <p className="text-white/85 text-sm mt-0.5">דירות, טיפים, אירועים ועבודות — כל הקהילה במקום אחד</p>
           </div>
           <span className="font-bold flex-shrink-0 group-hover:-translate-x-1 transition-transform">הצטרפו ←</span>
@@ -146,14 +146,14 @@ export default function SeasonairesPage() {
         <SectionHead kicker="קהילה" title="אירועים קרובים" />
         <ComingSoon icon={<IconParty size={28} className="text-violet-600" />} tint="bg-violet-50"
           title="אירועי קהילה בדרך"
-          desc="מפגשי סזונרים, ערבי אפטר-סקי, טריפים וחוויות משותפות. הצטרפו לקבוצת הוואטסאפ כדי להיות הראשונים לדעת." />
+          desc="מפגשי סיזיונרים, ערבי אפטר-סקי, טריפים וחוויות משותפות. הצטרפו לקבוצת הוואטסאפ כדי להיות הראשונים לדעת." />
       </section>
 
       {/* Jobs — coming soon */}
       <section id="jobs" className="max-w-5xl mx-auto px-6 pt-14 pb-16 scroll-mt-6">
         <SectionHead kicker="עבודה על ההר" title="חיפוש עבודות" />
         <ComingSoon icon={<IconBriefcase size={28} className="text-amber-600" />} tint="bg-amber-50"
-          title="לוח דרושים לסזונרים בדרך"
+          title="לוח דרושים לסיזיונרים בדרך"
           desc="משרות באתר הסקי — מסעדות, בארים, חנויות ציוד, בתי מלון ועוד. עם דרכון אירופאי אפשר לעבוד ולממן את העונה. הלוח ייפתח בקרוב." />
       </section>
 
@@ -162,7 +162,7 @@ export default function SeasonairesPage() {
         <div className="bg-slate-900 rounded-3xl p-8 md:p-12 text-center text-white relative overflow-hidden">
           <div className="absolute -left-16 -top-16 w-56 h-56 rounded-full bg-blue-500/10 blur-3xl" />
           <h2 className="relative font-display text-3xl font-black mb-3">רוצים להיות חלק מהקהילה?</h2>
-          <p className="relative text-white/70 mb-6 max-w-xl mx-auto">הצטרפו לקבוצת הוואטסאפ של הסזונרים, או דברו איתנו ישירות על דירה, סקי פס ועבודה.</p>
+          <p className="relative text-white/70 mb-6 max-w-xl mx-auto">הצטרפו לקבוצת הוואטסאפ של הסיזיונרים, או דברו איתנו ישירות על דירה, סקי פס ועבודה.</p>
           <div className="relative flex flex-col sm:flex-row gap-3 justify-center">
             <a href={WHATSAPP_GROUP_URL} target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-bold px-8 py-4 rounded-xl transition">

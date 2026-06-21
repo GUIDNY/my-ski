@@ -19,7 +19,7 @@ export default async function AdminDashboard() {
 
   const stats = [
     { label: "דירות פעילות",      value: aptCount ?? 0,                       icon: <IconBed size={20} />,      tint: "bg-blue-50 text-blue-600",     href: "/admin/apartments" },
-    { label: "דירות סזונרים",     value: seasonCount ?? 0,                    icon: <IconSkis size={20} />,     tint: "bg-cyan-50 text-cyan-600",     href: "/admin/season-rentals" },
+    { label: "דירות סיזיונרים",     value: seasonCount ?? 0,                    icon: <IconSkis size={20} />,     tint: "bg-cyan-50 text-cyan-600",     href: "/admin/season-rentals" },
     { label: "סה״כ הזמנות",       value: bookingCount ?? 0,                   icon: <IconCalendar size={20} />, tint: "bg-violet-50 text-violet-600", href: "/admin/bookings" },
     { label: "הכנסות מאושרות",    value: `€${totalRevenue.toLocaleString()}`, icon: <span className="font-black text-lg">€</span>, tint: "bg-emerald-50 text-emerald-600", href: "/admin/bookings" },
   ];
@@ -33,7 +33,7 @@ export default async function AdminDashboard() {
 
   const quickActions = [
     { label: "דירה חדשה", href: "/admin/apartments", icon: <IconBed size={16} /> },
-    { label: "דירת סזונר חדשה", href: "/admin/season-rentals", icon: <IconSkis size={16} /> },
+    { label: "דירת סיזיונר חדשה", href: "/admin/season-rentals", icon: <IconSkis size={16} /> },
     { label: "כל ההזמנות", href: "/admin/bookings", icon: <IconCalendar size={16} /> },
   ];
 

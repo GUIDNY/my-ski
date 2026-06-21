@@ -38,7 +38,7 @@ export default function SeasonRentalDetail() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#f7f9fb] text-center px-6" dir="rtl">
       <p className="text-5xl mb-4">🏔️</p>
       <h1 className="font-display text-2xl font-black text-slate-900 mb-2">הדירה לא נמצאה</h1>
-      <a href="/seasonaires" className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition">חזרה לאזור הסזונרים</a>
+      <a href="/seasonaires" className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition">חזרה לאזור הסיזיונרים</a>
     </div>
   );
 
@@ -61,7 +61,7 @@ export default function SeasonRentalDetail() {
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white border-b border-slate-100">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <a href="/seasonaires" className="text-slate-500 hover:text-slate-900 text-sm transition">→ אזור הסזונרים</a>
+          <a href="/seasonaires" className="text-slate-500 hover:text-slate-900 text-sm transition">→ אזור הסיזיונרים</a>
           <a href="/"><img src="/skishare-logo.png" alt="SkiShare" className="h-9 w-auto" /></a>
         </div>
       </header>

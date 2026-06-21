@@ -60,7 +60,7 @@ export default function Navbar() {
           <a href="/seasonaires"
             className="px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-1"
             style={{ color: scrolled ? "#1d4ed8" : "white" }}>
-            ❄️ אזור הסזונרים
+            ❄️ אזור הסיזיונרים
           </a>
         </div>
 

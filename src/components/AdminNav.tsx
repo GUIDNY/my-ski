@@ -12,7 +12,7 @@ const IconGrid = ({ size = 18 }: { size?: number }) => (
 const links = [
   { href: "/admin", label: "דשבורד", icon: <IconGrid size={18} /> },
   { href: "/admin/apartments", label: "דירות", icon: <IconBed size={18} /> },
-  { href: "/admin/season-rentals", label: "דירות סזונרים", icon: <IconSkis size={18} /> },
+  { href: "/admin/season-rentals", label: "דירות סיזיונרים", icon: <IconSkis size={18} /> },
   { href: "/admin/bookings", label: "הזמנות", icon: <IconCalendar size={18} /> },
 ];
 
