@@ -23,8 +23,9 @@ export async function POST(req: NextRequest) {
   const origin = req.headers.get("origin") || `https://${req.headers.get("host")}`;
   const desc = (b.description as string) || "SkiShare";
 
-  const payload = {
+  const payload: Record<string, unknown> = {
     payment_page_uid: PAGE_UID,
+    ...(process.env.PAYPLUS_TERMINAL_UID ? { terminal_uid: process.env.PAYPLUS_TERMINAL_UID } : {}),
     charge_method: 1, // 1 = charge
     amount,
     currency_code: CURRENCY,
