@@ -2,7 +2,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { Apartment } from "@/types";
-import { calcTotalForRange } from "@/lib/pricing";
+import { calcTotalForRange, getEffectivePrice } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
 import CardPaymentButton from "@/components/CardPaymentButton";
 import { buildWaHref } from "@/lib/whatsapp";
@@ -46,7 +46,7 @@ function AptBlock({ a }: { a: Apartment }) {
       <Gallery images={a.images} alt={a.name} />
       <div className="p-5 text-right">
         <div className="flex items-center justify-between mb-1">
-          <span className="flex items-center gap-1 text-sm"><IconStar size={13} className="text-amber-400" /><span className="font-bold text-gray-700">4.9</span></span>
+          <span className="flex items-center gap-1 text-sm"><IconStar size={13} className="text-amber-400" /><span className="font-bold text-gray-700">4.9</span><span className="text-gray-400 text-xs">· 47 ביקורות</span></span>
           <h3 className="font-display font-black text-gray-900 text-lg">{a.name}</h3>
         </div>
         <p className="text-xs text-gray-400 mb-3 flex items-center gap-1 justify-end">
@@ -123,6 +123,8 @@ function ComboInner() {
   const [transfer, setTransfer] = useState(false);
   const [cancel, setCancel] = useState<"none" | "flexible">("none");
   const [service, setService] = useState<"human" | "ai">("human");
+  const [showBreakdown, setShowBreakdown] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -150,6 +152,17 @@ function ComboInner() {
   const total = totalA + totalB + trTotal + flexExtra + aiDiscount;   // ski pass: price coming soon → not charged
   const comboName = `${a.name} + ${b.name}`;
   const avgNightly = nights > 0 ? Math.round((totalA + totalB) / nights) : Number(a.price_per_night) + Number(b.price_per_night);
+  const breakdown = (() => {
+    if (!checkin || !checkout || nights <= 0) return [] as { date: Date; price: number }[];
+    const out: { date: Date; price: number }[] = [];
+    const end = new Date(checkout + "T12:00:00");
+    for (let d = new Date(checkin + "T12:00:00"); d < end; d.setDate(d.getDate() + 1)) {
+      const pa = getEffectivePrice(new Date(d), Number(a.price_per_night), rulesA);
+      const pb = getEffectivePrice(new Date(d), Number(b.price_per_night), rulesB);
+      out.push({ date: new Date(d), price: pa + pb });
+    }
+    return out;
+  })();
   const skyscannerUrl = checkin && checkout
     ? `https://www.skyscanner.co.il/transport/flights/tlv/gva/${fmtSky(checkin)}/${fmtSky(checkout)}/?adultsv2=${guests}&cabinclass=economy&childrenv2=&rtn=1`
     : `https://www.skyscanner.co.il/transport/flights/tlv/gva/`;
@@ -191,11 +204,37 @@ function ComboInner() {
           {/* Booking panel */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm lg:sticky lg:top-24 overflow-hidden">
             <div className="bg-blue-50/60 px-6 py-5 border-b border-gray-100">
-              <div className="flex items-baseline gap-1.5 justify-end">
-                <span className="text-xs text-gray-400">/ לילה ממוצע</span>
-                <span className="font-display text-3xl font-black text-gray-900">€{avgNightly.toLocaleString()}</span>
+              <div className="flex items-center justify-between gap-2">
+                {breakdown.length > 0 && (
+                  <button onClick={() => setShowBreakdown(v => !v)}
+                    className="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
+                    פירוט מחיר {showBreakdown ? "▲" : "▼"}
+                  </button>
+                )}
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-xs text-gray-400">/ לילה ממוצע</span>
+                  <span className="font-display text-3xl font-black text-gray-900">€{avgNightly.toLocaleString()}</span>
+                </div>
               </div>
               <p className="text-xs text-gray-500 mt-1 text-right">{fmt(checkin)} — {fmt(checkout)} · {nights} לילות · {guests} אורחים</p>
+
+              {showBreakdown && breakdown.length > 0 && (
+                <div className="mt-3 bg-white rounded-xl border border-blue-100 overflow-hidden">
+                  <div className="px-4 py-2 bg-blue-50/60 text-[11px] text-gray-400 text-right">מחיר ללילה (שתי הדירות יחד)</div>
+                  <div className="max-h-52 overflow-y-auto divide-y divide-gray-50">
+                    {breakdown.map(({ date, price }, i) => (
+                      <div key={i} className="flex justify-between items-center px-4 py-2 text-sm">
+                        <span className="font-semibold text-gray-800">€{price.toLocaleString()}</span>
+                        <span className="text-gray-500">{fmt(`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`)}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex justify-between items-center px-4 py-2.5 bg-blue-50 border-t border-blue-100 text-sm font-bold">
+                    <span className="text-blue-700">€{avgNightly.toLocaleString()}</span>
+                    <span className="text-gray-600">ממוצע ללילה</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="px-6 py-5 space-y-5">
@@ -255,6 +294,10 @@ function ComboInner() {
                 className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-bold py-3.5 rounded-xl transition">
                 <IconWhatsApp size={20} /> תיאום בוואטסאפ
               </a>
+              <button onClick={() => { navigator.clipboard?.writeText(window.location.href); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+                className="block w-full py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-800 font-bold text-center text-sm transition-colors">
+                {copied ? "✓ הקישור הועתק" : "📋 שלח הצעת מחיר (העתק קישור)"}
+              </button>
               <p className="text-center text-xs text-gray-400">הזמנה אחת לשתי הדירות · תשלום מאובטח PayPlus</p>
             </div>
           </div>
