@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import type { SeasonRental } from "@/types";
 import {
-  IconBed, IconUsers, IconCalendar, IconWhatsApp, IconSnowflake, IconParty, IconBriefcase,
+  IconBed, IconUsers, IconCalendar, IconWhatsApp, IconParty, IconBriefcase,
 } from "@/components/Icons";
 import { buildWaHref } from "@/lib/whatsapp";
 
@@ -100,8 +100,8 @@ export default function SeasonairesPage() {
           <a href="/" className="absolute top-6 right-6">
             <img src="/skishare-logo.png" alt="SkiShare" className="h-12 w-auto" style={{ filter: "brightness(0) invert(1)" }} />
           </a>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-bold tracking-widest uppercase mb-4 w-fit">
-            <IconSnowflake size={13} /> קהילת הסזונרים
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-xs font-bold tracking-widest uppercase mb-4 w-fit">
+            <img src="/community.svg" alt="" className="w-5 h-5" style={{ filter: "brightness(0) invert(1)" }} /> קהילת הסזונרים
           </div>
           <h1 className="font-display text-5xl md:text-6xl font-black leading-none">אזור הסזונרים</h1>
           <p className="text-white/80 text-lg mt-4 max-w-2xl">
