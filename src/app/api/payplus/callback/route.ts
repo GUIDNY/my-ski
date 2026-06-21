@@ -15,6 +15,7 @@ export async function POST(req: NextRequest) {
   const name = String(t.customer_name || "").trim();
   const phone = String(t.customer_phone || t.phone || "").trim();
 
+  let order: Record<string, unknown> | null = null;
   if (orderCode) {
     try {
       const db = createServerClient();
@@ -22,7 +23,8 @@ export async function POST(req: NextRequest) {
       if (email) patch.customer_email = email;
       if (name) patch.customer_name = name;
       if (phone) patch.customer_phone = phone;
-      await db.from("orders").update(patch).eq("code", orderCode.toLowerCase());
+      const { data } = await db.from("orders").update(patch).eq("code", orderCode.toLowerCase()).select().single();
+      order = data;
     } catch { /* ignore */ }
   }
 
@@ -32,7 +34,16 @@ export async function POST(req: NextRequest) {
       await fetch(hook, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ source: "payplus", type: "received", order_code: orderCode, data: payload }),
+        // include the order from OUR db so the email recipient is reliable (not dependent on PayPlus echo)
+        body: JSON.stringify({
+          source: "payplus", type: "received", order_code: orderCode,
+          order: order ? {
+            customer_email: order.customer_email, customer_name: order.customer_name,
+            apartment: order.apartment_name, area: order.area, checkin: order.checkin, checkout: order.checkout,
+            guests: order.guests, nights: order.nights, total_eur: order.total_eur, code: order.code,
+          } : undefined,
+          data: payload,
+        }),
       });
     } catch { /* never block PayPlus on n8n errors */ }
   }
