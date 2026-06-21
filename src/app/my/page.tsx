@@ -388,7 +388,7 @@ function MyOrder() {
 function TopBar({ onLogout, initials }: { onLogout?: () => void; initials?: string }) {
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#c3c6d0]/30">
-      <div className="max-w-5xl mx-auto px-4 sm:px-5 h-16 flex items-center gap-2 sm:gap-3">
+      <div className="w-full px-4 sm:px-6 h-16 flex items-center gap-2 sm:gap-3">
         <a href="/" className="shrink-0"><img src="/skishare-logo.png" alt="SkiShare" className="h-8" /></a>
         {initials && <div className="w-9 h-9 rounded-full bg-[#d6e3ff] flex items-center justify-center text-sm font-bold shrink-0" style={{ color: C.primary }}>{initials}</div>}
         <div className="flex-1" />
