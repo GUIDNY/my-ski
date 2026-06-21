@@ -7,7 +7,7 @@ const tabs = [
   { href: "/",            label: "ראשי",    icon: IconHome },
   { href: "/seasonaires", label: "סיזיונרים", icon: IconCommunity },
   { href: "/apartments",  label: "דירות",   icon: IconBed },
-  { href: "/profile",     label: "פרופיל",  icon: IconUser },
+  { href: "/my",          label: "אזור אישי", icon: IconUser },
 ];
 
 // routes with their own full-screen / bottom UI — hide the tab bar there
