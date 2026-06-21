@@ -300,7 +300,8 @@ function MyOrder() {
           )}
         </section>
 
-        {/* Code link */}
+        {/* Code link — only when the user has no linked order yet */}
+        {orders.length === 0 && (
         <section className="bg-white rounded-2xl border border-[#c3c6d0]/40 shadow-sm p-5">
           <p className="font-bold text-sm mb-2" style={{ color: C.primary }}>יש לך קוד הזמנה?</p>
           <div className="flex gap-2">
@@ -310,6 +311,7 @@ function MyOrder() {
           </div>
           {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
         </section>
+        )}
 
         <FAQBlock open={open} setOpen={setOpen} />
         <a href={wa} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-bold py-3.5 rounded-xl transition"><IconWhatsApp size={20} /> דברו איתנו</a>
