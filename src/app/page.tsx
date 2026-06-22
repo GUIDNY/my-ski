@@ -184,7 +184,7 @@ export default async function Home() {
             </h2>
             <p className="text-white/75 text-base md:text-lg leading-relaxed mb-4">
               הצטרפו לקהילת הסיזיונרים של SkiShare — אנשים שבאים לחיות עונת סקי מלאה ב-Val Thorens.
-              דירות לטווח ארוך (חודשיים+), סקי פס עונתי (€1,070), עבודה עם דרכון אירופאי, וקהילה תומכת מכל העולם.
+              דירות לטווח ארוך (חודשיים+).
             </p>
             <ul className="text-white/70 text-sm space-y-1.5 mb-8">
               <li>🏔️ לוח דירות לטווח ארוך — מתעדכן כל הזמן</li>
