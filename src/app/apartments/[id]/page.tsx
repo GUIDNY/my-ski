@@ -580,13 +580,16 @@ function ApartmentPage() {
                   {/* ── Split payment ─────────────────────────────── */}
                   <div className="rounded-xl border border-gray-100 p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-bold text-gray-800">כמה אנשים משלמים?</span>
+                      <div>
+                        <span className="text-sm font-bold text-gray-800">כמה אנשים משלמים?</span>
+                        <span className="block text-[11px] text-gray-400">עד {guests} משלמים (לפי מספר האורחים)</span>
+                      </div>
                       <div className="flex items-center gap-2">
-                        <button onClick={() => setSplitCount(n => Math.max(1, n - 1))}
-                          className="w-7 h-7 rounded-full border border-gray-200 text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold">−</button>
+                        <button onClick={() => setSplitCount(n => Math.max(1, n - 1))} disabled={splitCount <= 1}
+                          className="w-7 h-7 rounded-full border border-gray-200 text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold disabled:opacity-40">−</button>
                         <span className="font-black text-gray-900 w-5 text-center">{splitCount}</span>
-                        <button onClick={() => setSplitCount(n => Math.min(8, n + 1))}
-                          className="w-7 h-7 rounded-full border border-gray-200 text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold">+</button>
+                        <button onClick={() => setSplitCount(n => Math.min(guests, n + 1))} disabled={splitCount >= guests}
+                          className="w-7 h-7 rounded-full border border-gray-200 text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold disabled:opacity-40">+</button>
                       </div>
                     </div>
                     {splitCount > 1 ? (
