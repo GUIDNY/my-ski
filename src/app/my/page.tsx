@@ -12,6 +12,8 @@ type OrderView = {
   checkin: string | null; checkout: string | null; guests: number; nights: number;
   ski_pass: boolean; transfer: boolean; total_eur: number; status: string; customer_name: string;
   apartment?: { images?: string[] } | null;
+  share_amount?: number | null; shares_total?: number | null;
+  group?: { code: string; shares_total: number; shares_paid: number } | null;
 };
 type Apt = { id: string; name: string; type: string; images: string[]; price_per_night: number; beds: number; baths: number; sqm: number };
 type Saved = {
@@ -85,8 +87,9 @@ function OrderCard({ o, onMore }: { o: OrderView; onMore?: (o: OrderView) => voi
             <div className="space-y-2">
               <Row icon={ICONS.cal} text={fmtRange(o.checkin, o.checkout)} />
               <Row icon={ICONS.group} text={`${o.guests} אורחים · ${o.nights} לילות`} />
-              <Row icon={ICONS.pay} text={`€${Number(o.total_eur).toLocaleString()}`} bold />
+              <Row icon={ICONS.pay} text={`€${Number(o.total_eur).toLocaleString()}${o.group ? " (החלק שלך)" : ""}`} bold />
             </div>
+            {o.group && <GroupProgress group={o.group} />}
           </div>
           <div className="flex items-center justify-between pt-4 mt-3 border-t border-gray-100 gap-2">
             <button onClick={() => onMore?.(o)} className="text-sm font-bold px-3 py-1.5 rounded-lg border border-[#c3c6d0]/60 hover:bg-[#eff4ff] transition" style={{ color: C.primary }}>מידע נוסף</button>
@@ -100,6 +103,32 @@ function OrderCard({ o, onMore }: { o: OrderView; onMore?: (o: OrderView) => voi
     </div>
   );
 }
+function GroupProgress({ group }: { group: { code: string; shares_total: number; shares_paid: number } }) {
+  const [copied, setCopied] = useState(false);
+  const pct = Math.min(100, Math.round((group.shares_paid / group.shares_total) * 100));
+  const done = group.shares_paid >= group.shares_total;
+  const link = typeof window !== "undefined" ? `${window.location.origin}/split/${group.code}` : "";
+  return (
+    <div className="mt-4 rounded-xl border border-[#c3c6d0]/40 bg-[#f8f9ff] p-3.5">
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="text-xs font-bold" style={{ color: C.primary }}>תשלום מפוצל</span>
+        <span className="text-xs font-bold" style={{ color: done ? "#059669" : C.accent }}>{group.shares_paid}/{group.shares_total} שילמו · {pct}%</span>
+      </div>
+      <div className="h-2.5 rounded-full bg-gray-200 overflow-hidden">
+        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: done ? "#059669" : C.accent }} />
+      </div>
+      {done ? (
+        <p className="text-xs text-emerald-600 font-bold mt-2">🎉 כל המשלמים שילמו — ההזמנה הושלמה!</p>
+      ) : (
+        <button onClick={() => { navigator.clipboard?.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+          className="mt-2.5 w-full text-sm font-bold py-2 rounded-lg text-white transition" style={{ background: C.accent }}>
+          {copied ? "✓ הקישור הועתק — שלח/י לחברים" : "🔗 שתף קישור תשלום עם החברים"}
+        </button>
+      )}
+    </div>
+  );
+}
+
 const Row = ({ icon, text, bold }: { icon: string; text: string; bold?: boolean }) => (
   <div className={`flex items-center gap-2 ${bold ? "font-bold" : "text-[#43474f]"}`} style={bold ? { color: C.primary } : {}}>
     <Ico d={icon} /><span className="text-[15px]">{text}</span>
