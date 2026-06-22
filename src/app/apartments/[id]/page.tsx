@@ -147,6 +147,7 @@ function ApartmentPage() {
   const [showBreakdown, setShowBreakdown] = useState(false);
   const [creatingQuote, setCreatingQuote] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   // Add-ons
   const [skiPass,  setSkiPass]  = useState(false);
@@ -378,10 +379,14 @@ function ApartmentPage() {
             </div>
           </div>
 
-          {/* ── RIGHT: booking sidebar ─────────────────────────── */}
-          <div className="lg:w-[400px] flex-shrink-0">
-            <div className="sticky top-20">
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden">
+          {/* ── RIGHT: booking sidebar (desktop) / bottom sheet (mobile) ── */}
+          {sheetOpen && <div className="lg:hidden fixed inset-0 z-40 bg-black/40" onClick={() => setSheetOpen(false)} />}
+          <div className={`lg:w-[400px] lg:flex-shrink-0 max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:z-50 max-lg:transition-transform max-lg:duration-300 ${sheetOpen ? "max-lg:translate-y-0" : "max-lg:translate-y-full"}`}>
+            <div className="sticky top-20 max-lg:static">
+              <button onClick={() => setSheetOpen(false)} className="lg:hidden w-full flex justify-center pt-2 pb-1" aria-label="סגור">
+                <span className="block w-10 h-1.5 rounded-full bg-gray-300" />
+              </button>
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden max-lg:rounded-b-none max-lg:max-h-[82vh] max-lg:overflow-y-auto">
 
                 {/* Price header */}
                 <div className="px-6 pt-6 pb-4 bg-gradient-to-br from-gray-50 to-blue-50 border-b border-gray-100">
@@ -653,19 +658,19 @@ function ApartmentPage() {
       <div className="h-24 lg:hidden" aria-hidden />
 
       {/* ── Mobile floating booking bar (Airbnb-style) ─────────── */}
-      <div dir="rtl" className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 shadow-[0_-4px_24px_rgba(0,0,0,0.10)]"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.5rem)" }}>
-        <div className="flex-shrink-0 text-right leading-none">
-          <div className="text-[11px] text-gray-400 mb-0.5">{splitCount > 1 ? "החלק שלך" : `סה״כ · ${nights} לילות`}</div>
-          <div className="text-xl font-black text-gray-900">€{payNow.toLocaleString()}</div>
+      {!sheetOpen && (
+        <div dir="rtl" className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 shadow-[0_-4px_24px_rgba(0,0,0,0.10)]"
+          style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.5rem)" }}>
+          <div className="flex-shrink-0 text-right leading-none">
+            <div className="text-[11px] text-gray-400 mb-0.5">{splitCount > 1 ? "החלק שלך" : `סה״כ · ${nights} לילות`}</div>
+            <div className="text-xl font-black text-gray-900">€{payNow.toLocaleString()}</div>
+          </div>
+          <button onClick={() => setSheetOpen(true)}
+            className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-center text-base transition-colors shadow-sm">
+            בחר/י אפשרויות ותשלום ↑
+          </button>
         </div>
-        <CardPaymentButton apartmentId={id} apartment={apt?.name ?? ""} checkin={checkin} checkout={checkout}
-          guests={guests} nights={nights} skiPass={skiPass} transfer={transfer} transferDetails={transferDetails} cancel={cancel} service={service}
-          grandTotal={payNow}
-          split={splitCount > 1 ? { sharesTotal: splitCount, accommodationTotal: aptTotal, shareAmount: shareAccommodation, area: "Val Thorens, Trois Vallées" } : undefined}
-          label={splitCount > 1 ? "שלם/י את חלקך" : "תשלום בכרטיס"}
-          className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-center text-base transition-colors shadow-sm" />
-      </div>
+      )}
 
       {/* ── No-cancellation confirmation + signature ───────────── */}
       {showNoCancel && (
