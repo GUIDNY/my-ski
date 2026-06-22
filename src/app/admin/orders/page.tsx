@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import type { Order } from "@/types";
 
 const STATUS: Record<string, { label: string; cls: string }> = {
-  awaiting:  { label: "ממתין לתשלום", cls: "bg-gray-100 text-gray-500" },
+  awaiting:  { label: "🔥 ליד חם — הגיע לתשלום, לא שילם", cls: "bg-orange-100 text-orange-700" },
   hold:      { label: "פיקדון — ממתין לאישור", cls: "bg-amber-100 text-amber-700" },
   approved:  { label: "אושר ✓", cls: "bg-emerald-100 text-emerald-700" },
   cancelled: { label: "בוטל", cls: "bg-red-100 text-red-600" },
