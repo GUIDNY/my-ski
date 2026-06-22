@@ -378,7 +378,7 @@ function ApartmentPage() {
               </div>
             </div>
             {/* booking choices — inline (mobile + desktop main column) */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-5">
+            <div className="lg:hidden bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-5">
                   {/* ── Ski Pass ──────────────────────────────────── */}
                   <div>
                     <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">תוספות</div>
@@ -540,6 +540,105 @@ function ApartmentPage() {
                 </div>
 
                 <div className="px-6 py-5 flex flex-col gap-5">
+
+                  <div className="hidden lg:flex flex-col gap-5">
+                  {/* ── Ski Pass ──────────────────────────────────── */}
+                  <div>
+                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">תוספות</div>
+                    <div className="flex flex-col gap-2">
+                      <ToggleRow
+                        icon={<IconSkis size={18} />}
+                        label="סקי פס · Trois Vallées"
+                        sublabel="600 ק״מ מסלולים · כל הרמות · איסוף עצמאי מהמכונה"
+                        checked={skiPass} onChange={setSkiPass}
+                        disabled
+                      />
+                      <ToggleRow
+                        icon={<IconBus size={18} />}
+                        label="הסעה הלוך-חזור"
+                        sublabel="שאטל ישיר משדה התעופה"
+                        price={`+€${TRANSFER_PRICE}`}
+                        checked={transfer} onChange={setTransfer}
+                      />
+                      {transfer && (
+                        <button onClick={() => setShowTransfer(true)}
+                          className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-colors text-sm w-full text-right">
+                          <span className="text-blue-700 font-semibold">{flightFilled(flight) ? "✓ פרטי טיסה נשמרו · עריכה" : "מלא פרטי טיסה להסעה ←"}</span>
+                          <span className="text-xs text-blue-400">מספר טיסה · שעה · תאריך</span>
+                        </button>
+                      )}
+                    </div>
+                    <a href={skyscannerUrl} target="_blank" rel="noopener noreferrer"
+                      className="mt-2 flex items-center gap-2.5 p-3.5 rounded-xl border border-gray-100 bg-white hover:border-blue-200 hover:bg-blue-50 transition-all">
+                      <span className="text-gray-400 flex-shrink-0"><IconPlane size={17} /></span>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-semibold text-gray-800">טיסה ל-Geneva (GVA)</div>
+                        <div className="text-xs text-gray-400">TLV → Geneva · {checkin ? fmtDate(checkin) : "בחר תאריך"} · 2.5h מ-Val Thorens</div>
+                      </div>
+                      <span className="text-xs font-bold text-blue-600 flex-shrink-0">Skyscanner ←</span>
+                    </a>
+                  </div>
+
+                  {/* ── Cancellation policy ───────────────────────── */}
+                  <div>
+                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">מדיניות ביטול</div>
+                    <div className="flex flex-col gap-2">
+                      <RadioOption
+                        icon={<IconShield size={18} />}
+                        label="ביטול רגיל"
+                        sublabel="בהתאם לתנאי התקנון · מחיר רגיל"
+                        selected={cancel === "regular"}
+                        onClick={() => setCancel("regular")}
+                      />
+                      <RadioOption
+                        icon={<IconShield size={18} />}
+                        label="ללא אפשרות ביטול"
+                        sublabel="מחיר מוזל · לא ניתן לבטל ואין החזר כספי"
+                        badge={`−€${CANCEL_NONE}`}
+                        badgeColor="#ef4444"
+                        selected={cancel === "none"}
+                        onClick={() => { setShowNoCancel(true); }}
+                      />
+                      <RadioOption
+                        icon={<IconShield size={18} />}
+                        label="ביטול גמיש"
+                        sublabel="80% החזר עד שבוע לפני · 50% עד 24ש׳ לפני ההמראה · אח״כ אין החזר"
+                        badge={`+€${CANCEL_FLEX}`}
+                        badgeColor="#10b981"
+                        selected={cancel === "flexible"}
+                        onClick={() => setCancel("flexible")}
+                      />
+                    </div>
+                    <a href="/terms" target="_blank" className="inline-block mt-2 text-xs text-blue-600 hover:underline font-semibold">קרא/י את מדיניות הביטולים בתקנון ←</a>
+                  </div>
+
+                  {/* ── Service level ─────────────────────────────── */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">רמת שירות</div>
+                      <button onClick={() => setShowAiInfo(true)} className="text-xs font-semibold text-blue-600 hover:underline">ⓘ מידע נוסף</button>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <RadioOption
+                        icon={<IconUser size={18} />}
+                        label="שירות אנושי מלא"
+                        sublabel="נציג ישראלי זמין לפני, במהלך ואחרי"
+                        selected={service === "human"}
+                        onClick={() => setService("human")}
+                      />
+                      <RadioOption
+                        icon={<IconBot size={18} />}
+                        label="AI בלבד"
+                        sublabel="ניהול עצמאי עם תמיכת צ'אטבוט · איסוף עצמאי של הסקי פס"
+                        badge={`-€${AI_DISCOUNT}`}
+                        badgeColor="#6366f1"
+                        selected={service === "ai"}
+                        onClick={() => setService("ai")}
+                      />
+                    </div>
+                  </div>
+
+                  </div>
 
                   {/* ── Price breakdown ───────────────────────────── */}
                   <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
