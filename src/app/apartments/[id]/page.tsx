@@ -447,11 +447,14 @@ function ApartmentPage() {
                         checked={transfer} onChange={setTransfer}
                       />
                       {transfer && (
-                        <a href={`/transfers?checkin=${checkin}&checkout=${checkout}&guests=${guests}&apartment=${encodeURIComponent(apt.name)}&apartment_id=${apt.id}`}
-                          className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-colors text-sm">
-                          <span className="text-blue-700 font-semibold">מלא פרטי טיסה להסעה ←</span>
-                          <span className="text-xs text-blue-400">מספר טיסה · שעה · תאריך</span>
-                        </a>
+                        <>
+                          <a href={`/transfers?checkin=${checkin}&checkout=${checkout}&guests=${guests}&apartment=${encodeURIComponent(apt.name)}&apartment_id=${apt.id}`}
+                            className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-colors text-sm">
+                            <span className="text-blue-700 font-semibold">מלא פרטי טיסה להסעה ←</span>
+                            <span className="text-xs text-blue-400">מספר טיסה · שעה · תאריך</span>
+                          </a>
+                          <p className="text-[11px] text-gray-400 px-1 leading-relaxed">⏱️ אישור סופי להסעה עד 48 שעות. במקרה של בעיה כלשהי ניצור איתך קשר — בדרך כלל ללא תקלות.</p>
+                        </>
                       )}
                     </div>
                     <a href={skyscannerUrl} target="_blank" rel="noopener noreferrer"
