@@ -149,6 +149,11 @@ function ApartmentPage() {
   // Add-ons
   const [skiPass,  setSkiPass]  = useState(false);
   const [transfer, setTransfer] = useState(false);
+  const [showTransfer, setShowTransfer] = useState(false);
+  const [flightDate, setFlightDate] = useState("");
+  const [flightNum, setFlightNum] = useState("");
+  const [flightTime, setFlightTime] = useState("");
+  const [retFlight, setRetFlight] = useState("");
 
   // Cancellation: "regular" (per terms) | "none" (-€100, signed) | "flexible" (+€100)
   const [cancel, setCancel] = useState<"regular" | "none" | "flexible">("regular");
@@ -207,6 +212,9 @@ function ApartmentPage() {
   const noCancelDiscount = cancel === "none"     ? -CANCEL_NONE : 0;
   const aiDiscount      = service === "ai"       ? -(AI_DISCOUNT * guests) : 0;
   const grandTotal      = aptTotal + skiTotal + trTotal + flexExtra + noCancelDiscount + aiDiscount;
+  const transferDetails = transfer && flightNum
+    ? `הגעה ${flightDate || "?"} · טיסה ${flightNum} בשעה ${flightTime || "?"}${retFlight ? ` · חזרה ${retFlight}` : ""}`
+    : "";
 
   /* ── Long fallback quote URL (works without DB) ─────────── */
   const buildQuoteUrl = () => {
@@ -236,8 +244,8 @@ function ApartmentPage() {
       `🏔️ דירה: ${apt?.name ?? ""}`,
       checkin && checkout ? `📅 תאריכים: ${fmtDate(checkin)} — ${fmtDate(checkout)} (${nights} לילות)` : `🗓️ ${nights} לילות`,
       `👥 אורחים: ${guests}`,
-      transfer ? "🚐 כולל הסעה הלוך-חזור" : null,
-      cancel === "flexible" ? "✅ מדיניות ביטול גמישה" : null,
+      transfer ? `🚐 כולל הסעה הלוך-חזור${transferDetails ? ` (${transferDetails})` : ""}` : null,
+      cancel === "flexible" ? "✅ מדיניות ביטול גמישה" : cancel === "none" ? "🔒 ללא אפשרות ביטול" : null,
       skiPass ? "🎿 מעוניין/ת גם בסקי פס" : null,
       service === "ai" ? "🤖 ניהול עצמאי (AI)" : null,
     ],
@@ -447,14 +455,11 @@ function ApartmentPage() {
                         checked={transfer} onChange={setTransfer}
                       />
                       {transfer && (
-                        <>
-                          <a href={`/transfers?checkin=${checkin}&checkout=${checkout}&guests=${guests}&apartment=${encodeURIComponent(apt.name)}&apartment_id=${apt.id}`}
-                            className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-colors text-sm">
-                            <span className="text-blue-700 font-semibold">מלא פרטי טיסה להסעה ←</span>
-                            <span className="text-xs text-blue-400">מספר טיסה · שעה · תאריך</span>
-                          </a>
-                          <p className="text-[11px] text-gray-400 px-1 leading-relaxed">⏱️ אישור סופי להסעה עד 48 שעות. במקרה של בעיה כלשהי ניצור איתך קשר — בדרך כלל ללא תקלות.</p>
-                        </>
+                        <button onClick={() => setShowTransfer(true)}
+                          className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-colors text-sm w-full text-right">
+                          <span className="text-blue-700 font-semibold">{flightNum ? "✓ פרטי טיסה נשמרו · עריכה" : "מלא פרטי טיסה להסעה ←"}</span>
+                          <span className="text-xs text-blue-400">מספר טיסה · שעה · תאריך</span>
+                        </button>
                       )}
                     </div>
                     <a href={skyscannerUrl} target="_blank" rel="noopener noreferrer"
@@ -575,6 +580,7 @@ function ApartmentPage() {
                   {/* ── CTA ───────────────────────────────────────── */}
                   <CardPaymentButton apartmentId={id} apartment={apt?.name ?? ""} checkin={checkin} checkout={checkout}
                     guests={guests} nights={nights} skiPass={skiPass} transfer={transfer} cancel={cancel} service={service}
+                    transferDetails={transferDetails}
                     grandTotal={grandTotal}
                     className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-center text-base transition-colors shadow-sm" />
 
@@ -630,6 +636,40 @@ function ApartmentPage() {
                 onClick={() => { setCancel("none"); setShowNoCancel(false); }}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition">אישור וחתימה</button>
               <button onClick={() => setShowNoCancel(false)} className="px-5 py-3 rounded-xl border border-gray-200 text-gray-600 font-bold">ביטול</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Transfer flight details ────────────────────────────── */}
+      {showTransfer && (
+        <div dir="rtl" className="fixed inset-0 z-[95] bg-black/55 flex items-center justify-center p-4" onClick={() => setShowTransfer(false)}>
+          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="font-display text-xl font-black text-slate-900">פרטי טיסה להסעה 🚐</h2>
+              <button onClick={() => setShowTransfer(false)} className="w-9 h-9 rounded-full hover:bg-slate-100 text-slate-400 text-xl">✕</button>
+            </div>
+            <p className="text-sm text-slate-500 mb-4 leading-relaxed">השאטל יחכה לך בשדה התעופה Geneva (GVA). מלא/י את פרטי הטיסה ונתאם הכל. <b className="text-slate-700">האישור הסופי להסעה ניתן עד 48 שעות</b>; אם תהיה בעיה כלשהי ניצור איתך קשר (בדרך כלל ללא תקלות).</p>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-bold text-gray-400 block mb-1">תאריך הגעה</label>
+                <input type="date" value={flightDate} onChange={e => setFlightDate(e.target.value)} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-gray-400 block mb-1">מספר טיסה (הגעה)</label>
+                  <input value={flightNum} onChange={e => setFlightNum(e.target.value)} placeholder="LY345" dir="ltr" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-right focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-400 block mb-1">שעת נחיתה</label>
+                  <input type="time" value={flightTime} onChange={e => setFlightTime(e.target.value)} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-400 block mb-1">טיסת חזרה (אופציונלי)</label>
+                <input value={retFlight} onChange={e => setRetFlight(e.target.value)} placeholder="מספר טיסה + שעה בחזרה" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <button onClick={() => setShowTransfer(false)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition">שמירת פרטי טיסה</button>
             </div>
           </div>
         </div>

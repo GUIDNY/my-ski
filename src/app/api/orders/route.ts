@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
     nights:         Number(b.nights ?? 1),
     ski_pass:       b.ski_pass === true || b.ski_pass === "true",
     transfer:       b.transfer === true || b.transfer === "true",
+    transfer_details: b.transfer_details || null,
     cancel:         b.cancel || "none",
     service:        b.service || "human",
     total_eur:      Number(b.grand_total ?? b.total_eur ?? 0),
