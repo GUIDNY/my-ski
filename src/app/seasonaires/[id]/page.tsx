@@ -1,4 +1,5 @@
 "use client";
+import SkiLoader from "@/components/SkiLoader";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import type { SeasonRental } from "@/types";
@@ -30,7 +31,7 @@ export default function SeasonRentalDetail() {
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-[#f7f9fb]">
-      <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      <SkiLoader />
     </div>
   );
 

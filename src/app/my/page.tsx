@@ -1,4 +1,5 @@
 "use client";
+import SkiLoader from "@/components/SkiLoader";
 import { Suspense, useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase-client";
@@ -463,7 +464,7 @@ function FAQBlock({ open, setOpen }: { open: number | null; setOpen: (n: number 
 }
 
 function Spinner() {
-  return <div className="min-h-screen flex items-center justify-center bg-[#f8f9ff]"><div className="w-10 h-10 border-4 border-[#0060ac] border-t-transparent rounded-full animate-spin" /></div>;
+  return <div className="min-h-screen flex items-center justify-center bg-[#f8f9ff]"><SkiLoader /></div>;
 }
 
 export default function MyPage() {

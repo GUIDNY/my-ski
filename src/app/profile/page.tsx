@@ -1,4 +1,5 @@
 "use client";
+import SkiLoader from "@/components/SkiLoader";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase-client";
@@ -48,7 +49,7 @@ export default function ProfilePage() {
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      <SkiLoader />
     </div>
   );
 

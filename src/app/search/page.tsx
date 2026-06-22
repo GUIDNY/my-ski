@@ -1,4 +1,5 @@
 "use client";
+import SkiLoader from "@/components/SkiLoader";
 import { Suspense, useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { Apartment } from "@/types";
@@ -423,7 +424,7 @@ export default function SearchPageWrapper() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <SkiLoader />
       </div>
     }>
       <SearchPage />

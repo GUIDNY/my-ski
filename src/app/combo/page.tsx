@@ -1,4 +1,5 @@
 "use client";
+import SkiLoader from "@/components/SkiLoader";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { Apartment } from "@/types";
@@ -154,7 +155,7 @@ function ComboInner() {
     });
   }, [aId, bId]);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" /></div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-gray-50"><SkiLoader /></div>;
   if (!a || !b) return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-500" dir="rtl">השילוב לא נמצא. <a href="/apartments" className="text-blue-600 underline mr-1">חזרה לדירות</a></div>;
 
   const totalA = nights > 0 ? calcTotalForRange(checkin, checkout, Number(a.price_per_night), rulesA) : Number(a.price_per_night);
