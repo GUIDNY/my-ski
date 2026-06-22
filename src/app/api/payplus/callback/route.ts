@@ -51,6 +51,15 @@ export async function POST(req: NextRequest) {
 
   if (hook && sendEmail) {
     const o = order || {};
+    // split payment: include a link friends can use to pay the remaining shares
+    let splitUrl: string | undefined;
+    if (o.group_id) {
+      try {
+        const gdb = createServerClient();
+        const { data: g } = await gdb.from("booking_groups").select("code").eq("id", o.group_id).single();
+        if (g?.code) splitUrl = `${origin}/split/${g.code}`;
+      } catch { /* ignore */ }
+    }
     try {
       await fetch(hook, {
         method: "POST",
@@ -64,6 +73,7 @@ export async function POST(req: NextRequest) {
             apartment: o.apartment_name, area: o.area, checkin: o.checkin, checkout: o.checkout,
             guests: o.guests, nights: o.nights, ski_pass: o.ski_pass, transfer: o.transfer,
             total_eur: o.total_eur, portal_url: `${origin}/my?code=${o.code}`,
+            share_amount: o.share_amount, shares_total: o.shares_total, split_url: splitUrl,
           } : undefined,
           data: payload,
         }),

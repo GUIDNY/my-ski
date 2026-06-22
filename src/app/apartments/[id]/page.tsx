@@ -150,6 +150,7 @@ function ApartmentPage() {
   const [skiPass,  setSkiPass]  = useState(false);
   const [transfer, setTransfer] = useState(false);
   const [showTransfer, setShowTransfer] = useState(false);
+  const [splitCount, setSplitCount] = useState(1);
   const [flightDate, setFlightDate] = useState("");
   const [flightNum, setFlightNum] = useState("");
   const [flightTime, setFlightTime] = useState("");
@@ -215,6 +216,8 @@ function ApartmentPage() {
   const transferDetails = transfer && flightNum
     ? `הגעה ${flightDate || "?"} · טיסה ${flightNum} בשעה ${flightTime || "?"}${retFlight ? ` · חזרה ${retFlight}` : ""}`
     : "";
+  const shareAccommodation = Math.round(aptTotal / splitCount);
+  const payNow = splitCount > 1 ? shareAccommodation + trTotal + flexExtra + noCancelDiscount + aiDiscount : grandTotal;
 
   /* ── Long fallback quote URL (works without DB) ─────────── */
   const buildQuoteUrl = () => {
@@ -577,11 +580,38 @@ function ApartmentPage() {
                     </div>
                   </div>
 
+                  {/* ── Split payment ─────────────────────────────── */}
+                  <div className="rounded-xl border border-gray-100 p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-bold text-gray-800">כמה אנשים משלמים?</span>
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => setSplitCount(n => Math.max(1, n - 1))}
+                          className="w-7 h-7 rounded-full border border-gray-200 text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold">−</button>
+                        <span className="font-black text-gray-900 w-5 text-center">{splitCount}</span>
+                        <button onClick={() => setSplitCount(n => Math.min(8, n + 1))}
+                          className="w-7 h-7 rounded-full border border-gray-200 text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold">+</button>
+                      </div>
+                    </div>
+                    {splitCount > 1 ? (
+                      <div className="bg-blue-50 rounded-lg px-3 py-2.5 text-sm">
+                        <div className="flex justify-between text-blue-900 font-bold">
+                          <span>החלק שלך לתשלום עכשיו</span>
+                          <span>€{payNow.toLocaleString()}</span>
+                        </div>
+                        <p className="text-xs text-blue-600 mt-1 leading-relaxed">מחיר הדירה (€{aptTotal.toLocaleString()}) מתחלק ל-{splitCount} · אחרי התשלום תקבל/י קישור לשלוח לחברים שישלמו את חלקם.</p>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-400">בחר/י יותר מאדם אחד כדי לפצל את התשלום בין כמה משלמים.</p>
+                    )}
+                  </div>
+
                   {/* ── CTA ───────────────────────────────────────── */}
                   <CardPaymentButton apartmentId={id} apartment={apt?.name ?? ""} checkin={checkin} checkout={checkout}
                     guests={guests} nights={nights} skiPass={skiPass} transfer={transfer} cancel={cancel} service={service}
                     transferDetails={transferDetails}
-                    grandTotal={grandTotal}
+                    grandTotal={payNow}
+                    split={splitCount > 1 ? { sharesTotal: splitCount, accommodationTotal: aptTotal, shareAmount: shareAccommodation, area: "Val Thorens, Trois Vallées" } : undefined}
+                    label={splitCount > 1 ? "שלם/י את חלקך בכרטיס" : undefined}
                     className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-center text-base transition-colors shadow-sm" />
 
                   {/* save + quote side by side */}

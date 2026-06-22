@@ -19,6 +19,8 @@ type Props = {
   grandTotal: number;
   className?: string;
   label?: string;
+  // split payment: create a new group (first payer) or join an existing one
+  split?: { sharesTotal: number; accommodationTotal: number; shareAmount: number; groupId?: string; area?: string };
 };
 
 const CARD_FEE_PCT = 0.019; // credit-card processing fee
@@ -41,6 +43,21 @@ export default function CardPaymentButton(p: Props) {
     if (!agreed) return setErr("יש לאשר את התקנון ומדיניות הביטולים");
     setBusy(true); setErr("");
     try {
+      // split payment: create the group on the first payment (or reuse when joining)
+      let groupId = p.split?.groupId;
+      if (p.split && !groupId) {
+        const g = await fetch("/api/groups", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            apartment_id: p.apartmentId, extra_apartment_id: p.extraApartmentId,
+            apartment_name: p.apartment, area: p.split.area,
+            checkin: p.checkin, checkout: p.checkout, guests: p.guests,
+            accommodation_total: p.split.accommodationTotal, shares_total: p.split.sharesTotal,
+          }),
+        }).then(r => r.json());
+        groupId = g.id;
+      }
+
       const order = await fetch("/api/orders", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -50,6 +67,7 @@ export default function CardPaymentButton(p: Props) {
           guests: p.guests, nights: p.nights, ski_pass: p.skiPass, transfer: p.transfer,
           transfer_details: p.transferDetails,
           cancel: p.cancel, service: p.service, grand_total: p.grandTotal,
+          group_id: groupId, share_amount: p.split?.shareAmount, shares_total: p.split?.sharesTotal,
           customer_name: name, customer_email: email, customer_phone: phone,
         }),
       }).then(r => r.json());
