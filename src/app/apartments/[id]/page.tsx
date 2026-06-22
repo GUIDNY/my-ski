@@ -19,7 +19,9 @@ const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s + "T12:
 
 const SKI_DAY_PRICE  = 70;
 const TRANSFER_PRICE = 180;
-const FLEXIBLE_EXTRA = 100; // per person
+const FLEXIBLE_EXTRA = 100; // per person (legacy)
+const CANCEL_FLEX    = 100; // flexible cancellation surcharge (flat)
+const CANCEL_NONE    = 100; // no-cancellation discount (flat)
 const AI_DISCOUNT    = 50;  // per person
 
 const AMENITY_ICONS: Record<string, React.ReactNode> = {
@@ -31,26 +33,31 @@ const AMENITY_ICONS: Record<string, React.ReactNode> = {
 const amenityIcon = (a: string) => AMENITY_ICONS[a] ?? <IconCheck size={15} />;
 
 /* ── Toggle row ───────────────────────────────────────────── */
-function ToggleRow({ icon, label, sublabel, price, checked, onChange }: {
+function ToggleRow({ icon, label, sublabel, price, checked, onChange, disabled }: {
   icon: React.ReactNode; label: string; sublabel?: string;
-  price?: string; checked: boolean; onChange: (v: boolean) => void;
+  price?: string; checked: boolean; onChange: (v: boolean) => void; disabled?: boolean;
 }) {
   return (
     <button
-      onClick={() => onChange(!checked)}
+      onClick={() => !disabled && onChange(!checked)}
+      disabled={disabled}
       className={`w-full flex items-center gap-3 p-3.5 rounded-xl border text-right transition-all
-        ${checked ? "border-blue-300 bg-blue-50" : "border-gray-100 bg-white hover:border-gray-200"}`}
+        ${disabled ? "border-gray-100 bg-gray-50 cursor-not-allowed" : checked ? "border-blue-300 bg-blue-50" : "border-gray-100 bg-white hover:border-gray-200"}`}
     >
-      <span className={`flex-shrink-0 ${checked ? "text-blue-600" : "text-gray-400"}`}>{icon}</span>
+      <span className={`flex-shrink-0 ${disabled ? "text-gray-300" : checked ? "text-blue-600" : "text-gray-400"}`}>{icon}</span>
       <div className="flex-1 min-w-0">
-        <div className="text-sm font-semibold text-gray-800">{label}</div>
+        <div className={`text-sm font-semibold ${disabled ? "text-gray-400" : "text-gray-800"}`}>{label}</div>
         {sublabel && <div className="text-xs text-gray-400 mt-0.5">{sublabel}</div>}
       </div>
-      {price && <span className="text-xs font-bold text-gray-600 flex-shrink-0">{price}</span>}
-      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0
-        ${checked ? "border-blue-500 bg-blue-500" : "border-gray-300"}`}>
-        {checked && <IconCheck size={11} className="text-white" />}
-      </div>
+      {price && <span className={`text-xs font-bold flex-shrink-0 ${disabled ? "text-blue-500" : "text-gray-600"}`}>{price}</span>}
+      {disabled ? (
+        <span className="text-[11px] font-bold text-blue-500 flex-shrink-0">בקרוב</span>
+      ) : (
+        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0
+          ${checked ? "border-blue-500 bg-blue-500" : "border-gray-300"}`}>
+          {checked && <IconCheck size={11} className="text-white" />}
+        </div>
+      )}
     </button>
   );
 }
@@ -142,11 +149,15 @@ function ApartmentPage() {
   const [skiPass,  setSkiPass]  = useState(false);
   const [transfer, setTransfer] = useState(false);
 
-  // Cancellation: "none" | "flexible"
-  const [cancel, setCancel] = useState<"none" | "flexible">("none");
+  // Cancellation: "regular" (per terms) | "none" (-€100, signed) | "flexible" (+€100)
+  const [cancel, setCancel] = useState<"regular" | "none" | "flexible">("regular");
+  const [showNoCancel, setShowNoCancel] = useState(false);
+  const [noCancelAgreed, setNoCancelAgreed] = useState(false);
+  const [signature, setSignature] = useState("");
 
   // Service: "human" | "ai"
   const [service, setService] = useState<"human" | "ai">("human");
+  const [showAiInfo, setShowAiInfo] = useState(false);
 
   const nights = checkin && checkout
     ? Math.round((new Date(checkout).getTime() - new Date(checkin).getTime()) / 86400000) : 7;
@@ -189,11 +200,12 @@ function ApartmentPage() {
   })();
 
   const avgNightlyPrice = breakdown.length > 0 ? Math.round(aptTotal / nights) : basePrice;
-  const skiTotal      = 0; // Coming soon — price not yet available
-  const trTotal       = transfer ? TRANSFER_PRICE : 0;
-  const flexExtra     = cancel   === "flexible" ? FLEXIBLE_EXTRA * guests : 0;
-  const aiDiscount    = service  === "ai"       ? -(AI_DISCOUNT  * guests) : 0;
-  const grandTotal    = aptTotal + skiTotal + trTotal + flexExtra + aiDiscount;
+  const skiTotal        = 0; // Coming soon — price not yet available
+  const trTotal         = transfer ? TRANSFER_PRICE : 0;
+  const flexExtra       = cancel  === "flexible" ? CANCEL_FLEX : 0;
+  const noCancelDiscount = cancel === "none"     ? -CANCEL_NONE : 0;
+  const aiDiscount      = service === "ai"       ? -(AI_DISCOUNT * guests) : 0;
+  const grandTotal      = aptTotal + skiTotal + trTotal + flexExtra + noCancelDiscount + aiDiscount;
 
   /* ── Long fallback quote URL (works without DB) ─────────── */
   const buildQuoteUrl = () => {
@@ -422,9 +434,9 @@ function ApartmentPage() {
                       <ToggleRow
                         icon={<IconSkis size={18} />}
                         label="סקי פס · Trois Vallées"
-                        sublabel="600 ק״מ מסלולים · כל הרמות"
-                        price="מחיר בקרוב"
+                        sublabel="600 ק״מ מסלולים · כל הרמות · איסוף עצמאי מהמכונה"
                         checked={skiPass} onChange={setSkiPass}
+                        disabled
                       />
                       <ToggleRow
                         icon={<IconBus size={18} />}
@@ -458,26 +470,39 @@ function ApartmentPage() {
                     <div className="flex flex-col gap-2">
                       <RadioOption
                         icon={<IconShield size={18} />}
-                        label="לא ניתן לביטול"
-                        sublabel="מחיר מוזל — אין החזר כספי"
-                        selected={cancel === "none"}
-                        onClick={() => setCancel("none")}
+                        label="ביטול רגיל"
+                        sublabel="בהתאם לתנאי התקנון · מחיר רגיל"
+                        selected={cancel === "regular"}
+                        onClick={() => setCancel("regular")}
                       />
                       <RadioOption
                         icon={<IconShield size={18} />}
-                        label="מדיניות גמישה"
-                        sublabel="80% החזר עד 48 שעות לפני"
-                        badge={`+€${FLEXIBLE_EXTRA}/אדם`}
+                        label="ללא אפשרות ביטול"
+                        sublabel="מחיר מוזל · לא ניתן לבטל ואין החזר כספי"
+                        badge={`−€${CANCEL_NONE}`}
+                        badgeColor="#ef4444"
+                        selected={cancel === "none"}
+                        onClick={() => { setShowNoCancel(true); }}
+                      />
+                      <RadioOption
+                        icon={<IconShield size={18} />}
+                        label="ביטול גמיש"
+                        sublabel="80% החזר עד שבוע לפני · 50% עד 24ש׳ לפני ההמראה · אח״כ אין החזר"
+                        badge={`+€${CANCEL_FLEX}`}
                         badgeColor="#10b981"
                         selected={cancel === "flexible"}
                         onClick={() => setCancel("flexible")}
                       />
                     </div>
+                    <a href="/terms" target="_blank" className="inline-block mt-2 text-xs text-blue-600 hover:underline font-semibold">קרא/י את מדיניות הביטולים בתקנון ←</a>
                   </div>
 
                   {/* ── Service level ─────────────────────────────── */}
                   <div>
-                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">רמת שירות</div>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">רמת שירות</div>
+                      <button onClick={() => setShowAiInfo(true)} className="text-xs font-semibold text-blue-600 hover:underline">ⓘ מידע נוסף</button>
+                    </div>
                     <div className="flex flex-col gap-2">
                       <RadioOption
                         icon={<IconUser size={18} />}
@@ -489,7 +514,7 @@ function ApartmentPage() {
                       <RadioOption
                         icon={<IconBot size={18} />}
                         label="AI בלבד"
-                        sublabel="ניהול עצמאי עם תמיכת צ'אטבוט"
+                        sublabel="ניהול עצמאי עם תמיכת צ'אטבוט · איסוף עצמאי של הסקי פס"
                         badge={`-€${AI_DISCOUNT}/אדם`}
                         badgeColor="#6366f1"
                         selected={service === "ai"}
@@ -520,8 +545,14 @@ function ApartmentPage() {
                       )}
                       {cancel === "flexible" && (
                         <div className="flex justify-between">
-                          <span className="text-gray-500">מדיניות גמישה × {guests}</span>
+                          <span className="text-gray-500">ביטול גמיש</span>
                           <span className="font-semibold text-gray-800">€{flexExtra.toLocaleString()}</span>
+                        </div>
+                      )}
+                      {cancel === "none" && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">ללא אפשרות ביטול</span>
+                          <span className="font-semibold text-emerald-600">−€{CANCEL_NONE.toLocaleString()}</span>
                         </div>
                       )}
                       {service === "ai" && (
@@ -558,7 +589,7 @@ function ApartmentPage() {
                     className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-gray-200 bg-white hover:bg-red-50 hover:border-red-200 text-gray-700 font-bold text-center text-sm transition-colors" />
 
                   <p className="text-center text-xs text-gray-400">
-                    {cancel === "flexible" ? "80% החזר עד 48 שעות לפני" : "לא ניתן לביטול לאחר ההזמנה"}
+                    {cancel === "flexible" ? "80% החזר עד שבוע לפני · 50% עד 24ש׳" : cancel === "none" ? "לא ניתן לביטול — אישרת בחתימה" : "ביטול בהתאם לתנאי התקנון"}
                   </p>
                 </div>
               </div>
@@ -567,6 +598,49 @@ function ApartmentPage() {
 
         </div>
       </div>
+
+      {/* ── No-cancellation confirmation + signature ───────────── */}
+      {showNoCancel && (
+        <div dir="rtl" className="fixed inset-0 z-[95] bg-black/55 flex items-center justify-center p-4" onClick={() => setShowNoCancel(false)}>
+          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <h2 className="font-display text-xl font-black text-slate-900 mb-1">ללא אפשרות ביטול</h2>
+            <p className="text-sm text-slate-500 mb-4">בחירה באפשרות זו מוזילה את המחיר ב-€{CANCEL_NONE}, אך ההזמנה <b>אינה ניתנת לביטול</b> ולא יינתן כל החזר כספי, בהתאם לתקנון.</p>
+            <label className="flex items-start gap-2 cursor-pointer mb-4">
+              <input type="checkbox" checked={noCancelAgreed} onChange={e => setNoCancelAgreed(e.target.checked)} className="mt-0.5 w-4 h-4 accent-blue-600" />
+              <span className="text-sm text-slate-600 leading-relaxed">אני מאשר/ת שקראתי והבנתי כי <b>לא אוכל לבטל את ההזמנה</b> ולא אקבל החזר כספי בשום מקרה, ומסכים/ה ל<a href="/terms" target="_blank" className="text-blue-600 underline">תקנון</a>.</span>
+            </label>
+            <label className="block text-xs font-bold text-gray-400 mb-1">חתימה (שם מלא)</label>
+            <input value={signature} onChange={e => setSignature(e.target.value)} placeholder="הקלד/י את שמך המלא כחתימה"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <div className="flex gap-2">
+              <button disabled={!noCancelAgreed || signature.trim().length < 2}
+                onClick={() => { setCancel("none"); setShowNoCancel(false); }}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition">אישור וחתימה</button>
+              <button onClick={() => setShowNoCancel(false)} className="px-5 py-3 rounded-xl border border-gray-200 text-gray-600 font-bold">ביטול</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── AI service info ────────────────────────────────────── */}
+      {showAiInfo && (
+        <div dir="rtl" className="fixed inset-0 z-[95] bg-black/55 flex items-center justify-center p-4" onClick={() => setShowAiInfo(false)}>
+          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-display text-xl font-black text-slate-900">שירות AI — איך זה עובד?</h2>
+              <button onClick={() => setShowAiInfo(false)} className="w-9 h-9 rounded-full hover:bg-slate-100 text-slate-400 text-xl">✕</button>
+            </div>
+            <ul className="space-y-3 text-sm text-slate-600 leading-relaxed">
+              <li className="flex gap-2"><span>📍</span><span>תקבל/י את הכתובת המלאה וחוקי הצ׳ק-אין / צ׳ק-אאוט.</span></li>
+              <li className="flex gap-2"><span>🔑</span><span>המפתחות יחכו לך בדלת כ-48 שעות לפני ההגעה. את הדירה יש לפנות לפי שעות הצ׳ק-אאוט הרגילות.</span></li>
+              <li className="flex gap-2"><span>🎿</span><span>אם הזמנת סקי פס — תאסוף/י אותו עצמאית מהמכונה במהלך השהות.</span></li>
+              <li className="flex gap-2"><span>🤖</span><span>לאורך החופשה תיעזר/י בצ׳אטבוט AI לכל שאלה.</span></li>
+              <li className="flex gap-2"><span>🆘</span><span>במקרים חריגים (קבלת דירה עם נזק, מקרה קיצון) תוכל/י כמובן לפנות לנציגים שלנו דרך האתר.</span></li>
+            </ul>
+            <button onClick={() => setShowAiInfo(false)} className="mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition">הבנתי</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
