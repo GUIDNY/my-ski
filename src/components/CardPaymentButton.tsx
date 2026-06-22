@@ -20,7 +20,11 @@ type Props = {
   label?: string;
 };
 
+const CARD_FEE_PCT = 0.019; // credit-card processing fee
+
 export default function CardPaymentButton(p: Props) {
+  const cardFee = Math.round(p.grandTotal * CARD_FEE_PCT);
+  const totalWithFee = p.grandTotal + cardFee;
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -51,7 +55,7 @@ export default function CardPaymentButton(p: Props) {
       const res = await fetch("/api/payplus/create-link", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount: p.grandTotal, description: `${p.apartment} · ${p.nights} לילות`,
+          amount: totalWithFee, description: `${p.apartment} · ${p.nights} לילות`,
           order_code: order.code, name, email, phone,
         }),
       }).then(r => r.json());
@@ -94,13 +98,20 @@ export default function CardPaymentButton(p: Props) {
                 </span>
               </label>
 
+              {/* fee breakdown */}
+              <div className="bg-slate-50 rounded-xl p-3.5 border border-slate-100 text-sm space-y-1.5">
+                <div className="flex justify-between text-slate-500"><span>סכום ההזמנה</span><span>€{p.grandTotal.toLocaleString()}</span></div>
+                <div className="flex justify-between text-slate-500"><span>עמלת סליקת אשראי (1.9%)</span><span>€{cardFee.toLocaleString()}</span></div>
+                <div className="flex justify-between font-black text-slate-900 border-t border-slate-200 pt-1.5"><span>לתשלום בכרטיס</span><span>€{totalWithFee.toLocaleString()}</span></div>
+              </div>
+
               {err && <p className="text-red-600 text-sm">{err}</p>}
 
               <button onClick={submit} disabled={busy}
                 className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-display font-bold py-3.5 rounded-xl transition">
                 <IconCreditCard size={20} /> {busy ? "מעביר לתשלום…" : "המשך לתשלום מאובטח"}
               </button>
-              <p className="text-center text-[11px] text-slate-400">תשלום מאובטח · PayPlus</p>
+              <p className="text-center text-[11px] text-slate-400">תשלום מאובטח · PayPlus · ללא עמלה בהעברה בנקאית — דברו עם נציג</p>
             </div>
           </div>
         </div>

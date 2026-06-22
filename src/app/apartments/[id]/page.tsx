@@ -144,6 +144,7 @@ function ApartmentPage() {
   const [loading,       setLoading]       = useState(true);
   const [showBreakdown, setShowBreakdown] = useState(false);
   const [creatingQuote, setCreatingQuote] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // Add-ons
   const [skiPass,  setSkiPass]  = useState(false);
@@ -574,19 +575,28 @@ function ApartmentPage() {
                     grandTotal={grandTotal}
                     className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-center text-base transition-colors shadow-sm" />
 
-                  <a href={waBookHref} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-[#25D366] hover:bg-[#1ebe5a] text-white font-black text-center text-base transition-colors shadow-sm">
-                    <IconWhatsApp size={20} /> צור קשר עם נציג להזמנה
-                  </a>
+                  {/* save + quote side by side */}
+                  <div className="flex gap-2">
+                    <SaveTripButton apartmentId={id} checkin={checkin} checkout={checkout} guests={guests}
+                      label="מועדפים"
+                      className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl border border-gray-200 bg-white hover:bg-red-50 hover:border-red-200 text-gray-700 font-bold text-center text-sm transition-colors" />
+                    <button onClick={handleSendQuote} disabled={creatingQuote}
+                      className="flex-1 py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-800 font-bold text-center text-sm transition-colors disabled:opacity-60">
+                      {creatingQuote ? "יוצר…" : "📋 הצעת מחיר"}
+                    </button>
+                  </div>
 
-                  <button onClick={handleSendQuote} disabled={creatingQuote}
-                    className="block w-full py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-800 font-bold text-center text-sm transition-colors disabled:opacity-60">
-                    {creatingQuote ? "יוצר הצעה…" : "📋 שלח הצעת מחיר"}
+                  {/* copy link */}
+                  <button onClick={() => { navigator.clipboard?.writeText(window.location.href); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+                    className="block w-full py-2.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-bold text-center text-sm transition-colors">
+                    {copied ? "✓ הקישור הועתק — שלח/י לחברים" : "🔗 העתק קישור לשיתוף"}
                   </button>
 
-                  <SaveTripButton apartmentId={id} checkin={checkin} checkout={checkout} guests={guests}
-                    label="שמור לחופשות שלי"
-                    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-gray-200 bg-white hover:bg-red-50 hover:border-red-200 text-gray-700 font-bold text-center text-sm transition-colors" />
+                  {/* small contact rep */}
+                  <a href={waBookHref} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-1.5 text-sm text-[#1ebe5a] font-bold hover:underline pt-1">
+                    <IconWhatsApp size={16} /> צור קשר עם נציג
+                  </a>
 
                   <p className="text-center text-xs text-gray-400">
                     {cancel === "flexible" ? "80% החזר עד שבוע לפני · 50% עד 24ש׳" : cancel === "none" ? "לא ניתן לביטול — אישרת בחתימה" : "ביטול בהתאם לתנאי התקנון"}
