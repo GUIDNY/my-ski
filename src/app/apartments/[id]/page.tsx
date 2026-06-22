@@ -210,7 +210,7 @@ function ApartmentPage() {
   const trTotal         = transfer ? TRANSFER_PRICE : 0;
   const flexExtra       = cancel  === "flexible" ? CANCEL_FLEX : 0;
   const noCancelDiscount = cancel === "none"     ? -CANCEL_NONE : 0;
-  const aiDiscount      = service === "ai"       ? -(AI_DISCOUNT * guests) : 0;
+  const aiDiscount      = service === "ai"       ? -AI_DISCOUNT : 0;
   const grandTotal      = aptTotal + skiTotal + trTotal + flexExtra + noCancelDiscount + aiDiscount;
   const transferDetails = transfer ? flightToString(flight) : "";
   const shareAccommodation = Math.round(aptTotal / splitCount);
@@ -524,7 +524,7 @@ function ApartmentPage() {
                         icon={<IconBot size={18} />}
                         label="AI בלבד"
                         sublabel="ניהול עצמאי עם תמיכת צ'אטבוט · איסוף עצמאי של הסקי פס"
-                        badge={`-€${AI_DISCOUNT}/אדם`}
+                        badge={`-€${AI_DISCOUNT}`}
                         badgeColor="#6366f1"
                         selected={service === "ai"}
                         onClick={() => setService("ai")}
@@ -566,8 +566,8 @@ function ApartmentPage() {
                       )}
                       {service === "ai" && (
                         <div className="flex justify-between">
-                          <span className="text-gray-500">הנחת AI × {guests}</span>
-                          <span className="font-semibold text-indigo-600">−€{(AI_DISCOUNT * guests).toLocaleString()}</span>
+                          <span className="text-gray-500">הנחת AI</span>
+                          <span className="font-semibold text-indigo-600">−€{AI_DISCOUNT.toLocaleString()}</span>
                         </div>
                       )}
                     </div>

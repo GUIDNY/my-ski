@@ -27,7 +27,7 @@ export default function FlightDetailsModal({ open, onClose, value, onChange }: {
           <h2 className="font-display text-xl font-black text-slate-900">פרטי טיסה להסעה 🚐</h2>
           <button onClick={onClose} className="w-9 h-9 rounded-full hover:bg-slate-100 text-slate-400 text-xl">✕</button>
         </div>
-        <p className="text-sm text-slate-500 mb-4 leading-relaxed">השאטל יחכה לך ב-Geneva (GVA). <b className="text-slate-700">האישור הסופי להסעה ניתן עד 48 שעות</b>; אם תהיה בעיה כלשהי ניצור איתך קשר (בדרך כלל ללא תקלות).</p>
+        <p className="text-sm text-slate-500 mb-4 leading-relaxed">השאטל יחכה לך ב-Geneva (GVA) או Lyon (LYS). <b className="text-slate-700">האישור הסופי להסעה ניתן עד 48 שעות</b>; אם תהיה בעיה כלשהי ניצור איתך קשר (בדרך כלל ללא תקלות).</p>
 
         <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">טיסת הגעה ✈️</div>
         <div className="space-y-2.5 mb-4">

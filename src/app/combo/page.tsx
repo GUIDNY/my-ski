@@ -163,7 +163,7 @@ function ComboInner() {
   const trTotal = transfer ? TRANSFER_PRICE : 0;
   const flexExtra = cancel === "flexible" ? CANCEL_FLEX : 0;
   const noCancelDiscount = cancel === "none" ? -CANCEL_NONE : 0;
-  const aiDiscount = service === "ai" ? -(AI_DISCOUNT * guests) : 0;
+  const aiDiscount = service === "ai" ? -AI_DISCOUNT : 0;
   const total = totalA + totalB + trTotal + flexExtra + noCancelDiscount + aiDiscount;   // ski pass: price coming soon → not charged
   const transferDetails = transfer ? flightToString(flight) : "";
   const comboName = `${a.name} + ${b.name}`;
@@ -295,7 +295,7 @@ function ComboInner() {
                 </div>
                 <div className="flex flex-col gap-2">
                   <RadioOption icon={<IconUser size={18} />} label="שירות אנושי מלא" sublabel="נציג ישראלי זמין לפני, במהלך ואחרי" selected={service === "human"} onClick={() => setService("human")} />
-                  <RadioOption icon={<IconBot size={18} />} label="AI בלבד" sublabel="ניהול עצמאי עם תמיכת צ'אטבוט · איסוף עצמאי של הסקי פס" badge={`-€${AI_DISCOUNT}/אדם`} badgeColor="#6366f1" selected={service === "ai"} onClick={() => setService("ai")} />
+                  <RadioOption icon={<IconBot size={18} />} label="AI בלבד" sublabel="ניהול עצמאי עם תמיכת צ'אטבוט · איסוף עצמאי של הסקי פס" badge={`-€${AI_DISCOUNT}`} badgeColor="#6366f1" selected={service === "ai"} onClick={() => setService("ai")} />
                 </div>
               </div>
 
@@ -306,7 +306,7 @@ function ComboInner() {
                 {skiPass && <Row label="סקי פס" value="מחיר בקרוב" muted />}
                 {cancel === "flexible" && <Row label="ביטול גמיש" value={`€${flexExtra.toLocaleString()}`} muted />}
                 {cancel === "none" && <Row label="ללא אפשרות ביטול" value={`−€${CANCEL_NONE.toLocaleString()}`} muted />}
-                {service === "ai" && <Row label="הנחת ניהול עצמאי (AI)" value={`-€${(AI_DISCOUNT * guests).toLocaleString()}`} muted />}
+                {service === "ai" && <Row label="הנחת ניהול עצמאי (AI)" value={`-€${AI_DISCOUNT.toLocaleString()}`} muted />}
               </div>
               <div className="flex items-center justify-between border-t border-gray-100 pt-3">
                 <span className="font-black text-gray-900 text-lg">סה״כ</span>
