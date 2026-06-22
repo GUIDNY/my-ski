@@ -148,6 +148,7 @@ function ApartmentPage() {
   const [creatingQuote, setCreatingQuote] = useState(false);
   const [copied, setCopied] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [showFullDesc, setShowFullDesc] = useState(false);
 
   // Add-ons
   const [skiPass,  setSkiPass]  = useState(false);
@@ -347,7 +348,12 @@ function ApartmentPage() {
             {apt.description && (
               <div className="mb-6 pb-6 border-b border-gray-100">
                 <h2 className="text-lg font-black text-gray-900 mb-3">על הדירה</h2>
-                <p className="text-gray-600 leading-relaxed text-sm">{apt.description}</p>
+                <p className={`text-gray-600 leading-relaxed text-sm whitespace-pre-line ${showFullDesc ? "" : "line-clamp-3"}`}>{apt.description}</p>
+                {apt.description.length > 180 && (
+                  <button onClick={() => setShowFullDesc(v => !v)} className="mt-2 text-sm font-bold text-blue-600 hover:underline">
+                    {showFullDesc ? "הצג פחות ↑" : "קרא עוד ←"}
+                  </button>
+                )}
               </div>
             )}
 
