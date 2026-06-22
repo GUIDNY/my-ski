@@ -11,10 +11,13 @@ const STATUS: Record<string, { label: string; cls: string }> = {
 
 const fmt = (s: string | null) => (s ? new Date(s + "T12:00:00").toLocaleDateString("he-IL", { day: "numeric", month: "short" }) : "—");
 
+const CANCEL_LABEL: Record<string, string> = { regular: "ביטול רגיל", none: "ללא ביטול", flexible: "ביטול גמיש" };
+
 export default function OrdersAdmin() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
+  const [open, setOpen] = useState<Record<string, boolean>>({});
 
   const load = async () => {
     setLoading(true);
@@ -52,6 +55,19 @@ export default function OrdersAdmin() {
     load();
   };
 
+  // operational checklist (persisted in orders.ops)
+  const toggleOp = async (o: Order, key: string) => {
+    const ops = { ...(o.ops || {}), [key]: !(o.ops && o.ops[key]) };
+    setOrders(prev => prev.map(x => x.id === o.id ? { ...x, ops } : x));   // optimistic
+    await fetch(`/api/orders/${o.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ops }) });
+  };
+
+  const checklistFor = (o: Order) => {
+    const items = [{ key: "address", label: "שליחת כתובת ופרטי צ׳ק-אין ללקוח" }, { key: "keys", label: "הכנת מפתחות בדלת (48ש׳ לפני)" }];
+    if (o.transfer) items.unshift({ key: "transfer", label: "תיאום שאטל/הסעה משדה התעופה" });
+    return items;
+  };
+
   return (
     <div>
       <div className="mb-8">
@@ -68,7 +84,8 @@ export default function OrdersAdmin() {
           {orders.map(o => {
             const st = STATUS[o.status] || STATUS.awaiting;
             return (
-              <div key={o.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col md:flex-row md:items-center gap-4">
+              <div key={o.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+               <div className="flex flex-col md:flex-row md:items-center gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <span className="font-black text-gray-900">{o.customer_name || "לקוח/ה"}</span>
@@ -94,6 +111,43 @@ export default function OrdersAdmin() {
                   )}
                   <button onClick={() => remove(o)} className="text-red-500 hover:text-red-700 text-sm px-2">🗑</button>
                 </div>
+               </div>
+
+                {/* add-ons summary chips */}
+                <div className="flex flex-wrap gap-1.5 mt-3">
+                  {o.transfer && <span className="text-xs font-semibold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full">🚐 הסעה{o.transfer_details ? ` · ${o.transfer_details}` : " · ללא פרטי טיסה"}</span>}
+                  {o.ski_pass && <span className="text-xs font-semibold bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full">🎿 סקי פס</span>}
+                  <span className="text-xs font-semibold bg-gray-50 text-gray-600 px-2.5 py-1 rounded-full">🛡️ {CANCEL_LABEL[o.cancel] || o.cancel}</span>
+                  <span className="text-xs font-semibold bg-gray-50 text-gray-600 px-2.5 py-1 rounded-full">{o.service === "ai" ? "🤖 AI" : "👤 שירות אנושי"}</span>
+                  {o.group_id && <span className="text-xs font-semibold bg-violet-50 text-violet-700 px-2.5 py-1 rounded-full">👥 תשלום מפוצל ({o.shares_total})</span>}
+                  {o.extra_apartment_name && <span className="text-xs font-semibold bg-violet-50 text-violet-700 px-2.5 py-1 rounded-full">+ {o.extra_apartment_name}</span>}
+                </div>
+
+                {/* checklist toggle */}
+                {(o.status === "hold" || o.status === "approved") && (
+                  <div className="mt-3 pt-3 border-t border-gray-100">
+                    <button onClick={() => setOpen(p => ({ ...p, [o.id]: !p[o.id] }))} className="text-sm font-bold text-blue-600 hover:underline">
+                      צ׳ק-ליסט לטיפול {open[o.id] ? "▲" : "▼"}
+                      {(() => { const items = checklistFor(o); const done = items.filter(it => o.ops && o.ops[it.key]).length; return <span className="text-xs font-normal text-gray-400 mr-1"> ({done}/{items.length})</span>; })()}
+                    </button>
+                    {open[o.id] && (
+                      <div className="mt-2 space-y-1.5">
+                        {checklistFor(o).map(it => {
+                          const checked = !!(o.ops && o.ops[it.key]);
+                          return (
+                            <label key={it.key} className="flex items-center gap-2.5 cursor-pointer text-sm py-1">
+                              <input type="checkbox" checked={checked} onChange={() => toggleOp(o, it.key)} className="w-4 h-4 accent-emerald-600" />
+                              <span className={checked ? "line-through text-gray-400" : "text-gray-700"}>{it.label}</span>
+                            </label>
+                          );
+                        })}
+                        {o.transfer && o.transfer_details && (
+                          <p className="text-xs text-blue-600 bg-blue-50 rounded-lg px-3 py-2 mt-1">✈️ פרטי טיסה: {o.transfer_details}</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })}

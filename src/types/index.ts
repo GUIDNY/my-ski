@@ -66,6 +66,11 @@ export type Order = {
   customer_phone: string;
   payplus_transaction_uid?: string | null;
   amount_ils?: number | null;
+  transfer_details?: string | null;
+  group_id?: string | null;
+  shares_total?: number | null;
+  extra_apartment_name?: string | null;
+  ops?: Record<string, boolean> | null;
   created_at: string;
 };
 
