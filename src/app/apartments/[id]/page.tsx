@@ -649,6 +649,24 @@ function ApartmentPage() {
         </div>
       </div>
 
+      {/* spacer so content clears the floating mobile bar */}
+      <div className="h-24 lg:hidden" aria-hidden />
+
+      {/* ── Mobile floating booking bar (Airbnb-style) ─────────── */}
+      <div dir="rtl" className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 shadow-[0_-4px_24px_rgba(0,0,0,0.10)]"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.5rem)" }}>
+        <div className="flex-shrink-0 text-right leading-none">
+          <div className="text-[11px] text-gray-400 mb-0.5">{splitCount > 1 ? "החלק שלך" : `סה״כ · ${nights} לילות`}</div>
+          <div className="text-xl font-black text-gray-900">€{payNow.toLocaleString()}</div>
+        </div>
+        <CardPaymentButton apartmentId={id} apartment={apt?.name ?? ""} checkin={checkin} checkout={checkout}
+          guests={guests} nights={nights} skiPass={skiPass} transfer={transfer} transferDetails={transferDetails} cancel={cancel} service={service}
+          grandTotal={payNow}
+          split={splitCount > 1 ? { sharesTotal: splitCount, accommodationTotal: aptTotal, shareAmount: shareAccommodation, area: "Val Thorens, Trois Vallées" } : undefined}
+          label={splitCount > 1 ? "שלם/י את חלקך" : "תשלום בכרטיס"}
+          className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-center text-base transition-colors shadow-sm" />
+      </div>
+
       {/* ── No-cancellation confirmation + signature ───────────── */}
       {showNoCancel && (
         <div dir="rtl" className="fixed inset-0 z-[95] bg-black/55 flex items-center justify-center p-4" onClick={() => setShowNoCancel(false)}>

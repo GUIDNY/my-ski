@@ -11,11 +11,13 @@ const tabs = [
 ];
 
 // routes with their own full-screen / bottom UI — hide the tab bar there
-const HIDDEN = ["/game", "/quote", "/q", "/pay", "/admin", "/book", "/auth"];
+const HIDDEN = ["/game", "/quote", "/q", "/pay", "/admin", "/book", "/auth", "/combo", "/split"];
 
 export default function MobileTabBar() {
   const pathname = usePathname() || "/";
-  if (HIDDEN.some(h => pathname === h || pathname.startsWith(h + "/"))) return null;
+  // apartment DETAIL pages (/apartments/<id>) have their own floating booking bar
+  const isApartmentDetail = pathname.startsWith("/apartments/");
+  if (isApartmentDetail || HIDDEN.some(h => pathname === h || pathname.startsWith(h + "/"))) return null;
 
   return (
     <>
