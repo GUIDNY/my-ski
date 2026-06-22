@@ -285,6 +285,15 @@ function MyOrder() {
   }, [params, loadMine]);
 
   const logout = async () => { await supabase.auth.signOut(); window.location.href = "/"; };
+  const deleteAccount = async () => {
+    if (!confirm("למחוק את החשבון לצמיתות? כל הנתונים האישיים שלך יימחקו. פעולה זו אינה הפיכה.")) return;
+    if (!confirm("אישור אחרון — למחוק את החשבון?")) return;
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+    const r = await fetch("/api/account/delete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ access_token: session.access_token }) });
+    if (r.ok) { await supabase.auth.signOut(); window.location.href = "/"; }
+    else alert("שגיאה במחיקת החשבון. נסו שוב או פנו אלינו בוואטסאפ.");
+  };
   const wa = buildWaHref({ intro: "היי! יש לי שאלה על ההזמנה שלי 🎿", lines: [] });
   const name = user ? (user.user_metadata?.full_name || (user.email || "").split("@")[0]) : "";
   const initials = name ? name.trim().slice(0, 2).toUpperCase() : "";
@@ -412,6 +421,11 @@ function MyOrder() {
 
         <FAQBlock open={open} setOpen={setOpen} />
         <a href={wa} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-bold py-3.5 rounded-xl transition"><IconWhatsApp size={20} /> דברו איתנו</a>
+
+        {/* Danger zone — account deletion (App Store requirement) */}
+        <div className="text-center pt-2">
+          <button onClick={deleteAccount} className="text-sm text-gray-400 hover:text-red-600 transition">מחיקת חשבון לצמיתות</button>
+        </div>
       </main>
 
       {/* Floating help */}
