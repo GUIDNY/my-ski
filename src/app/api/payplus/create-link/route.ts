@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
     currency_code: CURRENCY,
     sendEmailApproval: true,
     sendEmailFailure: false,
-    refURL_success: `${origin}/pay/success`,
+    refURL_success: `${origin}/pay/success${b.order_code ? `?order=${b.order_code}` : ""}`,
     refURL_failure: `${origin}/pay/failure`,
     refURL_cancel: `${origin}/pay/failure`,
     refURL_callback: `${origin}/api/payplus/callback`,
