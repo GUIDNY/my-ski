@@ -372,17 +372,6 @@ function ApartmentPage() {
               </div>
             )}
 
-            {/* Location */}
-            <div>
-              <h2 className="text-lg font-black text-gray-900 mb-3">מיקום</h2>
-              <div className="bg-blue-50 rounded-2xl p-5 text-sm text-gray-600 border border-blue-100">
-                <div className="flex items-center gap-2 font-bold text-gray-800 mb-1">
-                  <IconMountain size={16} className="text-blue-600" />
-                  Val Thorens
-                </div>
-                <p>הכפר הגבוה ביותר באירופה · 2,300 מ׳ · שלג מובטח נובמבר–מאי · גישה ישירה ל-600 ק״מ מסלולים</p>
-              </div>
-            </div>
             {/* booking choices — inline (mobile + desktop main column) */}
             <div className="lg:hidden bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-5">
                   {/* ── Ski Pass ──────────────────────────────────── */}
@@ -483,6 +472,17 @@ function ApartmentPage() {
 
             </div>
 
+            {/* Location */}
+            <div>
+              <h2 className="text-lg font-black text-gray-900 mb-3">מיקום</h2>
+              <div className="bg-blue-50 rounded-2xl p-5 text-sm text-gray-600 border border-blue-100">
+                <div className="flex items-center gap-2 font-bold text-gray-800 mb-1">
+                  <IconMountain size={16} className="text-blue-600" />
+                  Val Thorens
+                </div>
+                <p>הכפר הגבוה ביותר באירופה · 2,300 מ׳ · שלג מובטח נובמבר–מאי · גישה ישירה ל-600 ק״מ מסלולים</p>
+              </div>
+            </div>
           </div>
 
           {/* ── RIGHT: booking sidebar (desktop) / bottom sheet (mobile) ── */}
