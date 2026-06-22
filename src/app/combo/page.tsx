@@ -6,6 +6,7 @@ import { calcTotalForRange, getEffectivePrice } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
 import CardPaymentButton from "@/components/CardPaymentButton";
 import SaveTripButton from "@/components/SaveTripButton";
+import FlightDetailsModal, { EMPTY_FLIGHT, flightToString, flightFilled, type Flight } from "@/components/FlightDetailsModal";
 import { buildWaHref } from "@/lib/whatsapp";
 import { IconMountain, IconUser, IconBed, IconCheck, IconWhatsApp, IconStar, IconSkis, IconBus, IconPlane, IconShield, IconBot } from "@/components/Icons";
 import Logo from "@/components/Logo";
@@ -15,8 +16,9 @@ const fmt = (s: string) => { if (!s) return ""; const d = new Date(s + "T12:00:0
 const fmtSky = (s: string) => { if (!s) return ""; const d = new Date(s); return `${String(d.getFullYear()).slice(2)}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`; };
 const capacity = (a: Apartment) => a.max_guests || a.beds * 2 || 2;
 const TRANSFER_PRICE = 180;
-const FLEXIBLE_EXTRA = 100; // per person
-const AI_DISCOUNT = 50;     // per person
+const CANCEL_FLEX = 100; // flexible cancellation surcharge (flat)
+const CANCEL_NONE = 100; // no-cancellation discount (flat)
+const AI_DISCOUNT = 50;  // per person
 
 function Gallery({ images, alt }: { images: string[]; alt: string }) {
   const imgs = images?.length ? images : ["/hero-ski.jpg"];
@@ -74,19 +76,23 @@ function AptBlock({ a }: { a: Apartment }) {
   );
 }
 
-function AddonCard({ icon, label, sublabel, price, checked, onChange }: {
-  icon: React.ReactNode; label: string; sublabel: string; price: string; checked: boolean; onChange: (v: boolean) => void;
+function AddonCard({ icon, label, sublabel, price, checked, onChange, disabled }: {
+  icon: React.ReactNode; label: string; sublabel: string; price: string; checked: boolean; onChange: (v: boolean) => void; disabled?: boolean;
 }) {
   return (
-    <button type="button" onClick={() => onChange(!checked)}
-      className={`w-full flex items-center gap-3 p-3.5 rounded-xl border transition-all text-right ${checked ? "border-blue-500 bg-blue-50" : "border-gray-100 bg-white hover:border-blue-200"}`}>
-      <span className={`flex-shrink-0 ${checked ? "text-blue-600" : "text-gray-400"}`}>{icon}</span>
+    <button type="button" onClick={() => !disabled && onChange(!checked)} disabled={disabled}
+      className={`w-full flex items-center gap-3 p-3.5 rounded-xl border transition-all text-right ${disabled ? "border-gray-100 bg-gray-50 cursor-not-allowed" : checked ? "border-blue-500 bg-blue-50" : "border-gray-100 bg-white hover:border-blue-200"}`}>
+      <span className={`flex-shrink-0 ${disabled ? "text-gray-300" : checked ? "text-blue-600" : "text-gray-400"}`}>{icon}</span>
       <div className="flex-1 min-w-0">
-        <div className="text-sm font-semibold text-gray-800">{label}</div>
+        <div className={`text-sm font-semibold ${disabled ? "text-gray-400" : "text-gray-800"}`}>{label}</div>
         <div className="text-xs text-gray-400">{sublabel}</div>
       </div>
-      <span className="text-sm font-bold text-blue-600 flex-shrink-0 whitespace-nowrap">{price}</span>
-      <span className={`w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 ${checked ? "bg-blue-600 border-blue-600 text-white" : "border-gray-300"}`}>{checked && <IconCheck size={12} />}</span>
+      {disabled
+        ? <span className="text-[11px] font-bold text-blue-500 flex-shrink-0">בקרוב</span>
+        : <>
+            <span className="text-sm font-bold text-blue-600 flex-shrink-0 whitespace-nowrap">{price}</span>
+            <span className={`w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 ${checked ? "bg-blue-600 border-blue-600 text-white" : "border-gray-300"}`}>{checked && <IconCheck size={12} />}</span>
+          </>}
     </button>
   );
 }
@@ -122,8 +128,14 @@ function ComboInner() {
   const [loading, setLoading] = useState(true);
   const [skiPass, setSkiPass] = useState(false);
   const [transfer, setTransfer] = useState(false);
-  const [cancel, setCancel] = useState<"none" | "flexible">("none");
+  const [showTransfer, setShowTransfer] = useState(false);
+  const [flight, setFlight] = useState<Flight>(EMPTY_FLIGHT);
+  const [cancel, setCancel] = useState<"regular" | "none" | "flexible">("regular");
+  const [showNoCancel, setShowNoCancel] = useState(false);
+  const [noCancelAgreed, setNoCancelAgreed] = useState(false);
+  const [signature, setSignature] = useState("");
   const [service, setService] = useState<"human" | "ai">("human");
+  const [showAiInfo, setShowAiInfo] = useState(false);
   const [showBreakdown, setShowBreakdown] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -148,9 +160,11 @@ function ComboInner() {
   const totalA = nights > 0 ? calcTotalForRange(checkin, checkout, Number(a.price_per_night), rulesA) : Number(a.price_per_night);
   const totalB = nights > 0 ? calcTotalForRange(checkin, checkout, Number(b.price_per_night), rulesB) : Number(b.price_per_night);
   const trTotal = transfer ? TRANSFER_PRICE : 0;
-  const flexExtra = cancel === "flexible" ? FLEXIBLE_EXTRA * guests : 0;
+  const flexExtra = cancel === "flexible" ? CANCEL_FLEX : 0;
+  const noCancelDiscount = cancel === "none" ? -CANCEL_NONE : 0;
   const aiDiscount = service === "ai" ? -(AI_DISCOUNT * guests) : 0;
-  const total = totalA + totalB + trTotal + flexExtra + aiDiscount;   // ski pass: price coming soon → not charged
+  const total = totalA + totalB + trTotal + flexExtra + noCancelDiscount + aiDiscount;   // ski pass: price coming soon → not charged
+  const transferDetails = transfer ? flightToString(flight) : "";
   const comboName = `${a.name} + ${b.name}`;
   const avgNightly = nights > 0 ? Math.round((totalA + totalB) / nights) : Number(a.price_per_night) + Number(b.price_per_night);
   const breakdown = (() => {
@@ -172,8 +186,8 @@ function ComboInner() {
     intro: "היי! מעוניין/ת בחבילה משולבת של שתי דירות 🎿",
     lines: [
       `דירות: ${comboName}`, `תאריכים: ${fmt(checkin)}–${fmt(checkout)}`, `${guests} אורחים · ${nights} לילות`,
-      skiPass ? "🎿 מעוניין/ת גם בסקי פס" : "", transfer ? "🚐 כולל הסעה" : "",
-      cancel === "flexible" ? "✅ מדיניות ביטול גמישה" : "", service === "ai" ? "🤖 ניהול עצמאי (AI)" : "",
+      skiPass ? "🎿 מעוניין/ת גם בסקי פס" : "", transfer ? `🚐 כולל הסעה${transferDetails ? ` (${transferDetails})` : ""}` : "",
+      cancel === "flexible" ? "✅ מדיניות ביטול גמישה" : cancel === "none" ? "🔒 ללא אפשרות ביטול" : "", service === "ai" ? "🤖 ניהול עצמאי (AI)" : "",
     ].filter(Boolean),
     total,
   });
@@ -242,8 +256,15 @@ function ComboInner() {
               <div>
                 <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">תוספות</div>
                 <div className="flex flex-col gap-2">
-                  <AddonCard icon={<IconSkis size={18} />} label="סקי פס · Trois Vallées" sublabel="600 ק״מ מסלולים · כל הרמות" price="מחיר בקרוב" checked={skiPass} onChange={setSkiPass} />
+                  <AddonCard icon={<IconSkis size={18} />} label="סקי פס · Trois Vallées" sublabel="600 ק״מ מסלולים · כל הרמות · איסוף עצמאי מהמכונה" price="מחיר בקרוב" checked={skiPass} onChange={setSkiPass} disabled />
                   <AddonCard icon={<IconBus size={18} />} label="הסעה הלוך-חזור" sublabel="שאטל ישיר משדה התעופה" price={`+€${TRANSFER_PRICE}`} checked={transfer} onChange={setTransfer} />
+                  {transfer && (
+                    <button onClick={() => setShowTransfer(true)}
+                      className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-colors text-sm w-full text-right">
+                      <span className="text-blue-700 font-semibold">{flightFilled(flight) ? "✓ פרטי טיסה נשמרו · עריכה" : "מלא פרטי טיסה להסעה ←"}</span>
+                      <span className="text-xs text-blue-400">הגעה + חזור</span>
+                    </button>
+                  )}
                 </div>
                 <a href={skyscannerUrl} target="_blank" rel="noopener noreferrer"
                   className="mt-2 flex items-center gap-2.5 p-3.5 rounded-xl border border-gray-100 bg-white hover:border-blue-200 hover:bg-blue-50 transition-all">
@@ -259,16 +280,21 @@ function ComboInner() {
               <div>
                 <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">מדיניות ביטול</div>
                 <div className="flex flex-col gap-2">
-                  <RadioOption icon={<IconShield size={18} />} label="לא ניתן לביטול" sublabel="מחיר מוזל — אין החזר כספי" selected={cancel === "none"} onClick={() => setCancel("none")} />
-                  <RadioOption icon={<IconShield size={18} />} label="מדיניות גמישה" sublabel="80% החזר עד 48 שעות לפני" badge={`+€${FLEXIBLE_EXTRA}/אדם`} badgeColor="#10b981" selected={cancel === "flexible"} onClick={() => setCancel("flexible")} />
+                  <RadioOption icon={<IconShield size={18} />} label="ביטול רגיל" sublabel="בהתאם לתנאי התקנון · מחיר רגיל" selected={cancel === "regular"} onClick={() => setCancel("regular")} />
+                  <RadioOption icon={<IconShield size={18} />} label="ללא אפשרות ביטול" sublabel="מחיר מוזל · לא ניתן לבטל ואין החזר כספי" badge={`−€${CANCEL_NONE}`} badgeColor="#ef4444" selected={cancel === "none"} onClick={() => setShowNoCancel(true)} />
+                  <RadioOption icon={<IconShield size={18} />} label="ביטול גמיש" sublabel="80% החזר עד שבוע לפני · 50% עד 24ש׳ לפני ההמראה · אח״כ אין החזר" badge={`+€${CANCEL_FLEX}`} badgeColor="#10b981" selected={cancel === "flexible"} onClick={() => setCancel("flexible")} />
                 </div>
+                <a href="/terms" target="_blank" className="inline-block mt-2 text-xs text-blue-600 hover:underline font-semibold">קרא/י את מדיניות הביטולים בתקנון ←</a>
               </div>
 
               <div>
-                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">רמת שירות</div>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">רמת שירות</div>
+                  <button onClick={() => setShowAiInfo(true)} className="text-xs font-semibold text-blue-600 hover:underline">ⓘ מידע נוסף</button>
+                </div>
                 <div className="flex flex-col gap-2">
                   <RadioOption icon={<IconUser size={18} />} label="שירות אנושי מלא" sublabel="נציג ישראלי זמין לפני, במהלך ואחרי" selected={service === "human"} onClick={() => setService("human")} />
-                  <RadioOption icon={<IconBot size={18} />} label="AI בלבד" sublabel="ניהול עצמאי עם תמיכת צ'אטבוט" badge={`-€${AI_DISCOUNT}/אדם`} badgeColor="#6366f1" selected={service === "ai"} onClick={() => setService("ai")} />
+                  <RadioOption icon={<IconBot size={18} />} label="AI בלבד" sublabel="ניהול עצמאי עם תמיכת צ'אטבוט · איסוף עצמאי של הסקי פס" badge={`-€${AI_DISCOUNT}/אדם`} badgeColor="#6366f1" selected={service === "ai"} onClick={() => setService("ai")} />
                 </div>
               </div>
 
@@ -277,19 +303,21 @@ function ComboInner() {
                 <Row label={b.name} value={`€${totalB.toLocaleString()}`} muted />
                 {transfer && <Row label="הסעה הלוך-חזור" value={`€${trTotal}`} muted />}
                 {skiPass && <Row label="סקי פס" value="מחיר בקרוב" muted />}
-                {cancel === "flexible" && <Row label="מדיניות ביטול גמישה" value={`€${flexExtra.toLocaleString()}`} muted />}
+                {cancel === "flexible" && <Row label="ביטול גמיש" value={`€${flexExtra.toLocaleString()}`} muted />}
+                {cancel === "none" && <Row label="ללא אפשרות ביטול" value={`−€${CANCEL_NONE.toLocaleString()}`} muted />}
                 {service === "ai" && <Row label="הנחת ניהול עצמאי (AI)" value={`-€${(AI_DISCOUNT * guests).toLocaleString()}`} muted />}
               </div>
               <div className="flex items-center justify-between border-t border-gray-100 pt-3">
                 <span className="font-black text-gray-900 text-lg">סה״כ</span>
                 <span className="font-display text-2xl font-black text-blue-600">€{total.toLocaleString()}</span>
               </div>
+              <p className="text-[11px] text-gray-400 leading-relaxed">* ייתכנו עמלות נוספות (כגון עמלת סליקת אשראי 1.9%). המחירים ב-€ והחיוב בש״ח לפי שער ההמרה.</p>
 
               <CardPaymentButton
                 apartmentId={a.id} apartment={comboName}
                 extraApartmentId={b.id} extraApartmentName={b.name}
                 checkin={checkin} checkout={checkout} guests={guests} nights={nights}
-                skiPass={skiPass} transfer={transfer} grandTotal={total} cancel={cancel} service={service}
+                skiPass={skiPass} transfer={transfer} transferDetails={transferDetails} grandTotal={total} cancel={cancel} service={service}
                 label="תשלום מאובטח בכרטיס" />
               <a href={wa} target="_blank" rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-bold py-3.5 rounded-xl transition">
@@ -307,6 +335,52 @@ function ComboInner() {
           </div>
         </div>
       </main>
+
+      {/* Transfer flight details */}
+      <FlightDetailsModal open={showTransfer} onClose={() => setShowTransfer(false)} value={flight} onChange={setFlight} />
+
+      {/* No-cancellation confirmation + signature */}
+      {showNoCancel && (
+        <div dir="rtl" className="fixed inset-0 z-[95] bg-black/55 flex items-center justify-center p-4" onClick={() => setShowNoCancel(false)}>
+          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <h2 className="font-display text-xl font-black text-slate-900 mb-1">ללא אפשרות ביטול</h2>
+            <p className="text-sm text-slate-500 mb-4">בחירה באפשרות זו מוזילה את המחיר ב-€{CANCEL_NONE}, אך ההזמנה <b>אינה ניתנת לביטול</b> ולא יינתן כל החזר כספי, בהתאם לתקנון.</p>
+            <label className="flex items-start gap-2 cursor-pointer mb-4">
+              <input type="checkbox" checked={noCancelAgreed} onChange={e => setNoCancelAgreed(e.target.checked)} className="mt-0.5 w-4 h-4 accent-blue-600" />
+              <span className="text-sm text-slate-600 leading-relaxed">אני מאשר/ת שקראתי והבנתי כי <b>לא אוכל לבטל את ההזמנה</b> ולא אקבל החזר כספי בשום מקרה, ומסכים/ה ל<a href="/terms" target="_blank" className="text-blue-600 underline">תקנון</a>.</span>
+            </label>
+            <label className="block text-xs font-bold text-gray-400 mb-1">חתימה (שם מלא)</label>
+            <input value={signature} onChange={e => setSignature(e.target.value)} placeholder="הקלד/י את שמך המלא כחתימה"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <div className="flex gap-2">
+              <button disabled={!noCancelAgreed || signature.trim().length < 2}
+                onClick={() => { setCancel("none"); setShowNoCancel(false); }}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition">אישור וחתימה</button>
+              <button onClick={() => setShowNoCancel(false)} className="px-5 py-3 rounded-xl border border-gray-200 text-gray-600 font-bold">ביטול</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AI service info */}
+      {showAiInfo && (
+        <div dir="rtl" className="fixed inset-0 z-[95] bg-black/55 flex items-center justify-center p-4" onClick={() => setShowAiInfo(false)}>
+          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-display text-xl font-black text-slate-900">שירות AI — איך זה עובד?</h2>
+              <button onClick={() => setShowAiInfo(false)} className="w-9 h-9 rounded-full hover:bg-slate-100 text-slate-400 text-xl">✕</button>
+            </div>
+            <ul className="space-y-3 text-sm text-slate-600 leading-relaxed">
+              <li className="flex gap-2"><span>📍</span><span>תקבל/י את הכתובת המלאה וחוקי הצ׳ק-אין / צ׳ק-אאוט.</span></li>
+              <li className="flex gap-2"><span>🔑</span><span>המפתחות יחכו לך בדלת כ-48 שעות לפני ההגעה. את הדירה יש לפנות לפי שעות הצ׳ק-אאוט הרגילות.</span></li>
+              <li className="flex gap-2"><span>🎿</span><span>אם הזמנת סקי פס — תאסוף/י אותו עצמאית מהמכונה במהלך השהות.</span></li>
+              <li className="flex gap-2"><span>🤖</span><span>לאורך החופשה תיעזר/י בצ׳אטבוט AI לכל שאלה.</span></li>
+              <li className="flex gap-2"><span>🆘</span><span>במקרים חריגים (קבלת דירה עם נזק, מקרה קיצון) תוכל/י כמובן לפנות לנציגים שלנו דרך האתר.</span></li>
+            </ul>
+            <button onClick={() => setShowAiInfo(false)} className="mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition">הבנתי</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

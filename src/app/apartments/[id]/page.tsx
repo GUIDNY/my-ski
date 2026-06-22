@@ -11,6 +11,7 @@ import {
 } from "@/components/Icons";
 import { buildWaHref } from "@/lib/whatsapp";
 import CardPaymentButton from "@/components/CardPaymentButton";
+import FlightDetailsModal, { EMPTY_FLIGHT, flightToString, flightFilled, type Flight } from "@/components/FlightDetailsModal";
 import SaveTripButton from "@/components/SaveTripButton";
 import Logo from "@/components/Logo";
 
@@ -151,10 +152,7 @@ function ApartmentPage() {
   const [transfer, setTransfer] = useState(false);
   const [showTransfer, setShowTransfer] = useState(false);
   const [splitCount, setSplitCount] = useState(1);
-  const [flightDate, setFlightDate] = useState("");
-  const [flightNum, setFlightNum] = useState("");
-  const [flightTime, setFlightTime] = useState("");
-  const [retFlight, setRetFlight] = useState("");
+  const [flight, setFlight] = useState<Flight>(EMPTY_FLIGHT);
 
   // Cancellation: "regular" (per terms) | "none" (-€100, signed) | "flexible" (+€100)
   const [cancel, setCancel] = useState<"regular" | "none" | "flexible">("regular");
@@ -213,9 +211,7 @@ function ApartmentPage() {
   const noCancelDiscount = cancel === "none"     ? -CANCEL_NONE : 0;
   const aiDiscount      = service === "ai"       ? -(AI_DISCOUNT * guests) : 0;
   const grandTotal      = aptTotal + skiTotal + trTotal + flexExtra + noCancelDiscount + aiDiscount;
-  const transferDetails = transfer && flightNum
-    ? `הגעה ${flightDate || "?"} · טיסה ${flightNum} בשעה ${flightTime || "?"}${retFlight ? ` · חזרה ${retFlight}` : ""}`
-    : "";
+  const transferDetails = transfer ? flightToString(flight) : "";
   const shareAccommodation = Math.round(aptTotal / splitCount);
   const payNow = splitCount > 1 ? shareAccommodation + trTotal + flexExtra + noCancelDiscount + aiDiscount : grandTotal;
 
@@ -460,7 +456,7 @@ function ApartmentPage() {
                       {transfer && (
                         <button onClick={() => setShowTransfer(true)}
                           className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-colors text-sm w-full text-right">
-                          <span className="text-blue-700 font-semibold">{flightNum ? "✓ פרטי טיסה נשמרו · עריכה" : "מלא פרטי טיסה להסעה ←"}</span>
+                          <span className="text-blue-700 font-semibold">{flightFilled(flight) ? "✓ פרטי טיסה נשמרו · עריכה" : "מלא פרטי טיסה להסעה ←"}</span>
                           <span className="text-xs text-blue-400">מספר טיסה · שעה · תאריך</span>
                         </button>
                       )}
@@ -578,6 +574,7 @@ function ApartmentPage() {
                       <span className="font-black text-gray-900">סה״כ</span>
                       <span className="text-2xl font-black text-gray-900">€{grandTotal.toLocaleString()}</span>
                     </div>
+                    <p className="text-[11px] text-gray-400 mt-2 leading-relaxed">* ייתכנו עמלות נוספות (כגון עמלת סליקת אשראי 1.9%). המחירים ב-€ והחיוב בש״ח לפי שער ההמרה.</p>
                   </div>
 
                   {/* ── Split payment ─────────────────────────────── */}
@@ -672,38 +669,7 @@ function ApartmentPage() {
       )}
 
       {/* ── Transfer flight details ────────────────────────────── */}
-      {showTransfer && (
-        <div dir="rtl" className="fixed inset-0 z-[95] bg-black/55 flex items-center justify-center p-4" onClick={() => setShowTransfer(false)}>
-          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-1">
-              <h2 className="font-display text-xl font-black text-slate-900">פרטי טיסה להסעה 🚐</h2>
-              <button onClick={() => setShowTransfer(false)} className="w-9 h-9 rounded-full hover:bg-slate-100 text-slate-400 text-xl">✕</button>
-            </div>
-            <p className="text-sm text-slate-500 mb-4 leading-relaxed">השאטל יחכה לך בשדה התעופה Geneva (GVA). מלא/י את פרטי הטיסה ונתאם הכל. <b className="text-slate-700">האישור הסופי להסעה ניתן עד 48 שעות</b>; אם תהיה בעיה כלשהי ניצור איתך קשר (בדרך כלל ללא תקלות).</p>
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs font-bold text-gray-400 block mb-1">תאריך הגעה</label>
-                <input type="date" value={flightDate} onChange={e => setFlightDate(e.target.value)} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-bold text-gray-400 block mb-1">מספר טיסה (הגעה)</label>
-                  <input value={flightNum} onChange={e => setFlightNum(e.target.value)} placeholder="LY345" dir="ltr" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-right focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-gray-400 block mb-1">שעת נחיתה</label>
-                  <input type="time" value={flightTime} onChange={e => setFlightTime(e.target.value)} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                </div>
-              </div>
-              <div>
-                <label className="text-xs font-bold text-gray-400 block mb-1">טיסת חזרה (אופציונלי)</label>
-                <input value={retFlight} onChange={e => setRetFlight(e.target.value)} placeholder="מספר טיסה + שעה בחזרה" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-              </div>
-              <button onClick={() => setShowTransfer(false)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition">שמירת פרטי טיסה</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <FlightDetailsModal open={showTransfer} onClose={() => setShowTransfer(false)} value={flight} onChange={setFlight} />
 
       {/* ── AI service info ────────────────────────────────────── */}
       {showAiInfo && (
