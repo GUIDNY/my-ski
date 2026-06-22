@@ -377,70 +377,8 @@ function ApartmentPage() {
                 <p>הכפר הגבוה ביותר באירופה · 2,300 מ׳ · שלג מובטח נובמבר–מאי · גישה ישירה ל-600 ק״מ מסלולים</p>
               </div>
             </div>
-          </div>
-
-          {/* ── RIGHT: booking sidebar (desktop) / bottom sheet (mobile) ── */}
-          {sheetOpen && <div className="lg:hidden fixed inset-0 z-40 bg-black/40" onClick={() => setSheetOpen(false)} />}
-          <div className={`lg:w-[400px] lg:flex-shrink-0 max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:z-50 max-lg:transition-transform max-lg:duration-300 ${sheetOpen ? "max-lg:translate-y-0" : "max-lg:translate-y-full"}`}>
-            <div className="sticky top-20 max-lg:static">
-              <button onClick={() => setSheetOpen(false)} className="lg:hidden w-full flex justify-center pt-2 pb-1" aria-label="סגור">
-                <span className="block w-10 h-1.5 rounded-full bg-gray-300" />
-              </button>
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden max-lg:rounded-b-none max-lg:max-h-[82vh] max-lg:overflow-y-auto">
-
-                {/* Price header */}
-                <div className="px-6 pt-6 pb-4 bg-gradient-to-br from-gray-50 to-blue-50 border-b border-gray-100">
-                  <div className="flex items-end justify-between gap-2">
-                    <div>
-                      <div className="text-3xl font-black text-gray-900">
-                        €{avgNightlyPrice.toLocaleString()}
-                        <span className="text-base font-medium text-gray-400">
-                          {breakdown.length > 1 ? " / לילה ממוצע" : " / לילה"}
-                        </span>
-                      </div>
-                    </div>
-                    {breakdown.length > 0 && (
-                      <button
-                        onClick={() => setShowBreakdown(v => !v)}
-                        className="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap flex-shrink-0"
-                      >
-                        פירוט מחיר {showBreakdown ? "▲" : "▼"}
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Per-night breakdown panel */}
-                  {showBreakdown && breakdown.length > 0 && (
-                    <div className="mt-3 bg-white rounded-xl border border-blue-100 overflow-hidden">
-                      <div className="max-h-52 overflow-y-auto divide-y divide-gray-50">
-                        {breakdown.map(({ date, price }, i) => (
-                          <div key={i} className="flex justify-between items-center px-4 py-2 text-sm">
-                            <span className="text-gray-500">{fmtDate(`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`)}</span>
-                            <span className={`font-semibold ${price !== basePrice ? "text-blue-600" : "text-gray-800"}`}>
-                              €{price.toLocaleString()}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                      {breakdown.length > 1 && (
-                        <div className="flex justify-between items-center px-4 py-2.5 bg-blue-50 border-t border-blue-100 text-sm font-bold">
-                          <span className="text-gray-600">ממוצע ללילה</span>
-                          <span className="text-blue-700">€{avgNightlyPrice.toLocaleString()}</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {checkin && checkout && (
-                    <div className="flex items-center gap-2 mt-3 text-sm text-gray-500">
-                      <IconCalendar size={14} />
-                      {fmtDate(checkin)} — {fmtDate(checkout)} · {nights} לילות · {guests} אנשים
-                    </div>
-                  )}
-                </div>
-
-                <div className="px-6 py-5 flex flex-col gap-5">
-
+            {/* booking choices — inline (mobile + desktop main column) */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-5">
                   {/* ── Ski Pass ──────────────────────────────────── */}
                   <div>
                     <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">תוספות</div>
@@ -536,6 +474,72 @@ function ApartmentPage() {
                       />
                     </div>
                   </div>
+
+            </div>
+
+          </div>
+
+          {/* ── RIGHT: booking sidebar (desktop) / bottom sheet (mobile) ── */}
+          {sheetOpen && <div className="lg:hidden fixed inset-0 z-40 bg-black/40" onClick={() => setSheetOpen(false)} />}
+          <div className={`lg:w-[400px] lg:flex-shrink-0 max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:z-50 max-lg:transition-transform max-lg:duration-300 ${sheetOpen ? "max-lg:translate-y-0" : "max-lg:translate-y-full"}`}>
+            <div className="sticky top-20 max-lg:static">
+              <button onClick={() => setSheetOpen(false)} className="lg:hidden w-full flex justify-center pt-2 pb-1" aria-label="סגור">
+                <span className="block w-10 h-1.5 rounded-full bg-gray-300" />
+              </button>
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden max-lg:rounded-b-none max-lg:max-h-[82vh] max-lg:overflow-y-auto">
+
+                {/* Price header */}
+                <div className="px-6 pt-6 pb-4 bg-gradient-to-br from-gray-50 to-blue-50 border-b border-gray-100">
+                  <div className="flex items-end justify-between gap-2">
+                    <div>
+                      <div className="text-3xl font-black text-gray-900">
+                        €{avgNightlyPrice.toLocaleString()}
+                        <span className="text-base font-medium text-gray-400">
+                          {breakdown.length > 1 ? " / לילה ממוצע" : " / לילה"}
+                        </span>
+                      </div>
+                    </div>
+                    {breakdown.length > 0 && (
+                      <button
+                        onClick={() => setShowBreakdown(v => !v)}
+                        className="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap flex-shrink-0"
+                      >
+                        פירוט מחיר {showBreakdown ? "▲" : "▼"}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Per-night breakdown panel */}
+                  {showBreakdown && breakdown.length > 0 && (
+                    <div className="mt-3 bg-white rounded-xl border border-blue-100 overflow-hidden">
+                      <div className="max-h-52 overflow-y-auto divide-y divide-gray-50">
+                        {breakdown.map(({ date, price }, i) => (
+                          <div key={i} className="flex justify-between items-center px-4 py-2 text-sm">
+                            <span className="text-gray-500">{fmtDate(`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`)}</span>
+                            <span className={`font-semibold ${price !== basePrice ? "text-blue-600" : "text-gray-800"}`}>
+                              €{price.toLocaleString()}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      {breakdown.length > 1 && (
+                        <div className="flex justify-between items-center px-4 py-2.5 bg-blue-50 border-t border-blue-100 text-sm font-bold">
+                          <span className="text-gray-600">ממוצע ללילה</span>
+                          <span className="text-blue-700">€{avgNightlyPrice.toLocaleString()}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {checkin && checkout && (
+                    <div className="flex items-center gap-2 mt-3 text-sm text-gray-500">
+                      <IconCalendar size={14} />
+                      {fmtDate(checkin)} — {fmtDate(checkout)} · {nights} לילות · {guests} אנשים
+                    </div>
+                  )}
+                </div>
+
+                <div className="px-6 py-5 flex flex-col gap-5">
 
                   {/* ── Price breakdown ───────────────────────────── */}
                   <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
