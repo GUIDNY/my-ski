@@ -13,6 +13,7 @@ type Props = {
   nights: number;
   skiPass?: boolean;
   transfer?: boolean;
+  equipment?: boolean;
   transferDetails?: string;
   cancel?: string;
   service?: string;
@@ -68,7 +69,7 @@ export default function CardPaymentButton(p: Props) {
           apartment_id: p.apartmentId, apartment: p.apartment,
           extra_apartment_id: p.extraApartmentId, extra_apartment_name: p.extraApartmentName,
           checkin: p.checkin, checkout: p.checkout,
-          guests: p.guests, nights: p.nights, ski_pass: p.skiPass, transfer: p.transfer,
+          guests: p.guests, nights: p.nights, ski_pass: p.skiPass, transfer: p.transfer, equipment: p.equipment,
           transfer_details: p.transferDetails,
           cancel: p.cancel, service: p.service, grand_total: p.grandTotal,
           group_id: groupId, share_amount: p.split?.shareAmount, shares_total: p.split?.sharesTotal,

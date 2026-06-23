@@ -58,6 +58,7 @@ export type Order = {
   nights: number;
   ski_pass: boolean;
   transfer: boolean;
+  equipment?: boolean;
   cancel: string;
   service: string;
   total_eur: number;

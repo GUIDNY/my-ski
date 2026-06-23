@@ -307,6 +307,12 @@ export default function QuoteView({ q }: { q: QuoteData }) {
                 className="mt-2 flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-bold py-3.5 rounded-xl text-center transition shadow-sm shadow-emerald-600/20">
                 <IconWhatsApp size={20} /> צור קשר עם נציג
               </a>
+              {apt?.map_url && (
+                <a href={apt.map_url} target="_blank" rel="noopener noreferrer"
+                  className="mt-2 flex items-center justify-center gap-2 w-full border border-slate-200 hover:border-blue-300 hover:bg-blue-50 text-slate-700 font-bold py-3 rounded-xl text-center text-sm transition">
+                  <IconMountain size={16} className="text-blue-500" /> מיקום הדירה ב-Google Maps ←
+                </a>
+              )}
               <p className="text-center text-xs text-slate-400 mt-3">תשלום מאובטח · PayPlus · או סגירה בוואטסאפ</p>
             </div>
           </aside>

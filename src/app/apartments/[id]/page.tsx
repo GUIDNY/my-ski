@@ -21,6 +21,8 @@ const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s + "T12:
 
 const SKI_DAY_PRICE  = 70;
 const TRANSFER_PRICE = 180;
+// ski equipment rental: €30/night under a week · €120 for a week · +€20 each extra night
+const equipCost = (n: number) => (n <= 0 ? 0 : n < 7 ? 30 * n : 120 + 20 * (n - 7));
 const FLEXIBLE_EXTRA = 100; // per person (legacy)
 const CANCEL_FLEX    = 100; // flexible cancellation surcharge (flat)
 const CANCEL_NONE    = 100; // no-cancellation discount (flat)
@@ -153,6 +155,7 @@ function ApartmentPage() {
   // Add-ons
   const [skiPass,  setSkiPass]  = useState(false);
   const [transfer, setTransfer] = useState(false);
+  const [equipment, setEquipment] = useState(false);
   const [showTransfer, setShowTransfer] = useState(false);
   const [splitCount, setSplitCount] = useState(1);
   const [flight, setFlight] = useState<Flight>(EMPTY_FLIGHT);
@@ -210,13 +213,14 @@ function ApartmentPage() {
   const avgNightlyPrice = breakdown.length > 0 ? Math.round(aptTotal / nights) : basePrice;
   const skiTotal        = 0; // Coming soon — price not yet available
   const trTotal         = transfer ? TRANSFER_PRICE : 0;
+  const equipTotal      = equipment ? equipCost(nights) : 0;
   const flexExtra       = cancel  === "flexible" ? CANCEL_FLEX : 0;
   const noCancelDiscount = cancel === "none"     ? -CANCEL_NONE : 0;
   const aiDiscount      = service === "ai"       ? -AI_DISCOUNT : 0;
-  const grandTotal      = aptTotal + skiTotal + trTotal + flexExtra + noCancelDiscount + aiDiscount;
+  const grandTotal      = aptTotal + skiTotal + trTotal + equipTotal + flexExtra + noCancelDiscount + aiDiscount;
   const transferDetails = transfer ? flightToString(flight) : "";
   const shareAccommodation = Math.round(aptTotal / splitCount);
-  const payNow = splitCount > 1 ? shareAccommodation + trTotal + flexExtra + noCancelDiscount + aiDiscount : grandTotal;
+  const payNow = splitCount > 1 ? shareAccommodation + trTotal + equipTotal + flexExtra + noCancelDiscount + aiDiscount : grandTotal;
 
   /* ── Long fallback quote URL (works without DB) ─────────── */
   const buildQuoteUrl = () => {
@@ -247,6 +251,7 @@ function ApartmentPage() {
       checkin && checkout ? `📅 תאריכים: ${fmtDate(checkin)} — ${fmtDate(checkout)} (${nights} לילות)` : `🗓️ ${nights} לילות`,
       `👥 אורחים: ${guests}`,
       transfer ? `🚐 כולל הסעה הלוך-חזור${transferDetails ? ` (${transferDetails})` : ""}` : null,
+      equipment ? `🎿 כולל השכרת ציוד (€${equipTotal})` : null,
       cancel === "flexible" ? "✅ מדיניות ביטול גמישה" : cancel === "none" ? "🔒 ללא אפשרות ביטול" : null,
       skiPass ? "🎿 מעוניין/ת גם בסקי פס" : null,
       service === "ai" ? "🤖 ניהול עצמאי (AI)" : null,
@@ -391,6 +396,13 @@ function ApartmentPage() {
                         sublabel="שאטל ישיר משדה התעופה"
                         price={`+€${TRANSFER_PRICE}`}
                         checked={transfer} onChange={setTransfer}
+                      />
+                      <ToggleRow
+                        icon={<IconSkis size={18} />}
+                        label="השכרת ציוד סקי/סנובורד"
+                        sublabel="€30 ליום · €120 לשבוע · +€20 לכל יום נוסף"
+                        price={nights > 0 ? `+€${equipCost(nights)}` : "החל מ-€30"}
+                        checked={equipment} onChange={setEquipment}
                       />
                       {transfer && (
                         <button onClick={() => setShowTransfer(true)}
@@ -578,6 +590,13 @@ function ApartmentPage() {
                         price={`+€${TRANSFER_PRICE}`}
                         checked={transfer} onChange={setTransfer}
                       />
+                      <ToggleRow
+                        icon={<IconSkis size={18} />}
+                        label="השכרת ציוד סקי/סנובורד"
+                        sublabel="€30 ליום · €120 לשבוע · +€20 לכל יום נוסף"
+                        price={nights > 0 ? `+€${equipCost(nights)}` : "החל מ-€30"}
+                        checked={equipment} onChange={setEquipment}
+                      />
                       {transfer && (
                         <button onClick={() => setShowTransfer(true)}
                           className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-colors text-sm w-full text-right">
@@ -678,6 +697,12 @@ function ApartmentPage() {
                           <span className="font-semibold text-gray-800">€{TRANSFER_PRICE}</span>
                         </div>
                       )}
+                      {equipment && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">השכרת ציוד · {nights} ימים</span>
+                          <span className="font-semibold text-gray-800">€{equipTotal.toLocaleString()}</span>
+                        </div>
+                      )}
                       {cancel === "flexible" && (
                         <div className="flex justify-between">
                           <span className="text-gray-500">ביטול גמיש</span>
@@ -734,7 +759,7 @@ function ApartmentPage() {
 
                   {/* ── CTA ───────────────────────────────────────── */}
                   <CardPaymentButton apartmentId={id} apartment={apt?.name ?? ""} checkin={checkin} checkout={checkout}
-                    guests={guests} nights={nights} skiPass={skiPass} transfer={transfer} cancel={cancel} service={service}
+                    guests={guests} nights={nights} skiPass={skiPass} transfer={transfer} equipment={equipment} cancel={cancel} service={service}
                     transferDetails={transferDetails}
                     grandTotal={payNow}
                     split={splitCount > 1 ? { sharesTotal: splitCount, accommodationTotal: aptTotal, shareAmount: shareAccommodation, area: "Val Thorens, Trois Vallées" } : undefined}
