@@ -20,6 +20,7 @@ export default function Footer() {
               {[
                 { label: "תקנון, הזמנות וביטולים", href: "/terms" },
                 { label: "מדיניות פרטיות", href: "/privacy" },
+                { label: "מדיניות עוגיות", href: "/cookies" },
                 { label: "הצהרת נגישות", href: "/accessibility" },
                 { label: "מחיקת חשבון", href: "/delete-account" },
                 { label: "צור קשר", href: "mailto:skishareteam@gmail.com" },

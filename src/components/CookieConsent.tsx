@@ -23,7 +23,7 @@ export default function CookieConsent() {
                  bg-white rounded-2xl shadow-2xl border border-gray-200 p-4">
       <p className="text-sm text-gray-700 leading-relaxed">
         אנחנו משתמשים בעוגיות (Cookies) כדי שהאתר יעבוד ולשיפור החוויה.
-        בהמשך השימוש אתה מסכים ל<a href="/privacy" className="text-blue-600 font-semibold">מדיניות הפרטיות</a>.
+        בהמשך השימוש אתה מסכים ל<a href="/cookies" className="text-blue-600 font-semibold">מדיניות העוגיות</a>.
       </p>
       <div className="flex gap-2 mt-3">
         <button onClick={accept}
