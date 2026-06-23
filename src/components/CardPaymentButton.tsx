@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { IconCreditCard } from "@/components/Icons";
 
 type Props = {
@@ -28,6 +28,10 @@ const CARD_FEE_PCT = 0.019; // credit-card processing fee
 export default function CardPaymentButton(p: Props) {
   const cardFee = Math.round(p.grandTotal * CARD_FEE_PCT);
   const totalWithFee = p.grandTotal + cardFee;
+  const [currency, setCurrency] = useState<"EUR" | "ILS">("EUR");
+  const [sellRate, setSellRate] = useState<number | null>(null);
+  useEffect(() => { fetch("/api/fx").then(r => r.json()).then(d => setSellRate(Number(d.sell) || null)).catch(() => {}); }, []);
+  const ilsTotal = sellRate ? Math.round(totalWithFee * sellRate) : null;
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -75,7 +79,7 @@ export default function CardPaymentButton(p: Props) {
       const res = await fetch("/api/payplus/create-link", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount: totalWithFee, description: `${p.apartment} · ${p.nights} לילות`,
+          amount: totalWithFee, currency, description: `${p.apartment} · ${p.nights} לילות`,
           order_code: order.code, name, email, phone,
         }),
       }).then(r => r.json());
@@ -118,11 +122,28 @@ export default function CardPaymentButton(p: Props) {
                 </span>
               </label>
 
+              {/* currency choice */}
+              <div>
+                <div className="text-xs font-bold text-slate-400 mb-1.5">מטבע לתשלום</div>
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => setCurrency("EUR")}
+                    className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition ${currency === "EUR" ? "border-blue-500 bg-blue-50 text-blue-700" : "border-gray-200 text-gray-500"}`}>€ יורו</button>
+                  <button type="button" onClick={() => setCurrency("ILS")}
+                    className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition ${currency === "ILS" ? "border-blue-500 bg-blue-50 text-blue-700" : "border-gray-200 text-gray-500"}`}>₪ שקל</button>
+                </div>
+              </div>
+
               {/* fee breakdown */}
               <div className="bg-slate-50 rounded-xl p-3.5 border border-slate-100 text-sm space-y-1.5">
                 <div className="flex justify-between text-slate-500"><span>סכום ההזמנה</span><span>€{p.grandTotal.toLocaleString()}</span></div>
                 <div className="flex justify-between text-slate-500"><span>עמלת סליקת אשראי (1.9%)</span><span>€{cardFee.toLocaleString()}</span></div>
-                <div className="flex justify-between font-black text-slate-900 border-t border-slate-200 pt-1.5"><span>לתשלום בכרטיס</span><span>€{totalWithFee.toLocaleString()}</span></div>
+                <div className="flex justify-between font-black text-slate-900 border-t border-slate-200 pt-1.5">
+                  <span>לתשלום בכרטיס</span>
+                  <span>{currency === "ILS" && ilsTotal ? `₪${ilsTotal.toLocaleString()}` : `€${totalWithFee.toLocaleString()}`}</span>
+                </div>
+                {currency === "ILS" && (
+                  <p className="text-[11px] text-slate-400 pt-0.5">החיוב בש״ח לפי שער מזומן {sellRate ? `(${sellRate.toFixed(3)})` : ""} · ≈ €{totalWithFee.toLocaleString()}</p>
+                )}
               </div>
 
               {err && <p className="text-red-600 text-sm">{err}</p>}

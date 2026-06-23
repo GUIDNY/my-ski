@@ -1,24 +1,5 @@
+import { getEurToIls, SELL_MARKUP } from "@/lib/fx";
 import { NextRequest, NextResponse } from "next/server";
-
-/**
- * Current EUR→ILS rate, cached for 12h (Next data cache revalidate).
- * Source: Bank of Israel (official), fallback to open.er-api, then a safe default.
- */
-async function getEurToIls(): Promise<number> {
-  try {
-    const r = await fetch("https://boi.org.il/PublicApi/GetExchangeRate?key=EUR", { next: { revalidate: 43200 } });
-    const j = await r.json();
-    const rate = Number(j?.currentExchangeRate);
-    if (rate > 0) return rate;
-  } catch {}
-  try {
-    const r = await fetch("https://open.er-api.com/v6/latest/EUR", { next: { revalidate: 43200 } });
-    const j = await r.json();
-    const rate = Number(j?.rates?.ILS);
-    if (rate > 0) return rate;
-  } catch {}
-  return 3.9; // safe fallback
-}
 
 /**
  * Creates a PayPlus hosted payment-page link and returns its URL.
@@ -32,8 +13,6 @@ export async function POST(req: NextRequest) {
   const SECRET = process.env.PAYPLUS_SECRET_KEY;
   const PAGE_UID = process.env.PAYPLUS_PAGE_UID;
   const BASE = process.env.PAYPLUS_BASE_URL || "https://restapi.payplus.co.il";
-  const CURRENCY = process.env.PAYPLUS_CURRENCY || "ILS";
-
   if (!API_KEY || !SECRET) return NextResponse.json({ error: "PayPlus keys missing" }, { status: 500 });
   if (!PAGE_UID) return NextResponse.json({ error: "PAYPLUS_PAGE_UID not set" }, { status: 500 });
 
@@ -41,16 +20,18 @@ export async function POST(req: NextRequest) {
   const amountEur = Number(b.amount);
   if (!amountEur || amountEur <= 0) return NextResponse.json({ error: "invalid amount" }, { status: 400 });
 
+  // currency chosen by the customer (falls back to env default)
+  const CURRENCY = (b.currency === "EUR" || b.currency === "ILS") ? b.currency : (process.env.PAYPLUS_CURRENCY || "ILS");
+
   const origin = req.headers.get("origin") || `https://${req.headers.get("host")}`;
   let desc = (b.description as string) || "SkiShare";
 
-  // Convert EUR → ILS when charging in shekels
+  // Convert EUR → ILS at the sell (cash) rate when charging in shekels
   let amount = amountEur;
   if (CURRENCY === "ILS") {
-    const rate = await getEurToIls();
-    const markup = Number(process.env.EUR_ILS_MARKUP || "1.0");
-    amount = Math.round(amountEur * rate * markup); // whole shekels
-    desc = `${desc} (€${amountEur} · שער ${rate.toFixed(3)})`;
+    const sell = (await getEurToIls()) * SELL_MARKUP;
+    amount = Math.round(amountEur * sell); // whole shekels
+    desc = `${desc} (€${amountEur} · שער ${sell.toFixed(3)})`;
   }
 
   const payload: Record<string, unknown> = {
