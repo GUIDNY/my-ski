@@ -6,6 +6,7 @@ export type Apartment = {
   baths: number;
   sqm: number;
   max_guests?: number | null;
+  map_url?: string | null;
   price_per_night: number;
   images: string[];
   amenities: string[];

@@ -475,13 +475,25 @@ function ApartmentPage() {
             {/* Location */}
             <div>
               <h2 className="text-lg font-black text-gray-900 mb-3">מיקום</h2>
-              <div className="bg-blue-50 rounded-2xl p-5 text-sm text-gray-600 border border-blue-100">
-                <div className="flex items-center gap-2 font-bold text-gray-800 mb-1">
-                  <IconMountain size={16} className="text-blue-600" />
-                  Val Thorens
+              {apt.map_url ? (
+                <a href={apt.map_url} target="_blank" rel="noopener noreferrer"
+                  className="block bg-blue-50 rounded-2xl p-5 text-sm text-gray-600 border border-blue-100 hover:border-blue-300 hover:bg-blue-100/60 transition-all group">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2 font-bold text-gray-800">
+                      <IconMountain size={16} className="text-blue-600" /> Val Thorens
+                    </div>
+                    <span className="text-xs font-bold text-blue-600 group-hover:-translate-x-0.5 transition-transform">פתח ב-Google Maps ←</span>
+                  </div>
+                  <p>הכפר הגבוה ביותר באירופה · 2,300 מ׳ · שלג מובטח נובמבר–מאי · גישה ישירה ל-600 ק״מ מסלולים</p>
+                </a>
+              ) : (
+                <div className="bg-blue-50 rounded-2xl p-5 text-sm text-gray-600 border border-blue-100">
+                  <div className="flex items-center gap-2 font-bold text-gray-800 mb-1">
+                    <IconMountain size={16} className="text-blue-600" /> Val Thorens
+                  </div>
+                  <p>הכפר הגבוה ביותר באירופה · 2,300 מ׳ · שלג מובטח נובמבר–מאי · גישה ישירה ל-600 ק״מ מסלולים</p>
                 </div>
-                <p>הכפר הגבוה ביותר באירופה · 2,300 מ׳ · שלג מובטח נובמבר–מאי · גישה ישירה ל-600 ק״מ מסלולים</p>
-              </div>
+              )}
             </div>
           </div>
 
