@@ -117,8 +117,10 @@ export default function AuthPage() {
             <a href="/terms" className="mx-1 hover:underline" style={{ color: C.accent }}>תנאי השירות</a>
             של SkiShare
           </p>
-          <p className="text-center mt-3">
+          <p className="text-center mt-3 flex items-center justify-center gap-3">
             <a href="/" className="text-sm text-[#43474f] hover:text-[#0e3566]">→ חזרה לאתר</a>
+            <span className="text-gray-300">·</span>
+            <a href="/delete-account" className="text-sm text-[#43474f] hover:text-red-600">מחיקת חשבון</a>
           </p>
         </div>
       </div>

@@ -203,9 +203,10 @@ export default function AuthModal({ onClose, onAuth }: Props) {
       </div>
 
       {/* Footer */}
-      <p className="relative z-10 mt-8 text-white/20 text-[10px] tracking-widest uppercase">
-        SKISHARE. ALL RIGHTS RESERVED 2024 ©
-      </p>
+      <div className="relative z-10 mt-8 flex flex-col items-center gap-2">
+        <a href="/delete-account" className="text-white/40 hover:text-white/80 text-xs underline transition-colors">ניתן למחוק את החשבון בכל עת</a>
+        <p className="text-white/20 text-[10px] tracking-widest uppercase">SKISHARE. ALL RIGHTS RESERVED 2026 ©</p>
+      </div>
     </div>
   );
 }
