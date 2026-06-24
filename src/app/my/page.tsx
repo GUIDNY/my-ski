@@ -428,11 +428,11 @@ function MyOrder() {
 
         {/* Danger zone — account deletion (App Store requirement) */}
         <section className="bg-white rounded-2xl border border-red-200 shadow-sm p-5">
-          <h2 className="font-display text-lg font-black text-red-600 mb-1">מחיקת חשבון</h2>
+          <h2 className="font-display text-lg font-black text-red-600 mb-1">מחיקת חשבון <span className="text-gray-400 font-bold text-sm">· Delete account</span></h2>
           <p className="text-sm text-gray-500 mb-3">מחיקת החשבון לצמיתות תסיר את כל הנתונים האישיים שלך. פעולה זו אינה הפיכה.</p>
           <button onClick={deleteAccount}
             className="flex items-center justify-center gap-2 w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition">
-            <Ico d={ICONS.trash} /> מחק את החשבון שלי לצמיתות
+            <Ico d={ICONS.trash} /> מחק את החשבון שלי לצמיתות <span className="opacity-80 font-normal">(Delete my account)</span>
           </button>
         </section>
       </main>
