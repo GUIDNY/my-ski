@@ -53,6 +53,7 @@ const ICONS = {
   check: "M22 11.1V12a10 10 0 1 1-5.9-9.1M22 4 12 14.1l-3-3",
   add: "M12 5v14M5 12h14",
   home: "M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",
+  trash: "M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6M10 11v6M14 11v6",
 };
 
 function SideLink({ icon, label, href, active, onClick }: { icon: string; label: string; href?: string; active?: boolean; onClick?: () => void }) {
@@ -364,6 +365,9 @@ function MyOrder() {
         </nav>
         <div className="mt-auto border-t border-[#c3c6d0]/30 pt-3">
           <SideLink icon={ICONS.logout} label="התנתק" onClick={logout} />
+          <button onClick={deleteAccount} className="flex items-center gap-3 px-4 py-3 rounded-xl w-full text-right text-red-600 hover:bg-red-50 transition">
+            <Ico d={ICONS.trash} /><span className="text-[16px]">מחיקת חשבון</span>
+          </button>
         </div>
       </aside>
 
@@ -423,9 +427,14 @@ function MyOrder() {
         <a href={wa} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-bold py-3.5 rounded-xl transition"><IconWhatsApp size={20} /> דברו איתנו</a>
 
         {/* Danger zone — account deletion (App Store requirement) */}
-        <div className="text-center pt-2">
-          <button onClick={deleteAccount} className="text-sm text-gray-400 hover:text-red-600 transition">מחיקת חשבון לצמיתות</button>
-        </div>
+        <section className="bg-white rounded-2xl border border-red-200 shadow-sm p-5">
+          <h2 className="font-display text-lg font-black text-red-600 mb-1">מחיקת חשבון</h2>
+          <p className="text-sm text-gray-500 mb-3">מחיקת החשבון לצמיתות תסיר את כל הנתונים האישיים שלך. פעולה זו אינה הפיכה.</p>
+          <button onClick={deleteAccount}
+            className="flex items-center justify-center gap-2 w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition">
+            <Ico d={ICONS.trash} /> מחק את החשבון שלי לצמיתות
+          </button>
+        </section>
       </main>
 
       {/* Floating help */}
