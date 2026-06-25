@@ -19,6 +19,7 @@ import Logo from "@/components/Logo";
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s + "T12:00:00"); return `${d.getDate()} ${HE_MONTHS[d.getMonth()]}`; };
 
+const APP_STORE_URL = "https://apps.apple.com/app/id6782095727";
 const SKI_DAY_PRICE  = 70;
 const TRANSFER_PRICE = 180;
 // ski equipment rental: €30/night under a week · €120 for a week · +€20 each extra night
@@ -151,6 +152,8 @@ function ApartmentPage() {
   const [copied, setCopied] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [showFullDesc, setShowFullDesc] = useState(false);
+  const [quoteUrl, setQuoteUrl] = useState<string | null>(null);
+  const [qCopied, setQCopied] = useState("");
 
   // Add-ons
   const [skiPass,  setSkiPass]  = useState(false);
@@ -276,13 +279,20 @@ function ApartmentPage() {
       });
       if (!res.ok) throw new Error("no table");
       const { id: shortId } = await res.json();
-      router.push(`/q/${encodeURIComponent(nameSlug)}/${shortId}`);
+      const origin = typeof window !== "undefined" ? window.location.origin : "https://skisharebook.com";
+      setQuoteUrl(`${origin}/q/${encodeURIComponent(nameSlug)}/${shortId}`);
     } catch {
       // DB/table not ready → use the long URL so nothing breaks
-      router.push(buildQuoteUrl());
+      const origin = typeof window !== "undefined" ? window.location.origin : "https://skisharebook.com";
+      setQuoteUrl(origin + buildQuoteUrl());
     } finally {
       setCreatingQuote(false);
     }
+  };
+
+  const copyTo = (text: string, key: string) => {
+    navigator.clipboard?.writeText(text);
+    setQCopied(key); setTimeout(() => setQCopied(""), 2000);
   };
 
   if (loading) return (
@@ -836,6 +846,50 @@ function ApartmentPage() {
                 onClick={() => { setCancel("none"); setShowNoCancel(false); }}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition">אישור וחתימה</button>
               <button onClick={() => setShowNoCancel(false)} className="px-5 py-3 rounded-xl border border-gray-200 text-gray-600 font-bold">ביטול</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Quote share popup ──────────────────────────────────── */}
+      {quoteUrl && (
+        <div dir="rtl" className="fixed inset-0 z-[95] bg-black/55 flex items-center justify-center p-4" onClick={() => setQuoteUrl(null)}>
+          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="font-display text-xl font-black text-slate-900">הצעת המחיר מוכנה! 🎿</h2>
+              <button onClick={() => setQuoteUrl(null)} className="w-9 h-9 rounded-full hover:bg-slate-100 text-slate-400 text-xl">✕</button>
+            </div>
+            <p className="text-sm text-slate-500 mb-5">שלח/י את הקישור ללקוח. אפשר להעתיק בלחיצה.</p>
+
+            {/* web link */}
+            <div className="mb-3">
+              <label className="text-xs font-bold text-gray-400 block mb-1.5">קישור לאתר (נפתח בכל דפדפן)</label>
+              <div className="flex gap-2">
+                <input readOnly value={quoteUrl} dir="ltr" className="flex-1 min-w-0 border border-gray-200 rounded-xl px-3 py-2.5 text-xs text-right bg-gray-50 truncate" />
+                <button onClick={() => copyTo(quoteUrl, "web")} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 rounded-xl text-sm whitespace-nowrap">
+                  {qCopied === "web" ? "✓ הועתק" : "העתק"}
+                </button>
+              </div>
+            </div>
+
+            {/* app download link */}
+            <div className="mb-4">
+              <label className="text-xs font-bold text-gray-400 block mb-1.5">קישור לאפליקציה (הורדה מ-App Store)</label>
+              <div className="flex gap-2">
+                <input readOnly value={APP_STORE_URL} dir="ltr" className="flex-1 min-w-0 border border-gray-200 rounded-xl px-3 py-2.5 text-xs text-right bg-gray-50 truncate" />
+                <button onClick={() => copyTo(APP_STORE_URL, "app")} className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 rounded-xl text-sm whitespace-nowrap">
+                  {qCopied === "app" ? "✓ הועתק" : "העתק"}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <a href={`https://wa.me/?text=${encodeURIComponent(`הצעת מחיר ל-${apt?.name ?? "דירה"} 🎿\n${quoteUrl}`)}`} target="_blank" rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1ebe5a] text-white font-bold py-3 rounded-xl transition">
+                <IconWhatsApp size={18} /> שתף בוואטסאפ
+              </a>
+              <a href={quoteUrl} target="_blank" rel="noopener noreferrer"
+                className="px-5 py-3 rounded-xl border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition">פתח הצעה</a>
             </div>
           </div>
         </div>
