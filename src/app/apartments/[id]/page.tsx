@@ -223,8 +223,9 @@ function ApartmentPage() {
   const aiDiscount      = service === "ai"       ? -AI_DISCOUNT : 0;
   const grandTotal      = aptTotal + skiTotal + trTotal + equipTotal + flexExtra + noCancelDiscount + aiDiscount;
   const transferDetails = transfer ? flightToString(flight) : "";
-  const shareAccommodation = Math.round(aptTotal / splitCount);
-  const payNow = splitCount > 1 ? shareAccommodation + trTotal + equipTotal + flexExtra + noCancelDiscount + aiDiscount : grandTotal;
+  // split: divide the FULL total (lodging + all add-ons) equally between payers
+  const shareAccommodation = Math.round(grandTotal / splitCount);
+  const payNow = splitCount > 1 ? shareAccommodation : grandTotal;
 
   /* ── Long fallback quote URL (works without DB) ─────────── */
   const buildQuoteUrl = () => {
@@ -759,7 +760,7 @@ function ApartmentPage() {
                           <span>החלק שלך לתשלום עכשיו</span>
                           <span>€{payNow.toLocaleString()}</span>
                         </div>
-                        <p className="text-xs text-blue-600 mt-1 leading-relaxed">מחיר הדירה (€{aptTotal.toLocaleString()}) מתחלק ל-{splitCount} · אחרי התשלום תקבל/י קישור לשלוח לחברים שישלמו את חלקם.</p>
+                        <p className="text-xs text-blue-600 mt-1 leading-relaxed">הסה״כ (€{grandTotal.toLocaleString()}, כולל כל התוספות) מתחלק שווה ל-{splitCount} · אחרי התשלום תקבל/י קישור לשלוח לחברים שישלמו את חלקם.</p>
                       </div>
                     ) : (
                       <p className="text-xs text-gray-400">בחר/י יותר מאדם אחד כדי לפצל את התשלום בין כמה משלמים.</p>
@@ -771,7 +772,7 @@ function ApartmentPage() {
                     guests={guests} nights={nights} skiPass={skiPass} transfer={transfer} equipment={equipment} cancel={cancel} service={service}
                     transferDetails={transferDetails}
                     grandTotal={payNow}
-                    split={splitCount > 1 ? { sharesTotal: splitCount, accommodationTotal: aptTotal, shareAmount: shareAccommodation, area: "Val Thorens, Trois Vallées" } : undefined}
+                    split={splitCount > 1 ? { sharesTotal: splitCount, accommodationTotal: grandTotal, shareAmount: shareAccommodation, area: "Val Thorens, Trois Vallées" } : undefined}
                     label={splitCount > 1 ? "שלם/י את חלקך בכרטיס" : undefined}
                     className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-center text-base transition-colors shadow-sm" />
 

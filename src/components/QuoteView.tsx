@@ -114,10 +114,10 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const aiDisc = service === "ai" ? 50 : 0;
   const liveTotal = baseApt + trTotal + equipTotal + flexExtra + noCancelDiscount - aiDisc;
 
-  // split payment: divide the lodging between payers (add-ons stay individual)
-  const shareBase = Math.round(baseApt / splitCount);
-  const payNow = splitCount > 1 ? shareBase + trTotal + equipTotal + flexExtra + noCancelDiscount - aiDisc : liveTotal;
-  const splitProp = splitCount > 1 ? { sharesTotal: splitCount, accommodationTotal: baseApt, shareAmount: shareBase, area: "Val Thorens, Trois Vallées" } : undefined;
+  // split payment: divide the FULL total (lodging + all add-ons) equally between payers
+  const shareBase = Math.round(liveTotal / splitCount);
+  const payNow = splitCount > 1 ? shareBase : liveTotal;
+  const splitProp = splitCount > 1 ? { sharesTotal: splitCount, accommodationTotal: liveTotal, shareAmount: shareBase, area: "Val Thorens, Trois Vallées" } : undefined;
 
   const splitSelector = (
     <div className="rounded-xl border border-slate-200 p-3.5">
@@ -137,7 +137,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
       {splitCount > 1 && (
         <div className="bg-blue-50 rounded-lg px-3 py-2 mt-2.5 text-sm">
           <div className="flex justify-between font-bold text-blue-900"><span>החלק שלך עכשיו</span><span>€{payNow.toLocaleString()}</span></div>
-          <p className="text-xs text-blue-600 mt-0.5">לינה €{baseApt.toLocaleString()} ÷ {splitCount} · התוספות שבחרת אישיות. אחרי התשלום תקבל/י קישור לשלוח לחברים.</p>
+          <p className="text-xs text-blue-600 mt-0.5">הסה״כ €{liveTotal.toLocaleString()} (כולל כל התוספות) ÷ {splitCount} · אחרי התשלום תקבל/י קישור לשלוח לחברים.</p>
         </div>
       )}
     </div>

@@ -20,7 +20,6 @@ export default function SplitPage() {
   const { code } = useParams<{ code: string }>();
   const [d, setD] = useState<GroupData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [transfer, setTransfer] = useState(false);
 
   const load = () => fetch(`/api/groups?code=${code}`).then(r => r.ok ? r.json() : null).then(setD).finally(() => setLoading(false));
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [code]);
@@ -32,7 +31,7 @@ export default function SplitPage() {
   const nights = group.checkin && group.checkout ? Math.round((+new Date(group.checkout) - +new Date(group.checkin)) / 86400000) : 0;
   const pct = Math.min(100, Math.round((d.shares_paid / d.shares_total) * 100));
   const remaining = Math.max(0, d.shares_total - d.shares_paid);
-  const myShare = d.share_price + (transfer ? TRANSFER_PRICE : 0);
+  const myShare = d.share_price;
   const full = remaining <= 0;
 
   const wa = buildWaHref({ intro: `היי! לגבי תשלום מפוצל לדירה ${group.apartment_name} 🎿`, lines: [`קוד קבוצה: ${group.code}`] });
@@ -85,20 +84,15 @@ export default function SplitPage() {
         ) : (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
             <h2 className="font-display text-lg font-black text-gray-900">החלק שלך</h2>
-            <label className="flex items-center justify-between gap-3 p-3.5 rounded-xl border border-gray-100 cursor-pointer">
-              <div className="text-right"><div className="text-sm font-semibold text-gray-800">הסעה הלוך-חזור</div><div className="text-xs text-gray-400">שאטל ישיר משדה התעופה</div></div>
-              <div className="flex items-center gap-2"><span className="text-sm font-bold text-gray-600">+€{TRANSFER_PRICE}</span>
-                <input type="checkbox" checked={transfer} onChange={e => setTransfer(e.target.checked)} className="w-5 h-5 accent-blue-600" /></div>
-            </label>
             <div className="flex items-center justify-between bg-blue-50 rounded-xl px-4 py-3">
-              <span className="font-bold text-blue-900">לתשלום עכשיו</span>
+              <div><span className="font-bold text-blue-900">לתשלום עכשיו</span><span className="block text-xs text-blue-600">חלק שווה מהסה״כ (כולל כל התוספות) ÷ {d.shares_total}</span></div>
               <span className="font-display text-2xl font-black text-blue-700">€{myShare.toLocaleString()}</span>
             </div>
             <CardPaymentButton
               apartmentId={group.apartment_id} apartment={group.apartment_name}
               extraApartmentId={group.extra_apartment_id ?? undefined}
               checkin={group.checkin} checkout={group.checkout} guests={group.guests} nights={nights}
-              transfer={transfer} cancel="regular" service="human" grandTotal={myShare}
+              cancel="regular" service="human" grandTotal={myShare}
               split={{ sharesTotal: d.shares_total, accommodationTotal: group.accommodation_total, shareAmount: d.share_price, groupId: group.id }}
               label="שלם/י את חלקך בכרטיס" />
             <a href={wa} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full text-sm text-[#1ebe5a] font-bold hover:underline pt-1">
