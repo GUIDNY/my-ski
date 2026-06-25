@@ -329,7 +329,7 @@ function ComboInner() {
                 className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-bold py-3.5 rounded-xl transition">
                 <IconWhatsApp size={20} /> תיאום בוואטסאפ
               </a>
-              <button onClick={() => { navigator.clipboard?.writeText(window.location.href); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+              <button onClick={() => { navigator.clipboard?.writeText("https://skisharebook.com" + window.location.pathname + window.location.search); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
                 className="block w-full py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-800 font-bold text-center text-sm transition-colors">
                 {copied ? "✓ הקישור הועתק" : "📋 שלח הצעת מחיר (העתק קישור)"}
               </button>

@@ -19,6 +19,7 @@ import Logo from "@/components/Logo";
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s + "T12:00:00"); return `${d.getDate()} ${HE_MONTHS[d.getMonth()]}`; };
 
+const SITE_URL = "https://skisharebook.com";
 const APP_STORE_URL = "https://apps.apple.com/app/id6782095727";
 const SKI_DAY_PRICE  = 70;
 const TRANSFER_PRICE = 180;
@@ -279,12 +280,10 @@ function ApartmentPage() {
       });
       if (!res.ok) throw new Error("no table");
       const { id: shortId } = await res.json();
-      const origin = typeof window !== "undefined" ? window.location.origin : "https://skisharebook.com";
-      setQuoteUrl(`${origin}/q/${encodeURIComponent(nameSlug)}/${shortId}`);
+      setQuoteUrl(`${SITE_URL}/q/${encodeURIComponent(nameSlug)}/${shortId}`);
     } catch {
       // DB/table not ready → use the long URL so nothing breaks
-      const origin = typeof window !== "undefined" ? window.location.origin : "https://skisharebook.com";
-      setQuoteUrl(origin + buildQuoteUrl());
+      setQuoteUrl(SITE_URL + buildQuoteUrl());
     } finally {
       setCreatingQuote(false);
     }
@@ -788,7 +787,7 @@ function ApartmentPage() {
                   </div>
 
                   {/* copy link */}
-                  <button onClick={() => { navigator.clipboard?.writeText(window.location.href); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+                  <button onClick={() => { navigator.clipboard?.writeText("https://skisharebook.com" + window.location.pathname + window.location.search); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
                     className="block w-full py-2.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-bold text-center text-sm transition-colors">
                     {copied ? "✓ הקישור הועתק — שלח/י לחברים" : "🔗 העתק קישור לשיתוף"}
                   </button>
