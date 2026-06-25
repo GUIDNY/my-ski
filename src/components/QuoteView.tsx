@@ -9,6 +9,7 @@ import {
 import { buildWaHref } from "@/lib/whatsapp";
 import Logo from "@/components/Logo";
 import CardPaymentButton from "@/components/CardPaymentButton";
+import FlightDetailsModal, { EMPTY_FLIGHT, flightToString, flightFilled, type Flight } from "@/components/FlightDetailsModal";
 
 export type QuoteData = {
   apartmentId: string;
@@ -35,13 +36,7 @@ const fmtDate = (s: string) => {
 const TRANSFER_PRICE = 180;
 const FLEXIBLE_EXTRA = 100;
 const AI_DISCOUNT = 50;
-
-const ADDONS = [
-  { icon: <IconTicket size={20} />, title: "סקי פס",            sub: "6 ימים · כל אזור Trois Vallées", price: "€280" },
-  { icon: <IconSkis   size={20} />, title: "השכרת ציוד",        sub: "סט מלא · רמת פרימיום",            price: "€150" },
-  { icon: <IconBus    size={20} />, title: "הסעות",             sub: "משדה התעופה וחזרה",               price: "€80"  },
-  { icon: <IconUser   size={20} />, title: "שיעורי סקי / סנובורד", sub: "מדריך מוסמך · כל הרמות",        soon: true   },
-];
+const equipCost = (n: number) => (n <= 0 ? 0 : n < 7 ? 30 * n : 120 + 20 * (n - 7));
 
 export default function QuoteView({ q }: { q: QuoteData }) {
   const {
@@ -53,8 +48,18 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const [imgIdx, setImgIdx] = useState(0);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const [pageUrl, setPageUrl] = useState("");
+  const [showTransfer, setShowTransfer] = useState(false);
+  const [flight, setFlight] = useState<Flight>(EMPTY_FLIGHT);
+  const transferDetails = transfer ? flightToString(flight) : "";
 
   useEffect(() => { setPageUrl(window.location.href); }, []);
+
+  const ADDONS = [
+    { icon: <IconTicket size={20} />, title: "סקי פס", sub: "כל אזור Trois Vallées · 600 ק״מ מסלולים", soon: true },
+    { icon: <IconSkis size={20} />, title: "השכרת ציוד סקי/סנובורד", sub: "€30 ליום · €120 לשבוע · +€20 לכל יום נוסף", price: nights > 0 ? `€${equipCost(nights)}` : "החל מ-€30" },
+    { icon: <IconBus size={20} />, title: "הסעה הלוך-חזור", sub: "משדה התעופה וחזרה · מחיר לא קבוע, עשוי להשתנות", price: `€${TRANSFER_PRICE}` },
+    { icon: <IconUser size={20} />, title: "שיעורי סקי / סנובורד", sub: "מדריך מוסמך · כל הרמות", soon: true },
+  ];
 
   useEffect(() => {
     if (!apartmentId) return;
@@ -105,6 +110,14 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   );
 
   const addonsGrid = (
+    <div className="space-y-3">
+    {transfer && (
+      <button onClick={() => setShowTransfer(true)}
+        className="flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-colors text-sm text-right">
+        <span className="text-blue-700 font-semibold">{flightFilled(flight) ? "✓ פרטי טיסה נשמרו · עריכה" : "מלא פרטי טיסה להסעה ←"}</span>
+        <span className="text-xs text-blue-400">הגעה + חזור</span>
+      </button>
+    )}
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
       {ADDONS.map((a, i) => (
         <div key={i} className="flex items-center gap-3 p-3.5 rounded-xl bg-slate-50 border border-slate-100">
@@ -118,6 +131,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             : <span className="text-sm font-bold text-blue-600 flex-shrink-0">{(a as { price: string }).price}</span>}
         </div>
       ))}
+    </div>
     </div>
   );
 
@@ -300,7 +314,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
 
               <div className="mt-4">
                 <CardPaymentButton apartmentId={apartmentId} apartment={apartment} checkin={checkin} checkout={checkout}
-                  guests={guests} nights={nights} skiPass={skiPass} transfer={transfer} cancel={cancel} service={service}
+                  guests={guests} nights={nights} skiPass={skiPass} transfer={transfer} transferDetails={transferDetails} cancel={cancel} service={service}
                   grandTotal={grandTotal} />
               </div>
               <a href={waHref} target="_blank" rel="noopener noreferrer"
@@ -400,6 +414,8 @@ export default function QuoteView({ q }: { q: QuoteData }) {
           </div>
         </div>
       )}
+
+      <FlightDetailsModal open={showTransfer} onClose={() => setShowTransfer(false)} value={flight} onChange={setFlight} />
     </div>
   );
 }
