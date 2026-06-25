@@ -59,6 +59,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const [showNights, setShowNights] = useState(false);
   const [showBank, setShowBank] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [showDesc, setShowDesc] = useState(false);
   const transferDetails = transferOn ? flightToString(flight) : "";
 
   useEffect(() => { setPageUrl(window.location.href); }, []);
@@ -301,6 +302,32 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             </div>
           </div>
 
+          {/* About + location */}
+          {apt?.description && (
+            <div className="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-slate-100 p-5">
+              <h3 className="font-display font-bold text-slate-900 mb-2">על הדירה</h3>
+              <p className={`text-sm text-slate-500 leading-relaxed whitespace-pre-line ${showDesc ? "" : "line-clamp-3"}`}>{apt.description}</p>
+              {apt.description.length > 180 && (
+                <button onClick={() => setShowDesc(v => !v)} className="mt-2 text-sm font-bold text-blue-600">{showDesc ? "הצג פחות ↑" : "קרא עוד ←"}</button>
+              )}
+            </div>
+          )}
+          <div className="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-slate-100 p-5">
+            <h3 className="font-display font-bold text-slate-900 mb-2">מיקום</h3>
+            {apt?.map_url ? (
+              <a href={apt.map_url} target="_blank" rel="noopener noreferrer"
+                className="flex items-center justify-between rounded-xl bg-blue-50 border border-blue-100 p-4 hover:bg-blue-100 transition">
+                <span className="flex items-center gap-2 font-bold text-slate-800"><IconMountain size={16} className="text-blue-600" /> Val Thorens, France</span>
+                <span className="text-xs font-bold text-blue-600">פתח במפה ←</span>
+              </a>
+            ) : (
+              <div className="rounded-xl bg-blue-50 border border-blue-100 p-4 text-sm text-slate-600">
+                <span className="flex items-center gap-2 font-bold text-slate-800 mb-1"><IconMountain size={16} className="text-blue-600" /> Val Thorens, France</span>
+                <p>הכפר הגבוה ביותר באירופה · 2,300 מ׳ · גישה ישירה ל-600 ק״מ מסלולים</p>
+              </div>
+            )}
+          </div>
+
           <p className="flex items-center gap-1.5 justify-center text-xs text-slate-400 pt-2">
             <IconCheck size={13} className="text-emerald-500" /> הצעה תקפה ל־30 יום · SkiShare · Val Thorens
           </p>
@@ -455,20 +482,6 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             <p className="text-xs text-slate-400 mt-4">© 2026 SkiShare Premium Travel · Val Thorens, France</p>
           </div>
         </footer>
-      </div>
-
-      {/* MOBILE STICKY CTA */}
-      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/90 backdrop-blur-md border-t border-slate-100 px-4 py-3">
-        <div className="flex items-center gap-3">
-          <div className="flex-shrink-0">
-            <p className="text-[11px] text-slate-400 leading-none mb-0.5">סה״כ</p>
-            <p className="font-display font-black text-slate-900 text-lg leading-none">€{liveTotal.toLocaleString()}</p>
-          </div>
-          <a href={waHref} target="_blank" rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-bold py-3.5 rounded-xl text-center transition shadow-sm shadow-emerald-600/20">
-            <IconWhatsApp size={18} /> צור קשר להזמנה
-          </a>
-        </div>
       </div>
 
       {/* LIGHTBOX */}
