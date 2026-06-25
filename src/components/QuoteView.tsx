@@ -86,6 +86,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const [signature, setSignature] = useState("");
   const [openCancel, setOpenCancel] = useState(false);
   const [openService, setOpenService] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
   const transferDetails = transferOn ? flightToString(flight) : "";
 
   useEffect(() => { setPageUrl(window.location.href); }, []);
@@ -305,46 +306,38 @@ export default function QuoteView({ q }: { q: QuoteData }) {
     </div>
   );
 
+  // bank transfer (collapsible) — used inside the floating sheet & desktop
   const paymentBlock = (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-5">
-        <button onClick={() => setShowBank(v => !v)} className="w-full flex items-center justify-between text-blue-600">
-          <span className="flex items-center gap-2"><IconBank size={18} /><span className="font-bold text-slate-800">תשלום בהעברה בנקאית</span></span>
-          <span className="text-xs font-bold text-blue-600">{showBank ? "הסתר ▲" : "הצג פרטים ▼"}</span>
-        </button>
-        {showBank && (
-          <div className="space-y-4 mt-4">
-            <div>
-              <p className="text-xs font-bold text-slate-500 border-b border-slate-200 pb-1 mb-2">העברה בשקלים (ILS)</p>
-              <KV k="בנק" v={bank.name} />
-              <KV k="סניף" v={bank.branch} />
-              <KV k="מספר חשבון" v={bank.account} />
-            </div>
-            <div>
-              <p className="text-xs font-bold text-slate-500 border-b border-slate-200 pb-1 mb-2">העברה בינלאומית (FX)</p>
-              <KV k="IBAN" v={bank.iban} mono />
-              <KV k="SWIFT" v={bank.swift} mono />
-              <KV k="מוטב" v={bank.holder} />
-            </div>
+    <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4">
+      <button onClick={() => setShowBank(v => !v)} className="w-full flex items-center justify-between text-blue-600">
+        <span className="flex items-center gap-2"><IconBank size={18} /><span className="font-bold text-slate-800">תשלום בהעברה בנקאית</span></span>
+        <span className="text-xs font-bold text-blue-600">{showBank ? "הסתר ▲" : "הצג פרטים ▼"}</span>
+      </button>
+      {showBank && (
+        <div className="space-y-4 mt-4">
+          <div>
+            <p className="text-xs font-bold text-slate-500 border-b border-slate-200 pb-1 mb-2">העברה בשקלים (ILS)</p>
+            <KV k="בנק" v={bank.name} /><KV k="סניף" v={bank.branch} /><KV k="מספר חשבון" v={bank.account} />
           </div>
-        )}
-      </div>
-
-      <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-5">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2 text-blue-600">
-            <IconCreditCard size={18} /><span className="font-bold text-slate-800">כרטיס אשראי</span>
-          </div>
-          <div className="flex gap-1">
-            <div className="w-8 h-5 rounded bg-slate-200" />
-            <div className="w-8 h-5 rounded bg-slate-200" />
+          <div>
+            <p className="text-xs font-bold text-slate-500 border-b border-slate-200 pb-1 mb-2">העברה בינלאומית (FX)</p>
+            <KV k="IBAN" v={bank.iban} mono /><KV k="SWIFT" v={bank.swift} mono /><KV k="מוטב" v={bank.holder} />
           </div>
         </div>
-        <ul className="space-y-2.5">
-          <li className="flex items-center gap-2 text-sm text-slate-600"><IconCheck size={14} className="text-emerald-500" /> עד 3 תשלומים ללא ריבית</li>
-          <li className="flex items-center gap-2 text-sm text-slate-600"><IconCheck size={14} className="text-emerald-500" /> תשלום מאובטח בתקן PCI-DSS</li>
-        </ul>
-      </div>
+      )}
+    </div>
+  );
+
+  // credit-card explanation — shown at the bottom of the quote (not in the sheet)
+  const cardInfoNote = (
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+      <h3 className="font-display font-bold text-slate-900 flex items-center gap-2 mb-3"><IconCreditCard size={18} className="text-blue-600" /> תשלום בכרטיס אשראי</h3>
+      <ul className="space-y-2 text-sm text-slate-600">
+        <li className="flex items-center gap-2"><IconCheck size={14} className="text-emerald-500" /> עד 3 תשלומים ללא ריבית</li>
+        <li className="flex items-center gap-2"><IconCheck size={14} className="text-emerald-500" /> תשלום מאובטח בתקן PCI-DSS · PayPlus</li>
+        <li className="flex items-center gap-2"><IconCheck size={14} className="text-emerald-500" /> בכרטיס נוספת עמלת סליקה 1.9%</li>
+        <li className="flex items-center gap-2"><IconCheck size={14} className="text-emerald-500" /> אפשר לשלם בהעברה בנקאית ללא עמלה — דברו עם נציג</li>
+      </ul>
     </div>
   );
 
@@ -462,6 +455,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
           </div>
 
           {policiesCard}
+          {cardInfoNote}
 
           <p className="flex items-center gap-1.5 justify-center text-xs text-slate-400 pt-2">
             <IconCheck size={13} className="text-emerald-500" /> הצעה תקפה ל־30 יום · SkiShare · Val Thorens
@@ -490,6 +484,16 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             <h3 className="font-display text-lg font-black text-slate-900">תשלום</h3>
             <span className="font-display text-2xl font-black text-emerald-500">€{(splitCount > 1 ? payNow : liveTotal).toLocaleString()}</span>
           </div>
+
+          {/* order summary (collapsible) */}
+          <div className="rounded-xl border border-slate-200 overflow-hidden">
+            <button onClick={() => setShowSummary(v => !v)} className="w-full flex items-center justify-between p-3.5">
+              <span className="text-sm font-bold text-slate-800">סיכום ההזמנה והתוספות</span>
+              <span className="text-slate-400 text-sm">{showSummary ? "▲" : "▼"}</span>
+            </button>
+            {showSummary && <div className="px-3.5 pb-2 divide-y divide-slate-100">{breakdownRows}</div>}
+          </div>
+
           {choicesBlock}
           <CardPaymentButton apartmentId={apartmentId} apartment={apartment} checkin={checkin} checkout={checkout}
             guests={guests} nights={nights} skiPass={skiPass} transfer={transferOn} equipment={equipmentOn} transferDetails={transferDetails} cancel={cancel} service={service}
@@ -601,10 +605,11 @@ export default function QuoteView({ q }: { q: QuoteData }) {
               <div className="mt-5">{choicesBlock}</div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-7">
-              <h2 className="font-display text-xl font-bold text-slate-900 mb-5">דרכי תשלום</h2>
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-7 space-y-4">
+              <h2 className="font-display text-xl font-bold text-slate-900">דרכי תשלום</h2>
               {paymentBlock}
             </div>
+            {cardInfoNote}
           </main>
         </div>
 
