@@ -17,7 +17,7 @@ const fmt = (s: string) => { if (!s) return ""; const d = new Date(s + "T12:00:0
 const fmtSky = (s: string) => { if (!s) return ""; const d = new Date(s); return `${String(d.getFullYear()).slice(2)}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`; };
 const capacity = (a: Apartment) => a.max_guests || a.beds * 2 || 2;
 const TRANSFER_PRICE = 180;
-const equipCost = (n: number) => (n <= 0 ? 0 : n < 7 ? 30 * n : 120 + 20 * (n - 7));
+const equipCost = (n: number) => (n <= 0 ? 0 : n < 6 ? 30 * n : 120 + 20 * (n - 6));
 const CANCEL_FLEX = 100; // flexible cancellation surcharge (flat)
 const CANCEL_NONE = 100; // no-cancellation discount (flat)
 const AI_DISCOUNT = 50;  // per person

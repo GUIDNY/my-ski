@@ -22,7 +22,7 @@ const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s + "T12:
 const SKI_DAY_PRICE  = 70;
 const TRANSFER_PRICE = 180;
 // ski equipment rental: €30/night under a week · €120 for a week · +€20 each extra night
-const equipCost = (n: number) => (n <= 0 ? 0 : n < 7 ? 30 * n : 120 + 20 * (n - 7));
+const equipCost = (n: number) => (n <= 0 ? 0 : n < 6 ? 30 * n : 120 + 20 * (n - 6));
 const FLEXIBLE_EXTRA = 100; // per person (legacy)
 const CANCEL_FLEX    = 100; // flexible cancellation surcharge (flat)
 const CANCEL_NONE    = 100; // no-cancellation discount (flat)

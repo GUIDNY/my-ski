@@ -36,7 +36,8 @@ const fmtDate = (s: string) => {
 const TRANSFER_PRICE = 180;
 const FLEXIBLE_EXTRA = 100;
 const AI_DISCOUNT = 50;
-const equipCost = (n: number) => (n <= 0 ? 0 : n < 7 ? 30 * n : 120 + 20 * (n - 7));
+// a "week" = 6 nights → flat €120; under that €30/night; each extra night +€20
+const equipCost = (n: number) => (n <= 0 ? 0 : n < 6 ? 30 * n : 120 + 20 * (n - 6));
 
 export default function QuoteView({ q }: { q: QuoteData }) {
   const {
@@ -50,15 +51,24 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const [pageUrl, setPageUrl] = useState("");
   const [showTransfer, setShowTransfer] = useState(false);
   const [flight, setFlight] = useState<Flight>(EMPTY_FLIGHT);
-  const transferDetails = transfer ? flightToString(flight) : "";
+  const [transferOn, setTransferOn] = useState(transfer);
+  const [equipmentOn, setEquipmentOn] = useState(false);
+  const transferDetails = transferOn ? flightToString(flight) : "";
 
   useEffect(() => { setPageUrl(window.location.href); }, []);
 
+  // live total recomputed from the base lodging + currently-selected add-ons
+  const trTotal = transferOn ? TRANSFER_PRICE : 0;
+  const equipTotal = equipmentOn ? equipCost(nights) : 0;
+  const flexExtra = cancel === "flexible" ? FLEXIBLE_EXTRA * guests : 0;
+  const aiDisc = service === "ai" ? AI_DISCOUNT * guests : 0;
+  const liveTotal = aptTotal + trTotal + equipTotal + flexExtra - aiDisc;
+
   const ADDONS = [
-    { icon: <IconTicket size={20} />, title: "סקי פס", sub: "כל אזור Trois Vallées · 600 ק״מ מסלולים", soon: true },
-    { icon: <IconSkis size={20} />, title: "השכרת ציוד סקי/סנובורד", sub: "€30 ליום · €120 לשבוע · +€20 לכל יום נוסף", price: nights > 0 ? `€${equipCost(nights)}` : "החל מ-€30" },
-    { icon: <IconBus size={20} />, title: "הסעה הלוך-חזור", sub: "משדה התעופה וחזרה · מחיר לא קבוע, עשוי להשתנות", price: `€${TRANSFER_PRICE}` },
-    { icon: <IconUser size={20} />, title: "שיעורי סקי / סנובורד", sub: "מדריך מוסמך · כל הרמות", soon: true },
+    { key: "skipass", icon: <IconTicket size={20} />, title: "סקי פס", sub: "כל אזור Trois Vallées · 600 ק״מ מסלולים", soon: true },
+    { key: "equipment", icon: <IconSkis size={20} />, title: "השכרת ציוד סקי/סנובורד", sub: "€30 ליום · €120 לשבוע · +€20 ליום נוסף", price: equipCost(nights), on: equipmentOn, toggle: () => setEquipmentOn(v => !v) },
+    { key: "transfer", icon: <IconBus size={20} />, title: "הסעה הלוך-חזור", sub: "משדה התעופה וחזרה · מחיר לא קבוע, עשוי להשתנות", price: TRANSFER_PRICE, on: transferOn, toggle: () => setTransferOn(v => !v) },
+    { key: "lessons", icon: <IconUser size={20} />, title: "שיעורי סקי / סנובורד", sub: "מדריך מוסמך · כל הרמות", soon: true },
   ];
 
   useEffect(() => {
@@ -85,19 +95,21 @@ export default function QuoteView({ q }: { q: QuoteData }) {
       `🏔️ דירה: ${apartment}`,
       `📅 תאריכים: ${fmtDate(checkin)} — ${fmtDate(checkout)} (${nights} לילות)`,
       `👥 אורחים: ${guests}`,
-      transfer ? "🚐 כולל הסעה הלוך-חזור" : null,
+      transferOn ? `🚐 כולל הסעה הלוך-חזור${transferDetails ? ` (${transferDetails})` : ""}` : null,
+      equipmentOn ? `🎿 כולל השכרת ציוד (€${equipTotal})` : null,
       cancel === "flexible" ? "✅ מדיניות ביטול גמישה" : null,
       skiPass ? "🎿 מעוניין/ת גם בסקי פס" : null,
       service === "ai" ? "🤖 ניהול עצמאי (AI)" : null,
     ],
-    total: grandTotal,
+    total: liveTotal,
     pageUrl: pageUrl ? `ההצעה: ${pageUrl}` : undefined,
   });
 
   const breakdownRows = (
     <>
       <Row label="לינה" sub={`€${avgNightly.toLocaleString()} × ${nights} לילות`} amount={`€${aptTotal.toLocaleString()}`} />
-      {transfer        && <Row label="הסעה הלוך־חזור" sub="שאטל פרטי" amount={`€${TRANSFER_PRICE}`} />}
+      {transferOn      && <Row label="הסעה הלוך־חזור" sub="שאטל פרטי" amount={`€${TRANSFER_PRICE}`} />}
+      {equipmentOn     && <Row label="השכרת ציוד" sub={`${nights} לילות`} amount={`€${equipTotal.toLocaleString()}`} />}
       {cancel === "flexible" && <Row label="ביטול גמיש" sub={`${guests} אורחים`} amount={`€${(FLEXIBLE_EXTRA * guests).toLocaleString()}`} />}
       {service === "ai" && <Row label="הנחת AI" sub="ניהול עצמאי" amount={`−€${(AI_DISCOUNT * guests).toLocaleString()}`} green />}
       {skiPass && (
@@ -111,27 +123,35 @@ export default function QuoteView({ q }: { q: QuoteData }) {
 
   const addonsGrid = (
     <div className="space-y-3">
-    {transfer && (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      {ADDONS.map((a) => {
+        const soon = "soon" in a && a.soon;
+        const selected = "on" in a && a.on;
+        return (
+          <button key={a.key} type="button" disabled={soon} onClick={() => "toggle" in a && a.toggle?.()}
+            className={`flex items-center gap-3 p-3.5 rounded-xl border text-right transition-all ${soon ? "bg-slate-50 border-slate-100 cursor-default" : selected ? "bg-blue-50 border-blue-400" : "bg-white border-slate-200 hover:border-blue-300"}`}>
+            <span className={`w-10 h-10 rounded-lg shadow-sm flex items-center justify-center flex-shrink-0 ${selected ? "bg-blue-600 text-white" : "bg-white text-blue-600"}`}>{a.icon}</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-slate-800 truncate">{a.title}</p>
+              <p className="text-xs text-slate-400 truncate">{a.sub}</p>
+            </div>
+            {soon
+              ? <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full flex-shrink-0">בקרוב</span>
+              : <span className="flex items-center gap-2 flex-shrink-0">
+                  <span className="text-sm font-bold text-blue-600">+€{(a as { price: number }).price}</span>
+                  <span className={`w-5 h-5 rounded-md border flex items-center justify-center ${selected ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300"}`}>{selected && <IconCheck size={12} />}</span>
+                </span>}
+          </button>
+        );
+      })}
+    </div>
+    {transferOn && (
       <button onClick={() => setShowTransfer(true)}
         className="flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-colors text-sm text-right">
         <span className="text-blue-700 font-semibold">{flightFilled(flight) ? "✓ פרטי טיסה נשמרו · עריכה" : "מלא פרטי טיסה להסעה ←"}</span>
         <span className="text-xs text-blue-400">הגעה + חזור</span>
       </button>
     )}
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-      {ADDONS.map((a, i) => (
-        <div key={i} className="flex items-center gap-3 p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-          <span className="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center text-blue-600 flex-shrink-0">{a.icon}</span>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-slate-800 truncate">{a.title}</p>
-            <p className="text-xs text-slate-400 truncate">{a.sub}</p>
-          </div>
-          {"soon" in a && a.soon
-            ? <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full flex-shrink-0">בקרוב</span>
-            : <span className="text-sm font-bold text-blue-600 flex-shrink-0">{(a as { price: string }).price}</span>}
-        </div>
-      ))}
-    </div>
     </div>
   );
 
@@ -230,8 +250,8 @@ export default function QuoteView({ q }: { q: QuoteData }) {
                 <p className="text-white/35 text-xs mt-0.5">{guests} אנשים · {nights} לילות</p>
               </div>
               <div className="relative text-left">
-                <p className="font-display text-4xl font-black text-emerald-400 leading-none">€{grandTotal.toLocaleString()}</p>
-                <p className="text-white/40 text-xs mt-1">~ €{Math.round(grandTotal / nights)} / לילה</p>
+                <p className="font-display text-4xl font-black text-emerald-400 leading-none">€{liveTotal.toLocaleString()}</p>
+                <p className="text-white/40 text-xs mt-1">~ €{Math.round(liveTotal / nights)} / לילה</p>
               </div>
             </div>
           </div>
@@ -266,7 +286,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             </div>
             <div className="text-left flex-shrink-0">
               <p className="text-xs text-slate-400 mb-0.5">סה״כ לתשלום</p>
-              <p className="font-display text-3xl font-black text-slate-900 leading-none">€{grandTotal.toLocaleString()}</p>
+              <p className="font-display text-3xl font-black text-slate-900 leading-none">€{liveTotal.toLocaleString()}</p>
               <p className="text-xs text-slate-400 mt-1">{fmtDate(checkin)} — {fmtDate(checkout)}</p>
             </div>
           </div>
@@ -306,16 +326,16 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             <div className="bg-slate-900 rounded-2xl p-6 text-white text-center relative overflow-hidden">
               <div className="absolute -left-10 -top-10 w-40 h-40 rounded-full bg-blue-500/10 blur-2xl" />
               <p className="relative text-white/50 text-sm mb-1">סה״כ לתשלום</p>
-              <p className="relative font-display text-5xl font-black text-emerald-400 leading-none">€{grandTotal.toLocaleString()}</p>
-              <p className="relative text-white/40 text-xs mt-2">~ €{Math.round(grandTotal / nights)} / לילה</p>
+              <p className="relative font-display text-5xl font-black text-emerald-400 leading-none">€{liveTotal.toLocaleString()}</p>
+              <p className="relative text-white/40 text-xs mt-2">~ €{Math.round(liveTotal / nights)} / לילה</p>
             </div>
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
               <div className="divide-y divide-slate-100">{breakdownRows}</div>
 
               <div className="mt-4">
                 <CardPaymentButton apartmentId={apartmentId} apartment={apartment} checkin={checkin} checkout={checkout}
-                  guests={guests} nights={nights} skiPass={skiPass} transfer={transfer} transferDetails={transferDetails} cancel={cancel} service={service}
-                  grandTotal={grandTotal} />
+                  guests={guests} nights={nights} skiPass={skiPass} transfer={transferOn} equipment={equipmentOn} transferDetails={transferDetails} cancel={cancel} service={service}
+                  grandTotal={liveTotal} />
               </div>
               <a href={waHref} target="_blank" rel="noopener noreferrer"
                 className="mt-2 flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-bold py-3.5 rounded-xl text-center transition shadow-sm shadow-emerald-600/20">
@@ -375,7 +395,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
         <div className="flex items-center gap-3">
           <div className="flex-shrink-0">
             <p className="text-[11px] text-slate-400 leading-none mb-0.5">סה״כ</p>
-            <p className="font-display font-black text-slate-900 text-lg leading-none">€{grandTotal.toLocaleString()}</p>
+            <p className="font-display font-black text-slate-900 text-lg leading-none">€{liveTotal.toLocaleString()}</p>
           </div>
           <a href={waHref} target="_blank" rel="noopener noreferrer"
             className="flex-1 flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-bold py-3.5 rounded-xl text-center transition shadow-sm shadow-emerald-600/20">
