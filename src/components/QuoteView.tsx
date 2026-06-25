@@ -60,6 +60,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const [showBank, setShowBank] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [showDesc, setShowDesc] = useState(false);
+  const [splitCount, setSplitCount] = useState(1);
   const transferDetails = transferOn ? flightToString(flight) : "";
 
   useEffect(() => { setPageUrl(window.location.href); }, []);
@@ -85,6 +86,35 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const flexExtra = cancel === "flexible" ? FLEXIBLE_EXTRA * guests : 0;
   const aiDisc = service === "ai" ? AI_DISCOUNT * guests : 0;
   const liveTotal = baseApt + trTotal + equipTotal + flexExtra - aiDisc;
+
+  // split payment: divide the lodging between payers (add-ons stay individual)
+  const shareBase = Math.round(baseApt / splitCount);
+  const payNow = splitCount > 1 ? shareBase + trTotal + equipTotal + flexExtra - aiDisc : liveTotal;
+  const splitProp = splitCount > 1 ? { sharesTotal: splitCount, accommodationTotal: baseApt, shareAmount: shareBase, area: "Val Thorens, Trois Vallées" } : undefined;
+
+  const splitSelector = (
+    <div className="rounded-xl border border-slate-200 p-3.5">
+      <div className="flex items-center justify-between">
+        <div>
+          <span className="text-sm font-bold text-slate-800">כמה אנשים משלמים?</span>
+          <span className="block text-[11px] text-slate-400">עד {guests} משלמים · מתחלקים בלינה</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setSplitCount(n => Math.max(1, n - 1))} disabled={splitCount <= 1}
+            className="w-7 h-7 rounded-full border border-slate-200 text-slate-500 font-bold disabled:opacity-40">−</button>
+          <span className="font-black text-slate-900 w-5 text-center">{splitCount}</span>
+          <button onClick={() => setSplitCount(n => Math.min(guests, n + 1))} disabled={splitCount >= guests}
+            className="w-7 h-7 rounded-full border border-slate-200 text-slate-500 font-bold disabled:opacity-40">+</button>
+        </div>
+      </div>
+      {splitCount > 1 && (
+        <div className="bg-blue-50 rounded-lg px-3 py-2 mt-2.5 text-sm">
+          <div className="flex justify-between font-bold text-blue-900"><span>החלק שלך עכשיו</span><span>€{payNow.toLocaleString()}</span></div>
+          <p className="text-xs text-blue-600 mt-0.5">לינה €{baseApt.toLocaleString()} ÷ {splitCount} · התוספות שבחרת אישיות. אחרי התשלום תקבל/י קישור לשלוח לחברים.</p>
+        </div>
+      )}
+    </div>
+  );
 
   const ADDONS = [
     { key: "skipass", icon: <IconTicket size={20} />, title: "סקי פס", sub: "כל אזור Trois Vallées · 600 ק״מ מסלולים", soon: true },
@@ -127,6 +157,20 @@ export default function QuoteView({ q }: { q: QuoteData }) {
     total: liveTotal,
     pageUrl: pageUrl ? `ההצעה: ${pageUrl}` : undefined,
   });
+
+  const policiesCard = (
+    <div className="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-slate-100 p-5">
+      <h3 className="font-display font-bold text-slate-900 mb-3">מדיניות ומידע</h3>
+      <ul className="space-y-2.5 text-sm text-slate-600">
+        <li className="flex gap-2"><span>🛡️</span><span><b className="text-slate-800">ביטול:</b> רגיל לפי התקנון · ביטול גמיש (+€100): 80% החזר עד שבוע לפני, 50% עד 24ש׳ לפני, אח״כ אין החזר · ללא ביטול (−€100): לא ניתן לביטול.</span></li>
+        <li className="flex gap-2"><span>👤</span><span><b className="text-slate-800">שירות אנושי מלא:</b> נציג ישראלי זמין לפני, במהלך ואחרי החופשה.</span></li>
+        <li className="flex gap-2"><span>🤖</span><span><b className="text-slate-800">שירות AI (−€50):</b> ניהול עצמאי עם צ׳אטבוט · מפתחות בדלת 48ש׳ לפני · איסוף עצמאי של הסקי פס · פנייה לנציג במקרים חריגים.</span></li>
+        <li className="flex gap-2"><span>🚐</span><span><b className="text-slate-800">הסעה:</b> מחיר לא קבוע, עשוי להשתנות · אישור סופי עד 48 שעות.</span></li>
+        <li className="flex gap-2"><span>💳</span><span><b className="text-slate-800">תשלום:</b> בכרטיס נוספת עמלת סליקה 1.9% · אפשר העברה בנקאית ללא עמלה (דברו עם נציג).</span></li>
+      </ul>
+      <a href="/terms" target="_blank" className="inline-block mt-3 text-sm font-bold text-blue-600 hover:underline">מדיניות הביטולים והתקנון המלא ←</a>
+    </div>
+  );
 
   const breakdownRows = (
     <>
@@ -328,6 +372,8 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             )}
           </div>
 
+          {policiesCard}
+
           <p className="flex items-center gap-1.5 justify-center text-xs text-slate-400 pt-2">
             <IconCheck size={13} className="text-emerald-500" /> הצעה תקפה ל־30 יום · SkiShare · Val Thorens
           </p>
@@ -356,9 +402,11 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             <span className="font-display text-2xl font-black text-emerald-500">€{liveTotal.toLocaleString()}</span>
           </div>
           {addonsGrid}
+          {splitSelector}
           <CardPaymentButton apartmentId={apartmentId} apartment={apartment} checkin={checkin} checkout={checkout}
             guests={guests} nights={nights} skiPass={skiPass} transfer={transferOn} equipment={equipmentOn} transferDetails={transferDetails} cancel={cancel} service={service}
-            grandTotal={liveTotal}
+            grandTotal={payNow} split={splitProp}
+            label={splitCount > 1 ? "שלם/י את חלקך בכרטיס" : undefined}
             className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-base transition" />
           <a href={waHref} target="_blank" rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5a] text-white font-bold py-3.5 rounded-xl transition"><IconWhatsApp size={20} /> צור קשר עם נציג</a>
@@ -426,10 +474,11 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
               <div className="divide-y divide-slate-100">{breakdownRows}</div>
 
-              <div className="mt-4">
+              <div className="mt-4">{splitSelector}</div>
+              <div className="mt-3">
                 <CardPaymentButton apartmentId={apartmentId} apartment={apartment} checkin={checkin} checkout={checkout}
                   guests={guests} nights={nights} skiPass={skiPass} transfer={transferOn} equipment={equipmentOn} transferDetails={transferDetails} cancel={cancel} service={service}
-                  grandTotal={liveTotal} />
+                  grandTotal={payNow} split={splitProp} label={splitCount > 1 ? "שלם/י את חלקך בכרטיס" : undefined} />
               </div>
               <a href={waHref} target="_blank" rel="noopener noreferrer"
                 className="mt-2 flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-bold py-3.5 rounded-xl text-center transition shadow-sm shadow-emerald-600/20">
