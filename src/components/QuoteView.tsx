@@ -107,8 +107,9 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const baseApt = nightly.length ? nightly.reduce((s, n) => s + n.price, 0) : aptTotal;
 
   // live total recomputed from the base lodging + currently-selected add-ons
-  const trTotal = transferOn ? TRANSFER_PRICE : 0;
-  const equipTotal = equipmentOn ? equipCost(nights) : 0;
+  // add-ons are per-person: price × number of payers (default 1)
+  const trTotal = transferOn ? TRANSFER_PRICE * splitCount : 0;
+  const equipTotal = equipmentOn ? equipCost(nights) * splitCount : 0;
   const flexExtra = cancel === "flexible" ? 100 : 0;
   const noCancelDiscount = cancel === "none" ? -100 : 0;
   const aiDisc = service === "ai" ? 50 : 0;
@@ -181,8 +182,8 @@ export default function QuoteView({ q }: { q: QuoteData }) {
 
   const ADDONS = [
     { key: "skipass", icon: <IconTicket size={20} />, title: "סקי פס", sub: "כל אזור Trois Vallées · 600 ק״מ מסלולים", soon: true },
-    { key: "equipment", icon: <IconSkis size={20} />, title: "השכרת ציוד סקי/סנובורד", sub: "€30 ליום · €120 לשבוע · +€20 ליום נוסף", price: equipCost(nights), on: equipmentOn, toggle: () => setEquipmentOn(v => !v) },
-    { key: "transfer", icon: <IconBus size={20} />, title: "הסעה הלוך-חזור", sub: "משדה התעופה וחזרה · מחיר לא קבוע, עשוי להשתנות", price: TRANSFER_PRICE, on: transferOn, toggle: () => setTransferOn(v => !v) },
+    { key: "equipment", icon: <IconSkis size={20} />, title: "השכרת ציוד סקי/סנובורד", sub: `€30 ליום · €120 לשבוע · +€20 ליום נוסף${splitCount > 1 ? ` · ×${splitCount} אנשים` : ""}`, price: equipCost(nights) * splitCount, on: equipmentOn, toggle: () => setEquipmentOn(v => !v) },
+    { key: "transfer", icon: <IconBus size={20} />, title: "הסעה הלוך-חזור", sub: `משדה התעופה וחזרה · מחיר לא קבוע${splitCount > 1 ? ` · ×${splitCount} אנשים` : ""}`, price: TRANSFER_PRICE * splitCount, on: transferOn, toggle: () => setTransferOn(v => !v) },
     { key: "lessons", icon: <IconUser size={20} />, title: "שיעורי סקי / סנובורד", sub: "מדריך מוסמך · כל הרמות", soon: true },
   ];
 
@@ -258,8 +259,8 @@ export default function QuoteView({ q }: { q: QuoteData }) {
           </div>
         )}
       </div>
-      {transferOn      && <Row label="הסעה הלוך־חזור" sub="שאטל פרטי" amount={`€${TRANSFER_PRICE}`} />}
-      {equipmentOn     && <Row label="השכרת ציוד" sub={`${nights} לילות`} amount={`€${equipTotal.toLocaleString()}`} />}
+      {transferOn      && <Row label="הסעה הלוך־חזור" sub={splitCount > 1 ? `שאטל פרטי · ${splitCount} אנשים` : "שאטל פרטי"} amount={`€${trTotal.toLocaleString()}`} />}
+      {equipmentOn     && <Row label="השכרת ציוד" sub={`${nights} לילות${splitCount > 1 ? ` · ${splitCount} אנשים` : ""}`} amount={`€${equipTotal.toLocaleString()}`} />}
       {cancel === "flexible" && <Row label="ביטול גמיש" amount="€100" />}
       {cancel === "none" && <Row label="ללא אפשרות ביטול" amount="−€100" green />}
       {service === "ai" && <Row label="הנחת AI" sub="ניהול עצמאי" amount="−€50" green />}

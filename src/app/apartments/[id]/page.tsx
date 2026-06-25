@@ -216,8 +216,9 @@ function ApartmentPage() {
 
   const avgNightlyPrice = breakdown.length > 0 ? Math.round(aptTotal / nights) : basePrice;
   const skiTotal        = 0; // Coming soon — price not yet available
-  const trTotal         = transfer ? TRANSFER_PRICE : 0;
-  const equipTotal      = equipment ? equipCost(nights) : 0;
+  // add-ons are per-person: price × number of payers (default 1)
+  const trTotal         = transfer ? TRANSFER_PRICE * splitCount : 0;
+  const equipTotal      = equipment ? equipCost(nights) * splitCount : 0;
   const flexExtra       = cancel  === "flexible" ? CANCEL_FLEX : 0;
   const noCancelDiscount = cancel === "none"     ? -CANCEL_NONE : 0;
   const aiDiscount      = service === "ai"       ? -AI_DISCOUNT : 0;
@@ -404,14 +405,14 @@ function ApartmentPage() {
                         icon={<IconBus size={18} />}
                         label="הסעה הלוך-חזור"
                         sublabel="שאטל ישיר משדה התעופה"
-                        price={`+€${TRANSFER_PRICE}`}
+                        price={`+€${(TRANSFER_PRICE * splitCount).toLocaleString()}${splitCount > 1 ? ` (€${TRANSFER_PRICE}×${splitCount})` : ""}`}
                         checked={transfer} onChange={setTransfer}
                       />
                       <ToggleRow
                         icon={<IconSkis size={18} />}
                         label="השכרת ציוד סקי/סנובורד"
                         sublabel="€30 ליום · €120 לשבוע · +€20 לכל יום נוסף"
-                        price={nights > 0 ? `+€${equipCost(nights)}` : "החל מ-€30"}
+                        price={nights > 0 ? `+€${(equipCost(nights) * splitCount).toLocaleString()}${splitCount > 1 ? ` (€${equipCost(nights)}×${splitCount})` : ""}` : "החל מ-€30"}
                         checked={equipment} onChange={setEquipment}
                       />
                       {transfer && (
@@ -597,14 +598,14 @@ function ApartmentPage() {
                         icon={<IconBus size={18} />}
                         label="הסעה הלוך-חזור"
                         sublabel="שאטל ישיר משדה התעופה"
-                        price={`+€${TRANSFER_PRICE}`}
+                        price={`+€${(TRANSFER_PRICE * splitCount).toLocaleString()}${splitCount > 1 ? ` (€${TRANSFER_PRICE}×${splitCount})` : ""}`}
                         checked={transfer} onChange={setTransfer}
                       />
                       <ToggleRow
                         icon={<IconSkis size={18} />}
                         label="השכרת ציוד סקי/סנובורד"
                         sublabel="€30 ליום · €120 לשבוע · +€20 לכל יום נוסף"
-                        price={nights > 0 ? `+€${equipCost(nights)}` : "החל מ-€30"}
+                        price={nights > 0 ? `+€${(equipCost(nights) * splitCount).toLocaleString()}${splitCount > 1 ? ` (€${equipCost(nights)}×${splitCount})` : ""}` : "החל מ-€30"}
                         checked={equipment} onChange={setEquipment}
                       />
                       {transfer && (
@@ -703,13 +704,13 @@ function ApartmentPage() {
                       )}
                       {transfer && (
                         <div className="flex justify-between">
-                          <span className="text-gray-500">הסעה הלוך-חזור</span>
-                          <span className="font-semibold text-gray-800">€{TRANSFER_PRICE}</span>
+                          <span className="text-gray-500">הסעה הלוך-חזור{splitCount > 1 ? ` · ${splitCount} אנשים` : ""}</span>
+                          <span className="font-semibold text-gray-800">€{trTotal.toLocaleString()}</span>
                         </div>
                       )}
                       {equipment && (
                         <div className="flex justify-between">
-                          <span className="text-gray-500">השכרת ציוד · {nights} ימים</span>
+                          <span className="text-gray-500">השכרת ציוד · {nights} ימים{splitCount > 1 ? ` · ${splitCount} אנשים` : ""}</span>
                           <span className="font-semibold text-gray-800">€{equipTotal.toLocaleString()}</span>
                         </div>
                       )}
