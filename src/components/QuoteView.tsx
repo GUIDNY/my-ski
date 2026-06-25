@@ -41,10 +41,28 @@ const AI_DISCOUNT = 50;
 // a "week" = 6 nights → flat €120; under that €30/night; each extra night +€20
 const equipCost = (n: number) => (n <= 0 ? 0 : n < 6 ? 30 * n : 120 + 20 * (n - 6));
 
+function QRadio({ label, sublabel, badge, badgeColor, selected, onClick }: {
+  label: string; sublabel: string; badge?: string; badgeColor?: string; selected: boolean; onClick: () => void;
+}) {
+  return (
+    <button type="button" onClick={onClick}
+      className={`w-full flex items-start gap-3 p-3.5 rounded-xl border text-right transition-all ${selected ? "border-blue-400 bg-blue-50" : "border-slate-200 bg-white hover:border-blue-300"}`}>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-sm font-semibold text-slate-800">{label}</span>
+          {badge && <span className="text-xs font-bold px-2 py-0.5 rounded-full text-white" style={{ background: badgeColor }}>{badge}</span>}
+        </div>
+        <div className="text-xs text-slate-400 mt-0.5">{sublabel}</div>
+      </div>
+      <span className={`mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0 ${selected ? "border-blue-500 bg-blue-500 ring-2 ring-blue-200" : "border-slate-300"}`} />
+    </button>
+  );
+}
+
 export default function QuoteView({ q }: { q: QuoteData }) {
   const {
     apartmentId, apartment, checkin, checkout, guests, nights,
-    skiPass, transfer, cancel, service, aptTotal, grandTotal,
+    skiPass, transfer, aptTotal, grandTotal,
   } = q;
 
   const [apt, setApt] = useState<Apartment | null>(null);
@@ -61,6 +79,11 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [showDesc, setShowDesc] = useState(false);
   const [splitCount, setSplitCount] = useState(1);
+  const [cancel, setCancel] = useState(q.cancel === "flexible" || q.cancel === "none" ? q.cancel : "regular");
+  const [service, setService] = useState(q.service === "ai" ? "ai" : "human");
+  const [showNoCancel, setShowNoCancel] = useState(false);
+  const [noCancelAgreed, setNoCancelAgreed] = useState(false);
+  const [signature, setSignature] = useState("");
   const transferDetails = transferOn ? flightToString(flight) : "";
 
   useEffect(() => { setPageUrl(window.location.href); }, []);
@@ -83,13 +106,14 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   // live total recomputed from the base lodging + currently-selected add-ons
   const trTotal = transferOn ? TRANSFER_PRICE : 0;
   const equipTotal = equipmentOn ? equipCost(nights) : 0;
-  const flexExtra = cancel === "flexible" ? FLEXIBLE_EXTRA * guests : 0;
-  const aiDisc = service === "ai" ? AI_DISCOUNT * guests : 0;
-  const liveTotal = baseApt + trTotal + equipTotal + flexExtra - aiDisc;
+  const flexExtra = cancel === "flexible" ? 100 : 0;
+  const noCancelDiscount = cancel === "none" ? -100 : 0;
+  const aiDisc = service === "ai" ? 50 : 0;
+  const liveTotal = baseApt + trTotal + equipTotal + flexExtra + noCancelDiscount - aiDisc;
 
   // split payment: divide the lodging between payers (add-ons stay individual)
   const shareBase = Math.round(baseApt / splitCount);
-  const payNow = splitCount > 1 ? shareBase + trTotal + equipTotal + flexExtra - aiDisc : liveTotal;
+  const payNow = splitCount > 1 ? shareBase + trTotal + equipTotal + flexExtra + noCancelDiscount - aiDisc : liveTotal;
   const splitProp = splitCount > 1 ? { sharesTotal: splitCount, accommodationTotal: baseApt, shareAmount: shareBase, area: "Val Thorens, Trois Vallées" } : undefined;
 
   const splitSelector = (
@@ -113,6 +137,27 @@ export default function QuoteView({ q }: { q: QuoteData }) {
           <p className="text-xs text-blue-600 mt-0.5">לינה €{baseApt.toLocaleString()} ÷ {splitCount} · התוספות שבחרת אישיות. אחרי התשלום תקבל/י קישור לשלוח לחברים.</p>
         </div>
       )}
+    </div>
+  );
+
+  const choicesBlock = (
+    <div className="space-y-4">
+      <div>
+        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">מדיניות ביטול</div>
+        <div className="flex flex-col gap-2">
+          <QRadio label="ביטול רגיל" sublabel="בהתאם לתנאי התקנון · מחיר רגיל" selected={cancel === "regular"} onClick={() => setCancel("regular")} />
+          <QRadio label="ללא אפשרות ביטול" sublabel="מחיר מוזל · לא ניתן לבטל ואין החזר" badge="−€100" badgeColor="#ef4444" selected={cancel === "none"} onClick={() => setShowNoCancel(true)} />
+          <QRadio label="ביטול גמיש" sublabel="80% החזר עד שבוע לפני · 50% עד 24ש׳ · אח״כ אין החזר" badge="+€100" badgeColor="#10b981" selected={cancel === "flexible"} onClick={() => setCancel("flexible")} />
+        </div>
+        <a href="/terms" target="_blank" className="inline-block mt-2 text-xs text-blue-600 hover:underline font-semibold">מדיניות הביטולים בתקנון ←</a>
+      </div>
+      <div>
+        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">רמת שירות</div>
+        <div className="flex flex-col gap-2">
+          <QRadio label="שירות אנושי מלא" sublabel="נציג ישראלי זמין לפני, במהלך ואחרי" selected={service === "human"} onClick={() => setService("human")} />
+          <QRadio label="AI בלבד" sublabel="ניהול עצמאי · צ׳אטבוט · איסוף עצמאי של הסקי פס" badge="−€50" badgeColor="#6366f1" selected={service === "ai"} onClick={() => setService("ai")} />
+        </div>
+      </div>
     </div>
   );
 
@@ -150,7 +195,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
       `👥 אורחים: ${guests}`,
       transferOn ? `🚐 כולל הסעה הלוך-חזור${transferDetails ? ` (${transferDetails})` : ""}` : null,
       equipmentOn ? `🎿 כולל השכרת ציוד (€${equipTotal})` : null,
-      cancel === "flexible" ? "✅ מדיניות ביטול גמישה" : null,
+      cancel === "flexible" ? "✅ מדיניות ביטול גמישה" : cancel === "none" ? "🔒 ללא אפשרות ביטול" : null,
       skiPass ? "🎿 מעוניין/ת גם בסקי פס" : null,
       service === "ai" ? "🤖 ניהול עצמאי (AI)" : null,
     ],
@@ -197,8 +242,9 @@ export default function QuoteView({ q }: { q: QuoteData }) {
       </div>
       {transferOn      && <Row label="הסעה הלוך־חזור" sub="שאטל פרטי" amount={`€${TRANSFER_PRICE}`} />}
       {equipmentOn     && <Row label="השכרת ציוד" sub={`${nights} לילות`} amount={`€${equipTotal.toLocaleString()}`} />}
-      {cancel === "flexible" && <Row label="ביטול גמיש" sub={`${guests} אורחים`} amount={`€${(FLEXIBLE_EXTRA * guests).toLocaleString()}`} />}
-      {service === "ai" && <Row label="הנחת AI" sub="ניהול עצמאי" amount={`−€${(AI_DISCOUNT * guests).toLocaleString()}`} green />}
+      {cancel === "flexible" && <Row label="ביטול גמיש" amount="€100" />}
+      {cancel === "none" && <Row label="ללא אפשרות ביטול" amount="−€100" green />}
+      {service === "ai" && <Row label="הנחת AI" sub="ניהול עצמאי" amount="−€50" green />}
       {skiPass && (
         <div className="flex items-center justify-between py-2.5">
           <div><p className="text-sm font-medium text-slate-700">סקי פס</p></div>
@@ -421,6 +467,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             <span className="font-display text-2xl font-black text-emerald-500">€{liveTotal.toLocaleString()}</span>
           </div>
           {addonsGrid}
+          {choicesBlock}
           {splitSelector}
           <CardPaymentButton apartmentId={apartmentId} apartment={apartment} checkin={checkin} checkout={checkout}
             guests={guests} nights={nights} skiPass={skiPass} transfer={transferOn} equipment={equipmentOn} transferDetails={transferDetails} cancel={cancel} service={service}
@@ -529,6 +576,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
                 <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">אופציונלי</span>
               </div>
               {addonsGrid}
+              <div className="mt-5">{choicesBlock}</div>
             </div>
 
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-7">
@@ -579,6 +627,27 @@ export default function QuoteView({ q }: { q: QuoteData }) {
                 <img src={src} alt="" className="w-full h-full object-cover" />
               </button>
             ))}
+          </div>
+        </div>
+      )}
+
+      {showNoCancel && (
+        <div dir="rtl" className="fixed inset-0 z-[95] bg-black/55 flex items-center justify-center p-4" onClick={() => setShowNoCancel(false)}>
+          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <h2 className="font-display text-xl font-black text-slate-900 mb-1">ללא אפשרות ביטול</h2>
+            <p className="text-sm text-slate-500 mb-4">אפשרות זו מוזילה ב-€100, אך ההזמנה <b>אינה ניתנת לביטול</b> ולא יינתן החזר כספי, בהתאם לתקנון.</p>
+            <label className="flex items-start gap-2 cursor-pointer mb-4">
+              <input type="checkbox" checked={noCancelAgreed} onChange={e => setNoCancelAgreed(e.target.checked)} className="mt-0.5 w-4 h-4 accent-blue-600" />
+              <span className="text-sm text-slate-600 leading-relaxed">אני מאשר/ת שהבנתי כי <b>לא אוכל לבטל</b> ולא אקבל החזר, ומסכים/ה ל<a href="/terms" target="_blank" className="text-blue-600 underline">תקנון</a>.</span>
+            </label>
+            <label className="block text-xs font-bold text-slate-400 mb-1">חתימה (שם מלא)</label>
+            <input value={signature} onChange={e => setSignature(e.target.value)} placeholder="הקלד/י את שמך המלא"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <div className="flex gap-2">
+              <button disabled={!noCancelAgreed || signature.trim().length < 2} onClick={() => { setCancel("none"); setShowNoCancel(false); }}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl">אישור וחתימה</button>
+              <button onClick={() => setShowNoCancel(false)} className="px-5 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold">ביטול</button>
+            </div>
           </div>
         </div>
       )}
