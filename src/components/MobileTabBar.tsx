@@ -15,9 +15,9 @@ const HIDDEN = ["/game", "/quote", "/q", "/pay", "/admin", "/book", "/auth", "/c
 
 export default function MobileTabBar() {
   const pathname = usePathname() || "/";
-  // apartment DETAIL pages (/apartments/<id>) have their own floating booking bar
-  const isApartmentDetail = pathname.startsWith("/apartments/");
-  if (isApartmentDetail || HIDDEN.some(h => pathname === h || pathname.startsWith(h + "/"))) return null;
+  // detail pages with their own floating booking bar (apartment / seasonaire)
+  const isDetail = pathname.startsWith("/apartments/") || pathname.startsWith("/seasonaires/");
+  if (isDetail || HIDDEN.some(h => pathname === h || pathname.startsWith(h + "/"))) return null;
 
   return (
     <>
