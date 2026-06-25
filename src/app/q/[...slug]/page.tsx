@@ -3,6 +3,7 @@ import SkiLoader from "@/components/SkiLoader";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import QuoteView, { type QuoteData } from "@/components/QuoteView";
+import OpenInAppBanner from "@/components/OpenInAppBanner";
 
 export default function ShortQuotePage() {
   const { slug } = useParams<{ slug: string[] }>();
@@ -48,5 +49,5 @@ export default function ShortQuotePage() {
     </div>
   );
 
-  return <QuoteView q={q} />;
+  return <><OpenInAppBanner /><QuoteView q={q} /></>;
 }

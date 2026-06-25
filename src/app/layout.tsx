@@ -42,6 +42,8 @@ export const metadata: Metadata = {
     description: "דירות, סקי פס, הסעות ואזור הסיזיונרים ב-Val Thorens.",
     images: ["/og.jpg"],
   },
+  // iOS Smart App Banner — Safari shows "Open in app" if installed, else App Store
+  itunes: { appId: "6782095727" },
 };
 
 export default function RootLayout({
