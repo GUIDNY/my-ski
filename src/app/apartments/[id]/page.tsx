@@ -20,7 +20,6 @@ const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","�
 const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s + "T12:00:00"); return `${d.getDate()} ${HE_MONTHS[d.getMonth()]}`; };
 
 const SITE_URL = "https://skisharebook.com";
-const APP_STORE_URL = "https://apps.apple.com/il/app/skishare/id6782095727?l=he";
 const SKI_DAY_PRICE  = 70;
 const TRANSFER_PRICE = 180;
 // ski equipment rental: €30/night under a week · €120 for a week · +€20 each extra night
@@ -860,28 +859,18 @@ function ApartmentPage() {
               <h2 className="font-display text-xl font-black text-slate-900">הצעת המחיר מוכנה! 🎿</h2>
               <button onClick={() => setQuoteUrl(null)} className="w-9 h-9 rounded-full hover:bg-slate-100 text-slate-400 text-xl">✕</button>
             </div>
-            <p className="text-sm text-slate-500 mb-5">שלח/י את הקישור ללקוח. אפשר להעתיק בלחיצה.</p>
+            <p className="text-sm text-slate-500 mb-5">שלח/י קישור אחד ללקוח — הוא נפתח אוטומטית <b>באפליקציה</b> אם היא מותקנת, אחרת בדפדפן.</p>
 
-            {/* web link */}
-            <div className="mb-3">
-              <label className="text-xs font-bold text-gray-400 block mb-1.5">קישור לאתר (נפתח בכל דפדפן)</label>
+            {/* one smart link */}
+            <div className="mb-4">
+              <label className="text-xs font-bold text-gray-400 block mb-1.5">קישור להצעה</label>
               <div className="flex gap-2">
                 <input readOnly value={quoteUrl} dir="ltr" className="flex-1 min-w-0 border border-gray-200 rounded-xl px-3 py-2.5 text-xs text-right bg-gray-50 truncate" />
                 <button onClick={() => copyTo(quoteUrl, "web")} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 rounded-xl text-sm whitespace-nowrap">
                   {qCopied === "web" ? "✓ הועתק" : "העתק"}
                 </button>
               </div>
-            </div>
-
-            {/* app download link */}
-            <div className="mb-4">
-              <label className="text-xs font-bold text-gray-400 block mb-1.5">קישור לאפליקציה (הורדה מ-App Store)</label>
-              <div className="flex gap-2">
-                <input readOnly value={APP_STORE_URL} dir="ltr" className="flex-1 min-w-0 border border-gray-200 rounded-xl px-3 py-2.5 text-xs text-right bg-gray-50 truncate" />
-                <button onClick={() => copyTo(APP_STORE_URL, "app")} className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 rounded-xl text-sm whitespace-nowrap">
-                  {qCopied === "app" ? "✓ הועתק" : "העתק"}
-                </button>
-              </div>
+              <p className="text-[11px] text-slate-400 mt-1.5">אין צורך בקישור נפרד לחנות — אם האפליקציה לא מותקנת, מוצעת הורדה בעמוד עצמו.</p>
             </div>
 
             <div className="flex gap-2">
