@@ -317,9 +317,11 @@ export default function QuoteView({ q }: { q: QuoteData }) {
           {imgs.length > 1 && (
             <>
               <button onClick={() => setImgIdx(i => (i - 1 + imgs.length) % imgs.length)} aria-label="הקודם"
-                className="absolute top-1/3 right-3 -translate-y-1/2 w-10 h-10 rounded-full bg-black/35 hover:bg-black/55 backdrop-blur-sm text-white flex items-center justify-center text-xl z-10">›</button>
+                className="absolute top-1/3 right-3 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white flex items-center justify-center z-10">
+                <IconChevronLeft size={18} className="rotate-180" /></button>
               <button onClick={() => setImgIdx(i => (i + 1) % imgs.length)} aria-label="הבא"
-                className="absolute top-1/3 left-3 -translate-y-1/2 w-10 h-10 rounded-full bg-black/35 hover:bg-black/55 backdrop-blur-sm text-white flex items-center justify-center text-xl z-10">‹</button>
+                className="absolute top-1/3 left-3 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white flex items-center justify-center z-10">
+                <IconChevronLeft size={18} /></button>
               <div className="absolute top-[30%] left-0 right-0 flex justify-center gap-1.5 z-10">
                 {imgs.slice(0, 10).map((_, i) => (
                   <button key={i} onClick={() => setImgIdx(i)} aria-label={`תמונה ${i + 1}`}

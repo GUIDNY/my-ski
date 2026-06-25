@@ -122,12 +122,12 @@ function Gallery({ images, name }: { images: string[]; name: string }) {
       {/* Arrows */}
       {imgs.length > 1 && (
         <>
-          <button onClick={() => setIdx(i => (i - 1 + imgs.length) % imgs.length)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100">
+          <button onClick={() => setIdx(i => (i - 1 + imgs.length) % imgs.length)} aria-label="הקודם"
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/45 hover:bg-black/65 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-all">
             <IconChevronLeft size={18} className="rotate-180" />
           </button>
-          <button onClick={() => setIdx(i => (i + 1) % imgs.length)}
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100">
+          <button onClick={() => setIdx(i => (i + 1) % imgs.length)} aria-label="הבא"
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/45 hover:bg-black/65 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-all">
             <IconChevronLeft size={18} />
           </button>
         </>
