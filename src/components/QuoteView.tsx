@@ -411,6 +411,14 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             </div>
           </div>
 
+          {/* Booking options (mobile, on the page) */}
+          <div className="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-slate-100 p-5 space-y-4">
+            <h3 className="font-display font-bold text-slate-900 flex items-center gap-2"><IconPlus size={18} className="text-blue-600" /> התאמת ההזמנה</h3>
+            {addonsGrid}
+            {choicesBlock}
+            {splitSelector}
+          </div>
+
           {/* About + location */}
           {apt?.description && (
             <div className="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-slate-100 p-5">
@@ -463,12 +471,10 @@ export default function QuoteView({ q }: { q: QuoteData }) {
         <div className="bg-white rounded-t-3xl max-h-[90vh] overflow-y-auto p-5 space-y-4" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 1rem)" }}>
           <button onClick={() => setSheetOpen(false)} className="w-full flex justify-center"><span className="w-10 h-1.5 rounded-full bg-slate-300" /></button>
           <div className="flex items-center justify-between">
-            <h3 className="font-display text-lg font-black text-slate-900">תוספות ותשלום</h3>
-            <span className="font-display text-2xl font-black text-emerald-500">€{liveTotal.toLocaleString()}</span>
+            <h3 className="font-display text-lg font-black text-slate-900">תשלום</h3>
+            <span className="font-display text-2xl font-black text-emerald-500">€{(splitCount > 1 ? payNow : liveTotal).toLocaleString()}</span>
           </div>
-          {addonsGrid}
-          {choicesBlock}
-          {splitSelector}
+          <p className="text-xs text-slate-400 -mt-2">להתאמת תוספות, ביטול ושירות — סגור/י וגלול/י לאזור "התאמת ההזמנה".</p>
           <CardPaymentButton apartmentId={apartmentId} apartment={apartment} checkin={checkin} checkout={checkout}
             guests={guests} nights={nights} skiPass={skiPass} transfer={transferOn} equipment={equipmentOn} transferDetails={transferDetails} cancel={cancel} service={service}
             grandTotal={payNow} split={splitProp}
