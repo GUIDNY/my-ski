@@ -182,8 +182,8 @@ export default function QuoteView({ q }: { q: QuoteData }) {
 
   const ADDONS = [
     { key: "skipass", icon: <IconTicket size={20} />, title: "סקי פס", sub: "כל אזור Trois Vallées · 600 ק״מ מסלולים", soon: true },
-    { key: "equipment", icon: <IconSkis size={20} />, title: "השכרת ציוד סקי/סנובורד", sub: `€30 ליום · €120 לשבוע · +€20 ליום נוסף${splitCount > 1 ? ` · ×${splitCount} אנשים` : ""}`, price: equipCost(nights) * splitCount, on: equipmentOn, toggle: () => setEquipmentOn(v => !v) },
-    { key: "transfer", icon: <IconBus size={20} />, title: "הסעה הלוך-חזור", sub: `משדה התעופה וחזרה · מחיר לא קבוע${splitCount > 1 ? ` · ×${splitCount} אנשים` : ""}`, price: TRANSFER_PRICE * splitCount, on: transferOn, toggle: () => setTransferOn(v => !v) },
+    { key: "equipment", icon: <IconSkis size={20} />, title: "השכרת ציוד סקי/סנובורד", sub: `€30 ליום · €120 לשבוע · +€20 ליום נוסף${splitCount > 1 ? ` · ${splitCount} אנשים` : ""}`, price: equipCost(nights) * splitCount, unit: equipCost(nights), on: equipmentOn, toggle: () => setEquipmentOn(v => !v) },
+    { key: "transfer", icon: <IconBus size={20} />, title: "הסעה הלוך-חזור", sub: `משדה התעופה וחזרה · מחיר לא קבוע${splitCount > 1 ? ` · ${splitCount} אנשים` : ""}`, price: TRANSFER_PRICE * splitCount, unit: TRANSFER_PRICE, on: transferOn, toggle: () => setTransferOn(v => !v) },
     { key: "lessons", icon: <IconUser size={20} />, title: "שיעורי סקי / סנובורד", sub: "מדריך מוסמך · כל הרמות", soon: true },
   ];
 
@@ -290,7 +290,11 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             {soon
               ? <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full flex-shrink-0">בקרוב</span>
               : <span className="flex items-center gap-2 flex-shrink-0">
-                  <span className="text-sm font-bold text-blue-600">+€{(a as { price: number }).price}</span>
+                  <span className="text-sm font-bold text-blue-600">
+                    +€{"unit" in a && splitCount > 1
+                      ? `${(a as { unit: number }).unit}×${splitCount}`
+                      : (a as { price: number }).price.toLocaleString()}
+                  </span>
                   <span className={`w-5 h-5 rounded-md border flex items-center justify-center ${selected ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300"}`}>{selected && <IconCheck size={12} />}</span>
                 </span>}
           </button>
