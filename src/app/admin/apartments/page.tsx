@@ -100,6 +100,25 @@ export default function ApartmentsAdmin() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<Partial<Apartment>>(EMPTY);
   const [editing, setEditing] = useState<string | null>(null);
+  const [adjApt, setAdjApt] = useState<Apartment | null>(null);
+  const [adjMode, setAdjMode] = useState<"percent" | "fixed">("percent");
+  const [adjValue, setAdjValue] = useState("");
+  const [adjBusy, setAdjBusy] = useState(false);
+
+  const applyAdjust = async () => {
+    if (!adjApt) return;
+    const v = Number(adjValue);
+    if (!isFinite(v) || v === 0) { alert("הזן/י ערך (למשל ‎-10 לאחוז או ‎-20 לסכום)"); return; }
+    if (!confirm(`לעדכן את כל המחירון של "${adjApt.name}" ב-${adjMode === "percent" ? `${v}%` : `€${v}`}? פעולה זו משנה את כל הלוח.`)) return;
+    setAdjBusy(true);
+    const r = await fetch(`/api/apartments/${adjApt.id}/price-adjust`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: adjMode, value: v }),
+    });
+    const j = await r.json().catch(() => ({}));
+    setAdjBusy(false);
+    if (r.ok) { alert(`✓ עודכנו ${j.updated ?? 0} מחירים + מחיר הבסיס.`); setAdjApt(null); setAdjValue(""); load(); }
+    else alert(`שגיאה: ${j.error || "לא הצלחנו"}`);
+  };
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
@@ -290,6 +309,7 @@ export default function ApartmentsAdmin() {
                         className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-3 py-1.5 rounded-lg transition-colors">
                         ניהול דירה →
                       </Link>
+                      <button onClick={() => { setAdjApt(apt); setAdjValue(""); }} className="text-amber-600 hover:text-amber-800 font-medium text-xs">💰 מחיר גלובלי</button>
                       <button onClick={() => edit(apt)} className="text-blue-600 hover:text-blue-800 font-medium text-xs">עריכה</button>
                       <button onClick={() => remove(apt.id)} className="text-red-500 hover:text-red-700 font-medium text-xs">מחיקה</button>
                     </div>
@@ -298,6 +318,37 @@ export default function ApartmentsAdmin() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* ── Global price adjustment ──────────────────────────── */}
+      {adjApt && (
+        <div dir="rtl" className="fixed inset-0 z-[80] bg-black/55 flex items-center justify-center p-4" onClick={() => !adjBusy && setAdjApt(null)}>
+          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <h2 className="text-xl font-black text-gray-900 mb-1">שינוי מחיר גלובלי</h2>
+            <p className="text-sm text-gray-500 mb-4">משנה את <b>כל המחירון</b> של "{adjApt.name}" (כל החודשים + מחיר הבסיס).</p>
+
+            <div className="flex gap-2 mb-3">
+              <button onClick={() => setAdjMode("percent")} className={`flex-1 py-2.5 rounded-xl text-sm font-bold border ${adjMode === "percent" ? "border-blue-500 bg-blue-50 text-blue-700" : "border-gray-200 text-gray-500"}`}>אחוז (%)</button>
+              <button onClick={() => setAdjMode("fixed")} className={`flex-1 py-2.5 rounded-xl text-sm font-bold border ${adjMode === "fixed" ? "border-blue-500 bg-blue-50 text-blue-700" : "border-gray-200 text-gray-500"}`}>סכום (€)</button>
+            </div>
+
+            <label className="text-xs font-bold text-gray-400 block mb-1">ערך (מספר שלילי = הנחה)</label>
+            <input type="number" value={adjValue} onChange={e => setAdjValue(e.target.value)}
+              placeholder={adjMode === "percent" ? "לדוגמה: -10 (10% הנחה)" : "לדוגמה: -20 (€20 הנחה)"}
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <p className="text-xs text-gray-400 mb-4">
+              {adjMode === "percent" ? "‎-10 = הנחה של 10% · 15 = העלאה של 15%" : "‎-20 = €20 פחות לכל לילה · 30 = €30 יותר"}
+            </p>
+
+            <div className="flex gap-2">
+              <button onClick={applyAdjust} disabled={adjBusy}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition">
+                {adjBusy ? "מעדכן…" : "החל על כל המחירון"}
+              </button>
+              <button onClick={() => setAdjApt(null)} className="px-5 py-3 rounded-xl border border-gray-200 text-gray-600 font-bold">ביטול</button>
+            </div>
+          </div>
         </div>
       )}
     </div>
