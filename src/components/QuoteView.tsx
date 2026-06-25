@@ -7,6 +7,8 @@ import {
   IconUsers, IconUser, IconMoon, IconWhatsApp,
 } from "@/components/Icons";
 import { buildWaHref } from "@/lib/whatsapp";
+import { getEffectivePrice } from "@/lib/pricing";
+import type { PricingRule } from "@/lib/pricing";
 import Logo from "@/components/Logo";
 import CardPaymentButton from "@/components/CardPaymentButton";
 import FlightDetailsModal, { EMPTY_FLIGHT, flightToString, flightFilled, type Flight } from "@/components/FlightDetailsModal";
@@ -53,16 +55,35 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const [flight, setFlight] = useState<Flight>(EMPTY_FLIGHT);
   const [transferOn, setTransferOn] = useState(transfer);
   const [equipmentOn, setEquipmentOn] = useState(false);
+  const [rules, setRules] = useState<PricingRule[]>([]);
+  const [showNights, setShowNights] = useState(false);
+  const [showBank, setShowBank] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const transferDetails = transferOn ? flightToString(flight) : "";
 
   useEffect(() => { setPageUrl(window.location.href); }, []);
+  useEffect(() => {
+    if (!apartmentId) return;
+    fetch(`/api/pricing-rules?apartment_id=${apartmentId}`).then(r => r.json()).then(d => setRules(Array.isArray(d) ? d : [])).catch(() => {});
+  }, [apartmentId]);
+
+  // per-night breakdown from the seasonal calendar (falls back to the stored total)
+  const nightly = (() => {
+    if (!checkin || !checkout || nights <= 0 || !apt) return [] as { date: Date; price: number }[];
+    const out: { date: Date; price: number }[] = [];
+    const end = new Date(checkout + "T12:00:00");
+    for (let d = new Date(checkin + "T12:00:00"); d < end; d.setDate(d.getDate() + 1))
+      out.push({ date: new Date(d), price: getEffectivePrice(new Date(d), Number(apt.price_per_night || 0), rules) });
+    return out;
+  })();
+  const baseApt = nightly.length ? nightly.reduce((s, n) => s + n.price, 0) : aptTotal;
 
   // live total recomputed from the base lodging + currently-selected add-ons
   const trTotal = transferOn ? TRANSFER_PRICE : 0;
   const equipTotal = equipmentOn ? equipCost(nights) : 0;
   const flexExtra = cancel === "flexible" ? FLEXIBLE_EXTRA * guests : 0;
   const aiDisc = service === "ai" ? AI_DISCOUNT * guests : 0;
-  const liveTotal = aptTotal + trTotal + equipTotal + flexExtra - aiDisc;
+  const liveTotal = baseApt + trTotal + equipTotal + flexExtra - aiDisc;
 
   const ADDONS = [
     { key: "skipass", icon: <IconTicket size={20} />, title: "סקי פס", sub: "כל אזור Trois Vallées · 600 ק״מ מסלולים", soon: true },
@@ -77,7 +98,8 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   }, [apartmentId]);
 
   const imgs = apt?.images?.length ? apt.images : ["/apt1.jpg", "/apt2.jpg", "/apt3.jpg"];
-  const avgNightly = nights > 0 ? Math.round(aptTotal / nights) : aptTotal;
+  const avgNightly = nights > 0 ? Math.round(baseApt / nights) : baseApt;
+  const fmtFull = (d: Date) => `${d.getDate()} ${HE_MONTHS[d.getMonth()]}`;
 
   const bank = {
     name:    process.env.NEXT_PUBLIC_BANK_NAME    || "בנק הפועלים (12)",
@@ -107,7 +129,27 @@ export default function QuoteView({ q }: { q: QuoteData }) {
 
   const breakdownRows = (
     <>
-      <Row label="לינה" sub={`€${avgNightly.toLocaleString()} × ${nights} לילות`} amount={`€${aptTotal.toLocaleString()}`} />
+      <div className="py-2.5">
+        <button onClick={() => setShowNights(v => !v)} className="w-full flex items-center justify-between">
+          <div className="text-right">
+            <p className="text-sm font-medium text-slate-700">לינה</p>
+            <p className="text-xs text-slate-400">€{avgNightly.toLocaleString()} ממוצע × {nights} לילות · פירוט {showNights ? "▲" : "▼"}</p>
+          </div>
+          <span className="text-sm font-bold text-slate-900">€{baseApt.toLocaleString()}</span>
+        </button>
+        {showNights && nightly.length > 0 && (
+          <div className="mt-2 rounded-xl border border-slate-100 overflow-hidden">
+            <div className="max-h-48 overflow-y-auto divide-y divide-slate-50">
+              {nightly.map((n, i) => (
+                <div key={i} className="flex items-center justify-between px-3 py-1.5 text-xs">
+                  <span className="text-slate-500">{fmtFull(n.date)}</span>
+                  <span className="font-semibold text-slate-700">€{n.price.toLocaleString()}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
       {transferOn      && <Row label="הסעה הלוך־חזור" sub="שאטל פרטי" amount={`€${TRANSFER_PRICE}`} />}
       {equipmentOn     && <Row label="השכרת ציוד" sub={`${nights} לילות`} amount={`€${equipTotal.toLocaleString()}`} />}
       {cancel === "flexible" && <Row label="ביטול גמיש" sub={`${guests} אורחים`} amount={`€${(FLEXIBLE_EXTRA * guests).toLocaleString()}`} />}
@@ -158,23 +200,26 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const paymentBlock = (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-5">
-        <div className="flex items-center gap-2 text-blue-600 mb-4">
-          <IconBank size={18} /><span className="font-bold text-slate-800">העברה בנקאית</span>
-        </div>
-        <div className="space-y-4">
-          <div>
-            <p className="text-xs font-bold text-slate-500 border-b border-slate-200 pb-1 mb-2">העברה בשקלים (ILS)</p>
-            <KV k="בנק" v={bank.name} />
-            <KV k="סניף" v={bank.branch} />
-            <KV k="מספר חשבון" v={bank.account} />
+        <button onClick={() => setShowBank(v => !v)} className="w-full flex items-center justify-between text-blue-600">
+          <span className="flex items-center gap-2"><IconBank size={18} /><span className="font-bold text-slate-800">תשלום בהעברה בנקאית</span></span>
+          <span className="text-xs font-bold text-blue-600">{showBank ? "הסתר ▲" : "הצג פרטים ▼"}</span>
+        </button>
+        {showBank && (
+          <div className="space-y-4 mt-4">
+            <div>
+              <p className="text-xs font-bold text-slate-500 border-b border-slate-200 pb-1 mb-2">העברה בשקלים (ILS)</p>
+              <KV k="בנק" v={bank.name} />
+              <KV k="סניף" v={bank.branch} />
+              <KV k="מספר חשבון" v={bank.account} />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-500 border-b border-slate-200 pb-1 mb-2">העברה בינלאומית (FX)</p>
+              <KV k="IBAN" v={bank.iban} mono />
+              <KV k="SWIFT" v={bank.swift} mono />
+              <KV k="מוטב" v={bank.holder} />
+            </div>
           </div>
-          <div>
-            <p className="text-xs font-bold text-slate-500 border-b border-slate-200 pb-1 mb-2">העברה בינלאומית (FX)</p>
-            <KV k="IBAN" v={bank.iban} mono />
-            <KV k="SWIFT" v={bank.swift} mono />
-            <KV k="מוטב" v={bank.holder} />
-          </div>
-        </div>
+        )}
       </div>
 
       <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-5">
@@ -208,7 +253,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
       <header className="lg:hidden absolute top-0 inset-x-0 z-30 px-4 py-4 flex items-center justify-between">
         <a href="/"><Logo className="h-9" white /></a>
         <div className="flex items-center gap-2">
-          <a href="#addons" className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-white text-xs font-semibold"><IconPlus size={13} /> תוספות</a>
+          <button onClick={() => setSheetOpen(true)} className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-white text-xs font-semibold"><IconPlus size={13} /> תוספות</button>
           <button onClick={() => setImgIdx(i => (i + 1) % imgs.length)} className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-white text-xs font-semibold"><IconImage size={13} /> תמונות</button>
         </div>
       </header>
@@ -256,19 +301,41 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             </div>
           </div>
 
-          <div id="addons" className="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-slate-100 p-5 scroll-mt-20">
-            <h3 className="font-display font-bold text-slate-900 flex items-center gap-2 mb-4"><IconPlus size={18} className="text-blue-600" /> תוספות זמינות</h3>
-            {addonsGrid}
-          </div>
-
-          <div className="space-y-3">
-            <h3 className="font-display font-bold text-slate-900 flex items-center gap-2 px-1"><IconBank size={18} className="text-blue-600" /> דרכי תשלום</h3>
-            {paymentBlock}
-          </div>
-
           <p className="flex items-center gap-1.5 justify-center text-xs text-slate-400 pt-2">
             <IconCheck size={13} className="text-emerald-500" /> הצעה תקפה ל־30 יום · SkiShare · Val Thorens
           </p>
+        </div>
+      </div>
+
+      {/* MOBILE floating bar + sheet */}
+      {!sheetOpen && (
+        <div className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-slate-200 px-4 py-3 flex items-center gap-3 shadow-[0_-4px_24px_rgba(0,0,0,0.10)]"
+          style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.5rem)" }}>
+          <div className="flex-shrink-0 text-right leading-none">
+            <div className="text-[11px] text-slate-400 mb-0.5">סה״כ · {nights} לילות</div>
+            <div className="text-xl font-black text-slate-900">€{liveTotal.toLocaleString()}</div>
+          </div>
+          <button onClick={() => setSheetOpen(true)} className="flex-1 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-base transition">
+            בחר/י תוספות ותשלום ↑
+          </button>
+        </div>
+      )}
+      {sheetOpen && <div className="lg:hidden fixed inset-0 z-40 bg-black/45" onClick={() => setSheetOpen(false)} />}
+      <div className={`lg:hidden fixed inset-x-0 bottom-0 z-50 transition-transform duration-300 ${sheetOpen ? "translate-y-0" : "translate-y-full"}`}>
+        <div className="bg-white rounded-t-3xl max-h-[90vh] overflow-y-auto p-5 space-y-4" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 1rem)" }}>
+          <button onClick={() => setSheetOpen(false)} className="w-full flex justify-center"><span className="w-10 h-1.5 rounded-full bg-slate-300" /></button>
+          <div className="flex items-center justify-between">
+            <h3 className="font-display text-lg font-black text-slate-900">תוספות ותשלום</h3>
+            <span className="font-display text-2xl font-black text-emerald-500">€{liveTotal.toLocaleString()}</span>
+          </div>
+          {addonsGrid}
+          <CardPaymentButton apartmentId={apartmentId} apartment={apartment} checkin={checkin} checkout={checkout}
+            guests={guests} nights={nights} skiPass={skiPass} transfer={transferOn} equipment={equipmentOn} transferDetails={transferDetails} cancel={cancel} service={service}
+            grandTotal={liveTotal}
+            className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-base transition" />
+          <a href={waHref} target="_blank" rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5a] text-white font-bold py-3.5 rounded-xl transition"><IconWhatsApp size={20} /> צור קשר עם נציג</a>
+          {paymentBlock}
         </div>
       </div>
 
