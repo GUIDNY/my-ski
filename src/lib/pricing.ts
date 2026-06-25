@@ -18,7 +18,8 @@ export function getEffectivePrice(date: Date, basePrice: number, rules: PricingR
   const mo      = date.getMonth();
 
   const matches = (r: PricingRule) =>
-    (r.type === "date_range" && !!r.start_date && !!r.end_date && iso >= r.start_date && iso <= r.end_date) ||
+    (r.type === "date_range" && !!r.start_date && !!r.end_date && iso >= r.start_date && iso <= r.end_date
+      && (!r.weekdays || r.weekdays.length === 0 || r.weekdays.includes(wd))) ||
     (r.type === "month"      && !!r.months?.includes(mo)) ||
     (r.type === "weekday"    && !!r.weekdays?.includes(wd));
 
