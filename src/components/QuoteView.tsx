@@ -312,6 +312,23 @@ export default function QuoteView({ q }: { q: QuoteData }) {
               className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === imgIdx ? "opacity-100" : "opacity-0"}`} />
           ))}
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-slate-900/25" />
+
+          {/* image arrows + dots */}
+          {imgs.length > 1 && (
+            <>
+              <button onClick={() => setImgIdx(i => (i - 1 + imgs.length) % imgs.length)} aria-label="הקודם"
+                className="absolute top-1/3 right-3 -translate-y-1/2 w-10 h-10 rounded-full bg-black/35 hover:bg-black/55 backdrop-blur-sm text-white flex items-center justify-center text-xl z-10">›</button>
+              <button onClick={() => setImgIdx(i => (i + 1) % imgs.length)} aria-label="הבא"
+                className="absolute top-1/3 left-3 -translate-y-1/2 w-10 h-10 rounded-full bg-black/35 hover:bg-black/55 backdrop-blur-sm text-white flex items-center justify-center text-xl z-10">‹</button>
+              <div className="absolute top-[30%] left-0 right-0 flex justify-center gap-1.5 z-10">
+                {imgs.slice(0, 10).map((_, i) => (
+                  <button key={i} onClick={() => setImgIdx(i)} aria-label={`תמונה ${i + 1}`}
+                    className={`h-1.5 rounded-full transition-all ${i === imgIdx ? "w-5 bg-white" : "w-1.5 bg-white/50"}`} />
+                ))}
+              </div>
+            </>
+          )}
+
           <div className="absolute bottom-16 inset-x-0 px-6 text-white">
             <div className="flex items-center gap-1.5 text-xs font-medium opacity-90 mb-1.5">
               <IconMountain size={13} /> Val Thorens, France
