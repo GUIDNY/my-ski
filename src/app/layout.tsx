@@ -3,6 +3,7 @@ import { Montserrat, Inter } from "next/font/google";
 import "./globals.css";
 import MobileTabBar from "@/components/MobileTabBar";
 import CookieConsent from "@/components/CookieConsent";
+import DeepLinkHandler from "@/components/DeepLinkHandler";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -58,6 +59,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         {children}
+        <DeepLinkHandler />
         <MobileTabBar />
         <CookieConsent />
       </body>

@@ -20,7 +20,20 @@ export default function OpenInAppBanner() {
   if (!show) return null;
 
   const hide = () => { setShow(false); try { sessionStorage.setItem("appBannerHidden", "1"); } catch {} };
-  const openApp = () => { window.location.href = window.location.href; setTimeout(() => { window.location.href = APP_STORE_URL; }, 1200); };
+  // try to open the installed app via its custom URL scheme; if nothing happens
+  // (app not installed) fall back to the App Store after a short delay.
+  const openApp = () => {
+    const path = window.location.pathname + window.location.search;
+    const started = Date.now();
+    const fallback = setTimeout(() => {
+      // if we're still here & the page didn't go to background, the app isn't installed
+      if (Date.now() - started < 2000 && document.visibilityState === "visible") {
+        window.location.href = APP_STORE_URL;
+      }
+    }, 1400);
+    window.addEventListener("pagehide", () => clearTimeout(fallback), { once: true });
+    window.location.href = "skishare://open?path=" + encodeURIComponent(path);
+  };
 
   return (
     <div dir="rtl" className="sticky top-0 z-[60] bg-gradient-to-l from-blue-600 to-blue-500 text-white">
