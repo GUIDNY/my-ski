@@ -20,7 +20,7 @@ const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","�
 const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s + "T12:00:00"); return `${d.getDate()} ${HE_MONTHS[d.getMonth()]}`; };
 
 const SITE_URL = "https://skisharebook.com";
-const APP_STORE_URL = "https://apps.apple.com/app/id6782095727";
+const APP_STORE_URL = "https://apps.apple.com/il/app/skishare/id6782095727?l=he";
 const SKI_DAY_PRICE  = 70;
 const TRANSFER_PRICE = 180;
 // ski equipment rental: €30/night under a week · €120 for a week · +€20 each extra night

@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["TEAMID.com.skishare.app"],
+        "components": [
+          { "/": "/q/*", "comment": "quote links" },
+          { "/": "/split/*", "comment": "split-payment links" },
+          { "/": "/my", "comment": "personal area" }
+        ]
+      }
+    ]
+  }
+}
