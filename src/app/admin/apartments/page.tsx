@@ -104,7 +104,7 @@ export default function ApartmentsAdmin() {
 
   const load = async () => {
     setLoading(true);
-    const res = await fetch("/api/apartments");
+    const res = await fetch("/api/apartments?all=1");
     const data = await res.json();
     setApartments(data);
     setLoading(false);

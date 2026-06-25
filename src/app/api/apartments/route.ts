@@ -2,14 +2,12 @@ import { createServerClient } from "@/lib/supabase-server";
 import { buildSeasonalRules } from "@/lib/seasonal-pricing";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const db = createServerClient();
-  const { data, error } = await db
-    .from("apartments")
-    .select("*")
-    .eq("available", true)
-    .order("created_at", { ascending: false });
-
+  const all = req.nextUrl.searchParams.has("all"); // admin: include unavailable
+  let q = db.from("apartments").select("*").order("created_at", { ascending: false });
+  if (!all) q = q.eq("available", true);
+  const { data, error } = await q;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);
 }

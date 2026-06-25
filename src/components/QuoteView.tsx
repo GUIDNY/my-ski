@@ -84,6 +84,8 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const [showNoCancel, setShowNoCancel] = useState(false);
   const [noCancelAgreed, setNoCancelAgreed] = useState(false);
   const [signature, setSignature] = useState("");
+  const [openCancel, setOpenCancel] = useState(false);
+  const [openService, setOpenService] = useState(false);
   const transferDetails = transferOn ? flightToString(flight) : "";
 
   useEffect(() => { setPageUrl(window.location.href); }, []);
@@ -140,23 +142,38 @@ export default function QuoteView({ q }: { q: QuoteData }) {
     </div>
   );
 
+  const cancelLabel = cancel === "flexible" ? "ביטול גמיש (+€100)" : cancel === "none" ? "ללא ביטול (−€100)" : "ביטול רגיל";
+  const serviceLabel = service === "ai" ? "AI בלבד (−€50)" : "שירות אנושי מלא";
+
   const choicesBlock = (
-    <div className="space-y-4">
-      <div>
-        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">מדיניות ביטול</div>
-        <div className="flex flex-col gap-2">
-          <QRadio label="ביטול רגיל" sublabel="בהתאם לתנאי התקנון · מחיר רגיל" selected={cancel === "regular"} onClick={() => setCancel("regular")} />
-          <QRadio label="ללא אפשרות ביטול" sublabel="מחיר מוזל · לא ניתן לבטל ואין החזר" badge="−€100" badgeColor="#ef4444" selected={cancel === "none"} onClick={() => setShowNoCancel(true)} />
-          <QRadio label="ביטול גמיש" sublabel="80% החזר עד שבוע לפני · 50% עד 24ש׳ · אח״כ אין החזר" badge="+€100" badgeColor="#10b981" selected={cancel === "flexible"} onClick={() => setCancel("flexible")} />
-        </div>
-        <a href="/terms" target="_blank" className="inline-block mt-2 text-xs text-blue-600 hover:underline font-semibold">מדיניות הביטולים בתקנון ←</a>
+    <div className="space-y-2">
+      {/* cancellation selector */}
+      <div className="rounded-xl border border-slate-200 overflow-hidden">
+        <button onClick={() => setOpenCancel(v => !v)} className="w-full flex items-center justify-between p-3.5 text-right">
+          <span><span className="text-sm font-bold text-slate-800">מדיניות ביטול</span><span className="block text-xs text-blue-600 mt-0.5">{cancelLabel}</span></span>
+          <span className="text-slate-400">{openCancel ? "▲" : "▼"}</span>
+        </button>
+        {openCancel && (
+          <div className="px-3 pb-3 flex flex-col gap-2">
+            <QRadio label="ביטול רגיל" sublabel="בהתאם לתנאי התקנון · מחיר רגיל" selected={cancel === "regular"} onClick={() => { setCancel("regular"); setOpenCancel(false); }} />
+            <QRadio label="ללא אפשרות ביטול" sublabel="מחיר מוזל · לא ניתן לבטל ואין החזר" badge="−€100" badgeColor="#ef4444" selected={cancel === "none"} onClick={() => setShowNoCancel(true)} />
+            <QRadio label="ביטול גמיש" sublabel="80% החזר עד שבוע לפני · 50% עד 24ש׳ · אח״כ אין החזר" badge="+€100" badgeColor="#10b981" selected={cancel === "flexible"} onClick={() => { setCancel("flexible"); setOpenCancel(false); }} />
+            <a href="/terms" target="_blank" className="text-xs text-blue-600 hover:underline font-semibold">מדיניות הביטולים בתקנון ←</a>
+          </div>
+        )}
       </div>
-      <div>
-        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">רמת שירות</div>
-        <div className="flex flex-col gap-2">
-          <QRadio label="שירות אנושי מלא" sublabel="נציג ישראלי זמין לפני, במהלך ואחרי" selected={service === "human"} onClick={() => setService("human")} />
-          <QRadio label="AI בלבד" sublabel="ניהול עצמאי · צ׳אטבוט · איסוף עצמאי של הסקי פס" badge="−€50" badgeColor="#6366f1" selected={service === "ai"} onClick={() => setService("ai")} />
-        </div>
+      {/* service selector */}
+      <div className="rounded-xl border border-slate-200 overflow-hidden">
+        <button onClick={() => setOpenService(v => !v)} className="w-full flex items-center justify-between p-3.5 text-right">
+          <span><span className="text-sm font-bold text-slate-800">רמת שירות</span><span className="block text-xs text-blue-600 mt-0.5">{serviceLabel}</span></span>
+          <span className="text-slate-400">{openService ? "▲" : "▼"}</span>
+        </button>
+        {openService && (
+          <div className="px-3 pb-3 flex flex-col gap-2">
+            <QRadio label="שירות אנושי מלא" sublabel="נציג ישראלי זמין לפני, במהלך ואחרי" selected={service === "human"} onClick={() => { setService("human"); setOpenService(false); }} />
+            <QRadio label="AI בלבד" sublabel="ניהול עצמאי · צ׳אטבוט · איסוף עצמאי של הסקי פס" badge="−€50" badgeColor="#6366f1" selected={service === "ai"} onClick={() => { setService("ai"); setOpenService(false); }} />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -415,7 +432,6 @@ export default function QuoteView({ q }: { q: QuoteData }) {
           <div className="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-slate-100 p-5 space-y-4">
             <h3 className="font-display font-bold text-slate-900 flex items-center gap-2"><IconPlus size={18} className="text-blue-600" /> התאמת ההזמנה</h3>
             {addonsGrid}
-            {choicesBlock}
             {splitSelector}
           </div>
 
@@ -474,7 +490,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             <h3 className="font-display text-lg font-black text-slate-900">תשלום</h3>
             <span className="font-display text-2xl font-black text-emerald-500">€{(splitCount > 1 ? payNow : liveTotal).toLocaleString()}</span>
           </div>
-          <p className="text-xs text-slate-400 -mt-2">להתאמת תוספות, ביטול ושירות — סגור/י וגלול/י לאזור "התאמת ההזמנה".</p>
+          {choicesBlock}
           <CardPaymentButton apartmentId={apartmentId} apartment={apartment} checkin={checkin} checkout={checkout}
             guests={guests} nights={nights} skiPass={skiPass} transfer={transferOn} equipment={equipmentOn} transferDetails={transferDetails} cancel={cancel} service={service}
             grandTotal={payNow} split={splitProp}
