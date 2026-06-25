@@ -2,7 +2,7 @@
   "applinks": {
     "details": [
       {
-        "appIDs": ["TEAMID.com.skishare.app"],
+        "appIDs": ["ZX5VG4RDTL.com.skishare.app"],
         "components": [
           { "/": "/q/*", "comment": "quote links" },
           { "/": "/split/*", "comment": "split-payment links" },
