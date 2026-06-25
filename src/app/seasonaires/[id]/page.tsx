@@ -21,6 +21,7 @@ export default function SeasonRentalDetail() {
   const [loading, setLoading] = useState(true);
   const [idx, setIdx] = useState(0);
   const [selected, setSelected] = useState<string[]>([]);
+  const [showDesc, setShowDesc] = useState(false);
 
   useEffect(() => {
     fetch(`/api/season-rentals/${id}`)
@@ -113,11 +114,11 @@ export default function SeasonRentalDetail() {
         {imgs.length > 1 && (
           <>
             <button onClick={() => setIdx(i => (i - 1 + imgs.length) % imgs.length)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/15 hover:bg-white/30 backdrop-blur-md text-white flex items-center justify-center transition">
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-md text-white flex items-center justify-center transition">
               <IconChevronLeft size={18} className="rotate-180" />
             </button>
             <button onClick={() => setIdx(i => (i + 1) % imgs.length)}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/15 hover:bg-white/30 backdrop-blur-md text-white flex items-center justify-center transition">
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-md text-white flex items-center justify-center transition">
               <IconChevronLeft size={18} />
             </button>
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
@@ -150,7 +151,12 @@ export default function SeasonRentalDetail() {
           {r.description && (
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
               <h2 className="font-display text-xl font-bold text-slate-900 mb-3">על הדירה</h2>
-              <p className="text-slate-600 leading-relaxed">{r.description}</p>
+              <p className={`text-slate-600 leading-relaxed whitespace-pre-line ${showDesc ? "" : "line-clamp-5"}`}>{r.description}</p>
+              {r.description.length > 200 && (
+                <button onClick={() => setShowDesc(v => !v)} className="mt-2 text-sm font-bold text-blue-600 hover:underline">
+                  {showDesc ? "הצג פחות ↑" : "קרא עוד ←"}
+                </button>
+              )}
             </div>
           )}
 
