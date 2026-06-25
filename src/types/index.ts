@@ -83,6 +83,7 @@ export type SeasonRental = {
   beds: number;
   sleeps: number;
   price_per_month: number;
+  monthly_prices?: Record<string, number> | null;
   min_months: number;
   available_from: string | null;
   available_to: string | null;

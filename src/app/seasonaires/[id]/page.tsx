@@ -20,6 +20,7 @@ export default function SeasonRentalDetail() {
   const [r, setR] = useState<SeasonRental | null>(null);
   const [loading, setLoading] = useState(true);
   const [idx, setIdx] = useState(0);
+  const [selected, setSelected] = useState<string[]>([]);
 
   useEffect(() => {
     fetch(`/api/season-rentals/${id}`)
@@ -45,16 +46,51 @@ export default function SeasonRentalDetail() {
 
   const imgs = r.images?.length ? r.images : ["/apt1.jpg", "/apt2.jpg", "/apt3.jpg"];
 
+  const MONTHS: [string, string][] = [["nov","נובמבר"],["dec","דצמבר"],["jan","ינואר"],["feb","פברואר"],["mar","מרץ"],["apr","אפריל"],["may","מאי"]];
+  const mp = r.monthly_prices || {};
+  const availMonths = MONTHS.filter(([k]) => Number(mp[k]) > 0);
+  const monthLabel = (k: string) => MONTHS.find(m => m[0] === k)?.[1] || k;
+  const total = selected.reduce((s, k) => s + (Number(mp[k]) || 0), 0);
+  const toggleMonth = (k: string) => setSelected(p => p.includes(k) ? p.filter(x => x !== k) : [...p, k]);
+  const displayPrice = total > 0 ? total : r.price_per_month;
+
   const waHref = buildWaHref({
     intro: "היי! 👋 אני מעוניין/ת בדירה לעונה הבאה:",
     lines: [
       `🏔️ ${r.name} · ${r.area}`,
       `🛏️ ${r.beds} חדרים · עד ${r.sleeps} אנשים`,
-      `📅 זמינה: ${fmtDate(r.available_from)} — ${fmtDate(r.available_to)}`,
+      selected.length
+        ? `📅 חודשים: ${selected.map(monthLabel).join(", ")} (${selected.length} חודשים)`
+        : `📅 זמינה: ${fmtDate(r.available_from)} — ${fmtDate(r.available_to)}`,
       `⏳ מינימום ${r.min_months} חודשים`,
-      `💶 €${r.price_per_month.toLocaleString()} / חודש`,
+      total > 0 ? `💶 סה״כ: €${total.toLocaleString()}` : `💶 €${r.price_per_month.toLocaleString()} / חודש`,
     ],
   });
+
+  const monthPicker = availMonths.length > 0 && (
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+      <h3 className="font-display font-bold text-slate-900 mb-1">בחר/י חודשים</h3>
+      <p className="text-xs text-slate-400 mb-3">מינימום {r.min_months} חודשים · מחיר משתנה לפי החודש</p>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        {availMonths.map(([k, label]) => {
+          const on = selected.includes(k);
+          return (
+            <button key={k} onClick={() => toggleMonth(k)}
+              className={`flex flex-col items-start p-3 rounded-xl border transition-all text-right ${on ? "border-blue-500 bg-blue-50" : "border-slate-200 bg-white hover:border-blue-300"}`}>
+              <span className="text-sm font-bold text-slate-800">{label}</span>
+              <span className={`text-sm font-black ${on ? "text-blue-600" : "text-slate-500"}`}>€{Number(mp[k]).toLocaleString()}</span>
+            </button>
+          );
+        })}
+      </div>
+      {selected.length > 0 && (
+        <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
+          <span className="text-sm font-bold text-slate-700">{selected.length} חודשים</span>
+          <span className="font-display text-xl font-black text-blue-600">€{total.toLocaleString()}</span>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-[#f7f9fb] pb-28 lg:pb-0" dir="rtl">
@@ -137,17 +173,19 @@ export default function SeasonRentalDetail() {
             <p className="text-slate-600">{fmtDate(r.available_from)} — {fmtDate(r.available_to)}</p>
             <p className="text-sm text-slate-400 mt-1">סקי פס עונתי זמין בנפרד · €1,070 לכל העונה</p>
           </div>
+
+          {monthPicker}
         </main>
 
         {/* Sidebar (desktop) */}
         <aside className="hidden lg:block sticky top-24">
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-            <p className="text-sm text-slate-400">מחיר חודשי</p>
-            <p className="font-display text-4xl font-black text-slate-900 mt-1">€{r.price_per_month.toLocaleString()}<span className="text-base font-medium text-slate-400"> / חודש</span></p>
+            <p className="text-sm text-slate-400">{selected.length ? `${selected.length} חודשים נבחרו` : "מחיר חודשי"}</p>
+            <p className="font-display text-4xl font-black text-slate-900 mt-1">€{displayPrice.toLocaleString()}<span className="text-base font-medium text-slate-400">{selected.length ? " סה״כ" : " / חודש"}</span></p>
             <p className="text-xs text-slate-400 mt-1">מינימום {r.min_months} חודשים</p>
             <a href={waHref} target="_blank" rel="noopener noreferrer"
               className="mt-5 flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-bold py-3.5 rounded-xl transition">
-              <IconWhatsApp size={20} /> צור קשר להזמנה
+              <IconWhatsApp size={20} /> {selected.length ? "שלח/י פרטים בוואטסאפ" : "צור קשר להזמנה"}
             </a>
             <p className="text-center text-xs text-slate-400 mt-3">נציג ישראלי יחזור אליך בוואטסאפ</p>
           </div>
@@ -157,12 +195,12 @@ export default function SeasonRentalDetail() {
       {/* Mobile sticky CTA */}
       <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/90 backdrop-blur-md border-t border-slate-100 px-4 py-3 flex items-center gap-3">
         <div className="flex-shrink-0">
-          <p className="text-[11px] text-slate-400 leading-none mb-0.5">לחודש</p>
-          <p className="font-display font-black text-slate-900 text-lg leading-none">€{r.price_per_month.toLocaleString()}</p>
+          <p className="text-[11px] text-slate-400 leading-none mb-0.5">{selected.length ? `${selected.length} חודשים` : "לחודש"}</p>
+          <p className="font-display font-black text-slate-900 text-lg leading-none">€{displayPrice.toLocaleString()}</p>
         </div>
         <a href={waHref} target="_blank" rel="noopener noreferrer"
           className="flex-1 flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-bold py-3.5 rounded-xl transition">
-          <IconWhatsApp size={18} /> צור קשר להזמנה
+          <IconWhatsApp size={18} /> {selected.length ? "שלח/י פרטים" : "צור קשר להזמנה"}
         </a>
       </div>
     </div>

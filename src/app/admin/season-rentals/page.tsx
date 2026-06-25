@@ -143,12 +143,27 @@ export default function SeasonRentalsAdmin() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs text-gray-400 block mb-1">מחיר לחודש (€)</label>
+                  <label className="text-xs text-gray-400 block mb-1">מחיר בסיס לחודש (€)</label>
                   <input type="number" value={form.price_per_month ?? ""} onChange={e => setForm(f => ({ ...f, price_per_month: +e.target.value }))} className={inputCls} />
                 </div>
                 <div>
                   <label className="text-xs text-gray-400 block mb-1">מינימום חודשים</label>
                   <input type="number" value={form.min_months ?? ""} onChange={e => setForm(f => ({ ...f, min_months: +e.target.value }))} className={inputCls} />
+                </div>
+              </div>
+
+              {/* per-month pricing (Nov–May) */}
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">מחיר לכל חודש (נובמבר–מאי)</label>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                  {[["nov","נובמבר"],["dec","דצמבר"],["jan","ינואר"],["feb","פברואר"],["mar","מרץ"],["apr","אפריל"],["may","מאי"]].map(([key, label]) => (
+                    <div key={key}>
+                      <label className="text-[11px] text-gray-400 block mb-0.5">{label}</label>
+                      <input type="number" placeholder="€" value={form.monthly_prices?.[key] ?? ""}
+                        onChange={e => setForm(f => ({ ...f, monthly_prices: { ...(f.monthly_prices || {}), [key]: e.target.value === "" ? 0 : +e.target.value } }))}
+                        className={inputCls} />
+                    </div>
+                  ))}
                 </div>
               </div>
 
