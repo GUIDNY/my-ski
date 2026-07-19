@@ -9,10 +9,23 @@ const IconGrid = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
+const IconKey = ({ size = 18 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="7.5" cy="15.5" r="4.5" /><path d="m14 12 6-6" /><path d="m18 8 2 2" /><path d="m11 9 3 3" />
+  </svg>
+);
+const IconBriefcase = ({ size = 18 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="7" width="20" height="14" rx="2" /><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+  </svg>
+);
+
 const links = [
   { href: "/admin", label: "דשבורד", icon: <IconGrid size={18} /> },
   { href: "/admin/apartments", label: "דירות", icon: <IconBed size={18} /> },
   { href: "/admin/season-rentals", label: "דירות סיזיונרים", icon: <IconSkis size={18} /> },
+  { href: "/admin/seasonal-properties", label: "ניהול דירות עונתיות", icon: <IconKey size={18} /> },
+  { href: "/admin/agency-properties", label: "ניהול דירות סוכנות", icon: <IconBriefcase size={18} /> },
   { href: "/admin/orders", label: "הזמנות ותשלומים", icon: <IconCalendar size={18} /> },
 ];
 
