@@ -55,8 +55,9 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
-  const [expanded, setExpanded] = useState<string | null>(null);
   const [view, setView] = useState<"cards" | "list">("cards");
+  const [payModal, setPayModal] = useState<Prop | null>(null);
+  const [showMonths, setShowMonths] = useState(false);
   const emptyForm = (): Partial<Prop> => ({ kind, name: "", image: null, airbnb_open: false, revenue: 0, expenses: 0 });
   const [form, setForm] = useState<Partial<Prop>>(emptyForm());
   const [saving, setSaving] = useState(false);
@@ -90,6 +91,21 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
     return { total, paid, left: total - paid, count: p.payments.length, paidCount: p.payments.filter(x => x.paid).length };
   };
 
+  // portfolio-wide totals
+  const totals = {
+    count: rows.length,
+    revenue: rows.reduce((s, p) => s + (Number(p.revenue) || 0), 0),
+    expenses: rows.reduce((s, p) => s + (Number(p.expenses) || 0), 0),
+    payTotal: rows.reduce((s, p) => s + p.payments.reduce((a, x) => a + (Number(x.amount) || 0), 0), 0),
+    payPaid: rows.reduce((s, p) => s + p.payments.filter(x => x.paid).reduce((a, x) => a + (Number(x.amount) || 0), 0), 0),
+  };
+  const byMonth = MONTHS.map(m => {
+    const pays = rows.flatMap(p => p.payments).filter(x => x.month === m);
+    return { month: m, total: pays.reduce((a, x) => a + (Number(x.amount) || 0), 0), paid: pays.filter(x => x.paid).reduce((a, x) => a + (Number(x.amount) || 0), 0), count: pays.length };
+  }).filter(x => x.count > 0);
+  const noMonth = rows.flatMap(p => p.payments).filter(x => !x.month);
+  const modalProp = payModal ? rows.find(r => r.id === payModal.id) ?? payModal : null;
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
@@ -109,6 +125,55 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
         </div>
       </div>
 
+      {/* portfolio summary */}
+      {!loading && rows.length > 0 && (
+        <div className="mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="bg-white rounded-2xl border border-gray-100 p-4">
+              <p className="text-xs text-gray-400">סה״כ דירות</p>
+              <p className="text-2xl font-black text-gray-900">{totals.count}</p>
+            </div>
+            <div className="bg-white rounded-2xl border border-gray-100 p-4">
+              <p className="text-xs text-gray-400">סה״כ הכנסות</p>
+              <p className="text-2xl font-black text-emerald-600">{money(totals.revenue)}</p>
+            </div>
+            <div className="bg-white rounded-2xl border border-gray-100 p-4">
+              <p className="text-xs text-gray-400">סה״כ הוצאות</p>
+              <p className="text-2xl font-black text-red-500">{money(totals.expenses)}</p>
+            </div>
+            <button onClick={() => setShowMonths(v => !v)} className="bg-white rounded-2xl border border-gray-100 hover:border-blue-300 p-4 text-right transition">
+              <p className="text-xs text-gray-400 flex items-center justify-between">סה״כ תשלומים <span className="text-blue-600 font-bold">{showMonths ? "סגור ▲" : "לפי חודש ▼"}</span></p>
+              <p className="text-2xl font-black text-gray-900">{money(totals.payPaid)}<span className="text-sm text-gray-400"> / {money(totals.payTotal)}</span></p>
+            </button>
+          </div>
+
+          {/* monthly breakdown */}
+          {showMonths && (
+            <div className="mt-3 bg-white rounded-2xl border border-gray-100 p-4">
+              <h3 className="font-bold text-gray-800 text-sm mb-3">תשלומים לפי חודש</h3>
+              {byMonth.length === 0 && !noMonth.length ? (
+                <p className="text-sm text-gray-400">עדיין לא נרשמו תשלומים.</p>
+              ) : (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {byMonth.map(m => (
+                    <div key={m.month} className="flex items-center justify-between bg-gray-50 rounded-xl px-3.5 py-2.5">
+                      <span className="text-sm font-bold text-gray-700">{m.month}</span>
+                      <span className="text-sm"><b className={m.paid >= m.total ? "text-emerald-600" : "text-gray-800"}>{money(m.paid)}</b><span className="text-gray-400"> / {money(m.total)}</span>{m.paid < m.total && <b className="text-red-500 text-xs"> · חסר {money(m.total - m.paid)}</b>}</span>
+                    </div>
+                  ))}
+                  {noMonth.length > 0 && (
+                    <div className="flex items-center justify-between bg-gray-50 rounded-xl px-3.5 py-2.5">
+                      <span className="text-sm font-bold text-gray-400">ללא חודש</span>
+                      <span className="text-sm text-gray-500">{money(noMonth.reduce((a, x) => a + (Number(x.amount) || 0), 0))}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {loading ? (
         <div className="text-center py-20 text-gray-400">טוען…</div>
       ) : rows.length === 0 ? (
@@ -119,7 +184,7 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
         view === "list" ? (
         <div className="space-y-2.5">
           {rows.map(p => {
-            const pl = profit(p); const pt = payTotals(p); const isOpen = expanded === p.id;
+            const pl = profit(p); const pt = payTotals(p);
             return (
               <div key={p.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                 <div className="flex items-center gap-3 p-3">
@@ -140,23 +205,11 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
                   </div>
                   <span className={`font-black text-sm whitespace-nowrap ${pl >= 0 ? "text-emerald-600" : "text-red-500"}`}>{pl >= 0 ? "+" : "−"}{money(Math.abs(pl))}</span>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <button onClick={() => setExpanded(isOpen ? null : p.id)} className="text-blue-600 hover:text-blue-800 font-semibold text-xs whitespace-nowrap">{isOpen ? "סגור ▲" : "תשלומים ▼"}</button>
+                    <button onClick={() => setPayModal(p)} className="bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-xs px-3 py-1.5 rounded-lg whitespace-nowrap">💰 ניהול תשלומים</button>
                     <button onClick={() => edit(p)} className="text-gray-500 hover:text-gray-800 font-medium text-xs">עריכה</button>
                     <button onClick={() => remove(p.id)} className="text-red-500 hover:text-red-700 font-medium text-xs">מחיקה</button>
                   </div>
                 </div>
-                {isOpen && (
-                  <div className="px-3 pb-3">
-                    <PaymentsPanel property={p} onChange={load} />
-                    {(p.contact || p.issues || p.notes) && (
-                      <div className="mt-2 space-y-1 text-xs">
-                        {p.contact && <p className="text-gray-600"><b className="text-gray-400">☎ קשר:</b> {p.contact}</p>}
-                        {p.issues && <p className="text-amber-700"><b>⚠ בעיות:</b> {p.issues}</p>}
-                        {p.notes && <p className="text-gray-500"><b className="text-gray-400">📝</b> {p.notes}</p>}
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
             );
           })}
@@ -164,7 +217,7 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
         ) : (
         <div className="grid gap-5 lg:grid-cols-2">
           {rows.map(p => {
-            const pl = profit(p); const pt = payTotals(p); const isOpen = expanded === p.id;
+            const pl = profit(p); const pt = payTotals(p);
             return (
               <div key={p.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
                 {/* image header + overlays */}
@@ -220,14 +273,9 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
                     </div>
                   )}
 
-                  {/* expandable payments panel */}
-                  {isOpen && <PaymentsPanel property={p} onChange={load} />}
-
                   {/* actions */}
                   <div className="flex items-center gap-3 pt-3 mt-auto border-t border-gray-100">
-                    <button onClick={() => setExpanded(isOpen ? null : p.id)} className="text-blue-600 hover:text-blue-800 font-bold text-sm">
-                      {isOpen ? "סגור תשלומים ▲" : "נהל תשלומים ▼"}
-                    </button>
+                    <button onClick={() => setPayModal(p)} className="bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-sm px-3.5 py-1.5 rounded-lg">💰 ניהול תשלומים</button>
                     <div className="flex-1" />
                     <button onClick={() => edit(p)} className="text-gray-500 hover:text-gray-800 font-medium text-xs">עריכה</button>
                     <button onClick={() => remove(p.id)} className="text-red-500 hover:text-red-700 font-medium text-xs">מחיקה</button>
@@ -276,6 +324,25 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
               <button onClick={save} disabled={saving} className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition">{saving ? "שומר…" : "שמור"}</button>
               <button onClick={() => setShowForm(false)} className="px-5 py-3 rounded-xl border border-gray-200 text-gray-600 font-bold">ביטול</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payments management popup */}
+      {modalProp && (
+        <div className="fixed inset-0 z-[80] bg-black/55 flex items-center justify-center p-4" onClick={() => setPayModal(null)}>
+          <div className="bg-white rounded-3xl w-full max-w-xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                {modalProp.image && <img src={modalProp.image} alt="" className="w-11 h-11 rounded-xl object-cover" />}
+                <div>
+                  <h2 className="text-lg font-black text-gray-900">{modalProp.name}</h2>
+                  <p className="text-xs text-gray-400">ניהול תשלומי שכר דירה</p>
+                </div>
+              </div>
+              <button onClick={() => setPayModal(null)} className="w-9 h-9 rounded-full hover:bg-gray-100 text-gray-400 text-xl">✕</button>
+            </div>
+            <PaymentsPanel property={modalProp} onChange={load} />
           </div>
         </div>
       )}
