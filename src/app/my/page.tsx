@@ -54,7 +54,11 @@ const ICONS = {
   add: "M12 5v14M5 12h14",
   home: "M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",
   trash: "M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6M10 11v6M14 11v6",
+  cog: "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z",
 };
+
+// managers who can see the admin link inside the app
+const ADMIN_EMAILS = ["bd12123@gmail.com"];
 
 function SideLink({ icon, label, href, active, onClick }: { icon: string; label: string; href?: string; active?: boolean; onClick?: () => void }) {
   const cls = `flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full text-right ${active ? "bg-[#64a8fe] text-[#003c70] font-bold" : "text-[#43474f] hover:bg-[#dce9ff]"}`;
@@ -297,6 +301,7 @@ function MyOrder() {
   };
   const wa = buildWaHref({ intro: "היי! יש לי שאלה על ההזמנה שלי 🎿", lines: [] });
   const name = user ? (user.user_metadata?.full_name || (user.email || "").split("@")[0]) : "";
+  const isAdmin = !!user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase());
   const initials = name ? name.trim().slice(0, 2).toUpperCase() : "";
 
   if (loading) return <Spinner />;
@@ -349,7 +354,7 @@ function MyOrder() {
   /* ---------- LOGGED-IN DASHBOARD ---------- */
   return (
     <div className="min-h-screen bg-[#f8f9ff]" dir="rtl">
-      <TopBar onLogout={logout} initials={initials} />
+      <TopBar onLogout={logout} initials={initials} isAdmin={isAdmin} />
 
       {/* Desktop sidebar */}
       <aside className="fixed top-0 right-0 h-screen w-64 z-40 bg-white border-l border-[#c3c6d0]/30 shadow-xl hidden md:flex flex-col py-8 px-4 pt-24">
@@ -361,6 +366,7 @@ function MyOrder() {
           <SideLink icon={ICONS.dash} label="לוח בקרה" active />
           <SideLink icon={ICONS.cal} label="חיפוש דירות" href="/apartments" />
           <SideLink icon={ICONS.group} label="אזור הסיזיונרים" href="/seasonaires" />
+          {isAdmin && <SideLink icon={ICONS.cog} label="אזור ניהול" href="/admin" />}
           <SideLink icon={ICONS.help} label="עזרה" href={wa} />
         </nav>
         <div className="mt-auto border-t border-[#c3c6d0]/30 pt-3">
@@ -447,13 +453,18 @@ function MyOrder() {
   );
 }
 
-function TopBar({ onLogout, initials }: { onLogout?: () => void; initials?: string }) {
+function TopBar({ onLogout, initials, isAdmin }: { onLogout?: () => void; initials?: string; isAdmin?: boolean }) {
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#c3c6d0]/30">
       <div className="w-full px-4 sm:px-6 h-16 flex items-center gap-2 sm:gap-3">
         <a href="/" className="shrink-0"><img src="/skishare-logo.png" alt="SkiShare" className="h-8" /></a>
         {initials && <div className="w-9 h-9 rounded-full bg-[#d6e3ff] flex items-center justify-center text-sm font-bold shrink-0" style={{ color: C.primary }}>{initials}</div>}
         <div className="flex-1" />
+        {isAdmin && (
+          <a href="/admin" className="md:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-bold transition text-white shrink-0" style={{ background: C.primary }}>
+            <Ico d={ICONS.cog} /> <span>ניהול</span>
+          </a>
+        )}
         <a href="/" className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-bold transition border border-[#c3c6d0]/60 hover:bg-[#eff4ff] shrink-0" style={{ color: C.primary }}>
           <Ico d={ICONS.home} /> <span>דף הבית</span>
         </a>
