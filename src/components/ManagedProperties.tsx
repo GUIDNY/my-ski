@@ -1,5 +1,5 @@
 "use client";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Payment = {
   id: string; property_id: string; label: string; month: string | null;
@@ -106,82 +106,80 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
           עדיין אין דירות. לחץ/י "הוסף דירה" כדי להתחיל.
         </div>
       ) : (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
-          <table className="w-full text-sm min-w-[720px]">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                {["תמונה", "שם", ...(isAgency ? ["סוכנות"] : []), "רווח/הפסד", "תשלומים", ...(isAgency ? [] : ["סטטוס"]), ""].map((h, i) => (
-                  <th key={i} className="text-right px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {rows.map(p => {
-                const pl = profit(p); const pt = payTotals(p);
-                return (
-                  <Fragment key={p.id}>
-                    <tr className="hover:bg-gray-50/50 transition-colors align-top">
-                      <td className="px-4 py-3">
-                        {p.image
-                          ? <img src={p.image} alt={p.name} className="w-14 h-11 object-cover rounded-lg border border-gray-100" />
-                          : <div className="w-14 h-11 rounded-lg bg-gray-100 flex items-center justify-center text-gray-300">—</div>}
-                      </td>
-                      <td className="px-4 py-4 font-semibold text-gray-900">
-                        {p.name}
-                        {isAgency && p.link && <a href={p.link} target="_blank" rel="noreferrer" className="block text-xs text-blue-600 hover:underline">קישור ↗</a>}
-                      </td>
-                      {isAgency && <td className="px-4 py-4 text-gray-600">{p.agency_name || "—"}</td>}
-                      <td className="px-4 py-4">
-                        <span className={`font-bold ${pl >= 0 ? "text-emerald-600" : "text-red-500"}`}>{pl >= 0 ? "+" : "−"}{money(Math.abs(pl))}</span>
-                      </td>
-                      <td className="px-4 py-4">
-                        {pt.count === 0 ? <span className="text-gray-400">—</span> : (
-                          <div className="text-xs">
-                            <span className="font-bold text-gray-800">{money(pt.paid)}</span> <span className="text-gray-400">/ {money(pt.total)}</span>
-                            {pt.left > 0 && <span className="block text-red-500 font-semibold">חסר {money(pt.left)}</span>}
-                            <span className="block text-gray-400">{pt.paidCount}/{pt.count} שולמו</span>
-                          </div>
-                        )}
-                      </td>
-                      {!isAgency && (
-                        <td className="px-4 py-4">
-                          <div className="flex flex-col gap-1">
-                            <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold w-fit ${p.airbnb_open ? "bg-pink-100 text-pink-700" : "bg-gray-100 text-gray-500"}`}>
-                              {p.airbnb_open ? "🅰️ פתוחה ב-Airbnb" : "לא ב-Airbnb"}
-                            </span>
-                            {p.issues && <span className="px-2 py-0.5 rounded-full text-[11px] font-bold w-fit bg-amber-100 text-amber-700">⚠️ בעיה</span>}
-                          </div>
-                        </td>
-                      )}
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        <div className="flex gap-3 items-center">
-                          <button onClick={() => setExpanded(expanded === p.id ? null : p.id)} className="text-blue-600 hover:text-blue-800 font-semibold text-xs">
-                            {expanded === p.id ? "סגור ▲" : "תשלומים ▼"}
-                          </button>
-                          <button onClick={() => edit(p)} className="text-gray-500 hover:text-gray-800 font-medium text-xs">עריכה</button>
-                          <button onClick={() => remove(p.id)} className="text-red-500 hover:text-red-700 font-medium text-xs">מחיקה</button>
-                        </div>
-                      </td>
-                    </tr>
-                    {expanded === p.id && (
-                      <tr>
-                        <td colSpan={6} className="px-4 pb-5 bg-gray-50/40">
-                          <PaymentsPanel property={p} onChange={load} />
-                          {(p.contact || p.issues || p.notes) && (
-                            <div className="mt-3 grid sm:grid-cols-3 gap-3 text-xs">
-                              {p.contact && <div className="bg-white rounded-xl border border-gray-100 p-3"><b className="text-gray-400 block mb-1">פרטי קשר</b>{p.contact}</div>}
-                              {p.issues && <div className="bg-white rounded-xl border border-amber-100 p-3"><b className="text-amber-500 block mb-1">בעיות</b>{p.issues}</div>}
-                              {p.notes && <div className="bg-white rounded-xl border border-gray-100 p-3"><b className="text-gray-400 block mb-1">הערות</b>{p.notes}</div>}
-                            </div>
-                          )}
-                        </td>
-                      </tr>
+        <div className="grid gap-5 lg:grid-cols-2">
+          {rows.map(p => {
+            const pl = profit(p); const pt = payTotals(p); const isOpen = expanded === p.id;
+            return (
+              <div key={p.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+                {/* image header + overlays */}
+                <div className="relative h-40 bg-gray-100">
+                  {p.image
+                    ? <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
+                    : <div className="w-full h-full flex items-center justify-center text-gray-300 text-3xl">🏔️</div>}
+                  <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute bottom-3 right-4 left-4 flex items-end justify-between">
+                    <div className="text-white">
+                      <h3 className="font-black text-lg leading-tight drop-shadow">{p.name}</h3>
+                      {isAgency && p.agency_name && <p className="text-xs opacity-90">🏢 {p.agency_name}</p>}
+                    </div>
+                    <span className={`rounded-full px-3 py-1 text-sm font-black shadow ${pl >= 0 ? "bg-emerald-500 text-white" : "bg-red-500 text-white"}`}>
+                      {pl >= 0 ? "+" : "−"}{money(Math.abs(pl))}
+                    </span>
+                  </div>
+                  {/* status badges */}
+                  <div className="absolute top-3 right-3 flex flex-col items-end gap-1.5">
+                    {!isAgency && (
+                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold shadow-sm ${p.airbnb_open ? "bg-pink-500 text-white" : "bg-white/90 text-gray-500"}`}>
+                        {p.airbnb_open ? "🅰️ Airbnb" : "לא ב-Airbnb"}
+                      </span>
                     )}
-                  </Fragment>
-                );
-              })}
-            </tbody>
-          </table>
+                    {!isAgency && p.issues && <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500 text-white shadow-sm">⚠️ בעיה</span>}
+                    {isAgency && p.link && <a href={p.link} target="_blank" rel="noreferrer" className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-white/90 text-blue-600 shadow-sm">קישור ↗</a>}
+                  </div>
+                </div>
+
+                {/* body */}
+                <div className="p-4 flex-1 flex flex-col gap-3">
+                  {/* revenue / expenses / profit */}
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="bg-gray-50 rounded-xl py-2"><p className="text-[11px] text-gray-400">הכנסות</p><p className="font-bold text-gray-800 text-sm">{money(Number(p.revenue) || 0)}</p></div>
+                    <div className="bg-gray-50 rounded-xl py-2"><p className="text-[11px] text-gray-400">הוצאות</p><p className="font-bold text-gray-800 text-sm">{money(Number(p.expenses) || 0)}</p></div>
+                    <div className={`rounded-xl py-2 ${pl >= 0 ? "bg-emerald-50" : "bg-red-50"}`}><p className="text-[11px] text-gray-400">רווח/הפסד</p><p className={`font-black text-sm ${pl >= 0 ? "text-emerald-600" : "text-red-500"}`}>{pl >= 0 ? "+" : "−"}{money(Math.abs(pl))}</p></div>
+                  </div>
+
+                  {/* payments summary line */}
+                  <div className="flex items-center justify-between text-xs bg-blue-50/60 rounded-xl px-3 py-2">
+                    <span className="text-gray-500">💰 תשלומים</span>
+                    {pt.count === 0 ? <span className="text-gray-400">אין עדיין</span> : (
+                      <span><b className="text-gray-800">{money(pt.paid)}</b><span className="text-gray-400"> / {money(pt.total)}</span>{pt.left > 0 && <b className="text-red-500"> · חסר {money(pt.left)}</b>}</span>
+                    )}
+                  </div>
+
+                  {/* contact / issues / notes */}
+                  {(p.contact || p.issues || p.notes) && (
+                    <div className="space-y-1.5 text-xs">
+                      {p.contact && <p className="text-gray-600"><b className="text-gray-400">☎ קשר:</b> {p.contact}</p>}
+                      {p.issues && <p className="text-amber-700 bg-amber-50 rounded-lg px-2.5 py-1.5"><b>⚠ בעיות:</b> {p.issues}</p>}
+                      {p.notes && <p className="text-gray-500"><b className="text-gray-400">📝</b> {p.notes}</p>}
+                    </div>
+                  )}
+
+                  {/* expandable payments panel */}
+                  {isOpen && <PaymentsPanel property={p} onChange={load} />}
+
+                  {/* actions */}
+                  <div className="flex items-center gap-3 pt-3 mt-auto border-t border-gray-100">
+                    <button onClick={() => setExpanded(isOpen ? null : p.id)} className="text-blue-600 hover:text-blue-800 font-bold text-sm">
+                      {isOpen ? "סגור תשלומים ▲" : "נהל תשלומים ▼"}
+                    </button>
+                    <div className="flex-1" />
+                    <button onClick={() => edit(p)} className="text-gray-500 hover:text-gray-800 font-medium text-xs">עריכה</button>
+                    <button onClick={() => remove(p.id)} className="text-red-500 hover:text-red-700 font-medium text-xs">מחיקה</button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
