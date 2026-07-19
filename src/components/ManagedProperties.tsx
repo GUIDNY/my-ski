@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 type Payment = {
   id: string; property_id: string; label: string; month: string | null;
   due_date: string | null; amount: number; paid: boolean; paid_date: string | null;
+  kind: "rent" | "deposit" | string; note: string | null;
 };
 type Prop = {
   id: string; kind: string; name: string; image: string | null;
@@ -86,9 +87,12 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
   // profit/loss + payments summary
   const profit = (p: Prop) => (Number(p.revenue) || 0) - (Number(p.expenses) || 0);
   const payTotals = (p: Prop) => {
-    const total = p.payments.reduce((s, x) => s + (Number(x.amount) || 0), 0);
-    const paid = p.payments.filter(x => x.paid).reduce((s, x) => s + (Number(x.amount) || 0), 0);
-    return { total, paid, left: total - paid, count: p.payments.length, paidCount: p.payments.filter(x => x.paid).length };
+    const sum = (f: (x: Payment) => boolean) => p.payments.filter(f).reduce((s, x) => s + (Number(x.amount) || 0), 0);
+    const total = sum(() => true);
+    const paid = sum(x => x.paid);
+    const rent = sum(x => x.kind !== "deposit");
+    const deposit = sum(x => x.kind === "deposit");
+    return { total, paid, left: total - paid, rent, deposit, count: p.payments.length, paidCount: p.payments.filter(x => x.paid).length };
   };
 
   // portfolio-wide totals
@@ -98,6 +102,7 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
     expenses: rows.reduce((s, p) => s + (Number(p.expenses) || 0), 0),
     payTotal: rows.reduce((s, p) => s + p.payments.reduce((a, x) => a + (Number(x.amount) || 0), 0), 0),
     payPaid: rows.reduce((s, p) => s + p.payments.filter(x => x.paid).reduce((a, x) => a + (Number(x.amount) || 0), 0), 0),
+    payDeposit: rows.reduce((s, p) => s + p.payments.filter(x => x.kind === "deposit").reduce((a, x) => a + (Number(x.amount) || 0), 0), 0),
   };
   const byMonth = MONTHS.map(m => {
     const pays = rows.flatMap(p => p.payments).filter(x => x.month === m);
@@ -142,8 +147,9 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
               <p className="text-2xl font-black text-red-500">{money(totals.expenses)}</p>
             </div>
             <button onClick={() => setShowMonths(v => !v)} className="bg-white rounded-2xl border border-gray-100 hover:border-blue-300 p-4 text-right transition">
-              <p className="text-xs text-gray-400 flex items-center justify-between">סה״כ תשלומים <span className="text-blue-600 font-bold">{showMonths ? "סגור ▲" : "לפי חודש ▼"}</span></p>
+              <p className="text-xs text-gray-400 flex items-center justify-between">שולם / חוזה כולל <span className="text-blue-600 font-bold">{showMonths ? "סגור ▲" : "לפי חודש ▼"}</span></p>
               <p className="text-2xl font-black text-gray-900">{money(totals.payPaid)}<span className="text-sm text-gray-400"> / {money(totals.payTotal)}</span></p>
+              <p className="text-[11px] text-gray-400 mt-0.5">יתרה {money(totals.payTotal - totals.payPaid)}{totals.payDeposit > 0 && ` · פיקדונות ${money(totals.payDeposit)}`}</p>
             </button>
           </div>
 
@@ -259,13 +265,17 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
                     <div className={`rounded-xl py-2 ${pl >= 0 ? "bg-emerald-50" : "bg-red-50"}`}><p className="text-[11px] text-gray-400">רווח/הפסד</p><p className={`font-black text-sm ${pl >= 0 ? "text-emerald-600" : "text-red-500"}`}>{pl >= 0 ? "+" : "−"}{money(Math.abs(pl))}</p></div>
                   </div>
 
-                  {/* payments summary line */}
-                  <div className="flex items-center justify-between text-xs bg-blue-50/60 rounded-xl px-3 py-2">
-                    <span className="text-gray-500">💰 תשלומים</span>
-                    {pt.count === 0 ? <span className="text-gray-400">אין עדיין</span> : (
-                      <span><b className="text-gray-800">{money(pt.paid)}</b><span className="text-gray-400"> / {money(pt.total)}</span>{pt.left > 0 && <b className="text-red-500"> · חסר {money(pt.left)}</b>}</span>
-                    )}
-                  </div>
+                  {/* payments summary */}
+                  {pt.count === 0 ? (
+                    <div className="text-xs text-gray-400 bg-gray-50 rounded-xl px-3 py-2">💰 עדיין אין תשלומים</div>
+                  ) : (
+                    <div className="bg-blue-50/60 rounded-xl px-3 py-2.5 text-xs space-y-1">
+                      <div className="flex justify-between"><span className="text-gray-500">חוזה כולל</span><b className="text-gray-800">{money(pt.total)}</b></div>
+                      <div className="flex justify-between"><span className="text-gray-500">שולם</span><b className="text-emerald-600">{money(pt.paid)}</b></div>
+                      <div className="flex justify-between"><span className="text-gray-500">יתרה לתשלום</span><b className="text-red-500">{money(pt.left)}</b></div>
+                      {pt.deposit > 0 && <div className="flex justify-between border-t border-blue-100 pt-1 mt-1"><span className="text-gray-400">מזה פיקדון (החזרי)</span><span className="text-gray-500">{money(pt.deposit)}</span></div>}
+                    </div>
+                  )}
 
                   {/* contact / issues / notes */}
                   {(p.contact || p.issues || p.notes) && (
@@ -355,16 +365,20 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
 
 // ── Payments panel ──────────────────────────────────────────
 function PaymentsPanel({ property, onChange }: { property: Prop; onChange: () => void }) {
-  const [np, setNp] = useState<Partial<Payment>>({ label: "שכירות", month: "", due_date: "", amount: 0 });
+  const [np, setNp] = useState<Partial<Payment>>({ label: "", month: "", due_date: "", amount: 0, kind: "rent", note: "" });
   const [busy, setBusy] = useState(false);
+
+  const sum = (f: (x: Payment) => boolean) => property.payments.filter(f).reduce((s, x) => s + (Number(x.amount) || 0), 0);
+  const total = sum(() => true), paid = sum(x => x.paid), deposit = sum(x => x.kind === "deposit");
 
   const add = async () => {
     if (!np.amount) { alert("הזן/י סכום"); return; }
     setBusy(true);
     await fetch(`/api/managed-properties/${property.id}/payments`, {
-      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(np),
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...np, label: np.label || (np.kind === "deposit" ? "פיקדון" : "שכירות") }),
     });
-    setBusy(false); setNp({ label: "שכירות", month: "", due_date: "", amount: 0 }); onChange();
+    setBusy(false); setNp({ label: "", month: "", due_date: "", amount: 0, kind: "rent", note: "" }); onChange();
   };
   const togglePaid = async (pay: Payment) => {
     await fetch(`/api/property-payments/${pay.id}`, {
@@ -373,36 +387,64 @@ function PaymentsPanel({ property, onChange }: { property: Prop; onChange: () =>
     });
     onChange();
   };
-  const del = async (id: string) => { await fetch(`/api/property-payments/${id}`, { method: "DELETE" }); onChange(); };
+  const del = async (id: string) => { if (!confirm("למחוק תשלום?")) return; await fetch(`/api/property-payments/${id}`, { method: "DELETE" }); onChange(); };
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-4 mt-3">
-      <h3 className="font-bold text-gray-800 text-sm mb-3">💰 תשלומי שכר דירה</h3>
+      {/* summary */}
       {property.payments.length > 0 && (
-        <div className="divide-y divide-gray-50 mb-3">
-          {property.payments.map(pay => (
-            <div key={pay.id} className="flex items-center gap-3 py-2 text-sm">
-              <input type="checkbox" checked={pay.paid} onChange={() => togglePaid(pay)} className="w-5 h-5 accent-emerald-600 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <span className={`font-semibold ${pay.paid ? "text-gray-400 line-through" : "text-gray-800"}`}>{pay.label || "תשלום"}</span>
-                <span className="text-gray-400"> · {pay.month || "—"}{pay.due_date ? ` · עד ${pay.due_date}` : ""}</span>
-              </div>
-              <span className={`font-bold whitespace-nowrap ${pay.paid ? "text-emerald-600" : "text-gray-800"}`}>{money(Number(pay.amount))}</span>
-              <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${pay.paid ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>{pay.paid ? "שולם" : "ממתין"}</span>
-              <button onClick={() => del(pay.id)} className="text-red-400 hover:text-red-600 text-xs">✕</button>
-            </div>
-          ))}
+        <div className="grid grid-cols-3 gap-2 mb-3 text-center">
+          <div className="bg-gray-50 rounded-xl py-2"><p className="text-[11px] text-gray-400">חוזה כולל</p><p className="font-black text-gray-800 text-sm">{money(total)}</p></div>
+          <div className="bg-emerald-50 rounded-xl py-2"><p className="text-[11px] text-gray-400">שולם</p><p className="font-black text-emerald-600 text-sm">{money(paid)}</p></div>
+          <div className="bg-red-50 rounded-xl py-2"><p className="text-[11px] text-gray-400">יתרה לתשלום</p><p className="font-black text-red-500 text-sm">{money(total - paid)}</p></div>
         </div>
       )}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-2 items-end">
-        <input placeholder="תיאור" value={np.label ?? ""} onChange={e => setNp(v => ({ ...v, label: e.target.value }))} className={inputCls} />
-        <select value={np.month ?? ""} onChange={e => setNp(v => ({ ...v, month: e.target.value }))} className={inputCls}>
-          <option value="">חודש…</option>
-          {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
-        </select>
-        <input type="date" value={np.due_date ?? ""} onChange={e => setNp(v => ({ ...v, due_date: e.target.value }))} className={inputCls} />
-        <input type="number" placeholder="סכום €" value={np.amount || ""} onChange={e => setNp(v => ({ ...v, amount: +e.target.value }))} className={inputCls} />
-        <button onClick={add} disabled={busy} className="col-span-2 md:col-span-1 bg-gray-900 hover:bg-gray-800 disabled:opacity-60 text-white font-bold py-2.5 rounded-xl text-sm transition">+ תשלום</button>
+      {deposit > 0 && <p className="text-[11px] text-gray-400 mb-3 -mt-1">מזה פיקדון החזרי: {money(deposit)} (לא הוצאה סופית)</p>}
+
+      <h3 className="font-bold text-gray-800 text-sm mb-2">💰 לוח תשלומים</h3>
+      {property.payments.length > 0 && (
+        <div className="divide-y divide-gray-50 mb-3">
+          {property.payments.map(pay => {
+            const isDep = pay.kind === "deposit";
+            return (
+              <div key={pay.id} className="flex items-start gap-2.5 py-2 text-sm">
+                <input type="checkbox" checked={pay.paid} onChange={() => togglePaid(pay)} className="w-5 h-5 accent-emerald-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className={`font-semibold ${pay.paid ? "text-gray-400 line-through" : "text-gray-800"}`}>{pay.label || "תשלום"}</span>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${isDep ? "bg-purple-100 text-purple-700" : "bg-blue-100 text-blue-700"}`}>{isDep ? "פיקדון" : "שכירות"}</span>
+                  </div>
+                  <span className="text-gray-400 text-xs">{pay.due_date ? `עד ${pay.due_date}` : "בעת חתימת החוזה"}{pay.month ? ` · ${pay.month}` : ""}</span>
+                  {pay.note && <span className="block text-[11px] text-gray-500">📝 {pay.note}</span>}
+                </div>
+                <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                  <span className={`font-bold whitespace-nowrap ${pay.paid ? "text-emerald-600" : "text-gray-800"}`}>{money(Number(pay.amount))}</span>
+                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${pay.paid ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>{pay.paid ? "שולם" : "ממתין לתשלום"}</span>
+                </div>
+                <button onClick={() => del(pay.id)} className="text-red-400 hover:text-red-600 text-xs mt-0.5">✕</button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* add row */}
+      <div className="border-t border-gray-100 pt-3">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-2 items-end">
+          <select value={np.kind ?? "rent"} onChange={e => setNp(v => ({ ...v, kind: e.target.value }))} className={inputCls}>
+            <option value="rent">שכירות</option>
+            <option value="deposit">פיקדון</option>
+          </select>
+          <input placeholder="תיאור" value={np.label ?? ""} onChange={e => setNp(v => ({ ...v, label: e.target.value }))} className={inputCls} />
+          <select value={np.month ?? ""} onChange={e => setNp(v => ({ ...v, month: e.target.value }))} className={inputCls}>
+            <option value="">חודש…</option>
+            {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
+          </select>
+          <input type="date" value={np.due_date ?? ""} onChange={e => setNp(v => ({ ...v, due_date: e.target.value }))} className={inputCls} />
+          <input type="number" placeholder="סכום €" value={np.amount || ""} onChange={e => setNp(v => ({ ...v, amount: +e.target.value }))} className={inputCls} />
+          <button onClick={add} disabled={busy} className="col-span-2 md:col-span-1 bg-gray-900 hover:bg-gray-800 disabled:opacity-60 text-white font-bold py-2.5 rounded-xl text-sm transition">+ תשלום</button>
+        </div>
+        <input placeholder="הערה (למשל: לפני מסירת מפתחות · פיקדון החזרי)" value={np.note ?? ""} onChange={e => setNp(v => ({ ...v, note: e.target.value }))} className={inputCls + " mt-2"} />
       </div>
     </div>
   );
