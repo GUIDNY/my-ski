@@ -56,6 +56,7 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [view, setView] = useState<"cards" | "list">("cards");
   const emptyForm = (): Partial<Prop> => ({ kind, name: "", image: null, airbnb_open: false, revenue: 0, expenses: 0 });
   const [form, setForm] = useState<Partial<Prop>>(emptyForm());
   const [saving, setSaving] = useState(false);
@@ -96,7 +97,16 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
           <h1 className="text-2xl font-black text-gray-900">{isAgency ? "ניהול דירות סוכנות" : "ניהול דירות עונתיות"}</h1>
           <p className="text-sm text-gray-500 mt-0.5">{isAgency ? "דירות מסוכנויות — תשלומים, רווח/הפסד וקישורים" : "הדירות העונתיות שלנו — שכר דירה, רווח/הפסד וסטטוס"}</p>
         </div>
-        <button onClick={openNew} className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-5 py-2.5 rounded-xl transition">+ הוסף דירה</button>
+        <div className="flex items-center gap-2">
+          {/* view toggle */}
+          <div className="flex bg-gray-100 rounded-xl p-1">
+            <button onClick={() => setView("cards")} title="כרטיסיות"
+              className={`px-3 py-1.5 rounded-lg text-sm font-bold transition ${view === "cards" ? "bg-white text-blue-600 shadow-sm" : "text-gray-400"}`}>▦ כרטיסיות</button>
+            <button onClick={() => setView("list")} title="רשימה"
+              className={`px-3 py-1.5 rounded-lg text-sm font-bold transition ${view === "list" ? "bg-white text-blue-600 shadow-sm" : "text-gray-400"}`}>☰ רשימה</button>
+          </div>
+          <button onClick={openNew} className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-5 py-2.5 rounded-xl transition">+ הוסף דירה</button>
+        </div>
       </div>
 
       {loading ? (
@@ -106,6 +116,52 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
           עדיין אין דירות. לחץ/י "הוסף דירה" כדי להתחיל.
         </div>
       ) : (
+        view === "list" ? (
+        <div className="space-y-2.5">
+          {rows.map(p => {
+            const pl = profit(p); const pt = payTotals(p); const isOpen = expanded === p.id;
+            return (
+              <div key={p.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="flex items-center gap-3 p-3">
+                  {p.image
+                    ? <img src={p.image} alt={p.name} className="w-16 h-14 object-cover rounded-xl flex-shrink-0" />
+                    : <div className="w-16 h-14 rounded-xl bg-gray-100 flex items-center justify-center text-gray-300 flex-shrink-0">🏔️</div>}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-bold text-gray-900">{p.name}</h3>
+                      {isAgency && p.agency_name && <span className="text-xs text-gray-500">🏢 {p.agency_name}</span>}
+                      {!isAgency && p.airbnb_open && <span className="text-[11px] font-bold bg-pink-100 text-pink-700 px-2 py-0.5 rounded-full">🅰️ Airbnb</span>}
+                      {!isAgency && p.issues && <span className="text-[11px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">⚠️ בעיה</span>}
+                      {isAgency && p.link && <a href={p.link} target="_blank" rel="noreferrer" className="text-[11px] font-bold text-blue-600">קישור ↗</a>}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-0.5">
+                      {pt.count > 0 ? <span>💰 {money(pt.paid)}/{money(pt.total)}{pt.left > 0 && <b className="text-red-500"> · חסר {money(pt.left)}</b>}</span> : <span className="text-gray-400">אין תשלומים</span>}
+                    </div>
+                  </div>
+                  <span className={`font-black text-sm whitespace-nowrap ${pl >= 0 ? "text-emerald-600" : "text-red-500"}`}>{pl >= 0 ? "+" : "−"}{money(Math.abs(pl))}</span>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <button onClick={() => setExpanded(isOpen ? null : p.id)} className="text-blue-600 hover:text-blue-800 font-semibold text-xs whitespace-nowrap">{isOpen ? "סגור ▲" : "תשלומים ▼"}</button>
+                    <button onClick={() => edit(p)} className="text-gray-500 hover:text-gray-800 font-medium text-xs">עריכה</button>
+                    <button onClick={() => remove(p.id)} className="text-red-500 hover:text-red-700 font-medium text-xs">מחיקה</button>
+                  </div>
+                </div>
+                {isOpen && (
+                  <div className="px-3 pb-3">
+                    <PaymentsPanel property={p} onChange={load} />
+                    {(p.contact || p.issues || p.notes) && (
+                      <div className="mt-2 space-y-1 text-xs">
+                        {p.contact && <p className="text-gray-600"><b className="text-gray-400">☎ קשר:</b> {p.contact}</p>}
+                        {p.issues && <p className="text-amber-700"><b>⚠ בעיות:</b> {p.issues}</p>}
+                        {p.notes && <p className="text-gray-500"><b className="text-gray-400">📝</b> {p.notes}</p>}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        ) : (
         <div className="grid gap-5 lg:grid-cols-2">
           {rows.map(p => {
             const pl = profit(p); const pt = payTotals(p); const isOpen = expanded === p.id;
@@ -181,6 +237,7 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
             );
           })}
         </div>
+        )
       )}
 
       {/* Add / edit form */}
