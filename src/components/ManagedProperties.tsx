@@ -104,11 +104,21 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
     payPaid: rows.reduce((s, p) => s + p.payments.filter(x => x.paid).reduce((a, x) => a + (Number(x.amount) || 0), 0), 0),
     payDeposit: rows.reduce((s, p) => s + p.payments.filter(x => x.kind === "deposit").reduce((a, x) => a + (Number(x.amount) || 0), 0), 0),
   };
-  const byMonth = MONTHS.map(m => {
-    const pays = rows.flatMap(p => p.payments).filter(x => x.month === m);
-    return { month: m, total: pays.reduce((a, x) => a + (Number(x.amount) || 0), 0), paid: pays.filter(x => x.paid).reduce((a, x) => a + (Number(x.amount) || 0), 0), count: pays.length };
-  }).filter(x => x.count > 0);
-  const noMonth = rows.flatMap(p => p.payments).filter(x => !x.month);
+  // payments by month — season order (Dec→May); everything before December
+  // (incl. no-month signing payments) is grouped into one "טרום עונה" bucket.
+  const allPays = rows.flatMap(p => p.payments);
+  const bucketOf = (pays: Payment[]) => ({
+    total: pays.reduce((a, x) => a + (Number(x.amount) || 0), 0),
+    paid: pays.filter(x => x.paid).reduce((a, x) => a + (Number(x.amount) || 0), 0),
+    count: pays.length,
+  });
+  const PRE_SEASON = new Set(["יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר"]);
+  const SEASON_ORDER = ["דצמבר", "ינואר", "פברואר", "מרץ", "אפריל", "מאי"];
+  const preSeasonPays = allPays.filter(x => !x.month || PRE_SEASON.has(x.month));
+  const byMonth = [
+    ...(preSeasonPays.length ? [{ month: "טרום עונה", ...bucketOf(preSeasonPays) }] : []),
+    ...SEASON_ORDER.map(m => ({ month: m, ...bucketOf(allPays.filter(x => x.month === m)) })).filter(b => b.count > 0),
+  ];
   const modalProp = payModal ? rows.find(r => r.id === payModal.id) ?? payModal : null;
 
   return (
@@ -157,22 +167,19 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
           {showMonths && (
             <div className="mt-3 bg-white rounded-2xl border border-gray-100 p-4">
               <h3 className="font-bold text-gray-800 text-sm mb-3">תשלומים לפי חודש</h3>
-              {byMonth.length === 0 && !noMonth.length ? (
+              {byMonth.length === 0 ? (
                 <p className="text-sm text-gray-400">עדיין לא נרשמו תשלומים.</p>
               ) : (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                  {byMonth.map(m => (
-                    <div key={m.month} className="flex items-center justify-between bg-gray-50 rounded-xl px-3.5 py-2.5">
-                      <span className="text-sm font-bold text-gray-700">{m.month}</span>
-                      <span className="text-sm"><b className={m.paid >= m.total ? "text-emerald-600" : "text-gray-800"}>{money(m.paid)}</b><span className="text-gray-400"> / {money(m.total)}</span>{m.paid < m.total && <b className="text-red-500 text-xs"> · חסר {money(m.total - m.paid)}</b>}</span>
-                    </div>
-                  ))}
-                  {noMonth.length > 0 && (
-                    <div className="flex items-center justify-between bg-gray-50 rounded-xl px-3.5 py-2.5">
-                      <span className="text-sm font-bold text-gray-400">ללא חודש</span>
-                      <span className="text-sm text-gray-500">{money(noMonth.reduce((a, x) => a + (Number(x.amount) || 0), 0))}</span>
-                    </div>
-                  )}
+                  {byMonth.map(m => {
+                    const pre = m.month === "טרום עונה";
+                    return (
+                      <div key={m.month} className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 ${pre ? "bg-indigo-50 border border-indigo-100" : "bg-gray-50"}`}>
+                        <span className={`text-sm font-bold ${pre ? "text-indigo-700" : "text-gray-700"}`}>{pre ? "🎿 טרום עונה" : m.month}</span>
+                        <span className="text-sm"><b className={m.paid >= m.total ? "text-emerald-600" : "text-gray-800"}>{money(m.paid)}</b><span className="text-gray-400"> / {money(m.total)}</span>{m.paid < m.total && <b className="text-red-500 text-xs"> · חסר {money(m.total - m.paid)}</b>}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
