@@ -41,6 +41,25 @@ const AI_DISCOUNT = 50;
 // a "week" = 6 nights → flat €120; under that €30/night; each extra night +€20
 const equipCost = (n: number) => (n <= 0 ? 0 : n < 6 ? 30 * n : 120 + 20 * (n - 6));
 
+function QStep({ show, label, qty, setQty, max, total }: {
+  show: boolean; label: string; qty: number; setQty: (n: number) => void; max: number; total: number;
+}) {
+  if (!show) return null;
+  return (
+    <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-blue-50 border border-blue-200">
+      <span className="text-xs font-bold text-blue-700">{label}</span>
+      <div className="flex items-center gap-2.5">
+        <button type="button" onClick={() => setQty(Math.max(1, qty - 1))} disabled={qty <= 1}
+          className="w-7 h-7 rounded-full bg-white border border-blue-200 text-blue-600 font-black disabled:opacity-40 leading-none">−</button>
+        <span className="font-black text-slate-900 w-5 text-center">{qty}</span>
+        <button type="button" onClick={() => setQty(Math.min(max, qty + 1))} disabled={qty >= max}
+          className="w-7 h-7 rounded-full bg-white border border-blue-200 text-blue-600 font-black disabled:opacity-40 leading-none">+</button>
+        <span className="text-xs font-bold text-slate-700 w-16 text-left">= €{total.toLocaleString()}</span>
+      </div>
+    </div>
+  );
+}
+
 function QRadio({ label, sublabel, badge, badgeColor, selected, onClick }: {
   label: string; sublabel: string; badge?: string; badgeColor?: string; selected: boolean; onClick: () => void;
 }) {
@@ -79,6 +98,8 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [showDesc, setShowDesc] = useState(false);
   const [splitCount, setSplitCount] = useState(1);
+  const [transferQty, setTransferQty] = useState(1);
+  const [equipQty, setEquipQty] = useState(1);
   const [cancel, setCancel] = useState(q.cancel === "flexible" || q.cancel === "none" ? q.cancel : "regular");
   const [service, setService] = useState(q.service === "ai" ? "ai" : "human");
   const [showNoCancel, setShowNoCancel] = useState(false);
@@ -107,9 +128,9 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const baseApt = nightly.length ? nightly.reduce((s, n) => s + n.price, 0) : aptTotal;
 
   // live total recomputed from the base lodging + currently-selected add-ons
-  // add-ons are per-person: price × number of payers (default 1)
-  const trTotal = transferOn ? TRANSFER_PRICE * splitCount : 0;
-  const equipTotal = equipmentOn ? equipCost(nights) * splitCount : 0;
+  // add-ons are per-person: price × number of people who need each add-on
+  const trTotal = transferOn ? TRANSFER_PRICE * transferQty : 0;
+  const equipTotal = equipmentOn ? equipCost(nights) * equipQty : 0;
   const flexExtra = cancel === "flexible" ? 100 : 0;
   const noCancelDiscount = cancel === "none" ? -100 : 0;
   const aiDisc = service === "ai" ? 50 : 0;
@@ -182,8 +203,8 @@ export default function QuoteView({ q }: { q: QuoteData }) {
 
   const ADDONS = [
     { key: "skipass", icon: <IconTicket size={20} />, title: "סקי פס", sub: "כל אזור Trois Vallées · 600 ק״מ מסלולים", soon: true },
-    { key: "equipment", icon: <IconSkis size={20} />, title: "השכרת ציוד סקי/סנובורד", sub: `€30 ליום · €120 לשבוע · +€20 ליום נוסף${splitCount > 1 ? ` · ${splitCount} אנשים` : ""}`, price: equipCost(nights) * splitCount, unit: equipCost(nights), on: equipmentOn, toggle: () => setEquipmentOn(v => !v) },
-    { key: "transfer", icon: <IconBus size={20} />, title: "הסעה הלוך-חזור", sub: `משדה התעופה וחזרה · מחיר לא קבוע${splitCount > 1 ? ` · ${splitCount} אנשים` : ""}`, price: TRANSFER_PRICE * splitCount, unit: TRANSFER_PRICE, on: transferOn, toggle: () => setTransferOn(v => !v) },
+    { key: "equipment", icon: <IconSkis size={20} />, title: "השכרת ציוד סקי/סנובורד", sub: "€30 ליום · €120 לשבוע · לאדם", price: equipCost(nights) * equipQty, unit: equipCost(nights), on: equipmentOn, toggle: () => { setEquipmentOn(v => !v); if (!equipmentOn) setEquipQty(Math.min(equipQty || 1, guests) || 1); } },
+    { key: "transfer", icon: <IconBus size={20} />, title: "הסעה הלוך-חזור", sub: "משדה התעופה וחזרה · €180 לאדם", price: TRANSFER_PRICE * transferQty, unit: TRANSFER_PRICE, on: transferOn, toggle: () => { setTransferOn(v => !v); if (!transferOn) setTransferQty(Math.min(transferQty || 1, guests) || 1); } },
     { key: "lessons", icon: <IconUser size={20} />, title: "שיעורי סקי / סנובורד", sub: "מדריך מוסמך · כל הרמות", soon: true },
   ];
 
@@ -259,8 +280,8 @@ export default function QuoteView({ q }: { q: QuoteData }) {
           </div>
         )}
       </div>
-      {transferOn      && <Row label="הסעה הלוך־חזור" sub={splitCount > 1 ? `שאטל פרטי · ${splitCount} אנשים` : "שאטל פרטי"} amount={`€${trTotal.toLocaleString()}`} />}
-      {equipmentOn     && <Row label="השכרת ציוד" sub={`${nights} לילות${splitCount > 1 ? ` · ${splitCount} אנשים` : ""}`} amount={`€${equipTotal.toLocaleString()}`} />}
+      {transferOn      && <Row label="הסעה הלוך־חזור" sub={transferQty > 1 ? `שאטל פרטי · ${transferQty} אנשים` : "שאטל פרטי"} amount={`€${trTotal.toLocaleString()}`} />}
+      {equipmentOn     && <Row label="השכרת ציוד" sub={`${nights} לילות${equipQty > 1 ? ` · ${equipQty} אנשים` : ""}`} amount={`€${equipTotal.toLocaleString()}`} />}
       {cancel === "flexible" && <Row label="ביטול גמיש" amount="€100" />}
       {cancel === "none" && <Row label="ללא אפשרות ביטול" amount="−€100" green />}
       {service === "ai" && <Row label="הנחת AI" sub="ניהול עצמאי" amount="−€50" green />}
@@ -290,17 +311,15 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             {soon
               ? <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full flex-shrink-0">בקרוב</span>
               : <span className="flex items-center gap-2 flex-shrink-0">
-                  <span className="text-sm font-bold text-blue-600">
-                    +€{"unit" in a && splitCount > 1
-                      ? `${(a as { unit: number }).unit}×${splitCount}`
-                      : (a as { price: number }).price.toLocaleString()}
-                  </span>
+                  <span className="text-sm font-bold text-blue-600">+€{(a as { price: number }).price.toLocaleString()}</span>
                   <span className={`w-5 h-5 rounded-md border flex items-center justify-center ${selected ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300"}`}>{selected && <IconCheck size={12} />}</span>
                 </span>}
           </button>
         );
       })}
     </div>
+    <QStep show={equipmentOn} label="כמה אנשים צריכים ציוד?" qty={equipQty} setQty={setEquipQty} max={Math.max(guests, 1)} total={equipTotal} />
+    <QStep show={transferOn} label="כמה אנשים צריכים הסעה?" qty={transferQty} setQty={setTransferQty} max={Math.max(guests, 1)} total={trTotal} />
     {transferOn && (
       <button onClick={() => setShowTransfer(true)}
         className="flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-colors text-sm text-right">

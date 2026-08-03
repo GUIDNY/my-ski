@@ -67,6 +67,26 @@ function ToggleRow({ icon, label, sublabel, price, checked, onChange, disabled }
   );
 }
 
+/* ── Quantity stepper (how many people need this add-on) ──── */
+function QtyStepper({ show, label, qty, setQty, max, total }: {
+  show: boolean; label: string; qty: number; setQty: (n: number) => void; max: number; total: number;
+}) {
+  if (!show) return null;
+  return (
+    <div className="flex items-center justify-between px-3.5 py-2 -mt-1.5 mb-1 rounded-b-xl bg-blue-50 border border-t-0 border-blue-200">
+      <span className="text-xs font-bold text-blue-700">{label}</span>
+      <div className="flex items-center gap-2.5">
+        <button type="button" onClick={() => setQty(Math.max(1, qty - 1))} disabled={qty <= 1}
+          className="w-7 h-7 rounded-full bg-white border border-blue-200 text-blue-600 font-black disabled:opacity-40 leading-none">−</button>
+        <span className="font-black text-gray-900 w-5 text-center">{qty}</span>
+        <button type="button" onClick={() => setQty(Math.min(max, qty + 1))} disabled={qty >= max}
+          className="w-7 h-7 rounded-full bg-white border border-blue-200 text-blue-600 font-black disabled:opacity-40 leading-none">+</button>
+        <span className="text-xs font-bold text-gray-700 w-16 text-left">= €{total.toLocaleString()}</span>
+      </div>
+    </div>
+  );
+}
+
 /* ── Radio option ─────────────────────────────────────────── */
 function RadioOption({ icon, label, sublabel, badge, badgeColor, selected, onClick }: {
   icon: React.ReactNode; label: string; sublabel: string;
@@ -159,6 +179,8 @@ function ApartmentPage() {
   const [skiPass,  setSkiPass]  = useState(false);
   const [transfer, setTransfer] = useState(false);
   const [equipment, setEquipment] = useState(false);
+  const [transferQty, setTransferQty] = useState(1); // how many people need transfer
+  const [equipQty, setEquipQty] = useState(1);       // how many people need equipment
   const [showTransfer, setShowTransfer] = useState(false);
   const [splitCount, setSplitCount] = useState(1);
   const [flight, setFlight] = useState<Flight>(EMPTY_FLIGHT);
@@ -215,9 +237,9 @@ function ApartmentPage() {
 
   const avgNightlyPrice = breakdown.length > 0 ? Math.round(aptTotal / nights) : basePrice;
   const skiTotal        = 0; // Coming soon — price not yet available
-  // add-ons are per-person: price × number of payers (default 1)
-  const trTotal         = transfer ? TRANSFER_PRICE * splitCount : 0;
-  const equipTotal      = equipment ? equipCost(nights) * splitCount : 0;
+  // add-ons are per-person: price × number of people who need each add-on
+  const trTotal         = transfer ? TRANSFER_PRICE * transferQty : 0;
+  const equipTotal      = equipment ? equipCost(nights) * equipQty : 0;
   const flexExtra       = cancel  === "flexible" ? CANCEL_FLEX : 0;
   const noCancelDiscount = cancel === "none"     ? -CANCEL_NONE : 0;
   const aiDiscount      = service === "ai"       ? -AI_DISCOUNT : 0;
@@ -255,8 +277,8 @@ function ApartmentPage() {
       `🏔️ דירה: ${apt?.name ?? ""}`,
       checkin && checkout ? `📅 תאריכים: ${fmtDate(checkin)} — ${fmtDate(checkout)} (${nights} לילות)` : `🗓️ ${nights} לילות`,
       `👥 אורחים: ${guests}`,
-      transfer ? `🚐 כולל הסעה הלוך-חזור${transferDetails ? ` (${transferDetails})` : ""}` : null,
-      equipment ? `🎿 כולל השכרת ציוד (€${equipTotal})` : null,
+      transfer ? `🚐 הסעה הלוך-חזור ל-${transferQty} אנשים (€${trTotal})${transferDetails ? ` · ${transferDetails}` : ""}` : null,
+      equipment ? `🎿 השכרת ציוד ל-${equipQty} אנשים (€${equipTotal})` : null,
       cancel === "flexible" ? "✅ מדיניות ביטול גמישה" : cancel === "none" ? "🔒 ללא אפשרות ביטול" : null,
       skiPass ? "🎿 מעוניין/ת גם בסקי פס" : null,
       service === "ai" ? "🤖 ניהול עצמאי (AI)" : null,
@@ -403,17 +425,19 @@ function ApartmentPage() {
                       <ToggleRow
                         icon={<IconBus size={18} />}
                         label="הסעה הלוך-חזור"
-                        sublabel="שאטל ישיר משדה התעופה"
-                        price={`+€${(TRANSFER_PRICE * splitCount).toLocaleString()}${splitCount > 1 ? ` (€${TRANSFER_PRICE}×${splitCount})` : ""}`}
-                        checked={transfer} onChange={setTransfer}
+                        sublabel="שאטל ישיר משדה התעופה · €180 לאדם"
+                        price={`€${TRANSFER_PRICE} לאדם`}
+                        checked={transfer} onChange={v => { setTransfer(v); if (v) setTransferQty(Math.min(transferQty || 1, guests) || 1); }}
                       />
+                      <QtyStepper show={transfer} label="כמה אנשים צריכים הסעה?" qty={transferQty} setQty={setTransferQty} max={Math.max(guests, 1)} total={trTotal} />
                       <ToggleRow
                         icon={<IconSkis size={18} />}
                         label="השכרת ציוד סקי/סנובורד"
-                        sublabel="€30 ליום · €120 לשבוע · +€20 לכל יום נוסף"
-                        price={nights > 0 ? `+€${(equipCost(nights) * splitCount).toLocaleString()}${splitCount > 1 ? ` (€${equipCost(nights)}×${splitCount})` : ""}` : "החל מ-€30"}
-                        checked={equipment} onChange={setEquipment}
+                        sublabel="€30 ליום · €120 לשבוע · +€20 לכל יום נוסף · לאדם"
+                        price={nights > 0 ? `€${equipCost(nights)} לאדם` : "החל מ-€30"}
+                        checked={equipment} onChange={v => { setEquipment(v); if (v) setEquipQty(Math.min(equipQty || 1, guests) || 1); }}
                       />
+                      <QtyStepper show={equipment} label="כמה אנשים צריכים ציוד?" qty={equipQty} setQty={setEquipQty} max={Math.max(guests, 1)} total={equipTotal} />
                       {transfer && (
                         <button onClick={() => setShowTransfer(true)}
                           className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-colors text-sm w-full text-right">
@@ -596,17 +620,19 @@ function ApartmentPage() {
                       <ToggleRow
                         icon={<IconBus size={18} />}
                         label="הסעה הלוך-חזור"
-                        sublabel="שאטל ישיר משדה התעופה"
-                        price={`+€${(TRANSFER_PRICE * splitCount).toLocaleString()}${splitCount > 1 ? ` (€${TRANSFER_PRICE}×${splitCount})` : ""}`}
-                        checked={transfer} onChange={setTransfer}
+                        sublabel="שאטל ישיר משדה התעופה · €180 לאדם"
+                        price={`€${TRANSFER_PRICE} לאדם`}
+                        checked={transfer} onChange={v => { setTransfer(v); if (v) setTransferQty(Math.min(transferQty || 1, guests) || 1); }}
                       />
+                      <QtyStepper show={transfer} label="כמה אנשים צריכים הסעה?" qty={transferQty} setQty={setTransferQty} max={Math.max(guests, 1)} total={trTotal} />
                       <ToggleRow
                         icon={<IconSkis size={18} />}
                         label="השכרת ציוד סקי/סנובורד"
-                        sublabel="€30 ליום · €120 לשבוע · +€20 לכל יום נוסף"
-                        price={nights > 0 ? `+€${(equipCost(nights) * splitCount).toLocaleString()}${splitCount > 1 ? ` (€${equipCost(nights)}×${splitCount})` : ""}` : "החל מ-€30"}
-                        checked={equipment} onChange={setEquipment}
+                        sublabel="€30 ליום · €120 לשבוע · +€20 לכל יום נוסף · לאדם"
+                        price={nights > 0 ? `€${equipCost(nights)} לאדם` : "החל מ-€30"}
+                        checked={equipment} onChange={v => { setEquipment(v); if (v) setEquipQty(Math.min(equipQty || 1, guests) || 1); }}
                       />
+                      <QtyStepper show={equipment} label="כמה אנשים צריכים ציוד?" qty={equipQty} setQty={setEquipQty} max={Math.max(guests, 1)} total={equipTotal} />
                       {transfer && (
                         <button onClick={() => setShowTransfer(true)}
                           className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-colors text-sm w-full text-right">
@@ -703,13 +729,13 @@ function ApartmentPage() {
                       )}
                       {transfer && (
                         <div className="flex justify-between">
-                          <span className="text-gray-500">הסעה הלוך-חזור{splitCount > 1 ? ` · ${splitCount} אנשים` : ""}</span>
+                          <span className="text-gray-500">הסעה הלוך-חזור{transferQty > 1 ? ` · ${transferQty} אנשים` : ""}</span>
                           <span className="font-semibold text-gray-800">€{trTotal.toLocaleString()}</span>
                         </div>
                       )}
                       {equipment && (
                         <div className="flex justify-between">
-                          <span className="text-gray-500">השכרת ציוד · {nights} ימים{splitCount > 1 ? ` · ${splitCount} אנשים` : ""}</span>
+                          <span className="text-gray-500">השכרת ציוד · {nights} ימים{equipQty > 1 ? ` · ${equipQty} אנשים` : ""}</span>
                           <span className="font-semibold text-gray-800">€{equipTotal.toLocaleString()}</span>
                         </div>
                       )}
