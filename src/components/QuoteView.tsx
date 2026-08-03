@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import type { Apartment } from "@/types";
 import {
   IconMountain, IconCalendar, IconChevronLeft, IconCheck, IconPlus, IconImage,
-  IconTicket, IconSkis, IconBus, IconBank, IconCreditCard,
+  IconBank, IconCreditCard,
   IconUsers, IconUser, IconMoon, IconWhatsApp,
 } from "@/components/Icons";
 import { buildWaHref } from "@/lib/whatsapp";
@@ -12,6 +12,21 @@ import type { PricingRule } from "@/lib/pricing";
 import Logo from "@/components/Logo";
 import CardPaymentButton from "@/components/CardPaymentButton";
 import FlightDetailsModal, { EMPTY_FLIGHT, flightToString, flightFilled, type Flight } from "@/components/FlightDetailsModal";
+
+/* ── Polished add-on icons ─────────────────────────────────── */
+const svgBase = (s: number) => ({ width: s, height: s, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round" as const, strokeLinejoin: "round" as const });
+const AdPass = ({ size = 20 }: { size?: number }) => ( // gondola / lift pass
+  <svg {...svgBase(size)}><path d="M2.5 5.5 21.5 9" /><path d="M12 6.7V9.5" /><rect x="6.5" y="9.5" width="11" height="8" rx="2.2" /><path d="M6.5 13.5h11" /><path d="M12 9.5v8" /></svg>
+);
+const AdSkis = ({ size = 20 }: { size?: number }) => ( // crossed skis + pole
+  <svg {...svgBase(size)}><path d="M7.5 3.2 13.5 19.5" /><path d="M16.5 3.2 10.5 19.5" /><path d="M5.4 19.6c1.2.9 2.4.9 3.6 0" /><path d="M14.9 19.6c1.2.9 2.4.9 3.6 0" /></svg>
+);
+const AdShuttle = ({ size = 20 }: { size?: number }) => ( // shuttle van
+  <svg {...svgBase(size)}><path d="M3 12.5 4.4 7.4A2 2 0 0 1 6.3 6h8.4a2 2 0 0 1 1.7 1l2.1 3.4 1.6.5a1.6 1.6 0 0 1 1.1 1.5v2.1a1 1 0 0 1-1 1h-1.1" /><path d="M3 12.5v2.5a1 1 0 0 0 1 1h1.2" /><circle cx="7.6" cy="16" r="1.9" /><circle cx="16.6" cy="16" r="1.9" /><path d="M9.5 16h5.2" /><path d="M3.4 12.5H17" /><path d="M10.2 6.2v6" /></svg>
+);
+const AdLesson = ({ size = 20 }: { size?: number }) => ( // instructor + slalom flag
+  <svg {...svgBase(size)}><circle cx="8.5" cy="4.6" r="2.1" /><path d="M8.5 7v4.5" /><path d="M8.5 8.8 6 11" /><path d="M8.5 8.8 11 10.3" /><path d="M6 11l-1 6" /><path d="M11 10.3l1.4 6.7" /><path d="M17 3.5v15" /><path d="M17 4c1.9 1 2.9 1 3.8 0v3.6c-.9 1-1.9 1-3.8 0z" fill="currentColor" stroke="none" /></svg>
+);
 
 export type QuoteData = {
   apartmentId: string;
@@ -203,10 +218,10 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   );
 
   const ADDONS = [
-    { key: "skipass", icon: <IconTicket size={20} />, title: "סקי פס", sub: "כל אזור Trois Vallées · 600 ק״מ מסלולים", soon: true },
-    { key: "equipment", icon: <IconSkis size={20} />, title: "השכרת ציוד סקי/סנובורד *", sub: "€30 ליום · €120 לשבוע · לאדם", price: equipUnit * equipQty, unit: equipUnit, on: equipmentOn, toggle: () => { setEquipmentOn(v => !v); if (!equipmentOn) setEquipQty(Math.min(equipQty || 1, guests) || 1); } },
-    { key: "transfer", icon: <IconBus size={20} />, title: "הסעה הלוך-חזור", sub: "משדה התעופה וחזרה · €180 לאדם", price: TRANSFER_PRICE * transferQty, unit: TRANSFER_PRICE, on: transferOn, toggle: () => { setTransferOn(v => !v); if (!transferOn) setTransferQty(Math.min(transferQty || 1, guests) || 1); } },
-    { key: "lessons", icon: <IconUser size={20} />, title: "שיעורי סקי / סנובורד", sub: "מדריך מוסמך · כל הרמות", soon: true },
+    { key: "skipass", icon: <AdPass size={22} />, title: "סקי פס", sub: "כל אזור Trois Vallées · 600 ק״מ מסלולים", soon: true },
+    { key: "equipment", icon: <AdSkis size={22} />, title: "השכרת ציוד סקי/סנובורד *", sub: "€30 ליום · €120 לשבוע · לאדם", price: equipUnit * equipQty, unit: equipUnit, on: equipmentOn, toggle: () => { setEquipmentOn(v => !v); if (!equipmentOn) setEquipQty(Math.min(equipQty || 1, guests) || 1); } },
+    { key: "transfer", icon: <AdShuttle size={22} />, title: "הסעה הלוך-חזור", sub: "משדה התעופה וחזרה · €180 לאדם", price: TRANSFER_PRICE * transferQty, unit: TRANSFER_PRICE, on: transferOn, toggle: () => { setTransferOn(v => !v); if (!transferOn) setTransferQty(Math.min(transferQty || 1, guests) || 1); } },
+    { key: "lessons", icon: <AdLesson size={22} />, title: "שיעורי סקי / סנובורד", sub: "מדריך מוסמך · כל הרמות", soon: true },
   ];
 
   useEffect(() => {
