@@ -40,7 +40,6 @@ const FLEXIBLE_EXTRA = 100;
 const AI_DISCOUNT = 50;
 // a "week" = 6 nights → flat €120; under that €30/night; each extra night +€20
 const equipCost = (n: number) => (n <= 0 ? 0 : n < 6 ? 30 * n : 120 + 20 * (n - 6));
-const equipCostPremium = (n: number) => (n <= 0 ? 0 : n < 6 ? 50 * n : 200 + 30 * (n - 6));
 
 function QStep({ show, label, qty, setQty, max, total }: {
   show: boolean; label: string; qty: number; setQty: (n: number) => void; max: number; total: number;
@@ -101,7 +100,6 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const [splitCount, setSplitCount] = useState(1);
   const [transferQty, setTransferQty] = useState(1);
   const [equipQty, setEquipQty] = useState(1);
-  const [equipTier, setEquipTier] = useState<"regular" | "premium">("regular");
   const [cancel, setCancel] = useState(q.cancel === "flexible" || q.cancel === "none" ? q.cancel : "regular");
   const [service, setService] = useState(q.service === "ai" ? "ai" : "human");
   const [showNoCancel, setShowNoCancel] = useState(false);
@@ -131,7 +129,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
 
   // live total recomputed from the base lodging + currently-selected add-ons
   // add-ons are per-person: price × number of people who need each add-on
-  const equipUnit = equipTier === "premium" ? equipCostPremium(nights) : equipCost(nights);
+  const equipUnit = equipCost(nights);
   const trTotal = transferOn ? TRANSFER_PRICE * transferQty : 0;
   const equipTotal = equipmentOn ? equipUnit * equipQty : 0;
   const flexExtra = cancel === "flexible" ? 100 : 0;
@@ -206,7 +204,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
 
   const ADDONS = [
     { key: "skipass", icon: <IconTicket size={20} />, title: "סקי פס", sub: "כל אזור Trois Vallées · 600 ק״מ מסלולים", soon: true },
-    { key: "equipment", icon: <IconSkis size={20} />, title: "השכרת ציוד סקי/סנובורד", sub: equipTier === "premium" ? "ציוד פרמיום · לאדם" : "€30 ליום · €120 לשבוע · לאדם", price: equipUnit * equipQty, unit: equipUnit, on: equipmentOn, toggle: () => { setEquipmentOn(v => !v); if (!equipmentOn) setEquipQty(Math.min(equipQty || 1, guests) || 1); } },
+    { key: "equipment", icon: <IconSkis size={20} />, title: "השכרת ציוד סקי/סנובורד *", sub: "€30 ליום · €120 לשבוע · לאדם", price: equipUnit * equipQty, unit: equipUnit, on: equipmentOn, toggle: () => { setEquipmentOn(v => !v); if (!equipmentOn) setEquipQty(Math.min(equipQty || 1, guests) || 1); } },
     { key: "transfer", icon: <IconBus size={20} />, title: "הסעה הלוך-חזור", sub: "משדה התעופה וחזרה · €180 לאדם", price: TRANSFER_PRICE * transferQty, unit: TRANSFER_PRICE, on: transferOn, toggle: () => { setTransferOn(v => !v); if (!transferOn) setTransferQty(Math.min(transferQty || 1, guests) || 1); } },
     { key: "lessons", icon: <IconUser size={20} />, title: "שיעורי סקי / סנובורד", sub: "מדריך מוסמך · כל הרמות", soon: true },
   ];
@@ -284,7 +282,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
         )}
       </div>
       {transferOn      && <Row label="הסעה הלוך־חזור" sub={transferQty > 1 ? `שאטל פרטי · ${transferQty} אנשים` : "שאטל פרטי"} amount={`€${trTotal.toLocaleString()}`} />}
-      {equipmentOn     && <Row label={`השכרת ציוד${equipTier === "premium" ? " ⭐ פרמיום" : ""}`} sub={`${nights} לילות${equipQty > 1 ? ` · ${equipQty} אנשים` : ""}`} amount={`€${equipTotal.toLocaleString()}`} />}
+      {equipmentOn     && <Row label="השכרת ציוד" sub={`${nights} לילות${equipQty > 1 ? ` · ${equipQty} אנשים` : ""}`} amount={`€${equipTotal.toLocaleString()}`} />}
       {cancel === "flexible" && <Row label="ביטול גמיש" amount="€100" />}
       {cancel === "none" && <Row label="ללא אפשרות ביטול" amount="−€100" green />}
       {service === "ai" && <Row label="הנחת AI" sub="ניהול עצמאי" amount="−€50" green />}
@@ -319,22 +317,11 @@ export default function QuoteView({ q }: { q: QuoteData }) {
                   </span>}
             </button>
 
-            {/* equipment: tier + qty directly under the equipment card */}
+            {/* equipment: qty + premium note directly under the equipment card */}
             {a.key === "equipment" && equipmentOn && (
               <>
-                <div className="flex gap-2">
-                  <button type="button" onClick={() => setEquipTier("regular")}
-                    className={`flex-1 rounded-xl border p-2.5 text-right transition ${equipTier === "regular" ? "border-blue-400 bg-blue-50" : "border-slate-200 bg-white"}`}>
-                    <span className="block text-xs font-bold text-slate-800">ציוד רגיל</span>
-                    <span className="block text-[11px] text-slate-400">€{equipCost(nights).toLocaleString()} לאדם</span>
-                  </button>
-                  <button type="button" onClick={() => setEquipTier("premium")}
-                    className={`flex-1 rounded-xl border p-2.5 text-right transition ${equipTier === "premium" ? "border-amber-400 bg-amber-50" : "border-slate-200 bg-white"}`}>
-                    <span className="block text-xs font-bold text-slate-800">⭐ ציוד פרמיום</span>
-                    <span className="block text-[11px] text-slate-400">€{equipCostPremium(nights).toLocaleString()} לאדם</span>
-                  </button>
-                </div>
                 <QStep show label="כמה אנשים צריכים ציוד?" qty={equipQty} setQty={setEquipQty} max={Math.max(guests, 1)} total={equipTotal} />
+                <p className="text-[11px] text-slate-400 px-1 leading-relaxed">* לשדרוג לציוד פרמיום ניתן לשלם תוספת בחנות ההשכרה עצמה.</p>
               </>
             )}
 
