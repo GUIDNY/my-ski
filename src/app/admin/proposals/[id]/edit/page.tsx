@@ -328,7 +328,10 @@ function BlockEditor({ block, currency, onChange, onMove, onDelete }: {
           <IcoBtn onClick={() => onMove(-1)}>↑</IcoBtn><IcoBtn onClick={() => onMove(1)}>↓</IcoBtn><IcoBtn onClick={onDelete} danger>✕</IcoBtn>
         </div>
       </div>
-      {(block.type === "banner" || block.type === "text" || block.type === "note") && (
+      {block.type === "banner" && (
+        <input className={input} value={block.text} onChange={e => onChange({ ...block, text: e.target.value })} placeholder="לדוגמה: טיסת הלוך — 6.3.2027 · תל אביב (TLV) ← ליון (LYS)" />
+      )}
+      {(block.type === "text" || block.type === "note") && (
         <textarea className={input} rows={2} value={block.text} onChange={e => onChange({ ...block, text: e.target.value })} placeholder="טקסט" />
       )}
       {block.type === "option" && (<>
@@ -339,9 +342,19 @@ function BlockEditor({ block, currency, onChange, onMove, onDelete }: {
         <textarea className={input} rows={4} placeholder="פריט בכל שורה" value={block.items.join("\n")} onChange={e => onChange({ ...block, items: e.target.value.split("\n") })} />
       )}
       {(block.type === "kv" || block.type === "summary") && (
-        <textarea className={input} rows={4} placeholder="מפתח = ערך (שורה לכל זוג)"
-          value={block.rows.map(r => `${r[0]} = ${r[1]}`).join("\n")}
-          onChange={e => onChange({ ...block, rows: e.target.value.split("\n").map(l => { const idx = l.indexOf("="); return idx < 0 ? [l.trim(), ""] : [l.slice(0, idx).trim(), l.slice(idx + 1).trim()]; }) as [string, string][] })} />
+        <div className="space-y-1">
+          {block.rows.map((r, i) => (
+            <div key={i} className="flex gap-1 items-center">
+              <input className={input + " flex-1"} placeholder="תווית" value={r[0]}
+                onChange={e => onChange({ ...block, rows: block.rows.map((x, j) => j === i ? [e.target.value, x[1]] : x) as [string, string][] })} />
+              <span className="text-gray-300 text-xs">:</span>
+              <input className={input + " flex-1"} placeholder="ערך" value={r[1]}
+                onChange={e => onChange({ ...block, rows: block.rows.map((x, j) => j === i ? [x[0], e.target.value] : x) as [string, string][] })} />
+              <button onClick={() => onChange({ ...block, rows: block.rows.filter((_, j) => j !== i) as [string, string][] })} className="text-red-400 hover:text-red-600 text-xs px-1">✕</button>
+            </div>
+          ))}
+          <button onClick={() => onChange({ ...block, rows: [...block.rows, ["", ""]] as [string, string][] })} className="text-[11px] font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md px-2 py-1">+ שורה</button>
+        </div>
       )}
       {block.type === "table" && <TableEditor block={block} currency={currency} onChange={onChange} />}
     </div>
