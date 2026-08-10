@@ -3,7 +3,6 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import AdminGate from "@/components/AdminGate";
 import ProposalDocument, { PROPOSAL_CSS } from "@/components/ProposalDocument";
-import { SAVED_BLOCKS } from "@/lib/proposal-demo";
 import { computeTotals, money, type LineItem } from "@/lib/proposal-pricing";
 import { calcTotalForRange, type PricingRule } from "@/lib/pricing";
 import type { Proposal, ProposalData, ProposalSection, ProposalBlock, ProposalStatus } from "@/types";
@@ -200,11 +199,6 @@ function EditorInner() {
 
   const addSection = () => setD({ sections: [...data.sections, { heading: "סעיף חדש", blocks: [] }] });
   const addBlock = (si: number, type: string) => { const s = data.sections[si]; setSection(si, { ...s, blocks: [...s.blocks, emptyBlock(type)] }); };
-  const insertSaved = (sb: typeof SAVED_BLOCKS[number]) => {
-    const idx = data.sections.findIndex(s => s.heading === sb.heading);
-    if (idx >= 0) setSection(idx, { ...data.sections[idx], blocks: [...data.sections[idx].blocks, sb.block] });
-    else setD({ sections: [...data.sections, { heading: sb.heading, blocks: [sb.block] }] });
-  };
 
   return (
     <div dir="rtl" className="lg:flex lg:gap-6 lg:items-start">
@@ -279,9 +273,6 @@ function EditorInner() {
             <button onClick={addFlightSection} className="border border-blue-200 text-blue-700 bg-blue-50 font-semibold text-xs px-3 py-2 rounded-xl">✈️ הוסף טיסה</button>
             <button onClick={() => addPriceLine("הסעות שדה תעופה הלוך-חזור", 180)} className="border border-gray-200 text-gray-700 font-semibold text-xs px-3 py-2 rounded-xl">🚐 הוסף הסעה</button>
             <button onClick={() => addPriceLine("השכרת ציוד סקי/סנובורד", 120)} className="border border-gray-200 text-gray-700 font-semibold text-xs px-3 py-2 rounded-xl">🎿 הוסף ציוד</button>
-            {SAVED_BLOCKS.map((sb, i) => (
-              <button key={i} onClick={() => insertSaved(sb)} className="border border-gray-200 text-gray-700 font-semibold text-xs px-3 py-2 rounded-xl">➕ {sb.name}</button>
-            ))}
           </div>
 
           {/* signature */}
