@@ -71,3 +71,9 @@ export const SAVED_BLOCKS: { name: string; heading: string; block: import("@/typ
   { name: "תוקף ההצעה", heading: "תנאים", block: { type: "note", text: "ההצעה בתוקף ל־14 ימים ממועד הנפקתה, וכפופה לזמינות במועד אישור ההזמנה." } },
   { name: "אמצעי תשלום", heading: "תנאים", block: { type: "text", text: "התשלום מתבצע בכרטיס אשראי (עד 3 תשלומים ללא ריבית) או בהעברה בנקאית. בתשלום בכרטיס נוספת עמלת סליקה של 1.9%." } },
 ];
+
+// Terms that appear on every proposal by default (cancellation, validity, payment).
+export const DEFAULT_TERMS_SECTION: import("@/types").ProposalSection = {
+  heading: "תנאים",
+  blocks: [SAVED_BLOCKS[0].block, SAVED_BLOCKS[1].block, SAVED_BLOCKS[2].block],
+};

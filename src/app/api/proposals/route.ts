@@ -1,12 +1,13 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { NextRequest, NextResponse } from "next/server";
 import type { ProposalData } from "@/types";
+import { DEFAULT_TERMS_SECTION } from "@/lib/proposal-demo";
 
 const EMPTY_DATA: ProposalData = {
   title: "הצעת מחיר לחופשת סקי",
   subtitle: "",
   intro: "",
-  sections: [],
+  sections: [DEFAULT_TERMS_SECTION],
   signature: {
     heading: "אישור ההצעה",
     text: "אני מאשר/ת כי קראתי את ההצעה, הבנתי את תנאיה ואני מסכים/ה להזמנה בהתאם למפורט לעיל.",

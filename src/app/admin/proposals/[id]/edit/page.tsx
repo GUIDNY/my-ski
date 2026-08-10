@@ -98,8 +98,10 @@ function EditorInner() {
         ["תאריכים", `${fmtHe(o.checkin)} – ${fmtHe(o.checkout)}`], ["לילות", String(o.nights ?? "")], ["אורחים", String(o.guests ?? "")],
       ] as [string, string][] }] };
       const price: ProposalSection = { heading: "פירוט מחירים", blocks: [itemsToTable([{ label: `${o.apartment_name || "חבילת נופש"} · ${o.nights ?? ""} לילות`, qty: 1, unitPrice: Number(o.total_eur) || 0 }], 0, 0, p.currency)] };
+      const terms = data.sections.filter(s => s.heading === "תנאים");
+      const nonTerms = data.sections.filter(s => s.heading !== "תנאים");
       setP({ ...p, client_name: o.customer_name || p.client_name });
-      setData({ ...data, subtitle: o.area || data.subtitle, sections: [...data.sections, summary, price] });
+      setData({ ...data, subtitle: o.area || data.subtitle, sections: [...nonTerms, summary, price, ...terms] });
       return;
     }
     alert("לא נמצאה הצעה/הזמנה עבור הקישור הזה");
@@ -165,11 +167,13 @@ function EditorInner() {
     if (q.equipment) items.push({ label: "השכרת ציוד סקי/סנובורד", qty: 1, unitPrice: 0 });
     const price: ProposalSection = { heading: "פירוט מחירים", blocks: [itemsToTable(items, 0, 0, p.currency)] };
 
+    const terms = data.sections.filter(s => s.heading === "תנאים");
+    const nonTerms = data.sections.filter(s => s.heading !== "תנאים");
     setData({
       ...data,
       subtitle: `ואל טורנס, צרפת  |  ${fmtHe(q.checkin)} – ${fmtHe(q.checkout)}`,
       intro: data.intro || `מוצעת בזאת חופשת סקי בוואל טורנס, צרפת, בתאריכים ${fmtHe(q.checkin)} עד ${fmtHe(q.checkout)}, למשך ${q.nights ?? ""} לילות.`,
-      sections: [...data.sections, included, lodging, summary, price].filter(s => s.blocks.length > 0),
+      sections: [...nonTerms, included, lodging, summary, price, ...terms].filter(s => s.blocks.length > 0),
     });
   };
 
