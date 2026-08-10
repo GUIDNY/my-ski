@@ -90,6 +90,21 @@ function Block({ block }: { block: ProposalBlock }) {
       return <p className="note">{block.text}</p>;
     case "option":
       return <div className="opt"><span className="lbl">{block.label}</span>{block.text}</div>;
+    case "flight": {
+      const dir = block.direction === "return" ? "טיסת חזור" : "טיסת הלוך";
+      return (
+        <>
+          <div className="route">{dir}{block.date ? ` — ${block.date}` : ""}{block.from || block.to ? `  ·  ${block.from} ← ${block.to}` : ""}</div>
+          <table className="flt"><tbody>
+            {block.airline && <tr><td className="k">חברת תעופה</td><td className="v">{block.airline}</td></tr>}
+            {block.depart && <tr><td className="k">שעת המראה</td><td className="v">{block.depart}</td></tr>}
+            {block.arrive && <tr><td className="k">שעת נחיתה</td><td className="v">{block.arrive}</td></tr>}
+            <tr><td className="k">סוג טיסה</td><td className="v">{block.nonstop ? "ישירה" : "עם עצירה"}</td></tr>
+            {block.price && <tr><td className="k">מחיר</td><td className="v">{block.price}</td></tr>}
+          </tbody></table>
+        </>
+      );
+    }
     case "table":
       return (
         <table className="grid">

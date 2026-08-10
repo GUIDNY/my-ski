@@ -8,7 +8,7 @@ import { calcTotalForRange, type PricingRule } from "@/lib/pricing";
 import type { Proposal, ProposalData, ProposalSection, ProposalBlock, ProposalStatus } from "@/types";
 
 const input = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
-const BLOCK_LABELS: Record<string, string> = { banner: "פס טיסה", kv: "מפתח/ערך", summary: "סיכום", list: "רשימה", text: "פסקה", note: "הערה", option: "תיבה ממוסגרת", table: "טבלת מחירים" };
+const BLOCK_LABELS: Record<string, string> = { flight: "טיסה", banner: "פס טיסה", kv: "מפתח/ערך", summary: "סיכום", list: "רשימה", text: "פסקה", note: "הערה", option: "תיבה ממוסגרת", table: "טבלת מחירים" };
 const emptyBlock = (type: string): ProposalBlock => {
   switch (type) {
     case "banner": return { type: "banner", text: "" };
@@ -18,6 +18,7 @@ const emptyBlock = (type: string): ProposalBlock => {
     case "note": return { type: "note", text: "" };
     case "option": return { type: "option", label: "", text: "" };
     case "table": return { type: "table", header: ["פריט", "כמות", "מחיר ליחידה", "סה\"כ"], rows: [], total: [] };
+    case "flight": return { type: "flight", direction: "out", date: "", from: "תל אביב (TLV)", to: "", airline: "", depart: "", arrive: "", nonstop: true, price: "" };
     default: return { type: "text", text: "" };
   }
 };
@@ -176,13 +177,16 @@ function EditorInner() {
     });
   };
 
-  // add-on quick actions
-  const addFlightSection = () => setD({ sections: [...data.sections, { heading: "טיסות", blocks: [
-    { type: "banner", text: "טיסת הלוך — [תאריך]  ·  תל אביב (TLV) ← [יעד]" },
-    { type: "kv", rows: [["חברת תעופה", ""], ["שעת המראה", ""], ["שעת נחיתה", ""], ["סוג טיסה", "ישירה"], ["מחיר", ""]] },
-    { type: "banner", text: "טיסת חזור — [תאריך]  ·  [מוצא] ← תל אביב (TLV)" },
-    { type: "kv", rows: [["חברת תעופה", ""], ["שעת המראה", ""], ["שעת נחיתה", ""], ["סוג טיסה", "ישירה"], ["מחיר", ""]] },
-  ] }] });
+  // add-on quick actions — structured flight blocks (easy form)
+  const addFlightSection = () => {
+    const terms = data.sections.filter(s => s.heading === "תנאים");
+    const nonTerms = data.sections.filter(s => s.heading !== "תנאים");
+    const flights: ProposalSection = { heading: "טיסות", blocks: [
+      { type: "flight", direction: "out", date: "", from: "תל אביב (TLV)", to: "", airline: "", depart: "", arrive: "", nonstop: true, price: "" },
+      { type: "flight", direction: "return", date: "", from: "", to: "תל אביב (TLV)", airline: "", depart: "", arrive: "", nonstop: true, price: "" },
+    ] };
+    setD({ sections: [...nonTerms, flights, ...terms] });
+  };
 
   const addPriceLine = (label: string, unitPrice: number) => {
     const sections = [...data.sections];
@@ -345,6 +349,30 @@ function BlockEditor({ block, currency, onChange, onMove, onDelete }: {
             </div>
           ))}
           <button onClick={() => onChange({ ...block, rows: [...block.rows, ["", ""]] as [string, string][] })} className="text-[11px] font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md px-2 py-1">+ שורה</button>
+        </div>
+      )}
+      {block.type === "flight" && (
+        <div className="space-y-1.5">
+          <div className="flex gap-1">
+            <select className={input + " flex-1"} value={block.direction} onChange={e => onChange({ ...block, direction: e.target.value as "out" | "return" })}>
+              <option value="out">הלוך</option><option value="return">חזור</option>
+            </select>
+            <input className={input + " flex-1"} placeholder="תאריך (6.3.2027)" value={block.date} onChange={e => onChange({ ...block, date: e.target.value })} />
+          </div>
+          <div className="flex gap-1">
+            <input className={input + " flex-1"} placeholder="מוצא" value={block.from} onChange={e => onChange({ ...block, from: e.target.value })} />
+            <span className="text-gray-300 self-center">←</span>
+            <input className={input + " flex-1"} placeholder="יעד" value={block.to} onChange={e => onChange({ ...block, to: e.target.value })} />
+          </div>
+          <input className={input} placeholder="חברת תעופה" value={block.airline} onChange={e => onChange({ ...block, airline: e.target.value })} />
+          <div className="flex gap-1">
+            <input className={input + " flex-1"} placeholder="שעת המראה" value={block.depart} onChange={e => onChange({ ...block, depart: e.target.value })} />
+            <input className={input + " flex-1"} placeholder="שעת נחיתה" value={block.arrive} onChange={e => onChange({ ...block, arrive: e.target.value })} />
+          </div>
+          <div className="flex gap-2 items-center">
+            <input className={input + " flex-1"} placeholder="מחיר (למשל €320)" value={block.price} onChange={e => onChange({ ...block, price: e.target.value })} />
+            <label className="flex items-center gap-1.5 text-xs text-gray-600 whitespace-nowrap"><input type="checkbox" checked={block.nonstop} onChange={e => onChange({ ...block, nonstop: e.target.checked })} className="w-4 h-4 accent-blue-600" /> טיסה ישירה</label>
+          </div>
         </div>
       )}
       {block.type === "table" && <TableEditor block={block} currency={currency} onChange={onChange} />}
