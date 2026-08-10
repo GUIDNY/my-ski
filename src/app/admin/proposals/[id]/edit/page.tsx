@@ -122,39 +122,76 @@ function EditorInner() {
     });
   };
 
+  const firstTwoSentences = (t: string) =>
+    t.replace(/\s+/g, " ").trim().split(/(?<=[.!?])\s+/).filter(Boolean).slice(0, 2).join(" ");
+
   const buildFromQuote = async (q: {
     apartment_id?: string; apartment_name?: string; checkin?: string; checkout?: string;
-    nights?: number; guests?: number; transfer?: boolean; ski_pass?: boolean; grand_total?: number;
+    nights?: number; guests?: number; transfer?: boolean; equipment?: boolean; ski_pass?: boolean;
+    apt_total?: number; grand_total?: number;
   }) => {
     let desc = "";
     if (q.apartment_id) {
       const ar = await fetch(`/api/apartments/${q.apartment_id}`);
       if (ar.ok) { const a = await ar.json(); desc = a.description || ""; }
     }
-    const flights: ProposalSection = { heading: "טיסות", blocks: [
-      { type: "banner", text: `טיסת הלוך — ${fmtHe(q.checkin)}  ·  תל אביב (TLV) ← ליון (LYS)` },
-      { type: "kv", rows: [["חברת תעופה", ""], ["שעת המראה", ""], ["שעת נחיתה", ""], ["סוג טיסה", "ישירה"]] },
-      { type: "banner", text: `טיסת חזור — ${fmtHe(q.checkout)}  ·  ליון (LYS) ← תל אביב (TLV)` },
-      { type: "kv", rows: [["חברת תעופה", ""], ["שעת המראה", ""], ["שעת נחיתה", ""], ["סוג טיסה", "ישירה"]] },
-    ] };
+    const aptTotal = Number(q.apt_total ?? q.grand_total) || 0;
+    const grand = Number(q.grand_total ?? q.apt_total) || 0;
+    const addonDiff = Math.max(0, grand - aptTotal);
+
     const included: ProposalSection = { heading: "החבילה כוללת", blocks: [{ type: "list", items: [
       "טיסות הלוך וחזור.",
-      ...(q.transfer ? ["הסעה משדה התעופה בליון לוואל טורנס וחזרה."] : []),
+      ...(q.transfer ? ["הסעה משדה התעופה לוואל טורנס וחזרה."] : []),
       `${q.nights ?? ""} לילות לינה ב${q.apartment_name || "ואל טורנס"}.`,
+      ...(q.equipment ? ["השכרת ציוד סקי/סנובורד."] : []),
       ...(q.ski_pass ? ["סקי פס."] : []),
     ] }] };
-    const lodging: ProposalSection = { heading: "הלינה", blocks: desc ? [{ type: "text", text: desc }] : [] };
+
+    // lodging: only the first two sentences + a link to photos/full description
+    const lodgingBlocks: ProposalBlock[] = [];
+    const first2 = firstTwoSentences(desc);
+    if (first2) lodgingBlocks.push({ type: "text", text: first2 });
+    if (srcUrl.trim()) lodgingBlocks.push({ type: "note", text: `תמונות ותיאור מלא של הדירה זמינים בקישור: ${srcUrl.trim()}` });
+    const lodging: ProposalSection = { heading: "הלינה", blocks: lodgingBlocks };
+
     const summary: ProposalSection = { heading: "סיכום החופשה", blocks: [{ type: "summary", rows: [
       ["יעד", "ואל טורנס, צרפת"], ["דירה", q.apartment_name || ""],
       ["תאריכים", `${fmtHe(q.checkin)} – ${fmtHe(q.checkout)}`], ["לילות", String(q.nights ?? "")], ["אורחים", String(q.guests ?? "")],
     ] as [string, string][] }] };
-    const price: ProposalSection = { heading: "פירוט מחירים", blocks: [itemsToTable([{ label: `${q.apartment_name || "חבילת נופש"} · ${q.nights ?? ""} לילות`, qty: 1, unitPrice: Number(q.grand_total) || 0 }], 0, 0, p.currency)] };
+
+    // price: lodging line + transfer/equipment as separate lines when present
+    const items: LineItem[] = [{ label: `${q.apartment_name || "לינה"} · ${q.nights ?? ""} לילות`, qty: 1, unitPrice: aptTotal }];
+    if (q.transfer) items.push({ label: "הסעות שדה תעופה הלוך-חזור", qty: 1, unitPrice: addonDiff || 180 });
+    if (q.equipment) items.push({ label: "השכרת ציוד סקי/סנובורד", qty: 1, unitPrice: 0 });
+    const price: ProposalSection = { heading: "פירוט מחירים", blocks: [itemsToTable(items, 0, 0, p.currency)] };
+
     setData({
       ...data,
       subtitle: `ואל טורנס, צרפת  |  ${fmtHe(q.checkin)} – ${fmtHe(q.checkout)}`,
       intro: data.intro || `מוצעת בזאת חופשת סקי בוואל טורנס, צרפת, בתאריכים ${fmtHe(q.checkin)} עד ${fmtHe(q.checkout)}, למשך ${q.nights ?? ""} לילות.`,
-      sections: [...data.sections, flights, included, lodging, summary, price].filter(s => s.blocks.length > 0),
+      sections: [...data.sections, included, lodging, summary, price].filter(s => s.blocks.length > 0),
     });
+  };
+
+  // add-on quick actions
+  const addFlightSection = () => setD({ sections: [...data.sections, { heading: "טיסות", blocks: [
+    { type: "banner", text: "טיסת הלוך — [תאריך]  ·  תל אביב (TLV) ← [יעד]" },
+    { type: "kv", rows: [["חברת תעופה", ""], ["שעת המראה", ""], ["שעת נחיתה", ""], ["סוג טיסה", "ישירה"], ["מחיר", ""]] },
+    { type: "banner", text: "טיסת חזור — [תאריך]  ·  [מוצא] ← תל אביב (TLV)" },
+    { type: "kv", rows: [["חברת תעופה", ""], ["שעת המראה", ""], ["שעת נחיתה", ""], ["סוג טיסה", "ישירה"], ["מחיר", ""]] },
+  ] }] });
+
+  const addPriceLine = (label: string, unitPrice: number) => {
+    const sections = [...data.sections];
+    let idx = sections.findIndex(s => s.heading === "פירוט מחירים");
+    if (idx < 0) { sections.push({ heading: "פירוט מחירים", blocks: [itemsToTable([], 0, 0, p.currency)] }); idx = sections.length - 1; }
+    const sec = sections[idx];
+    const tbIdx = sec.blocks.findIndex(b => b.type === "table");
+    const tb = (tbIdx >= 0 ? sec.blocks[tbIdx] : itemsToTable([], 0, 0, p.currency)) as ProposalBlock & TableExtra;
+    const { items, discount, vatRate } = tableToItems(tb);
+    const nb = itemsToTable([...items, { label, qty: 1, unitPrice }], discount, vatRate, p.currency);
+    sections[idx] = { ...sec, blocks: tbIdx >= 0 ? sec.blocks.map((b, i) => i === tbIdx ? nb : b) : [...sec.blocks, nb] };
+    setD({ sections });
   };
 
   const addSection = () => setD({ sections: [...data.sections, { heading: "סעיף חדש", blocks: [] }] });
@@ -235,6 +272,9 @@ function EditorInner() {
 
           <div className="flex flex-wrap gap-2">
             <button onClick={addSection} className="bg-gray-900 text-white font-bold text-sm px-4 py-2 rounded-xl">+ סעיף</button>
+            <button onClick={addFlightSection} className="border border-blue-200 text-blue-700 bg-blue-50 font-semibold text-xs px-3 py-2 rounded-xl">✈️ הוסף טיסה</button>
+            <button onClick={() => addPriceLine("הסעות שדה תעופה הלוך-חזור", 180)} className="border border-gray-200 text-gray-700 font-semibold text-xs px-3 py-2 rounded-xl">🚐 הוסף הסעה</button>
+            <button onClick={() => addPriceLine("השכרת ציוד סקי/סנובורד", 120)} className="border border-gray-200 text-gray-700 font-semibold text-xs px-3 py-2 rounded-xl">🎿 הוסף ציוד</button>
             {SAVED_BLOCKS.map((sb, i) => (
               <button key={i} onClick={() => insertSaved(sb)} className="border border-gray-200 text-gray-700 font-semibold text-xs px-3 py-2 rounded-xl">➕ {sb.name}</button>
             ))}
