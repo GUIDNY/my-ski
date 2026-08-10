@@ -76,6 +76,43 @@ export type Order = {
   created_at: string;
 };
 
+// ── Branded PDF proposals (admin-built quote documents) ──────────
+export type ProposalBlock =
+  | { type: "banner"; text: string }
+  | { type: "kv"; rows: [string, string][] }
+  | { type: "summary"; rows: [string, string][] }
+  | { type: "list"; items: string[] }
+  | { type: "text"; text: string }
+  | { type: "note"; text: string }
+  | { type: "option"; label: string; text: string }
+  | { type: "table"; header: string[]; rows: string[][]; total: string[] };
+
+export type ProposalSection = { heading: string; blocks: ProposalBlock[] };
+
+export type ProposalData = {
+  title: string;
+  subtitle: string;
+  intro: string;
+  sections: ProposalSection[];
+  signature?: { heading: string; text: string; fields: string[] };
+};
+
+export type ProposalStatus = "draft" | "sent" | "accepted" | "expired";
+
+export type Proposal = {
+  id: string;
+  proposal_number: string | null;
+  client_name: string;
+  client_email: string;
+  client_phone: string;
+  status: ProposalStatus;
+  valid_until: string | null;
+  currency: string;
+  data: ProposalData;
+  created_at: string;
+  updated_at: string;
+};
+
 export type SeasonRental = {
   id: string;
   name: string;

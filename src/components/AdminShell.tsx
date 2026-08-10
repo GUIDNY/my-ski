@@ -1,9 +1,14 @@
 "use client";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import AdminNav from "@/components/AdminNav";
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname() || "";
+
+  // print/PDF routes render bare — no sidebar or admin chrome
+  if (pathname.endsWith("/print")) return <>{children}</>;
 
   return (
     <div className="min-h-screen bg-gray-50">
