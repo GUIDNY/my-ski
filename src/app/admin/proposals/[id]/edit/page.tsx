@@ -42,6 +42,7 @@ function EditorInner() {
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState<string>("");
   const [showPreview, setShowPreview] = useState(false);
+  const [srcUrl, setSrcUrl] = useState("");
 
   useEffect(() => {
     fetch(`/api/proposals/${id}`).then(r => r.json()).then((row: Proposal) => { setP(row); setData(row.data); });
@@ -64,25 +65,69 @@ function EditorInner() {
   const setSection = (si: number, sec: ProposalSection) => setD({ sections: data.sections.map((s, i) => i === si ? sec : s) });
   const move = <T,>(arr: T[], i: number, dir: number): T[] => { const j = i + dir; if (j < 0 || j >= arr.length) return arr; const c = [...arr]; [c[i], c[j]] = [c[j], c[i]]; return c; };
 
-  const prefillFromOrder = async () => {
-    const code = prompt("קוד הזמנה למילוי אוטומטי:");
-    if (!code) return;
-    const r = await fetch(`/api/orders/code/${encodeURIComponent(code.trim())}`);
-    if (!r.ok) { alert("הזמנה לא נמצאה"); return; }
-    const o = await r.json();
-    const fmt = (d?: string) => d ? new Date(d).toLocaleDateString("he-IL") : "";
-    const summary: ProposalSection = { heading: "סיכום החופשה", blocks: [{ type: "summary", rows: [
-      ["יעד", o.area || "ואל טורנס, צרפת"],
-      ["דירה", o.apartment_name || ""],
-      ["תאריכים", `${fmt(o.checkin)} – ${fmt(o.checkout)}`],
-      ["לילות", String(o.nights ?? "")],
-      ["אורחים", String(o.guests ?? "")],
-    ] as [string, string][] }] };
-    const priceSec: ProposalSection = { heading: "פירוט מחירים", blocks: [
-      itemsToTable([{ label: `${o.apartment_name || "חבילת נופש"} · ${o.nights ?? ""} לילות`, qty: 1, unitPrice: Number(o.total_eur) || 0 }], 0, 0, p.currency),
+  const fmtHe = (d?: string) => d ? new Date(d).toLocaleDateString("he-IL") : "";
+
+  // paste a quote URL (/q/slug/id) OR a quote/order code → auto-fill everything
+  const prefillFromSource = async () => {
+    const raw = srcUrl.trim();
+    if (!raw) { alert("הדבק/י קישור להצעה או קוד"); return; }
+    // token = last path segment (strip query/hash), or the raw code
+    let token = raw;
+    try { const u = new URL(raw); token = u.pathname.split("/").filter(Boolean).pop() || raw; }
+    catch { token = raw.split(/[?#]/)[0].split("/").filter(Boolean).pop() || raw; }
+
+    // 1) try a saved quote (rich: apartment + flights)
+    const qr = await fetch(`/api/quotes/${encodeURIComponent(token)}`);
+    if (qr.ok) { await buildFromQuote(await qr.json()); return; }
+    // 2) fall back to an order code
+    const or = await fetch(`/api/orders/code/${encodeURIComponent(token.toLowerCase())}`);
+    if (or.ok) {
+      const o = await or.json();
+      const summary: ProposalSection = { heading: "סיכום החופשה", blocks: [{ type: "summary", rows: [
+        ["יעד", o.area || "ואל טורנס, צרפת"], ["דירה", o.apartment_name || ""],
+        ["תאריכים", `${fmtHe(o.checkin)} – ${fmtHe(o.checkout)}`], ["לילות", String(o.nights ?? "")], ["אורחים", String(o.guests ?? "")],
+      ] as [string, string][] }] };
+      const price: ProposalSection = { heading: "פירוט מחירים", blocks: [itemsToTable([{ label: `${o.apartment_name || "חבילת נופש"} · ${o.nights ?? ""} לילות`, qty: 1, unitPrice: Number(o.total_eur) || 0 }], 0, 0, p.currency)] };
+      setP({ ...p, client_name: o.customer_name || p.client_name });
+      setData({ ...data, subtitle: o.area || data.subtitle, sections: [...data.sections, summary, price] });
+      return;
+    }
+    alert("לא נמצאה הצעה/הזמנה עבור הקישור הזה");
+  };
+
+  const buildFromQuote = async (q: {
+    apartment_id?: string; apartment_name?: string; checkin?: string; checkout?: string;
+    nights?: number; guests?: number; transfer?: boolean; ski_pass?: boolean; grand_total?: number;
+  }) => {
+    let desc = "";
+    if (q.apartment_id) {
+      const ar = await fetch(`/api/apartments/${q.apartment_id}`);
+      if (ar.ok) { const a = await ar.json(); desc = a.description || ""; }
+    }
+    const flights: ProposalSection = { heading: "טיסות", blocks: [
+      { type: "banner", text: `טיסת הלוך — ${fmtHe(q.checkin)}  ·  תל אביב (TLV) ← ליון (LYS)` },
+      { type: "kv", rows: [["חברת תעופה", ""], ["שעת המראה", ""], ["שעת נחיתה", ""], ["סוג טיסה", "ישירה"]] },
+      { type: "banner", text: `טיסת חזור — ${fmtHe(q.checkout)}  ·  ליון (LYS) ← תל אביב (TLV)` },
+      { type: "kv", rows: [["חברת תעופה", ""], ["שעת המראה", ""], ["שעת נחיתה", ""], ["סוג טיסה", "ישירה"]] },
     ] };
-    setP({ ...p, client_name: o.customer_name || p.client_name });
-    setData({ ...data, subtitle: o.area || data.subtitle, sections: [...data.sections, summary, priceSec] });
+    const included: ProposalSection = { heading: "החבילה כוללת", blocks: [{ type: "list", items: [
+      "טיסות הלוך וחזור.",
+      ...(q.transfer ? ["הסעה משדה התעופה בליון לוואל טורנס וחזרה."] : []),
+      `${q.nights ?? ""} לילות לינה ב${q.apartment_name || "ואל טורנס"}.`,
+      ...(q.ski_pass ? ["סקי פס."] : []),
+    ] }] };
+    const lodging: ProposalSection = { heading: "הלינה", blocks: desc ? [{ type: "text", text: desc }] : [] };
+    const summary: ProposalSection = { heading: "סיכום החופשה", blocks: [{ type: "summary", rows: [
+      ["יעד", "ואל טורנס, צרפת"], ["דירה", q.apartment_name || ""],
+      ["תאריכים", `${fmtHe(q.checkin)} – ${fmtHe(q.checkout)}`], ["לילות", String(q.nights ?? "")], ["אורחים", String(q.guests ?? "")],
+    ] as [string, string][] }] };
+    const price: ProposalSection = { heading: "פירוט מחירים", blocks: [itemsToTable([{ label: `${q.apartment_name || "חבילת נופש"} · ${q.nights ?? ""} לילות`, qty: 1, unitPrice: Number(q.grand_total) || 0 }], 0, 0, p.currency)] };
+    setData({
+      ...data,
+      subtitle: `ואל טורנס, צרפת  |  ${fmtHe(q.checkin)} – ${fmtHe(q.checkout)}`,
+      intro: data.intro || `מוצעת בזאת חופשת סקי בוואל טורנס, צרפת, בתאריכים ${fmtHe(q.checkin)} עד ${fmtHe(q.checkout)}, למשך ${q.nights ?? ""} לילות.`,
+      sections: [...data.sections, flights, included, lodging, summary, price].filter(s => s.blocks.length > 0),
+    });
   };
 
   const addSection = () => setD({ sections: [...data.sections, { heading: "סעיף חדש", blocks: [] }] });
@@ -109,8 +154,14 @@ function EditorInner() {
 
         <div className={showPreview ? "hidden lg:block space-y-4" : "space-y-4"}>
           {/* client + meta */}
-          <Card title="פרטי ההצעה והלקוח" right={<button onClick={prefillFromOrder} className="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg px-3 py-1.5">מלא מהזמנה ↺</button>}>
+          <Card title="פרטי ההצעה והלקוח">
             <div className="text-xs text-gray-400 mb-2 font-mono">{p.proposal_number}</div>
+            {/* pull an existing quote/order to auto-fill dates, flights & apartment */}
+            <div className="flex gap-1.5 mb-3 bg-blue-50/60 rounded-xl p-2">
+              <input className={input} dir="ltr" placeholder="הדבק/י קישור להצעה  (/q/...)  או קוד הזמנה"
+                value={srcUrl} onChange={e => setSrcUrl(e.target.value)} />
+              <button onClick={prefillFromSource} className="whitespace-nowrap bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 rounded-lg">משוך ומלא ↺</button>
+            </div>
             <div className="grid grid-cols-2 gap-2">
               <input className={input} placeholder="שם הלקוח" value={p.client_name} onChange={e => setMeta({ client_name: e.target.value })} />
               <input className={input} placeholder="טלפון" value={p.client_phone} onChange={e => setMeta({ client_phone: e.target.value })} />
