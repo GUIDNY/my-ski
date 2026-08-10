@@ -1,4 +1,5 @@
 import type { ProposalData, ProposalBlock } from "@/types";
+import { DEFAULT_TERMS_SECTION } from "@/lib/proposal-demo";
 
 /**
  * Branded proposal document. Pure & presentational — used by both the print
@@ -107,6 +108,10 @@ function Block({ block }: { block: ProposalBlock }) {
 }
 
 export default function ProposalDocument({ data }: { data: ProposalData }) {
+  // terms (cancellation / validity / payment) always appear — auto-added if missing
+  const sections = data.sections.some(s => s.heading === "תנאים")
+    ? data.sections
+    : [...data.sections, DEFAULT_TERMS_SECTION];
   return (
     <div className="proposal" dir="rtl">
       <div className="cover">
@@ -119,7 +124,7 @@ export default function ProposalDocument({ data }: { data: ProposalData }) {
 
       {data.intro && <div className="intro">{data.intro}</div>}
 
-      {data.sections.map((sec, si) => (
+      {sections.map((sec, si) => (
         <section key={si}>
           <h2><span className="num">{si + 1}</span>{sec.heading}</h2>
           {sec.blocks.map((b, bi) => <Block key={bi} block={b} />)}
