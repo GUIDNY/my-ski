@@ -5,6 +5,7 @@ import AdminGate from "@/components/AdminGate";
 import ProposalDocument, { PROPOSAL_CSS } from "@/components/ProposalDocument";
 import { SAVED_BLOCKS } from "@/lib/proposal-demo";
 import { computeTotals, money, type LineItem } from "@/lib/proposal-pricing";
+import { calcTotalForRange, type PricingRule } from "@/lib/pricing";
 import type { Proposal, ProposalData, ProposalSection, ProposalBlock, ProposalStatus } from "@/types";
 
 const input = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
@@ -67,19 +68,28 @@ function EditorInner() {
 
   const fmtHe = (d?: string) => d ? new Date(d).toLocaleDateString("he-IL") : "";
 
-  // paste a quote URL (/q/slug/id) OR a quote/order code → auto-fill everything
+  // paste an apartment URL (/apartments/<id>?checkin&checkout&guests),
+  // a quote URL (/q/slug/id), OR a quote/order code → auto-fill everything
   const prefillFromSource = async () => {
     const raw = srcUrl.trim();
-    if (!raw) { alert("הדבק/י קישור להצעה או קוד"); return; }
-    // token = last path segment (strip query/hash), or the raw code
-    let token = raw;
-    try { const u = new URL(raw); token = u.pathname.split("/").filter(Boolean).pop() || raw; }
-    catch { token = raw.split(/[?#]/)[0].split("/").filter(Boolean).pop() || raw; }
+    if (!raw) { alert("הדבק/י קישור או קוד"); return; }
 
-    // 1) try a saved quote (rich: apartment + flights)
+    let segs: string[] = [];
+    let qp = new URLSearchParams();
+    try { const u = new URL(raw); segs = u.pathname.split("/").filter(Boolean); qp = u.searchParams; }
+    catch { const [path, query] = raw.split("?"); segs = path.split("/").filter(Boolean); if (query) qp = new URLSearchParams(query); }
+    const token = segs[segs.length - 1] || raw;
+
+    // 0) apartment page URL with dates → compute price from pricing rules
+    const aptIdx = segs.indexOf("apartments");
+    if (aptIdx >= 0 && segs[aptIdx + 1]) {
+      await buildFromApartment(segs[aptIdx + 1], qp.get("checkin"), qp.get("checkout"), qp.get("guests"));
+      return;
+    }
+    // 1) saved quote (rich: apartment + flights)
     const qr = await fetch(`/api/quotes/${encodeURIComponent(token)}`);
     if (qr.ok) { await buildFromQuote(await qr.json()); return; }
-    // 2) fall back to an order code
+    // 2) order code
     const or = await fetch(`/api/orders/code/${encodeURIComponent(token.toLowerCase())}`);
     if (or.ok) {
       const o = await or.json();
@@ -93,6 +103,23 @@ function EditorInner() {
       return;
     }
     alert("לא נמצאה הצעה/הזמנה עבור הקישור הזה");
+  };
+
+  const buildFromApartment = async (aptId: string, checkin: string | null, checkout: string | null, guests: string | null) => {
+    const [aptRes, rulesRes] = await Promise.all([
+      fetch(`/api/apartments/${aptId}`),
+      fetch(`/api/pricing-rules?apartment_id=${aptId}`),
+    ]);
+    if (!aptRes.ok) { alert("הדירה לא נמצאה"); return; }
+    const apt = await aptRes.json();
+    const rules: PricingRule[] = rulesRes.ok ? await rulesRes.json() : [];
+    const nights = checkin && checkout ? Math.max(0, Math.round((+new Date(checkout) - +new Date(checkin)) / 86400000)) : 0;
+    const total = checkin && checkout ? calcTotalForRange(checkin, checkout, Number(apt.price_per_night) || 0, rules) : 0;
+    await buildFromQuote({
+      apartment_id: aptId, apartment_name: apt.name,
+      checkin: checkin ?? undefined, checkout: checkout ?? undefined,
+      nights, guests: guests ? +guests : undefined, grand_total: total,
+    });
   };
 
   const buildFromQuote = async (q: {
@@ -158,7 +185,7 @@ function EditorInner() {
             <div className="text-xs text-gray-400 mb-2 font-mono">{p.proposal_number}</div>
             {/* pull an existing quote/order to auto-fill dates, flights & apartment */}
             <div className="flex gap-1.5 mb-3 bg-blue-50/60 rounded-xl p-2">
-              <input className={input} dir="ltr" placeholder="הדבק/י קישור להצעה  (/q/...)  או קוד הזמנה"
+              <input className={input} dir="ltr" placeholder="קישור דירה (/apartments/…?checkin&checkout) · הצעה (/q/…) · או קוד"
                 value={srcUrl} onChange={e => setSrcUrl(e.target.value)} />
               <button onClick={prefillFromSource} className="whitespace-nowrap bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 rounded-lg">משוך ומלא ↺</button>
             </div>
