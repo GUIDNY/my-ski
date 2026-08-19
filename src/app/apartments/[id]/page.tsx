@@ -46,21 +46,26 @@ function ToggleRow({ icon, label, sublabel, price, checked, onChange, disabled }
     <button
       onClick={() => !disabled && onChange(!checked)}
       disabled={disabled}
-      className={`w-full flex items-center gap-3 p-3.5 rounded-xl border text-right transition-all
-        ${disabled ? "border-gray-100 bg-gray-50 cursor-not-allowed" : checked ? "border-blue-300 bg-blue-50" : "border-gray-100 bg-white hover:border-gray-200"}`}
+      className="w-full flex items-center gap-3 p-3.5 border text-right transition-all"
+      style={{
+        borderRadius: 4,
+        borderColor: disabled ? "rgba(28,27,23,0.08)" : checked ? "var(--gold)" : "rgba(28,27,23,0.1)",
+        background: disabled ? "var(--ivory-deep)" : checked ? "var(--gold-wash)" : "var(--paper)",
+        cursor: disabled ? "not-allowed" : "pointer",
+      }}
     >
-      <span className={`flex-shrink-0 ${disabled ? "text-gray-300" : checked ? "text-blue-600" : "text-gray-400"}`}>{icon}</span>
+      <span className="flex-shrink-0" style={{ color: disabled ? "var(--stone-soft)" : checked ? "var(--gold-deep)" : "var(--stone-soft)" }}>{icon}</span>
       <div className="flex-1 min-w-0">
-        <div className={`text-sm font-semibold ${disabled ? "text-gray-400" : "text-gray-800"}`}>{label}</div>
-        {sublabel && <div className="text-xs text-gray-400 mt-0.5">{sublabel}</div>}
+        <div className="text-sm font-semibold" style={{ color: disabled ? "var(--stone-soft)" : "var(--charcoal)" }}>{label}</div>
+        {sublabel && <div className="text-xs mt-0.5 text-[var(--stone-soft)]">{sublabel}</div>}
       </div>
-      {price && <span className={`text-xs font-bold flex-shrink-0 ${disabled ? "text-blue-500" : "text-gray-600"}`}>{price}</span>}
+      {price && <span className="text-xs font-bold flex-shrink-0" style={{ color: disabled ? "var(--gold-deep)" : "var(--stone)" }}>{price}</span>}
       {disabled ? (
-        <span className="text-[11px] font-bold text-blue-500 flex-shrink-0">בקרוב</span>
+        <span className="text-[11px] font-bold flex-shrink-0 text-[var(--gold-deep)]">בקרוב</span>
       ) : (
-        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0
-          ${checked ? "border-blue-500 bg-blue-500" : "border-gray-300"}`}>
-          {checked && <IconCheck size={11} className="text-white" />}
+        <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0"
+          style={{ borderColor: checked ? "var(--gold)" : "rgba(28,27,23,0.2)", background: checked ? "var(--gold)" : "transparent" }}>
+          {checked && <IconCheck size={11} className="text-[var(--ink)]" />}
         </div>
       )}
     </button>
@@ -73,15 +78,18 @@ function QtyStepper({ show, label, qty, setQty, max, total }: {
 }) {
   if (!show) return null;
   return (
-    <div className="flex items-center justify-between px-3.5 py-2 -mt-1.5 mb-1 rounded-b-xl bg-blue-50 border border-t-0 border-blue-200">
-      <span className="text-xs font-bold text-blue-700">{label}</span>
+    <div className="flex items-center justify-between px-3.5 py-2 -mt-1.5 mb-1 border border-t-0"
+      style={{ borderRadius: "0 0 4px 4px", background: "var(--gold-wash)", borderColor: "var(--gold-line)" }}>
+      <span className="text-xs font-bold text-[var(--gold-deep)]">{label}</span>
       <div className="flex items-center gap-2.5">
         <button type="button" onClick={() => setQty(Math.max(1, qty - 1))} disabled={qty <= 1}
-          className="w-7 h-7 rounded-full bg-white border border-blue-200 text-blue-600 font-black disabled:opacity-40 leading-none">−</button>
-        <span className="font-black text-gray-900 w-5 text-center">{qty}</span>
+          className="w-7 h-7 rounded-full border font-black disabled:opacity-40 leading-none"
+          style={{ background: "var(--paper)", borderColor: "var(--gold-line)", color: "var(--gold-deep)" }}>−</button>
+        <span className="font-black w-5 text-center text-[var(--charcoal)]">{qty}</span>
         <button type="button" onClick={() => setQty(Math.min(max, qty + 1))} disabled={qty >= max}
-          className="w-7 h-7 rounded-full bg-white border border-blue-200 text-blue-600 font-black disabled:opacity-40 leading-none">+</button>
-        <span className="text-xs font-bold text-gray-700 w-16 text-left">= €{total.toLocaleString()}</span>
+          className="w-7 h-7 rounded-full border font-black disabled:opacity-40 leading-none"
+          style={{ background: "var(--paper)", borderColor: "var(--gold-line)", color: "var(--gold-deep)" }}>+</button>
+        <span className="text-xs font-bold w-16 text-left text-[var(--charcoal)]">= €{total.toLocaleString()}</span>
       </div>
     </div>
   );
@@ -95,24 +103,28 @@ function RadioOption({ icon, label, sublabel, badge, badgeColor, selected, onCli
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-start gap-3 p-3.5 rounded-xl border text-right transition-all
-        ${selected ? "border-blue-300 bg-blue-50" : "border-gray-100 bg-white hover:border-gray-200"}`}
+      className="w-full flex items-start gap-3 p-3.5 border text-right transition-all"
+      style={{
+        borderRadius: 4,
+        borderColor: selected ? "var(--gold)" : "rgba(28,27,23,0.1)",
+        background: selected ? "var(--gold-wash)" : "var(--paper)",
+      }}
     >
-      <span className={`mt-0.5 flex-shrink-0 ${selected ? "text-blue-600" : "text-gray-400"}`}>{icon}</span>
+      <span className="mt-0.5 flex-shrink-0" style={{ color: selected ? "var(--gold-deep)" : "var(--stone-soft)" }}>{icon}</span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm font-semibold text-gray-800">{label}</span>
+          <span className="text-sm font-semibold text-[var(--charcoal)]">{label}</span>
           {badge && (
             <span className="text-xs font-bold px-2 py-0.5 rounded-full text-white" style={{ background: badgeColor }}>
               {badge}
             </span>
           )}
         </div>
-        <div className="text-xs text-gray-400 mt-0.5">{sublabel}</div>
+        <div className="text-xs mt-0.5 text-[var(--stone-soft)]">{sublabel}</div>
       </div>
-      <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0
-        ${selected ? "border-blue-500 bg-blue-500" : "border-gray-300"}`}>
-        {selected && <div className="w-2.5 h-2.5 bg-white rounded-full mx-auto mt-0.5" />}
+      <div className="mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0"
+        style={{ borderColor: selected ? "var(--gold)" : "rgba(28,27,23,0.2)", background: selected ? "var(--gold)" : "transparent" }}>
+        {selected && <div className="w-2.5 h-2.5 rounded-full mx-auto mt-0.5" style={{ background: "var(--ink)" }} />}
       </div>
     </button>
   );
@@ -124,16 +136,17 @@ function Gallery({ images, name }: { images: string[]; name: string }) {
   const imgs = images?.length ? images : ["/apt1.jpg", "/apt2.jpg", "/apt3.jpg"];
 
   return (
-    <div className="relative rounded-2xl overflow-hidden bg-gray-100 h-72 md:h-96 group">
+    <div className="relative overflow-hidden h-80 md:h-[30rem] group" style={{ borderRadius: 4, background: "var(--ivory-deep)" }}>
       <img src={imgs[idx]} alt={name} className="w-full h-full object-cover transition-all duration-500" />
-      <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.25) 0%, transparent 50%)" }} />
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(11,15,20,0.55) 0%, transparent 45%)" }} />
 
       {/* Thumbnails strip */}
       {imgs.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
           {imgs.map((_, i) => (
             <button key={i} onClick={() => setIdx(i)}
-              className={`w-2 h-2 rounded-full transition-all ${i === idx ? "bg-white scale-125" : "bg-white/50 hover:bg-white/80"}`} />
+              className="w-2 h-2 rounded-full transition-all"
+              style={{ background: i === idx ? "var(--gold-light)" : "rgba(255,255,255,0.45)", transform: i === idx ? "scale(1.25)" : "scale(1)" }} />
           ))}
         </div>
       )}
@@ -142,11 +155,13 @@ function Gallery({ images, name }: { images: string[]; name: string }) {
       {imgs.length > 1 && (
         <>
           <button onClick={() => setIdx(i => (i - 1 + imgs.length) % imgs.length)} aria-label="הקודם"
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/45 hover:bg-black/65 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-all">
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-sm transition-all"
+            style={{ background: "rgba(11,15,20,0.5)", color: "var(--ivory)" }}>
             <IconChevronLeft size={18} className="rotate-180" />
           </button>
           <button onClick={() => setIdx(i => (i + 1) % imgs.length)} aria-label="הבא"
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/45 hover:bg-black/65 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-all">
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-sm transition-all"
+            style={{ background: "rgba(11,15,20,0.5)", color: "var(--ivory)" }}>
             <IconChevronLeft size={18} />
           </button>
         </>
@@ -318,33 +333,33 @@ function ApartmentPage() {
   };
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ink)" }}>
       <SkiLoader />
     </div>
   );
 
   if (!apt) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-400 text-lg" dir="rtl">
+    <div className="min-h-screen flex items-center justify-center text-lg" style={{ background: "var(--ivory)", color: "var(--stone-soft)" }} dir="rtl">
       דירה לא נמצאה
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gray-50" dir="rtl">
+    <div className="min-h-screen" style={{ background: "var(--ivory)" }} dir="rtl">
 
       {/* ── Top nav ──────────────────────────────────────────── */}
-      <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
+      <div className="sticky top-0 z-40" style={{ background: "rgba(250,247,241,0.95)", backdropFilter: "blur(10px)", borderBottom: "1px solid rgba(28,27,23,0.08)" }}>
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
           <a href="/" className="flex items-center"><Logo className="h-9" /></a>
-          <span className="text-gray-200 text-lg font-light">/</span>
+          <span className="text-lg font-light text-[var(--stone-soft)]">/</span>
           <a href={`/search?checkin=${checkin}&checkout=${checkout}&guests=${guests}`}
-            className="text-sm text-gray-500 hover:text-blue-600 transition-colors">תוצאות חיפוש</a>
-          <span className="text-gray-200 text-lg font-light">/</span>
-          <span className="text-sm text-gray-700 font-semibold truncate">{apt.name}</span>
+            className="text-sm transition-colors text-[var(--stone)]">תוצאות חיפוש</a>
+          <span className="text-lg font-light text-[var(--stone-soft)]">/</span>
+          <span className="text-sm font-semibold truncate text-[var(--charcoal)]">{apt.name}</span>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 py-10 md:py-12">
         <div className="flex flex-col lg:flex-row gap-8">
 
           {/* ── LEFT: apartment details ────────────────────────── */}
@@ -354,26 +369,26 @@ function ApartmentPage() {
             <Gallery images={apt.images} name={apt.name} />
 
             {/* Header */}
-            <div className="mt-6 mb-6 pb-6 border-b border-gray-100">
+            <div className="mt-7 mb-7 pb-7" style={{ borderBottom: "1px solid rgba(28,27,23,0.08)" }}>
               <div className="flex items-start justify-between gap-4 flex-wrap">
                 <div>
-                  <div className="text-xs font-bold tracking-widest uppercase text-blue-600 mb-1">{apt.type}</div>
-                  <h1 className="text-3xl font-black text-gray-900">{apt.name}</h1>
-                  <div className="flex items-center gap-1.5 mt-2 text-gray-500 text-sm">
-                    <IconMountain size={14} className="text-blue-500" />
+                  <span className="eyebrow">{apt.type}</span>
+                  <h1 className="font-display text-3xl md:text-4xl font-medium mt-2 text-[var(--charcoal)]">{apt.name}</h1>
+                  <div className="flex items-center gap-1.5 mt-3 text-sm text-[var(--stone)]">
+                    <IconMountain size={14} className="text-[var(--gold-deep)]" />
                     Val Thorens, Trois Vallées, France
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5 bg-gray-50 px-4 py-2.5 rounded-xl">
-                  <IconStar size={16} className="text-amber-400" />
-                  <span className="font-black text-gray-900">4.9</span>
-                  <span className="text-gray-400 text-sm">· 47 ביקורות</span>
+                <div className="flex items-center gap-1.5 px-4 py-2.5" style={{ background: "var(--ivory-deep)", borderRadius: 4 }}>
+                  <IconStar size={16} className="text-[var(--gold)]" />
+                  <span className="font-bold text-[var(--charcoal)]">4.9</span>
+                  <span className="text-sm text-[var(--stone-soft)]">· 47 ביקורות</span>
                 </div>
               </div>
 
               {/* Quick stats */}
-              <div className="flex gap-5 mt-4 text-sm text-gray-500">
-                <span className="flex items-center gap-1.5"><IconBed size={15} className="text-gray-400" />{apt.beds} חדרי שינה</span>
+              <div className="flex gap-5 mt-5 text-sm text-[var(--stone)]">
+                <span className="flex items-center gap-1.5"><IconBed size={15} className="text-[var(--stone-soft)]" />{apt.beds} חדרי שינה</span>
                 <span>·</span>
                 <span>{apt.baths} חדרי רחצה</span>
                 <span>·</span>
@@ -383,11 +398,11 @@ function ApartmentPage() {
 
             {/* Description */}
             {apt.description && (
-              <div className="mb-6 pb-6 border-b border-gray-100">
-                <h2 className="text-lg font-black text-gray-900 mb-3">על הדירה</h2>
-                <p className={`text-gray-600 leading-relaxed text-sm whitespace-pre-line ${showFullDesc ? "" : "line-clamp-3"}`}>{apt.description}</p>
+              <div className="mb-7 pb-7" style={{ borderBottom: "1px solid rgba(28,27,23,0.08)" }}>
+                <h2 className="font-display text-lg font-medium mb-3 text-[var(--charcoal)]">על הדירה</h2>
+                <p className={`leading-relaxed text-sm whitespace-pre-line text-[var(--stone)] ${showFullDesc ? "" : "line-clamp-3"}`}>{apt.description}</p>
                 {apt.description.length > 180 && (
-                  <button onClick={() => setShowFullDesc(v => !v)} className="mt-2 text-sm font-bold text-blue-600 hover:underline">
+                  <button onClick={() => setShowFullDesc(v => !v)} className="mt-2 text-sm font-bold hover:underline text-[var(--gold-deep)]">
                     {showFullDesc ? "הצג פחות ↑" : "קרא עוד ←"}
                   </button>
                 )}
@@ -396,12 +411,12 @@ function ApartmentPage() {
 
             {/* Amenities */}
             {apt.amenities?.length > 0 && (
-              <div className="mb-6 pb-6 border-b border-gray-100">
-                <h2 className="text-lg font-black text-gray-900 mb-4">מה כלול</h2>
+              <div className="mb-7 pb-7" style={{ borderBottom: "1px solid rgba(28,27,23,0.08)" }}>
+                <h2 className="font-display text-lg font-medium mb-4 text-[var(--charcoal)]">מה כלול</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {apt.amenities.map((a, i) => (
-                    <div key={i} className="flex items-center gap-2.5 text-sm text-gray-700">
-                      <span className="text-blue-500">{amenityIcon(a)}</span>
+                    <div key={i} className="flex items-center gap-2.5 text-sm text-[var(--charcoal)]">
+                      <span className="text-[var(--gold-deep)]">{amenityIcon(a)}</span>
                       {a}
                     </div>
                   ))}
@@ -410,10 +425,10 @@ function ApartmentPage() {
             )}
 
             {/* booking choices — inline (mobile + desktop main column) */}
-            <div className="lg:hidden bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-5">
+            <div className="lg:hidden p-5 flex flex-col gap-5" style={{ background: "var(--paper)", border: "1px solid rgba(28,27,23,0.08)", borderRadius: 4 }}>
                   {/* ── Ski Pass ──────────────────────────────────── */}
                   <div>
-                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">תוספות</div>
+                    <div className="eyebrow mb-2">תוספות</div>
                     <div className="flex flex-col gap-2">
                       <ToggleRow
                         icon={<IconSkis size={18} />}
@@ -440,26 +455,28 @@ function ApartmentPage() {
                       <QtyStepper show={equipment} label="כמה אנשים צריכים ציוד?" qty={equipQty} setQty={setEquipQty} max={Math.max(guests, 1)} total={equipTotal} />
                       {transfer && (
                         <button onClick={() => setShowTransfer(true)}
-                          className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-colors text-sm w-full text-right">
-                          <span className="text-blue-700 font-semibold">{flightFilled(flight) ? "✓ פרטי טיסה נשמרו · עריכה" : "מלא פרטי טיסה להסעה ←"}</span>
-                          <span className="text-xs text-blue-400">מספר טיסה · שעה · תאריך</span>
+                          className="flex items-center justify-between px-3.5 py-2.5 border transition-colors text-sm w-full text-right"
+                          style={{ borderRadius: 4, background: "var(--gold-wash)", borderColor: "var(--gold-line)" }}>
+                          <span className="font-semibold text-[var(--gold-deep)]">{flightFilled(flight) ? "✓ פרטי טיסה נשמרו · עריכה" : "מלא פרטי טיסה להסעה ←"}</span>
+                          <span className="text-xs text-[var(--stone-soft)]">מספר טיסה · שעה · תאריך</span>
                         </button>
                       )}
                     </div>
                     <a href={skyscannerUrl} target="_blank" rel="noopener noreferrer"
-                      className="mt-2 flex items-center gap-2.5 p-3.5 rounded-xl border border-gray-100 bg-white hover:border-blue-200 hover:bg-blue-50 transition-all">
-                      <span className="text-gray-400 flex-shrink-0"><IconPlane size={17} /></span>
+                      className="mt-2 flex items-center gap-2.5 p-3.5 border transition-all"
+                      style={{ borderRadius: 4, borderColor: "rgba(28,27,23,0.1)", background: "var(--paper)" }}>
+                      <span className="flex-shrink-0 text-[var(--stone-soft)]"><IconPlane size={17} /></span>
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-gray-800">טיסה ל-Geneva (GVA)</div>
-                        <div className="text-xs text-gray-400">TLV → Geneva · {checkin ? fmtDate(checkin) : "בחר תאריך"} · 2.5h מ-Val Thorens</div>
+                        <div className="text-sm font-semibold text-[var(--charcoal)]">טיסה ל-Geneva (GVA)</div>
+                        <div className="text-xs text-[var(--stone-soft)]">TLV → Geneva · {checkin ? fmtDate(checkin) : "בחר תאריך"} · 2.5h מ-Val Thorens</div>
                       </div>
-                      <span className="text-xs font-bold text-blue-600 flex-shrink-0">Skyscanner ←</span>
+                      <span className="text-xs font-bold flex-shrink-0 text-[var(--gold-deep)]">Skyscanner ←</span>
                     </a>
                   </div>
 
                   {/* ── Cancellation policy ───────────────────────── */}
                   <div>
-                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">מדיניות ביטול</div>
+                    <div className="eyebrow mb-2">מדיניות ביטול</div>
                     <div className="flex flex-col gap-2">
                       <RadioOption
                         icon={<IconShield size={18} />}
@@ -473,7 +490,7 @@ function ApartmentPage() {
                         label="ללא אפשרות ביטול"
                         sublabel="מחיר מוזל · לא ניתן לבטל ואין החזר כספי"
                         badge={`−€${CANCEL_NONE}`}
-                        badgeColor="#ef4444"
+                        badgeColor="var(--gold-deep)"
                         selected={cancel === "none"}
                         onClick={() => { setShowNoCancel(true); }}
                       />
@@ -482,19 +499,19 @@ function ApartmentPage() {
                         label="ביטול גמיש"
                         sublabel="80% החזר עד שבוע לפני · 50% עד 24ש׳ לפני ההמראה · אח״כ אין החזר"
                         badge={`+€${CANCEL_FLEX}`}
-                        badgeColor="#10b981"
+                        badgeColor="var(--ink)"
                         selected={cancel === "flexible"}
                         onClick={() => setCancel("flexible")}
                       />
                     </div>
-                    <a href="/terms" target="_blank" className="inline-block mt-2 text-xs text-blue-600 hover:underline font-semibold">קרא/י את מדיניות הביטולים בתקנון ←</a>
+                    <a href="/terms" target="_blank" className="inline-block mt-2 text-xs hover:underline font-semibold text-[var(--gold-deep)]">קרא/י את מדיניות הביטולים בתקנון ←</a>
                   </div>
 
                   {/* ── Service level ─────────────────────────────── */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">רמת שירות</div>
-                      <button onClick={() => setShowAiInfo(true)} className="text-xs font-semibold text-blue-600 hover:underline">ⓘ מידע נוסף</button>
+                      <div className="eyebrow">רמת שירות</div>
+                      <button onClick={() => setShowAiInfo(true)} className="text-xs font-semibold hover:underline text-[var(--gold-deep)]">ⓘ מידע נוסף</button>
                     </div>
                     <div className="flex flex-col gap-2">
                       <RadioOption
@@ -509,7 +526,7 @@ function ApartmentPage() {
                         label="AI בלבד"
                         sublabel="ניהול עצמאי עם תמיכת צ'אטבוט · איסוף עצמאי של הסקי פס"
                         badge={`-€${AI_DISCOUNT}`}
-                        badgeColor="#6366f1"
+                        badgeColor="var(--gold-deep)"
                         selected={service === "ai"}
                         onClick={() => setService("ai")}
                       />
@@ -520,22 +537,23 @@ function ApartmentPage() {
 
             {/* Location */}
             <div>
-              <h2 className="text-lg font-black text-gray-900 mb-3">מיקום</h2>
+              <h2 className="font-display text-lg font-medium mb-3 text-[var(--charcoal)]">מיקום</h2>
               {apt.map_url ? (
                 <a href={apt.map_url} target="_blank" rel="noopener noreferrer"
-                  className="block bg-blue-50 rounded-2xl p-5 text-sm text-gray-600 border border-blue-100 hover:border-blue-300 hover:bg-blue-100/60 transition-all group">
+                  className="block p-5 text-sm transition-all group"
+                  style={{ borderRadius: 4, background: "var(--ivory-deep)", border: "1px solid var(--gold-line)", color: "var(--stone)" }}>
                   <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-2 font-bold text-gray-800">
-                      <IconMountain size={16} className="text-blue-600" /> Val Thorens
+                    <div className="flex items-center gap-2 font-bold text-[var(--charcoal)]">
+                      <IconMountain size={16} className="text-[var(--gold-deep)]" /> Val Thorens
                     </div>
-                    <span className="text-xs font-bold text-blue-600 group-hover:-translate-x-0.5 transition-transform">פתח ב-Google Maps ←</span>
+                    <span className="text-xs font-bold group-hover:-translate-x-0.5 transition-transform text-[var(--gold-deep)]">פתח ב-Google Maps ←</span>
                   </div>
                   <p>הכפר הגבוה ביותר באירופה · 2,300 מ׳ · שלג מובטח נובמבר–מאי · גישה ישירה ל-600 ק״מ מסלולים</p>
                 </a>
               ) : (
-                <div className="bg-blue-50 rounded-2xl p-5 text-sm text-gray-600 border border-blue-100">
-                  <div className="flex items-center gap-2 font-bold text-gray-800 mb-1">
-                    <IconMountain size={16} className="text-blue-600" /> Val Thorens
+                <div className="p-5 text-sm" style={{ borderRadius: 4, background: "var(--ivory-deep)", border: "1px solid var(--gold-line)", color: "var(--stone)" }}>
+                  <div className="flex items-center gap-2 font-bold mb-1 text-[var(--charcoal)]">
+                    <IconMountain size={16} className="text-[var(--gold-deep)]" /> Val Thorens
                   </div>
                   <p>הכפר הגבוה ביותר באירופה · 2,300 מ׳ · שלג מובטח נובמבר–מאי · גישה ישירה ל-600 ק״מ מסלולים</p>
                 </div>
@@ -548,17 +566,18 @@ function ApartmentPage() {
           <div className={`lg:w-[400px] lg:flex-shrink-0 max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:z-50 max-lg:transition-transform max-lg:duration-300 ${sheetOpen ? "max-lg:translate-y-0" : "max-lg:translate-y-full"}`}>
             <div className="sticky top-20 max-lg:static">
               <button onClick={() => setSheetOpen(false)} className="lg:hidden w-full flex justify-center pt-2 pb-1" aria-label="סגור">
-                <span className="block w-10 h-1.5 rounded-full bg-gray-300" />
+                <span className="block w-10 h-1.5 rounded-full" style={{ background: "rgba(28,27,23,0.15)" }} />
               </button>
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden max-lg:rounded-b-none max-lg:max-h-[82vh] max-lg:overflow-y-auto">
+              <div className="overflow-hidden max-lg:rounded-b-none max-lg:max-h-[82vh] max-lg:overflow-y-auto"
+                style={{ background: "var(--paper)", border: "1px solid rgba(28,27,23,0.08)", borderRadius: 4, boxShadow: "0 24px 48px -24px rgba(11,15,20,0.25)" }}>
 
                 {/* Price header */}
-                <div className="px-6 pt-6 pb-4 bg-gradient-to-br from-gray-50 to-blue-50 border-b border-gray-100">
+                <div className="px-6 pt-6 pb-5" style={{ background: "var(--ivory-deep)", borderBottom: "1px solid rgba(28,27,23,0.08)" }}>
                   <div className="flex items-end justify-between gap-2">
                     <div>
-                      <div className="text-3xl font-black text-gray-900">
-                        €{avgNightlyPrice.toLocaleString()}
-                        <span className="text-base font-medium text-gray-400">
+                      <div className="font-display text-3xl font-medium text-[var(--charcoal)]">
+                        <span className="text-[var(--gold-deep)]">€{avgNightlyPrice.toLocaleString()}</span>
+                        <span className="text-base font-medium text-[var(--stone-soft)]">
                           {breakdown.length > 1 ? " / לילה ממוצע" : " / לילה"}
                         </span>
                       </div>
@@ -566,7 +585,8 @@ function ApartmentPage() {
                     {breakdown.length > 0 && (
                       <button
                         onClick={() => setShowBreakdown(v => !v)}
-                        className="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap flex-shrink-0"
+                        className="text-xs font-bold px-3 py-1.5 transition-colors whitespace-nowrap flex-shrink-0"
+                        style={{ color: "var(--gold-deep)", background: "var(--gold-wash)", borderRadius: 4 }}
                       >
                         פירוט מחיר {showBreakdown ? "▲" : "▼"}
                       </button>
@@ -575,40 +595,40 @@ function ApartmentPage() {
 
                   {/* Per-night breakdown panel */}
                   {showBreakdown && breakdown.length > 0 && (
-                    <div className="mt-3 bg-white rounded-xl border border-blue-100 overflow-hidden">
-                      <div className="max-h-52 overflow-y-auto divide-y divide-gray-50">
+                    <div className="mt-3 overflow-hidden" style={{ background: "var(--paper)", border: "1px solid var(--gold-line)", borderRadius: 4 }}>
+                      <div className="max-h-52 overflow-y-auto divide-y" style={{ borderColor: "rgba(28,27,23,0.06)" }}>
                         {breakdown.map(({ date, price }, i) => (
                           <div key={i} className="flex justify-between items-center px-4 py-2 text-sm">
-                            <span className="text-gray-500">{fmtDate(`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`)}</span>
-                            <span className={`font-semibold ${price !== basePrice ? "text-blue-600" : "text-gray-800"}`}>
+                            <span className="text-[var(--stone)]">{fmtDate(`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`)}</span>
+                            <span className="font-semibold" style={{ color: price !== basePrice ? "var(--gold-deep)" : "var(--charcoal)" }}>
                               €{price.toLocaleString()}
                             </span>
                           </div>
                         ))}
                       </div>
                       {breakdown.length > 1 && (
-                        <div className="flex justify-between items-center px-4 py-2.5 bg-blue-50 border-t border-blue-100 text-sm font-bold">
-                          <span className="text-gray-600">ממוצע ללילה</span>
-                          <span className="text-blue-700">€{avgNightlyPrice.toLocaleString()}</span>
+                        <div className="flex justify-between items-center px-4 py-2.5 text-sm font-bold" style={{ background: "var(--gold-wash)", borderTop: "1px solid var(--gold-line)" }}>
+                          <span className="text-[var(--stone)]">ממוצע ללילה</span>
+                          <span className="text-[var(--gold-deep)]">€{avgNightlyPrice.toLocaleString()}</span>
                         </div>
                       )}
                     </div>
                   )}
 
                   {checkin && checkout && (
-                    <div className="flex items-center gap-2 mt-3 text-sm text-gray-500">
+                    <div className="flex items-center gap-2 mt-3 text-sm text-[var(--stone)]">
                       <IconCalendar size={14} />
                       {fmtDate(checkin)} — {fmtDate(checkout)} · {nights} לילות · {guests} אנשים
                     </div>
                   )}
                 </div>
 
-                <div className="px-6 py-5 flex flex-col gap-5">
+                <div className="px-6 py-6 flex flex-col gap-5">
 
                   <div className="hidden lg:flex flex-col gap-5">
                   {/* ── Ski Pass ──────────────────────────────────── */}
                   <div>
-                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">תוספות</div>
+                    <div className="eyebrow mb-2">תוספות</div>
                     <div className="flex flex-col gap-2">
                       <ToggleRow
                         icon={<IconSkis size={18} />}
@@ -635,26 +655,28 @@ function ApartmentPage() {
                       <QtyStepper show={equipment} label="כמה אנשים צריכים ציוד?" qty={equipQty} setQty={setEquipQty} max={Math.max(guests, 1)} total={equipTotal} />
                       {transfer && (
                         <button onClick={() => setShowTransfer(true)}
-                          className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-colors text-sm w-full text-right">
-                          <span className="text-blue-700 font-semibold">{flightFilled(flight) ? "✓ פרטי טיסה נשמרו · עריכה" : "מלא פרטי טיסה להסעה ←"}</span>
-                          <span className="text-xs text-blue-400">מספר טיסה · שעה · תאריך</span>
+                          className="flex items-center justify-between px-3.5 py-2.5 border transition-colors text-sm w-full text-right"
+                          style={{ borderRadius: 4, background: "var(--gold-wash)", borderColor: "var(--gold-line)" }}>
+                          <span className="font-semibold text-[var(--gold-deep)]">{flightFilled(flight) ? "✓ פרטי טיסה נשמרו · עריכה" : "מלא פרטי טיסה להסעה ←"}</span>
+                          <span className="text-xs text-[var(--stone-soft)]">מספר טיסה · שעה · תאריך</span>
                         </button>
                       )}
                     </div>
                     <a href={skyscannerUrl} target="_blank" rel="noopener noreferrer"
-                      className="mt-2 flex items-center gap-2.5 p-3.5 rounded-xl border border-gray-100 bg-white hover:border-blue-200 hover:bg-blue-50 transition-all">
-                      <span className="text-gray-400 flex-shrink-0"><IconPlane size={17} /></span>
+                      className="mt-2 flex items-center gap-2.5 p-3.5 border transition-all"
+                      style={{ borderRadius: 4, borderColor: "rgba(28,27,23,0.1)", background: "var(--paper)" }}>
+                      <span className="flex-shrink-0 text-[var(--stone-soft)]"><IconPlane size={17} /></span>
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-gray-800">טיסה ל-Geneva (GVA)</div>
-                        <div className="text-xs text-gray-400">TLV → Geneva · {checkin ? fmtDate(checkin) : "בחר תאריך"} · 2.5h מ-Val Thorens</div>
+                        <div className="text-sm font-semibold text-[var(--charcoal)]">טיסה ל-Geneva (GVA)</div>
+                        <div className="text-xs text-[var(--stone-soft)]">TLV → Geneva · {checkin ? fmtDate(checkin) : "בחר תאריך"} · 2.5h מ-Val Thorens</div>
                       </div>
-                      <span className="text-xs font-bold text-blue-600 flex-shrink-0">Skyscanner ←</span>
+                      <span className="text-xs font-bold flex-shrink-0 text-[var(--gold-deep)]">Skyscanner ←</span>
                     </a>
                   </div>
 
                   {/* ── Cancellation policy ───────────────────────── */}
                   <div>
-                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">מדיניות ביטול</div>
+                    <div className="eyebrow mb-2">מדיניות ביטול</div>
                     <div className="flex flex-col gap-2">
                       <RadioOption
                         icon={<IconShield size={18} />}
@@ -668,7 +690,7 @@ function ApartmentPage() {
                         label="ללא אפשרות ביטול"
                         sublabel="מחיר מוזל · לא ניתן לבטל ואין החזר כספי"
                         badge={`−€${CANCEL_NONE}`}
-                        badgeColor="#ef4444"
+                        badgeColor="var(--gold-deep)"
                         selected={cancel === "none"}
                         onClick={() => { setShowNoCancel(true); }}
                       />
@@ -677,19 +699,19 @@ function ApartmentPage() {
                         label="ביטול גמיש"
                         sublabel="80% החזר עד שבוע לפני · 50% עד 24ש׳ לפני ההמראה · אח״כ אין החזר"
                         badge={`+€${CANCEL_FLEX}`}
-                        badgeColor="#10b981"
+                        badgeColor="var(--ink)"
                         selected={cancel === "flexible"}
                         onClick={() => setCancel("flexible")}
                       />
                     </div>
-                    <a href="/terms" target="_blank" className="inline-block mt-2 text-xs text-blue-600 hover:underline font-semibold">קרא/י את מדיניות הביטולים בתקנון ←</a>
+                    <a href="/terms" target="_blank" className="inline-block mt-2 text-xs hover:underline font-semibold text-[var(--gold-deep)]">קרא/י את מדיניות הביטולים בתקנון ←</a>
                   </div>
 
                   {/* ── Service level ─────────────────────────────── */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">רמת שירות</div>
-                      <button onClick={() => setShowAiInfo(true)} className="text-xs font-semibold text-blue-600 hover:underline">ⓘ מידע נוסף</button>
+                      <div className="eyebrow">רמת שירות</div>
+                      <button onClick={() => setShowAiInfo(true)} className="text-xs font-semibold hover:underline text-[var(--gold-deep)]">ⓘ מידע נוסף</button>
                     </div>
                     <div className="flex flex-col gap-2">
                       <RadioOption
@@ -704,7 +726,7 @@ function ApartmentPage() {
                         label="AI בלבד"
                         sublabel="ניהול עצמאי עם תמיכת צ'אטבוט · איסוף עצמאי של הסקי פס"
                         badge={`-€${AI_DISCOUNT}`}
-                        badgeColor="#6366f1"
+                        badgeColor="var(--gold-deep)"
                         selected={service === "ai"}
                         onClick={() => setService("ai")}
                       />
@@ -714,82 +736,84 @@ function ApartmentPage() {
                   </div>
 
                   {/* ── Price breakdown ───────────────────────────── */}
-                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">סיכום מחיר</div>
+                  <div className="p-4" style={{ background: "var(--ivory-deep)", border: "1px solid rgba(28,27,23,0.08)", borderRadius: 4 }}>
+                    <div className="eyebrow mb-3">סיכום מחיר</div>
                     <div className="flex flex-col gap-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-500">לינה × {nights} לילות</span>
-                        <span className="font-semibold text-gray-800">€{aptTotal.toLocaleString()}</span>
+                        <span className="text-[var(--stone)]">לינה × {nights} לילות</span>
+                        <span className="font-semibold text-[var(--charcoal)]">€{aptTotal.toLocaleString()}</span>
                       </div>
                       {skiPass && (
                         <div className="flex justify-between items-center">
-                          <span className="text-gray-500">סקי פס × {guests} × {nights} ימים</span>
-                          <span className="text-xs font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">בקרוב</span>
+                          <span className="text-[var(--stone)]">סקי פס × {guests} × {nights} ימים</span>
+                          <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: "var(--gold-wash)", color: "var(--gold-deep)" }}>בקרוב</span>
                         </div>
                       )}
                       {transfer && (
                         <div className="flex justify-between">
-                          <span className="text-gray-500">הסעה הלוך-חזור{transferQty > 1 ? ` · ${transferQty} אנשים` : ""}</span>
-                          <span className="font-semibold text-gray-800">€{trTotal.toLocaleString()}</span>
+                          <span className="text-[var(--stone)]">הסעה הלוך-חזור{transferQty > 1 ? ` · ${transferQty} אנשים` : ""}</span>
+                          <span className="font-semibold text-[var(--charcoal)]">€{trTotal.toLocaleString()}</span>
                         </div>
                       )}
                       {equipment && (
                         <div className="flex justify-between">
-                          <span className="text-gray-500">השכרת ציוד · {nights} ימים{equipQty > 1 ? ` · ${equipQty} אנשים` : ""}</span>
-                          <span className="font-semibold text-gray-800">€{equipTotal.toLocaleString()}</span>
+                          <span className="text-[var(--stone)]">השכרת ציוד · {nights} ימים{equipQty > 1 ? ` · ${equipQty} אנשים` : ""}</span>
+                          <span className="font-semibold text-[var(--charcoal)]">€{equipTotal.toLocaleString()}</span>
                         </div>
                       )}
                       {cancel === "flexible" && (
                         <div className="flex justify-between">
-                          <span className="text-gray-500">ביטול גמיש</span>
-                          <span className="font-semibold text-gray-800">€{flexExtra.toLocaleString()}</span>
+                          <span className="text-[var(--stone)]">ביטול גמיש</span>
+                          <span className="font-semibold text-[var(--charcoal)]">€{flexExtra.toLocaleString()}</span>
                         </div>
                       )}
                       {cancel === "none" && (
                         <div className="flex justify-between">
-                          <span className="text-gray-500">ללא אפשרות ביטול</span>
-                          <span className="font-semibold text-emerald-600">−€{CANCEL_NONE.toLocaleString()}</span>
+                          <span className="text-[var(--stone)]">ללא אפשרות ביטול</span>
+                          <span className="font-semibold text-[var(--gold-deep)]">−€{CANCEL_NONE.toLocaleString()}</span>
                         </div>
                       )}
                       {service === "ai" && (
                         <div className="flex justify-between">
-                          <span className="text-gray-500">הנחת AI</span>
-                          <span className="font-semibold text-indigo-600">−€{AI_DISCOUNT.toLocaleString()}</span>
+                          <span className="text-[var(--stone)]">הנחת AI</span>
+                          <span className="font-semibold text-[var(--gold-deep)]">−€{AI_DISCOUNT.toLocaleString()}</span>
                         </div>
                       )}
                     </div>
-                    <div className="flex justify-between items-center border-t border-gray-200 pt-3 mt-3">
-                      <span className="font-black text-gray-900">סה״כ</span>
-                      <span className="text-2xl font-black text-gray-900">€{grandTotal.toLocaleString()}</span>
+                    <div className="flex justify-between items-center pt-3 mt-3" style={{ borderTop: "1px solid rgba(28,27,23,0.12)" }}>
+                      <span className="font-display font-medium text-[var(--charcoal)]">סה״כ</span>
+                      <span className="font-display text-2xl font-medium text-[var(--gold-deep)]">€{grandTotal.toLocaleString()}</span>
                     </div>
-                    <p className="text-[11px] text-gray-400 mt-2 leading-relaxed">* ייתכנו עמלות נוספות (כגון עמלת סליקת אשראי 1.9%). המחירים ב-€ והחיוב בש״ח לפי שער ההמרה.</p>
+                    <p className="text-[11px] mt-2 leading-relaxed text-[var(--stone-soft)]">* ייתכנו עמלות נוספות (כגון עמלת סליקת אשראי 1.9%). המחירים ב-€ והחיוב בש״ח לפי שער ההמרה.</p>
                   </div>
 
                   {/* ── Split payment ─────────────────────────────── */}
-                  <div className="rounded-xl border border-gray-100 p-4">
+                  <div className="p-4" style={{ border: "1px solid rgba(28,27,23,0.08)", borderRadius: 4 }}>
                     <div className="flex items-center justify-between mb-2">
                       <div>
-                        <span className="text-sm font-bold text-gray-800">כמה אנשים משלמים?</span>
-                        <span className="block text-[11px] text-gray-400">עד {guests} משלמים (לפי מספר האורחים)</span>
+                        <span className="text-sm font-bold text-[var(--charcoal)]">כמה אנשים משלמים?</span>
+                        <span className="block text-[11px] text-[var(--stone-soft)]">עד {guests} משלמים (לפי מספר האורחים)</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <button onClick={() => setSplitCount(n => Math.max(1, n - 1))} disabled={splitCount <= 1}
-                          className="w-7 h-7 rounded-full border border-gray-200 text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold disabled:opacity-40">−</button>
-                        <span className="font-black text-gray-900 w-5 text-center">{splitCount}</span>
+                          className="w-7 h-7 rounded-full border font-bold disabled:opacity-40"
+                          style={{ borderColor: "rgba(28,27,23,0.15)", color: "var(--stone)" }}>−</button>
+                        <span className="font-bold w-5 text-center text-[var(--charcoal)]">{splitCount}</span>
                         <button onClick={() => setSplitCount(n => Math.min(guests, n + 1))} disabled={splitCount >= guests}
-                          className="w-7 h-7 rounded-full border border-gray-200 text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold disabled:opacity-40">+</button>
+                          className="w-7 h-7 rounded-full border font-bold disabled:opacity-40"
+                          style={{ borderColor: "rgba(28,27,23,0.15)", color: "var(--stone)" }}>+</button>
                       </div>
                     </div>
                     {splitCount > 1 ? (
-                      <div className="bg-blue-50 rounded-lg px-3 py-2.5 text-sm">
-                        <div className="flex justify-between text-blue-900 font-bold">
+                      <div className="px-3 py-2.5 text-sm" style={{ background: "var(--gold-wash)", borderRadius: 4 }}>
+                        <div className="flex justify-between font-bold text-[var(--charcoal)]">
                           <span>החלק שלך לתשלום עכשיו</span>
                           <span>€{payNow.toLocaleString()}</span>
                         </div>
-                        <p className="text-xs text-blue-600 mt-1 leading-relaxed">הסה״כ (€{grandTotal.toLocaleString()}, כולל כל התוספות) מתחלק שווה ל-{splitCount} · אחרי התשלום תקבל/י קישור לשלוח לחברים שישלמו את חלקם.</p>
+                        <p className="text-xs mt-1 leading-relaxed text-[var(--gold-deep)]">הסה״כ (€{grandTotal.toLocaleString()}, כולל כל התוספות) מתחלק שווה ל-{splitCount} · אחרי התשלום תקבל/י קישור לשלוח לחברים שישלמו את חלקם.</p>
                       </div>
                     ) : (
-                      <p className="text-xs text-gray-400">בחר/י יותר מאדם אחד כדי לפצל את התשלום בין כמה משלמים.</p>
+                      <p className="text-xs text-[var(--stone-soft)]">בחר/י יותר מאדם אחד כדי לפצל את התשלום בין כמה משלמים.</p>
                     )}
                   </div>
 
@@ -800,22 +824,22 @@ function ApartmentPage() {
                     grandTotal={payNow}
                     split={splitCount > 1 ? { sharesTotal: splitCount, accommodationTotal: grandTotal, shareAmount: shareAccommodation, area: "Val Thorens, Trois Vallées" } : undefined}
                     label={splitCount > 1 ? "שלם/י את חלקך בכרטיס" : undefined}
-                    className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-center text-base transition-colors shadow-sm" />
+                    className="btn-gold flex w-full py-4 text-base" />
 
                   {/* save + quote side by side */}
                   <div className="flex gap-2">
                     <SaveTripButton apartmentId={id} checkin={checkin} checkout={checkout} guests={guests}
                       label="מועדפים"
-                      className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl border border-gray-200 bg-white hover:bg-red-50 hover:border-red-200 text-gray-700 font-bold text-center text-sm transition-colors" />
+                      className="btn-ghost flex-1 py-3 text-sm" />
                     <button onClick={handleSendQuote} disabled={creatingQuote}
-                      className="flex-1 py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-800 font-bold text-center text-sm transition-colors disabled:opacity-60">
+                      className="btn-ghost flex-1 py-3 text-sm disabled:opacity-60">
                       {creatingQuote ? "יוצר…" : "📋 הצעת מחיר"}
                     </button>
                   </div>
 
                   {/* copy link */}
                   <button onClick={() => { navigator.clipboard?.writeText("https://skisharebook.com" + window.location.pathname + window.location.search); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-                    className="block w-full py-2.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-bold text-center text-sm transition-colors">
+                    className="btn-ghost block w-full py-2.5 text-sm">
                     {copied ? "✓ הקישור הועתק — שלח/י לחברים" : "🔗 העתק קישור לשיתוף"}
                   </button>
 
@@ -825,7 +849,7 @@ function ApartmentPage() {
                     <IconWhatsApp size={16} /> צור קשר עם נציג
                   </a>
 
-                  <p className="text-center text-xs text-gray-400">
+                  <p className="text-center text-xs text-[var(--stone-soft)]">
                     {cancel === "flexible" ? "80% החזר עד שבוע לפני · 50% עד 24ש׳" : cancel === "none" ? "לא ניתן לביטול — אישרת בחתימה" : "ביטול בהתאם לתנאי התקנון"}
                   </p>
                 </div>
@@ -841,14 +865,14 @@ function ApartmentPage() {
 
       {/* ── Mobile floating booking bar (Airbnb-style) ─────────── */}
       {!sheetOpen && (
-        <div dir="rtl" className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 shadow-[0_-4px_24px_rgba(0,0,0,0.10)]"
-          style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.5rem)" }}>
+        <div dir="rtl" className="lg:hidden fixed bottom-0 inset-x-0 z-30 px-4 py-3 flex items-center gap-3"
+          style={{ background: "var(--paper)", borderTop: "1px solid rgba(28,27,23,0.1)", boxShadow: "0 -4px 24px rgba(11,15,20,0.10)", paddingBottom: "calc(env(safe-area-inset-bottom) + 0.5rem)" }}>
           <div className="flex-shrink-0 text-right leading-none">
-            <div className="text-[11px] text-gray-400 mb-0.5">{splitCount > 1 ? "החלק שלך" : `סה״כ · ${nights} לילות`}</div>
-            <div className="text-xl font-black text-gray-900">€{payNow.toLocaleString()}</div>
+            <div className="text-[11px] mb-0.5 text-[var(--stone-soft)]">{splitCount > 1 ? "החלק שלך" : `סה״כ · ${nights} לילות`}</div>
+            <div className="font-display text-xl font-medium text-[var(--charcoal)]">€{payNow.toLocaleString()}</div>
           </div>
           <button onClick={() => setSheetOpen(true)}
-            className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-center text-base transition-colors shadow-sm">
+            className="btn-gold flex-1 py-3.5 text-base">
             בחר/י אפשרויות ותשלום ↑
           </button>
         </div>
@@ -856,22 +880,23 @@ function ApartmentPage() {
 
       {/* ── No-cancellation confirmation + signature ───────────── */}
       {showNoCancel && (
-        <div dir="rtl" className="fixed inset-0 z-[95] bg-black/55 flex items-center justify-center p-4" onClick={() => setShowNoCancel(false)}>
-          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
-            <h2 className="font-display text-xl font-black text-slate-900 mb-1">ללא אפשרות ביטול</h2>
-            <p className="text-sm text-slate-500 mb-4">בחירה באפשרות זו מוזילה את המחיר ב-€{CANCEL_NONE}, אך ההזמנה <b>אינה ניתנת לביטול</b> ולא יינתן כל החזר כספי, בהתאם לתקנון.</p>
+        <div dir="rtl" className="fixed inset-0 z-[95] flex items-center justify-center p-4" style={{ background: "rgba(11,15,20,0.6)" }} onClick={() => setShowNoCancel(false)}>
+          <div className="w-full max-w-md p-6" style={{ background: "var(--paper)", borderRadius: 4, boxShadow: "0 24px 48px -24px rgba(11,15,20,0.4)" }} onClick={e => e.stopPropagation()}>
+            <h2 className="font-display text-xl font-medium mb-1 text-[var(--charcoal)]">ללא אפשרות ביטול</h2>
+            <p className="text-sm mb-4 text-[var(--stone)]">בחירה באפשרות זו מוזילה את המחיר ב-€{CANCEL_NONE}, אך ההזמנה <b>אינה ניתנת לביטול</b> ולא יינתן כל החזר כספי, בהתאם לתקנון.</p>
             <label className="flex items-start gap-2 cursor-pointer mb-4">
-              <input type="checkbox" checked={noCancelAgreed} onChange={e => setNoCancelAgreed(e.target.checked)} className="mt-0.5 w-4 h-4 accent-blue-600" />
-              <span className="text-sm text-slate-600 leading-relaxed">אני מאשר/ת שקראתי והבנתי כי <b>לא אוכל לבטל את ההזמנה</b> ולא אקבל החזר כספי בשום מקרה, ומסכים/ה ל<a href="/terms" target="_blank" className="text-blue-600 underline">תקנון</a>.</span>
+              <input type="checkbox" checked={noCancelAgreed} onChange={e => setNoCancelAgreed(e.target.checked)} className="mt-0.5 w-4 h-4 accent-[var(--gold-deep)]" />
+              <span className="text-sm leading-relaxed text-[var(--stone)]">אני מאשר/ת שקראתי והבנתי כי <b>לא אוכל לבטל את ההזמנה</b> ולא אקבל החזר כספי בשום מקרה, ומסכים/ה ל<a href="/terms" target="_blank" className="underline text-[var(--gold-deep)]">תקנון</a>.</span>
             </label>
-            <label className="block text-xs font-bold text-gray-400 mb-1">חתימה (שם מלא)</label>
+            <label className="block text-xs font-bold mb-1 text-[var(--stone-soft)]">חתימה (שם מלא)</label>
             <input value={signature} onChange={e => setSignature(e.target.value)} placeholder="הקלד/י את שמך המלא כחתימה"
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              className="w-full px-4 py-3 text-sm mb-4 focus:outline-none"
+              style={{ border: "1px solid rgba(28,27,23,0.15)", borderRadius: 4 }} />
             <div className="flex gap-2">
               <button disabled={!noCancelAgreed || signature.trim().length < 2}
                 onClick={() => { setCancel("none"); setShowNoCancel(false); }}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition">אישור וחתימה</button>
-              <button onClick={() => setShowNoCancel(false)} className="px-5 py-3 rounded-xl border border-gray-200 text-gray-600 font-bold">ביטול</button>
+                className="btn-gold flex-1 py-3 disabled:opacity-50">אישור וחתימה</button>
+              <button onClick={() => setShowNoCancel(false)} className="btn-ghost px-5 py-3 text-[var(--stone)]">ביטול</button>
             </div>
           </div>
         </div>
@@ -879,33 +904,35 @@ function ApartmentPage() {
 
       {/* ── Quote share popup ──────────────────────────────────── */}
       {quoteUrl && (
-        <div dir="rtl" className="fixed inset-0 z-[95] bg-black/55 flex items-center justify-center p-4" onClick={() => setQuoteUrl(null)}>
-          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+        <div dir="rtl" className="fixed inset-0 z-[95] flex items-center justify-center p-4" style={{ background: "rgba(11,15,20,0.6)" }} onClick={() => setQuoteUrl(null)}>
+          <div className="w-full max-w-md p-6" style={{ background: "var(--paper)", borderRadius: 4, boxShadow: "0 24px 48px -24px rgba(11,15,20,0.4)" }} onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-1">
-              <h2 className="font-display text-xl font-black text-slate-900">הצעת המחיר מוכנה! 🎿</h2>
-              <button onClick={() => setQuoteUrl(null)} className="w-9 h-9 rounded-full hover:bg-slate-100 text-slate-400 text-xl">✕</button>
+              <h2 className="font-display text-xl font-medium text-[var(--charcoal)]">הצעת המחיר מוכנה! 🎿</h2>
+              <button onClick={() => setQuoteUrl(null)} className="w-9 h-9 rounded-full text-xl text-[var(--stone-soft)]">✕</button>
             </div>
-            <p className="text-sm text-slate-500 mb-5">שלח/י קישור אחד ללקוח — הוא נפתח אוטומטית <b>באפליקציה</b> אם היא מותקנת, אחרת בדפדפן.</p>
+            <p className="text-sm mb-5 text-[var(--stone)]">שלח/י קישור אחד ללקוח — הוא נפתח אוטומטית <b>באפליקציה</b> אם היא מותקנת, אחרת בדפדפן.</p>
 
             {/* one smart link */}
             <div className="mb-4">
-              <label className="text-xs font-bold text-gray-400 block mb-1.5">קישור להצעה</label>
+              <label className="text-xs font-bold block mb-1.5 text-[var(--stone-soft)]">קישור להצעה</label>
               <div className="flex gap-2">
-                <input readOnly value={quoteUrl} dir="ltr" className="flex-1 min-w-0 border border-gray-200 rounded-xl px-3 py-2.5 text-xs text-right bg-gray-50 truncate" />
-                <button onClick={() => copyTo(quoteUrl, "web")} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 rounded-xl text-sm whitespace-nowrap">
+                <input readOnly value={quoteUrl} dir="ltr" className="flex-1 min-w-0 px-3 py-2.5 text-xs text-right truncate"
+                  style={{ border: "1px solid rgba(28,27,23,0.15)", borderRadius: 4, background: "var(--ivory-deep)" }} />
+                <button onClick={() => copyTo(quoteUrl, "web")} className="btn-gold px-4 text-sm whitespace-nowrap">
                   {qCopied === "web" ? "✓ הועתק" : "העתק"}
                 </button>
               </div>
-              <p className="text-[11px] text-slate-400 mt-1.5">אין צורך בקישור נפרד לחנות — אם האפליקציה לא מותקנת, מוצעת הורדה בעמוד עצמו.</p>
+              <p className="text-[11px] mt-1.5 text-[var(--stone-soft)]">אין צורך בקישור נפרד לחנות — אם האפליקציה לא מותקנת, מוצעת הורדה בעמוד עצמו.</p>
             </div>
 
             <div className="flex gap-2">
               <a href={`https://wa.me/?text=${encodeURIComponent(`הצעת מחיר ל-${apt?.name ?? "דירה"} 🎿\n${quoteUrl}`)}`} target="_blank" rel="noopener noreferrer"
-                className="flex-1 flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1ebe5a] text-white font-bold py-3 rounded-xl transition">
+                className="flex-1 flex items-center justify-center gap-2 text-white font-bold py-3 transition"
+                style={{ background: "#25D366", borderRadius: 4 }}>
                 <IconWhatsApp size={18} /> שתף בוואטסאפ
               </a>
               <a href={quoteUrl} target="_blank" rel="noopener noreferrer"
-                className="px-5 py-3 rounded-xl border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition">פתח הצעה</a>
+                className="btn-ghost px-5 py-3 text-[var(--stone)]">פתח הצעה</a>
             </div>
           </div>
         </div>
@@ -916,20 +943,20 @@ function ApartmentPage() {
 
       {/* ── AI service info ────────────────────────────────────── */}
       {showAiInfo && (
-        <div dir="rtl" className="fixed inset-0 z-[95] bg-black/55 flex items-center justify-center p-4" onClick={() => setShowAiInfo(false)}>
-          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div dir="rtl" className="fixed inset-0 z-[95] flex items-center justify-center p-4" style={{ background: "rgba(11,15,20,0.6)" }} onClick={() => setShowAiInfo(false)}>
+          <div className="w-full max-w-md p-6 max-h-[85vh] overflow-y-auto" style={{ background: "var(--paper)", borderRadius: 4, boxShadow: "0 24px 48px -24px rgba(11,15,20,0.4)" }} onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="font-display text-xl font-black text-slate-900">שירות AI — איך זה עובד?</h2>
-              <button onClick={() => setShowAiInfo(false)} className="w-9 h-9 rounded-full hover:bg-slate-100 text-slate-400 text-xl">✕</button>
+              <h2 className="font-display text-xl font-medium text-[var(--charcoal)]">שירות AI — איך זה עובד?</h2>
+              <button onClick={() => setShowAiInfo(false)} className="w-9 h-9 rounded-full text-xl text-[var(--stone-soft)]">✕</button>
             </div>
-            <ul className="space-y-3 text-sm text-slate-600 leading-relaxed">
+            <ul className="space-y-3 text-sm leading-relaxed text-[var(--stone)]">
               <li className="flex gap-2"><span>📍</span><span>תקבל/י את הכתובת המלאה וחוקי הצ׳ק-אין / צ׳ק-אאוט.</span></li>
               <li className="flex gap-2"><span>🔑</span><span>המפתחות יחכו לך בדלת כ-48 שעות לפני ההגעה. את הדירה יש לפנות לפי שעות הצ׳ק-אאוט הרגילות.</span></li>
               <li className="flex gap-2"><span>🎿</span><span>אם הזמנת סקי פס — תאסוף/י אותו עצמאית מהמכונה במהלך השהות.</span></li>
               <li className="flex gap-2"><span>🤖</span><span>לאורך החופשה תיעזר/י בצ׳אטבוט AI לכל שאלה.</span></li>
               <li className="flex gap-2"><span>🆘</span><span>במקרים חריגים (קבלת דירה עם נזק, מקרה קיצון) תוכל/י כמובן לפנות לנציגים שלנו דרך האתר.</span></li>
             </ul>
-            <button onClick={() => setShowAiInfo(false)} className="mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition">הבנתי</button>
+            <button onClick={() => setShowAiInfo(false)} className="btn-gold mt-5 w-full py-3">הבנתי</button>
           </div>
         </div>
       )}
@@ -940,7 +967,7 @@ function ApartmentPage() {
 export default function ApartmentPageWrapper() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ink)" }}>
         <SkiLoader />
       </div>
     }>
