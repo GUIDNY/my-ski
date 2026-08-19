@@ -1,20 +1,22 @@
 import type { Metadata } from "next";
-import { Montserrat, Inter } from "next/font/google";
+import { Frank_Ruhl_Libre, Heebo } from "next/font/google";
 import "./globals.css";
 import MobileTabBar from "@/components/MobileTabBar";
 import CookieConsent from "@/components/CookieConsent";
 import DeepLinkHandler from "@/components/DeepLinkHandler";
 
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
-  subsets: ["latin"],
-  weight: ["400", "600", "700", "900"],
+// Display serif — elegant, editorial, renders both Hebrew & Latin (headlines).
+const frankRuhlLibre = Frank_Ruhl_Libre({
+  variable: "--font-display",
+  subsets: ["hebrew", "latin"],
+  weight: ["400", "500", "700", "900"],
 });
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+// Refined humanist sans — body copy & UI, renders both Hebrew & Latin.
+const heebo = Heebo({
+  variable: "--font-sans",
+  subsets: ["hebrew", "latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -55,9 +57,9 @@ export default function RootLayout({
   return (
     <html
       lang="he"
-      className={`${montserrat.variable} ${inter.variable} h-full antialiased`}
+      className={`${frankRuhlLibre.variable} ${heebo.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col" style={{ background: "var(--ivory)" }}>
         {children}
         <DeepLinkHandler />
         <MobileTabBar />

@@ -1,12 +1,43 @@
 @import "tailwindcss";
 
+/* ══════════════════════════════════════════════════════════════
+   MySki — Alpine Luxury design tokens
+   Deep charcoal/midnight ground · warm champagne-gold accent ·
+   alpine ivory negative space · serif display + refined sans.
+   ══════════════════════════════════════════════════════════════ */
 :root {
-  --navy-deep: #050D1A;
-  --navy-mid: #0A1F3D;
-  --navy-light: #0F3460;
-  --blue-brand: #1D6FED;
-  --blue-ice: #7DD3FC;
+  /* Dark ground (hero scrims, footer, dark sections, chrome-on-scroll-top) */
+  --ink:        #0B0F14;
+  --ink-mid:    #12171F;
+  --ink-soft:   #1B222C;
+  --ink-line:   rgba(255, 255, 255, 0.10);
+  --ink-line-strong: rgba(255, 255, 255, 0.18);
+
+  /* Alpine ivory (page background / light sections) */
+  --ivory:      #FAF7F1;
+  --ivory-deep: #F2ECDF;
+  --paper:      #FFFFFF;
+
+  /* Champagne / brass gold — the single accent */
+  --gold:       #C9A34E;
+  --gold-light: #E8D9B5;
+  --gold-deep:  #A6823A;
+  --gold-line:  rgba(201, 163, 78, 0.35);
+  --gold-wash:  rgba(201, 163, 78, 0.10);
+
+  /* Warm neutral text */
+  --charcoal:   #1C1B17;
+  --stone:      #625C4E;
+  --stone-soft: #9A9284;
+
   --white: #FFFFFF;
+
+  /* legacy aliases kept for any lingering references */
+  --navy-deep: var(--ink);
+  --navy-mid: var(--ink-mid);
+  --navy-light: var(--ink-soft);
+  --blue-brand: var(--gold);
+  --blue-ice: var(--gold-light);
 }
 
 * {
@@ -18,16 +49,99 @@ html {
 }
 
 body {
-  background: #f7f9fb;
-  color: #191c1e;
-  font-family: var(--font-inter), system-ui, sans-serif;
+  background: var(--ivory);
+  color: var(--charcoal);
+  font-family: var(--font-sans), Heebo, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
 .font-display {
-  font-family: var(--font-montserrat), Montserrat, system-ui, sans-serif;
+  font-family: var(--font-display), "Frank Ruhl Libre", Georgia, serif;
 }
 
+/* eyebrow / kicker label — small caps, wide tracking, muted gold */
+.eyebrow {
+  font-family: var(--font-sans), Heebo, system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+}
+.eyebrow-light {
+  color: var(--gold-light);
+}
+
+/* thin hairline divider */
+.hr-hairline {
+  height: 1px;
+  background: linear-gradient(to left, transparent, var(--gold-line), transparent);
+}
+
+/* ── Buttons ──────────────────────────────────────────────── */
+.btn-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-deep) 100%);
+  color: var(--ink);
+  font-weight: 700;
+  border-radius: 4px;
+  transition: transform 0.35s cubic-bezier(.22,1,.36,1), box-shadow 0.35s ease, filter 0.3s ease;
+  box-shadow: 0 8px 24px -8px rgba(201, 163, 78, 0.55);
+}
+.btn-gold:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 12px 32px -8px rgba(201, 163, 78, 0.65);
+  transform: translateY(-1px);
+}
+.btn-gold:active { transform: translateY(0) scale(0.98); }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: 1px solid var(--gold-line);
+  color: inherit;
+  font-weight: 600;
+  border-radius: 4px;
+  transition: border-color 0.35s ease, background 0.35s ease;
+}
+.btn-ghost:hover {
+  border-color: var(--gold);
+  background: var(--gold-wash);
+}
+
+.btn-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--ink);
+  color: var(--ivory);
+  font-weight: 700;
+  border-radius: 4px;
+  transition: background 0.35s ease, transform 0.35s cubic-bezier(.22,1,.36,1);
+}
+.btn-dark:hover { background: var(--ink-soft); transform: translateY(-1px); }
+
+/* ── Cards ────────────────────────────────────────────────── */
+.card-luxury {
+  background: var(--paper);
+  border: 1px solid rgba(28, 27, 23, 0.08);
+  border-radius: 4px;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s cubic-bezier(.22,1,.36,1);
+}
+.card-luxury:hover {
+  border-color: var(--gold-line);
+  box-shadow: 0 24px 48px -24px rgba(11, 15, 20, 0.25);
+  transform: translateY(-3px);
+}
+
+/* ══ Motion ══════════════════════════════════════════════════ */
 @keyframes snowfall {
   0% {
     transform: translateY(-20px) translateX(0px) rotate(0deg);
@@ -60,36 +174,50 @@ body {
   100% { background-position: 200% center; }
 }
 
-.animate-fade-up {
-  animation: fadeUp 0.8s ease forwards;
+@keyframes kenburns {
+  0% { transform: scale(1.08) translateY(0); }
+  100% { transform: scale(1.16) translateY(-1.5%); }
 }
 
-.animate-fade-up-delay-1 { animation: fadeUp 0.8s 0.2s ease both; }
-.animate-fade-up-delay-2 { animation: fadeUp 0.8s 0.4s ease both; }
-.animate-fade-up-delay-3 { animation: fadeUp 0.8s 0.6s ease both; }
+.animate-fade-up {
+  animation: fadeUp 0.9s cubic-bezier(.22,1,.36,1) forwards;
+}
+
+.animate-fade-up-delay-1 { animation: fadeUp 0.9s 0.2s cubic-bezier(.22,1,.36,1) both; }
+.animate-fade-up-delay-2 { animation: fadeUp 0.9s 0.4s cubic-bezier(.22,1,.36,1) both; }
+.animate-fade-up-delay-3 { animation: fadeUp 0.9s 0.6s cubic-bezier(.22,1,.36,1) both; }
+
+.animate-kenburns {
+  animation: kenburns 18s ease-out forwards;
+}
 
 .gradient-text {
-  background: linear-gradient(135deg, #fff 0%, #7DD3FC 50%, #fff 100%);
+  background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 45%, var(--gold-light) 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: shimmer 4s linear infinite;
+  animation: shimmer 5s linear infinite;
 }
 
 .glass {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
 .glass-white {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(250, 247, 241, 0.96);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
 
+::selection {
+  background: var(--gold);
+  color: var(--ink);
+}
+
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #f1f5f9; }
-::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
+::-webkit-scrollbar-track { background: var(--ivory-deep); }
+::-webkit-scrollbar-thumb { background: var(--stone-soft); border-radius: 3px; }
