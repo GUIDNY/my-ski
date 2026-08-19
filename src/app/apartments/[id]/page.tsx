@@ -49,22 +49,22 @@ function ToggleRow({ icon, label, sublabel, price, checked, onChange, disabled }
       className="w-full flex items-center gap-3 p-3.5 border text-right transition-all"
       style={{
         borderRadius: 4,
-        borderColor: disabled ? "rgba(28,27,23,0.08)" : checked ? "var(--gold)" : "rgba(28,27,23,0.1)",
-        background: disabled ? "var(--ivory-deep)" : checked ? "var(--gold-wash)" : "var(--paper)",
+        borderColor: disabled ? "rgba(22,32,46,0.08)" : checked ? "var(--accent)" : "rgba(22,32,46,0.1)",
+        background: disabled ? "var(--ivory-deep)" : checked ? "var(--accent-wash)" : "var(--paper)",
         cursor: disabled ? "not-allowed" : "pointer",
       }}
     >
-      <span className="flex-shrink-0" style={{ color: disabled ? "var(--stone-soft)" : checked ? "var(--gold-deep)" : "var(--stone-soft)" }}>{icon}</span>
+      <span className="flex-shrink-0" style={{ color: disabled ? "var(--stone-soft)" : checked ? "var(--accent-deep)" : "var(--stone-soft)" }}>{icon}</span>
       <div className="flex-1 min-w-0">
         <div className="text-sm font-semibold" style={{ color: disabled ? "var(--stone-soft)" : "var(--charcoal)" }}>{label}</div>
         {sublabel && <div className="text-xs mt-0.5 text-[var(--stone-soft)]">{sublabel}</div>}
       </div>
-      {price && <span className="text-xs font-bold flex-shrink-0" style={{ color: disabled ? "var(--gold-deep)" : "var(--stone)" }}>{price}</span>}
+      {price && <span className="text-xs font-bold flex-shrink-0" style={{ color: disabled ? "var(--accent-deep)" : "var(--stone)" }}>{price}</span>}
       {disabled ? (
-        <span className="text-[11px] font-bold flex-shrink-0 text-[var(--gold-deep)]">בקרוב</span>
+        <span className="text-[11px] font-bold flex-shrink-0 text-[var(--accent-deep)]">בקרוב</span>
       ) : (
         <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0"
-          style={{ borderColor: checked ? "var(--gold)" : "rgba(28,27,23,0.2)", background: checked ? "var(--gold)" : "transparent" }}>
+          style={{ borderColor: checked ? "var(--accent)" : "rgba(22,32,46,0.2)", background: checked ? "var(--accent)" : "transparent" }}>
           {checked && <IconCheck size={11} className="text-[var(--ink)]" />}
         </div>
       )}
@@ -79,16 +79,16 @@ function QtyStepper({ show, label, qty, setQty, max, total }: {
   if (!show) return null;
   return (
     <div className="flex items-center justify-between px-3.5 py-2 -mt-1.5 mb-1 border border-t-0"
-      style={{ borderRadius: "0 0 4px 4px", background: "var(--gold-wash)", borderColor: "var(--gold-line)" }}>
-      <span className="text-xs font-bold text-[var(--gold-deep)]">{label}</span>
+      style={{ borderRadius: "0 0 4px 4px", background: "var(--accent-wash)", borderColor: "var(--accent-line)" }}>
+      <span className="text-xs font-bold text-[var(--accent-deep)]">{label}</span>
       <div className="flex items-center gap-2.5">
         <button type="button" onClick={() => setQty(Math.max(1, qty - 1))} disabled={qty <= 1}
           className="w-7 h-7 rounded-full border font-black disabled:opacity-40 leading-none"
-          style={{ background: "var(--paper)", borderColor: "var(--gold-line)", color: "var(--gold-deep)" }}>−</button>
+          style={{ background: "var(--paper)", borderColor: "var(--accent-line)", color: "var(--accent-deep)" }}>−</button>
         <span className="font-black w-5 text-center text-[var(--charcoal)]">{qty}</span>
         <button type="button" onClick={() => setQty(Math.min(max, qty + 1))} disabled={qty >= max}
           className="w-7 h-7 rounded-full border font-black disabled:opacity-40 leading-none"
-          style={{ background: "var(--paper)", borderColor: "var(--gold-line)", color: "var(--gold-deep)" }}>+</button>
+          style={{ background: "var(--paper)", borderColor: "var(--accent-line)", color: "var(--accent-deep)" }}>+</button>
         <span className="text-xs font-bold w-16 text-left text-[var(--charcoal)]">= €{total.toLocaleString()}</span>
       </div>
     </div>
@@ -106,11 +106,11 @@ function RadioOption({ icon, label, sublabel, badge, badgeColor, selected, onCli
       className="w-full flex items-start gap-3 p-3.5 border text-right transition-all"
       style={{
         borderRadius: 4,
-        borderColor: selected ? "var(--gold)" : "rgba(28,27,23,0.1)",
-        background: selected ? "var(--gold-wash)" : "var(--paper)",
+        borderColor: selected ? "var(--accent)" : "rgba(22,32,46,0.1)",
+        background: selected ? "var(--accent-wash)" : "var(--paper)",
       }}
     >
-      <span className="mt-0.5 flex-shrink-0" style={{ color: selected ? "var(--gold-deep)" : "var(--stone-soft)" }}>{icon}</span>
+      <span className="mt-0.5 flex-shrink-0" style={{ color: selected ? "var(--accent-deep)" : "var(--stone-soft)" }}>{icon}</span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm font-semibold text-[var(--charcoal)]">{label}</span>
@@ -123,7 +123,7 @@ function RadioOption({ icon, label, sublabel, badge, badgeColor, selected, onCli
         <div className="text-xs mt-0.5 text-[var(--stone-soft)]">{sublabel}</div>
       </div>
       <div className="mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0"
-        style={{ borderColor: selected ? "var(--gold)" : "rgba(28,27,23,0.2)", background: selected ? "var(--gold)" : "transparent" }}>
+        style={{ borderColor: selected ? "var(--accent)" : "rgba(22,32,46,0.2)", background: selected ? "var(--accent)" : "transparent" }}>
         {selected && <div className="w-2.5 h-2.5 rounded-full mx-auto mt-0.5" style={{ background: "var(--ink)" }} />}
       </div>
     </button>
@@ -138,7 +138,7 @@ function Gallery({ images, name }: { images: string[]; name: string }) {
   return (
     <div className="relative overflow-hidden h-80 md:h-[30rem] group" style={{ borderRadius: 4, background: "var(--ivory-deep)" }}>
       <img src={imgs[idx]} alt={name} className="w-full h-full object-cover transition-all duration-500" />
-      <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(11,15,20,0.55) 0%, transparent 45%)" }} />
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(10,27,51,0.55) 0%, transparent 45%)" }} />
 
       {/* Thumbnails strip */}
       {imgs.length > 1 && (
@@ -146,7 +146,7 @@ function Gallery({ images, name }: { images: string[]; name: string }) {
           {imgs.map((_, i) => (
             <button key={i} onClick={() => setIdx(i)}
               className="w-2 h-2 rounded-full transition-all"
-              style={{ background: i === idx ? "var(--gold-light)" : "rgba(255,255,255,0.45)", transform: i === idx ? "scale(1.25)" : "scale(1)" }} />
+              style={{ background: i === idx ? "var(--accent-light)" : "rgba(255,255,255,0.45)", transform: i === idx ? "scale(1.25)" : "scale(1)" }} />
           ))}
         </div>
       )}
@@ -156,12 +156,12 @@ function Gallery({ images, name }: { images: string[]; name: string }) {
         <>
           <button onClick={() => setIdx(i => (i - 1 + imgs.length) % imgs.length)} aria-label="הקודם"
             className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-sm transition-all"
-            style={{ background: "rgba(11,15,20,0.5)", color: "var(--ivory)" }}>
+            style={{ background: "rgba(10,27,51,0.5)", color: "var(--ivory)" }}>
             <IconChevronLeft size={18} className="rotate-180" />
           </button>
           <button onClick={() => setIdx(i => (i + 1) % imgs.length)} aria-label="הבא"
             className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-sm transition-all"
-            style={{ background: "rgba(11,15,20,0.5)", color: "var(--ivory)" }}>
+            style={{ background: "rgba(10,27,51,0.5)", color: "var(--ivory)" }}>
             <IconChevronLeft size={18} />
           </button>
         </>
@@ -348,7 +348,7 @@ function ApartmentPage() {
     <div className="min-h-screen" style={{ background: "var(--ivory)" }} dir="rtl">
 
       {/* ── Top nav ──────────────────────────────────────────── */}
-      <div className="sticky top-0 z-40" style={{ background: "rgba(250,247,241,0.95)", backdropFilter: "blur(10px)", borderBottom: "1px solid rgba(28,27,23,0.08)" }}>
+      <div className="sticky top-0 z-40" style={{ background: "rgba(247,249,252,0.95)", backdropFilter: "blur(10px)", borderBottom: "1px solid rgba(22,32,46,0.08)" }}>
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
           <a href="/" className="flex items-center"><Logo className="h-9" /></a>
           <span className="text-lg font-light text-[var(--stone-soft)]">/</span>
@@ -369,18 +369,18 @@ function ApartmentPage() {
             <Gallery images={apt.images} name={apt.name} />
 
             {/* Header */}
-            <div className="mt-7 mb-7 pb-7" style={{ borderBottom: "1px solid rgba(28,27,23,0.08)" }}>
+            <div className="mt-7 mb-7 pb-7" style={{ borderBottom: "1px solid rgba(22,32,46,0.08)" }}>
               <div className="flex items-start justify-between gap-4 flex-wrap">
                 <div>
                   <span className="eyebrow">{apt.type}</span>
                   <h1 className="font-display text-3xl md:text-4xl font-medium mt-2 text-[var(--charcoal)]">{apt.name}</h1>
                   <div className="flex items-center gap-1.5 mt-3 text-sm text-[var(--stone)]">
-                    <IconMountain size={14} className="text-[var(--gold-deep)]" />
+                    <IconMountain size={14} className="text-[var(--accent-deep)]" />
                     Val Thorens, Trois Vallées, France
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5 px-4 py-2.5" style={{ background: "var(--ivory-deep)", borderRadius: 4 }}>
-                  <IconStar size={16} className="text-[var(--gold)]" />
+                  <IconStar size={16} className="text-[var(--accent)]" />
                   <span className="font-bold text-[var(--charcoal)]">4.9</span>
                   <span className="text-sm text-[var(--stone-soft)]">· 47 ביקורות</span>
                 </div>
@@ -398,11 +398,11 @@ function ApartmentPage() {
 
             {/* Description */}
             {apt.description && (
-              <div className="mb-7 pb-7" style={{ borderBottom: "1px solid rgba(28,27,23,0.08)" }}>
+              <div className="mb-7 pb-7" style={{ borderBottom: "1px solid rgba(22,32,46,0.08)" }}>
                 <h2 className="font-display text-lg font-medium mb-3 text-[var(--charcoal)]">על הדירה</h2>
                 <p className={`leading-relaxed text-sm whitespace-pre-line text-[var(--stone)] ${showFullDesc ? "" : "line-clamp-3"}`}>{apt.description}</p>
                 {apt.description.length > 180 && (
-                  <button onClick={() => setShowFullDesc(v => !v)} className="mt-2 text-sm font-bold hover:underline text-[var(--gold-deep)]">
+                  <button onClick={() => setShowFullDesc(v => !v)} className="mt-2 text-sm font-bold hover:underline text-[var(--accent-deep)]">
                     {showFullDesc ? "הצג פחות ↑" : "קרא עוד ←"}
                   </button>
                 )}
@@ -411,12 +411,12 @@ function ApartmentPage() {
 
             {/* Amenities */}
             {apt.amenities?.length > 0 && (
-              <div className="mb-7 pb-7" style={{ borderBottom: "1px solid rgba(28,27,23,0.08)" }}>
+              <div className="mb-7 pb-7" style={{ borderBottom: "1px solid rgba(22,32,46,0.08)" }}>
                 <h2 className="font-display text-lg font-medium mb-4 text-[var(--charcoal)]">מה כלול</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {apt.amenities.map((a, i) => (
                     <div key={i} className="flex items-center gap-2.5 text-sm text-[var(--charcoal)]">
-                      <span className="text-[var(--gold-deep)]">{amenityIcon(a)}</span>
+                      <span className="text-[var(--accent-deep)]">{amenityIcon(a)}</span>
                       {a}
                     </div>
                   ))}
@@ -425,7 +425,7 @@ function ApartmentPage() {
             )}
 
             {/* booking choices — inline (mobile + desktop main column) */}
-            <div className="lg:hidden p-5 flex flex-col gap-5" style={{ background: "var(--paper)", border: "1px solid rgba(28,27,23,0.08)", borderRadius: 4 }}>
+            <div className="lg:hidden p-5 flex flex-col gap-5" style={{ background: "var(--paper)", border: "1px solid rgba(22,32,46,0.08)", borderRadius: 4 }}>
                   {/* ── Ski Pass ──────────────────────────────────── */}
                   <div>
                     <div className="eyebrow mb-2">תוספות</div>
@@ -456,21 +456,21 @@ function ApartmentPage() {
                       {transfer && (
                         <button onClick={() => setShowTransfer(true)}
                           className="flex items-center justify-between px-3.5 py-2.5 border transition-colors text-sm w-full text-right"
-                          style={{ borderRadius: 4, background: "var(--gold-wash)", borderColor: "var(--gold-line)" }}>
-                          <span className="font-semibold text-[var(--gold-deep)]">{flightFilled(flight) ? "✓ פרטי טיסה נשמרו · עריכה" : "מלא פרטי טיסה להסעה ←"}</span>
+                          style={{ borderRadius: 4, background: "var(--accent-wash)", borderColor: "var(--accent-line)" }}>
+                          <span className="font-semibold text-[var(--accent-deep)]">{flightFilled(flight) ? "✓ פרטי טיסה נשמרו · עריכה" : "מלא פרטי טיסה להסעה ←"}</span>
                           <span className="text-xs text-[var(--stone-soft)]">מספר טיסה · שעה · תאריך</span>
                         </button>
                       )}
                     </div>
                     <a href={skyscannerUrl} target="_blank" rel="noopener noreferrer"
                       className="mt-2 flex items-center gap-2.5 p-3.5 border transition-all"
-                      style={{ borderRadius: 4, borderColor: "rgba(28,27,23,0.1)", background: "var(--paper)" }}>
+                      style={{ borderRadius: 4, borderColor: "rgba(22,32,46,0.1)", background: "var(--paper)" }}>
                       <span className="flex-shrink-0 text-[var(--stone-soft)]"><IconPlane size={17} /></span>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-semibold text-[var(--charcoal)]">טיסה ל-Geneva (GVA)</div>
                         <div className="text-xs text-[var(--stone-soft)]">TLV → Geneva · {checkin ? fmtDate(checkin) : "בחר תאריך"} · 2.5h מ-Val Thorens</div>
                       </div>
-                      <span className="text-xs font-bold flex-shrink-0 text-[var(--gold-deep)]">Skyscanner ←</span>
+                      <span className="text-xs font-bold flex-shrink-0 text-[var(--accent-deep)]">Skyscanner ←</span>
                     </a>
                   </div>
 
@@ -490,7 +490,7 @@ function ApartmentPage() {
                         label="ללא אפשרות ביטול"
                         sublabel="מחיר מוזל · לא ניתן לבטל ואין החזר כספי"
                         badge={`−€${CANCEL_NONE}`}
-                        badgeColor="var(--gold-deep)"
+                        badgeColor="var(--accent-deep)"
                         selected={cancel === "none"}
                         onClick={() => { setShowNoCancel(true); }}
                       />
@@ -504,14 +504,14 @@ function ApartmentPage() {
                         onClick={() => setCancel("flexible")}
                       />
                     </div>
-                    <a href="/terms" target="_blank" className="inline-block mt-2 text-xs hover:underline font-semibold text-[var(--gold-deep)]">קרא/י את מדיניות הביטולים בתקנון ←</a>
+                    <a href="/terms" target="_blank" className="inline-block mt-2 text-xs hover:underline font-semibold text-[var(--accent-deep)]">קרא/י את מדיניות הביטולים בתקנון ←</a>
                   </div>
 
                   {/* ── Service level ─────────────────────────────── */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <div className="eyebrow">רמת שירות</div>
-                      <button onClick={() => setShowAiInfo(true)} className="text-xs font-semibold hover:underline text-[var(--gold-deep)]">ⓘ מידע נוסף</button>
+                      <button onClick={() => setShowAiInfo(true)} className="text-xs font-semibold hover:underline text-[var(--accent-deep)]">ⓘ מידע נוסף</button>
                     </div>
                     <div className="flex flex-col gap-2">
                       <RadioOption
@@ -526,7 +526,7 @@ function ApartmentPage() {
                         label="AI בלבד"
                         sublabel="ניהול עצמאי עם תמיכת צ'אטבוט · איסוף עצמאי של הסקי פס"
                         badge={`-€${AI_DISCOUNT}`}
-                        badgeColor="var(--gold-deep)"
+                        badgeColor="var(--accent-deep)"
                         selected={service === "ai"}
                         onClick={() => setService("ai")}
                       />
@@ -541,19 +541,19 @@ function ApartmentPage() {
               {apt.map_url ? (
                 <a href={apt.map_url} target="_blank" rel="noopener noreferrer"
                   className="block p-5 text-sm transition-all group"
-                  style={{ borderRadius: 4, background: "var(--ivory-deep)", border: "1px solid var(--gold-line)", color: "var(--stone)" }}>
+                  style={{ borderRadius: 4, background: "var(--ivory-deep)", border: "1px solid var(--accent-line)", color: "var(--stone)" }}>
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2 font-bold text-[var(--charcoal)]">
-                      <IconMountain size={16} className="text-[var(--gold-deep)]" /> Val Thorens
+                      <IconMountain size={16} className="text-[var(--accent-deep)]" /> Val Thorens
                     </div>
-                    <span className="text-xs font-bold group-hover:-translate-x-0.5 transition-transform text-[var(--gold-deep)]">פתח ב-Google Maps ←</span>
+                    <span className="text-xs font-bold group-hover:-translate-x-0.5 transition-transform text-[var(--accent-deep)]">פתח ב-Google Maps ←</span>
                   </div>
                   <p>הכפר הגבוה ביותר באירופה · 2,300 מ׳ · שלג מובטח נובמבר–מאי · גישה ישירה ל-600 ק״מ מסלולים</p>
                 </a>
               ) : (
-                <div className="p-5 text-sm" style={{ borderRadius: 4, background: "var(--ivory-deep)", border: "1px solid var(--gold-line)", color: "var(--stone)" }}>
+                <div className="p-5 text-sm" style={{ borderRadius: 4, background: "var(--ivory-deep)", border: "1px solid var(--accent-line)", color: "var(--stone)" }}>
                   <div className="flex items-center gap-2 font-bold mb-1 text-[var(--charcoal)]">
-                    <IconMountain size={16} className="text-[var(--gold-deep)]" /> Val Thorens
+                    <IconMountain size={16} className="text-[var(--accent-deep)]" /> Val Thorens
                   </div>
                   <p>הכפר הגבוה ביותר באירופה · 2,300 מ׳ · שלג מובטח נובמבר–מאי · גישה ישירה ל-600 ק״מ מסלולים</p>
                 </div>
@@ -566,17 +566,17 @@ function ApartmentPage() {
           <div className={`lg:w-[400px] lg:flex-shrink-0 max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:z-50 max-lg:transition-transform max-lg:duration-300 ${sheetOpen ? "max-lg:translate-y-0" : "max-lg:translate-y-full"}`}>
             <div className="sticky top-20 max-lg:static">
               <button onClick={() => setSheetOpen(false)} className="lg:hidden w-full flex justify-center pt-2 pb-1" aria-label="סגור">
-                <span className="block w-10 h-1.5 rounded-full" style={{ background: "rgba(28,27,23,0.15)" }} />
+                <span className="block w-10 h-1.5 rounded-full" style={{ background: "rgba(22,32,46,0.15)" }} />
               </button>
               <div className="overflow-hidden max-lg:rounded-b-none max-lg:max-h-[82vh] max-lg:overflow-y-auto"
-                style={{ background: "var(--paper)", border: "1px solid rgba(28,27,23,0.08)", borderRadius: 4, boxShadow: "0 24px 48px -24px rgba(11,15,20,0.25)" }}>
+                style={{ background: "var(--paper)", border: "1px solid rgba(22,32,46,0.08)", borderRadius: 4, boxShadow: "0 24px 48px -24px rgba(10,27,51,0.25)" }}>
 
                 {/* Price header */}
-                <div className="px-6 pt-6 pb-5" style={{ background: "var(--ivory-deep)", borderBottom: "1px solid rgba(28,27,23,0.08)" }}>
+                <div className="px-6 pt-6 pb-5" style={{ background: "var(--ivory-deep)", borderBottom: "1px solid rgba(22,32,46,0.08)" }}>
                   <div className="flex items-end justify-between gap-2">
                     <div>
                       <div className="font-display text-3xl font-medium text-[var(--charcoal)]">
-                        <span className="text-[var(--gold-deep)]">€{avgNightlyPrice.toLocaleString()}</span>
+                        <span className="text-[var(--accent-deep)]">€{avgNightlyPrice.toLocaleString()}</span>
                         <span className="text-base font-medium text-[var(--stone-soft)]">
                           {breakdown.length > 1 ? " / לילה ממוצע" : " / לילה"}
                         </span>
@@ -586,7 +586,7 @@ function ApartmentPage() {
                       <button
                         onClick={() => setShowBreakdown(v => !v)}
                         className="text-xs font-bold px-3 py-1.5 transition-colors whitespace-nowrap flex-shrink-0"
-                        style={{ color: "var(--gold-deep)", background: "var(--gold-wash)", borderRadius: 4 }}
+                        style={{ color: "var(--accent-deep)", background: "var(--accent-wash)", borderRadius: 4 }}
                       >
                         פירוט מחיר {showBreakdown ? "▲" : "▼"}
                       </button>
@@ -595,21 +595,21 @@ function ApartmentPage() {
 
                   {/* Per-night breakdown panel */}
                   {showBreakdown && breakdown.length > 0 && (
-                    <div className="mt-3 overflow-hidden" style={{ background: "var(--paper)", border: "1px solid var(--gold-line)", borderRadius: 4 }}>
-                      <div className="max-h-52 overflow-y-auto divide-y" style={{ borderColor: "rgba(28,27,23,0.06)" }}>
+                    <div className="mt-3 overflow-hidden" style={{ background: "var(--paper)", border: "1px solid var(--accent-line)", borderRadius: 4 }}>
+                      <div className="max-h-52 overflow-y-auto divide-y" style={{ borderColor: "rgba(22,32,46,0.06)" }}>
                         {breakdown.map(({ date, price }, i) => (
                           <div key={i} className="flex justify-between items-center px-4 py-2 text-sm">
                             <span className="text-[var(--stone)]">{fmtDate(`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`)}</span>
-                            <span className="font-semibold" style={{ color: price !== basePrice ? "var(--gold-deep)" : "var(--charcoal)" }}>
+                            <span className="font-semibold" style={{ color: price !== basePrice ? "var(--accent-deep)" : "var(--charcoal)" }}>
                               €{price.toLocaleString()}
                             </span>
                           </div>
                         ))}
                       </div>
                       {breakdown.length > 1 && (
-                        <div className="flex justify-between items-center px-4 py-2.5 text-sm font-bold" style={{ background: "var(--gold-wash)", borderTop: "1px solid var(--gold-line)" }}>
+                        <div className="flex justify-between items-center px-4 py-2.5 text-sm font-bold" style={{ background: "var(--accent-wash)", borderTop: "1px solid var(--accent-line)" }}>
                           <span className="text-[var(--stone)]">ממוצע ללילה</span>
-                          <span className="text-[var(--gold-deep)]">€{avgNightlyPrice.toLocaleString()}</span>
+                          <span className="text-[var(--accent-deep)]">€{avgNightlyPrice.toLocaleString()}</span>
                         </div>
                       )}
                     </div>
@@ -656,21 +656,21 @@ function ApartmentPage() {
                       {transfer && (
                         <button onClick={() => setShowTransfer(true)}
                           className="flex items-center justify-between px-3.5 py-2.5 border transition-colors text-sm w-full text-right"
-                          style={{ borderRadius: 4, background: "var(--gold-wash)", borderColor: "var(--gold-line)" }}>
-                          <span className="font-semibold text-[var(--gold-deep)]">{flightFilled(flight) ? "✓ פרטי טיסה נשמרו · עריכה" : "מלא פרטי טיסה להסעה ←"}</span>
+                          style={{ borderRadius: 4, background: "var(--accent-wash)", borderColor: "var(--accent-line)" }}>
+                          <span className="font-semibold text-[var(--accent-deep)]">{flightFilled(flight) ? "✓ פרטי טיסה נשמרו · עריכה" : "מלא פרטי טיסה להסעה ←"}</span>
                           <span className="text-xs text-[var(--stone-soft)]">מספר טיסה · שעה · תאריך</span>
                         </button>
                       )}
                     </div>
                     <a href={skyscannerUrl} target="_blank" rel="noopener noreferrer"
                       className="mt-2 flex items-center gap-2.5 p-3.5 border transition-all"
-                      style={{ borderRadius: 4, borderColor: "rgba(28,27,23,0.1)", background: "var(--paper)" }}>
+                      style={{ borderRadius: 4, borderColor: "rgba(22,32,46,0.1)", background: "var(--paper)" }}>
                       <span className="flex-shrink-0 text-[var(--stone-soft)]"><IconPlane size={17} /></span>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-semibold text-[var(--charcoal)]">טיסה ל-Geneva (GVA)</div>
                         <div className="text-xs text-[var(--stone-soft)]">TLV → Geneva · {checkin ? fmtDate(checkin) : "בחר תאריך"} · 2.5h מ-Val Thorens</div>
                       </div>
-                      <span className="text-xs font-bold flex-shrink-0 text-[var(--gold-deep)]">Skyscanner ←</span>
+                      <span className="text-xs font-bold flex-shrink-0 text-[var(--accent-deep)]">Skyscanner ←</span>
                     </a>
                   </div>
 
@@ -690,7 +690,7 @@ function ApartmentPage() {
                         label="ללא אפשרות ביטול"
                         sublabel="מחיר מוזל · לא ניתן לבטל ואין החזר כספי"
                         badge={`−€${CANCEL_NONE}`}
-                        badgeColor="var(--gold-deep)"
+                        badgeColor="var(--accent-deep)"
                         selected={cancel === "none"}
                         onClick={() => { setShowNoCancel(true); }}
                       />
@@ -704,14 +704,14 @@ function ApartmentPage() {
                         onClick={() => setCancel("flexible")}
                       />
                     </div>
-                    <a href="/terms" target="_blank" className="inline-block mt-2 text-xs hover:underline font-semibold text-[var(--gold-deep)]">קרא/י את מדיניות הביטולים בתקנון ←</a>
+                    <a href="/terms" target="_blank" className="inline-block mt-2 text-xs hover:underline font-semibold text-[var(--accent-deep)]">קרא/י את מדיניות הביטולים בתקנון ←</a>
                   </div>
 
                   {/* ── Service level ─────────────────────────────── */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <div className="eyebrow">רמת שירות</div>
-                      <button onClick={() => setShowAiInfo(true)} className="text-xs font-semibold hover:underline text-[var(--gold-deep)]">ⓘ מידע נוסף</button>
+                      <button onClick={() => setShowAiInfo(true)} className="text-xs font-semibold hover:underline text-[var(--accent-deep)]">ⓘ מידע נוסף</button>
                     </div>
                     <div className="flex flex-col gap-2">
                       <RadioOption
@@ -726,7 +726,7 @@ function ApartmentPage() {
                         label="AI בלבד"
                         sublabel="ניהול עצמאי עם תמיכת צ'אטבוט · איסוף עצמאי של הסקי פס"
                         badge={`-€${AI_DISCOUNT}`}
-                        badgeColor="var(--gold-deep)"
+                        badgeColor="var(--accent-deep)"
                         selected={service === "ai"}
                         onClick={() => setService("ai")}
                       />
@@ -736,7 +736,7 @@ function ApartmentPage() {
                   </div>
 
                   {/* ── Price breakdown ───────────────────────────── */}
-                  <div className="p-4" style={{ background: "var(--ivory-deep)", border: "1px solid rgba(28,27,23,0.08)", borderRadius: 4 }}>
+                  <div className="p-4" style={{ background: "var(--ivory-deep)", border: "1px solid rgba(22,32,46,0.08)", borderRadius: 4 }}>
                     <div className="eyebrow mb-3">סיכום מחיר</div>
                     <div className="flex flex-col gap-2 text-sm">
                       <div className="flex justify-between">
@@ -746,7 +746,7 @@ function ApartmentPage() {
                       {skiPass && (
                         <div className="flex justify-between items-center">
                           <span className="text-[var(--stone)]">סקי פס × {guests} × {nights} ימים</span>
-                          <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: "var(--gold-wash)", color: "var(--gold-deep)" }}>בקרוב</span>
+                          <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: "var(--accent-wash)", color: "var(--accent-deep)" }}>בקרוב</span>
                         </div>
                       )}
                       {transfer && (
@@ -770,25 +770,25 @@ function ApartmentPage() {
                       {cancel === "none" && (
                         <div className="flex justify-between">
                           <span className="text-[var(--stone)]">ללא אפשרות ביטול</span>
-                          <span className="font-semibold text-[var(--gold-deep)]">−€{CANCEL_NONE.toLocaleString()}</span>
+                          <span className="font-semibold text-[var(--accent-deep)]">−€{CANCEL_NONE.toLocaleString()}</span>
                         </div>
                       )}
                       {service === "ai" && (
                         <div className="flex justify-between">
                           <span className="text-[var(--stone)]">הנחת AI</span>
-                          <span className="font-semibold text-[var(--gold-deep)]">−€{AI_DISCOUNT.toLocaleString()}</span>
+                          <span className="font-semibold text-[var(--accent-deep)]">−€{AI_DISCOUNT.toLocaleString()}</span>
                         </div>
                       )}
                     </div>
-                    <div className="flex justify-between items-center pt-3 mt-3" style={{ borderTop: "1px solid rgba(28,27,23,0.12)" }}>
+                    <div className="flex justify-between items-center pt-3 mt-3" style={{ borderTop: "1px solid rgba(22,32,46,0.12)" }}>
                       <span className="font-display font-medium text-[var(--charcoal)]">סה״כ</span>
-                      <span className="font-display text-2xl font-medium text-[var(--gold-deep)]">€{grandTotal.toLocaleString()}</span>
+                      <span className="font-display text-2xl font-medium text-[var(--accent-deep)]">€{grandTotal.toLocaleString()}</span>
                     </div>
                     <p className="text-[11px] mt-2 leading-relaxed text-[var(--stone-soft)]">* ייתכנו עמלות נוספות (כגון עמלת סליקת אשראי 1.9%). המחירים ב-€ והחיוב בש״ח לפי שער ההמרה.</p>
                   </div>
 
                   {/* ── Split payment ─────────────────────────────── */}
-                  <div className="p-4" style={{ border: "1px solid rgba(28,27,23,0.08)", borderRadius: 4 }}>
+                  <div className="p-4" style={{ border: "1px solid rgba(22,32,46,0.08)", borderRadius: 4 }}>
                     <div className="flex items-center justify-between mb-2">
                       <div>
                         <span className="text-sm font-bold text-[var(--charcoal)]">כמה אנשים משלמים?</span>
@@ -797,20 +797,20 @@ function ApartmentPage() {
                       <div className="flex items-center gap-2">
                         <button onClick={() => setSplitCount(n => Math.max(1, n - 1))} disabled={splitCount <= 1}
                           className="w-7 h-7 rounded-full border font-bold disabled:opacity-40"
-                          style={{ borderColor: "rgba(28,27,23,0.15)", color: "var(--stone)" }}>−</button>
+                          style={{ borderColor: "rgba(22,32,46,0.15)", color: "var(--stone)" }}>−</button>
                         <span className="font-bold w-5 text-center text-[var(--charcoal)]">{splitCount}</span>
                         <button onClick={() => setSplitCount(n => Math.min(guests, n + 1))} disabled={splitCount >= guests}
                           className="w-7 h-7 rounded-full border font-bold disabled:opacity-40"
-                          style={{ borderColor: "rgba(28,27,23,0.15)", color: "var(--stone)" }}>+</button>
+                          style={{ borderColor: "rgba(22,32,46,0.15)", color: "var(--stone)" }}>+</button>
                       </div>
                     </div>
                     {splitCount > 1 ? (
-                      <div className="px-3 py-2.5 text-sm" style={{ background: "var(--gold-wash)", borderRadius: 4 }}>
+                      <div className="px-3 py-2.5 text-sm" style={{ background: "var(--accent-wash)", borderRadius: 4 }}>
                         <div className="flex justify-between font-bold text-[var(--charcoal)]">
                           <span>החלק שלך לתשלום עכשיו</span>
                           <span>€{payNow.toLocaleString()}</span>
                         </div>
-                        <p className="text-xs mt-1 leading-relaxed text-[var(--gold-deep)]">הסה״כ (€{grandTotal.toLocaleString()}, כולל כל התוספות) מתחלק שווה ל-{splitCount} · אחרי התשלום תקבל/י קישור לשלוח לחברים שישלמו את חלקם.</p>
+                        <p className="text-xs mt-1 leading-relaxed text-[var(--accent-deep)]">הסה״כ (€{grandTotal.toLocaleString()}, כולל כל התוספות) מתחלק שווה ל-{splitCount} · אחרי התשלום תקבל/י קישור לשלוח לחברים שישלמו את חלקם.</p>
                       </div>
                     ) : (
                       <p className="text-xs text-[var(--stone-soft)]">בחר/י יותר מאדם אחד כדי לפצל את התשלום בין כמה משלמים.</p>
@@ -824,7 +824,7 @@ function ApartmentPage() {
                     grandTotal={payNow}
                     split={splitCount > 1 ? { sharesTotal: splitCount, accommodationTotal: grandTotal, shareAmount: shareAccommodation, area: "Val Thorens, Trois Vallées" } : undefined}
                     label={splitCount > 1 ? "שלם/י את חלקך בכרטיס" : undefined}
-                    className="btn-gold flex w-full py-4 text-base" />
+                    className="btn-primary flex w-full py-4 text-base" />
 
                   {/* save + quote side by side */}
                   <div className="flex gap-2">
@@ -866,13 +866,13 @@ function ApartmentPage() {
       {/* ── Mobile floating booking bar (Airbnb-style) ─────────── */}
       {!sheetOpen && (
         <div dir="rtl" className="lg:hidden fixed bottom-0 inset-x-0 z-30 px-4 py-3 flex items-center gap-3"
-          style={{ background: "var(--paper)", borderTop: "1px solid rgba(28,27,23,0.1)", boxShadow: "0 -4px 24px rgba(11,15,20,0.10)", paddingBottom: "calc(env(safe-area-inset-bottom) + 0.5rem)" }}>
+          style={{ background: "var(--paper)", borderTop: "1px solid rgba(22,32,46,0.1)", boxShadow: "0 -4px 24px rgba(10,27,51,0.10)", paddingBottom: "calc(env(safe-area-inset-bottom) + 0.5rem)" }}>
           <div className="flex-shrink-0 text-right leading-none">
             <div className="text-[11px] mb-0.5 text-[var(--stone-soft)]">{splitCount > 1 ? "החלק שלך" : `סה״כ · ${nights} לילות`}</div>
             <div className="font-display text-xl font-medium text-[var(--charcoal)]">€{payNow.toLocaleString()}</div>
           </div>
           <button onClick={() => setSheetOpen(true)}
-            className="btn-gold flex-1 py-3.5 text-base">
+            className="btn-primary flex-1 py-3.5 text-base">
             בחר/י אפשרויות ותשלום ↑
           </button>
         </div>
@@ -880,22 +880,22 @@ function ApartmentPage() {
 
       {/* ── No-cancellation confirmation + signature ───────────── */}
       {showNoCancel && (
-        <div dir="rtl" className="fixed inset-0 z-[95] flex items-center justify-center p-4" style={{ background: "rgba(11,15,20,0.6)" }} onClick={() => setShowNoCancel(false)}>
-          <div className="w-full max-w-md p-6" style={{ background: "var(--paper)", borderRadius: 4, boxShadow: "0 24px 48px -24px rgba(11,15,20,0.4)" }} onClick={e => e.stopPropagation()}>
+        <div dir="rtl" className="fixed inset-0 z-[95] flex items-center justify-center p-4" style={{ background: "rgba(10,27,51,0.6)" }} onClick={() => setShowNoCancel(false)}>
+          <div className="w-full max-w-md p-6" style={{ background: "var(--paper)", borderRadius: 4, boxShadow: "0 24px 48px -24px rgba(10,27,51,0.4)" }} onClick={e => e.stopPropagation()}>
             <h2 className="font-display text-xl font-medium mb-1 text-[var(--charcoal)]">ללא אפשרות ביטול</h2>
             <p className="text-sm mb-4 text-[var(--stone)]">בחירה באפשרות זו מוזילה את המחיר ב-€{CANCEL_NONE}, אך ההזמנה <b>אינה ניתנת לביטול</b> ולא יינתן כל החזר כספי, בהתאם לתקנון.</p>
             <label className="flex items-start gap-2 cursor-pointer mb-4">
-              <input type="checkbox" checked={noCancelAgreed} onChange={e => setNoCancelAgreed(e.target.checked)} className="mt-0.5 w-4 h-4 accent-[var(--gold-deep)]" />
-              <span className="text-sm leading-relaxed text-[var(--stone)]">אני מאשר/ת שקראתי והבנתי כי <b>לא אוכל לבטל את ההזמנה</b> ולא אקבל החזר כספי בשום מקרה, ומסכים/ה ל<a href="/terms" target="_blank" className="underline text-[var(--gold-deep)]">תקנון</a>.</span>
+              <input type="checkbox" checked={noCancelAgreed} onChange={e => setNoCancelAgreed(e.target.checked)} className="mt-0.5 w-4 h-4 accent-[var(--accent-deep)]" />
+              <span className="text-sm leading-relaxed text-[var(--stone)]">אני מאשר/ת שקראתי והבנתי כי <b>לא אוכל לבטל את ההזמנה</b> ולא אקבל החזר כספי בשום מקרה, ומסכים/ה ל<a href="/terms" target="_blank" className="underline text-[var(--accent-deep)]">תקנון</a>.</span>
             </label>
             <label className="block text-xs font-bold mb-1 text-[var(--stone-soft)]">חתימה (שם מלא)</label>
             <input value={signature} onChange={e => setSignature(e.target.value)} placeholder="הקלד/י את שמך המלא כחתימה"
               className="w-full px-4 py-3 text-sm mb-4 focus:outline-none"
-              style={{ border: "1px solid rgba(28,27,23,0.15)", borderRadius: 4 }} />
+              style={{ border: "1px solid rgba(22,32,46,0.15)", borderRadius: 4 }} />
             <div className="flex gap-2">
               <button disabled={!noCancelAgreed || signature.trim().length < 2}
                 onClick={() => { setCancel("none"); setShowNoCancel(false); }}
-                className="btn-gold flex-1 py-3 disabled:opacity-50">אישור וחתימה</button>
+                className="btn-primary flex-1 py-3 disabled:opacity-50">אישור וחתימה</button>
               <button onClick={() => setShowNoCancel(false)} className="btn-ghost px-5 py-3 text-[var(--stone)]">ביטול</button>
             </div>
           </div>
@@ -904,8 +904,8 @@ function ApartmentPage() {
 
       {/* ── Quote share popup ──────────────────────────────────── */}
       {quoteUrl && (
-        <div dir="rtl" className="fixed inset-0 z-[95] flex items-center justify-center p-4" style={{ background: "rgba(11,15,20,0.6)" }} onClick={() => setQuoteUrl(null)}>
-          <div className="w-full max-w-md p-6" style={{ background: "var(--paper)", borderRadius: 4, boxShadow: "0 24px 48px -24px rgba(11,15,20,0.4)" }} onClick={e => e.stopPropagation()}>
+        <div dir="rtl" className="fixed inset-0 z-[95] flex items-center justify-center p-4" style={{ background: "rgba(10,27,51,0.6)" }} onClick={() => setQuoteUrl(null)}>
+          <div className="w-full max-w-md p-6" style={{ background: "var(--paper)", borderRadius: 4, boxShadow: "0 24px 48px -24px rgba(10,27,51,0.4)" }} onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-1">
               <h2 className="font-display text-xl font-medium text-[var(--charcoal)]">הצעת המחיר מוכנה! 🎿</h2>
               <button onClick={() => setQuoteUrl(null)} className="w-9 h-9 rounded-full text-xl text-[var(--stone-soft)]">✕</button>
@@ -917,8 +917,8 @@ function ApartmentPage() {
               <label className="text-xs font-bold block mb-1.5 text-[var(--stone-soft)]">קישור להצעה</label>
               <div className="flex gap-2">
                 <input readOnly value={quoteUrl} dir="ltr" className="flex-1 min-w-0 px-3 py-2.5 text-xs text-right truncate"
-                  style={{ border: "1px solid rgba(28,27,23,0.15)", borderRadius: 4, background: "var(--ivory-deep)" }} />
-                <button onClick={() => copyTo(quoteUrl, "web")} className="btn-gold px-4 text-sm whitespace-nowrap">
+                  style={{ border: "1px solid rgba(22,32,46,0.15)", borderRadius: 4, background: "var(--ivory-deep)" }} />
+                <button onClick={() => copyTo(quoteUrl, "web")} className="btn-primary px-4 text-sm whitespace-nowrap">
                   {qCopied === "web" ? "✓ הועתק" : "העתק"}
                 </button>
               </div>
@@ -943,8 +943,8 @@ function ApartmentPage() {
 
       {/* ── AI service info ────────────────────────────────────── */}
       {showAiInfo && (
-        <div dir="rtl" className="fixed inset-0 z-[95] flex items-center justify-center p-4" style={{ background: "rgba(11,15,20,0.6)" }} onClick={() => setShowAiInfo(false)}>
-          <div className="w-full max-w-md p-6 max-h-[85vh] overflow-y-auto" style={{ background: "var(--paper)", borderRadius: 4, boxShadow: "0 24px 48px -24px rgba(11,15,20,0.4)" }} onClick={e => e.stopPropagation()}>
+        <div dir="rtl" className="fixed inset-0 z-[95] flex items-center justify-center p-4" style={{ background: "rgba(10,27,51,0.6)" }} onClick={() => setShowAiInfo(false)}>
+          <div className="w-full max-w-md p-6 max-h-[85vh] overflow-y-auto" style={{ background: "var(--paper)", borderRadius: 4, boxShadow: "0 24px 48px -24px rgba(10,27,51,0.4)" }} onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-3">
               <h2 className="font-display text-xl font-medium text-[var(--charcoal)]">שירות AI — איך זה עובד?</h2>
               <button onClick={() => setShowAiInfo(false)} className="w-9 h-9 rounded-full text-xl text-[var(--stone-soft)]">✕</button>
@@ -956,7 +956,7 @@ function ApartmentPage() {
               <li className="flex gap-2"><span>🤖</span><span>לאורך החופשה תיעזר/י בצ׳אטבוט AI לכל שאלה.</span></li>
               <li className="flex gap-2"><span>🆘</span><span>במקרים חריגים (קבלת דירה עם נזק, מקרה קיצון) תוכל/י כמובן לפנות לנציגים שלנו דרך האתר.</span></li>
             </ul>
-            <button onClick={() => setShowAiInfo(false)} className="btn-gold mt-5 w-full py-3">הבנתי</button>
+            <button onClick={() => setShowAiInfo(false)} className="btn-primary mt-5 w-full py-3">הבנתי</button>
           </div>
         </div>
       )}

@@ -53,16 +53,16 @@ function ApartmentCard({ apt, checkin, checkout, guests, rules }: {
           src={apt.images?.[0] ?? "/apt1.jpg"} alt={apt.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
         />
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(11,15,20,0.45) 0%, transparent 55%)" }} />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(10,27,51,0.45) 0%, transparent 55%)" }} />
         <div className="absolute top-4 right-4 text-[11px] font-bold px-3 py-1 tracking-wide"
-          style={{ background: "rgba(11,15,20,0.7)", color: "var(--gold-light)", backdropFilter: "blur(6px)" }}>
+          style={{ background: "rgba(10,27,51,0.7)", color: "var(--accent-light)", backdropFilter: "blur(6px)" }}>
           {cat === "cozy" ? "Cozy" : "Premium"}
         </div>
         <div className="absolute bottom-4 left-4 text-sm font-bold px-3 py-1.5"
-          style={{ background: "rgba(11,15,20,0.7)", color: "var(--ivory)", backdropFilter: "blur(6px)" }}>
+          style={{ background: "rgba(10,27,51,0.7)", color: "var(--ivory)", backdropFilter: "blur(6px)" }}>
           {checkin && checkout
-            ? <>החל מ <span className="text-[var(--gold-light)]">€{minNightlyPrice.toLocaleString()}</span> / לילה</>
-            : <><span className="text-[var(--gold-light)]">€{apt.price_per_night.toLocaleString()}</span> / לילה</>
+            ? <>החל מ <span className="text-[var(--accent-light)]">€{minNightlyPrice.toLocaleString()}</span> / לילה</>
+            : <><span className="text-[var(--accent-light)]">€{apt.price_per_night.toLocaleString()}</span> / לילה</>
           }
         </div>
       </div>
@@ -74,12 +74,12 @@ function ApartmentCard({ apt, checkin, checkout, guests, rules }: {
             <h3 className="font-display font-medium text-xl truncate text-[var(--charcoal)]">{apt.name}</h3>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0 mr-2">
-            <IconStar size={13} className="text-[var(--gold)]" />
-            <span className="text-sm font-bold text-[var(--gold-deep)]">4.9</span>
+            <IconStar size={13} className="text-[var(--accent)]" />
+            <span className="text-sm font-bold text-[var(--accent-deep)]">4.9</span>
           </div>
         </div>
 
-        <div className="flex gap-3 text-xs py-3 mb-4" style={{ color: "var(--stone-soft)", borderTop: "1px solid rgba(28,27,23,0.08)" }}>
+        <div className="flex gap-3 text-xs py-3 mb-4" style={{ color: "var(--stone-soft)", borderTop: "1px solid rgba(22,32,46,0.08)" }}>
           <span className="flex items-center gap-1"><IconBed size={12} /> {apt.beds} חד׳</span>
           <span>·</span>
           <span>{apt.baths} אמב׳</span>
@@ -90,14 +90,14 @@ function ApartmentCard({ apt, checkin, checkout, guests, rules }: {
         <div className="flex gap-1.5 flex-wrap mb-5">
           {apt.amenities?.slice(0, 3).map((a, i) => (
             <span key={i} className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full" style={{ background: "var(--ivory-deep)", color: "var(--stone)" }}>
-              <IconCheck size={10} className="text-[var(--gold-deep)]" /> {a}
+              <IconCheck size={10} className="text-[var(--accent-deep)]" /> {a}
             </span>
           ))}
         </div>
 
         <div className="mt-auto">
           {nights > 0 && (
-            <div className="text-sm font-bold mb-3 text-[var(--gold-deep)]">€{total.toLocaleString()} סה״כ ל-{nights} לילות</div>
+            <div className="text-sm font-bold mb-3 text-[var(--accent-deep)]">€{total.toLocaleString()} סה״כ ל-{nights} לילות</div>
           )}
           <div className="btn-dark w-full py-3 text-sm">
             ← צפה בדירה
@@ -127,10 +127,10 @@ function CalendarOverlay({ guests, onApply, onClose }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(11,15,20,0.6)", backdropFilter: "blur(3px)" }}>
+      style={{ background: "rgba(10,27,51,0.6)", backdropFilter: "blur(3px)" }}>
       <div ref={cardRef} className="w-full max-w-2xl" dir="rtl">
         <div style={{ background: "var(--paper)", borderRadius: 4 }} className="overflow-hidden shadow-2xl">
-          <div className="px-6 pt-5 pb-4 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(28,27,23,0.08)" }}>
+          <div className="px-6 pt-5 pb-4 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(22,32,46,0.08)" }}>
             <div>
               <h2 className="font-display font-medium text-lg text-[var(--charcoal)]">בחר תאריכי שהייה</h2>
               <p className="text-sm mt-0.5 text-[var(--stone-soft)]">עונת סקי: דצמבר 2026 – מאי 2027</p>
@@ -147,18 +147,18 @@ function CalendarOverlay({ guests, onApply, onClose }: {
               onCancel={onClose}
             />
 
-            <div className="mt-4 pt-4 flex items-center gap-4" style={{ borderTop: "1px solid rgba(28,27,23,0.08)" }} dir="rtl">
+            <div className="mt-4 pt-4 flex items-center gap-4" style={{ borderTop: "1px solid rgba(22,32,46,0.08)" }} dir="rtl">
               <label className="text-sm font-semibold whitespace-nowrap text-[var(--charcoal)]">מספר אנשים</label>
               <div className="flex items-center gap-2">
                 <button onClick={() => setG(v => Math.max(1, v - 1))}
                   className="w-8 h-8 rounded-full border flex items-center justify-center transition-colors font-bold"
-                  style={{ borderColor: "var(--gold-line)", color: "var(--charcoal)" }}>
+                  style={{ borderColor: "var(--accent-line)", color: "var(--charcoal)" }}>
                   −
                 </button>
                 <span className="w-8 text-center font-bold text-[var(--charcoal)]">{g}</span>
                 <button onClick={() => setG(v => Math.min(8, v + 1))}
                   className="w-8 h-8 rounded-full border flex items-center justify-center transition-colors font-bold"
-                  style={{ borderColor: "var(--gold-line)", color: "var(--charcoal)" }}>
+                  style={{ borderColor: "var(--accent-line)", color: "var(--charcoal)" }}>
                   +
                 </button>
               </div>
@@ -243,7 +243,7 @@ function ApartmentsPage() {
       )}
 
       {/* ── Nav ──────────────────────────────────────────────── */}
-      <div className="sticky top-0 z-40" style={{ background: "rgba(250,247,241,0.95)", backdropFilter: "blur(10px)", borderBottom: "1px solid rgba(28,27,23,0.08)" }}>
+      <div className="sticky top-0 z-40" style={{ background: "rgba(247,249,252,0.95)", backdropFilter: "blur(10px)", borderBottom: "1px solid rgba(22,32,46,0.08)" }}>
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3 flex-wrap">
           <a href="/" className="flex items-center"><Logo className="h-9" /></a>
           <span className="text-[var(--stone-soft)]">/</span>
@@ -251,19 +251,19 @@ function ApartmentsPage() {
             <button onClick={() => setShowCal(true)}
               className="text-sm flex items-center gap-1.5 transition-colors text-[var(--stone)]">
               <span>{fmtDate(checkin)} — {fmtDate(checkout)}</span>
-              {nights > 0 && <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ color: "var(--gold-deep)", background: "var(--gold-wash)" }}>{nights} לילות</span>}
+              {nights > 0 && <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ color: "var(--accent-deep)", background: "var(--accent-wash)" }}>{nights} לילות</span>}
               <span className="text-xs text-[var(--stone-soft)]">✏️</span>
             </button>
           ) : (
             <button onClick={() => setShowCal(true)}
               className="text-sm font-semibold flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-colors"
-              style={{ color: "var(--gold-deep)", background: "var(--gold-wash)" }}>
+              style={{ color: "var(--accent-deep)", background: "var(--accent-wash)" }}>
               📅 בחר תאריכים
             </button>
           )}
           <div className="flex-1" />
           <a href={`/search?checkin=${checkin}&checkout=${checkout}&guests=${guests}`}
-            className="text-sm font-semibold hover:underline whitespace-nowrap text-[var(--gold-deep)]">
+            className="text-sm font-semibold hover:underline whitespace-nowrap text-[var(--accent-deep)]">
             → חזור לחבילות
           </a>
         </div>
@@ -289,7 +289,7 @@ function ApartmentsPage() {
                 className="px-4 py-2 text-sm font-semibold transition-all"
                 style={filter === f.key
                   ? { background: "var(--ink)", color: "var(--ivory)", borderRadius: 4 }
-                  : { background: "var(--paper)", color: "var(--stone)", border: "1px solid rgba(28,27,23,0.12)", borderRadius: 4 }
+                  : { background: "var(--paper)", color: "var(--stone)", border: "1px solid rgba(22,32,46,0.12)", borderRadius: 4 }
                 }>
                 {f.label}
               </button>
@@ -301,7 +301,7 @@ function ApartmentsPage() {
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1,2,3,4,5,6].map(i => (
-              <div key={i} className="h-80 animate-pulse" style={{ background: "var(--paper)", border: "1px solid rgba(28,27,23,0.08)", borderRadius: 4 }} />
+              <div key={i} className="h-80 animate-pulse" style={{ background: "var(--paper)", border: "1px solid rgba(22,32,46,0.08)", borderRadius: 4 }} />
             ))}
           </div>
         ) : shown.length === 0 ? (
@@ -311,7 +311,7 @@ function ApartmentsPage() {
             </div>
             <p className="text-lg font-medium text-[var(--stone)]">לא נמצאו דירות</p>
             <button onClick={() => setFilter("all")}
-              className="mt-4 text-sm font-semibold hover:underline text-[var(--gold-deep)]">
+              className="mt-4 text-sm font-semibold hover:underline text-[var(--accent-deep)]">
               הצג את כל הדירות
             </button>
           </div>
