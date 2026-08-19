@@ -29,8 +29,8 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-const inputCls = "w-full border rounded px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold)]";
-const inputStyle = { borderColor: "rgba(28,27,23,0.15)", color: "var(--charcoal)", background: "var(--ivory-deep)" } as const;
+const inputCls = "w-full border rounded px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]";
+const inputStyle = { borderColor: "rgba(22,32,46,0.15)", color: "var(--charcoal)", background: "var(--ivory-deep)" } as const;
 
 /* ── Flight leg form ───────────────────────────────────────── */
 function FlightLeg({ title, flightNum, date, time, onFlight, onDate, onTime }: {
@@ -40,9 +40,9 @@ function FlightLeg({ title, flightNum, date, time, onFlight, onDate, onTime }: {
 }) {
   const elal = isElAl(flightNum);
   return (
-    <div className="rounded p-4 border" style={{ background: "var(--ivory-deep)", borderColor: "rgba(28,27,23,0.08)" }}>
+    <div className="rounded p-4 border" style={{ background: "var(--ivory-deep)", borderColor: "rgba(22,32,46,0.08)" }}>
       <div className="flex items-center gap-2 mb-3">
-        <IconPlane size={15} className="text-[var(--gold-deep)]" />
+        <IconPlane size={15} className="text-[var(--accent-deep)]" />
         <span className="font-bold text-sm text-[var(--charcoal)]">{title}</span>
         {flightNum && (
           <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${elal ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
@@ -168,7 +168,7 @@ function TransfersPage() {
         </div>
         <h2 className="font-display text-2xl font-medium mb-2 text-[var(--charcoal)]">ההזמנה התקבלה!</h2>
         <p className="text-sm mb-1 text-[var(--stone)]">הסעה ל-{AIRPORTS.find(a=>a.code===airport)?.label}</p>
-        <p className="text-sm mb-4 text-[var(--stone)]">{passengers} נוסעים · {directions} כיוון{directions > 1 ? "ות" : ""} · <span style={{ color: "var(--gold-deep)", fontWeight: 700 }}>€{totalPrice}</span></p>
+        <p className="text-sm mb-4 text-[var(--stone)]">{passengers} נוסעים · {directions} כיוון{directions > 1 ? "ות" : ""} · <span style={{ color: "var(--accent-deep)", fontWeight: 700 }}>€{totalPrice}</span></p>
         {!priceConfirmed && (
           <p className="text-xs text-amber-600 bg-amber-50 rounded px-4 py-3 mb-4">
             המחיר משוער — נציג יצור איתך קשר לאישור סופי
@@ -186,12 +186,12 @@ function TransfersPage() {
     <div className="min-h-screen" style={{ background: "var(--ivory)" }} dir="rtl">
 
       {/* Nav */}
-      <div className="sticky top-0 z-40 backdrop-blur-sm border-b" style={{ background: "rgba(255,255,255,0.95)", borderColor: "rgba(28,27,23,0.08)" }}>
+      <div className="sticky top-0 z-40 backdrop-blur-sm border-b" style={{ background: "rgba(255,255,255,0.95)", borderColor: "rgba(22,32,46,0.08)" }}>
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-3">
           <a href="/" className="flex items-center"><Logo className="h-9" /></a>
           <span className="text-[var(--stone-soft)]">/</span>
           <span className="text-sm font-semibold flex items-center gap-1.5 text-[var(--charcoal)]">
-            <IconBus size={14} className="text-[var(--gold-deep)]" /> הזמנת הסעה
+            <IconBus size={14} className="text-[var(--accent-deep)]" /> הזמנת הסעה
           </span>
         </div>
       </div>
@@ -208,8 +208,8 @@ function TransfersPage() {
               <h1 className="font-display text-3xl font-medium mt-2 text-[var(--charcoal)]">הזמנת הסעה</h1>
               <p className="text-sm mt-1 text-[var(--stone)]">שאטל ישיר משדה התעופה לוואל תורנס</p>
               {aptName && checkin && checkout && (
-                <div className="mt-3 text-sm px-3 py-2 rounded inline-flex items-center gap-2" style={{ color: "var(--stone)", background: "var(--gold-wash)" }}>
-                  <span className="text-[var(--gold-deep)]">🏠</span>
+                <div className="mt-3 text-sm px-3 py-2 rounded inline-flex items-center gap-2" style={{ color: "var(--stone)", background: "var(--accent-wash)" }}>
+                  <span className="text-[var(--accent-deep)]">🏠</span>
                   {aptName} · {fmtDate(checkin)} — {fmtDate(checkout)}
                 </div>
               )}
@@ -223,8 +223,8 @@ function TransfersPage() {
                   <button key={a.code} onClick={() => setAirport(a.code)}
                     className="flex-1 flex flex-col items-center py-3 rounded border transition-all text-sm font-bold"
                     style={airport === a.code
-                      ? { borderColor: "var(--gold)", background: "var(--gold-wash)", color: "var(--gold-deep)" }
-                      : { borderColor: "rgba(28,27,23,0.1)", background: "var(--paper)", color: "var(--stone)" }}>
+                      ? { borderColor: "var(--accent)", background: "var(--accent-wash)", color: "var(--accent-deep)" }
+                      : { borderColor: "rgba(22,32,46,0.1)", background: "var(--paper)", color: "var(--stone)" }}>
                     ✈️ {a.label}
                     <span className="text-xs font-normal mt-0.5 text-[var(--stone-soft)]">{a.note}</span>
                   </button>
@@ -240,8 +240,8 @@ function TransfersPage() {
                   <button key={k} onClick={() => setDirection(k)}
                     className="flex-1 py-2.5 rounded border text-sm font-bold transition-all"
                     style={direction === k
-                      ? { borderColor: "var(--gold)", background: "var(--gold-wash)", color: "var(--gold-deep)" }
-                      : { borderColor: "rgba(28,27,23,0.1)", background: "var(--paper)", color: "var(--stone)" }}>
+                      ? { borderColor: "var(--accent)", background: "var(--accent-wash)", color: "var(--accent-deep)" }
+                      : { borderColor: "rgba(22,32,46,0.1)", background: "var(--paper)", color: "var(--stone)" }}>
                     {label}
                   </button>
                 ))}
@@ -269,14 +269,14 @@ function TransfersPage() {
             {/* Passengers */}
             <div>
               <div className="text-xs font-bold uppercase tracking-wider mb-2 text-[var(--stone-soft)]">מספר נוסעים</div>
-              <div className="flex items-center gap-3 border rounded p-3 w-fit" style={{ background: "var(--paper)", borderColor: "rgba(28,27,23,0.15)" }}>
+              <div className="flex items-center gap-3 border rounded p-3 w-fit" style={{ background: "var(--paper)", borderColor: "rgba(22,32,46,0.15)" }}>
                 <button onClick={() => setPassengers(v => Math.max(1, v - 1))}
-                  className="w-9 h-9 rounded-full border flex items-center justify-center font-bold transition-colors hover:border-[var(--gold)] hover:text-[var(--gold-deep)]"
-                  style={{ borderColor: "rgba(28,27,23,0.15)", color: "var(--stone)" }}>−</button>
+                  className="w-9 h-9 rounded-full border flex items-center justify-center font-bold transition-colors hover:border-[var(--accent)] hover:text-[var(--accent-deep)]"
+                  style={{ borderColor: "rgba(22,32,46,0.15)", color: "var(--stone)" }}>−</button>
                 <span className="font-bold text-lg w-8 text-center text-[var(--charcoal)]">{passengers}</span>
                 <button onClick={() => setPassengers(v => Math.min(20, v + 1))}
-                  className="w-9 h-9 rounded-full border flex items-center justify-center font-bold transition-colors hover:border-[var(--gold)] hover:text-[var(--gold-deep)]"
-                  style={{ borderColor: "rgba(28,27,23,0.15)", color: "var(--stone)" }}>+</button>
+                  className="w-9 h-9 rounded-full border flex items-center justify-center font-bold transition-colors hover:border-[var(--accent)] hover:text-[var(--accent-deep)]"
+                  style={{ borderColor: "rgba(22,32,46,0.15)", color: "var(--stone)" }}>+</button>
                 <span className="text-sm mr-1 text-[var(--stone-soft)]">{passengers === 1 ? "אדם" : "אנשים"}</span>
               </div>
             </div>
@@ -311,9 +311,9 @@ function TransfersPage() {
           <div className="lg:w-80 flex-shrink-0">
             <div className="sticky top-20 card-luxury overflow-hidden">
 
-              <div className="px-5 py-4 border-b" style={{ background: "var(--gold-wash)", borderColor: "rgba(28,27,23,0.08)" }}>
+              <div className="px-5 py-4 border-b" style={{ background: "var(--accent-wash)", borderColor: "rgba(22,32,46,0.08)" }}>
                 <div className="flex items-center gap-2 mb-1">
-                  <IconBus size={18} className="text-[var(--gold-deep)]" />
+                  <IconBus size={18} className="text-[var(--accent-deep)]" />
                   <span className="font-display font-medium text-[var(--charcoal)]">סיכום הסעה</span>
                 </div>
                 <p className="text-xs text-[var(--stone-soft)]">שאטל ישיר — Val Thorens</p>
@@ -333,14 +333,14 @@ function TransfersPage() {
                   <span className="font-semibold text-[var(--charcoal)]">{passengers}</span>
                 </div>
 
-                <div className="pt-3 mt-1 flex flex-col gap-2" style={{ borderTop: "1px solid rgba(28,27,23,0.08)" }}>
+                <div className="pt-3 mt-1 flex flex-col gap-2" style={{ borderTop: "1px solid rgba(22,32,46,0.08)" }}>
                   <div className="flex justify-between text-xs text-[var(--stone-soft)]">
                     <span>€{PRICE_PER_DIRECTION} × {directions} כיוון × {passengers} נוסעים</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="font-bold text-[var(--charcoal)]">סה״כ</span>
                     <div className="text-right">
-                      <span className="font-display text-2xl font-medium text-[var(--gold-deep)]">€{totalPrice}</span>
+                      <span className="font-display text-2xl font-medium text-[var(--accent-deep)]">€{totalPrice}</span>
                       {hasAnyFlight && (
                         <div className={`text-xs font-bold mt-0.5 ${priceConfirmed ? "text-green-600" : "text-amber-600"}`}>
                           {priceConfirmed ? "✓ מחיר קבוע" : "⚠ מחיר משוער"}
@@ -355,7 +355,7 @@ function TransfersPage() {
                   className="w-full flex items-center gap-3 p-3 rounded border-2 transition-all text-right"
                   style={isElAlOverride || priceConfirmed
                     ? { borderColor: "#4ade80", background: "#f0fdf4" }
-                    : { borderColor: "rgba(28,27,23,0.12)", background: "var(--ivory-deep)" }}>
+                    : { borderColor: "rgba(22,32,46,0.12)", background: "var(--ivory-deep)" }}>
                   <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all
                     ${isElAlOverride || priceConfirmed ? "bg-green-500 border-green-500" : "border-gray-300"}`}>
                     {(isElAlOverride || priceConfirmed) && <IconCheck size={11} className="text-white" />}
@@ -371,7 +371,7 @@ function TransfersPage() {
                 </button>
 
                 <button onClick={handleSubmit} disabled={!canSubmit || submitting}
-                  className="btn-gold w-full py-3.5 text-base disabled:opacity-40 disabled:cursor-not-allowed mt-1">
+                  className="btn-primary w-full py-3.5 text-base disabled:opacity-40 disabled:cursor-not-allowed mt-1">
                   {submitting ? "שולח..." : "← הזמן הסעה"}
                 </button>
                 <p className="text-center text-xs text-[var(--stone-soft)]">נציג יצור קשר לאישור ותשלום</p>

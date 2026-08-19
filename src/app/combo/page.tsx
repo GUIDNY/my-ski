@@ -55,10 +55,10 @@ function AptBlock({ a }: { a: Apartment }) {
           <h3 className="font-display font-medium text-lg text-[var(--charcoal)]">{a.name}</h3>
         </div>
         <p className="text-xs mb-3 flex items-center gap-1 justify-end text-[var(--stone-soft)]">
-          <IconMountain size={12} className="text-[var(--gold-deep)]" /> Val Thorens, Trois Vallées · {a.type}
+          <IconMountain size={12} className="text-[var(--accent-deep)]" /> Val Thorens, Trois Vallées · {a.type}
         </p>
         <div className="flex items-center gap-2.5 text-xs justify-end mb-3 flex-wrap text-[var(--stone)]">
-          <span className="flex items-center gap-1 font-bold text-[var(--gold-deep)]"><IconUser size={12} /> עד {capacity(a)}</span>
+          <span className="flex items-center gap-1 font-bold text-[var(--accent-deep)]"><IconUser size={12} /> עד {capacity(a)}</span>
           <span>·</span><span className="flex items-center gap-1"><IconBed size={12} /> {a.beds} חד׳</span>
           <span>·</span><span>{a.baths} אמב׳</span>
           <span>·</span><span>{a.sqm} מ״ר</span>
@@ -85,21 +85,21 @@ function AddonCard({ icon, label, sublabel, price, checked, onChange, disabled }
     <button type="button" onClick={() => !disabled && onChange(!checked)} disabled={disabled}
       className="w-full flex items-center gap-3 p-3.5 rounded border transition-all text-right"
       style={disabled
-        ? { borderColor: "rgba(28,27,23,0.08)", background: "var(--ivory-deep)", cursor: "not-allowed" }
+        ? { borderColor: "rgba(22,32,46,0.08)", background: "var(--ivory-deep)", cursor: "not-allowed" }
         : checked
-          ? { borderColor: "var(--gold)", background: "var(--gold-wash)" }
-          : { borderColor: "rgba(28,27,23,0.1)", background: "var(--paper)" }}>
-      <span className="flex-shrink-0" style={{ color: disabled ? "var(--stone-soft)" : checked ? "var(--gold-deep)" : "var(--stone-soft)" }}>{icon}</span>
+          ? { borderColor: "var(--accent)", background: "var(--accent-wash)" }
+          : { borderColor: "rgba(22,32,46,0.1)", background: "var(--paper)" }}>
+      <span className="flex-shrink-0" style={{ color: disabled ? "var(--stone-soft)" : checked ? "var(--accent-deep)" : "var(--stone-soft)" }}>{icon}</span>
       <div className="flex-1 min-w-0">
         <div className="text-sm font-semibold" style={{ color: disabled ? "var(--stone-soft)" : "var(--charcoal)" }}>{label}</div>
         <div className="text-xs text-[var(--stone-soft)]">{sublabel}</div>
       </div>
       {disabled
-        ? <span className="text-[11px] font-bold flex-shrink-0 text-[var(--gold-deep)]">בקרוב</span>
+        ? <span className="text-[11px] font-bold flex-shrink-0 text-[var(--accent-deep)]">בקרוב</span>
         : <>
-            <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap text-[var(--gold-deep)]">{price}</span>
+            <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap text-[var(--accent-deep)]">{price}</span>
             <span className="w-5 h-5 rounded border flex items-center justify-center flex-shrink-0"
-              style={checked ? { background: "var(--gold)", borderColor: "var(--gold)", color: "var(--ink)" } : { borderColor: "rgba(28,27,23,0.2)" }}>{checked && <IconCheck size={12} />}</span>
+              style={checked ? { background: "var(--accent)", borderColor: "var(--accent)", color: "var(--ink)" } : { borderColor: "rgba(22,32,46,0.2)" }}>{checked && <IconCheck size={12} />}</span>
           </>}
     </button>
   );
@@ -111,14 +111,14 @@ function RadioOption({ icon, label, sublabel, badge, badgeColor, selected, onCli
   return (
     <button type="button" onClick={onClick}
       className="w-full flex items-center gap-3 p-3.5 rounded border transition-all text-right"
-      style={selected ? { borderColor: "var(--gold)", background: "var(--gold-wash)" } : { borderColor: "rgba(28,27,23,0.1)", background: "var(--paper)" }}>
-      <span className="flex-shrink-0" style={{ color: selected ? "var(--gold-deep)" : "var(--stone-soft)" }}>{icon}</span>
+      style={selected ? { borderColor: "var(--accent)", background: "var(--accent-wash)" } : { borderColor: "rgba(22,32,46,0.1)", background: "var(--paper)" }}>
+      <span className="flex-shrink-0" style={{ color: selected ? "var(--accent-deep)" : "var(--stone-soft)" }}>{icon}</span>
       <div className="flex-1 min-w-0">
         <div className="text-sm font-semibold text-[var(--charcoal)]">{label}</div>
         <div className="text-xs text-[var(--stone-soft)]">{sublabel}</div>
       </div>
       {badge && <span className="text-xs font-bold px-2 py-0.5 rounded-full text-white flex-shrink-0" style={{ background: badgeColor }}>{badge}</span>}
-      <span className="w-4 h-4 rounded-full border-2 flex-shrink-0" style={selected ? { borderColor: "var(--gold)", background: "var(--gold)", boxShadow: "0 0 0 2px var(--gold-wash)" } : { borderColor: "rgba(28,27,23,0.2)" }} />
+      <span className="w-4 h-4 rounded-full border-2 flex-shrink-0" style={selected ? { borderColor: "var(--accent)", background: "var(--accent)", boxShadow: "0 0 0 2px var(--accent-wash)" } : { borderColor: "rgba(22,32,46,0.2)" }} />
     </button>
   );
 }
@@ -165,7 +165,7 @@ function ComboInner() {
   }, [aId, bId]);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ivory)" }}><SkiLoader /></div>;
-  if (!a || !b) return <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ivory)", color: "var(--stone)" }} dir="rtl">השילוב לא נמצא. <a href="/apartments" className="underline mr-1 text-[var(--gold-deep)]">חזרה לדירות</a></div>;
+  if (!a || !b) return <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ivory)", color: "var(--stone)" }} dir="rtl">השילוב לא נמצא. <a href="/apartments" className="underline mr-1 text-[var(--accent-deep)]">חזרה לדירות</a></div>;
 
   const totalA = nights > 0 ? calcTotalForRange(checkin, checkout, Number(a.price_per_night), rulesA) : Number(a.price_per_night);
   const totalB = nights > 0 ? calcTotalForRange(checkin, checkout, Number(b.price_per_night), rulesB) : Number(b.price_per_night);
@@ -205,7 +205,7 @@ function ComboInner() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--ivory)" }} dir="rtl">
-      <header className="border-b sticky top-0 z-30" style={{ background: "var(--paper)", borderColor: "rgba(28,27,23,0.08)" }}>
+      <header className="border-b sticky top-0 z-30" style={{ background: "var(--paper)", borderColor: "rgba(22,32,46,0.08)" }}>
         <div className="max-w-5xl mx-auto px-5 h-16 flex items-center justify-between">
           <a href="/apartments" className="text-sm transition-colors text-[var(--stone)]">→ חזרה לדירות</a>
           <a href="/"><Logo className="h-8" /></a>
@@ -217,7 +217,7 @@ function ComboInner() {
           <span className="eyebrow block mb-3">חבילה משולבת · 2 דירות צמודות</span>
           <h1 className="font-display text-3xl font-medium text-[var(--charcoal)]">{comboName}</h1>
           <p className="mt-2 flex items-center justify-center gap-1.5 text-[var(--stone)]">
-            <IconMountain size={14} className="text-[var(--gold-deep)]" /> Val Thorens, France · מתאים עד {capacity(a) + capacity(b)} אורחים
+            <IconMountain size={14} className="text-[var(--accent-deep)]" /> Val Thorens, France · מתאים עד {capacity(a) + capacity(b)} אורחים
           </p>
         </div>
 
@@ -229,12 +229,12 @@ function ComboInner() {
 
           {/* Booking panel */}
           <div className="card-luxury lg:sticky lg:top-24 overflow-hidden">
-            <div className="px-6 py-5 border-b" style={{ background: "var(--gold-wash)", borderColor: "rgba(28,27,23,0.08)" }}>
+            <div className="px-6 py-5 border-b" style={{ background: "var(--accent-wash)", borderColor: "rgba(22,32,46,0.08)" }}>
               <div className="flex items-center justify-between gap-2">
                 {breakdown.length > 0 && (
                   <button onClick={() => setShowBreakdown(v => !v)}
                     className="text-xs font-bold px-3 py-1.5 rounded transition-colors whitespace-nowrap flex-shrink-0"
-                    style={{ color: "var(--gold-deep)", background: "var(--paper)" }}>
+                    style={{ color: "var(--accent-deep)", background: "var(--paper)" }}>
                     פירוט מחיר {showBreakdown ? "▲" : "▼"}
                   </button>
                 )}
@@ -246,18 +246,18 @@ function ComboInner() {
               <p className="text-xs mt-1 text-right text-[var(--stone)]">{fmt(checkin)} — {fmt(checkout)} · {nights} לילות · {guests} אורחים</p>
 
               {showBreakdown && breakdown.length > 0 && (
-                <div className="mt-3 rounded border overflow-hidden" style={{ background: "var(--paper)", borderColor: "var(--gold-line)" }}>
-                  <div className="px-4 py-2 text-[11px] text-right" style={{ background: "var(--gold-wash)", color: "var(--stone-soft)" }}>מחיר ללילה (שתי הדירות יחד)</div>
-                  <div className="max-h-52 overflow-y-auto divide-y" style={{ borderColor: "rgba(28,27,23,0.06)" }}>
+                <div className="mt-3 rounded border overflow-hidden" style={{ background: "var(--paper)", borderColor: "var(--accent-line)" }}>
+                  <div className="px-4 py-2 text-[11px] text-right" style={{ background: "var(--accent-wash)", color: "var(--stone-soft)" }}>מחיר ללילה (שתי הדירות יחד)</div>
+                  <div className="max-h-52 overflow-y-auto divide-y" style={{ borderColor: "rgba(22,32,46,0.06)" }}>
                     {breakdown.map(({ date, price }, i) => (
-                      <div key={i} className="flex justify-between items-center px-4 py-2 text-sm" style={{ borderColor: "rgba(28,27,23,0.06)" }}>
+                      <div key={i} className="flex justify-between items-center px-4 py-2 text-sm" style={{ borderColor: "rgba(22,32,46,0.06)" }}>
                         <span className="font-semibold text-[var(--charcoal)]">€{price.toLocaleString()}</span>
                         <span className="text-[var(--stone)]">{fmt(`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`)}</span>
                       </div>
                     ))}
                   </div>
-                  <div className="flex justify-between items-center px-4 py-2.5 border-t text-sm font-bold" style={{ background: "var(--gold-wash)", borderColor: "var(--gold-line)" }}>
-                    <span className="text-[var(--gold-deep)]">€{avgNightly.toLocaleString()}</span>
+                  <div className="flex justify-between items-center px-4 py-2.5 border-t text-sm font-bold" style={{ background: "var(--accent-wash)", borderColor: "var(--accent-line)" }}>
+                    <span className="text-[var(--accent-deep)]">€{avgNightly.toLocaleString()}</span>
                     <span className="text-[var(--stone)]">ממוצע ללילה</span>
                   </div>
                 </div>
@@ -274,21 +274,21 @@ function ComboInner() {
                   {transfer && (
                     <button onClick={() => setShowTransfer(true)}
                       className="flex items-center justify-between px-3.5 py-2.5 rounded border transition-colors text-sm w-full text-right"
-                      style={{ background: "var(--gold-wash)", borderColor: "var(--gold-line)" }}>
-                      <span className="font-semibold text-[var(--gold-deep)]">{flightFilled(flight) ? "✓ פרטי טיסה נשמרו · עריכה" : "מלא פרטי טיסה להסעה ←"}</span>
+                      style={{ background: "var(--accent-wash)", borderColor: "var(--accent-line)" }}>
+                      <span className="font-semibold text-[var(--accent-deep)]">{flightFilled(flight) ? "✓ פרטי טיסה נשמרו · עריכה" : "מלא פרטי טיסה להסעה ←"}</span>
                       <span className="text-xs text-[var(--stone-soft)]">הגעה + חזור</span>
                     </button>
                   )}
                 </div>
                 <a href={skyscannerUrl} target="_blank" rel="noopener noreferrer"
-                  className="mt-2 flex items-center gap-2.5 p-3.5 rounded border transition-all hover:border-[var(--gold-line)] hover:bg-[var(--gold-wash)]"
-                  style={{ background: "var(--paper)", borderColor: "rgba(28,27,23,0.1)" }}>
+                  className="mt-2 flex items-center gap-2.5 p-3.5 rounded border transition-all hover:border-[var(--accent-line)] hover:bg-[var(--accent-wash)]"
+                  style={{ background: "var(--paper)", borderColor: "rgba(22,32,46,0.1)" }}>
                   <span className="flex-shrink-0 text-[var(--stone-soft)]"><IconPlane size={17} /></span>
                   <div className="flex-1 min-w-0 text-right">
                     <div className="text-sm font-semibold text-[var(--charcoal)]">טיסה ל-Geneva (GVA)</div>
                     <div className="text-xs text-[var(--stone-soft)]">TLV → Geneva · {checkin ? fmt(checkin) : "בחר תאריך"} · 2.5h מ-Val Thorens</div>
                   </div>
-                  <span className="text-xs font-bold flex-shrink-0 text-[var(--gold-deep)]">Skyscanner ←</span>
+                  <span className="text-xs font-bold flex-shrink-0 text-[var(--accent-deep)]">Skyscanner ←</span>
                 </a>
               </div>
 
@@ -299,13 +299,13 @@ function ComboInner() {
                   <RadioOption icon={<IconShield size={18} />} label="ללא אפשרות ביטול" sublabel="מחיר מוזל · לא ניתן לבטל ואין החזר כספי" badge={`−€${CANCEL_NONE}`} badgeColor="#ef4444" selected={cancel === "none"} onClick={() => setShowNoCancel(true)} />
                   <RadioOption icon={<IconShield size={18} />} label="ביטול גמיש" sublabel="80% החזר עד שבוע לפני · 50% עד 24ש׳ לפני ההמראה · אח״כ אין החזר" badge={`+€${CANCEL_FLEX}`} badgeColor="#10b981" selected={cancel === "flexible"} onClick={() => setCancel("flexible")} />
                 </div>
-                <a href="/terms" target="_blank" className="inline-block mt-2 text-xs hover:underline font-semibold text-[var(--gold-deep)]">קרא/י את מדיניות הביטולים בתקנון ←</a>
+                <a href="/terms" target="_blank" className="inline-block mt-2 text-xs hover:underline font-semibold text-[var(--accent-deep)]">קרא/י את מדיניות הביטולים בתקנון ←</a>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <div className="text-xs font-bold uppercase tracking-wider text-[var(--stone-soft)]">רמת שירות</div>
-                  <button onClick={() => setShowAiInfo(true)} className="text-xs font-semibold hover:underline text-[var(--gold-deep)]">ⓘ מידע נוסף</button>
+                  <button onClick={() => setShowAiInfo(true)} className="text-xs font-semibold hover:underline text-[var(--accent-deep)]">ⓘ מידע נוסף</button>
                 </div>
                 <div className="flex flex-col gap-2">
                   <RadioOption icon={<IconUser size={18} />} label="שירות אנושי מלא" sublabel="נציג ישראלי זמין לפני, במהלך ואחרי" selected={service === "human"} onClick={() => setService("human")} />
@@ -313,7 +313,7 @@ function ComboInner() {
                 </div>
               </div>
 
-              <div className="pt-4 space-y-2" style={{ borderTop: "1px solid rgba(28,27,23,0.08)" }}>
+              <div className="pt-4 space-y-2" style={{ borderTop: "1px solid rgba(22,32,46,0.08)" }}>
                 <Row label={a.name} value={`€${totalA.toLocaleString()}`} muted />
                 <Row label={b.name} value={`€${totalB.toLocaleString()}`} muted />
                 {transfer && <Row label="הסעה הלוך-חזור" value={`€${trTotal}`} muted />}
@@ -323,9 +323,9 @@ function ComboInner() {
                 {cancel === "none" && <Row label="ללא אפשרות ביטול" value={`−€${CANCEL_NONE.toLocaleString()}`} muted />}
                 {service === "ai" && <Row label="הנחת ניהול עצמאי (AI)" value={`-€${AI_DISCOUNT.toLocaleString()}`} muted />}
               </div>
-              <div className="flex items-center justify-between pt-3" style={{ borderTop: "1px solid rgba(28,27,23,0.08)" }}>
+              <div className="flex items-center justify-between pt-3" style={{ borderTop: "1px solid rgba(22,32,46,0.08)" }}>
                 <span className="font-bold text-lg text-[var(--charcoal)]">סה״כ</span>
-                <span className="font-display text-2xl font-medium text-[var(--gold-deep)]">€{total.toLocaleString()}</span>
+                <span className="font-display text-2xl font-medium text-[var(--accent-deep)]">€{total.toLocaleString()}</span>
               </div>
               <p className="text-[11px] leading-relaxed text-[var(--stone-soft)]">* ייתכנו עמלות נוספות (כגון עמלת סליקת אשראי 1.9%). המחירים ב-€ והחיוב בש״ח לפי שער ההמרה.</p>
 
@@ -362,17 +362,17 @@ function ComboInner() {
             <h2 className="font-display text-xl font-medium mb-1 text-[var(--charcoal)]">ללא אפשרות ביטול</h2>
             <p className="text-sm mb-4 text-[var(--stone)]">בחירה באפשרות זו מוזילה את המחיר ב-€{CANCEL_NONE}, אך ההזמנה <b>אינה ניתנת לביטול</b> ולא יינתן כל החזר כספי, בהתאם לתקנון.</p>
             <label className="flex items-start gap-2 cursor-pointer mb-4">
-              <input type="checkbox" checked={noCancelAgreed} onChange={e => setNoCancelAgreed(e.target.checked)} className="mt-0.5 w-4 h-4 accent-[var(--gold)]" />
-              <span className="text-sm leading-relaxed text-[var(--stone)]">אני מאשר/ת שקראתי והבנתי כי <b>לא אוכל לבטל את ההזמנה</b> ולא אקבל החזר כספי בשום מקרה, ומסכים/ה ל<a href="/terms" target="_blank" className="underline text-[var(--gold-deep)]">תקנון</a>.</span>
+              <input type="checkbox" checked={noCancelAgreed} onChange={e => setNoCancelAgreed(e.target.checked)} className="mt-0.5 w-4 h-4 accent-[var(--accent)]" />
+              <span className="text-sm leading-relaxed text-[var(--stone)]">אני מאשר/ת שקראתי והבנתי כי <b>לא אוכל לבטל את ההזמנה</b> ולא אקבל החזר כספי בשום מקרה, ומסכים/ה ל<a href="/terms" target="_blank" className="underline text-[var(--accent-deep)]">תקנון</a>.</span>
             </label>
             <label className="block text-xs font-bold mb-1 text-[var(--stone-soft)]">חתימה (שם מלא)</label>
             <input value={signature} onChange={e => setSignature(e.target.value)} placeholder="הקלד/י את שמך המלא כחתימה"
-              className="w-full border rounded px-4 py-3 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]"
-              style={{ borderColor: "rgba(28,27,23,0.15)", background: "var(--ivory-deep)", color: "var(--charcoal)" }} />
+              className="w-full border rounded px-4 py-3 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+              style={{ borderColor: "rgba(22,32,46,0.15)", background: "var(--ivory-deep)", color: "var(--charcoal)" }} />
             <div className="flex gap-2">
               <button disabled={!noCancelAgreed || signature.trim().length < 2}
                 onClick={() => { setCancel("none"); setShowNoCancel(false); }}
-                className="btn-gold flex-1 disabled:opacity-50 py-3">אישור וחתימה</button>
+                className="btn-primary flex-1 disabled:opacity-50 py-3">אישור וחתימה</button>
               <button onClick={() => setShowNoCancel(false)} className="btn-ghost px-5 py-3 text-[var(--stone)]">ביטול</button>
             </div>
           </div>
@@ -394,7 +394,7 @@ function ComboInner() {
               <li className="flex gap-2"><span>🤖</span><span>לאורך החופשה תיעזר/י בצ׳אטבוט AI לכל שאלה.</span></li>
               <li className="flex gap-2"><span>🆘</span><span>במקרים חריגים (קבלת דירה עם נזק, מקרה קיצון) תוכל/י כמובן לפנות לנציגים שלנו דרך האתר.</span></li>
             </ul>
-            <button onClick={() => setShowAiInfo(false)} className="btn-gold mt-5 w-full py-3">הבנתי</button>
+            <button onClick={() => setShowAiInfo(false)} className="btn-primary mt-5 w-full py-3">הבנתי</button>
           </div>
         </div>
       )}

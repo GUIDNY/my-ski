@@ -80,7 +80,7 @@ export default function FlightSearch({ destination = "Val Thorens", defaultCheck
   return (
     <div className="card-luxury p-6 md:p-8" dir="rtl">
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-11 h-11 rounded-full border flex items-center justify-center text-lg flex-shrink-0" style={{ borderColor: "var(--gold-line)" }}>✈️</div>
+        <div className="w-11 h-11 rounded-full border flex items-center justify-center text-lg flex-shrink-0" style={{ borderColor: "var(--accent-line)" }}>✈️</div>
         <div>
           <h3 className="font-display font-medium text-lg" style={{ color: "var(--charcoal)" }}>חיפוש טיסות</h3>
           <p className="text-sm" style={{ color: "var(--stone)" }}>
@@ -94,8 +94,8 @@ export default function FlightSearch({ destination = "Val Thorens", defaultCheck
         <div>
           <label className="text-xs font-bold uppercase tracking-wider block mb-1.5" style={{ color: "var(--stone-soft)" }}>מוצא</label>
           <select value={origin} onChange={e => setOrigin(e.target.value)}
-            className="w-full border rounded px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--gold)]"
-            style={{ borderColor: "rgba(28,27,23,0.15)", color: "var(--charcoal)", background: "var(--ivory-deep)" }}>
+            className="w-full border rounded px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+            style={{ borderColor: "rgba(22,32,46,0.15)", color: "var(--charcoal)", background: "var(--ivory-deep)" }}>
             {AIRPORTS.map(a => <option key={a.code} value={a.code}>{a.label}</option>)}
           </select>
         </div>
@@ -104,8 +104,8 @@ export default function FlightSearch({ destination = "Val Thorens", defaultCheck
         <div>
           <label className="text-xs font-bold uppercase tracking-wider block mb-1.5" style={{ color: "var(--stone-soft)" }}>יעד</label>
           <select value={dest} onChange={e => setDest(e.target.value)}
-            className="w-full border rounded px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--gold)]"
-            style={{ borderColor: "rgba(28,27,23,0.15)", color: "var(--charcoal)", background: "var(--ivory-deep)" }}>
+            className="w-full border rounded px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+            style={{ borderColor: "rgba(22,32,46,0.15)", color: "var(--charcoal)", background: "var(--ivory-deep)" }}>
             {DEST_OPTIONS.map(d => (
               <option key={d.code} value={d.code}>{d.label} — {d.note}</option>
             ))}
@@ -115,7 +115,7 @@ export default function FlightSearch({ destination = "Val Thorens", defaultCheck
         {/* Passengers */}
         <div>
           <label className="text-xs font-bold uppercase tracking-wider block mb-1.5" style={{ color: "var(--stone-soft)" }}>נוסעים</label>
-          <div className="flex items-center border rounded overflow-hidden" style={{ borderColor: "rgba(28,27,23,0.15)", background: "var(--ivory-deep)" }}>
+          <div className="flex items-center border rounded overflow-hidden" style={{ borderColor: "rgba(22,32,46,0.15)", background: "var(--ivory-deep)" }}>
             <button onClick={() => setPax(Math.max(1, pax - 1))} className="px-4 py-3 font-bold text-lg transition-colors" style={{ color: "var(--stone)" }}>−</button>
             <span className="flex-1 text-center font-bold text-sm" style={{ color: "var(--charcoal)" }}>{pax} נוסעים</span>
             <button onClick={() => setPax(Math.min(9, pax + 1))} className="px-4 py-3 font-bold text-lg transition-colors" style={{ color: "var(--stone)" }}>+</button>
@@ -128,8 +128,8 @@ export default function FlightSearch({ destination = "Val Thorens", defaultCheck
         onClick={() => setCalOpen(o => !o)}
         className="w-full flex items-center justify-between rounded px-4 py-3 mb-3 border text-sm transition-colors"
         style={calOpen
-          ? { background: "var(--gold-wash)", borderColor: "var(--gold)" }
-          : { background: "var(--ivory-deep)", borderColor: "rgba(28,27,23,0.15)" }}
+          ? { background: "var(--accent-wash)", borderColor: "var(--accent)" }
+          : { background: "var(--ivory-deep)", borderColor: "rgba(22,32,46,0.15)" }}
       >
         <span className="font-bold" style={{ color: checkin && checkout ? "var(--charcoal)" : "var(--stone-soft)" }}>
           {checkin && checkout ? `${fmtDate(checkin)} — ${fmtDate(checkout)}` : "בחר תאריכים"}
@@ -161,7 +161,7 @@ export default function FlightSearch({ destination = "Val Thorens", defaultCheck
       {/* Search buttons */}
       <div className="flex gap-2.5">
         <button onClick={() => handleSearch("skyscanner")} disabled={searching}
-          className="btn-gold flex-1 disabled:opacity-60 py-3.5 text-sm">
+          className="btn-primary flex-1 disabled:opacity-60 py-3.5 text-sm">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21 4 19.5 2.5S18 2 16.5 3.5L13 7 4.8 5.2l-2 2 7.5 3.5L7.8 14l-1.4 1.4-.7 2.1 2.1-.7 1.4-1.4 3.5 7.5z"/>
           </svg>

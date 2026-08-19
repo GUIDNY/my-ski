@@ -50,9 +50,9 @@ function AptCard({ apt, nights, checkin, checkout, guests, rules }: {
       <div className="relative sm:w-56 h-48 sm:h-auto flex-shrink-0 overflow-hidden">
         <img src={apt.images?.[0] ?? "/hero-ski.jpg"} alt={apt.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(11,15,20,0.35) 0%, transparent 50%)" }} />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(10,27,51,0.35) 0%, transparent 50%)" }} />
         <div className="absolute top-3 right-3 text-xs font-bold px-2.5 py-1 tracking-wide"
-          style={{ background: "rgba(11,15,20,0.7)", color: "var(--gold-light)", backdropFilter: "blur(6px)" }}>
+          style={{ background: "rgba(10,27,51,0.7)", color: "var(--accent-light)", backdropFilter: "blur(6px)" }}>
           {cat === "cozy" ? "Cozy" : "Premium"}
         </div>
       </div>
@@ -63,7 +63,7 @@ function AptCard({ apt, nights, checkin, checkout, guests, rules }: {
           <div className="text-xs font-semibold uppercase tracking-wider mb-0.5 text-[var(--stone-soft)]">{apt.type}</div>
           <h3 className="font-display text-lg font-medium mb-1 text-[var(--charcoal)]">{apt.name}</h3>
           <p className="text-xs mb-3 flex items-center gap-1 text-[var(--stone-soft)]">
-            <IconMountain size={12} className="text-[var(--gold-deep)]" />
+            <IconMountain size={12} className="text-[var(--accent-deep)]" />
             Val Thorens, Trois Vallées
           </p>
 
@@ -85,7 +85,7 @@ function AptCard({ apt, nights, checkin, checkout, guests, rules }: {
         </div>
 
         {/* Price + CTA */}
-        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 sm:min-w-[130px] pt-4 sm:pt-0" style={{ borderTop: "1px solid rgba(28,27,23,0.08)" }}>
+        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 sm:min-w-[130px] pt-4 sm:pt-0" style={{ borderTop: "1px solid rgba(22,32,46,0.08)" }}>
           <div className="text-right">
             {checkin && checkout && nights > 0 && (
               <div className="text-xs font-semibold mb-0.5 text-[var(--stone-soft)]">החל מ</div>
@@ -98,7 +98,7 @@ function AptCard({ apt, nights, checkin, checkout, guests, rules }: {
               <div className="text-xs line-through text-[var(--stone-soft)]">€{apt.price_per_night}</div>
             )}
             {nights > 0 && (
-              <div className="text-sm font-bold mt-0.5 text-[var(--gold-deep)]">€{total.toLocaleString()} סה״כ</div>
+              <div className="text-sm font-bold mt-0.5 text-[var(--accent-deep)]">€{total.toLocaleString()} סה״כ</div>
             )}
             <div className="flex items-center gap-1 mt-1 justify-end">
               <IconStar size={12} className="text-amber-400" />
@@ -121,32 +121,32 @@ function ComboCard({ a, b, total, cap, checkin, checkout, guests, nights }: {
 }) {
   const query = new URLSearchParams({ a: a.id, b: b.id, checkin, checkout, guests: String(guests) }).toString();
   return (
-    <div className="card-luxury overflow-hidden" style={{ borderColor: "var(--gold-line)" }} dir="rtl">
+    <div className="card-luxury overflow-hidden" style={{ borderColor: "var(--accent-line)" }} dir="rtl">
       <div className="flex flex-col sm:flex-row">
         {/* two thumbnails */}
         <div className="relative sm:w-56 h-40 sm:h-auto flex-shrink-0 flex">
           <img src={a.images?.[0] ?? "/hero-ski.jpg"} alt={a.name} className="w-1/2 h-full object-cover" />
           <img src={b.images?.[0] ?? "/hero-ski.jpg"} alt={b.name} className="w-1/2 h-full object-cover" />
           <span className="absolute top-2 right-2 text-xs font-bold px-2.5 py-1 tracking-wide"
-            style={{ background: "rgba(11,15,20,0.7)", color: "var(--gold-light)", backdropFilter: "blur(6px)" }}>חבילה משולבת</span>
+            style={{ background: "rgba(10,27,51,0.7)", color: "var(--accent-light)", backdropFilter: "blur(6px)" }}>חבילה משולבת</span>
         </div>
         <div className="flex-1 p-5 flex flex-col sm:flex-row gap-4">
           <div className="flex-1 min-w-0">
             <h3 className="font-display text-lg font-medium mb-1 text-[var(--charcoal)]">{a.name} + {b.name}</h3>
-            <p className="text-xs mb-3 flex items-center gap-1 text-[var(--stone-soft)]"><IconMountain size={12} className="text-[var(--gold-deep)]" /> Val Thorens · 2 דירות צמודות</p>
+            <p className="text-xs mb-3 flex items-center gap-1 text-[var(--stone-soft)]"><IconMountain size={12} className="text-[var(--accent-deep)]" /> Val Thorens · 2 דירות צמודות</p>
             <div className="flex items-center gap-3 text-xs text-[var(--stone)]">
-              <span className="flex items-center gap-1 font-bold text-[var(--gold-deep)]"><IconUser size={12} /> עד {cap} אורחים</span>
+              <span className="flex items-center gap-1 font-bold text-[var(--accent-deep)]"><IconUser size={12} /> עד {cap} אורחים</span>
               <span>·</span>
               <span className="flex items-center gap-1"><IconBed size={12} /> {a.beds + b.beds} חד׳ סה״כ</span>
             </div>
           </div>
-          <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 sm:min-w-[150px] pt-4 sm:pt-0" style={{ borderTop: "1px solid rgba(28,27,23,0.08)" }}>
+          <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 sm:min-w-[150px] pt-4 sm:pt-0" style={{ borderTop: "1px solid rgba(22,32,46,0.08)" }}>
             <div className="text-right">
               {nights > 0 && <div className="text-xs font-semibold mb-0.5 text-[var(--stone-soft)]">{nights} לילות · 2 דירות</div>}
-              <div className="font-display text-2xl font-medium text-[var(--gold-deep)]">€{total.toLocaleString()}</div>
+              <div className="font-display text-2xl font-medium text-[var(--accent-deep)]">€{total.toLocaleString()}</div>
               <div className="text-xs text-[var(--stone-soft)]">סה״כ לשתי הדירות</div>
             </div>
-            <a href={`/combo?${query}`} className="btn-gold px-5 py-2.5 text-sm whitespace-nowrap">
+            <a href={`/combo?${query}`} className="btn-primary px-5 py-2.5 text-sm whitespace-nowrap">
               ← המשך להזמנה
             </a>
           </div>
@@ -265,7 +265,7 @@ function SearchPage() {
     <div className="min-h-screen" style={{ background: "var(--ivory)" }} dir="rtl">
 
       {/* ── Sticky header ─────────────────────────────────── */}
-      <div className="sticky top-0 z-40 backdrop-blur-sm border-b" style={{ background: "rgba(255,255,255,0.95)", borderColor: "rgba(28,27,23,0.08)" }}>
+      <div className="sticky top-0 z-40 backdrop-blur-sm border-b" style={{ background: "rgba(255,255,255,0.95)", borderColor: "rgba(22,32,46,0.08)" }}>
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-3 flex-wrap">
           <a href="/" className="flex-shrink-0"><Logo className="h-9" /></a>
 
@@ -273,12 +273,12 @@ function SearchPage() {
           <button onClick={() => setDateOpen(o => !o)}
             className="flex-1 flex items-center gap-2 rounded px-4 py-2.5 border min-w-0 overflow-hidden transition-colors text-right"
             style={dateOpen
-              ? { background: "var(--gold-wash)", borderColor: "var(--gold)" }
-              : { background: "var(--ivory-deep)", borderColor: "rgba(28,27,23,0.1)" }}>
-            <IconMountain size={13} className="flex-shrink-0 text-[var(--gold-deep)]" />
+              ? { background: "var(--accent-wash)", borderColor: "var(--accent)" }
+              : { background: "var(--ivory-deep)", borderColor: "rgba(22,32,46,0.1)" }}>
+            <IconMountain size={13} className="flex-shrink-0 text-[var(--accent-deep)]" />
             <span className="text-sm font-bold whitespace-nowrap hidden sm:inline text-[var(--charcoal)]">Val Thorens</span>
             <span className="text-xs hidden sm:block text-[var(--stone-soft)]">|</span>
-            <span className="hidden sm:flex items-center gap-1.5 text-sm whitespace-nowrap font-semibold" style={{ color: checkin && checkout ? "var(--charcoal)" : "var(--gold-deep)" }}>
+            <span className="hidden sm:flex items-center gap-1.5 text-sm whitespace-nowrap font-semibold" style={{ color: checkin && checkout ? "var(--charcoal)" : "var(--accent-deep)" }}>
               <IconCalendar size={13} />
               {checkin && checkout ? `${fmtDate(checkin)} — ${fmtDate(checkout)}` : "לחץ לבחירת תאריכים ←"}
             </span>
@@ -287,21 +287,21 @@ function SearchPage() {
               <IconUser size={13} /> {guests} אנשים
             </span>
             {nights > 0 && (
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 border" style={{ color: "var(--gold-deep)", background: "var(--gold-wash)", borderColor: "var(--gold-line)" }}>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 border" style={{ color: "var(--accent-deep)", background: "var(--accent-wash)", borderColor: "var(--accent-line)" }}>
                 {nights} לילות
               </span>
             )}
           </button>
 
           <button onClick={() => router.push("/")}
-            className="text-sm font-semibold hover:underline whitespace-nowrap flex-shrink-0 text-[var(--gold-deep)]">
+            className="text-sm font-semibold hover:underline whitespace-nowrap flex-shrink-0 text-[var(--accent-deep)]">
             שנה חיפוש
           </button>
         </div>
 
         {/* ── Calendar dropdown ─────────────────────────────── */}
         {dateOpen && (
-          <div className="absolute top-full left-0 right-0 z-50 px-4 pt-2 pb-4 backdrop-blur-sm border-b shadow-lg" style={{ background: "rgba(255,255,255,0.97)", borderColor: "rgba(28,27,23,0.08)" }}>
+          <div className="absolute top-full left-0 right-0 z-50 px-4 pt-2 pb-4 backdrop-blur-sm border-b shadow-lg" style={{ background: "rgba(255,255,255,0.97)", borderColor: "rgba(22,32,46,0.08)" }}>
             <div className="max-w-5xl mx-auto" ref={calendarRef}>
               {/* Guests row above calendar */}
               <div className="flex items-center justify-between mb-3 pt-1">
@@ -309,16 +309,16 @@ function SearchPage() {
                   <span className="text-xs font-bold text-[var(--stone)]">אנשים:</span>
                   <div className="flex items-center gap-2">
                     <button type="button" onClick={() => setGDraft(g => Math.max(1, g - 1))}
-                      className="w-7 h-7 rounded-full border flex items-center justify-center font-bold text-sm transition-colors hover:border-[var(--gold)] hover:text-[var(--gold-deep)]"
-                      style={{ borderColor: "rgba(28,27,23,0.15)", color: "var(--stone)" }}>−</button>
+                      className="w-7 h-7 rounded-full border flex items-center justify-center font-bold text-sm transition-colors hover:border-[var(--accent)] hover:text-[var(--accent-deep)]"
+                      style={{ borderColor: "rgba(22,32,46,0.15)", color: "var(--stone)" }}>−</button>
                     <span className="font-bold w-5 text-center text-sm text-[var(--charcoal)]">{gDraft}</span>
                     <button type="button" onClick={() => setGDraft(g => Math.min(12, g + 1))}
-                      className="w-7 h-7 rounded-full border flex items-center justify-center font-bold text-sm transition-colors hover:border-[var(--gold)] hover:text-[var(--gold-deep)]"
-                      style={{ borderColor: "rgba(28,27,23,0.15)", color: "var(--stone)" }}>+</button>
+                      className="w-7 h-7 rounded-full border flex items-center justify-center font-bold text-sm transition-colors hover:border-[var(--accent)] hover:text-[var(--accent-deep)]"
+                      style={{ borderColor: "rgba(22,32,46,0.15)", color: "var(--stone)" }}>+</button>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <button onClick={applySearch} className="btn-gold text-sm px-5 py-2">
+                  <button onClick={applySearch} className="btn-primary text-sm px-5 py-2">
                     שמור חיפוש ←
                   </button>
                   {checkin && checkout && (
@@ -350,7 +350,7 @@ function SearchPage() {
               {!loading && minPrice !== null && (
                 <span className="flex items-center gap-1">
                   {nights > 0 && <span className="text-[var(--stone-soft)]">·</span>}
-                  <span className="font-bold text-[var(--stone)]">החל מ <span className="text-[var(--gold-deep)]">€{minPrice}</span> ללילה</span>
+                  <span className="font-bold text-[var(--stone)]">החל מ <span className="text-[var(--accent-deep)]">€{minPrice}</span> ללילה</span>
                 </span>
               )}
             </p>
@@ -366,13 +366,13 @@ function SearchPage() {
             </button>
             <button onClick={() => setFilter("cozy")}
               className="flex items-center gap-1.5 px-4 py-2 rounded text-sm font-semibold transition-all"
-              style={filter === "cozy" ? { background: "var(--paper)", color: "var(--gold-deep)" } : { color: "var(--stone)" }}>
+              style={filter === "cozy" ? { background: "var(--paper)", color: "var(--accent-deep)" } : { color: "var(--stone)" }}>
               <IconHome size={14} />
               Cozy
             </button>
             <button onClick={() => setFilter("premium")}
               className="flex items-center gap-1.5 px-4 py-2 rounded text-sm font-semibold transition-all"
-              style={filter === "premium" ? { background: "var(--paper)", color: "var(--gold-deep)" } : { color: "var(--stone)" }}>
+              style={filter === "premium" ? { background: "var(--paper)", color: "var(--accent-deep)" } : { color: "var(--stone)" }}>
               <IconDiamond size={14} />
               Premium
             </button>
@@ -383,12 +383,12 @@ function SearchPage() {
         {loading ? (
           <div className="flex flex-col gap-4">
             {[1,2,3].map(i => (
-              <div key={i} className="h-44 rounded border animate-pulse" style={{ background: "var(--paper)", borderColor: "rgba(28,27,23,0.08)" }} />
+              <div key={i} className="h-44 rounded border animate-pulse" style={{ background: "var(--paper)", borderColor: "rgba(22,32,46,0.08)" }} />
             ))}
           </div>
         ) : combos.length > 0 ? (
           <div dir="rtl">
-            <div className="rounded p-5 mb-5 text-center border" style={{ background: "var(--gold-wash)", borderColor: "var(--gold-line)" }}>
+            <div className="rounded p-5 mb-5 text-center border" style={{ background: "var(--accent-wash)", borderColor: "var(--accent-line)" }}>
               <p className="font-display text-lg font-medium mb-1 text-[var(--charcoal)]">אין דירה בודדת ל-{guests} אורחים — אבל יש פתרון! 🎿</p>
               <p className="text-sm text-[var(--stone)]">שילבנו עבורכם שתי דירות צמודות שמתאימות יחד לכל הקבוצה. מחיר כולל, הזמנה אחת.</p>
             </div>
@@ -401,12 +401,12 @@ function SearchPage() {
           </div>
         ) : shown.length === 0 ? (
           <div className="text-center py-24">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full border mb-4" style={{ borderColor: "var(--gold-line)" }}>
-              <IconSearch size={24} className="text-[var(--gold-deep)]" />
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full border mb-4" style={{ borderColor: "var(--accent-line)" }}>
+              <IconSearch size={24} className="text-[var(--accent-deep)]" />
             </div>
             <p className="text-lg font-medium text-[var(--stone)]">לא נמצאו דירות מתאימות{guests > 1 ? ` ל-${guests} אורחים` : ""}</p>
             <button onClick={() => setFilter("all")}
-              className="mt-3 text-sm font-semibold hover:underline text-[var(--gold-deep)]">
+              className="mt-3 text-sm font-semibold hover:underline text-[var(--accent-deep)]">
               הצג את כל הדירות
             </button>
           </div>
