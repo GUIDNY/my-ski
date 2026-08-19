@@ -30,63 +30,55 @@ export default function Navbar() {
     )}
     <nav
       dir="rtl"
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
       style={{
-        background: scrolled ? "rgba(255,255,255,0.97)" : "transparent",
-        backdropFilter: scrolled ? "blur(12px)" : "none",
-        boxShadow: scrolled ? "0 1px 0 rgba(0,0,0,0.08)" : "none",
+        background: scrolled ? "rgba(11,15,20,0.92)" : "transparent",
+        backdropFilter: scrolled ? "blur(16px)" : "none",
+        borderBottom: scrolled ? "1px solid var(--ink-line)" : "1px solid transparent",
       }}
     >
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 h-[72px] flex items-center justify-between">
         {/* Logo */}
         <a href="/" className="flex items-center">
           <img src="/skishare-logo.png" alt="SkiShare"
-            className="h-11 w-auto transition-all"
-            style={{ filter: scrolled ? "none" : "brightness(0) invert(1)" }} />
+            className="h-10 w-auto transition-all"
+            style={{ filter: "brightness(0) invert(1)" }} />
         </a>
 
         {/* Center nav */}
         <div className="hidden md:flex items-center gap-1">
           <a href="/apartments"
-            className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-            style={{ color: scrolled ? "#374151" : "rgba(255,255,255,0.9)" }}>
+            className="px-4 py-2 text-sm font-medium transition-colors hover:text-white"
+            style={{ color: "rgba(250,247,241,0.78)" }}>
             דירות
           </a>
           <a href="/transfers"
-            className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-            style={{ color: scrolled ? "#374151" : "rgba(255,255,255,0.9)" }}>
+            className="px-4 py-2 text-sm font-medium transition-colors hover:text-white"
+            style={{ color: "rgba(250,247,241,0.78)" }}>
             הסעות
           </a>
           <a href="/seasonaires"
-            className="px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-1"
-            style={{ color: scrolled ? "#1d4ed8" : "white" }}>
-            ❄️ אזור הסיזיונרים
+            className="px-4 py-2 text-sm font-bold transition-colors flex items-center gap-1.5"
+            style={{ color: "var(--gold-light)" }}>
+            ❄ אזור הסיזיונרים
           </a>
         </div>
 
         {/* Right side */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           {isAdmin && (
             <a href="/admin"
-              className="flex items-center gap-1.5 text-sm font-bold px-3 py-1.5 rounded-full transition-colors"
-              style={{
-                background: scrolled ? "#f3e8ff" : "rgba(255,255,255,0.18)",
-                color: scrolled ? "#7c3aed" : "white",
-                border: scrolled ? "none" : "1px solid rgba(255,255,255,0.35)",
-              }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full transition-colors border"
+              style={{ borderColor: "var(--ink-line-strong)", color: "var(--gold-light)" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
               ניהול
             </a>
           )}
           {user ? (
             <a href="/my"
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm font-semibold transition-all"
-              style={{
-                borderColor: scrolled ? "#d1d5db" : "rgba(255,255,255,0.4)",
-                color: scrolled ? "#374151" : "white",
-                background: scrolled ? "transparent" : "rgba(255,255,255,0.1)",
-              }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              className="flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-sm font-semibold transition-all hover:border-[var(--gold)]"
+              style={{ borderColor: "var(--ink-line-strong)", color: "var(--ivory)" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
               </svg>
               האזור שלי
@@ -94,12 +86,8 @@ export default function Navbar() {
           ) : (
             <button
               onClick={() => setShowAuth(true)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold transition-all"
-              style={{
-                background: scrolled ? "#1d4ed8" : "rgba(255,255,255,0.18)",
-                color: "white",
-                border: scrolled ? "none" : "1px solid rgba(255,255,255,0.35)",
-              }}>
+              className="btn-gold px-5 py-2 text-sm"
+            >
               כניסה / הרשמה
             </button>
           )}

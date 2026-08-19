@@ -22,8 +22,8 @@ export default function AccessibilityPage() {
       <H2>פנייה בנושא נגישות</H2>
       <p>נתקלת בבעיית נגישות, או יש לך הצעה לשיפור? נשמח שתפנה אלינו ונטפל בהקדם:</p>
       <UL>
-        <li>דוא״ל: <a href="mailto:skishareteam@gmail.com" className="text-blue-600">skishareteam@gmail.com</a></li>
-        <li>טלפון: <a href="tel:+972547701899" className="text-blue-600">054-7701899</a></li>
+        <li>דוא״ל: <a href="mailto:skishareteam@gmail.com" style={{ color: "var(--gold-deep)" }}>skishareteam@gmail.com</a></li>
+        <li>טלפון: <a href="tel:+972547701899" style={{ color: "var(--gold-deep)" }}>054-7701899</a></li>
       </UL>
       <p>בפנייתך נא לציין את העמוד/הרכיב הרלוונטי ותיאור הבעיה, כדי שנוכל לסייע במהירות.</p>
     </LegalShell>

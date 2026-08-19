@@ -12,7 +12,7 @@ const FLAKES = [
 
 export default function SkiLoader({ label = "רגע, מכינים את החופשה…" }: { label?: string }) {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#f8f9ff] overflow-hidden relative" dir="rtl">
+    <div className="min-h-screen flex flex-col items-center justify-center overflow-hidden relative" style={{ background: "var(--ink)" }} dir="rtl">
       <style>{`
         @keyframes ski-fall { 0% { transform: translateY(-30px); opacity: 0 } 10% { opacity: .9 } 100% { transform: translateY(105vh); opacity: 0 } }
         @keyframes ski-slide { 0%,100% { transform: translateX(-12px) rotate(-8deg) } 50% { transform: translateX(12px) rotate(6deg) } }
@@ -20,16 +20,15 @@ export default function SkiLoader({ label = "רגע, מכינים את החופ�
       `}</style>
 
       {FLAKES.map((f, i) => (
-        <span key={i} className="absolute top-0 text-blue-200 select-none"
-          style={{ left: f.left, fontSize: f.size, animation: `ski-fall ${f.dur} linear ${f.delay} infinite` }}>❄</span>
+        <span key={i} className="absolute top-0 select-none" style={{ left: f.left, fontSize: f.size, color: "var(--gold-line)", animation: `ski-fall ${f.dur} linear ${f.delay} infinite` }}>❄</span>
       ))}
 
       <div className="relative z-10 flex flex-col items-center">
         <div className="text-6xl" style={{ animation: "ski-slide 1.1s ease-in-out infinite" }}>⛷️</div>
-        <div className="mt-6 h-1.5 w-40 rounded-full bg-blue-100 overflow-hidden">
-          <div className="h-full w-1/2 rounded-full bg-blue-600" style={{ animation: "ski-slide 1.1s ease-in-out infinite" }} />
+        <div className="mt-6 h-[3px] w-40 overflow-hidden rounded-full" style={{ background: "var(--ink-line)" }}>
+          <div className="h-full w-1/2 rounded-full" style={{ background: "linear-gradient(90deg, var(--gold-deep), var(--gold))", animation: "ski-slide 1.1s ease-in-out infinite" }} />
         </div>
-        <p className="mt-4 text-sm font-semibold" style={{ color: "#0e3566", animation: "ski-bob 1.6s ease-in-out infinite" }}>{label}</p>
+        <p className="font-display mt-5 text-base" style={{ color: "var(--ivory)", animation: "ski-bob 1.6s ease-in-out infinite" }}>{label}</p>
       </div>
     </div>
   );

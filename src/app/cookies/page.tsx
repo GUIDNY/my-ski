@@ -31,7 +31,7 @@ export default function CookiesPage() {
       <p>ניתן לחסום או למחוק עוגיות דרך הגדרות הדפדפן/המכשיר. חסימת עוגיות חיוניות עלולה לפגוע ביכולת להתחבר ולהשתמש בחלק מהשירותים.</p>
 
       <H2>6. יצירת קשר</H2>
-      <p>לשאלות בנוגע למדיניות זו או לפרטיות, ניתן לפנות אלינו במייל <b>skishareteam@gmail.com</b>. ראה/י גם את <a href="/privacy" className="text-blue-600 hover:underline">מדיניות הפרטיות</a> המלאה.</p>
+      <p>לשאלות בנוגע למדיניות זו או לפרטיות, ניתן לפנות אלינו במייל <b>skishareteam@gmail.com</b>. ראה/י גם את <a href="/privacy" className="underline transition-colors">מדיניות הפרטיות</a> המלאה.</p>
     </LegalShell>
   );
 }

@@ -213,6 +213,22 @@ body {
   -webkit-backdrop-filter: blur(20px);
 }
 
+.footer-social-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--ink-line-strong);
+  color: var(--stone-soft);
+  transition: border-color 0.3s ease, color 0.3s ease;
+}
+.footer-social-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold-light);
+}
+
 ::selection {
   background: var(--gold);
   color: var(--ink);

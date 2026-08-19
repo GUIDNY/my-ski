@@ -24,13 +24,14 @@ export default function MobileTabBar() {
       {/* spacer so content isn't hidden behind the fixed bar */}
       <div className="h-[68px] md:hidden" aria-hidden />
       <nav dir="rtl"
-        className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur-md border-t border-gray-200 flex"
-        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+        className="md:hidden fixed bottom-0 inset-x-0 z-50 flex backdrop-blur-md"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)", background: "rgba(11,15,20,0.94)", borderTop: "1px solid var(--ink-line)" }}>
         {tabs.map(({ href, label, icon: Icon }) => {
           const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
           return (
             <a key={href} href={href}
-              className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 transition-colors ${active ? "text-blue-600" : "text-gray-400"}`}>
+              className="flex-1 flex flex-col items-center justify-center gap-1 py-2.5 transition-colors"
+              style={{ color: active ? "var(--gold-light)" : "rgba(250,247,241,0.45)" }}>
               <Icon size={22} />
               <span className={`text-[11px] ${active ? "font-bold" : "font-medium"}`}>{label}</span>
             </a>
