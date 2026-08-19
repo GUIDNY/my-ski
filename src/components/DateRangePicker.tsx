@@ -40,17 +40,17 @@ export default function DateRangePicker({ value, onChange }: Props) {
   return (
     <div className="relative" ref={ref}>
       <button onClick={() => setOpen(!open)} className="w-full text-right">
-        <div className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-1">תאריכים</div>
+        <div className="text-xs font-bold tracking-widest uppercase mb-1" style={{ color: "var(--stone-soft)" }}>תאריכים</div>
         <div className="flex items-center gap-2">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--stone-soft)" strokeWidth="2">
             <rect x="3" y="4" width="18" height="18" rx="2" />
             <path d="M16 2v4M8 2v4M3 10h18" />
           </svg>
-          <span className={`font-medium text-[15px] ${value?.from ? "text-gray-900" : "text-gray-400"}`}>
+          <span className="font-medium text-[15px]" style={{ color: value?.from ? "var(--charcoal)" : "var(--stone-soft)" }}>
             {label}
           </span>
           {nights && (
-            <span className="text-xs text-blue-500 font-semibold bg-blue-50 px-2 py-0.5 rounded-full">
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ color: "var(--gold-deep)", background: "var(--gold-wash)" }}>
               {nights} לילות
             </span>
           )}
@@ -59,8 +59,8 @@ export default function DateRangePicker({ value, onChange }: Props) {
 
       {open && (
         <div
-          className="absolute top-full mt-3 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 p-4"
-          style={{ right: "-120px" }}
+          className="absolute top-full mt-3 rounded z-50 p-4"
+          style={{ right: "-120px", background: "var(--paper)", border: "1px solid rgba(28,27,23,0.08)", boxShadow: "0 24px 48px -24px rgba(11,15,20,0.35)" }}
         >
           <DayPicker
             mode="range"
@@ -76,19 +76,19 @@ export default function DateRangePicker({ value, onChange }: Props) {
               formatWeekdayName: (d) => HE_DAYS[d.getDay()],
             }}
             classNames={{
-              today:        "font-black !text-blue-600",
-              selected:     "!bg-blue-600 !text-white rounded-lg",
-              range_middle: "!bg-blue-50 !text-blue-900",
-              range_start:  "!bg-blue-600 !text-white rounded-lg",
-              range_end:    "!bg-blue-600 !text-white rounded-lg",
-              day_button:   "w-9 h-9 text-sm hover:bg-blue-50 rounded-lg transition-colors cursor-pointer",
+              today:        "font-black !text-[var(--gold-deep)]",
+              selected:     "!bg-[var(--gold)] !text-[var(--ink)] rounded-lg",
+              range_middle: "!bg-[var(--gold-wash)] !text-[var(--charcoal)]",
+              range_start:  "!bg-[var(--gold)] !text-[var(--ink)] rounded-lg",
+              range_end:    "!bg-[var(--gold)] !text-[var(--ink)] rounded-lg",
+              day_button:   "w-9 h-9 text-sm hover:bg-[var(--gold-wash)] rounded-lg transition-colors cursor-pointer",
               months:       "flex gap-6",
               nav:          "flex items-center justify-between mb-2",
             }}
           />
-          <div className="flex justify-between items-center pt-3 border-t border-gray-100 mt-2">
-            <button onClick={() => { onChange(undefined); }} className="text-sm text-gray-400 hover:text-gray-600">נקה</button>
-            {nights && <span className="text-sm font-bold text-blue-600">{nights} לילות נבחרו</span>}
+          <div className="flex justify-between items-center pt-3 mt-2" style={{ borderTop: "1px solid rgba(28,27,23,0.08)" }}>
+            <button onClick={() => { onChange(undefined); }} className="text-sm hover:opacity-70 transition-opacity" style={{ color: "var(--stone-soft)" }}>נקה</button>
+            {nights && <span className="text-sm font-bold" style={{ color: "var(--gold-deep)" }}>{nights} לילות נבחרו</span>}
           </div>
         </div>
       )}

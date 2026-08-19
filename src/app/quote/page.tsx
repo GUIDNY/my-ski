@@ -26,7 +26,7 @@ function QuotePage() {
 export default function QuotePageWrapper() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-[#f7f9fb]">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ivory)" }}>
         <SkiLoader />
       </div>
     }>

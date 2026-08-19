@@ -35,10 +35,10 @@ function MonthGrid({ year, month, from, to, hov, onEnter, onLeave, onClick }: {
 
   return (
     <div className="flex-1 min-w-0" dir="ltr">
-      <p className="text-sm font-bold text-gray-900 text-center mb-3">{MONTHS[month]} {year}</p>
+      <p className="text-sm font-bold text-center mb-3" style={{ color: "var(--charcoal)" }}>{MONTHS[month]} {year}</p>
       <div className="grid grid-cols-7">
         {DAYS.map(d => (
-          <div key={d} className="h-8 flex items-center justify-center text-xs font-semibold text-gray-400">{d}</div>
+          <div key={d} className="h-8 flex items-center justify-center text-xs font-semibold" style={{ color: "var(--stone-soft)" }}>{d}</div>
         ))}
       </div>
       <div className="grid grid-cols-7">
@@ -57,15 +57,21 @@ function MonthGrid({ year, month, from, to, hov, onEnter, onLeave, onClick }: {
               onMouseLeave={onLeave}
               onClick={() => !disabled && onClick(date)}
             >
-              {between   && <div className="absolute top-1.5 bottom-1.5 left-0 right-0 bg-blue-50" />}
-              {isStart && hasRange && <div className="absolute top-1.5 bottom-1.5 left-1/2 right-0 bg-blue-50" />}
-              {isEnd   && hasRange && <div className="absolute top-1.5 bottom-1.5 left-0 right-1/2 bg-blue-50" />}
-              <div className={[
-                "relative z-10 w-9 h-9 flex items-center justify-center rounded-full text-sm font-medium select-none transition-colors",
-                disabled ? "text-gray-300" : "",
-                !disabled && !isStart && !isEnd ? "hover:bg-blue-100 hover:text-blue-700 text-gray-800" : "",
-                isStart || isEnd ? "bg-blue-600 text-white font-bold shadow" : "",
-              ].join(" ")}>
+              {between   && <div className="absolute top-1.5 bottom-1.5 left-0 right-0" style={{ background: "var(--gold-wash)" }} />}
+              {isStart && hasRange && <div className="absolute top-1.5 bottom-1.5 left-1/2 right-0" style={{ background: "var(--gold-wash)" }} />}
+              {isEnd   && hasRange && <div className="absolute top-1.5 bottom-1.5 left-0 right-1/2" style={{ background: "var(--gold-wash)" }} />}
+              <div
+                className={`relative z-10 w-9 h-9 flex items-center justify-center rounded-full text-sm select-none transition-colors ${
+                  !disabled && !isStart && !isEnd ? "hover:bg-[var(--gold-wash)]" : ""
+                }`}
+                style={
+                  isStart || isEnd
+                    ? { background: "var(--gold)", color: "var(--ink)", fontWeight: 700 }
+                    : disabled
+                      ? { color: "#d4cfc2" }
+                      : { color: "var(--charcoal)", fontWeight: 500 }
+                }
+              >
                 {date.getDate()}
               </div>
             </div>
@@ -117,20 +123,24 @@ export default function SkiCalendar({ initialFrom, initialTo, onSelect, onCancel
   const navBtn = (disabled: boolean, onClick: () => void, icon: React.ReactNode) => (
     <button type="button" onClick={() => !disabled && onClick()}
       className={`w-9 h-9 flex items-center justify-center rounded-full border transition-colors
-        ${disabled ? "border-gray-100 text-gray-300 cursor-not-allowed" : "border-gray-200 text-gray-600 hover:border-blue-400 hover:text-blue-600"}`}>
+        ${disabled ? "border-gray-100 text-gray-300 cursor-not-allowed" : "hover:border-[var(--gold)] hover:text-[var(--gold-deep)]"}`}
+      style={!disabled ? { borderColor: "rgba(28,27,23,0.14)", color: "var(--stone)" } : undefined}>
       {icon}
     </button>
   );
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-xl p-5" dir="rtl">
+    <div className="card-luxury p-5" dir="rtl" style={{ boxShadow: "0 24px 48px -24px rgba(11,15,20,0.3)" }}>
       {/* Tabs */}
       <div className="flex gap-2 mb-4">
         {(["from","to"] as const).map(w => (
           <button key={w} type="button" onClick={() => setPicking(w)}
-            className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all border-2 ${
-              picking === w ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-100 text-gray-500 hover:border-gray-200"
-            }`}>
+            className="flex-1 py-2.5 rounded text-xs font-bold transition-all border"
+            style={
+              picking === w
+                ? { borderColor: "var(--gold)", background: "var(--gold-wash)", color: "var(--gold-deep)" }
+                : { borderColor: "rgba(28,27,23,0.1)", color: "var(--stone)" }
+            }>
             {w === "from" ? "✈️ יציאה" : "🏠 חזרה"} — {fmtD(w === "from" ? from : to) ?? "בחר"}
           </button>
         ))}
@@ -147,7 +157,7 @@ export default function SkiCalendar({ initialFrom, initialTo, onSelect, onCancel
         <MonthGrid year={base.getFullYear()} month={base.getMonth()}
           from={from} to={to} hov={picking === "to" ? hov : null}
           onEnter={setHov} onLeave={() => setHov(null)} onClick={handleDay} />
-        <div className="hidden md:block w-px bg-gray-100" />
+        <div className="hidden md:block w-px" style={{ background: "rgba(28,27,23,0.08)" }} />
         <div className="hidden md:flex flex-1">
           <MonthGrid year={next.getFullYear()} month={next.getMonth()}
             from={from} to={to} hov={picking === "to" ? hov : null}
@@ -156,18 +166,19 @@ export default function SkiCalendar({ initialFrom, initialTo, onSelect, onCancel
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-4">
+      <div className="flex items-center justify-between pt-4 mt-4" style={{ borderTop: "1px solid rgba(28,27,23,0.08)" }}>
         <button type="button" onClick={() => { setFrom(null); setTo(null); setPicking("from"); }}
-          className="text-sm text-gray-400 hover:text-gray-600">נקה תאריכים</button>
+          className="text-sm hover:opacity-70 transition-opacity" style={{ color: "var(--stone-soft)" }}>נקה תאריכים</button>
         <div className="flex items-center gap-3">
           {nights ? (
-            <span className="text-sm font-bold text-blue-600">{nights} לילות ✓</span>
+            <span className="text-sm font-bold" style={{ color: "var(--gold-deep)" }}>{nights} לילות ✓</span>
           ) : (
-            <span className="text-xs text-gray-400">{picking === "from" ? "בחר תאריך יציאה" : "עכשיו בחר חזרה"}</span>
+            <span className="text-xs" style={{ color: "var(--stone-soft)" }}>{picking === "from" ? "בחר תאריך יציאה" : "עכשיו בחר חזרה"}</span>
           )}
           {onCancel && (
             <button type="button" onClick={onCancel}
-              className="text-sm text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50">
+              className="text-sm px-3 py-1.5 rounded border hover:bg-[var(--gold-wash)] transition-colors"
+              style={{ color: "var(--stone)", borderColor: "rgba(28,27,23,0.14)" }}>
               ביטול
             </button>
           )}
