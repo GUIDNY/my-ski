@@ -62,15 +62,18 @@ function MonthGrid({
               onMouseLeave={onLeave}
               onClick={() => !disabled && onClick(date)}
             >
-              {between   && <div className="absolute top-1.5 bottom-1.5 left-0 right-0 bg-blue-50" />}
-              {isStart && hasRange && <div className="absolute top-1.5 bottom-1.5 left-1/2 right-0 bg-blue-50" />}
-              {isEnd   && hasRange && <div className="absolute top-1.5 bottom-1.5 left-0 right-1/2 bg-blue-50" />}
-              <div className={[
-                `relative z-10 ${circle} flex items-center justify-center rounded-full select-none transition-colors font-medium`,
-                disabled ? "text-gray-300" : "",
-                !disabled && !isStart && !isEnd ? "hover:bg-blue-100 hover:text-blue-700 text-gray-800" : "",
-                isStart || isEnd ? "bg-blue-600 text-white font-bold shadow" : "",
-              ].join(" ")}>
+              {between   && <div className="absolute top-1.5 bottom-1.5 left-0 right-0" style={{ background: "var(--gold-wash)" }} />}
+              {isStart && hasRange && <div className="absolute top-1.5 bottom-1.5 left-1/2 right-0" style={{ background: "var(--gold-wash)" }} />}
+              {isEnd   && hasRange && <div className="absolute top-1.5 bottom-1.5 left-0 right-1/2" style={{ background: "var(--gold-wash)" }} />}
+              <div className={`relative z-10 ${circle} flex items-center justify-center rounded-full select-none transition-colors font-medium ${!disabled && !isStart && !isEnd ? "hover:bg-[var(--gold-wash)]" : ""}`}
+                style={
+                  isStart || isEnd
+                    ? { background: "var(--gold)", color: "var(--ink)", fontWeight: 700 }
+                    : disabled
+                      ? { color: "#d4cfc2" }
+                      : { color: "var(--charcoal)" }
+                }
+              >
                 {date.getDate()}
               </div>
             </div>
@@ -84,12 +87,12 @@ function MonthGrid({
 /* ── Icons ─────────────────────────────────────────────────── */
 const IconMountain = () => (
   <svg width="16" height="14" viewBox="0 0 32 28" fill="none">
-    <polygon points="16,2 30,26 2,26" fill="#dbeafe" stroke="#2563eb" strokeWidth="2.2" strokeLinejoin="round"/>
-    <polygon points="16,10 23,26 9,26" fill="white" stroke="#2563eb" strokeWidth="1.5" strokeLinejoin="round"/>
+    <polygon points="16,2 30,26 2,26" fill="none" stroke="var(--gold-deep)" strokeWidth="2.2" strokeLinejoin="round"/>
+    <polygon points="16,10 23,26 9,26" fill="none" stroke="var(--gold-deep)" strokeWidth="1.5" strokeLinejoin="round"/>
   </svg>
 );
 const IconCal = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--stone-soft)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
   </svg>
 );
@@ -148,7 +151,7 @@ export default function SearchWidget() {
   const navBtn = (disabled: boolean, onClick: () => void, children: React.ReactNode) => (
     <button onClick={() => !disabled && onClick()}
       className={`w-9 h-9 flex items-center justify-center rounded-full border transition-colors
-        ${disabled ? "border-gray-100 text-gray-300 cursor-not-allowed" : "border-gray-200 text-gray-600 hover:border-blue-400 hover:text-blue-600"}`}>
+        ${disabled ? "border-gray-100 text-gray-300 cursor-not-allowed" : "border-gray-200 text-gray-600 hover:border-[var(--gold)] hover:text-[var(--gold-deep)]"}`}>
       {children}
     </button>
   );
@@ -157,7 +160,7 @@ export default function SearchWidget() {
     <div ref={ref} className="relative w-full max-w-3xl" dir="rtl">
 
       {/* ══ DESKTOP search bar (md+) ══════════════════════════ */}
-      <div className="hidden md:flex bg-white items-stretch rounded-2xl" style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.18)" }}>
+      <div className="hidden md:flex items-stretch rounded" style={{ background: "var(--paper)", boxShadow: "0 20px 60px -12px rgba(11,15,20,0.45)" }}>
         <div className="flex-1 px-6 py-5 text-right">
           <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-1.5">יעד</div>
           <div className="flex items-center gap-2">
@@ -167,7 +170,7 @@ export default function SearchWidget() {
         </div>
         <div className="w-px bg-gray-100 my-4" />
         <button onClick={() => openPicker("from")}
-          className={`flex-1 px-5 py-5 text-right transition-colors hover:bg-gray-50 ${open && picking === "from" ? "bg-blue-50/60" : ""}`}>
+          className={`flex-1 px-5 py-5 text-right transition-colors hover:bg-gray-50 ${open && picking === "from" ? "bg-[var(--gold-wash)]" : ""}`}>
           <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-1.5">יציאה</div>
           <div className="flex items-center gap-2">
             <IconCal />
@@ -176,35 +179,35 @@ export default function SearchWidget() {
         </button>
         <div className="w-px bg-gray-100 my-4" />
         <button onClick={() => openPicker("to")}
-          className={`flex-1 px-5 py-5 text-right transition-colors hover:bg-gray-50 ${open && picking === "to" ? "bg-blue-50/60" : ""}`}>
+          className={`flex-1 px-5 py-5 text-right transition-colors hover:bg-gray-50 ${open && picking === "to" ? "bg-[var(--gold-wash)]" : ""}`}>
           <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-1.5">חזרה</div>
           <div className="flex items-center gap-2">
             <IconCal />
             <span className={`text-sm font-semibold ${to ? "text-gray-900" : "text-gray-400"}`}>{fmt(to) ?? "הוסף תאריך"}</span>
           </div>
-          {nights && <div className="text-[10px] text-blue-500 font-bold mt-0.5">{nights} לילות</div>}
+          {nights && <div className="text-[10px] text-[var(--gold-deep)] font-bold mt-0.5">{nights} לילות</div>}
         </button>
         <div className="w-px bg-gray-100 my-4" />
         <div className="flex items-center px-4 py-5">
           <div>
             <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-1.5">אנשים</div>
             <div className="flex items-center gap-2">
-              <button onClick={() => setGuests(g => Math.max(1, g - 1))} className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold text-sm transition-colors">−</button>
+              <button onClick={() => setGuests(g => Math.max(1, g - 1))} className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[var(--gold)] hover:text-[var(--gold-deep)] font-bold text-sm transition-colors">−</button>
               <span className="font-bold text-gray-900 w-5 text-center text-sm">{guests}</span>
-              <button onClick={() => setGuests(g => Math.min(12, g + 1))} className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold text-sm transition-colors">+</button>
+              <button onClick={() => setGuests(g => Math.min(12, g + 1))} className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[var(--gold)] hover:text-[var(--gold-deep)] font-bold text-sm transition-colors">+</button>
             </div>
           </div>
         </div>
         <div className="flex items-center px-3">
-          <button onClick={handleSearch} className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold px-7 py-4 rounded-xl transition-all flex items-center gap-2 text-sm">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <button onClick={handleSearch} className="btn-gold active:scale-95 px-7 py-4 rounded transition-all flex items-center gap-2 text-sm">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             חפש
           </button>
         </div>
       </div>
 
       {/* ══ MOBILE search bar (< md) ══════════════════════════ */}
-      <div className="md:hidden bg-white rounded-2xl overflow-hidden" style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.18)" }}>
+      <div className="md:hidden rounded overflow-hidden" style={{ background: "var(--paper)", boxShadow: "0 20px 60px -12px rgba(11,15,20,0.45)" }}>
         {/* Destination row */}
         <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-gray-100">
           <IconMountain />
@@ -216,7 +219,7 @@ export default function SearchWidget() {
         {/* Dates row */}
         <div className="grid grid-cols-2 border-b border-gray-100">
           <button onClick={() => openPicker("from")}
-            className={`px-5 py-3.5 text-right border-l border-gray-100 transition-colors ${open && picking === "from" ? "bg-blue-50" : "hover:bg-gray-50"}`}>
+            className={`px-5 py-3.5 text-right border-l border-gray-100 transition-colors ${open && picking === "from" ? "bg-[var(--gold-wash)]" : "hover:bg-gray-50"}`}>
             <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">יציאה</div>
             <div className="flex items-center gap-1.5">
               <IconCal />
@@ -224,13 +227,13 @@ export default function SearchWidget() {
             </div>
           </button>
           <button onClick={() => openPicker("to")}
-            className={`px-5 py-3.5 text-right transition-colors ${open && picking === "to" ? "bg-blue-50" : "hover:bg-gray-50"}`}>
+            className={`px-5 py-3.5 text-right transition-colors ${open && picking === "to" ? "bg-[var(--gold-wash)]" : "hover:bg-gray-50"}`}>
             <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">חזרה</div>
             <div className="flex items-center gap-1.5">
               <IconCal />
               <span className={`text-sm font-semibold ${to ? "text-gray-900" : "text-gray-400"}`}>{fmt(to) ?? "בחר"}</span>
             </div>
-            {nights && <div className="text-[10px] text-blue-500 font-bold mt-0.5">{nights} לילות</div>}
+            {nights && <div className="text-[10px] text-[var(--gold-deep)] font-bold mt-0.5">{nights} לילות</div>}
           </button>
         </div>
         {/* Guests + Search */}
@@ -238,13 +241,13 @@ export default function SearchWidget() {
           <div className="flex items-center gap-3">
             <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">אנשים</span>
             <div className="flex items-center gap-2">
-              <button onClick={() => setGuests(g => Math.max(1, g - 1))} className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold transition-colors">−</button>
+              <button onClick={() => setGuests(g => Math.max(1, g - 1))} className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[var(--gold)] hover:text-[var(--gold-deep)] font-bold transition-colors">−</button>
               <span className="font-bold text-gray-900 w-6 text-center">{guests}</span>
-              <button onClick={() => setGuests(g => Math.min(12, g + 1))} className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold transition-colors">+</button>
+              <button onClick={() => setGuests(g => Math.min(12, g + 1))} className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[var(--gold)] hover:text-[var(--gold-deep)] font-bold transition-colors">+</button>
             </div>
           </div>
-          <button onClick={handleSearch} className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold px-6 py-2.5 rounded-xl transition-all flex items-center gap-2 text-sm">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <button onClick={handleSearch} className="btn-gold active:scale-95 px-6 py-2.5 rounded transition-all flex items-center gap-2 text-sm">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             חפש
           </button>
         </div>
@@ -252,14 +255,14 @@ export default function SearchWidget() {
 
       {/* ══ Calendar dropdown ══════════════════════════════════ */}
       {open && (
-        <div className="absolute top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 p-4 md:p-6" style={{ right: 0, left: 0 }}>
+        <div className="absolute top-full mt-2 rounded shadow-2xl border z-50 p-4 md:p-6" style={{ right: 0, left: 0, background: "var(--paper)", borderColor: "rgba(28,27,23,0.08)" }}>
 
           {/* Tabs */}
           <div className="flex gap-2 mb-4">
             {(["from","to"] as const).map(w => (
               <button key={w} onClick={() => setPicking(w)}
-                className={`flex-1 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all border-2 ${
-                  picking === w ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-100 text-gray-500 hover:border-gray-200"
+                className={`flex-1 py-2.5 rounded text-xs md:text-sm font-bold transition-all border-2 ${
+                  picking === w ? "border-[var(--gold)] bg-[var(--gold-wash)] text-[var(--gold-deep)]" : "border-gray-100 text-gray-500 hover:border-gray-200"
                 }`}>
                 {w === "from" ? "✈️ יציאה" : "🏠 חזרה"} — {fmt(w === "from" ? from : to) ?? "בחר"}
               </button>
@@ -296,7 +299,7 @@ export default function SearchWidget() {
             <button onClick={() => { setFrom(null); setTo(null); setPicking("from"); }}
               className="text-sm text-gray-400 hover:text-gray-600 transition-colors">נקה תאריכים</button>
             {nights
-              ? <span className="text-sm font-bold text-blue-600">{nights} לילות ✓</span>
+              ? <span className="text-sm font-bold text-[var(--gold-deep)]">{nights} לילות ✓</span>
               : <span className="text-sm text-gray-400">{picking === "from" ? "בחר תאריך יציאה" : "בחר תאריך חזרה"}</span>
             }
           </div>
