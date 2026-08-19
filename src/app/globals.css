@@ -2,33 +2,33 @@
 
 /* ══════════════════════════════════════════════════════════════
    MySki — Alpine Luxury design tokens
-   Deep charcoal/midnight ground · warm champagne-gold accent ·
-   alpine ivory negative space · serif display + refined sans.
+   Deep midnight-sapphire ground · refined two-tone blue accent ·
+   crisp alpine white negative space · serif display + refined sans.
    ══════════════════════════════════════════════════════════════ */
 :root {
   /* Dark ground (hero scrims, footer, dark sections, chrome-on-scroll-top) */
-  --ink:        #0B0F14;
-  --ink-mid:    #12171F;
-  --ink-soft:   #1B222C;
+  --ink:        #0A1B33;
+  --ink-mid:    #0F2647;
+  --ink-soft:   #1B3A63;
   --ink-line:   rgba(255, 255, 255, 0.10);
   --ink-line-strong: rgba(255, 255, 255, 0.18);
 
-  /* Alpine ivory (page background / light sections) */
-  --ivory:      #FAF7F1;
-  --ivory-deep: #F2ECDF;
+  /* Alpine white (page background / light sections) */
+  --ivory:      #F7F9FC;
+  --ivory-deep: #EAF0F7;
   --paper:      #FFFFFF;
 
-  /* Champagne / brass gold — the single accent */
-  --gold:       #C9A34E;
-  --gold-light: #E8D9B5;
-  --gold-deep:  #A6823A;
-  --gold-line:  rgba(201, 163, 78, 0.35);
-  --gold-wash:  rgba(201, 163, 78, 0.10);
+  /* Sapphire — two-tone blue accent */
+  --accent:       #1E4C8C;
+  --accent-light: #A9C9EE;
+  --accent-deep:  #0F2F5C;
+  --accent-line:  rgba(30, 76, 140, 0.35);
+  --accent-wash:  rgba(30, 76, 140, 0.10);
 
-  /* Warm neutral text */
-  --charcoal:   #1C1B17;
-  --stone:      #625C4E;
-  --stone-soft: #9A9284;
+  /* Cool neutral text */
+  --charcoal:   #16202E;
+  --stone:      #4C5A6E;
+  --stone-soft: #8B97A8;
 
   --white: #FFFFFF;
 
@@ -36,8 +36,8 @@
   --navy-deep: var(--ink);
   --navy-mid: var(--ink-mid);
   --navy-light: var(--ink-soft);
-  --blue-brand: var(--gold);
-  --blue-ice: var(--gold-light);
+  --blue-brand: var(--accent);
+  --blue-ice: var(--accent-light);
 }
 
 * {
@@ -59,44 +59,44 @@ body {
   font-family: var(--font-display), "Frank Ruhl Libre", Georgia, serif;
 }
 
-/* eyebrow / kicker label — small caps, wide tracking, muted gold */
+/* eyebrow / kicker label — small caps, wide tracking, muted sapphire */
 .eyebrow {
   font-family: var(--font-sans), Heebo, system-ui, sans-serif;
   font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--gold-deep);
+  color: var(--accent-deep);
 }
 .eyebrow-light {
-  color: var(--gold-light);
+  color: var(--accent-light);
 }
 
 /* thin hairline divider */
 .hr-hairline {
   height: 1px;
-  background: linear-gradient(to left, transparent, var(--gold-line), transparent);
+  background: linear-gradient(to left, transparent, var(--accent-line), transparent);
 }
 
 /* ── Buttons ──────────────────────────────────────────────── */
-.btn-gold {
+.btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-deep) 100%);
-  color: var(--ink);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
+  color: var(--ivory);
   font-weight: 700;
   border-radius: 4px;
   transition: transform 0.35s cubic-bezier(.22,1,.36,1), box-shadow 0.35s ease, filter 0.3s ease;
-  box-shadow: 0 8px 24px -8px rgba(201, 163, 78, 0.55);
+  box-shadow: 0 8px 24px -8px rgba(30, 76, 140, 0.55);
 }
-.btn-gold:hover {
-  filter: brightness(1.08);
-  box-shadow: 0 12px 32px -8px rgba(201, 163, 78, 0.65);
+.btn-primary:hover {
+  filter: brightness(1.12);
+  box-shadow: 0 12px 32px -8px rgba(30, 76, 140, 0.65);
   transform: translateY(-1px);
 }
-.btn-gold:active { transform: translateY(0) scale(0.98); }
+.btn-primary:active { transform: translateY(0) scale(0.98); }
 
 .btn-ghost {
   display: inline-flex;
@@ -104,15 +104,15 @@ body {
   justify-content: center;
   gap: 0.5rem;
   background: transparent;
-  border: 1px solid var(--gold-line);
+  border: 1px solid var(--accent-line);
   color: inherit;
   font-weight: 600;
   border-radius: 4px;
   transition: border-color 0.35s ease, background 0.35s ease;
 }
 .btn-ghost:hover {
-  border-color: var(--gold);
-  background: var(--gold-wash);
+  border-color: var(--accent);
+  background: var(--accent-wash);
 }
 
 .btn-dark {
@@ -131,13 +131,13 @@ body {
 /* ── Cards ────────────────────────────────────────────────── */
 .card-luxury {
   background: var(--paper);
-  border: 1px solid rgba(28, 27, 23, 0.08);
+  border: 1px solid rgba(22, 32, 46, 0.08);
   border-radius: 4px;
   transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s cubic-bezier(.22,1,.36,1);
 }
 .card-luxury:hover {
-  border-color: var(--gold-line);
-  box-shadow: 0 24px 48px -24px rgba(11, 15, 20, 0.25);
+  border-color: var(--accent-line);
+  box-shadow: 0 24px 48px -24px rgba(10, 27, 51, 0.25);
   transform: translateY(-3px);
 }
 
@@ -192,7 +192,7 @@ body {
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 45%, var(--gold-light) 100%);
+  background: linear-gradient(135deg, var(--accent-light) 0%, var(--accent) 45%, var(--accent-light) 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -208,7 +208,7 @@ body {
 }
 
 .glass-white {
-  background: rgba(250, 247, 241, 0.96);
+  background: rgba(247, 249, 252, 0.96);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
@@ -225,13 +225,13 @@ body {
   transition: border-color 0.3s ease, color 0.3s ease;
 }
 .footer-social-btn:hover {
-  border-color: var(--gold);
-  color: var(--gold-light);
+  border-color: var(--accent);
+  color: var(--accent-light);
 }
 
 ::selection {
-  background: var(--gold);
-  color: var(--ink);
+  background: var(--accent);
+  color: var(--white);
 }
 
 ::-webkit-scrollbar { width: 6px; }
