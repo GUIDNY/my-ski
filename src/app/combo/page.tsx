@@ -26,7 +26,7 @@ function Gallery({ images, alt }: { images: string[]; alt: string }) {
   const imgs = images?.length ? images : ["/hero-ski.jpg"];
   const [idx, setIdx] = useState(0);
   return (
-    <div className="relative h-60 rounded-t-2xl overflow-hidden">
+    <div className="relative h-60 overflow-hidden">
       <img src={imgs[idx]} alt={alt} className="w-full h-full object-cover" />
       {imgs.length > 1 && (
         <>
@@ -47,18 +47,18 @@ function Gallery({ images, alt }: { images: string[]; alt: string }) {
 
 function AptBlock({ a }: { a: Apartment }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+    <div className="card-luxury overflow-hidden">
       <Gallery images={a.images} alt={a.name} />
       <div className="p-5 text-right">
         <div className="flex items-center justify-between mb-1">
-          <span className="flex items-center gap-1 text-sm"><IconStar size={13} className="text-amber-400" /><span className="font-bold text-gray-700">4.9</span><span className="text-gray-400 text-xs">· 47 ביקורות</span></span>
-          <h3 className="font-display font-black text-gray-900 text-lg">{a.name}</h3>
+          <span className="flex items-center gap-1 text-sm"><IconStar size={13} className="text-amber-400" /><span className="font-bold text-[var(--stone)]">4.9</span><span className="text-xs text-[var(--stone-soft)]">· 47 ביקורות</span></span>
+          <h3 className="font-display font-medium text-lg text-[var(--charcoal)]">{a.name}</h3>
         </div>
-        <p className="text-xs text-gray-400 mb-3 flex items-center gap-1 justify-end">
-          <IconMountain size={12} className="text-blue-400" /> Val Thorens, Trois Vallées · {a.type}
+        <p className="text-xs mb-3 flex items-center gap-1 justify-end text-[var(--stone-soft)]">
+          <IconMountain size={12} className="text-[var(--gold-deep)]" /> Val Thorens, Trois Vallées · {a.type}
         </p>
-        <div className="flex items-center gap-2.5 text-xs text-gray-500 justify-end mb-3 flex-wrap">
-          <span className="flex items-center gap-1 font-bold text-blue-600"><IconUser size={12} /> עד {capacity(a)}</span>
+        <div className="flex items-center gap-2.5 text-xs justify-end mb-3 flex-wrap text-[var(--stone)]">
+          <span className="flex items-center gap-1 font-bold text-[var(--gold-deep)]"><IconUser size={12} /> עד {capacity(a)}</span>
           <span>·</span><span className="flex items-center gap-1"><IconBed size={12} /> {a.beds} חד׳</span>
           <span>·</span><span>{a.baths} אמב׳</span>
           <span>·</span><span>{a.sqm} מ״ר</span>
@@ -66,13 +66,13 @@ function AptBlock({ a }: { a: Apartment }) {
         {a.amenities?.length > 0 && (
           <div className="flex flex-wrap gap-1.5 justify-end mb-3">
             {a.amenities.slice(0, 8).map((am, i) => (
-              <span key={i} className="flex items-center gap-1 text-xs text-gray-600 bg-gray-50 px-2.5 py-1 rounded-full">
+              <span key={i} className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full" style={{ color: "var(--stone)", background: "var(--ivory-deep)" }}>
                 <IconCheck size={10} className="text-green-500" /> {am}
               </span>
             ))}
           </div>
         )}
-        {a.description && <p className="text-sm text-gray-500 leading-relaxed whitespace-pre-line line-clamp-6">{a.description}</p>}
+        {a.description && <p className="text-sm leading-relaxed whitespace-pre-line line-clamp-6 text-[var(--stone)]">{a.description}</p>}
       </div>
     </div>
   );
@@ -83,17 +83,23 @@ function AddonCard({ icon, label, sublabel, price, checked, onChange, disabled }
 }) {
   return (
     <button type="button" onClick={() => !disabled && onChange(!checked)} disabled={disabled}
-      className={`w-full flex items-center gap-3 p-3.5 rounded-xl border transition-all text-right ${disabled ? "border-gray-100 bg-gray-50 cursor-not-allowed" : checked ? "border-blue-500 bg-blue-50" : "border-gray-100 bg-white hover:border-blue-200"}`}>
-      <span className={`flex-shrink-0 ${disabled ? "text-gray-300" : checked ? "text-blue-600" : "text-gray-400"}`}>{icon}</span>
+      className="w-full flex items-center gap-3 p-3.5 rounded border transition-all text-right"
+      style={disabled
+        ? { borderColor: "rgba(28,27,23,0.08)", background: "var(--ivory-deep)", cursor: "not-allowed" }
+        : checked
+          ? { borderColor: "var(--gold)", background: "var(--gold-wash)" }
+          : { borderColor: "rgba(28,27,23,0.1)", background: "var(--paper)" }}>
+      <span className="flex-shrink-0" style={{ color: disabled ? "var(--stone-soft)" : checked ? "var(--gold-deep)" : "var(--stone-soft)" }}>{icon}</span>
       <div className="flex-1 min-w-0">
-        <div className={`text-sm font-semibold ${disabled ? "text-gray-400" : "text-gray-800"}`}>{label}</div>
-        <div className="text-xs text-gray-400">{sublabel}</div>
+        <div className="text-sm font-semibold" style={{ color: disabled ? "var(--stone-soft)" : "var(--charcoal)" }}>{label}</div>
+        <div className="text-xs text-[var(--stone-soft)]">{sublabel}</div>
       </div>
       {disabled
-        ? <span className="text-[11px] font-bold text-blue-500 flex-shrink-0">בקרוב</span>
+        ? <span className="text-[11px] font-bold flex-shrink-0 text-[var(--gold-deep)]">בקרוב</span>
         : <>
-            <span className="text-sm font-bold text-blue-600 flex-shrink-0 whitespace-nowrap">{price}</span>
-            <span className={`w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 ${checked ? "bg-blue-600 border-blue-600 text-white" : "border-gray-300"}`}>{checked && <IconCheck size={12} />}</span>
+            <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap text-[var(--gold-deep)]">{price}</span>
+            <span className="w-5 h-5 rounded border flex items-center justify-center flex-shrink-0"
+              style={checked ? { background: "var(--gold)", borderColor: "var(--gold)", color: "var(--ink)" } : { borderColor: "rgba(28,27,23,0.2)" }}>{checked && <IconCheck size={12} />}</span>
           </>}
     </button>
   );
@@ -104,14 +110,15 @@ function RadioOption({ icon, label, sublabel, badge, badgeColor, selected, onCli
 }) {
   return (
     <button type="button" onClick={onClick}
-      className={`w-full flex items-center gap-3 p-3.5 rounded-xl border transition-all text-right ${selected ? "border-blue-500 bg-blue-50" : "border-gray-100 bg-white hover:border-blue-200"}`}>
-      <span className={`flex-shrink-0 ${selected ? "text-blue-600" : "text-gray-400"}`}>{icon}</span>
+      className="w-full flex items-center gap-3 p-3.5 rounded border transition-all text-right"
+      style={selected ? { borderColor: "var(--gold)", background: "var(--gold-wash)" } : { borderColor: "rgba(28,27,23,0.1)", background: "var(--paper)" }}>
+      <span className="flex-shrink-0" style={{ color: selected ? "var(--gold-deep)" : "var(--stone-soft)" }}>{icon}</span>
       <div className="flex-1 min-w-0">
-        <div className="text-sm font-semibold text-gray-800">{label}</div>
-        <div className="text-xs text-gray-400">{sublabel}</div>
+        <div className="text-sm font-semibold text-[var(--charcoal)]">{label}</div>
+        <div className="text-xs text-[var(--stone-soft)]">{sublabel}</div>
       </div>
       {badge && <span className="text-xs font-bold px-2 py-0.5 rounded-full text-white flex-shrink-0" style={{ background: badgeColor }}>{badge}</span>}
-      <span className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${selected ? "border-blue-600 bg-blue-600 ring-2 ring-blue-200" : "border-gray-300"}`} />
+      <span className="w-4 h-4 rounded-full border-2 flex-shrink-0" style={selected ? { borderColor: "var(--gold)", background: "var(--gold)", boxShadow: "0 0 0 2px var(--gold-wash)" } : { borderColor: "rgba(28,27,23,0.2)" }} />
     </button>
   );
 }
@@ -157,8 +164,8 @@ function ComboInner() {
     });
   }, [aId, bId]);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-gray-50"><SkiLoader /></div>;
-  if (!a || !b) return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-500" dir="rtl">השילוב לא נמצא. <a href="/apartments" className="text-blue-600 underline mr-1">חזרה לדירות</a></div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ivory)" }}><SkiLoader /></div>;
+  if (!a || !b) return <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ivory)", color: "var(--stone)" }} dir="rtl">השילוב לא נמצא. <a href="/apartments" className="underline mr-1 text-[var(--gold-deep)]">חזרה לדירות</a></div>;
 
   const totalA = nights > 0 ? calcTotalForRange(checkin, checkout, Number(a.price_per_night), rulesA) : Number(a.price_per_night);
   const totalB = nights > 0 ? calcTotalForRange(checkin, checkout, Number(b.price_per_night), rulesB) : Number(b.price_per_night);
@@ -197,20 +204,20 @@ function ComboInner() {
   });
 
   return (
-    <div className="min-h-screen bg-[#f8f9ff]" dir="rtl">
-      <header className="bg-white border-b border-gray-100 sticky top-0 z-30">
+    <div className="min-h-screen" style={{ background: "var(--ivory)" }} dir="rtl">
+      <header className="border-b sticky top-0 z-30" style={{ background: "var(--paper)", borderColor: "rgba(28,27,23,0.08)" }}>
         <div className="max-w-5xl mx-auto px-5 h-16 flex items-center justify-between">
-          <a href="/apartments" className="text-sm text-gray-500 hover:text-gray-900">→ חזרה לדירות</a>
+          <a href="/apartments" className="text-sm transition-colors text-[var(--stone)]">→ חזרה לדירות</a>
           <a href="/"><Logo className="h-8" /></a>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-5 py-8">
-        <div className="text-center mb-7">
-          <span className="inline-block bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full mb-3">חבילה משולבת · 2 דירות צמודות</span>
-          <h1 className="font-display text-3xl font-black text-gray-900">{comboName}</h1>
-          <p className="text-gray-500 mt-1 flex items-center justify-center gap-1.5">
-            <IconMountain size={14} className="text-blue-400" /> Val Thorens, France · מתאים עד {capacity(a) + capacity(b)} אורחים
+      <main className="max-w-5xl mx-auto px-5 py-8 md:py-12">
+        <div className="text-center mb-9">
+          <span className="eyebrow block mb-3">חבילה משולבת · 2 דירות צמודות</span>
+          <h1 className="font-display text-3xl font-medium text-[var(--charcoal)]">{comboName}</h1>
+          <p className="mt-2 flex items-center justify-center gap-1.5 text-[var(--stone)]">
+            <IconMountain size={14} className="text-[var(--gold-deep)]" /> Val Thorens, France · מתאים עד {capacity(a) + capacity(b)} אורחים
           </p>
         </div>
 
@@ -221,36 +228,37 @@ function ComboInner() {
           </div>
 
           {/* Booking panel */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm lg:sticky lg:top-24 overflow-hidden">
-            <div className="bg-blue-50/60 px-6 py-5 border-b border-gray-100">
+          <div className="card-luxury lg:sticky lg:top-24 overflow-hidden">
+            <div className="px-6 py-5 border-b" style={{ background: "var(--gold-wash)", borderColor: "rgba(28,27,23,0.08)" }}>
               <div className="flex items-center justify-between gap-2">
                 {breakdown.length > 0 && (
                   <button onClick={() => setShowBreakdown(v => !v)}
-                    className="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
+                    className="text-xs font-bold px-3 py-1.5 rounded transition-colors whitespace-nowrap flex-shrink-0"
+                    style={{ color: "var(--gold-deep)", background: "var(--paper)" }}>
                     פירוט מחיר {showBreakdown ? "▲" : "▼"}
                   </button>
                 )}
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-xs text-gray-400">/ לילה ממוצע</span>
-                  <span className="font-display text-3xl font-black text-gray-900">€{avgNightly.toLocaleString()}</span>
+                  <span className="text-xs text-[var(--stone-soft)]">/ לילה ממוצע</span>
+                  <span className="font-display text-3xl font-medium text-[var(--charcoal)]">€{avgNightly.toLocaleString()}</span>
                 </div>
               </div>
-              <p className="text-xs text-gray-500 mt-1 text-right">{fmt(checkin)} — {fmt(checkout)} · {nights} לילות · {guests} אורחים</p>
+              <p className="text-xs mt-1 text-right text-[var(--stone)]">{fmt(checkin)} — {fmt(checkout)} · {nights} לילות · {guests} אורחים</p>
 
               {showBreakdown && breakdown.length > 0 && (
-                <div className="mt-3 bg-white rounded-xl border border-blue-100 overflow-hidden">
-                  <div className="px-4 py-2 bg-blue-50/60 text-[11px] text-gray-400 text-right">מחיר ללילה (שתי הדירות יחד)</div>
-                  <div className="max-h-52 overflow-y-auto divide-y divide-gray-50">
+                <div className="mt-3 rounded border overflow-hidden" style={{ background: "var(--paper)", borderColor: "var(--gold-line)" }}>
+                  <div className="px-4 py-2 text-[11px] text-right" style={{ background: "var(--gold-wash)", color: "var(--stone-soft)" }}>מחיר ללילה (שתי הדירות יחד)</div>
+                  <div className="max-h-52 overflow-y-auto divide-y" style={{ borderColor: "rgba(28,27,23,0.06)" }}>
                     {breakdown.map(({ date, price }, i) => (
-                      <div key={i} className="flex justify-between items-center px-4 py-2 text-sm">
-                        <span className="font-semibold text-gray-800">€{price.toLocaleString()}</span>
-                        <span className="text-gray-500">{fmt(`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`)}</span>
+                      <div key={i} className="flex justify-between items-center px-4 py-2 text-sm" style={{ borderColor: "rgba(28,27,23,0.06)" }}>
+                        <span className="font-semibold text-[var(--charcoal)]">€{price.toLocaleString()}</span>
+                        <span className="text-[var(--stone)]">{fmt(`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`)}</span>
                       </div>
                     ))}
                   </div>
-                  <div className="flex justify-between items-center px-4 py-2.5 bg-blue-50 border-t border-blue-100 text-sm font-bold">
-                    <span className="text-blue-700">€{avgNightly.toLocaleString()}</span>
-                    <span className="text-gray-600">ממוצע ללילה</span>
+                  <div className="flex justify-between items-center px-4 py-2.5 border-t text-sm font-bold" style={{ background: "var(--gold-wash)", borderColor: "var(--gold-line)" }}>
+                    <span className="text-[var(--gold-deep)]">€{avgNightly.toLocaleString()}</span>
+                    <span className="text-[var(--stone)]">ממוצע ללילה</span>
                   </div>
                 </div>
               )}
@@ -258,44 +266,46 @@ function ComboInner() {
 
             <div className="px-6 py-5 space-y-5">
               <div>
-                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">תוספות</div>
+                <div className="text-xs font-bold uppercase tracking-wider mb-2 text-[var(--stone-soft)]">תוספות</div>
                 <div className="flex flex-col gap-2">
                   <AddonCard icon={<IconSkis size={18} />} label="סקי פס · Trois Vallées" sublabel="600 ק״מ מסלולים · כל הרמות · איסוף עצמאי מהמכונה" price="מחיר בקרוב" checked={skiPass} onChange={setSkiPass} disabled />
                   <AddonCard icon={<IconBus size={18} />} label="הסעה הלוך-חזור" sublabel="שאטל ישיר משדה התעופה" price={`+€${TRANSFER_PRICE}`} checked={transfer} onChange={setTransfer} />
                   <AddonCard icon={<IconSkis size={18} />} label="השכרת ציוד סקי/סנובורד" sublabel="€30 ליום · €120 לשבוע · +€20 לכל יום נוסף" price={nights > 0 ? `+€${equipCost(nights)}` : "החל מ-€30"} checked={equipment} onChange={setEquipment} />
                   {transfer && (
                     <button onClick={() => setShowTransfer(true)}
-                      className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-colors text-sm w-full text-right">
-                      <span className="text-blue-700 font-semibold">{flightFilled(flight) ? "✓ פרטי טיסה נשמרו · עריכה" : "מלא פרטי טיסה להסעה ←"}</span>
-                      <span className="text-xs text-blue-400">הגעה + חזור</span>
+                      className="flex items-center justify-between px-3.5 py-2.5 rounded border transition-colors text-sm w-full text-right"
+                      style={{ background: "var(--gold-wash)", borderColor: "var(--gold-line)" }}>
+                      <span className="font-semibold text-[var(--gold-deep)]">{flightFilled(flight) ? "✓ פרטי טיסה נשמרו · עריכה" : "מלא פרטי טיסה להסעה ←"}</span>
+                      <span className="text-xs text-[var(--stone-soft)]">הגעה + חזור</span>
                     </button>
                   )}
                 </div>
                 <a href={skyscannerUrl} target="_blank" rel="noopener noreferrer"
-                  className="mt-2 flex items-center gap-2.5 p-3.5 rounded-xl border border-gray-100 bg-white hover:border-blue-200 hover:bg-blue-50 transition-all">
-                  <span className="text-gray-400 flex-shrink-0"><IconPlane size={17} /></span>
+                  className="mt-2 flex items-center gap-2.5 p-3.5 rounded border transition-all hover:border-[var(--gold-line)] hover:bg-[var(--gold-wash)]"
+                  style={{ background: "var(--paper)", borderColor: "rgba(28,27,23,0.1)" }}>
+                  <span className="flex-shrink-0 text-[var(--stone-soft)]"><IconPlane size={17} /></span>
                   <div className="flex-1 min-w-0 text-right">
-                    <div className="text-sm font-semibold text-gray-800">טיסה ל-Geneva (GVA)</div>
-                    <div className="text-xs text-gray-400">TLV → Geneva · {checkin ? fmt(checkin) : "בחר תאריך"} · 2.5h מ-Val Thorens</div>
+                    <div className="text-sm font-semibold text-[var(--charcoal)]">טיסה ל-Geneva (GVA)</div>
+                    <div className="text-xs text-[var(--stone-soft)]">TLV → Geneva · {checkin ? fmt(checkin) : "בחר תאריך"} · 2.5h מ-Val Thorens</div>
                   </div>
-                  <span className="text-xs font-bold text-blue-600 flex-shrink-0">Skyscanner ←</span>
+                  <span className="text-xs font-bold flex-shrink-0 text-[var(--gold-deep)]">Skyscanner ←</span>
                 </a>
               </div>
 
               <div>
-                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">מדיניות ביטול</div>
+                <div className="text-xs font-bold uppercase tracking-wider mb-2 text-[var(--stone-soft)]">מדיניות ביטול</div>
                 <div className="flex flex-col gap-2">
                   <RadioOption icon={<IconShield size={18} />} label="ביטול רגיל" sublabel="בהתאם לתנאי התקנון · מחיר רגיל" selected={cancel === "regular"} onClick={() => setCancel("regular")} />
                   <RadioOption icon={<IconShield size={18} />} label="ללא אפשרות ביטול" sublabel="מחיר מוזל · לא ניתן לבטל ואין החזר כספי" badge={`−€${CANCEL_NONE}`} badgeColor="#ef4444" selected={cancel === "none"} onClick={() => setShowNoCancel(true)} />
                   <RadioOption icon={<IconShield size={18} />} label="ביטול גמיש" sublabel="80% החזר עד שבוע לפני · 50% עד 24ש׳ לפני ההמראה · אח״כ אין החזר" badge={`+€${CANCEL_FLEX}`} badgeColor="#10b981" selected={cancel === "flexible"} onClick={() => setCancel("flexible")} />
                 </div>
-                <a href="/terms" target="_blank" className="inline-block mt-2 text-xs text-blue-600 hover:underline font-semibold">קרא/י את מדיניות הביטולים בתקנון ←</a>
+                <a href="/terms" target="_blank" className="inline-block mt-2 text-xs hover:underline font-semibold text-[var(--gold-deep)]">קרא/י את מדיניות הביטולים בתקנון ←</a>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">רמת שירות</div>
-                  <button onClick={() => setShowAiInfo(true)} className="text-xs font-semibold text-blue-600 hover:underline">ⓘ מידע נוסף</button>
+                  <div className="text-xs font-bold uppercase tracking-wider text-[var(--stone-soft)]">רמת שירות</div>
+                  <button onClick={() => setShowAiInfo(true)} className="text-xs font-semibold hover:underline text-[var(--gold-deep)]">ⓘ מידע נוסף</button>
                 </div>
                 <div className="flex flex-col gap-2">
                   <RadioOption icon={<IconUser size={18} />} label="שירות אנושי מלא" sublabel="נציג ישראלי זמין לפני, במהלך ואחרי" selected={service === "human"} onClick={() => setService("human")} />
@@ -303,7 +313,7 @@ function ComboInner() {
                 </div>
               </div>
 
-              <div className="border-t border-gray-100 pt-4 space-y-2">
+              <div className="pt-4 space-y-2" style={{ borderTop: "1px solid rgba(28,27,23,0.08)" }}>
                 <Row label={a.name} value={`€${totalA.toLocaleString()}`} muted />
                 <Row label={b.name} value={`€${totalB.toLocaleString()}`} muted />
                 {transfer && <Row label="הסעה הלוך-חזור" value={`€${trTotal}`} muted />}
@@ -313,11 +323,11 @@ function ComboInner() {
                 {cancel === "none" && <Row label="ללא אפשרות ביטול" value={`−€${CANCEL_NONE.toLocaleString()}`} muted />}
                 {service === "ai" && <Row label="הנחת ניהול עצמאי (AI)" value={`-€${AI_DISCOUNT.toLocaleString()}`} muted />}
               </div>
-              <div className="flex items-center justify-between border-t border-gray-100 pt-3">
-                <span className="font-black text-gray-900 text-lg">סה״כ</span>
-                <span className="font-display text-2xl font-black text-blue-600">€{total.toLocaleString()}</span>
+              <div className="flex items-center justify-between pt-3" style={{ borderTop: "1px solid rgba(28,27,23,0.08)" }}>
+                <span className="font-bold text-lg text-[var(--charcoal)]">סה״כ</span>
+                <span className="font-display text-2xl font-medium text-[var(--gold-deep)]">€{total.toLocaleString()}</span>
               </div>
-              <p className="text-[11px] text-gray-400 leading-relaxed">* ייתכנו עמלות נוספות (כגון עמלת סליקת אשראי 1.9%). המחירים ב-€ והחיוב בש״ח לפי שער ההמרה.</p>
+              <p className="text-[11px] leading-relaxed text-[var(--stone-soft)]">* ייתכנו עמלות נוספות (כגון עמלת סליקת אשראי 1.9%). המחירים ב-€ והחיוב בש״ח לפי שער ההמרה.</p>
 
               <CardPaymentButton
                 apartmentId={a.id} apartment={comboName}
@@ -326,17 +336,17 @@ function ComboInner() {
                 skiPass={skiPass} transfer={transfer} equipment={equipment} transferDetails={transferDetails} grandTotal={total} cancel={cancel} service={service}
                 label="תשלום מאובטח בכרטיס" />
               <a href={wa} target="_blank" rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-bold py-3.5 rounded-xl transition">
+                className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-medium py-3.5 rounded transition">
                 <IconWhatsApp size={20} /> תיאום בוואטסאפ
               </a>
               <button onClick={() => { navigator.clipboard?.writeText("https://skisharebook.com" + window.location.pathname + window.location.search); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-                className="block w-full py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-800 font-bold text-center text-sm transition-colors">
+                className="btn-ghost block w-full py-3 text-sm text-[var(--charcoal)]">
                 {copied ? "✓ הקישור הועתק" : "📋 שלח הצעת מחיר (העתק קישור)"}
               </button>
               <SaveTripButton apartmentId={a.id} extraApartmentId={b.id} checkin={checkin} checkout={checkout} guests={guests}
                 label="שמור לחופשות שלי"
-                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-gray-200 bg-white hover:bg-red-50 hover:border-red-200 text-gray-700 font-bold text-center text-sm transition-colors" />
-              <p className="text-center text-xs text-gray-400">הזמנה אחת לשתי הדירות · תשלום מאובטח PayPlus</p>
+                className="btn-ghost flex items-center justify-center gap-2 w-full py-3 text-sm" />
+              <p className="text-center text-xs text-[var(--stone-soft)]">הזמנה אחת לשתי הדירות · תשלום מאובטח PayPlus</p>
             </div>
           </div>
         </div>
@@ -348,21 +358,22 @@ function ComboInner() {
       {/* No-cancellation confirmation + signature */}
       {showNoCancel && (
         <div dir="rtl" className="fixed inset-0 z-[95] bg-black/55 flex items-center justify-center p-4" onClick={() => setShowNoCancel(false)}>
-          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
-            <h2 className="font-display text-xl font-black text-slate-900 mb-1">ללא אפשרות ביטול</h2>
-            <p className="text-sm text-slate-500 mb-4">בחירה באפשרות זו מוזילה את המחיר ב-€{CANCEL_NONE}, אך ההזמנה <b>אינה ניתנת לביטול</b> ולא יינתן כל החזר כספי, בהתאם לתקנון.</p>
+          <div className="w-full max-w-md p-6 shadow-2xl rounded" style={{ background: "var(--paper)" }} onClick={e => e.stopPropagation()}>
+            <h2 className="font-display text-xl font-medium mb-1 text-[var(--charcoal)]">ללא אפשרות ביטול</h2>
+            <p className="text-sm mb-4 text-[var(--stone)]">בחירה באפשרות זו מוזילה את המחיר ב-€{CANCEL_NONE}, אך ההזמנה <b>אינה ניתנת לביטול</b> ולא יינתן כל החזר כספי, בהתאם לתקנון.</p>
             <label className="flex items-start gap-2 cursor-pointer mb-4">
-              <input type="checkbox" checked={noCancelAgreed} onChange={e => setNoCancelAgreed(e.target.checked)} className="mt-0.5 w-4 h-4 accent-blue-600" />
-              <span className="text-sm text-slate-600 leading-relaxed">אני מאשר/ת שקראתי והבנתי כי <b>לא אוכל לבטל את ההזמנה</b> ולא אקבל החזר כספי בשום מקרה, ומסכים/ה ל<a href="/terms" target="_blank" className="text-blue-600 underline">תקנון</a>.</span>
+              <input type="checkbox" checked={noCancelAgreed} onChange={e => setNoCancelAgreed(e.target.checked)} className="mt-0.5 w-4 h-4 accent-[var(--gold)]" />
+              <span className="text-sm leading-relaxed text-[var(--stone)]">אני מאשר/ת שקראתי והבנתי כי <b>לא אוכל לבטל את ההזמנה</b> ולא אקבל החזר כספי בשום מקרה, ומסכים/ה ל<a href="/terms" target="_blank" className="underline text-[var(--gold-deep)]">תקנון</a>.</span>
             </label>
-            <label className="block text-xs font-bold text-gray-400 mb-1">חתימה (שם מלא)</label>
+            <label className="block text-xs font-bold mb-1 text-[var(--stone-soft)]">חתימה (שם מלא)</label>
             <input value={signature} onChange={e => setSignature(e.target.value)} placeholder="הקלד/י את שמך המלא כחתימה"
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              className="w-full border rounded px-4 py-3 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]"
+              style={{ borderColor: "rgba(28,27,23,0.15)", background: "var(--ivory-deep)", color: "var(--charcoal)" }} />
             <div className="flex gap-2">
               <button disabled={!noCancelAgreed || signature.trim().length < 2}
                 onClick={() => { setCancel("none"); setShowNoCancel(false); }}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition">אישור וחתימה</button>
-              <button onClick={() => setShowNoCancel(false)} className="px-5 py-3 rounded-xl border border-gray-200 text-gray-600 font-bold">ביטול</button>
+                className="btn-gold flex-1 disabled:opacity-50 py-3">אישור וחתימה</button>
+              <button onClick={() => setShowNoCancel(false)} className="btn-ghost px-5 py-3 text-[var(--stone)]">ביטול</button>
             </div>
           </div>
         </div>
@@ -371,19 +382,19 @@ function ComboInner() {
       {/* AI service info */}
       {showAiInfo && (
         <div dir="rtl" className="fixed inset-0 z-[95] bg-black/55 flex items-center justify-center p-4" onClick={() => setShowAiInfo(false)}>
-          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-md p-6 shadow-2xl max-h-[85vh] overflow-y-auto rounded" style={{ background: "var(--paper)" }} onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="font-display text-xl font-black text-slate-900">שירות AI — איך זה עובד?</h2>
-              <button onClick={() => setShowAiInfo(false)} className="w-9 h-9 rounded-full hover:bg-slate-100 text-slate-400 text-xl">✕</button>
+              <h2 className="font-display text-xl font-medium text-[var(--charcoal)]">שירות AI — איך זה עובד?</h2>
+              <button onClick={() => setShowAiInfo(false)} className="w-9 h-9 rounded-full transition-colors text-xl text-[var(--stone-soft)]">✕</button>
             </div>
-            <ul className="space-y-3 text-sm text-slate-600 leading-relaxed">
+            <ul className="space-y-3 text-sm leading-relaxed text-[var(--stone)]">
               <li className="flex gap-2"><span>📍</span><span>תקבל/י את הכתובת המלאה וחוקי הצ׳ק-אין / צ׳ק-אאוט.</span></li>
               <li className="flex gap-2"><span>🔑</span><span>המפתחות יחכו לך בדלת כ-48 שעות לפני ההגעה. את הדירה יש לפנות לפי שעות הצ׳ק-אאוט הרגילות.</span></li>
               <li className="flex gap-2"><span>🎿</span><span>אם הזמנת סקי פס — תאסוף/י אותו עצמאית מהמכונה במהלך השהות.</span></li>
               <li className="flex gap-2"><span>🤖</span><span>לאורך החופשה תיעזר/י בצ׳אטבוט AI לכל שאלה.</span></li>
               <li className="flex gap-2"><span>🆘</span><span>במקרים חריגים (קבלת דירה עם נזק, מקרה קיצון) תוכל/י כמובן לפנות לנציגים שלנו דרך האתר.</span></li>
             </ul>
-            <button onClick={() => setShowAiInfo(false)} className="mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition">הבנתי</button>
+            <button onClick={() => setShowAiInfo(false)} className="btn-gold mt-5 w-full py-3">הבנתי</button>
           </div>
         </div>
       )}
@@ -393,11 +404,11 @@ function ComboInner() {
 
 const Row = ({ label, value, muted }: { label: string; value: string; muted?: boolean }) => (
   <div className="flex items-center justify-between">
-    <span className={muted ? "text-gray-400 text-sm" : "text-gray-600"}>{label}</span>
-    <span className={muted ? "text-gray-500 text-sm" : "font-bold text-gray-900"}>{value}</span>
+    <span className="text-sm" style={{ color: muted ? "var(--stone-soft)" : "var(--stone)" }}>{label}</span>
+    <span className="text-sm" style={muted ? { color: "var(--stone)" } : { fontWeight: 700, color: "var(--charcoal)" }}>{value}</span>
   </div>
 );
 
 export default function ComboPage() {
-  return <Suspense fallback={<div className="min-h-screen bg-gray-50" />}><ComboInner /></Suspense>;
+  return <Suspense fallback={<div className="min-h-screen" style={{ background: "var(--ivory)" }} />}><ComboInner /></Suspense>;
 }
