@@ -6,7 +6,7 @@ import Snow from "@/components/Snow";
 import { createServerClient } from "@/lib/supabase-server";
 import type { Apartment } from "@/types";
 
-/* ── Step icons (thin gold line style) ───────────────────────── */
+/* ── Step icons (thin sapphire line style) ───────────────────── */
 const IcoBed = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
     <path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/>
@@ -112,7 +112,7 @@ export default async function Home() {
         />
         <div className="absolute inset-0" style={{
           zIndex: 1,
-          background: "linear-gradient(to bottom, rgba(11,15,20,0.72) 0%, rgba(11,15,20,0.28) 38%, rgba(11,15,20,0.32) 62%, rgba(11,15,20,0.88) 100%)"
+          background: "linear-gradient(to bottom, rgba(10,27,51,0.72) 0%, rgba(10,27,51,0.28) 38%, rgba(10,27,51,0.32) 62%, rgba(10,27,51,0.88) 100%)"
         }} />
         <Snow />
         <div className="relative z-10 flex flex-col items-center gap-8 px-4 text-center w-full max-w-4xl mx-auto">
@@ -120,13 +120,13 @@ export default async function Home() {
           <h1 className="font-display text-6xl md:text-8xl font-medium leading-[1.05] animate-fade-up-delay-1" style={{ color: "var(--ivory)", textShadow: "0 4px 40px rgba(0,0,0,0.35)" }}>
             חופשת הסקי<br className="hidden md:block" /> שתמיד רצית
           </h1>
-          <p className="text-lg md:text-xl font-light animate-fade-up-delay-2" style={{ color: "rgba(250,247,241,0.82)" }}>
+          <p className="text-lg md:text-xl font-light animate-fade-up-delay-2" style={{ color: "rgba(247,249,252,0.82)" }}>
             דירות נבחרות, סקי פס, הסעות וטיסות — הכל במקום אחד, בסטנדרט של קונסיירז׳ אלפיני
           </p>
           <div className="w-full animate-fade-up-delay-3">
             <SearchWidget />
           </div>
-          <a href="/seasonaires" className="btn-ghost animate-fade-up-delay-3 px-6 py-3 text-sm" style={{ color: "var(--gold-light)", borderColor: "var(--gold-line)" }}>
+          <a href="/seasonaires" className="btn-ghost animate-fade-up-delay-3 px-6 py-3 text-sm" style={{ color: "var(--accent-light)", borderColor: "var(--accent-line)" }}>
             ❄ אזור הסיזיונרים ←
           </a>
         </div>
@@ -140,7 +140,7 @@ export default async function Home() {
             <h2 className="font-display text-3xl md:text-5xl font-medium mt-3" style={{ color: "var(--charcoal)" }}>בונים חבילה ב-4 שלבים</h2>
             <div className="hr-hairline w-24 mx-auto mt-6" />
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-px" style={{ background: "rgba(28,27,23,0.08)" }} dir="rtl">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-px" style={{ background: "rgba(22,32,46,0.08)" }} dir="rtl">
             {steps.map((step, i) => (
               <a
                 key={i}
@@ -149,17 +149,17 @@ export default async function Home() {
                 style={{ background: "var(--paper)" }}
               >
                 <div className="flex items-start justify-between">
-                  <div className="w-11 h-11 md:w-14 md:h-14 flex items-center justify-center rounded-full border transition-colors duration-500 group-hover:border-[var(--gold)]"
-                    style={{ borderColor: "var(--gold-line)", color: "var(--gold-deep)" }}>
+                  <div className="w-11 h-11 md:w-14 md:h-14 flex items-center justify-center rounded-full border transition-colors duration-500 group-hover:border-[var(--accent)]"
+                    style={{ borderColor: "var(--accent-line)", color: "var(--accent-deep)" }}>
                     {step.iconEl}
                   </div>
-                  <span className="font-display text-2xl md:text-3xl" style={{ color: "rgba(28,27,23,0.14)" }}>{step.label}</span>
+                  <span className="font-display text-2xl md:text-3xl" style={{ color: "rgba(22,32,46,0.14)" }}>{step.label}</span>
                 </div>
                 <div className="flex-1">
                   <h3 className="font-display text-lg md:text-2xl font-medium leading-tight mb-1 md:mb-3" style={{ color: "var(--charcoal)" }}>{step.title}</h3>
                   <p className="hidden md:block text-sm leading-relaxed" style={{ color: "var(--stone)" }}>{step.desc}</p>
                 </div>
-                <span className="hidden md:flex items-center gap-2 text-sm font-semibold group-hover:gap-4 transition-all duration-500" style={{ color: "var(--gold-deep)" }}>
+                <span className="hidden md:flex items-center gap-2 text-sm font-semibold group-hover:gap-4 transition-all duration-500" style={{ color: "var(--accent-deep)" }}>
                   {step.cta} ←
                 </span>
               </a>
@@ -171,23 +171,23 @@ export default async function Home() {
       {/* ── SEASONAIRES ──────────────────────────────────── */}
       <section className="relative py-28 px-6 overflow-hidden">
         <img src="/view.jpg" alt="" className="absolute inset-0 w-full h-full object-cover object-center" />
-        <div className="absolute inset-0" style={{ background: "linear-gradient(120deg, rgba(11,15,20,0.94) 0%, rgba(11,15,20,0.78) 55%, rgba(11,15,20,0.55) 100%)" }} />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(120deg, rgba(10,27,51,0.94) 0%, rgba(10,27,51,0.78) 55%, rgba(10,27,51,0.55) 100%)" }} />
         <div className="relative z-10 max-w-5xl mx-auto">
           <div className="max-w-2xl text-right">
             <span className="eyebrow eyebrow-light mb-5 block">❄ אזור הסיזיונרים</span>
             <h2 className="font-display text-4xl md:text-5xl font-medium leading-tight mb-6" style={{ color: "var(--ivory)" }}>
               עושים עונה שלמה על ההרים?
             </h2>
-            <p className="text-base md:text-lg leading-relaxed mb-5 font-light" style={{ color: "rgba(250,247,241,0.75)" }}>
+            <p className="text-base md:text-lg leading-relaxed mb-5 font-light" style={{ color: "rgba(247,249,252,0.75)" }}>
               הצטרפו לקהילת הסיזיונרים של SkiShare — אנשים שבאים לחיות עונת סקי מלאה ב-Val Thorens.
               דירות לטווח ארוך (חודשיים+).
             </p>
-            <ul className="text-sm space-y-2 mb-9" style={{ color: "rgba(250,247,241,0.65)" }}>
+            <ul className="text-sm space-y-2 mb-9" style={{ color: "rgba(247,249,252,0.65)" }}>
               <li>🏔 לוח דירות לטווח ארוך — מתעדכן כל הזמן</li>
               <li>💬 קבוצת וואטסאפ של הקהילה</li>
               <li>🎿 סקי פס עונתי · עבודה על ההר · אירועים</li>
             </ul>
-            <a href="/seasonaires" className="btn-gold px-8 py-4 text-base">
+            <a href="/seasonaires" className="btn-primary px-8 py-4 text-base">
               לחצו כאן לקהילת הסיזיונרים ←
             </a>
           </div>
@@ -215,7 +215,7 @@ export default async function Home() {
               <h2 className="font-display text-3xl md:text-4xl font-medium mt-3" style={{ color: "var(--charcoal)" }}>דירות נבחרות</h2>
             </div>
             <a href="/apartments" className="text-sm font-semibold pb-0.5 transition-opacity hover:opacity-60 hidden md:block"
-              style={{ color: "var(--gold-deep)", borderBottom: "1px solid var(--gold-line)" }}>
+              style={{ color: "var(--accent-deep)", borderBottom: "1px solid var(--accent-line)" }}>
               כל הדירות ←
             </a>
           </div>
@@ -228,14 +228,14 @@ export default async function Home() {
                   <div className="relative h-56 overflow-hidden">
                     <img src={apt.images?.[0] ?? "/hero-ski.jpg"} alt={apt.name}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                    <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(11,15,20,0.45) 0%, transparent 55%)" }} />
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(10,27,51,0.45) 0%, transparent 55%)" }} />
                     <div className="absolute top-4 right-4 text-[11px] font-bold px-3 py-1 tracking-wide"
-                      style={{ background: "rgba(11,15,20,0.7)", color: "var(--gold-light)", backdropFilter: "blur(6px)" }}>
+                      style={{ background: "rgba(10,27,51,0.7)", color: "var(--accent-light)", backdropFilter: "blur(6px)" }}>
                       {tag}
                     </div>
                     <div className="absolute bottom-4 left-4 text-sm font-bold px-3 py-1.5"
-                      style={{ background: "rgba(11,15,20,0.7)", color: "var(--ivory)", backdropFilter: "blur(6px)" }}>
-                      <span style={{ color: "var(--gold-light)" }}>€{Number(apt.price_per_night).toLocaleString()}</span> / לילה
+                      style={{ background: "rgba(10,27,51,0.7)", color: "var(--ivory)", backdropFilter: "blur(6px)" }}>
+                      <span style={{ color: "var(--accent-light)" }}>€{Number(apt.price_per_night).toLocaleString()}</span> / לילה
                     </div>
                   </div>
                   <div className="p-6">
@@ -245,10 +245,10 @@ export default async function Home() {
                         <p className="text-sm mt-0.5" style={{ color: "var(--stone-soft)" }}>{apt.type}</p>
                       </div>
                       <div className="text-left">
-                        <div className="text-sm font-bold" style={{ color: "var(--gold-deep)" }}>★ 4.9</div>
+                        <div className="text-sm font-bold" style={{ color: "var(--accent-deep)" }}>★ 4.9</div>
                       </div>
                     </div>
-                    <div className="flex gap-3 text-xs py-3 mb-4" style={{ color: "var(--stone-soft)", borderTop: "1px solid rgba(28,27,23,0.08)" }}>
+                    <div className="flex gap-3 text-xs py-3 mb-4" style={{ color: "var(--stone-soft)", borderTop: "1px solid rgba(22,32,46,0.08)" }}>
                       <span>{apt.beds} חדרים</span>
                       <span>·</span>
                       <span>{apt.baths} אמבטיות</span>
@@ -274,18 +274,18 @@ export default async function Home() {
       {/* ── CTA ──────────────────────────────────────────── */}
       <section className="relative py-32 px-6 overflow-hidden">
         <img src="/hero-ski.jpg" alt="" className="absolute inset-0 w-full h-full object-cover object-center" />
-        <div className="absolute inset-0" style={{ background: "rgba(11,15,20,0.82)" }} />
+        <div className="absolute inset-0" style={{ background: "rgba(10,27,51,0.82)" }} />
         <div className="relative z-10 max-w-2xl mx-auto text-center">
           <span className="eyebrow eyebrow-light block mb-5">Val Thorens · Trois Vallées</span>
           <h2 className="font-display text-4xl md:text-5xl font-medium mb-5 leading-tight" style={{ color: "var(--ivory)" }}>מוכן לרוץ על השלג?</h2>
-          <p className="text-base mb-11 font-light" style={{ color: "rgba(250,247,241,0.65)" }}>הזמן עכשיו לעונת 2025/26 — מחירי early bird זמינים לשבועות הקרובים בלבד</p>
+          <p className="text-base mb-11 font-light" style={{ color: "rgba(247,249,252,0.65)" }}>הזמן עכשיו לעונת 2025/26 — מחירי early bird זמינים לשבועות הקרובים בלבד</p>
           <a
             href="/apartments"
-            className="btn-gold inline-flex px-10 py-4 text-base"
+            className="btn-primary inline-flex px-10 py-4 text-base"
           >
             התחל לבנות את החבילה שלי ←
           </a>
-          <p className="text-xs mt-8 tracking-wider uppercase" style={{ color: "rgba(250,247,241,0.4)" }}>ביטול חינם עד 30 יום לפני הגעה</p>
+          <p className="text-xs mt-8 tracking-wider uppercase" style={{ color: "rgba(247,249,252,0.4)" }}>ביטול חינם עד 30 יום לפני הגעה</p>
         </div>
       </section>
 
