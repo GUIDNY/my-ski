@@ -26,7 +26,7 @@ export default function Footer() {
                 { label: "צור קשר", href: "mailto:skishareteam@gmail.com" },
               ].map((item) => (
                 <li key={item.href}>
-                  <a href={item.href} className="text-sm transition-colors hover:text-[var(--gold-light)]" style={{ color: "rgba(250,247,241,0.65)" }}>{item.label}</a>
+                  <a href={item.href} className="text-sm transition-colors hover:text-[var(--accent-light)]" style={{ color: "rgba(247,249,252,0.65)" }}>{item.label}</a>
                 </li>
               ))}
             </ul>

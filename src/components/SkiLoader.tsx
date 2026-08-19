@@ -20,13 +20,13 @@ export default function SkiLoader({ label = "רגע, מכינים את החופ�
       `}</style>
 
       {FLAKES.map((f, i) => (
-        <span key={i} className="absolute top-0 select-none" style={{ left: f.left, fontSize: f.size, color: "var(--gold-line)", animation: `ski-fall ${f.dur} linear ${f.delay} infinite` }}>❄</span>
+        <span key={i} className="absolute top-0 select-none" style={{ left: f.left, fontSize: f.size, color: "var(--accent-line)", animation: `ski-fall ${f.dur} linear ${f.delay} infinite` }}>❄</span>
       ))}
 
       <div className="relative z-10 flex flex-col items-center">
         <div className="text-6xl" style={{ animation: "ski-slide 1.1s ease-in-out infinite" }}>⛷️</div>
         <div className="mt-6 h-[3px] w-40 overflow-hidden rounded-full" style={{ background: "var(--ink-line)" }}>
-          <div className="h-full w-1/2 rounded-full" style={{ background: "linear-gradient(90deg, var(--gold-deep), var(--gold))", animation: "ski-slide 1.1s ease-in-out infinite" }} />
+          <div className="h-full w-1/2 rounded-full" style={{ background: "linear-gradient(90deg, var(--accent-deep), var(--accent))", animation: "ski-slide 1.1s ease-in-out infinite" }} />
         </div>
         <p className="font-display mt-5 text-base" style={{ color: "var(--ivory)", animation: "ski-bob 1.6s ease-in-out infinite" }}>{label}</p>
       </div>

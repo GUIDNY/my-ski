@@ -2,7 +2,7 @@ export default function CancellationPolicy() {
   return (
     <div className="min-h-screen py-16 px-4" style={{ background: "var(--ivory)" }} dir="rtl">
       <div className="max-w-2xl mx-auto">
-        <a href="/" className="text-sm transition-colors hover:text-[var(--gold-deep)]" style={{ color: "var(--stone)" }}>→ חזור לעמוד הבית</a>
+        <a href="/" className="text-sm transition-colors hover:text-[var(--accent-deep)]" style={{ color: "var(--stone)" }}>→ חזור לעמוד הבית</a>
 
         <span className="eyebrow block mt-8 mb-3">מסמך משפטי</span>
         <h1 className="font-display text-3xl md:text-4xl font-medium mb-2" style={{ color: "var(--charcoal)" }}>מדיניות ביטול</h1>
@@ -19,10 +19,10 @@ export default function CancellationPolicy() {
             </ul>
           </div>
 
-          <div className="card-luxury p-6" style={{ borderColor: "var(--gold-line)" }}>
+          <div className="card-luxury p-6" style={{ borderColor: "var(--accent-line)" }}>
             <div className="flex items-center gap-2 mb-3">
               <h2 className="font-display text-lg font-medium" style={{ color: "var(--charcoal)" }}>מדיניות גמישה</h2>
-              <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "var(--gold-wash)", color: "var(--gold-deep)" }}>+€100/אדם</span>
+              <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "var(--accent-wash)", color: "var(--accent-deep)" }}>+€100/אדם</span>
             </div>
             <ul className="space-y-2 text-sm" style={{ color: "var(--stone)" }}>
               <li className="flex gap-2"><span className="font-bold mt-0.5" style={{ color: "#6b8f5e" }}>✓</span>ביטול עד 48 שעות לפני הגעה — 80% החזר</li>
@@ -32,7 +32,7 @@ export default function CancellationPolicy() {
             </ul>
           </div>
 
-          <div className="rounded p-5 text-sm" style={{ background: "var(--gold-wash)", border: "1px solid var(--gold-line)", color: "var(--charcoal)" }}>
+          <div className="rounded p-5 text-sm" style={{ background: "var(--accent-wash)", border: "1px solid var(--accent-line)", color: "var(--charcoal)" }}>
             <div className="font-bold mb-1">הערה חשובה</div>
             מדיניות ביטול גמישה כוללת שירות אנושי מלא — לא ניתן לשלבה עם שירות AI בלבד. לשאלות נוספות: skishareteam@gmail.com
           </div>

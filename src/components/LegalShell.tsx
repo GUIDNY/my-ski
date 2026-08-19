@@ -5,9 +5,9 @@ export default function LegalShell({
 }: { title: string; updated: string; children: React.ReactNode }) {
   return (
     <div className="min-h-screen" style={{ background: "var(--ivory)" }} dir="rtl">
-      <header className="sticky top-0 z-30" style={{ background: "var(--paper)", borderBottom: "1px solid rgba(28,27,23,0.08)" }}>
+      <header className="sticky top-0 z-30" style={{ background: "var(--paper)", borderBottom: "1px solid rgba(22,32,46,0.08)" }}>
         <div className="max-w-3xl mx-auto px-5 h-16 flex items-center justify-between">
-          <a href="/" className="text-sm transition hover:text-[var(--gold-deep)]" style={{ color: "var(--stone)" }}>→ חזרה לאתר</a>
+          <a href="/" className="text-sm transition hover:text-[var(--accent-deep)]" style={{ color: "var(--stone)" }}>→ חזרה לאתר</a>
           <a href="/"><Logo className="h-8" /></a>
         </div>
       </header>
@@ -21,10 +21,10 @@ export default function LegalShell({
           {children}
         </article>
 
-        <div className="mt-14 pt-6 text-sm space-y-1" style={{ borderTop: "1px solid rgba(28,27,23,0.08)", color: "var(--stone)" }}>
+        <div className="mt-14 pt-6 text-sm space-y-1" style={{ borderTop: "1px solid rgba(22,32,46,0.08)", color: "var(--stone)" }}>
           <p className="font-bold" style={{ color: "var(--charcoal)" }}>סקי שר בע״מ · SkiShare</p>
           <p>ח.פ: 517332060 · הזוהר 12, קיסריה</p>
-          <p>טלפון: <a href="tel:+972547701899" style={{ color: "var(--gold-deep)" }}>054-7701899</a> · דוא״ל: <a href="mailto:skishareteam@gmail.com" style={{ color: "var(--gold-deep)" }}>skishareteam@gmail.com</a></p>
+          <p>טלפון: <a href="tel:+972547701899" style={{ color: "var(--accent-deep)" }}>054-7701899</a> · דוא״ל: <a href="mailto:skishareteam@gmail.com" style={{ color: "var(--accent-deep)" }}>skishareteam@gmail.com</a></p>
         </div>
       </main>
     </div>
