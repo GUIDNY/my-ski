@@ -50,7 +50,7 @@ export default function DateRangePicker({ value, onChange }: Props) {
             {label}
           </span>
           {nights && (
-            <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ color: "var(--gold-deep)", background: "var(--gold-wash)" }}>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ color: "var(--accent-deep)", background: "var(--accent-wash)" }}>
               {nights} לילות
             </span>
           )}
@@ -60,7 +60,7 @@ export default function DateRangePicker({ value, onChange }: Props) {
       {open && (
         <div
           className="absolute top-full mt-3 rounded z-50 p-4"
-          style={{ right: "-120px", background: "var(--paper)", border: "1px solid rgba(28,27,23,0.08)", boxShadow: "0 24px 48px -24px rgba(11,15,20,0.35)" }}
+          style={{ right: "-120px", background: "var(--paper)", border: "1px solid rgba(22,32,46,0.08)", boxShadow: "0 24px 48px -24px rgba(10,27,51,0.35)" }}
         >
           <DayPicker
             mode="range"
@@ -76,19 +76,19 @@ export default function DateRangePicker({ value, onChange }: Props) {
               formatWeekdayName: (d) => HE_DAYS[d.getDay()],
             }}
             classNames={{
-              today:        "font-black !text-[var(--gold-deep)]",
-              selected:     "!bg-[var(--gold)] !text-[var(--ink)] rounded-lg",
-              range_middle: "!bg-[var(--gold-wash)] !text-[var(--charcoal)]",
-              range_start:  "!bg-[var(--gold)] !text-[var(--ink)] rounded-lg",
-              range_end:    "!bg-[var(--gold)] !text-[var(--ink)] rounded-lg",
-              day_button:   "w-9 h-9 text-sm hover:bg-[var(--gold-wash)] rounded-lg transition-colors cursor-pointer",
+              today:        "font-black !text-[var(--accent-deep)]",
+              selected:     "!bg-[var(--accent)] !text-[var(--ink)] rounded-lg",
+              range_middle: "!bg-[var(--accent-wash)] !text-[var(--charcoal)]",
+              range_start:  "!bg-[var(--accent)] !text-[var(--ink)] rounded-lg",
+              range_end:    "!bg-[var(--accent)] !text-[var(--ink)] rounded-lg",
+              day_button:   "w-9 h-9 text-sm hover:bg-[var(--accent-wash)] rounded-lg transition-colors cursor-pointer",
               months:       "flex gap-6",
               nav:          "flex items-center justify-between mb-2",
             }}
           />
-          <div className="flex justify-between items-center pt-3 mt-2" style={{ borderTop: "1px solid rgba(28,27,23,0.08)" }}>
+          <div className="flex justify-between items-center pt-3 mt-2" style={{ borderTop: "1px solid rgba(22,32,46,0.08)" }}>
             <button onClick={() => { onChange(undefined); }} className="text-sm hover:opacity-70 transition-opacity" style={{ color: "var(--stone-soft)" }}>נקה</button>
-            {nights && <span className="text-sm font-bold" style={{ color: "var(--gold-deep)" }}>{nights} לילות נבחרו</span>}
+            {nights && <span className="text-sm font-bold" style={{ color: "var(--accent-deep)" }}>{nights} לילות נבחרו</span>}
           </div>
         </div>
       )}

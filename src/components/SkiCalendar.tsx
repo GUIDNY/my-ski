@@ -57,16 +57,16 @@ function MonthGrid({ year, month, from, to, hov, onEnter, onLeave, onClick }: {
               onMouseLeave={onLeave}
               onClick={() => !disabled && onClick(date)}
             >
-              {between   && <div className="absolute top-1.5 bottom-1.5 left-0 right-0" style={{ background: "var(--gold-wash)" }} />}
-              {isStart && hasRange && <div className="absolute top-1.5 bottom-1.5 left-1/2 right-0" style={{ background: "var(--gold-wash)" }} />}
-              {isEnd   && hasRange && <div className="absolute top-1.5 bottom-1.5 left-0 right-1/2" style={{ background: "var(--gold-wash)" }} />}
+              {between   && <div className="absolute top-1.5 bottom-1.5 left-0 right-0" style={{ background: "var(--accent-wash)" }} />}
+              {isStart && hasRange && <div className="absolute top-1.5 bottom-1.5 left-1/2 right-0" style={{ background: "var(--accent-wash)" }} />}
+              {isEnd   && hasRange && <div className="absolute top-1.5 bottom-1.5 left-0 right-1/2" style={{ background: "var(--accent-wash)" }} />}
               <div
                 className={`relative z-10 w-9 h-9 flex items-center justify-center rounded-full text-sm select-none transition-colors ${
-                  !disabled && !isStart && !isEnd ? "hover:bg-[var(--gold-wash)]" : ""
+                  !disabled && !isStart && !isEnd ? "hover:bg-[var(--accent-wash)]" : ""
                 }`}
                 style={
                   isStart || isEnd
-                    ? { background: "var(--gold)", color: "var(--ink)", fontWeight: 700 }
+                    ? { background: "var(--accent)", color: "var(--ink)", fontWeight: 700 }
                     : disabled
                       ? { color: "#d4cfc2" }
                       : { color: "var(--charcoal)", fontWeight: 500 }
@@ -123,14 +123,14 @@ export default function SkiCalendar({ initialFrom, initialTo, onSelect, onCancel
   const navBtn = (disabled: boolean, onClick: () => void, icon: React.ReactNode) => (
     <button type="button" onClick={() => !disabled && onClick()}
       className={`w-9 h-9 flex items-center justify-center rounded-full border transition-colors
-        ${disabled ? "border-gray-100 text-gray-300 cursor-not-allowed" : "hover:border-[var(--gold)] hover:text-[var(--gold-deep)]"}`}
-      style={!disabled ? { borderColor: "rgba(28,27,23,0.14)", color: "var(--stone)" } : undefined}>
+        ${disabled ? "border-gray-100 text-gray-300 cursor-not-allowed" : "hover:border-[var(--accent)] hover:text-[var(--accent-deep)]"}`}
+      style={!disabled ? { borderColor: "rgba(22,32,46,0.14)", color: "var(--stone)" } : undefined}>
       {icon}
     </button>
   );
 
   return (
-    <div className="card-luxury p-5" dir="rtl" style={{ boxShadow: "0 24px 48px -24px rgba(11,15,20,0.3)" }}>
+    <div className="card-luxury p-5" dir="rtl" style={{ boxShadow: "0 24px 48px -24px rgba(10,27,51,0.3)" }}>
       {/* Tabs */}
       <div className="flex gap-2 mb-4">
         {(["from","to"] as const).map(w => (
@@ -138,8 +138,8 @@ export default function SkiCalendar({ initialFrom, initialTo, onSelect, onCancel
             className="flex-1 py-2.5 rounded text-xs font-bold transition-all border"
             style={
               picking === w
-                ? { borderColor: "var(--gold)", background: "var(--gold-wash)", color: "var(--gold-deep)" }
-                : { borderColor: "rgba(28,27,23,0.1)", color: "var(--stone)" }
+                ? { borderColor: "var(--accent)", background: "var(--accent-wash)", color: "var(--accent-deep)" }
+                : { borderColor: "rgba(22,32,46,0.1)", color: "var(--stone)" }
             }>
             {w === "from" ? "✈️ יציאה" : "🏠 חזרה"} — {fmtD(w === "from" ? from : to) ?? "בחר"}
           </button>
@@ -157,7 +157,7 @@ export default function SkiCalendar({ initialFrom, initialTo, onSelect, onCancel
         <MonthGrid year={base.getFullYear()} month={base.getMonth()}
           from={from} to={to} hov={picking === "to" ? hov : null}
           onEnter={setHov} onLeave={() => setHov(null)} onClick={handleDay} />
-        <div className="hidden md:block w-px" style={{ background: "rgba(28,27,23,0.08)" }} />
+        <div className="hidden md:block w-px" style={{ background: "rgba(22,32,46,0.08)" }} />
         <div className="hidden md:flex flex-1">
           <MonthGrid year={next.getFullYear()} month={next.getMonth()}
             from={from} to={to} hov={picking === "to" ? hov : null}
@@ -166,19 +166,19 @@ export default function SkiCalendar({ initialFrom, initialTo, onSelect, onCancel
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-4 mt-4" style={{ borderTop: "1px solid rgba(28,27,23,0.08)" }}>
+      <div className="flex items-center justify-between pt-4 mt-4" style={{ borderTop: "1px solid rgba(22,32,46,0.08)" }}>
         <button type="button" onClick={() => { setFrom(null); setTo(null); setPicking("from"); }}
           className="text-sm hover:opacity-70 transition-opacity" style={{ color: "var(--stone-soft)" }}>נקה תאריכים</button>
         <div className="flex items-center gap-3">
           {nights ? (
-            <span className="text-sm font-bold" style={{ color: "var(--gold-deep)" }}>{nights} לילות ✓</span>
+            <span className="text-sm font-bold" style={{ color: "var(--accent-deep)" }}>{nights} לילות ✓</span>
           ) : (
             <span className="text-xs" style={{ color: "var(--stone-soft)" }}>{picking === "from" ? "בחר תאריך יציאה" : "עכשיו בחר חזרה"}</span>
           )}
           {onCancel && (
             <button type="button" onClick={onCancel}
-              className="text-sm px-3 py-1.5 rounded border hover:bg-[var(--gold-wash)] transition-colors"
-              style={{ color: "var(--stone)", borderColor: "rgba(28,27,23,0.14)" }}>
+              className="text-sm px-3 py-1.5 rounded border hover:bg-[var(--accent-wash)] transition-colors"
+              style={{ color: "var(--stone)", borderColor: "rgba(22,32,46,0.14)" }}>
               ביטול
             </button>
           )}

@@ -45,7 +45,7 @@ function SignaturePad({ onChange }: { onChange: (v: string) => void }) {
     if (!down.current) return;
     e.preventDefault();
     const ctx = ref.current!.getContext("2d")!;
-    ctx.strokeStyle = "#1C1B17";
+    ctx.strokeStyle = "#16202E";
     ctx.lineWidth   = 2;
     ctx.lineCap     = "round";
     const { x, y } = getXY(e);
@@ -68,13 +68,13 @@ function SignaturePad({ onChange }: { onChange: (v: string) => void }) {
   return (
     <div>
       <div className="border border-dashed rounded overflow-hidden relative"
-        style={{ touchAction: "none", borderColor: "var(--gold-line)", background: "var(--ivory-deep)" }}>
+        style={{ touchAction: "none", borderColor: "var(--accent-line)", background: "var(--ivory-deep)" }}>
         <canvas ref={ref} width={400} height={100} className="w-full h-24 cursor-crosshair"
           onMouseDown={start} onMouseMove={move} onMouseUp={end} onMouseLeave={end}
           onTouchStart={start} onTouchMove={move} onTouchEnd={end} />
         <div className="absolute top-2 left-2">
           <button onClick={clear} className="text-xs transition-colors px-2 py-0.5 rounded border hover:opacity-70"
-            style={{ color: "var(--stone-soft)", background: "var(--paper)", borderColor: "rgba(28,27,23,0.12)" }}>
+            style={{ color: "var(--stone-soft)", background: "var(--paper)", borderColor: "rgba(22,32,46,0.12)" }}>
             נקה
           </button>
         </div>
@@ -88,8 +88,8 @@ function SignaturePad({ onChange }: { onChange: (v: string) => void }) {
 function Section({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className="card-luxury overflow-hidden">
-      <div className="flex items-center gap-3 px-5 py-4" style={{ borderBottom: "1px solid rgba(28,27,23,0.06)" }}>
-        <span className="text-[var(--gold-deep)]">{icon}</span>
+      <div className="flex items-center gap-3 px-5 py-4" style={{ borderBottom: "1px solid rgba(22,32,46,0.06)" }}>
+        <span className="text-[var(--accent-deep)]">{icon}</span>
         <h3 className="font-display font-medium text-[var(--charcoal)]">{title}</h3>
       </div>
       <div className="px-5 py-4">{children}</div>
@@ -108,14 +108,14 @@ function Confirmation({ bookingId, apt, checkin, checkout, guests, nights, skiPa
       <div className="w-full max-w-2xl">
         {/* Success badge */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4" style={{ background: "var(--gold-wash)" }}>
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--gold-deep)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4" style={{ background: "var(--accent-wash)" }}>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--accent-deep)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="20 6 9 17 4 12"/>
             </svg>
           </div>
           <span className="eyebrow block mb-2">התשלום אושר</span>
           <h1 className="font-display text-3xl font-medium mb-1 text-[var(--charcoal)]">תודה, {details.name.split(" ")[0] || "אורח יקר"}!</h1>
-          <p className="text-[var(--stone)]">הזמנה מספר <span className="font-bold text-[var(--gold-deep)]">{orderRef(bookingId)}</span></p>
+          <p className="text-[var(--stone)]">הזמנה מספר <span className="font-bold text-[var(--accent-deep)]">{orderRef(bookingId)}</span></p>
         </div>
 
         {/* Booking card */}
@@ -124,62 +124,62 @@ function Confirmation({ bookingId, apt, checkin, checkout, guests, nights, skiPa
           <div className="px-6 py-5" style={{ background: "var(--ink)", color: "var(--ivory)" }}>
             <div className="eyebrow eyebrow-light mb-1.5">SkiShare · Val Thorens</div>
             <div className="font-display text-xl font-medium">{apt?.name ?? "דירה"}</div>
-            <div className="text-sm mt-1" style={{ color: "rgba(250,247,241,0.7)" }}>{fmtShort(checkin)} — {fmtShort(checkout)} · {nights} לילות · {guests} אנשים</div>
+            <div className="text-sm mt-1" style={{ color: "rgba(247,249,252,0.7)" }}>{fmtShort(checkin)} — {fmtShort(checkout)} · {nights} לילות · {guests} אנשים</div>
           </div>
 
           {/* Details */}
           <div className="px-6 py-5 space-y-0 text-sm">
-            <div className="flex justify-between py-2.5" style={{ borderBottom: "1px solid rgba(28,27,23,0.06)" }}>
+            <div className="flex justify-between py-2.5" style={{ borderBottom: "1px solid rgba(22,32,46,0.06)" }}>
               <span className="text-[var(--stone-soft)]">לקוח</span>
               <span className="font-semibold text-[var(--charcoal)]">{details.name}</span>
             </div>
-            <div className="flex justify-between py-2.5" style={{ borderBottom: "1px solid rgba(28,27,23,0.06)" }}>
+            <div className="flex justify-between py-2.5" style={{ borderBottom: "1px solid rgba(22,32,46,0.06)" }}>
               <span className="text-[var(--stone-soft)]">אימייל</span>
               <span className="font-semibold text-[var(--charcoal)]">{details.email}</span>
             </div>
             {details.phone && (
-              <div className="flex justify-between py-2.5" style={{ borderBottom: "1px solid rgba(28,27,23,0.06)" }}>
+              <div className="flex justify-between py-2.5" style={{ borderBottom: "1px solid rgba(22,32,46,0.06)" }}>
                 <span className="text-[var(--stone-soft)]">טלפון</span>
                 <span className="font-semibold text-[var(--charcoal)]">{details.phone}</span>
               </div>
             )}
-            <div className="flex justify-between py-2.5" style={{ borderBottom: "1px solid rgba(28,27,23,0.06)" }}>
+            <div className="flex justify-between py-2.5" style={{ borderBottom: "1px solid rgba(22,32,46,0.06)" }}>
               <span className="text-[var(--stone-soft)]">הגעה</span>
               <span className="font-semibold text-[var(--charcoal)]">{fmtDate(checkin)}</span>
             </div>
-            <div className="flex justify-between py-2.5" style={{ borderBottom: "1px solid rgba(28,27,23,0.06)" }}>
+            <div className="flex justify-between py-2.5" style={{ borderBottom: "1px solid rgba(22,32,46,0.06)" }}>
               <span className="text-[var(--stone-soft)]">יציאה</span>
               <span className="font-semibold text-[var(--charcoal)]">{fmtDate(checkout)}</span>
             </div>
             {skiPass && (
-              <div className="flex justify-between py-2.5" style={{ borderBottom: "1px solid rgba(28,27,23,0.06)" }}>
+              <div className="flex justify-between py-2.5" style={{ borderBottom: "1px solid rgba(22,32,46,0.06)" }}>
                 <span className="text-[var(--stone-soft)]">סקי פס</span>
                 <span className="font-semibold text-[var(--charcoal)]">{skiPass.name} × {guests}</span>
               </div>
             )}
             {transfer && (
-              <div className="flex justify-between py-2.5" style={{ borderBottom: "1px solid rgba(28,27,23,0.06)" }}>
+              <div className="flex justify-between py-2.5" style={{ borderBottom: "1px solid rgba(22,32,46,0.06)" }}>
                 <span className="text-[var(--stone-soft)]">הסעה</span>
                 <span className="font-semibold text-[var(--charcoal)]">כלול</span>
               </div>
             )}
-            <div className="flex justify-between py-2.5" style={{ borderBottom: "1px solid rgba(28,27,23,0.06)" }}>
+            <div className="flex justify-between py-2.5" style={{ borderBottom: "1px solid rgba(22,32,46,0.06)" }}>
               <span className="text-[var(--stone-soft)]">מדיניות ביטול</span>
               <span className="font-semibold text-[var(--charcoal)]">{cancel === "flexible" ? "גמישה (80% החזר)" : "לא ניתן לביטול"}</span>
             </div>
-            <div className="flex justify-between py-2.5" style={{ borderBottom: "1px solid rgba(28,27,23,0.06)" }}>
+            <div className="flex justify-between py-2.5" style={{ borderBottom: "1px solid rgba(22,32,46,0.06)" }}>
               <span className="text-[var(--stone-soft)]">שירות</span>
               <span className="font-semibold text-[var(--charcoal)]">{service === "ai" ? "AI בלבד" : "שירות אנושי"}</span>
             </div>
             <div className="flex justify-between pt-4">
               <span className="font-display font-medium text-base text-[var(--charcoal)]">סה״כ שולם</span>
-              <span className="font-display font-medium text-xl text-[var(--gold-deep)]">€{total.toLocaleString()}</span>
+              <span className="font-display font-medium text-xl text-[var(--accent-deep)]">€{total.toLocaleString()}</span>
             </div>
           </div>
         </div>
 
         {/* Notes */}
-        <div className="rounded p-4 text-sm mb-4" style={{ background: "var(--gold-wash)", border: "1px solid var(--gold-line)", color: "var(--gold-deep)" }}>
+        <div className="rounded p-4 text-sm mb-4" style={{ background: "var(--accent-wash)", border: "1px solid var(--accent-line)", color: "var(--accent-deep)" }}>
           <div className="font-bold mb-1">⏰ הצעת מחיר תקפה ל-24 שעות</div>
           <div className="text-[var(--stone)]">תוך 24 שעות תקבל אישור מסודר ואישור הזמנה סופי מנציג SkiShare.</div>
         </div>
@@ -197,7 +197,7 @@ function Confirmation({ bookingId, apt, checkin, checkout, guests, nights, skiPa
           </a>
         </div>
 
-        <a href="/" className="block text-center font-semibold text-sm hover:opacity-70 transition-opacity text-[var(--gold-deep)]">
+        <a href="/" className="block text-center font-semibold text-sm hover:opacity-70 transition-opacity text-[var(--accent-deep)]">
           → חזור לעמוד הבית
         </a>
       </div>
@@ -373,7 +373,7 @@ function BookPage() {
   return (
     <div className="min-h-screen" style={{ background: "var(--ivory)" }} dir="rtl">
       {/* Header */}
-      <div className="sticky top-0 z-40" style={{ background: "var(--paper)", borderBottom: "1px solid rgba(28,27,23,0.08)" }}>
+      <div className="sticky top-0 z-40" style={{ background: "var(--paper)", borderBottom: "1px solid rgba(22,32,46,0.08)" }}>
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <a href="/" className="flex items-center"><Logo className="h-9" /></a>
           <div className="text-sm flex items-center gap-1.5 text-[var(--stone)]">
@@ -397,12 +397,12 @@ function BookPage() {
               <div className="eyebrow mb-1">{apt.type}</div>
               <h2 className="font-display text-xl font-medium mb-1 text-[var(--charcoal)]">{apt.name}</h2>
               <div className="flex items-center gap-1.5 text-sm mb-3 text-[var(--stone)]">
-                <IconMountain size={13} className="text-[var(--gold-deep)]" />
+                <IconMountain size={13} className="text-[var(--accent-deep)]" />
                 Val Thorens, Trois Vallées
               </div>
               <div className="flex flex-wrap gap-3 text-sm">
                 <span className="flex items-center gap-1.5 font-semibold text-[var(--charcoal)]">
-                  <IconCalendar size={14} className="text-[var(--gold-deep)]" />
+                  <IconCalendar size={14} className="text-[var(--accent-deep)]" />
                   {fmtShort(checkin)} — {fmtShort(checkout)}
                 </span>
                 <span className="text-[var(--stone-soft)]">·</span>
@@ -410,7 +410,7 @@ function BookPage() {
                 <span className="text-[var(--stone-soft)]">·</span>
                 <span className="text-[var(--stone)]">{guests} אנשים</span>
               </div>
-              <a href="/search" className="mt-3 inline-block text-xs hover:opacity-70 transition-opacity text-[var(--gold-deep)]">→ שנה בחירה</a>
+              <a href="/search" className="mt-3 inline-block text-xs hover:opacity-70 transition-opacity text-[var(--accent-deep)]">→ שנה בחירה</a>
             </div>
           </div>
         )}
@@ -426,20 +426,20 @@ function BookPage() {
                 <button onClick={() => setSelectedPass(null)}
                   className="w-full flex items-center justify-between px-4 py-3 rounded border text-sm transition-all"
                   style={selectedPass === null
-                    ? { borderColor: "var(--gold)", background: "var(--gold-wash)" }
-                    : { borderColor: "rgba(28,27,23,0.1)" }}>
+                    ? { borderColor: "var(--accent)", background: "var(--accent-wash)" }
+                    : { borderColor: "rgba(22,32,46,0.1)" }}>
                   <span className="font-medium text-[var(--stone)]">ללא סקי פס</span>
-                  {selectedPass === null && <IconCheck size={15} className="text-[var(--gold-deep)]" />}
+                  {selectedPass === null && <IconCheck size={15} className="text-[var(--accent-deep)]" />}
                 </button>
                 {skiPasses.map(pass => (
                   <div key={pass.id}
                     className="w-full flex items-center justify-between px-4 py-3 rounded border text-sm opacity-50 cursor-not-allowed select-none"
-                    style={{ borderColor: "rgba(28,27,23,0.1)" }}>
+                    style={{ borderColor: "rgba(22,32,46,0.1)" }}>
                     <div className="text-right">
                       <div className="font-semibold text-[var(--stone)]">{pass.name}</div>
                       <div className="text-xs text-[var(--stone-soft)]">{pass.duration_days} ימי סקי</div>
                     </div>
-                    <span className="text-xs font-bold px-2 py-1 rounded-full" style={{ background: "var(--gold-wash)", color: "var(--gold-deep)" }}>הצעת מחיר בנפרד</span>
+                    <span className="text-xs font-bold px-2 py-1 rounded-full" style={{ background: "var(--accent-wash)", color: "var(--accent-deep)" }}>הצעת מחיר בנפרד</span>
                   </div>
                 ))}
               </div>
@@ -455,23 +455,23 @@ function BookPage() {
                 <div className="flex items-center gap-3">
                   <button onClick={() => setTransfer(!transfer)}
                     className="w-12 h-6 rounded-full transition-all relative flex-shrink-0"
-                    style={{ background: transfer ? "var(--gold)" : "rgba(28,27,23,0.15)" }}>
+                    style={{ background: transfer ? "var(--accent)" : "rgba(22,32,46,0.15)" }}>
                     <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${transfer ? "right-0.5" : "left-0.5"}`} />
                   </button>
                 </div>
               </div>
 
               {transfer && (
-                <div className="rounded p-4 space-y-4" style={{ background: "var(--gold-wash)", border: "1px solid var(--gold-line)" }}>
+                <div className="rounded p-4 space-y-4" style={{ background: "var(--accent-wash)", border: "1px solid var(--accent-line)" }}>
 
                   {/* El Al checkbox */}
                   <button onClick={() => setIsElAlChecked(v => !v)}
                     className="w-full flex items-center gap-3 p-3.5 rounded border transition-all text-right"
                     style={isElAlChecked
                       ? { borderColor: "#7fb88f", background: "#f0f7f2" }
-                      : { borderColor: "rgba(28,27,23,0.12)", background: "var(--paper)" }}>
+                      : { borderColor: "rgba(22,32,46,0.12)", background: "var(--paper)" }}>
                     <div className="w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all"
-                      style={isElAlChecked ? { background: "#4a9d63", borderColor: "#4a9d63" } : { borderColor: "rgba(28,27,23,0.2)" }}>
+                      style={isElAlChecked ? { background: "#4a9d63", borderColor: "#4a9d63" } : { borderColor: "rgba(22,32,46,0.2)" }}>
                       {isElAlChecked && <IconCheck size={13} className="text-white" />}
                     </div>
                     <div className="flex-1">
@@ -492,8 +492,8 @@ function BookPage() {
                         <button key={k} onClick={() => setTDirection(k)}
                           className="flex-1 py-2 rounded border text-xs font-bold transition-all"
                           style={tDirection === k
-                            ? { borderColor: "var(--gold)", background: "var(--paper)", color: "var(--gold-deep)" }
-                            : { borderColor: "rgba(28,27,23,0.12)", background: "var(--paper)", color: "var(--stone)" }}>
+                            ? { borderColor: "var(--accent)", background: "var(--paper)", color: "var(--accent-deep)" }
+                            : { borderColor: "rgba(22,32,46,0.12)", background: "var(--paper)", color: "var(--stone)" }}>
                           {label}
                         </button>
                       ))}
@@ -503,28 +503,28 @@ function BookPage() {
                   {/* Passengers */}
                   <div>
                     <div className="text-xs font-bold uppercase tracking-wider mb-2 text-[var(--stone-soft)]">נוסעים</div>
-                    <div className="flex items-center gap-3 rounded px-4 py-2 w-fit" style={{ background: "var(--paper)", border: "1px solid rgba(28,27,23,0.12)" }}>
+                    <div className="flex items-center gap-3 rounded px-4 py-2 w-fit" style={{ background: "var(--paper)", border: "1px solid rgba(22,32,46,0.12)" }}>
                       <button onClick={() => setTPassengers(v => Math.max(1, v - 1))}
-                        className="w-8 h-8 rounded-full border flex items-center justify-center font-bold hover:border-[var(--gold)] hover:text-[var(--gold-deep)] transition-colors"
-                        style={{ borderColor: "rgba(28,27,23,0.12)", color: "var(--stone)" }}>−</button>
+                        className="w-8 h-8 rounded-full border flex items-center justify-center font-bold hover:border-[var(--accent)] hover:text-[var(--accent-deep)] transition-colors"
+                        style={{ borderColor: "rgba(22,32,46,0.12)", color: "var(--stone)" }}>−</button>
                       <span className="font-display font-medium text-lg w-6 text-center text-[var(--charcoal)]">{tPassengers}</span>
                       <button onClick={() => setTPassengers(v => Math.min(20, v + 1))}
-                        className="w-8 h-8 rounded-full border flex items-center justify-center font-bold hover:border-[var(--gold)] hover:text-[var(--gold-deep)] transition-colors"
-                        style={{ borderColor: "rgba(28,27,23,0.12)", color: "var(--stone)" }}>+</button>
+                        className="w-8 h-8 rounded-full border flex items-center justify-center font-bold hover:border-[var(--accent)] hover:text-[var(--accent-deep)] transition-colors"
+                        style={{ borderColor: "rgba(22,32,46,0.12)", color: "var(--stone)" }}>+</button>
                       <span className="text-sm text-[var(--stone-soft)]">{tPassengers === 1 ? "אדם" : "אנשים"}</span>
                     </div>
                   </div>
 
                   {/* Inbound fields */}
                   {(tDirection === "both" || tDirection === "outbound") && (
-                    <div className="rounded p-3 space-y-2" style={{ background: "var(--paper)", border: "1px solid var(--gold-line)" }}>
+                    <div className="rounded p-3 space-y-2" style={{ background: "var(--paper)", border: "1px solid var(--accent-line)" }}>
                       <div className="text-xs font-bold mb-1 text-[var(--stone)]">✈️ טיסת הלוך — נחיתה בשדה התעופה</div>
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <label className="text-xs block mb-1 text-[var(--stone-soft)]">שדה תעופה</label>
                           <select value={tAirportIn} onChange={e => setTAirportIn(e.target.value)}
                             className="w-full rounded px-3 py-2 text-sm focus:ring-2 focus:outline-none"
-                            style={{ border: "1px solid rgba(28,27,23,0.14)", background: "var(--paper)" }}>
+                            style={{ border: "1px solid rgba(22,32,46,0.14)", background: "var(--paper)" }}>
                             <option value="GVA">Geneva (GVA)</option>
                             <option value="LYS">Lyon (LYS)</option>
                           </select>
@@ -533,14 +533,14 @@ function BookPage() {
                           <label className="text-xs block mb-1 text-[var(--stone-soft)]">שעת נחיתה</label>
                           <input type="time" value={tArrival} onChange={e => setTArrival(e.target.value)}
                             className="w-full rounded px-3 py-2 text-sm focus:ring-2 focus:outline-none"
-                            style={{ border: "1px solid rgba(28,27,23,0.14)", background: "var(--paper)" }} />
+                            style={{ border: "1px solid rgba(22,32,46,0.14)", background: "var(--paper)" }} />
                         </div>
                         <div className="col-span-2">
                           <label className="text-xs block mb-1 text-[var(--stone-soft)]">מספר טיסה</label>
                           <input type="text" value={tFlightIn} onChange={e => setTFlightIn(e.target.value.toUpperCase())}
                             placeholder="LY323 / FR1234"
                             className="w-full rounded px-3 py-2 text-sm font-mono focus:ring-2 focus:outline-none"
-                            style={{ border: "1px solid rgba(28,27,23,0.14)", background: "var(--paper)" }} dir="ltr" />
+                            style={{ border: "1px solid rgba(22,32,46,0.14)", background: "var(--paper)" }} dir="ltr" />
                         </div>
                       </div>
                     </div>
@@ -548,14 +548,14 @@ function BookPage() {
 
                   {/* Outbound fields */}
                   {(tDirection === "both" || tDirection === "return") && (
-                    <div className="rounded p-3 space-y-2" style={{ background: "var(--paper)", border: "1px solid var(--gold-line)" }}>
+                    <div className="rounded p-3 space-y-2" style={{ background: "var(--paper)", border: "1px solid var(--accent-line)" }}>
                       <div className="text-xs font-bold mb-1 text-[var(--stone)]">✈️ טיסת חזור — המראה משדה התעופה</div>
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <label className="text-xs block mb-1 text-[var(--stone-soft)]">שדה תעופה</label>
                           <select value={tAirportOut} onChange={e => setTAirportOut(e.target.value)}
                             className="w-full rounded px-3 py-2 text-sm focus:ring-2 focus:outline-none"
-                            style={{ border: "1px solid rgba(28,27,23,0.14)", background: "var(--paper)" }}>
+                            style={{ border: "1px solid rgba(22,32,46,0.14)", background: "var(--paper)" }}>
                             <option value="GVA">Geneva (GVA)</option>
                             <option value="LYS">Lyon (LYS)</option>
                           </select>
@@ -564,14 +564,14 @@ function BookPage() {
                           <label className="text-xs block mb-1 text-[var(--stone-soft)]">שעת המראה</label>
                           <input type="time" value={tDeparture} onChange={e => setTDeparture(e.target.value)}
                             className="w-full rounded px-3 py-2 text-sm focus:ring-2 focus:outline-none"
-                            style={{ border: "1px solid rgba(28,27,23,0.14)", background: "var(--paper)" }} />
+                            style={{ border: "1px solid rgba(22,32,46,0.14)", background: "var(--paper)" }} />
                         </div>
                         <div className="col-span-2">
                           <label className="text-xs block mb-1 text-[var(--stone-soft)]">מספר טיסה</label>
                           <input type="text" value={tFlightOut} onChange={e => setTFlightOut(e.target.value.toUpperCase())}
                             placeholder="LY324 / FR1235"
                             className="w-full rounded px-3 py-2 text-sm font-mono focus:ring-2 focus:outline-none"
-                            style={{ border: "1px solid rgba(28,27,23,0.14)", background: "var(--paper)" }} dir="ltr" />
+                            style={{ border: "1px solid rgba(22,32,46,0.14)", background: "var(--paper)" }} dir="ltr" />
                         </div>
                       </div>
                     </div>
@@ -585,7 +585,7 @@ function BookPage() {
                       <span className="font-bold">€{TRANSFER_PP} × {tDirs} × {tPassengers} = €{trPrice}</span>
                     </div>
                   ) : (
-                    <div className="text-xs rounded px-3 py-2.5" style={{ color: "var(--gold-deep)", background: "var(--gold-wash)", border: "1px solid var(--gold-line)" }}>
+                    <div className="text-xs rounded px-3 py-2.5" style={{ color: "var(--accent-deep)", background: "var(--accent-wash)", border: "1px solid var(--accent-line)" }}>
                       ⚠ הצעת מחיר להסעה תשלח בהקדם (מחיר ממוצע ~€{TRANSFER_PP} לאדם לכיוון)
                     </div>
                   )}
@@ -594,13 +594,13 @@ function BookPage() {
 
               {/* Skyscanner suggestion */}
               <a href={skyscannerUrl} target="_blank" rel="noopener noreferrer"
-                className="mt-3 flex items-center justify-between px-4 py-3 rounded border transition-all hover:bg-[var(--gold-wash)]"
-                style={{ borderColor: "rgba(28,27,23,0.1)" }}>
+                className="mt-3 flex items-center justify-between px-4 py-3 rounded border transition-all hover:bg-[var(--accent-wash)]"
+                style={{ borderColor: "rgba(22,32,46,0.1)" }}>
                 <div className="flex items-center gap-2 text-sm text-[var(--stone)]">
                   <IconPlane size={15} className="text-[var(--stone-soft)]" />
                   טרם הזמנת טיסה? חפש TLV → Geneva
                 </div>
-                <span className="text-xs font-bold text-[var(--gold-deep)]">Skyscanner ←</span>
+                <span className="text-xs font-bold text-[var(--accent-deep)]">Skyscanner ←</span>
               </a>
             </Section>
 
@@ -609,9 +609,9 @@ function BookPage() {
               <div className="space-y-2">
                 <button onClick={() => setCancelSafe("none")}
                   className={`w-full flex items-start gap-3 p-4 rounded-xl border-2 transition-all text-right
-                    ${cancel === "none" ? "border-[var(--gold)] bg-[var(--gold-wash)]" : "border-gray-100 hover:border-gray-200"}`}>
+                    ${cancel === "none" ? "border-[var(--accent)] bg-[var(--accent-wash)]" : "border-gray-100 hover:border-gray-200"}`}>
                   <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center
-                    ${cancel === "none" ? "border-[var(--gold)] bg-[var(--gold)]" : "border-gray-300"}`}>
+                    ${cancel === "none" ? "border-[var(--accent)] bg-[var(--accent)]" : "border-gray-300"}`}>
                     {cancel === "none" && <div className="w-2 h-2 bg-white rounded-full" />}
                   </div>
                   <div className="flex-1">
@@ -641,7 +641,7 @@ function BookPage() {
                 </button>
               </div>
               <a href="/cancellation-policy" target="_blank"
-                className="mt-3 text-xs text-[var(--gold-deep)] hover:underline block text-center">
+                className="mt-3 text-xs text-[var(--accent-deep)] hover:underline block text-center">
                 ← קרא את מדיניות הביטול המלאה
               </a>
             </Section>
@@ -651,9 +651,9 @@ function BookPage() {
               <div className="space-y-2">
                 <button onClick={() => setServiceSafe("human")}
                   className={`w-full flex items-start gap-3 p-4 rounded-xl border-2 transition-all text-right
-                    ${service === "human" ? "border-[var(--gold)] bg-[var(--gold-wash)]" : "border-gray-100 hover:border-gray-200"}`}>
+                    ${service === "human" ? "border-[var(--accent)] bg-[var(--accent-wash)]" : "border-gray-100 hover:border-gray-200"}`}>
                   <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center
-                    ${service === "human" ? "border-[var(--gold)] bg-[var(--gold)]" : "border-gray-300"}`}>
+                    ${service === "human" ? "border-[var(--accent)] bg-[var(--accent)]" : "border-gray-300"}`}>
                     {service === "human" && <div className="w-2 h-2 bg-white rounded-full" />}
                   </div>
                   <div className="flex-1">
@@ -691,23 +691,23 @@ function BookPage() {
                   <div>
                     <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">שם מלא *</label>
                     <input value={name} onChange={e => setName(e.target.value)} placeholder="ישראל ישראלי"
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[var(--gold)] focus:outline-none" />
+                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[var(--accent)] focus:outline-none" />
                   </div>
                   <div>
                     <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">טלפון</label>
                     <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+972-50-000-0000" type="tel"
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[var(--gold)] focus:outline-none" />
+                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[var(--accent)] focus:outline-none" />
                   </div>
                 </div>
                 <div>
                   <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">אימייל *</label>
                   <input value={email} onChange={e => setEmail(e.target.value)} placeholder="israel@example.com" type="email"
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[var(--gold)] focus:outline-none" />
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[var(--accent)] focus:outline-none" />
                 </div>
                 <div>
                   <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">הערות</label>
                   <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} placeholder="בקשות מיוחדות..."
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[var(--gold)] focus:outline-none resize-none" />
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[var(--accent)] focus:outline-none resize-none" />
                 </div>
               </div>
             </Section>
@@ -770,12 +770,12 @@ function BookPage() {
                   <input value={cardNum}
                     onChange={e => setCardNum(fmtCard(e.target.value))}
                     placeholder="1234 5678 9012 3456" maxLength={19}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-mono tracking-widest focus:ring-2 focus:ring-[var(--gold)] focus:outline-none" dir="ltr" />
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-mono tracking-widest focus:ring-2 focus:ring-[var(--accent)] focus:outline-none" dir="ltr" />
                 </div>
                 <div>
                   <label className="text-xs font-bold text-gray-400 block mb-1">שם בעל הכרטיס</label>
                   <input value={cardName} onChange={e => setCardName(e.target.value)} placeholder="ISRAEL ISRAELI"
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[var(--gold)] focus:outline-none" dir="ltr" />
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[var(--accent)] focus:outline-none" dir="ltr" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -783,13 +783,13 @@ function BookPage() {
                     <input value={cardExpiry}
                       onChange={e => setCardExpiry(fmtExpiry(e.target.value))}
                       placeholder="MM/YY" maxLength={5}
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-mono text-center focus:ring-2 focus:ring-[var(--gold)] focus:outline-none" dir="ltr" />
+                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-mono text-center focus:ring-2 focus:ring-[var(--accent)] focus:outline-none" dir="ltr" />
                   </div>
                   <div>
                     <label className="text-xs font-bold text-gray-400 block mb-1">CVV</label>
                     <input value={cardCvv} onChange={e => setCardCvv(e.target.value.replace(/\D/g,"").slice(0,4))}
                       placeholder="123" maxLength={4}
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-mono text-center focus:ring-2 focus:ring-[var(--gold)] focus:outline-none" dir="ltr" />
+                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-mono text-center focus:ring-2 focus:ring-[var(--accent)] focus:outline-none" dir="ltr" />
                   </div>
                 </div>
 
@@ -803,13 +803,13 @@ function BookPage() {
                 {/* Terms */}
                 <label className="flex items-start gap-2.5 cursor-pointer">
                   <div className={`mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all
-                    ${terms ? "bg-[var(--gold)] border-[var(--gold)]" : "border-gray-300 hover:border-[var(--gold)]"}`}
+                    ${terms ? "bg-[var(--accent)] border-[var(--accent)]" : "border-gray-300 hover:border-[var(--accent)]"}`}
                     onClick={() => setTerms(!terms)}>
                     {terms && <IconCheck size={12} className="text-white" />}
                   </div>
                   <span className="text-xs text-gray-600 leading-relaxed">
                     קראתי ואני מאשר את{" "}
-                    <a href="/cancellation-policy" target="_blank" className="text-[var(--gold-deep)] hover:underline">תנאי השירות ומדיניות הביטול</a>
+                    <a href="/cancellation-policy" target="_blank" className="text-[var(--accent-deep)] hover:underline">תנאי השירות ומדיניות הביטול</a>
                     {" "}של SkiShare
                   </span>
                 </label>
@@ -819,7 +819,7 @@ function BookPage() {
                 )}
 
                 <button onClick={submit} disabled={submitting || !terms}
-                  className="w-full py-4 rounded-xl bg-[var(--gold)] hover:bg-[var(--gold-deep)] disabled:opacity-50 disabled:cursor-not-allowed text-[var(--ink)] font-black text-base transition-colors shadow-sm">
+                  className="w-full py-4 rounded-xl bg-[var(--accent)] hover:bg-[var(--accent-deep)] disabled:opacity-50 disabled:cursor-not-allowed text-[var(--ink)] font-black text-base transition-colors shadow-sm">
                   {submitting ? (
                     <span className="flex items-center justify-center gap-2">
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

@@ -61,14 +61,14 @@ function QStep({ show, label, qty, setQty, max, total }: {
 }) {
   if (!show) return null;
   return (
-    <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[var(--gold-wash)] border border-[var(--gold-line)]">
-      <span className="text-xs font-bold text-[var(--gold-deep)]">{label}</span>
+    <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[var(--accent-wash)] border border-[var(--accent-line)]">
+      <span className="text-xs font-bold text-[var(--accent-deep)]">{label}</span>
       <div className="flex items-center gap-2.5">
         <button type="button" onClick={() => setQty(Math.max(1, qty - 1))} disabled={qty <= 1}
-          className="w-7 h-7 rounded-full bg-white border border-[var(--gold-line)] text-[var(--gold-deep)] font-black disabled:opacity-40 leading-none">−</button>
+          className="w-7 h-7 rounded-full bg-white border border-[var(--accent-line)] text-[var(--accent-deep)] font-black disabled:opacity-40 leading-none">−</button>
         <span className="font-black text-slate-900 w-5 text-center">{qty}</span>
         <button type="button" onClick={() => setQty(Math.min(max, qty + 1))} disabled={qty >= max}
-          className="w-7 h-7 rounded-full bg-white border border-[var(--gold-line)] text-[var(--gold-deep)] font-black disabled:opacity-40 leading-none">+</button>
+          className="w-7 h-7 rounded-full bg-white border border-[var(--accent-line)] text-[var(--accent-deep)] font-black disabled:opacity-40 leading-none">+</button>
         <span className="text-xs font-bold text-slate-700 w-16 text-left">= €{total.toLocaleString()}</span>
       </div>
     </div>
@@ -80,7 +80,7 @@ function QRadio({ label, sublabel, badge, badgeColor, selected, onClick }: {
 }) {
   return (
     <button type="button" onClick={onClick}
-      className={`w-full flex items-start gap-3 p-3.5 rounded-xl border text-right transition-all ${selected ? "border-[var(--gold)] bg-[var(--gold-wash)]" : "border-slate-200 bg-white hover:border-[var(--gold)]"}`}>
+      className={`w-full flex items-start gap-3 p-3.5 rounded-xl border text-right transition-all ${selected ? "border-[var(--accent)] bg-[var(--accent-wash)]" : "border-slate-200 bg-white hover:border-[var(--accent)]"}`}>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm font-semibold text-slate-800">{label}</span>
@@ -88,7 +88,7 @@ function QRadio({ label, sublabel, badge, badgeColor, selected, onClick }: {
         </div>
         <div className="text-xs text-slate-400 mt-0.5">{sublabel}</div>
       </div>
-      <span className={`mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0 ${selected ? "border-[var(--gold)] bg-[var(--gold)] ring-2 ring-[var(--gold-wash)]" : "border-slate-300"}`} />
+      <span className={`mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0 ${selected ? "border-[var(--accent)] bg-[var(--accent)] ring-2 ring-[var(--accent-wash)]" : "border-slate-300"}`} />
     </button>
   );
 }
@@ -173,9 +173,9 @@ export default function QuoteView({ q }: { q: QuoteData }) {
         </div>
       </div>
       {splitCount > 1 && (
-        <div className="bg-[var(--gold-wash)] rounded-lg px-3 py-2 mt-2.5 text-sm">
+        <div className="bg-[var(--accent-wash)] rounded-lg px-3 py-2 mt-2.5 text-sm">
           <div className="flex justify-between font-bold text-[var(--charcoal)]"><span>החלק שלך עכשיו</span><span>€{payNow.toLocaleString()}</span></div>
-          <p className="text-xs text-[var(--gold-deep)] mt-0.5">הסה״כ €{liveTotal.toLocaleString()} (כולל כל התוספות) ÷ {splitCount} · אחרי התשלום תקבל/י קישור לשלוח לחברים.</p>
+          <p className="text-xs text-[var(--accent-deep)] mt-0.5">הסה״כ €{liveTotal.toLocaleString()} (כולל כל התוספות) ÷ {splitCount} · אחרי התשלום תקבל/י קישור לשלוח לחברים.</p>
         </div>
       )}
     </div>
@@ -189,7 +189,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
       {/* cancellation selector */}
       <div className="rounded-xl border border-slate-200 overflow-hidden">
         <button onClick={() => setOpenCancel(v => !v)} className="w-full flex items-center justify-between p-3.5 text-right">
-          <span><span className="text-sm font-bold text-slate-800">מדיניות ביטול</span><span className="block text-xs text-[var(--gold-deep)] mt-0.5">{cancelLabel}</span></span>
+          <span><span className="text-sm font-bold text-slate-800">מדיניות ביטול</span><span className="block text-xs text-[var(--accent-deep)] mt-0.5">{cancelLabel}</span></span>
           <span className="text-slate-400">{openCancel ? "▲" : "▼"}</span>
         </button>
         {openCancel && (
@@ -197,14 +197,14 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             <QRadio label="ביטול רגיל" sublabel="בהתאם לתנאי התקנון · מחיר רגיל" selected={cancel === "regular"} onClick={() => { setCancel("regular"); setOpenCancel(false); }} />
             <QRadio label="ללא אפשרות ביטול" sublabel="מחיר מוזל · לא ניתן לבטל ואין החזר" badge="−€100" badgeColor="#ef4444" selected={cancel === "none"} onClick={() => setShowNoCancel(true)} />
             <QRadio label="ביטול גמיש" sublabel="80% החזר עד שבוע לפני · 50% עד 24ש׳ · אח״כ אין החזר" badge="+€100" badgeColor="#10b981" selected={cancel === "flexible"} onClick={() => { setCancel("flexible"); setOpenCancel(false); }} />
-            <a href="/terms" target="_blank" className="text-xs text-[var(--gold-deep)] hover:underline font-semibold">מדיניות הביטולים בתקנון ←</a>
+            <a href="/terms" target="_blank" className="text-xs text-[var(--accent-deep)] hover:underline font-semibold">מדיניות הביטולים בתקנון ←</a>
           </div>
         )}
       </div>
       {/* service selector */}
       <div className="rounded-xl border border-slate-200 overflow-hidden">
         <button onClick={() => setOpenService(v => !v)} className="w-full flex items-center justify-between p-3.5 text-right">
-          <span><span className="text-sm font-bold text-slate-800">רמת שירות</span><span className="block text-xs text-[var(--gold-deep)] mt-0.5">{serviceLabel}</span></span>
+          <span><span className="text-sm font-bold text-slate-800">רמת שירות</span><span className="block text-xs text-[var(--accent-deep)] mt-0.5">{serviceLabel}</span></span>
           <span className="text-slate-400">{openService ? "▲" : "▼"}</span>
         </button>
         {openService && (
@@ -269,7 +269,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
         <li className="flex gap-2"><span>🚐</span><span><b className="text-slate-800">הסעה:</b> מחיר לא קבוע, עשוי להשתנות · אישור סופי עד 48 שעות.</span></li>
         <li className="flex gap-2"><span>💳</span><span><b className="text-slate-800">תשלום:</b> בכרטיס נוספת עמלת סליקה 1.9% · אפשר העברה בנקאית ללא עמלה (דברו עם נציג).</span></li>
       </ul>
-      <a href="/terms" target="_blank" className="inline-block mt-3 text-sm font-bold text-[var(--gold-deep)] hover:underline">מדיניות הביטולים והתקנון המלא ←</a>
+      <a href="/terms" target="_blank" className="inline-block mt-3 text-sm font-bold text-[var(--accent-deep)] hover:underline">מדיניות הביטולים והתקנון המלא ←</a>
     </div>
   );
 
@@ -318,8 +318,8 @@ export default function QuoteView({ q }: { q: QuoteData }) {
         return (
           <div key={a.key} className="space-y-2">
             <button type="button" disabled={soon} onClick={() => "toggle" in a && a.toggle?.()}
-              className={`w-full flex items-center gap-3 p-3.5 rounded-xl border text-right transition-all ${soon ? "bg-slate-50 border-slate-100 cursor-default" : selected ? "bg-[var(--gold-wash)] border-[var(--gold)]" : "bg-white border-slate-200 hover:border-[var(--gold)]"}`}>
-              <span className={`w-10 h-10 rounded-lg shadow-sm flex items-center justify-center flex-shrink-0 ${selected ? "bg-[var(--gold)] text-[var(--ink)]" : "bg-white text-[var(--gold-deep)]"}`}>{a.icon}</span>
+              className={`w-full flex items-center gap-3 p-3.5 rounded-xl border text-right transition-all ${soon ? "bg-slate-50 border-slate-100 cursor-default" : selected ? "bg-[var(--accent-wash)] border-[var(--accent)]" : "bg-white border-slate-200 hover:border-[var(--accent)]"}`}>
+              <span className={`w-10 h-10 rounded-lg shadow-sm flex items-center justify-center flex-shrink-0 ${selected ? "bg-[var(--accent)] text-[var(--ink)]" : "bg-white text-[var(--accent-deep)]"}`}>{a.icon}</span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-slate-800 truncate">{a.title}</p>
                 <p className="text-xs text-slate-400 truncate">{a.sub}</p>
@@ -327,8 +327,8 @@ export default function QuoteView({ q }: { q: QuoteData }) {
               {soon
                 ? <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full flex-shrink-0">בקרוב</span>
                 : <span className="flex items-center gap-2 flex-shrink-0">
-                    <span className="text-sm font-bold text-[var(--gold-deep)]">+€{(a as { price: number }).price.toLocaleString()}</span>
-                    <span className={`w-5 h-5 rounded-md border flex items-center justify-center ${selected ? "bg-[var(--gold)] border-[var(--gold)] text-[var(--ink)]" : "border-slate-300"}`}>{selected && <IconCheck size={12} />}</span>
+                    <span className="text-sm font-bold text-[var(--accent-deep)]">+€{(a as { price: number }).price.toLocaleString()}</span>
+                    <span className={`w-5 h-5 rounded-md border flex items-center justify-center ${selected ? "bg-[var(--accent)] border-[var(--accent)] text-[var(--ink)]" : "border-slate-300"}`}>{selected && <IconCheck size={12} />}</span>
                   </span>}
             </button>
 
@@ -345,8 +345,8 @@ export default function QuoteView({ q }: { q: QuoteData }) {
               <>
                 <QStep show label="כמה אנשים צריכים הסעה?" qty={transferQty} setQty={setTransferQty} max={Math.max(guests, 1)} total={trTotal} />
                 <button onClick={() => setShowTransfer(true)}
-                  className="flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl bg-[var(--gold-wash)] border border-[var(--gold-line)] hover:bg-[var(--gold-wash)] transition-colors text-sm text-right">
-                  <span className="text-[var(--gold-deep)] font-semibold">{flightFilled(flight) ? "✓ פרטי טיסה נשמרו · עריכה" : "מלא פרטי טיסה להסעה ←"}</span>
+                  className="flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl bg-[var(--accent-wash)] border border-[var(--accent-line)] hover:bg-[var(--accent-wash)] transition-colors text-sm text-right">
+                  <span className="text-[var(--accent-deep)] font-semibold">{flightFilled(flight) ? "✓ פרטי טיסה נשמרו · עריכה" : "מלא פרטי טיסה להסעה ←"}</span>
                   <span className="text-xs text-[var(--stone-soft)]">הגעה + חזור</span>
                 </button>
               </>
@@ -360,9 +360,9 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   // bank transfer (collapsible) — used inside the floating sheet & desktop
   const paymentBlock = (
     <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4">
-      <button onClick={() => setShowBank(v => !v)} className="w-full flex items-center justify-between text-[var(--gold-deep)]">
+      <button onClick={() => setShowBank(v => !v)} className="w-full flex items-center justify-between text-[var(--accent-deep)]">
         <span className="flex items-center gap-2"><IconBank size={18} /><span className="font-bold text-slate-800">תשלום בהעברה בנקאית</span></span>
-        <span className="text-xs font-bold text-[var(--gold-deep)]">{showBank ? "הסתר ▲" : "הצג פרטים ▼"}</span>
+        <span className="text-xs font-bold text-[var(--accent-deep)]">{showBank ? "הסתר ▲" : "הצג פרטים ▼"}</span>
       </button>
       {showBank && (
         <div className="space-y-4 mt-4">
@@ -382,7 +382,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   // credit-card explanation — shown at the bottom of the quote (not in the sheet)
   const cardInfoNote = (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-      <h3 className="font-display font-bold text-slate-900 flex items-center gap-2 mb-3"><IconCreditCard size={18} className="text-[var(--gold-deep)]" /> תשלום בכרטיס אשראי</h3>
+      <h3 className="font-display font-bold text-slate-900 flex items-center gap-2 mb-3"><IconCreditCard size={18} className="text-[var(--accent-deep)]" /> תשלום בכרטיס אשראי</h3>
       <ul className="space-y-2 text-sm text-slate-600">
         <li className="flex items-center gap-2"><IconCheck size={14} className="text-emerald-500" /> עד 3 תשלומים ללא ריבית</li>
         <li className="flex items-center gap-2"><IconCheck size={14} className="text-emerald-500" /> תשלום מאובטח בתקן PCI-DSS · PayPlus</li>
@@ -460,7 +460,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
               <div className="divide-y divide-slate-100">{breakdownRows}</div>
             </div>
             <div className="bg-slate-900 px-5 py-5 flex items-center justify-between text-white relative overflow-hidden">
-              <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-[var(--gold-wash)] blur-2xl" />
+              <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-[var(--accent-wash)] blur-2xl" />
               <div className="relative">
                 <p className="text-white/50 text-sm">סה״כ לתשלום</p>
                 <p className="text-white/35 text-xs mt-0.5">{guests} אנשים · {nights} לילות</p>
@@ -474,7 +474,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
 
           {/* Booking options (mobile, on the page) */}
           <div className="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-slate-100 p-5 space-y-4">
-            <h3 className="font-display font-bold text-slate-900 flex items-center gap-2"><IconPlus size={18} className="text-[var(--gold-deep)]" /> התאמת ההזמנה</h3>
+            <h3 className="font-display font-bold text-slate-900 flex items-center gap-2"><IconPlus size={18} className="text-[var(--accent-deep)]" /> התאמת ההזמנה</h3>
             {addonsGrid}
             {splitSelector}
           </div>
@@ -485,7 +485,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
               <h3 className="font-display font-bold text-slate-900 mb-2">על הדירה</h3>
               <p className={`text-sm text-slate-500 leading-relaxed whitespace-pre-line ${showDesc ? "" : "line-clamp-3"}`}>{apt.description}</p>
               {apt.description.length > 180 && (
-                <button onClick={() => setShowDesc(v => !v)} className="mt-2 text-sm font-bold text-[var(--gold-deep)]">{showDesc ? "הצג פחות ↑" : "קרא עוד ←"}</button>
+                <button onClick={() => setShowDesc(v => !v)} className="mt-2 text-sm font-bold text-[var(--accent-deep)]">{showDesc ? "הצג פחות ↑" : "קרא עוד ←"}</button>
               )}
             </div>
           )}
@@ -493,13 +493,13 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             <h3 className="font-display font-bold text-slate-900 mb-2">מיקום</h3>
             {apt?.map_url ? (
               <a href={apt.map_url} target="_blank" rel="noopener noreferrer"
-                className="flex items-center justify-between rounded-xl bg-[var(--gold-wash)] border border-[var(--gold-line)] p-4 hover:bg-[var(--gold-wash)] transition">
-                <span className="flex items-center gap-2 font-bold text-slate-800"><IconMountain size={16} className="text-[var(--gold-deep)]" /> Val Thorens, France</span>
-                <span className="text-xs font-bold text-[var(--gold-deep)]">פתח במפה ←</span>
+                className="flex items-center justify-between rounded-xl bg-[var(--accent-wash)] border border-[var(--accent-line)] p-4 hover:bg-[var(--accent-wash)] transition">
+                <span className="flex items-center gap-2 font-bold text-slate-800"><IconMountain size={16} className="text-[var(--accent-deep)]" /> Val Thorens, France</span>
+                <span className="text-xs font-bold text-[var(--accent-deep)]">פתח במפה ←</span>
               </a>
             ) : (
-              <div className="rounded-xl bg-[var(--gold-wash)] border border-[var(--gold-line)] p-4 text-sm text-slate-600">
-                <span className="flex items-center gap-2 font-bold text-slate-800 mb-1"><IconMountain size={16} className="text-[var(--gold-deep)]" /> Val Thorens, France</span>
+              <div className="rounded-xl bg-[var(--accent-wash)] border border-[var(--accent-line)] p-4 text-sm text-slate-600">
+                <span className="flex items-center gap-2 font-bold text-slate-800 mb-1"><IconMountain size={16} className="text-[var(--accent-deep)]" /> Val Thorens, France</span>
                 <p>הכפר הגבוה ביותר באירופה · 2,300 מ׳ · גישה ישירה ל-600 ק״מ מסלולים</p>
               </div>
             )}
@@ -522,7 +522,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             <div className="text-[11px] text-slate-400 mb-0.5">סה״כ · {nights} לילות</div>
             <div className="text-xl font-black text-slate-900">€{liveTotal.toLocaleString()}</div>
           </div>
-          <button onClick={() => setSheetOpen(true)} className="flex-1 py-3.5 rounded-xl bg-[var(--gold)] hover:bg-[var(--gold-deep)] text-[var(--ink)] font-black text-base transition">
+          <button onClick={() => setSheetOpen(true)} className="flex-1 py-3.5 rounded-xl bg-[var(--accent)] hover:bg-[var(--accent-deep)] text-[var(--ink)] font-black text-base transition">
             בחר/י תוספות ותשלום ↑
           </button>
         </div>
@@ -550,7 +550,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             guests={guests} nights={nights} skiPass={skiPass} transfer={transferOn} equipment={equipmentOn} transferDetails={transferDetails} cancel={cancel} service={service}
             grandTotal={payNow} split={splitProp}
             label={splitCount > 1 ? "שלם/י את חלקך בכרטיס" : undefined}
-            className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-[var(--gold)] hover:bg-[var(--gold-deep)] text-[var(--ink)] font-black text-base transition" />
+            className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-[var(--accent)] hover:bg-[var(--accent-deep)] text-[var(--ink)] font-black text-base transition" />
           <a href={waHref} target="_blank" rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5a] text-white font-bold py-3.5 rounded-xl transition"><IconWhatsApp size={20} /> צור קשר עם נציג</a>
           {paymentBlock}
@@ -563,11 +563,11 @@ export default function QuoteView({ q }: { q: QuoteData }) {
           {/* clean header */}
           <div className="flex items-end justify-between gap-8 mb-6">
             <div className="text-right">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--gold-wash)] text-[var(--gold-deep)] text-xs font-bold tracking-widest uppercase mb-3">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--accent-wash)] text-[var(--accent-deep)] text-xs font-bold tracking-widest uppercase mb-3">
                 הצעת מחיר בלעדית
               </div>
               <h1 className="font-display text-5xl font-black text-slate-900 leading-none">{apartment}</h1>
-              <p className="flex items-center gap-1.5 text-sm text-slate-500 mt-3"><IconMountain size={14} className="text-[var(--gold-deep)]" /> Val Thorens · Trois Vallées · France</p>
+              <p className="flex items-center gap-1.5 text-sm text-slate-500 mt-3"><IconMountain size={14} className="text-[var(--accent-deep)]" /> Val Thorens · Trois Vallées · France</p>
             </div>
             <div className="text-left flex-shrink-0">
               <p className="text-xs text-slate-400 mb-0.5">סה״כ לתשלום</p>
@@ -609,7 +609,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
         <div className="max-w-6xl mx-auto px-8 py-10 grid grid-cols-[340px_1fr] gap-8 items-start">
           <aside className="sticky top-24 space-y-4">
             <div className="bg-slate-900 rounded-2xl p-6 text-white text-center relative overflow-hidden">
-              <div className="absolute -left-10 -top-10 w-40 h-40 rounded-full bg-[var(--gold-wash)] blur-2xl" />
+              <div className="absolute -left-10 -top-10 w-40 h-40 rounded-full bg-[var(--accent-wash)] blur-2xl" />
               <p className="relative text-white/50 text-sm mb-1">סה״כ לתשלום</p>
               <p className="relative font-display text-5xl font-black text-emerald-400 leading-none">€{liveTotal.toLocaleString()}</p>
               <p className="relative text-white/40 text-xs mt-2">~ €{Math.round(liveTotal / nights)} / לילה</p>
@@ -629,8 +629,8 @@ export default function QuoteView({ q }: { q: QuoteData }) {
               </a>
               {apt?.map_url && (
                 <a href={apt.map_url} target="_blank" rel="noopener noreferrer"
-                  className="mt-2 flex items-center justify-center gap-2 w-full border border-slate-200 hover:border-[var(--gold)] hover:bg-[var(--gold-wash)] text-slate-700 font-bold py-3 rounded-xl text-center text-sm transition">
-                  <IconMountain size={16} className="text-[var(--gold-deep)]" /> מיקום הדירה ב-Google Maps ←
+                  className="mt-2 flex items-center justify-center gap-2 w-full border border-slate-200 hover:border-[var(--accent)] hover:bg-[var(--accent-wash)] text-slate-700 font-bold py-3 rounded-xl text-center text-sm transition">
+                  <IconMountain size={16} className="text-[var(--accent-deep)]" /> מיקום הדירה ב-Google Maps ←
                 </a>
               )}
               <p className="text-center text-xs text-slate-400 mt-3">תשלום מאובטח · PayPlus · או סגירה בוואטסאפ</p>
@@ -650,7 +650,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-7">
               <div className="flex items-center justify-between mb-5">
                 <h2 className="font-display text-xl font-bold text-slate-900">תוספות זמינות</h2>
-                <span className="text-xs font-semibold text-[var(--gold-deep)] bg-[var(--gold-wash)] px-3 py-1 rounded-full">אופציונלי</span>
+                <span className="text-xs font-semibold text-[var(--accent-deep)] bg-[var(--accent-wash)] px-3 py-1 rounded-full">אופציונלי</span>
               </div>
               {addonsGrid}
               <div className="mt-5">{choicesBlock}</div>
@@ -668,7 +668,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
           <div className="max-w-6xl mx-auto px-8 text-center">
             <a href="/" className="inline-block"><Logo className="h-10 mx-auto" /></a>
             <div className="flex items-center justify-center gap-6 text-sm text-slate-500 mt-4">
-              <a href={`mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'skishareteam@gmail.com'}`} className="hover:text-[var(--gold-deep)]">צור קשר</a>
+              <a href={`mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'skishareteam@gmail.com'}`} className="hover:text-[var(--accent-deep)]">צור קשר</a>
               <span>·</span><span>פרטי בנק</span>
               <span>·</span><span>מדיניות פרטיות</span>
               <span>·</span><span>תנאי שימוש</span>
@@ -715,15 +715,15 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             <h2 className="font-display text-xl font-black text-slate-900 mb-1">ללא אפשרות ביטול</h2>
             <p className="text-sm text-slate-500 mb-4">אפשרות זו מוזילה ב-€100, אך ההזמנה <b>אינה ניתנת לביטול</b> ולא יינתן החזר כספי, בהתאם לתקנון.</p>
             <label className="flex items-start gap-2 cursor-pointer mb-4">
-              <input type="checkbox" checked={noCancelAgreed} onChange={e => setNoCancelAgreed(e.target.checked)} className="mt-0.5 w-4 h-4 accent-[var(--gold-deep)]" />
-              <span className="text-sm text-slate-600 leading-relaxed">אני מאשר/ת שהבנתי כי <b>לא אוכל לבטל</b> ולא אקבל החזר, ומסכים/ה ל<a href="/terms" target="_blank" className="text-[var(--gold-deep)] underline">תקנון</a>.</span>
+              <input type="checkbox" checked={noCancelAgreed} onChange={e => setNoCancelAgreed(e.target.checked)} className="mt-0.5 w-4 h-4 accent-[var(--accent-deep)]" />
+              <span className="text-sm text-slate-600 leading-relaxed">אני מאשר/ת שהבנתי כי <b>לא אוכל לבטל</b> ולא אקבל החזר, ומסכים/ה ל<a href="/terms" target="_blank" className="text-[var(--accent-deep)] underline">תקנון</a>.</span>
             </label>
             <label className="block text-xs font-bold text-slate-400 mb-1">חתימה (שם מלא)</label>
             <input value={signature} onChange={e => setSignature(e.target.value)} placeholder="הקלד/י את שמך המלא"
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]" />
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]" />
             <div className="flex gap-2">
               <button disabled={!noCancelAgreed || signature.trim().length < 2} onClick={() => { setCancel("none"); setShowNoCancel(false); }}
-                className="flex-1 bg-[var(--gold)] hover:bg-[var(--gold-deep)] disabled:opacity-50 text-[var(--ink)] font-bold py-3 rounded-xl">אישור וחתימה</button>
+                className="flex-1 bg-[var(--accent)] hover:bg-[var(--accent-deep)] disabled:opacity-50 text-[var(--ink)] font-bold py-3 rounded-xl">אישור וחתימה</button>
               <button onClick={() => setShowNoCancel(false)} className="px-5 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold">ביטול</button>
             </div>
           </div>
@@ -756,7 +756,7 @@ function DetailRow({ icon, label, main, sub }: { icon: React.ReactNode; label: s
         <p className="font-display font-bold text-slate-900">{main}</p>
         {sub && <p className="text-xs text-slate-400 mt-0.5">{sub}</p>}
       </div>
-      <span className="w-11 h-11 rounded-xl bg-[var(--gold-wash)] flex items-center justify-center text-[var(--gold-deep)] flex-shrink-0">{icon}</span>
+      <span className="w-11 h-11 rounded-xl bg-[var(--accent-wash)] flex items-center justify-center text-[var(--accent-deep)] flex-shrink-0">{icon}</span>
     </div>
   );
 }
@@ -766,7 +766,7 @@ function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string
     <div className="rounded-xl bg-slate-50 border border-slate-100 p-4 text-right">
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs text-slate-400">{label}</span>
-        <span className="w-9 h-9 rounded-lg bg-[var(--gold-wash)] flex items-center justify-center text-[var(--gold-deep)]">{icon}</span>
+        <span className="w-9 h-9 rounded-lg bg-[var(--accent-wash)] flex items-center justify-center text-[var(--accent-deep)]">{icon}</span>
       </div>
       <p className="font-display font-bold text-slate-900">{value}</p>
     </div>
