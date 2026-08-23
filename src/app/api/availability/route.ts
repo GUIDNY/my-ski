@@ -19,6 +19,7 @@ export async function GET(req: NextRequest) {
   const [blocks, bookings] = await Promise.all([
     supabase.from("availability_blocks").select("*").eq("apartment_id", apartment_id).gte("date", start).lte("date", end),
     supabase.from("bookings").select("check_in,check_out,status,customer_name,guests").eq("apartment_id", apartment_id)
+      .neq("status", "cancelled")
       .or(`check_in.lte.${end},check_out.gte.${start}`),
   ]);
 
