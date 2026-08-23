@@ -80,7 +80,7 @@ function CalendarTab({ aptId, basePrice, rules, reloadRules }: {
   const blockMap   = Object.fromEntries(blocks.map(b => [b.date, b]));
   const bookedDates = useMemo(() => {
     const s = new Set<string>();
-    bookings.forEach(b => {
+    bookings.filter(b => b.status !== "cancelled").forEach(b => {
       for (let d = new Date(b.check_in); d < new Date(b.check_out); d.setDate(d.getDate()+1))
         s.add(d.toISOString().split("T")[0]);
     });
