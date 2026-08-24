@@ -1,5 +1,23 @@
 import type { ProposalData, ProposalBlock } from "@/types";
-import { DEFAULT_TERMS_SECTION } from "@/lib/proposal-demo";
+import { DEFAULT_TERMS_SECTION, MANDATORY_TERM_BLOCKS } from "@/lib/proposal-demo";
+
+// Guarantees the mandatory legal disclosures (flights are external, subject to
+// the site terms, approval+payment = acceptance) are present in the terms
+// section of every proposal, including ones saved before these clauses existed.
+function withMandatoryTerms(sections: ProposalData["sections"]): ProposalData["sections"] {
+  const idx = sections.findIndex(s => s.heading === "תנאים");
+  if (idx === -1) return [...sections, DEFAULT_TERMS_SECTION];
+
+  const existingText = new Set(
+    sections[idx].blocks.filter(b => b.type === "text").map(b => (b as { text: string }).text)
+  );
+  const missing = MANDATORY_TERM_BLOCKS.filter(b => b.type === "text" && !existingText.has(b.text));
+  if (!missing.length) return sections;
+
+  const merged = [...sections];
+  merged[idx] = { ...merged[idx], blocks: [...merged[idx].blocks, ...missing] };
+  return merged;
+}
 
 /**
  * Branded proposal document. Pure & presentational — used by both the print
@@ -123,10 +141,8 @@ function Block({ block }: { block: ProposalBlock }) {
 }
 
 export default function ProposalDocument({ data }: { data: ProposalData }) {
-  // terms (cancellation / validity / payment) always appear — auto-added if missing
-  const sections = data.sections.some(s => s.heading === "תנאים")
-    ? data.sections
-    : [...data.sections, DEFAULT_TERMS_SECTION];
+  // terms (cancellation / validity / payment / flights / site terms / approval) always appear
+  const sections = withMandatoryTerms(data.sections);
   return (
     <div className="proposal" dir="rtl">
       <div className="cover">

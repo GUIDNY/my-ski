@@ -70,10 +70,21 @@ export const SAVED_BLOCKS: { name: string; heading: string; block: import("@/typ
   { name: "תנאי ביטול", heading: "תנאים", block: { type: "text", text: "ביטול עד 30 יום לפני מועד היציאה — החזר מלא בניכוי דמי טיפול. ביטול 30–14 יום לפני — 50% החזר. ביטול פחות מ־14 יום לפני מועד היציאה — ללא החזר." } },
   { name: "תוקף ההצעה", heading: "תנאים", block: { type: "note", text: "ההצעה בתוקף ל־14 ימים ממועד הנפקתה, וכפופה לזמינות במועד אישור ההזמנה." } },
   { name: "אמצעי תשלום", heading: "תנאים", block: { type: "text", text: "התשלום מתבצע בכרטיס אשראי (עד 3 תשלומים ללא ריבית) או בהעברה בנקאית. בתשלום בכרטיס נוספת עמלת סליקה של 1.9%." } },
+  { name: "טיסות — גורם חיצוני", heading: "תנאים", block: { type: "text", text: "הטיסות המפורטות בהצעה זו (ככל שמפורטות) הן שירות חיצוני. כל עניין הנוגע לטיסה — לרבות שינויים, עיכובים, ביטולים, כבודה ותנאי ההזמנה — כפוף באופן בלעדי לחוזה ולתנאי ההזמנה מול חברת התעופה שדרכה הוזמנה הטיסה, ואינו באחריות החברה." } },
+  { name: "כפיפות לתקנון האתר", heading: "תנאים", block: { type: "text", text: "מעבר למדיניות הביטולים המפורטת לעיל, ההזמנה כפופה במלואה למדיניות החברה כפי שמפורטת בתקנון האתר." } },
+  { name: "אישור ותשלום", heading: "תנאים", block: { type: "text", text: "אישור הצעה זו על ידי הלקוח מהווה הצהרה כי קרא את ההצעה על כל תנאיה ואישר אותם. ביצוע תשלום כלשהו על חשבון ההזמנה מהווה הסכמה מלאה ומחייבת לכל התנאים המפורטים לעיל." } },
 ];
 
-// Terms that appear on every proposal by default (cancellation, validity, payment).
+// Terms that appear on every proposal by default (cancellation, validity, payment, flights, site terms, approval).
 export const DEFAULT_TERMS_SECTION: import("@/types").ProposalSection = {
   heading: "תנאים",
-  blocks: [SAVED_BLOCKS[0].block, SAVED_BLOCKS[1].block, SAVED_BLOCKS[2].block],
+  blocks: SAVED_BLOCKS.map(b => b.block),
 };
+
+// Legal disclosures that must appear on every printed/PDF proposal — even ones
+// created before these clauses existed — so the terms row is never missing them.
+export const MANDATORY_TERM_BLOCKS: import("@/types").ProposalBlock[] = [
+  SAVED_BLOCKS[3].block,
+  SAVED_BLOCKS[4].block,
+  SAVED_BLOCKS[5].block,
+];
