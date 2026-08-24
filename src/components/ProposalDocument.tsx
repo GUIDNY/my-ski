@@ -1,21 +1,27 @@
 import type { ProposalData, ProposalBlock } from "@/types";
 import { DEFAULT_TERMS_SECTION, MANDATORY_TERM_BLOCKS } from "@/lib/proposal-demo";
 
+// Retired inline cancellation-days/percentage clause (e.g. "30 יום ... 50% החזר").
+// Cancellations are now governed solely by the site's cancellation policy, so
+// this text is stripped even from proposals that already had it baked in.
+const RETIRED_TEXT_PREFIX = "ביטול עד 30 יום לפני מועד היציאה";
+
 // Guarantees the mandatory legal disclosures (flights are external, subject to
 // the site terms, approval+payment = acceptance) are present in the terms
-// section of every proposal, including ones saved before these clauses existed.
+// section of every proposal, including ones saved before these clauses existed,
+// and strips any retired clauses that shouldn't appear anymore.
 function withMandatoryTerms(sections: ProposalData["sections"]): ProposalData["sections"] {
   const idx = sections.findIndex(s => s.heading === "תנאים");
   if (idx === -1) return [...sections, DEFAULT_TERMS_SECTION];
 
-  const existingText = new Set(
-    sections[idx].blocks.filter(b => b.type === "text").map(b => (b as { text: string }).text)
+  const blocks = sections[idx].blocks.filter(
+    b => !(b.type === "text" && b.text.startsWith(RETIRED_TEXT_PREFIX))
   );
+  const existingText = new Set(blocks.filter(b => b.type === "text").map(b => (b as { text: string }).text));
   const missing = MANDATORY_TERM_BLOCKS.filter(b => b.type === "text" && !existingText.has(b.text));
-  if (!missing.length) return sections;
 
   const merged = [...sections];
-  merged[idx] = { ...merged[idx], blocks: [...merged[idx].blocks, ...missing] };
+  merged[idx] = { ...merged[idx], blocks: [...blocks, ...missing] };
   return merged;
 }
 
