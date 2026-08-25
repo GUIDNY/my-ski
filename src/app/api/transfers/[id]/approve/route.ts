@@ -22,7 +22,7 @@ export async function POST(_: NextRequest, { params }: { params: Promise<{ id: s
   }
   if (!legs.length) return NextResponse.json({ error: "no legs to book" }, { status: 400 });
 
-  const vehicleClass = t.vehicle_class ?? "sedan";
+  const vehicleClass = t.vehicle_class_id ?? t.vehicle_class ?? "sedan";
   const bookings = [];
   try {
     for (const leg of legs) {
@@ -36,6 +36,9 @@ export async function POST(_: NextRequest, { params }: { params: Promise<{ id: s
         flight_no: leg.flight_no ?? undefined,
         chosen_class: vehicleClass,
         customer: { name: t.customer_name, phone: t.customer_phone ?? undefined, email: t.customer_email ?? undefined },
+        luggage: t.luggage ?? undefined,
+        ski: t.ski ?? undefined,
+        supplements: Array.isArray(t.supplements) && t.supplements.length ? t.supplements : undefined,
       });
       bookings.push({ ...booking, leg: leg.direction });
     }

@@ -21,10 +21,29 @@ type Transfer = {
   status: string | null;
   resort_slug: string | null;
   vehicle_class: string | null;
-  quote_snapshot: unknown;
+  vehicle_class_id: string | null;
+  luggage: number | null;
+  ski: number | null;
+  supplements: string[] | null;
+  quote_snapshot: { outbound?: { supplements: { id: string; name: string }[] } | null; return?: { supplements: { id: string; name: string }[] } | null } | null;
   winteride_ref: string | null;
   winteride_status: string | null;
 };
+
+const SUPPLEMENT_LABELS: Record<string, string> = {
+  "Additional stop": "עצירה נוספת",
+  "Baby seat (0–13 kg)": "כיסא תינוק",
+  "Booster seat (15–36 kg)": "בוסטר",
+};
+
+function supplementNames(t: Transfer): string[] {
+  if (!t.supplements?.length) return [];
+  const catalog = [...(t.quote_snapshot?.outbound?.supplements ?? []), ...(t.quote_snapshot?.return?.supplements ?? [])];
+  return t.supplements.map(id => {
+    const name = catalog.find(s => s.id === id)?.name;
+    return name ? (SUPPLEMENT_LABELS[name] ?? name) : id;
+  });
+}
 
 const STATUS: Record<string, { label: string; cls: string }> = {
   pending:   { label: "ממתין לאישור", cls: "bg-amber-100 text-amber-700" },
@@ -115,6 +134,13 @@ export default function TransfersAdmin() {
                       {t.customer_email && <>{t.customer_email} · </>}
                       {t.customer_phone}
                     </p>
+                    {(t.luggage != null || t.ski != null || supplementNames(t).length > 0) && (
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        {t.luggage != null && <>🧳 {t.luggage} · </>}
+                        {t.ski != null && t.ski > 0 && <>🎿 {t.ski} · </>}
+                        {supplementNames(t).map(n => <span key={n} className="inline-block bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full mr-1">{n}</span>)}
+                      </p>
+                    )}
                     {t.winteride_ref && <p className="text-xs text-blue-600 mt-1">Winteride ref: {t.winteride_ref}</p>}
                     {t.notes && <p className="text-xs text-gray-400 mt-1">הערות: {t.notes}</p>}
                   </div>
