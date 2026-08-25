@@ -1,9 +1,29 @@
 "use client";
 import SkiLoader from "@/components/SkiLoader";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { IconMountain, IconBus, IconCheck, IconPlane } from "@/components/Icons";
 import Logo from "@/components/Logo";
+
+type LiveQuote = {
+  cheapest_class: string;
+  cheapest_price_cents: number;
+} | null;
+
+// Cheapest bookable (not on_request) class from a Winteride /quotes response.
+async function fetchLiveQuote(params: { airport_code: string; resort_slug: string; date: string; pax: number; out_direction: "arrival" | "departure"; flight_no?: string }): Promise<LiveQuote> {
+  try {
+    const res = await fetch("/api/transfers/quote", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(params) });
+    if (!res.ok) return null;
+    const q = await res.json();
+    const bookable = (q.private ?? []).filter((c: { on_request: boolean }) => !c.on_request);
+    if (!bookable.length) return null;
+    const cheapest = bookable.reduce((a: { price_cents: number }, b: { price_cents: number }) => (b.price_cents < a.price_cents ? b : a));
+    return { cheapest_class: cheapest.class, cheapest_price_cents: cheapest.price_cents };
+  } catch {
+    return null;
+  }
+}
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s + "T12:00:00"); return `${d.getDate()} ${HE_MONTHS[d.getMonth()]}`; };
@@ -107,8 +127,38 @@ function TransfersPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error,     setError]     = useState("");
 
+  // Live pricing from Winteride, fetched per active leg once its date is set.
+  const [outQuote, setOutQuote] = useState<LiveQuote>(null);
+  const [retQuote, setRetQuote] = useState<LiveQuote>(null);
+  const [quoting,  setQuoting]  = useState(false);
+
+  useEffect(() => {
+    if (direction === "return" || !outDate) { setOutQuote(null); return; }
+    let cancelled = false;
+    setQuoting(true);
+    fetchLiveQuote({ airport_code: airport, resort_slug: "val-thorens", date: outDate, pax: passengers, out_direction: "arrival", flight_no: outFlight || undefined })
+      .then(q => { if (!cancelled) setOutQuote(q); })
+      .finally(() => { if (!cancelled) setQuoting(false); });
+    return () => { cancelled = true; };
+  }, [airport, outDate, passengers, outFlight, direction]);
+
+  useEffect(() => {
+    if (direction === "outbound" || !retDate) { setRetQuote(null); return; }
+    let cancelled = false;
+    setQuoting(true);
+    fetchLiveQuote({ airport_code: airport, resort_slug: "val-thorens", date: retDate, pax: passengers, out_direction: "departure", flight_no: retFlight || undefined })
+      .then(q => { if (!cancelled) setRetQuote(q); })
+      .finally(() => { if (!cancelled) setQuoting(false); });
+    return () => { cancelled = true; };
+  }, [airport, retDate, passengers, retFlight, direction]);
+
   const directions = direction === "both" ? 2 : 1;
-  const totalPrice = PRICE_PER_DIRECTION * directions * passengers;
+  const liveCentsTotal = (direction !== "return" ? outQuote?.cheapest_price_cents ?? 0 : 0)
+    + (direction !== "outbound" ? retQuote?.cheapest_price_cents ?? 0 : 0);
+  const hasLivePrice = (direction === "outbound" && !!outQuote)
+    || (direction === "return" && !!retQuote)
+    || (direction === "both" && !!outQuote && !!retQuote);
+  const totalPrice = hasLivePrice ? Math.round(liveCentsTotal / 100) : PRICE_PER_DIRECTION * directions * passengers;
 
   // Is confirmed price? All selected legs must be El Al
   const outIsElal = isElAl(outFlight);
@@ -118,10 +168,6 @@ function TransfersPage() {
     if (direction === "return")   return retFlight ? retIsElal : false;
     return (outFlight || retFlight) ? (outIsElal && retIsElal) : false;
   })();
-  const hasAnyFlight = direction === "both"
-    ? (outFlight || retFlight)
-    : direction === "outbound" ? outFlight : retFlight;
-
   const canSubmit = name.trim() &&
     (direction !== "outbound" || (outFlight && outDate && outTime)) &&
     (direction !== "return"   || (retFlight && retDate && retTime)) &&
@@ -148,6 +194,10 @@ function TransfersPage() {
         customer_phone: phone || null,
         notes: [aptName ? `דירה: ${aptName}` : "", notes].filter(Boolean).join(" | ") || null,
         apartment_id: aptId || null,
+        resort_slug: "val-thorens",
+        vehicle_class: outQuote?.cheapest_class ?? retQuote?.cheapest_class ?? "sedan",
+        quote_snapshot: { outbound: outQuote, return: retQuote },
+        status: "pending",
       };
       const res = await fetch("/api/transfers", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       if (!res.ok) throw new Error("שגיאה בשמירת ההזמנה");
@@ -328,17 +378,17 @@ function TransfersPage() {
 
                 <div className="border-t border-gray-100 pt-3 mt-1 flex flex-col gap-2">
                   <div className="flex justify-between text-xs text-gray-400">
-                    <span>€{PRICE_PER_DIRECTION} × {directions} כיוון × {passengers} נוסעים</span>
+                    <span>
+                      {quoting ? "בודק מחיר עדכני..." : hasLivePrice ? `${directions} כיוון · מחיר חי מספק ההסעות` : `€${PRICE_PER_DIRECTION} × ${directions} כיוון × ${passengers} נוסעים`}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="font-black text-gray-900">סה״כ</span>
                     <div className="text-right">
                       <span className="text-2xl font-black text-gray-900">€{totalPrice}</span>
-                      {hasAnyFlight && (
-                        <div className={`text-xs font-bold mt-0.5 ${priceConfirmed ? "text-green-600" : "text-amber-600"}`}>
-                          {priceConfirmed ? "✓ מחיר קבוע" : "⚠ מחיר משוער"}
-                        </div>
-                      )}
+                      <div className={`text-xs font-bold mt-0.5 ${hasLivePrice ? "text-green-600" : "text-amber-600"}`}>
+                        {hasLivePrice ? "✓ מחיר חי" : "⚠ מחיר משוער — יעודכן לפני האישור"}
+                      </div>
                     </div>
                   </div>
                 </div>
