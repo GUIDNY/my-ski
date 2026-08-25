@@ -18,6 +18,7 @@ export default function Footer() {
             <h5 className="text-xs font-bold tracking-widest uppercase text-gray-900 mb-6">מידע ותקנון</h5>
             <ul className="flex flex-col gap-3.5">
               {[
+                { label: "מדריך ואל טורנס", href: "/guide" },
                 { label: "תקנון, הזמנות וביטולים", href: "/terms" },
                 { label: "מדיניות פרטיות", href: "/privacy" },
                 { label: "מדיניות עוגיות", href: "/cookies" },
