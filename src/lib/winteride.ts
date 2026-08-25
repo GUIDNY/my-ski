@@ -63,6 +63,9 @@ export type WinterideBooking = {
 export type CreateBookingParams = QuoteParams & {
   chosen_class: string; // vehicle_class_id from the quote the customer picked
   customer: { name: string; phone?: string; email?: string };
+  luggage?: number;
+  ski?: number;
+  supplements?: string[]; // supplement ids from the quote's `supplements` list
 };
 
 // Creates a REAL, billable, confirmed booking on the partner account. Only

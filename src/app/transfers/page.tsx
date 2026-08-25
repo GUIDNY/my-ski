@@ -5,25 +5,28 @@ import { useSearchParams } from "next/navigation";
 import { IconMountain, IconBus, IconCheck, IconPlane } from "@/components/Icons";
 import Logo from "@/components/Logo";
 
-type LiveQuote = {
-  cheapest_class: string;
-  cheapest_price_cents: number;
-} | null;
+type VehicleClass = { class: string; vehicle_class_id: string; max_pax: number; max_luggage: number; on_request: boolean; price_cents: number };
+type Supplement = { id: string; name: string; price_cents: number };
+type LiveQuote = { private: VehicleClass[]; supplements: Supplement[] } | null;
 
-// Cheapest bookable (not on_request) class from a Winteride /quotes response.
+// Full Winteride /quotes response for one leg (vehicle classes + available supplements).
 async function fetchLiveQuote(params: { airport_code: string; resort_slug: string; date: string; pax: number; out_direction: "arrival" | "departure"; flight_no?: string }): Promise<LiveQuote> {
   try {
     const res = await fetch("/api/transfers/quote", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(params) });
     if (!res.ok) return null;
     const q = await res.json();
-    const bookable = (q.private ?? []).filter((c: { on_request: boolean }) => !c.on_request);
-    if (!bookable.length) return null;
-    const cheapest = bookable.reduce((a: { price_cents: number }, b: { price_cents: number }) => (b.price_cents < a.price_cents ? b : a));
-    return { cheapest_class: cheapest.class, cheapest_price_cents: cheapest.price_cents };
+    if (!q.private?.length) return null;
+    return { private: q.private, supplements: q.supplements ?? [] };
   } catch {
     return null;
   }
 }
+
+const SUPPLEMENT_LABELS: Record<string, string> = {
+  "Additional stop": "עצירה נוספת",
+  "Baby seat (0–13 kg)": "כיסא תינוק (0–13 ק״ג)",
+  "Booster seat (15–36 kg)": "בוסטר (15–36 ק״ג)",
+};
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s + "T12:00:00"); return `${d.getDate()} ${HE_MONTHS[d.getMonth()]}`; };
@@ -132,6 +135,12 @@ function TransfersPage() {
   const [retQuote, setRetQuote] = useState<LiveQuote>(null);
   const [quoting,  setQuoting]  = useState(false);
 
+  // Vehicle class + extras — chosen once, applied to every active leg.
+  const [vehicleClassId, setVehicleClassId] = useState<string | null>(null);
+  const [supplementIds, setSupplementIds]   = useState<string[]>([]);
+  const [luggage, setLuggage] = useState(passengers);
+  const [ski,     setSki]     = useState(0);
+
   useEffect(() => {
     if (direction === "return" || !outDate) { setOutQuote(null); return; }
     let cancelled = false;
@@ -152,12 +161,27 @@ function TransfersPage() {
     return () => { cancelled = true; };
   }, [airport, retDate, passengers, retFlight, direction]);
 
+  // Master class/supplements list — whichever leg has answered first.
+  const referenceQuote = outQuote ?? retQuote;
+  const availableClasses = referenceQuote?.private ?? [];
+  const availableSupplements = referenceQuote?.supplements ?? [];
+
+  useEffect(() => {
+    if (!availableClasses.length) return;
+    if (vehicleClassId && availableClasses.some(c => c.vehicle_class_id === vehicleClassId)) return;
+    const bookable = availableClasses.filter(c => !c.on_request);
+    const cheapest = (bookable.length ? bookable : availableClasses).reduce((a, b) => (b.price_cents < a.price_cents ? b : a));
+    setVehicleClassId(cheapest.vehicle_class_id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availableClasses.map(c => c.vehicle_class_id).join(",")]);
+
   const directions = direction === "both" ? 2 : 1;
-  const liveCentsTotal = (direction !== "return" ? outQuote?.cheapest_price_cents ?? 0 : 0)
-    + (direction !== "outbound" ? retQuote?.cheapest_price_cents ?? 0 : 0);
-  const hasLivePrice = (direction === "outbound" && !!outQuote)
-    || (direction === "return" && !!retQuote)
-    || (direction === "both" && !!outQuote && !!retQuote);
+  const classPriceFor = (q: LiveQuote) => q?.private.find(c => c.vehicle_class_id === vehicleClassId)?.price_cents ?? null;
+  const outClassPrice = direction !== "return" ? classPriceFor(outQuote) : null;
+  const retClassPrice = direction !== "outbound" ? classPriceFor(retQuote) : null;
+  const hasLivePrice = (direction !== "return" ? outClassPrice != null : true) && (direction !== "outbound" ? retClassPrice != null : true);
+  const supplementsCentsPerLeg = availableSupplements.filter(s => supplementIds.includes(s.id)).reduce((sum, s) => sum + s.price_cents, 0);
+  const liveCentsTotal = (outClassPrice ?? 0) + (retClassPrice ?? 0) + supplementsCentsPerLeg * directions;
   const totalPrice = hasLivePrice ? Math.round(liveCentsTotal / 100) : PRICE_PER_DIRECTION * directions * passengers;
 
   // Is confirmed price? All selected legs must be El Al
@@ -195,7 +219,11 @@ function TransfersPage() {
         notes: [aptName ? `דירה: ${aptName}` : "", notes].filter(Boolean).join(" | ") || null,
         apartment_id: aptId || null,
         resort_slug: "val-thorens",
-        vehicle_class: outQuote?.cheapest_class ?? retQuote?.cheapest_class ?? "sedan",
+        vehicle_class: availableClasses.find(c => c.vehicle_class_id === vehicleClassId)?.class ?? "sedan",
+        vehicle_class_id: vehicleClassId,
+        supplements: supplementIds,
+        luggage,
+        ski,
         quote_snapshot: { outbound: outQuote, return: retQuote },
         status: "pending",
       };
@@ -323,6 +351,66 @@ function TransfersPage() {
                 <span className="text-sm text-gray-400 mr-1">{passengers === 1 ? "אדם" : "אנשים"}</span>
               </div>
             </div>
+
+            {/* Luggage / ski */}
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="מספר מזוודות">
+                <input type="number" min={0} max={30} value={luggage}
+                  onChange={e => setLuggage(Math.max(0, parseInt(e.target.value) || 0))}
+                  className={inputCls} dir="ltr" />
+              </Field>
+              <Field label="ציוד סקי (סטים)">
+                <input type="number" min={0} max={30} value={ski}
+                  onChange={e => setSki(Math.max(0, parseInt(e.target.value) || 0))}
+                  className={inputCls} dir="ltr" />
+              </Field>
+            </div>
+
+            {/* Vehicle class */}
+            {availableClasses.length > 0 && (
+              <div>
+                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">סוג רכב</div>
+                <div className="flex flex-col gap-2">
+                  {availableClasses.map(c => (
+                    <button key={c.vehicle_class_id} onClick={() => setVehicleClassId(c.vehicle_class_id)}
+                      disabled={c.on_request}
+                      className={`flex items-center justify-between px-4 py-3 rounded-xl border-2 text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed
+                        ${vehicleClassId === c.vehicle_class_id ? "border-blue-500 bg-blue-50" : "border-gray-100 bg-white hover:border-gray-200"}`}>
+                      <span className="text-right">
+                        <span className="font-bold block text-gray-900">{c.class}{c.on_request && " (לפי בקשה בלבד)"}</span>
+                        <span className="text-xs text-gray-400">עד {c.max_pax} נוסעים · עד {c.max_luggage} מזוודות</span>
+                      </span>
+                      <span className="font-bold text-blue-700">€{Math.round(c.price_cents / 100)}{direction === "both" ? " / כיוון" : ""}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Supplements */}
+            {availableSupplements.length > 0 && (
+              <div>
+                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">תוספות</div>
+                <div className="flex flex-col gap-2">
+                  {availableSupplements.map(s => {
+                    const checked = supplementIds.includes(s.id);
+                    return (
+                      <label key={s.id}
+                        className={`flex items-center justify-between px-4 py-3 rounded-xl border-2 cursor-pointer transition-all
+                          ${checked ? "border-blue-500 bg-blue-50" : "border-gray-100 bg-white hover:border-gray-200"}`}>
+                        <span className="flex items-center gap-2.5">
+                          <input type="checkbox" checked={checked}
+                            onChange={() => setSupplementIds(v => checked ? v.filter(id => id !== s.id) : [...v, s.id])}
+                            className="w-4 h-4" />
+                          <span className="text-sm font-semibold text-gray-900">{SUPPLEMENT_LABELS[s.name] ?? s.name}</span>
+                        </span>
+                        <span className="text-sm font-bold text-blue-700">+€{(s.price_cents / 100).toFixed(0)}{directions > 1 ? " / כיוון" : ""}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Contact */}
             <div className="bg-white rounded-2xl border border-gray-100 p-5">
