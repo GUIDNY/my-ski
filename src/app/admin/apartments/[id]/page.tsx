@@ -138,8 +138,11 @@ function CalendarTab({ aptId, basePrice, rules, reloadRules }: {
     setSaving(false); setSaveMsg(`נשמר`); reloadRules(); clearSelection(); load();
   };
 
-  const navPrev = () => { if (month === 0) { setYear(y=>y-1); setMonth(11); } else setMonth(m=>m-1); clearSelection(); };
-  const navNext = () => { if (month === 11) { setYear(y=>y+1); setMonth(0); } else setMonth(m=>m+1); clearSelection(); };
+  // Deliberately does NOT clear the in-progress range — a start date picked
+  // in one month needs to survive navigating to another month to pick the
+  // end date. Use the × in the action panel to cancel a selection instead.
+  const navPrev = () => { if (month === 0) { setYear(y=>y-1); setMonth(11); } else setMonth(m=>m-1); };
+  const navNext = () => { if (month === 11) { setYear(y=>y+1); setMonth(0); } else setMonth(m=>m+1); };
 
   return (
     <div className="pb-48">
