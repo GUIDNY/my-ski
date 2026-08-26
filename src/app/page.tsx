@@ -120,15 +120,15 @@ export default async function Home() {
           className="absolute inset-0 w-full h-full object-cover object-center"
           style={{ zIndex: 0 }}
         />
-        <div className="absolute inset-0 overflow-hidden" style={{ zIndex: 1 }} aria-hidden="true">
+        <div className="absolute inset-0" style={{
+          zIndex: 1,
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.15) 60%, rgba(0,0,0,0.55) 100%)"
+        }} />
+        <div className="absolute inset-0 overflow-hidden" style={{ zIndex: 2 }} aria-hidden="true">
           <div className="cloud-layer cloud-1" />
           <div className="cloud-layer cloud-2" />
           <div className="cloud-layer cloud-3" />
         </div>
-        <div className="absolute inset-0" style={{
-          zIndex: 2,
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.15) 60%, rgba(0,0,0,0.55) 100%)"
-        }} />
         <div className="relative z-10 flex flex-col items-center gap-7 px-4 text-center w-full max-w-4xl mx-auto">
           <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-white leading-tight" style={{ textShadow: "0 2px 20px rgba(0,0,0,0.4)" }}>
             Val Thorens

@@ -86,13 +86,13 @@ body {
   position: absolute;
   pointer-events: none;
   border-radius: 50%;
-  filter: blur(30px);
-  background: radial-gradient(ellipse at center, rgba(255,255,255,0.85), rgba(255,255,255,0) 70%);
+  filter: blur(22px);
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.95), rgba(255,255,255,0) 70%);
   will-change: transform;
 }
-.cloud-1 { top: 6%;  width: 46vw; height: 16vw; opacity: 0.32; animation: cloud-drift 90s linear infinite; }
-.cloud-2 { top: 16%; width: 60vw; height: 20vw; opacity: 0.22; animation: cloud-drift 130s linear infinite; animation-delay: -40s; }
-.cloud-3 { top: 2%;  width: 36vw; height: 13vw; opacity: 0.26; animation: cloud-drift 70s linear infinite; animation-delay: -15s; }
+.cloud-1 { top: 8%;  width: 42vw; height: 15vw; opacity: 0.75; animation: cloud-drift 34s linear infinite; }
+.cloud-2 { top: 20%; width: 55vw; height: 18vw; opacity: 0.55; animation: cloud-drift 48s linear infinite; animation-delay: -14s; }
+.cloud-3 { top: 3%;  width: 34vw; height: 12vw; opacity: 0.65; animation: cloud-drift 26s linear infinite; animation-delay: -6s; }
 
 @media (prefers-reduced-motion: reduce) {
   .cloud-layer { animation: none; }
