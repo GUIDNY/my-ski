@@ -77,6 +77,27 @@ body {
   animation: shimmer 4s linear infinite;
 }
 
+/* ── Drifting cloud layer (hero background) ──────────────── */
+@keyframes cloud-drift {
+  from { transform: translateX(-10%); }
+  to   { transform: translateX(120vw); }
+}
+.cloud-layer {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  filter: blur(30px);
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.85), rgba(255,255,255,0) 70%);
+  will-change: transform;
+}
+.cloud-1 { top: 6%;  width: 46vw; height: 16vw; opacity: 0.32; animation: cloud-drift 90s linear infinite; }
+.cloud-2 { top: 16%; width: 60vw; height: 20vw; opacity: 0.22; animation: cloud-drift 130s linear infinite; animation-delay: -40s; }
+.cloud-3 { top: 2%;  width: 36vw; height: 13vw; opacity: 0.26; animation: cloud-drift 70s linear infinite; animation-delay: -15s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cloud-layer { animation: none; }
+}
+
 .glass {
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(20px);
