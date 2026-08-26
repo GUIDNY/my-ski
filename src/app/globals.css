@@ -77,13 +77,19 @@ body {
   animation: shimmer 4s linear infinite;
 }
 
-/* ── Drifting cloud layer (hero background) ──────────────── */
+/* ── Drifting cloud layer (hero background) ──────────────────────
+   `left` is set explicitly on every cloud (rather than relying on
+   static-position fallback) because the page is dir="rtl" — without
+   an explicit left, the browser's RTL static-position fallback put
+   clouds somewhere mid-viewport instead of off-screen, so they
+   seemed to "pop in" mid-page instead of sweeping in from the edge. */
 @keyframes cloud-drift {
-  from { transform: translateX(-10%); }
-  to   { transform: translateX(120vw); }
+  from { transform: translateX(0); }
+  to   { transform: translateX(160vw); }
 }
 .cloud-layer {
   position: absolute;
+  left: -70vw;
   pointer-events: none;
   border-radius: 50%;
   filter: blur(18px);
