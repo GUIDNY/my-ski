@@ -582,6 +582,39 @@ function SyncTab({ aptId }: { aptId: string }) {
         {syncing ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> מסנכרן...</> : "↻ סנכרן עכשיו"}
       </button>
       {msg && <p className="text-green-600 text-sm font-medium text-center mt-3">{msg}</p>}
+
+      <ExportCalendarBox aptId={aptId} />
+    </div>
+  );
+}
+
+/* ── Export our calendar → paste into Airbnb/Booking as an "import" URL ── */
+function ExportCalendarBox({ aptId }: { aptId: string }) {
+  const [copied, setCopied] = useState(false);
+  const exportUrl = typeof window !== "undefined" ? `${window.location.origin}/api/ical-export?apartment_id=${aptId}` : "";
+
+  const copy = async () => {
+    await navigator.clipboard.writeText(exportUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="mt-8 pt-6 border-t border-gray-100">
+      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-3 text-sm text-blue-700">
+        <p className="font-bold mb-1">כיוון הפוך: לעדכן את Airbnb/Booking בהזמנות מהאתר שלנו</p>
+        <p className="text-xs leading-relaxed">
+          העתיקו את הקישור למטה, והדביקו אותו אצל Airbnb/Booking.com בתור &quot;ייבוא לוח שנה&quot; (Import calendar) —
+          כך שכל הזמנה שמתבצעת אצלנו תיחסם אוטומטית גם שם.
+        </p>
+      </div>
+      <div className="flex gap-2">
+        <input readOnly value={exportUrl} onClick={e => (e.target as HTMLInputElement).select()}
+          className="flex-1 border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-500 bg-gray-50" dir="ltr" />
+        <button onClick={copy} className="px-4 py-2.5 bg-gray-900 text-white rounded-lg text-sm font-bold shrink-0">
+          {copied ? "הועתק ✓" : "העתק"}
+        </button>
+      </div>
     </div>
   );
 }

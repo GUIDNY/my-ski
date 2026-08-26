@@ -60,6 +60,12 @@ export async function POST(req: NextRequest) {
         const text = await res.text();
         const events = parseIcal(text);
 
+        // Clear this source's previous blocks first — otherwise dates freed
+        // upstream (e.g. unblocked on Airbnb) stay stuck as "external" here
+        // forever, since the loop below only ever adds/updates, never removes.
+        await supabase.from("availability_blocks").delete()
+          .eq("apartment_id", body.apartment_id).eq("source", src.platform);
+
         for (const ev of events) {
           const start = new Date(ev.start);
           const end   = new Date(ev.end);
