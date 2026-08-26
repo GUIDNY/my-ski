@@ -59,12 +59,20 @@ function CalendarTab({ aptId, basePrice, rules, reloadRules }: {
 
   const [rangeStart, setRangeStart] = useState<string | null>(null);
   const [rangeEnd,   setRangeEnd]   = useState<string | null>(null);
-  const [panel,      setPanel]      = useState<"block"|"unblock"|"price"|null>(null);
+  const [panel,      setPanel]      = useState<"block"|"unblock"|"price"|"booking"|null>(null);
   const [priceVal,   setPriceVal]   = useState("");
   const [priceLbl,   setPriceLbl]   = useState("");
   const [priceMode,  setPriceMode]  = useState<"absolute"|"add"|"subtract">("absolute");
   const [saving,     setSaving]     = useState(false);
   const [saveMsg,    setSaveMsg]    = useState("");
+
+  // Manual booking form
+  const [bkName,   setBkName]   = useState("");
+  const [bkEmail,  setBkEmail]  = useState("");
+  const [bkPhone,  setBkPhone]  = useState("");
+  const [bkGuests, setBkGuests] = useState(2);
+  const [bkPrice,  setBkPrice]  = useState("");
+  const [bkNotes,  setBkNotes]  = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -97,6 +105,18 @@ function CalendarTab({ aptId, basePrice, rules, reloadRules }: {
     return s;
   }, [rangeStart, rangeEnd]);
 
+  // check_in/check_out for the selected range (checkout = day after last selected night).
+  const selectedCheckin  = [...selectedRange].sort()[0] ?? "";
+  const selectedCheckout = (() => {
+    const sorted = [...selectedRange].sort();
+    if (!sorted.length) return "";
+    const d = new Date(sorted[sorted.length - 1] + "T12:00:00");
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split("T")[0];
+  })();
+  const suggestedBookingTotal = selectedCheckin && selectedCheckout
+    ? calcTotalForRange(selectedCheckin, selectedCheckout, basePrice, rules) : 0;
+
   const firstDay    = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month+1, 0).getDate();
   const cells: (number|null)[] = [...Array(firstDay).fill(null), ...Array.from({length:daysInMonth},(_,i)=>i+1)];
@@ -111,7 +131,10 @@ function CalendarTab({ aptId, basePrice, rules, reloadRules }: {
     else { setRangeStart(iso); setRangeEnd(null); setPanel(null); setSaveMsg(""); }
   };
 
-  const clearSelection = () => { setRangeStart(null); setRangeEnd(null); setPanel(null); setSaveMsg(""); setPriceVal(""); setPriceLbl(""); };
+  const clearSelection = () => {
+    setRangeStart(null); setRangeEnd(null); setPanel(null); setSaveMsg(""); setPriceVal(""); setPriceLbl("");
+    setBkName(""); setBkEmail(""); setBkPhone(""); setBkGuests(2); setBkPrice(""); setBkNotes("");
+  };
 
   const applyBlockToggle = async (status: "blocked"|"free") => {
     setSaving(true);
@@ -136,6 +159,20 @@ function CalendarTab({ aptId, basePrice, rules, reloadRules }: {
         start_date: sorted[0], end_date: sorted[sorted.length-1],
         price: parseFloat(priceVal), priority: 10 }) });
     setSaving(false); setSaveMsg(`נשמר`); reloadRules(); clearSelection(); load();
+  };
+
+  const applyBooking = async () => {
+    if (!bkName.trim() || !selectedCheckin || !selectedCheckout) return;
+    setSaving(true);
+    const price = bkPrice ? parseFloat(bkPrice) : suggestedBookingTotal;
+    await fetch("/api/bookings", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        apartment_id: aptId, check_in: selectedCheckin, check_out: selectedCheckout, guests: bkGuests,
+        total_price: price, status: "confirmed",
+        customer_name: bkName, customer_email: bkEmail, customer_phone: bkPhone || null,
+        notes: bkNotes || null,
+      }) });
+    setSaving(false); clearSelection(); load();
   };
 
   // Deliberately does NOT clear the in-progress range — a start date picked
@@ -221,13 +258,55 @@ function CalendarTab({ aptId, basePrice, rules, reloadRules }: {
             </div>
 
             {panel === null && (
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <button onClick={() => applyBlockToggle("blocked")} disabled={saving}
                   className="py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-black disabled:opacity-50">חסום ימים</button>
                 <button onClick={() => applyBlockToggle("free")} disabled={saving}
                   className="py-3 rounded-xl bg-green-500 hover:bg-green-600 text-white text-xs font-black disabled:opacity-50">שחרר ימים</button>
                 <button onClick={() => { setPanel("price"); setPriceVal(""); setPriceLbl(""); setPriceMode("absolute"); }}
                   className="py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black">קבע מחיר</button>
+                <button onClick={() => setPanel("booking")}
+                  className="py-3 rounded-xl bg-gray-900 hover:bg-gray-800 text-white text-xs font-black">הזמנה חדשה</button>
+              </div>
+            )}
+
+            {panel === "booking" && (
+              <div className="space-y-3">
+                <input value={bkName} onChange={e=>setBkName(e.target.value)}
+                  placeholder="שם הלקוח *"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <div className="grid grid-cols-2 gap-2">
+                  <input value={bkPhone} onChange={e=>setBkPhone(e.target.value)}
+                    placeholder="טלפון" dir="ltr"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <input type="email" value={bkEmail} onChange={e=>setBkEmail(e.target.value)}
+                    placeholder="אימייל" dir="ltr"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-1.5">
+                    <span className="text-xs text-gray-400 shrink-0">אורחים</span>
+                    <input type="number" min={1} value={bkGuests} onChange={e=>setBkGuests(Math.max(1, parseInt(e.target.value)||1))}
+                      className="w-full text-sm py-1 focus:outline-none" dir="ltr" />
+                  </div>
+                  <div className="relative">
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-bold">€</span>
+                    <input type="number" value={bkPrice} onChange={e=>setBkPrice(e.target.value)}
+                      placeholder={`${suggestedBookingTotal}`}
+                      dir="ltr"
+                      className="w-full border border-gray-200 rounded-lg pr-8 pl-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  </div>
+                </div>
+                <input value={bkNotes} onChange={e=>setBkNotes(e.target.value)}
+                  placeholder="הערות (אופציונלי)"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <div className="flex gap-2">
+                  <button onClick={applyBooking} disabled={saving || !bkName.trim()}
+                    className="flex-1 py-3 rounded-xl bg-gray-900 hover:bg-gray-800 disabled:opacity-50 text-white text-sm font-black">
+                    {saving ? "יוצר..." : "צור הזמנה"}
+                  </button>
+                  <button onClick={() => setPanel(null)} className="px-4 py-3 border border-gray-200 rounded-xl text-sm font-bold text-gray-500">חזרה</button>
+                </div>
               </div>
             )}
 
