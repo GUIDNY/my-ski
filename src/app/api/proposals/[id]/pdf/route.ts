@@ -27,6 +27,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       headless: "shell",
     });
     const page = await browser.newPage();
+    // A headless browser never has the cookie-consent banner pre-dismissed
+    // like a real visitor's would be, so it renders over the document —
+    // pre-seed the same localStorage flag CookieConsent checks before nav.
+    await page.evaluateOnNewDocument(() => {
+      localStorage.setItem("skishare_cookie_consent", "1");
+    });
     await page.goto(`${origin}/admin/proposals/${id}/print`, {
       waitUntil: "networkidle0",
       timeout: 45000,
