@@ -19,13 +19,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 
   const origin = new URL(req.url).origin;
-  const browser = await puppeteer.launch({
-    args: chromium.args,
-    executablePath: await chromium.executablePath(),
-    headless: "shell",
-  });
-
+  let browser: Awaited<ReturnType<typeof puppeteer.launch>> | undefined;
   try {
+    browser = await puppeteer.launch({
+      args: chromium.args,
+      executablePath: await chromium.executablePath(),
+      headless: "shell",
+    });
     const page = await browser.newPage();
     await page.goto(`${origin}/admin/proposals/${id}/print`, {
       waitUntil: "networkidle0",
@@ -39,7 +39,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         "Content-Disposition": `inline; filename="proposal-${id}.pdf"`,
       },
     });
+  } catch (e) {
+    console.error("proposal pdf render failed", e);
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : String(e), stack: e instanceof Error ? e.stack : undefined },
+      { status: 500 }
+    );
   } finally {
-    await browser.close();
+    await browser?.close();
   }
 }
