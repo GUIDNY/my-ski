@@ -2,7 +2,7 @@ import Navbar from "@/components/Navbar";
 import SearchWidget from "@/components/SearchWidget";
 import FlightSearch from "@/components/FlightSearch";
 import Footer from "@/components/Footer";
-import { IconMountain } from "@/components/Icons";
+import { IconMountain, IconSnowflake } from "@/components/Icons";
 import { createServerClient } from "@/lib/supabase-server";
 import type { Apartment } from "@/types";
 
@@ -130,7 +130,7 @@ export default async function Home() {
           <div className="cloud-layer cloud-3" />
         </div>
         <div className="relative z-10 flex flex-col items-center gap-7 px-4 text-center w-full max-w-4xl mx-auto">
-          <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-white leading-tight" style={{ textShadow: "0 2px 20px rgba(0,0,0,0.4)" }}>
+          <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-white leading-tight" style={{ textShadow: "0 2px 20px rgba(0,0,0,0.4)", textWrap: "balance" }}>
             Val Thorens
           </h1>
           <p className="text-xl md:text-2xl text-white/90 font-medium" style={{ textShadow: "0 1px 10px rgba(0,0,0,0.3)" }}>
@@ -138,7 +138,7 @@ export default async function Home() {
           </p>
           <SearchWidget />
           <a href="/seasonaires" className="flex items-center gap-2.5 px-6 py-3 rounded-full text-white text-sm font-bold transition-all hover:bg-white/20" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.25)" }}>
-            ❄️ אזור הסיזיונרים ←
+            <IconSnowflake size={16} /> אזור הסיזיונרים ←
           </a>
         </div>
       </section>
