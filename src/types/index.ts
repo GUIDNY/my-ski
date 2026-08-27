@@ -86,7 +86,8 @@ export type ProposalBlock =
   | { type: "note"; text: string }
   | { type: "option"; label: string; text: string }
   | { type: "flight"; direction: "out" | "return"; date: string; from: string; to: string; airline: string; depart: string; arrive: string; nonstop: boolean; price: string }
-  | { type: "table"; header: string[]; rows: string[][]; total: string[] };
+  | { type: "table"; header: string[]; rows: string[][]; total: string[] }
+  | { type: "gallery"; urls: string[]; caption?: string };
 
 export type ProposalSection = { heading: string; blocks: ProposalBlock[] };
 

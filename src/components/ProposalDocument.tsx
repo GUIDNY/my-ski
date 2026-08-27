@@ -79,6 +79,8 @@ export const PROPOSAL_CSS = `
 .proposal .cap { font-size:8.5pt; color:var(--muted); }
 .proposal .note { font-size:9.5pt; color:var(--muted); }
 .proposal section { page-break-inside:avoid; }
+.proposal .gallery { display:grid; grid-template-columns:repeat(3, 1fr); gap:2mm; margin-bottom:4mm; page-break-inside:avoid; }
+.proposal .gallery img { width:100%; height:32mm; object-fit:cover; border-radius:1.5mm; }
 
 @media print {
   @page { size:A4; margin:18mm 16mm 20mm 16mm;
@@ -140,6 +142,16 @@ function Block({ block }: { block: ProposalBlock }) {
             )}
           </tbody>
         </table>
+      );
+    case "gallery":
+      return (
+        <div className="gallery">
+          {block.urls.map((url, i) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img key={i} src={url} alt={block.caption ? `${block.caption} ${i + 1}` : `תמונה ${i + 1}`} />
+          ))}
+          {block.caption && <p className="cap">{block.caption}</p>}
+        </div>
       );
     default:
       return null;
