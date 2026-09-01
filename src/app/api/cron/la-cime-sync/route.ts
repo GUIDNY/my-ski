@@ -57,7 +57,11 @@ function parseWeekOffers(html: string): Map<string, number> {
     if (!refMatch) continue;
     const priceMatch = card.match(PRICE_RE);
     if (!priceMatch) continue;
-    const digits = priceMatch[1].replace(/[^0-9]/g, "");
+    // Strip HTML numeric entities (e.g. "&#160;" for the thousands
+    // separator) as whole units FIRST — the "160" in "&#160;" is part of
+    // the entity's own code point, not a price digit, and blindly keeping
+    // every remaining digit turns "2 142" into "2160142".
+    const digits = priceMatch[1].replace(/&#\d+;/g, "").replace(/[^0-9]/g, "");
     if (!digits) continue;
     offers.set(refMatch[1], parseInt(digits, 10));
   }
