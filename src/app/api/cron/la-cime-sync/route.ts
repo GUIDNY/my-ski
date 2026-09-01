@@ -6,27 +6,43 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export const maxDuration = 30;
+export const maxDuration = 60;
 
-// Next Saturday-to-Saturday week (rolling: if today is Saturday, that's checkin).
-function upcomingWeek(): { checkin: Date; checkout: Date } {
+// Every Saturday of the current/upcoming Val Thorens ski season (roughly
+// Nov 28 -> May 3), starting from today if we're already mid-season.
+function seasonSaturdays(): Date[] {
   const now = new Date();
-  const day = now.getDay(); // 0=Sun..6=Sat
-  const daysUntilSat = (6 - day + 7) % 7;
-  const checkin = new Date(now);
-  checkin.setDate(checkin.getDate() + daysUntilSat);
-  const checkout = new Date(checkin);
-  checkout.setDate(checkout.getDate() + 7);
-  return { checkin, checkout };
+  now.setHours(0, 0, 0, 0);
+  const y = now.getFullYear();
+  const candidates = [
+    { start: new Date(y - 1, 10, 28), end: new Date(y, 4, 3) },
+    { start: new Date(y, 10, 28), end: new Date(y + 1, 4, 3) },
+  ];
+  const season = candidates.find(c => now <= c.end) ?? candidates[1];
+  const rangeStart = now > season.start ? now : season.start;
+
+  const day = rangeStart.getDay(); // 0=Sun..6=Sat
+  const toSat = (6 - day + 7) % 7;
+  const firstSat = new Date(rangeStart);
+  firstSat.setDate(firstSat.getDate() + toSat);
+
+  const weeks: Date[] = [];
+  const cursor = new Date(firstSat);
+  while (cursor <= season.end) {
+    weeks.push(new Date(cursor));
+    cursor.setDate(cursor.getDate() + 7);
+  }
+  return weeks;
 }
 
 const fmtFR = (d: Date) =>
   `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
 
-// Triggered daily by Vercel Cron. Queries the partner site (Agence La Cime,
-// via its Arkiane booking engine) for which properties are free for the
-// upcoming Saturday-to-Saturday week, and mirrors that into `available` for
-// every apartment we imported from them (source = 'la_cime').
+// Triggered daily by Vercel Cron. For every Saturday-to-Saturday week left
+// in the ski season, asks the partner site (Agence La Cime / Arkiane) which
+// properties are free that week, and records the list of open weeks per
+// apartment we imported from them (source = 'la_cime').
 export async function GET(req: NextRequest) {
   const auth = req.headers.get("authorization");
   if (process.env.CRON_SECRET && auth !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -34,30 +50,41 @@ export async function GET(req: NextRequest) {
   }
 
   const { data: ours } = await supabase.from("apartments").select("id,source_ref").eq("source", "la_cime");
-  if (!ours?.length) return NextResponse.json({ checked: 0, available: 0, unavailable: 0 });
+  if (!ours?.length) return NextResponse.json({ checked: 0, weeksScanned: 0 });
 
-  const { checkin, checkout } = upcomingWeek();
-  const url = `https://agencelacime.locvacances.com/?startDate=${encodeURIComponent(fmtFR(checkin))}&endDate=${encodeURIComponent(fmtFR(checkout))}`;
+  const weeks = seasonSaturdays();
+  const availableWeeksByRef = new Map<string, string[]>();
 
-  const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
-  if (!res.ok) return NextResponse.json({ error: `partner site returned ${res.status}` }, { status: 502 });
-  const html = await res.text();
+  for (const sat of weeks) {
+    const checkout = new Date(sat);
+    checkout.setDate(checkout.getDate() + 7);
+    const url = `https://agencelacime.locvacances.com/?startDate=${encodeURIComponent(fmtFR(sat))}&endDate=${encodeURIComponent(fmtFR(checkout))}`;
+    let html = "";
+    try {
+      const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
+      if (res.ok) html = await res.text();
+    } catch {
+      continue; // skip this week on network failure, don't fail the whole sync
+    }
+    const refsThisWeek = new Set([...html.matchAll(/data-caption="([A-Z0-9]+) -/g)].map(m => m[1]));
+    for (const ref of refsThisWeek) {
+      if (!availableWeeksByRef.has(ref)) availableWeeksByRef.set(ref, []);
+      availableWeeksByRef.get(ref)!.push(fmtISO(sat));
+    }
+  }
 
-  const availableRefs = new Set(
-    [...html.matchAll(/data-caption="([A-Z0-9]+) -/g)].map(m => m[1])
-  );
-
-  let availableCount = 0, unavailableCount = 0;
+  let updated = 0;
   for (const apt of ours) {
-    const isAvailable = !!apt.source_ref && availableRefs.has(apt.source_ref);
-    await supabase.from("apartments").update({ available: isAvailable }).eq("id", apt.id);
-    if (isAvailable) availableCount++; else unavailableCount++;
+    const availableWeeks = (apt.source_ref && availableWeeksByRef.get(apt.source_ref)) || [];
+    await supabase.from("apartments")
+      .update({ available_weeks: availableWeeks, available: availableWeeks.length > 0 })
+      .eq("id", apt.id);
+    updated++;
   }
 
   return NextResponse.json({
-    week: { checkin: fmtFR(checkin), checkout: fmtFR(checkout) },
-    checked: ours.length,
-    available: availableCount,
-    unavailable: unavailableCount,
+    weeksScanned: weeks.length,
+    seasonRange: weeks.length ? { from: fmtISO(weeks[0]), to: fmtISO(weeks[weeks.length - 1]) } : null,
+    apartmentsUpdated: updated,
   });
 }
