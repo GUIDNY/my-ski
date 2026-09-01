@@ -8,6 +8,8 @@ const supabase = createClient(
 
 export const maxDuration = 60;
 
+const MARKUP = 1.25;
+
 // Every Saturday of the current/upcoming Val Thorens ski season (roughly
 // Nov 28 -> May 3), starting from today if we're already mid-season.
 function seasonSaturdays(): Date[] {
@@ -39,10 +41,33 @@ const fmtFR = (d: Date) =>
   `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
 const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
 
+// Each property card in the search results HTML starts at `<div id="availability-`.
+// Within a card: `data-caption="REF - ..."` gives the reference, and when the
+// search was date-filtered, `<div class="rate">1&#160;216 EUR</div>` gives that
+// week's actual price (not the generic "starting from" price shown on the
+// unfiltered catalog). The raw HTML still has entities un-decoded, so the
+// thousands separator is literally the 6 characters "&#160;", not a space.
+const PRICE_RE = /<div class="rate">([^<]+)<\/div>/;
+
+function parseWeekOffers(html: string): Map<string, number> {
+  const offers = new Map<string, number>();
+  const cards = html.split('<div id="availability-');
+  for (const card of cards) {
+    const refMatch = card.match(/data-caption="([A-Z0-9]+) -/);
+    if (!refMatch) continue;
+    const priceMatch = card.match(PRICE_RE);
+    if (!priceMatch) continue;
+    const digits = priceMatch[1].replace(/[^0-9]/g, "");
+    if (!digits) continue;
+    offers.set(refMatch[1], parseInt(digits, 10));
+  }
+  return offers;
+}
+
 // Triggered daily by Vercel Cron. For every Saturday-to-Saturday week left
 // in the ski season, asks the partner site (Agence La Cime / Arkiane) which
-// properties are free that week, and records the list of open weeks per
-// apartment we imported from them (source = 'la_cime').
+// properties are free that week and at what price, and records the list of
+// {week, price} for every apartment we imported from them (source = 'la_cime').
 export async function GET(req: NextRequest) {
   const auth = req.headers.get("authorization");
   if (process.env.CRON_SECRET && auth !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -53,7 +78,8 @@ export async function GET(req: NextRequest) {
   if (!ours?.length) return NextResponse.json({ checked: 0, weeksScanned: 0 });
 
   const weeks = seasonSaturdays();
-  const availableWeeksByRef = new Map<string, string[]>();
+  // ref -> [{week, price}]
+  const byRef = new Map<string, { week: string; price: number }[]>();
 
   for (const sat of weeks) {
     const checkout = new Date(sat);
@@ -66,16 +92,16 @@ export async function GET(req: NextRequest) {
     } catch {
       continue; // skip this week on network failure, don't fail the whole sync
     }
-    const refsThisWeek = new Set([...html.matchAll(/data-caption="([A-Z0-9]+) -/g)].map(m => m[1]));
-    for (const ref of refsThisWeek) {
-      if (!availableWeeksByRef.has(ref)) availableWeeksByRef.set(ref, []);
-      availableWeeksByRef.get(ref)!.push(fmtISO(sat));
+    const offers = parseWeekOffers(html);
+    for (const [ref, basePrice] of offers) {
+      if (!byRef.has(ref)) byRef.set(ref, []);
+      byRef.get(ref)!.push({ week: fmtISO(sat), price: Math.round(basePrice * MARKUP) });
     }
   }
 
   let updated = 0;
   for (const apt of ours) {
-    const availableWeeks = (apt.source_ref && availableWeeksByRef.get(apt.source_ref)) || [];
+    const availableWeeks = (apt.source_ref && byRef.get(apt.source_ref)) || [];
     await supabase.from("apartments")
       .update({ available_weeks: availableWeeks, available: availableWeeks.length > 0 })
       .eq("id", apt.id);
