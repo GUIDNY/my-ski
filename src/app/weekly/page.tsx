@@ -6,6 +6,10 @@ import { IconBed, IconMountain } from "@/components/Icons";
 import WeeklyAvailability from "@/components/WeeklyAvailability";
 
 export const metadata = { title: "שבת עד שבת — SkiShare" };
+// Availability changes daily via the sync cron — this page has no
+// searchParams to force dynamic rendering on its own, so without this it
+// gets statically baked in at build time and never reflects the sync.
+export const dynamic = "force-dynamic";
 
 function ApartmentCard({ apt }: { apt: Apartment }) {
   const weeklyPrice = Math.round(apt.price_per_night * 7);
