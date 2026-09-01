@@ -13,6 +13,9 @@ export type Apartment = {
   description: string;
   available: boolean;
   created_at: string;
+  source?: string | null;
+  source_ref?: string | null;
+  source_price_per_night?: number | null;
 };
 
 export type Booking = {
