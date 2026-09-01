@@ -163,6 +163,16 @@ export default function ApartmentsAdmin() {
 
   const openNew = () => { setForm(EMPTY); setEditing(null); setShowForm(true); };
 
+  const [syncingAll, setSyncingAll] = useState(false);
+  const [syncAllMsg, setSyncAllMsg] = useState("");
+  const syncAll = async () => {
+    setSyncingAll(true); setSyncAllMsg("");
+    const r = await fetch("/api/ical-sync", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "sync_all" }) });
+    const d = await r.json();
+    setSyncAllMsg(`סונכרנו ${d.apartments} דירות, ${d.synced} ימים עודכנו`);
+    setSyncingAll(false);
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
@@ -170,10 +180,17 @@ export default function ApartmentsAdmin() {
           <h1 className="text-2xl font-black text-gray-900">דירות</h1>
           <p className="text-gray-500 text-sm mt-1">ניהול הדירות ב-Val Thorens</p>
         </div>
-        <button onClick={openNew}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-colors">
-          + הוסף דירה
-        </button>
+        <div className="flex items-center gap-3">
+          {syncAllMsg && <span className="text-xs text-gray-500">{syncAllMsg}</span>}
+          <button onClick={syncAll} disabled={syncingAll}
+            className="flex items-center gap-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold px-4 py-2.5 rounded-xl text-sm transition-colors disabled:opacity-50">
+            {syncingAll ? <><div className="w-3.5 h-3.5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" /> מסנכרן...</> : "↻ סנכרן הכל (Airbnb)"}
+          </button>
+          <button onClick={openNew}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-colors">
+            + הוסף דירה
+          </button>
+        </div>
       </div>
 
       {/* Modal */}

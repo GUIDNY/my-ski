@@ -38,6 +38,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ synced: totalBlocked });
   }
 
+  if (body.action === "sync_all") {
+    const { data: sources } = await supabase.from("ical_sources").select("*");
+    if (!sources?.length) return NextResponse.json({ apartments: 0, synced: 0 });
+
+    const byApartment = new Map<string, typeof sources>();
+    for (const s of sources) {
+      if (!byApartment.has(s.apartment_id)) byApartment.set(s.apartment_id, []);
+      byApartment.get(s.apartment_id)!.push(s);
+    }
+
+    let totalSynced = 0;
+    for (const [apartment_id, aptSources] of byApartment) {
+      totalSynced += await syncApartmentIcal(supabase, apartment_id, aptSources);
+    }
+    return NextResponse.json({ apartments: byApartment.size, synced: totalSynced });
+  }
+
   if (body.action === "delete_source") {
     await supabase.from("ical_sources").delete().eq("id", body.id);
     return NextResponse.json({ ok: true });
