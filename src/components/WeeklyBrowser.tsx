@@ -29,11 +29,21 @@ function SpecChip({ icon, label }: { icon: React.ReactNode; label: string }) {
 }
 
 export default function WeeklyBrowser({ apartments }: { apartments: Apartment[] }) {
-  const allWeeks = useMemo(() => {
-    const set = new Set<string>();
-    for (const apt of apartments) for (const w of apt.available_weeks ?? []) set.add(w.week);
-    return [...set].sort();
+  const weekMinPrice = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const apt of apartments) {
+      for (const w of apt.available_weeks ?? []) {
+        const cur = map.get(w.week);
+        if (cur === undefined || w.price < cur) map.set(w.week, w.price);
+      }
+    }
+    return map;
   }, [apartments]);
+
+  const allWeeks = useMemo(
+    () => [...weekMinPrice.keys()].sort(),
+    [weekMinPrice]
+  );
 
   const [selected, setSelected] = useState<string | null>(allWeeks[0] ?? null);
 
@@ -71,15 +81,23 @@ export default function WeeklyBrowser({ apartments }: { apartments: Apartment[] 
             style={{ scrollbarWidth: "none" }}>
             {allWeeks.map(w => {
               const isSelected = selected === w;
+              const minPrice = weekMinPrice.get(w);
               return (
                 <button key={w} onClick={() => setSelected(w)}
-                  className={`flex-shrink-0 snap-start flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-bold border transition-all ${
+                  className={`flex-shrink-0 snap-start flex flex-col items-center gap-0.5 rounded-2xl px-4 py-2 border transition-all ${
                     isSelected
                       ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-600/20"
                       : "bg-white border-gray-200 text-gray-700 hover:border-blue-300"
                   }`}>
-                  {isSelected && <IconCheck size={13} />}
-                  {fmtWeek(w)}
+                  <span className="flex items-center gap-1.5 text-sm font-bold">
+                    {isSelected && <IconCheck size={13} />}
+                    {fmtWeek(w)}
+                  </span>
+                  {minPrice !== undefined && (
+                    <span className={`text-[11px] font-semibold ${isSelected ? "text-blue-100" : "text-gray-400"}`}>
+                      החל מ-€{minPrice.toLocaleString("en-US")}
+                    </span>
+                  )}
                 </button>
               );
             })}
