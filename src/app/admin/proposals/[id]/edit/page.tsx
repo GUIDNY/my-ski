@@ -109,31 +109,44 @@ function EditorInner() {
 
   const HEBREW_LETTERS = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י"];
 
-  // Paste an apartment link and add it as one more numbered option
-  // (photos + price) alongside whatever options are already in the
-  // proposal — for building a "3 apartments to choose from" comparison,
-  // repeated once per link, instead of replacing the whole document.
+  // Paste an apartment link and add it as one more UNIT of the same combined
+  // group booking (e.g. a group of 12 split across 3 apartments) — photos +
+  // its own price folded straight into the shared price table's running
+  // total, repeated once per link. NOT "pick one of these" alternatives —
+  // every apartment added here is booked together, so the total must
+  // reflect all of them, not just show each one's price informationally.
   const addApartmentOption = async () => {
     const raw = srcUrl.trim();
     if (!raw) { alert("הדבק/י קישור לדירה"); return; }
     let segs: string[] = [];
-    try { segs = new URL(raw).pathname.split("/").filter(Boolean); }
-    catch { segs = raw.split("?")[0].split("/").filter(Boolean); }
+    let qp = new URLSearchParams();
+    try { const u = new URL(raw); segs = u.pathname.split("/").filter(Boolean); qp = u.searchParams; }
+    catch { const [path, query] = raw.split("?"); segs = path.split("/").filter(Boolean); if (query) qp = new URLSearchParams(query); }
     const aptIdx = segs.indexOf("apartments");
     const aptId = aptIdx >= 0 ? segs[aptIdx + 1] : null;
     if (!aptId) { alert("זה לא נראה כמו קישור לדירה (/apartments/...)"); return; }
 
-    const res = await fetch(`/api/apartments/${aptId}`);
-    if (!res.ok) { alert("הדירה לא נמצאה"); return; }
-    const apt = await res.json();
+    const checkin = qp.get("checkin");
+    const checkout = qp.get("checkout");
 
-    const existingOptions = data.sections.filter(s => s.heading.startsWith("אפשרות ")).length;
-    const letter = HEBREW_LETTERS[existingOptions] ?? String(existingOptions + 1);
+    const [aptRes, rulesRes] = await Promise.all([
+      fetch(`/api/apartments/${aptId}`),
+      fetch(`/api/pricing-rules?apartment_id=${aptId}`),
+    ]);
+    if (!aptRes.ok) { alert("הדירה לא נמצאה"); return; }
+    const apt = await aptRes.json();
+    const rules: PricingRule[] = rulesRes.ok ? await rulesRes.json() : [];
+
+    const nights = checkin && checkout ? Math.max(0, Math.round((+new Date(checkout) - +new Date(checkin)) / 86400000)) : 0;
+    const total = nights > 0 ? calcTotalForRange(checkin!, checkout!, Number(apt.price_per_night) || 0, rules) : Number(apt.price_per_night) || 0;
+
+    const existingUnits = data.sections.filter(s => s.heading.startsWith("דירה ")).length;
+    const letter = HEBREW_LETTERS[existingUnits] ?? String(existingUnits + 1);
 
     const blocks: ProposalBlock[] = [];
     if (Array.isArray(apt.images) && apt.images.length) blocks.push({ type: "gallery", urls: apt.images.slice(0, 6) });
     blocks.push({ type: "kv", rows: [
-      ["מחיר ללילה", `€${Math.round(apt.price_per_night)}`],
+      [nights > 0 ? `מחיר ל-${nights} לילות` : "מחיר ללילה", `€${Math.round(total).toLocaleString("en-US")}`],
       ["חדרים", String(apt.beds ?? "-")],
       ["גודל", apt.sqm ? `${apt.sqm} מ"ר` : "-"],
       ["אורחים", String(apt.max_guests ?? "-")],
@@ -141,10 +154,29 @@ function EditorInner() {
     const firstSentence = firstTwoSentences(apt.description || "");
     if (firstSentence) blocks.push({ type: "text", text: firstSentence });
 
-    const section: ProposalSection = { heading: `אפשרות ${letter} — ${apt.name}`, blocks };
+    const section: ProposalSection = { heading: `דירה ${letter} — ${apt.name}`, blocks };
     const terms = data.sections.filter(s => s.heading === "תנאים");
     const nonTerms = data.sections.filter(s => s.heading !== "תנאים");
-    setD({ sections: [...nonTerms, section, ...terms] });
+    const sections = [...nonTerms, section, ...terms];
+
+    // Fold this apartment's price into the shared price table in the SAME
+    // update as adding its section — two separate setD calls here would
+    // both read the same pre-update `data` closure and the second would
+    // silently discard the first (classic React stale-closure race).
+    const priceIdx = sections.findIndex(s => s.heading === "פירוט מחירים");
+    const priceLabel = `דירה ${letter} — ${apt.name}${nights > 0 ? ` · ${nights} לילות` : ""}`;
+    if (priceIdx < 0) {
+      sections.push({ heading: "פירוט מחירים", blocks: [itemsToTable([{ label: priceLabel, qty: 1, unitPrice: total }], 0, 0, p.currency)] });
+    } else {
+      const sec = sections[priceIdx];
+      const tbIdx = sec.blocks.findIndex(b => b.type === "table");
+      const tb = (tbIdx >= 0 ? sec.blocks[tbIdx] : itemsToTable([], 0, 0, p.currency)) as ProposalBlock & TableExtra;
+      const { items, discount, vatRate } = tableToItems(tb);
+      const nb = itemsToTable([...items, { label: priceLabel, qty: 1, unitPrice: total }], discount, vatRate, p.currency);
+      sections[priceIdx] = { ...sec, blocks: tbIdx >= 0 ? sec.blocks.map((b, i) => i === tbIdx ? nb : b) : [...sec.blocks, nb] };
+    }
+
+    setD({ sections });
     setSrcUrl("");
   };
 
