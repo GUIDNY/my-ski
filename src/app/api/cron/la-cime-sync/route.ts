@@ -79,11 +79,15 @@ export async function GET(req: NextRequest) {
   }
 
   const { data: ours } = await supabase.from("apartments").select("id,source_ref").eq("source", "la_cime");
-  if (!ours?.length) return NextResponse.json({ checked: 0, weeksScanned: 0 });
+  if (!ours?.length) {
+    await logRun(true, { checked: 0, weeksScanned: 0, note: "no la_cime apartments in DB" });
+    return NextResponse.json({ checked: 0, weeksScanned: 0 });
+  }
 
   const weeks = seasonSaturdays();
   // ref -> [{week, price}]
   const byRef = new Map<string, { week: string; price: number }[]>();
+  let weeksFailed = 0;
 
   for (const sat of weeks) {
     const checkout = new Date(sat);
@@ -93,7 +97,9 @@ export async function GET(req: NextRequest) {
     try {
       const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
       if (res.ok) html = await res.text();
+      else weeksFailed++;
     } catch {
+      weeksFailed++;
       continue; // skip this week on network failure, don't fail the whole sync
     }
     const offers = parseWeekOffers(html);
@@ -112,9 +118,22 @@ export async function GET(req: NextRequest) {
     updated++;
   }
 
-  return NextResponse.json({
+  // A run that reported success on every fetch but found zero offers
+  // anywhere is suspicious (likely the partner site's markup changed
+  // under us) — flag it as not-ok even though nothing technically threw.
+  const ok = weeksFailed < weeks.length && byRef.size > 0;
+  const summary = {
     weeksScanned: weeks.length,
+    weeksFailed,
     seasonRange: weeks.length ? { from: fmtISO(weeks[0]), to: fmtISO(weeks[weeks.length - 1]) } : null,
     apartmentsUpdated: updated,
-  });
+    refsWithOffers: byRef.size,
+  };
+  await logRun(ok, summary);
+
+  return NextResponse.json(summary);
+}
+
+async function logRun(ok: boolean, detail: Record<string, unknown>) {
+  await supabase.from("sync_log").insert({ job: "la_cime_sync", ok, detail });
 }
