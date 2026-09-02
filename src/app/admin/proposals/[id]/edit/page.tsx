@@ -107,6 +107,47 @@ function EditorInner() {
     alert("לא נמצאה הצעה/הזמנה עבור הקישור הזה");
   };
 
+  const HEBREW_LETTERS = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י"];
+
+  // Paste an apartment link and add it as one more numbered option
+  // (photos + price) alongside whatever options are already in the
+  // proposal — for building a "3 apartments to choose from" comparison,
+  // repeated once per link, instead of replacing the whole document.
+  const addApartmentOption = async () => {
+    const raw = srcUrl.trim();
+    if (!raw) { alert("הדבק/י קישור לדירה"); return; }
+    let segs: string[] = [];
+    try { segs = new URL(raw).pathname.split("/").filter(Boolean); }
+    catch { segs = raw.split("?")[0].split("/").filter(Boolean); }
+    const aptIdx = segs.indexOf("apartments");
+    const aptId = aptIdx >= 0 ? segs[aptIdx + 1] : null;
+    if (!aptId) { alert("זה לא נראה כמו קישור לדירה (/apartments/...)"); return; }
+
+    const res = await fetch(`/api/apartments/${aptId}`);
+    if (!res.ok) { alert("הדירה לא נמצאה"); return; }
+    const apt = await res.json();
+
+    const existingOptions = data.sections.filter(s => s.heading.startsWith("אפשרות ")).length;
+    const letter = HEBREW_LETTERS[existingOptions] ?? String(existingOptions + 1);
+
+    const blocks: ProposalBlock[] = [];
+    if (Array.isArray(apt.images) && apt.images.length) blocks.push({ type: "gallery", urls: apt.images.slice(0, 6) });
+    blocks.push({ type: "kv", rows: [
+      ["מחיר ללילה", `€${Math.round(apt.price_per_night)}`],
+      ["חדרים", String(apt.beds ?? "-")],
+      ["גודל", apt.sqm ? `${apt.sqm} מ"ר` : "-"],
+      ["אורחים", String(apt.max_guests ?? "-")],
+    ] });
+    const firstSentence = firstTwoSentences(apt.description || "");
+    if (firstSentence) blocks.push({ type: "text", text: firstSentence });
+
+    const section: ProposalSection = { heading: `אפשרות ${letter} — ${apt.name}`, blocks };
+    const terms = data.sections.filter(s => s.heading === "תנאים");
+    const nonTerms = data.sections.filter(s => s.heading !== "תנאים");
+    setD({ sections: [...nonTerms, section, ...terms] });
+    setSrcUrl("");
+  };
+
   const buildFromApartment = async (aptId: string, checkin: string | null, checkout: string | null, guests: string | null) => {
     const [aptRes, rulesRes] = await Promise.all([
       fetch(`/api/apartments/${aptId}`),
@@ -227,6 +268,8 @@ function EditorInner() {
               <input className={input} dir="ltr" placeholder="קישור דירה (/apartments/…?checkin&checkout) · הצעה (/q/…) · או קוד"
                 value={srcUrl} onChange={e => setSrcUrl(e.target.value)} />
               <button onClick={prefillFromSource} className="whitespace-nowrap bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 rounded-lg">משוך ומלא ↺</button>
+              <button onClick={addApartmentOption} title="מוסיף את הדירה כאפשרות נוספת (עם תמונות) בלי למחוק את שאר ההצעה — להשוואה בין כמה דירות"
+                className="whitespace-nowrap border border-blue-200 text-blue-700 bg-white hover:bg-blue-50 font-bold text-xs px-4 rounded-lg">+ הוסף כאפשרות</button>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <input className={input} placeholder="שם הלקוח" value={p.client_name} onChange={e => setMeta({ client_name: e.target.value })} />
