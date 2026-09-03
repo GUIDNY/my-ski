@@ -68,6 +68,13 @@ export default function WeeklyBrowser({ apartments }: { apartments: Apartment[] 
 
   return (
     <div>
+      {/* Explainer */}
+      <div className="bg-blue-50/60 border border-blue-100 rounded-2xl p-4 md:p-5 mb-6 text-sm text-gray-700 leading-relaxed">
+        הדירות כאן מוצעות לשבוע שלם (שבת עד שבת) ומתאימות במיוחד לחבילה מלאה — אפשר לבקש מאיתנו הצעת מחיר
+        שכוללת גם טיסה, סקי פס והסעה, או פשוט להזמין את הדירה בלבד ולסדר את השאר בעצמכם. אנחנו מאמינים בגמישות
+        ובחוויית לקוח נוחה.
+      </div>
+
       {/* Week picker */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 md:p-5 mb-6 sticky top-20 z-10">
         <div className="flex items-center justify-between mb-3">
@@ -76,35 +83,27 @@ export default function WeeklyBrowser({ apartments }: { apartments: Apartment[] 
           </div>
           {selected && <span className="text-[11px] font-semibold text-gray-400">{seasonLabel(selected)}</span>}
         </div>
-        <div className="relative -mx-1">
-          <div className="flex gap-2 overflow-x-auto px-1 pb-1 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden"
-            style={{ scrollbarWidth: "none" }}>
-            {allWeeks.map(w => {
-              const isSelected = selected === w;
-              const minPrice = weekMinPrice.get(w);
-              return (
-                <button key={w} onClick={() => setSelected(w)}
-                  className={`flex-shrink-0 snap-start flex flex-col items-center gap-0.5 rounded-2xl px-4 py-2 border transition-all ${
-                    isSelected
-                      ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-600/20"
-                      : "bg-white border-gray-200 text-gray-700 hover:border-blue-300"
-                  }`}>
-                  <span className="flex items-center gap-1.5 text-sm font-bold">
-                    {isSelected && <IconCheck size={13} />}
-                    {fmtWeek(w)}
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 max-h-64 overflow-y-auto pr-1">
+          {allWeeks.map(w => {
+            const isSelected = selected === w;
+            const minPrice = weekMinPrice.get(w);
+            return (
+              <button key={w} onClick={() => setSelected(w)}
+                className={`aspect-square flex flex-col items-center justify-center gap-1 rounded-xl border px-1.5 text-center transition-all ${
+                  isSelected
+                    ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-600/20"
+                    : "bg-white border-gray-200 text-gray-700 hover:border-blue-300"
+                }`}>
+                {isSelected && <IconCheck size={13} />}
+                <span className="text-xs font-bold leading-tight">{fmtWeek(w)}</span>
+                {minPrice !== undefined && (
+                  <span className={`text-[10px] font-semibold ${isSelected ? "text-blue-100" : "text-gray-400"}`}>
+                    החל מ-€{minPrice.toLocaleString("en-US")}
                   </span>
-                  {minPrice !== undefined && (
-                    <span className={`text-[11px] font-semibold ${isSelected ? "text-blue-100" : "text-gray-400"}`}>
-                      החל מ-€{minPrice.toLocaleString("en-US")}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-          {/* edge fade hinting more content on scroll */}
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-white to-transparent" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-white to-transparent" />
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
