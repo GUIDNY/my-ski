@@ -99,15 +99,24 @@ function aptTag(apts: Apartment[], apt: Apartment): { label: string; color: stri
 
 /* ── Page ─────────────────────────────────────────────────── */
 
+function PriceRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between bg-gray-50 rounded-xl px-3.5 py-2.5">
+      <span className="text-xs text-gray-500 font-medium">{label}</span>
+      <span className="text-sm font-black text-gray-900">{value}</span>
+    </div>
+  );
+}
+
 export default async function Home() {
   const db = createServerClient();
-  const { data: featuredApts } = await db
-    .from("apartments")
-    .select("*")
-    .eq("available", true)
-    .order("price_per_night", { ascending: false })
-    .limit(3);
+  const [{ data: featuredApts }, { data: skiPasses }] = await Promise.all([
+    db.from("apartments").select("*").eq("available", true).order("price_per_night", { ascending: false }).limit(3),
+    db.from("ski_passes").select("area,price").not("area", "is", null),
+  ]);
   const apartments: Apartment[] = featuredApts ?? [];
+  const valThorensPass = skiPasses?.find(p => p.area === "val_thorens")?.price;
+  const troisValleesPass = skiPasses?.find(p => p.area === "trois_vallees")?.price;
   return (
     <div className="min-h-screen" style={{ background: "#f7f9fb" }} dir="rtl">
       <Navbar />
@@ -140,6 +149,41 @@ export default async function Home() {
           <a href="/seasonaires" className="flex items-center gap-2.5 px-6 py-3 rounded-full text-white text-sm font-bold transition-all hover:bg-white/20" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.25)" }}>
             <IconSnowflake size={16} /> אזור הסיזיונרים ←
           </a>
+        </div>
+      </section>
+
+      {/* ── שבת עד שבת ───────────────────────────────────── */}
+      <section className="py-12 md:py-20 px-5 md:px-6 bg-gradient-to-b from-blue-50 to-white">
+        <div className="max-w-5xl mx-auto">
+          <div className="bg-white rounded-3xl border border-gray-100 shadow-lg overflow-hidden md:flex">
+            <div className="relative h-44 md:h-auto md:w-2/5 flex-shrink-0">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/hero-ski.jpg" alt="Val Thorens" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-l from-black/50 to-transparent" />
+            </div>
+            <div className="p-6 md:p-10 flex-1">
+              <span className="text-xs font-bold tracking-widest uppercase text-blue-600">הכי נוח לדיל שלם</span>
+              <h2 className="font-display text-2xl md:text-3xl font-black text-gray-900 mt-2 mb-3">דירות שבת עד שבת</h2>
+              <p className="text-gray-500 text-sm mb-5 leading-relaxed">
+                שבוע מלא בואל טורנס — דירה, סקי פס, ציוד והסעה, הכל מסודר מראש במחיר לשבוע.
+              </p>
+              <div className="grid grid-cols-2 gap-2.5 mb-6">
+                {valThorensPass && <PriceRow label="סקי פס — ואל טורנס" value={`€${Math.round(valThorensPass)}`} />}
+                {troisValleesPass && <PriceRow label="סקי פס — שלושת העמקים" value={`€${Math.round(troisValleesPass)}`} />}
+                <PriceRow label="ציוד סקי/סנובורד" value="החל מ-€120" />
+                <PriceRow label="הסעה הלוך-חזור" value="€180 לאדם" />
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <a href="/weekly" className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-5 py-3 rounded-xl transition-colors">
+                  לכל הדירות הזמינות ←
+                </a>
+                <a href="https://www.skyscanner.co.il/transport/flights/tlv/gva/" target="_blank" rel="noopener noreferrer"
+                  className="border border-gray-200 hover:border-blue-300 text-gray-700 text-sm font-bold px-5 py-3 rounded-xl transition-colors">
+                  חיפוש טיסות ←
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
