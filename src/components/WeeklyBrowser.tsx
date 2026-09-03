@@ -1,18 +1,10 @@
 "use client";
 import { useMemo, useState } from "react";
 import type { Apartment } from "@/types";
-import { IconBed, IconUsers, IconMountain, IconCalendar, IconCheck } from "@/components/Icons";
+import { IconBed, IconUsers, IconMountain, IconCalendar, IconBriefcase } from "@/components/Icons";
 
-const HE_MONTHS_SHORT = ["ינו׳", "פבר׳", "מרץ", "אפר׳", "מאי", "יונ׳", "יול׳", "אוג׳", "ספט׳", "אוק׳", "נוב׳", "דצמ׳"];
-
-function fmtWeek(iso: string) {
-  const start = new Date(iso + "T12:00:00");
-  const end = new Date(start);
-  end.setDate(end.getDate() + 7);
-  const sameMonth = start.getMonth() === end.getMonth();
-  return sameMonth
-    ? `${start.getDate()}–${end.getDate()} ב${HE_MONTHS_SHORT[start.getMonth()]}`
-    : `${start.getDate()} ב${HE_MONTHS_SHORT[start.getMonth()]} – ${end.getDate()} ב${HE_MONTHS_SHORT[end.getMonth()]}`;
+function fmtDate(d: Date) {
+  return `${String(d.getDate()).padStart(2, "0")}.${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
 function seasonLabel(iso: string) {
@@ -83,25 +75,38 @@ export default function WeeklyBrowser({ apartments }: { apartments: Apartment[] 
           </div>
           {selected && <span className="text-[11px] font-semibold text-gray-400">{seasonLabel(selected)}</span>}
         </div>
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 max-h-64 overflow-y-auto pr-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-80 overflow-y-auto pr-1">
           {allWeeks.map(w => {
             const isSelected = selected === w;
             const minPrice = weekMinPrice.get(w);
+            const checkin = new Date(w + "T12:00:00");
+            const checkout = new Date(checkin);
+            checkout.setDate(checkout.getDate() + 7);
             return (
-              <button key={w} onClick={() => setSelected(w)}
-                className={`aspect-square flex flex-col items-center justify-center gap-1 rounded-xl border px-1.5 text-center transition-all ${
-                  isSelected
-                    ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-600/20"
-                    : "bg-white border-gray-200 text-gray-700 hover:border-blue-300"
+              <div key={w}
+                className={`rounded-xl border p-3 flex flex-col gap-2.5 transition-all ${
+                  isSelected ? "border-blue-500 bg-blue-50/60 shadow-sm" : "border-gray-200 bg-white"
                 }`}>
-                {isSelected && <IconCheck size={13} />}
-                <span className="text-xs font-bold leading-tight">{fmtWeek(w)}</span>
-                {minPrice !== undefined && (
-                  <span className={`text-[10px] font-semibold ${isSelected ? "text-blue-100" : "text-gray-400"}`}>
-                    החל מ-€{minPrice.toLocaleString("en-US")}
-                  </span>
-                )}
-              </button>
+                <div className="flex items-center justify-between text-[11px] font-semibold text-gray-600">
+                  <span className="flex items-center gap-1"><IconBriefcase size={12} className="text-blue-500" /> כניסה: {fmtDate(checkin)}</span>
+                  <span className="text-gray-300">←</span>
+                  <span className="flex items-center gap-1">יציאה: {fmtDate(checkout)} <IconBriefcase size={12} className="text-blue-500" /></span>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <button onClick={() => setSelected(w)}
+                    className={`flex-1 text-xs font-bold rounded-lg py-2 transition-colors ${
+                      isSelected ? "bg-blue-600 text-white" : "bg-gray-900 text-white hover:bg-blue-600"
+                    }`}>
+                    {isSelected ? "השבוע שנבחר ✓" : "בחירה"}
+                  </button>
+                  {minPrice !== undefined && (
+                    <div className="text-left shrink-0">
+                      <div className="text-[9px] text-gray-400 font-medium leading-none mb-0.5">החל מ</div>
+                      <div className="text-sm font-black text-gray-900 leading-none">€{minPrice.toLocaleString("en-US")}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
             );
           })}
         </div>
