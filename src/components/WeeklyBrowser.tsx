@@ -1,16 +1,34 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Apartment } from "@/types";
-import { IconBed, IconUsers, IconMountain, IconCalendar, IconBriefcase } from "@/components/Icons";
+import { IconBed, IconUsers, IconMountain, IconCalendar, IconBriefcase, IconCheck } from "@/components/Icons";
 
 function fmtDate(d: Date) {
   return `${String(d.getDate()).padStart(2, "0")}.${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function weekRange(iso: string) {
+  const checkin = new Date(iso + "T12:00:00");
+  const checkout = new Date(checkin);
+  checkout.setDate(checkout.getDate() + 7);
+  return { checkin, checkout };
 }
 
 function seasonLabel(iso: string) {
   const y = new Date(iso + "T12:00:00").getMonth() >= 7 ? new Date(iso).getFullYear() : new Date(iso).getFullYear() - 1;
   return `עונת ${y}/${String(y + 1).slice(2)}`;
 }
+
+const TIER_STYLE: Record<"cheap" | "mid" | "expensive", string> = {
+  cheap: "bg-green-50 text-green-700",
+  mid: "bg-gray-100 text-gray-500",
+  expensive: "bg-orange-50 text-orange-700",
+};
+const TIER_LABEL: Record<"cheap" | "mid" | "expensive", string> = {
+  cheap: "זול",
+  mid: "ממוצע",
+  expensive: "יקר",
+};
 
 function SpecChip({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
@@ -37,7 +55,29 @@ export default function WeeklyBrowser({ apartments }: { apartments: Apartment[] 
     [weekMinPrice]
   );
 
+  const priceTier = useMemo(() => {
+    const sorted = allWeeks.map(w => weekMinPrice.get(w)!).sort((a, b) => a - b);
+    const q1 = sorted[Math.floor(sorted.length / 3)];
+    const q2 = sorted[Math.floor((sorted.length * 2) / 3)];
+    const tier = new Map<string, "cheap" | "mid" | "expensive">();
+    for (const w of allWeeks) {
+      const p = weekMinPrice.get(w)!;
+      tier.set(w, p <= q1 ? "cheap" : p >= q2 ? "expensive" : "mid");
+    }
+    return tier;
+  }, [allWeeks, weekMinPrice]);
+
   const [selected, setSelected] = useState<string | null>(allWeeks[0] ?? null);
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const h = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, []);
 
   const visible = useMemo(() => {
     if (!selected) return [];
@@ -67,49 +107,66 @@ export default function WeeklyBrowser({ apartments }: { apartments: Apartment[] 
         ובחוויית לקוח נוחה.
       </div>
 
-      {/* Week picker */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 md:p-5 mb-6 sticky top-20 z-10">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2 text-sm font-bold text-gray-900">
-            <IconCalendar size={16} className="text-blue-600" /> בחירת שבוע גלישה
-          </div>
-          {selected && <span className="text-[11px] font-semibold text-gray-400">{seasonLabel(selected)}</span>}
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-80 overflow-y-auto pr-1">
-          {allWeeks.map(w => {
-            const isSelected = selected === w;
-            const minPrice = weekMinPrice.get(w);
-            const checkin = new Date(w + "T12:00:00");
-            const checkout = new Date(checkin);
-            checkout.setDate(checkout.getDate() + 7);
-            return (
-              <div key={w}
-                className={`rounded-xl border p-3 flex flex-col gap-2.5 transition-all ${
-                  isSelected ? "border-blue-500 bg-blue-50/60 shadow-sm" : "border-gray-200 bg-white"
-                }`}>
-                <div className="flex items-center justify-between text-[11px] font-semibold text-gray-600">
-                  <span className="flex items-center gap-1"><IconBriefcase size={12} className="text-blue-500" /> כניסה: {fmtDate(checkin)}</span>
-                  <span className="text-gray-300">←</span>
-                  <span className="flex items-center gap-1">יציאה: {fmtDate(checkout)} <IconBriefcase size={12} className="text-blue-500" /></span>
-                </div>
-                <div className="flex items-center justify-between gap-2">
-                  <button onClick={() => setSelected(w)}
-                    className={`flex-1 text-xs font-bold rounded-lg py-2 transition-colors ${
-                      isSelected ? "bg-blue-600 text-white" : "bg-gray-900 text-white hover:bg-blue-600"
-                    }`}>
-                    {isSelected ? "השבוע שנבחר ✓" : "בחירה"}
-                  </button>
-                  {minPrice !== undefined && (
-                    <div className="text-left shrink-0">
-                      <div className="text-[9px] text-gray-400 font-medium leading-none mb-0.5">החל מ</div>
-                      <div className="text-sm font-black text-gray-900 leading-none">€{minPrice.toLocaleString("en-US")}</div>
-                    </div>
-                  )}
-                </div>
+      {/* Week picker — search-bar style dropdown */}
+      <div ref={ref} className="relative mb-6 sticky top-20 z-20">
+        <button onClick={() => setOpen(o => !o)}
+          className="w-full bg-white rounded-2xl border border-gray-100 p-4 md:p-5 flex items-center justify-between gap-3 text-right transition-shadow hover:shadow-md"
+          style={{ boxShadow: "0 8px 30px rgba(0,0,0,0.08)" }}>
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+              <IconCalendar size={18} className="text-blue-600" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-0.5">שבוע גלישה</div>
+              <div className="text-sm font-bold text-gray-900 truncate">
+                {selected ? (() => {
+                  const { checkin, checkout } = weekRange(selected);
+                  return `כניסה ${fmtDate(checkin)} ← יציאה ${fmtDate(checkout)} · ${seasonLabel(selected)}`;
+                })() : "בחר שבוע"}
               </div>
-            );
-          })}
-        </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            {selected && weekMinPrice.get(selected) !== undefined && (
+              <div className="text-left">
+                <div className="text-[9px] text-gray-400 font-medium leading-none mb-0.5">החל מ</div>
+                <div className="text-base font-black text-gray-900 leading-none">€{weekMinPrice.get(selected)!.toLocaleString("en-US")}</div>
+              </div>
+            )}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+              className={`text-gray-400 transition-transform ${open ? "rotate-180" : ""}`}>
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </div>
+        </button>
+
+        {open && (
+          <div className="absolute top-full mt-2 left-0 right-0 bg-white rounded-2xl border border-gray-100 z-50 max-h-96 overflow-y-auto p-2"
+            style={{ boxShadow: "0 16px 50px rgba(0,0,0,0.18)" }}>
+            {allWeeks.map(w => {
+              const isSelected = selected === w;
+              const price = weekMinPrice.get(w);
+              const tier = priceTier.get(w) ?? "mid";
+              const { checkin, checkout } = weekRange(w);
+              return (
+                <button key={w} onClick={() => { setSelected(w); setOpen(false); }}
+                  className={`w-full flex items-center justify-between gap-3 rounded-xl px-3 py-3 text-right transition-colors ${
+                    isSelected ? "bg-blue-50" : "hover:bg-gray-50"
+                  }`}>
+                  <div className="flex items-center gap-2 text-xs font-semibold text-gray-700">
+                    <IconBriefcase size={12} className="text-blue-500 shrink-0" />
+                    כניסה {fmtDate(checkin)} ← יציאה {fmtDate(checkout)}
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${TIER_STYLE[tier]}`}>{TIER_LABEL[tier]}</span>
+                    {price !== undefined && <span className="text-sm font-black text-gray-900">€{price.toLocaleString("en-US")}</span>}
+                    {isSelected && <IconCheck size={14} className="text-blue-600" />}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Results line */}
