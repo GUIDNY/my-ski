@@ -3,8 +3,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { Apartment } from "@/types";
 import { IconBed, IconUsers, IconMountain, IconCalendar, IconBriefcase, IconCheck } from "@/components/Icons";
 
+const MONTHS_FULL = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
+
 function fmtDate(d: Date) {
   return `${String(d.getDate()).padStart(2, "0")}.${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function fmtFull(d: Date) {
+  return `${d.getDate()} ${MONTHS_FULL[d.getMonth()]}`;
 }
 
 function weekRange(iso: string) {
@@ -12,11 +18,6 @@ function weekRange(iso: string) {
   const checkout = new Date(checkin);
   checkout.setDate(checkout.getDate() + 7);
   return { checkin, checkout };
-}
-
-function seasonLabel(iso: string) {
-  const y = new Date(iso + "T12:00:00").getMonth() >= 7 ? new Date(iso).getFullYear() : new Date(iso).getFullYear() - 1;
-  return `עונת ${y}/${String(y + 1).slice(2)}`;
 }
 
 const TIER_STYLE: Record<"cheap" | "mid" | "expensive", string> = {
@@ -107,41 +108,111 @@ export default function WeeklyBrowser({ apartments }: { apartments: Apartment[] 
         ובחוויית לקוח נוחה.
       </div>
 
-      {/* Week picker — search-bar style dropdown */}
+      {/* Week picker — cloned from the homepage search bar */}
       <div ref={ref} className="relative mb-6 sticky top-20 z-20">
-        <button onClick={() => setOpen(o => !o)}
-          className="w-full bg-white rounded-2xl border border-gray-100 p-4 md:p-5 flex items-center justify-between gap-3 text-right transition-shadow hover:shadow-md"
-          style={{ boxShadow: "0 8px 30px rgba(0,0,0,0.08)" }}>
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
-              <IconCalendar size={18} className="text-blue-600" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-0.5">שבוע גלישה</div>
-              <div className="text-sm font-bold text-gray-900 truncate">
-                {selected ? (() => {
-                  const { checkin, checkout } = weekRange(selected);
-                  return `כניסה ${fmtDate(checkin)} ← יציאה ${fmtDate(checkout)} · ${seasonLabel(selected)}`;
-                })() : "בחר שבוע"}
+        {(() => {
+          const range = selected ? weekRange(selected) : null;
+          const price = selected ? weekMinPrice.get(selected) : undefined;
+          return (
+            <>
+              {/* ══ DESKTOP bar (md+) ══════════════════════════ */}
+              <div className="hidden md:flex bg-white items-stretch rounded-2xl" style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.18)" }}>
+                <div className="flex-1 px-6 py-5 text-right">
+                  <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-1.5">יעד</div>
+                  <div className="flex items-center gap-2">
+                    <IconMountain size={16} className="text-blue-500" />
+                    <span className="text-gray-900 font-bold text-sm">Val Thorens</span>
+                  </div>
+                </div>
+                <div className="w-px bg-gray-100 my-4" />
+                <button onClick={() => setOpen(o => !o)}
+                  className={`flex-1 px-5 py-5 text-right transition-colors hover:bg-gray-50 ${open ? "bg-blue-50/60" : ""}`}>
+                  <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-1.5">כניסה</div>
+                  <div className="flex items-center gap-2">
+                    <IconCalendar size={14} className="text-gray-400" />
+                    <span className="text-sm font-semibold text-gray-900">{range ? fmtFull(range.checkin) : "בחר שבוע"}</span>
+                  </div>
+                </button>
+                <div className="w-px bg-gray-100 my-4" />
+                <button onClick={() => setOpen(o => !o)}
+                  className={`flex-1 px-5 py-5 text-right transition-colors hover:bg-gray-50 ${open ? "bg-blue-50/60" : ""}`}>
+                  <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-1.5">יציאה</div>
+                  <div className="flex items-center gap-2">
+                    <IconCalendar size={14} className="text-gray-400" />
+                    <span className="text-sm font-semibold text-gray-900">{range ? fmtFull(range.checkout) : "-"}</span>
+                  </div>
+                  <div className="text-[10px] text-blue-500 font-bold mt-0.5">7 לילות</div>
+                </button>
+                <div className="w-px bg-gray-100 my-4" />
+                <div className="flex items-center px-5 py-5">
+                  <div>
+                    <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-1.5">מחיר</div>
+                    {price !== undefined ? (
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-black text-gray-900 text-base">€{price.toLocaleString("en-US")}</span>
+                        {selected && <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${TIER_STYLE[priceTier.get(selected) ?? "mid"]}`}>{TIER_LABEL[priceTier.get(selected) ?? "mid"]}</span>}
+                      </div>
+                    ) : <span className="text-gray-400 text-sm">-</span>}
+                  </div>
+                </div>
+                <div className="flex items-center px-3">
+                  <button onClick={() => setOpen(o => !o)}
+                    className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold px-7 py-4 rounded-xl transition-all flex items-center gap-2 text-sm">
+                    <IconCalendar size={16} className="text-white" />
+                    בחירת שבוע
+                  </button>
+                </div>
               </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 shrink-0">
-            {selected && weekMinPrice.get(selected) !== undefined && (
-              <div className="text-left">
-                <div className="text-[9px] text-gray-400 font-medium leading-none mb-0.5">החל מ</div>
-                <div className="text-base font-black text-gray-900 leading-none">€{weekMinPrice.get(selected)!.toLocaleString("en-US")}</div>
-              </div>
-            )}
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-              className={`text-gray-400 transition-transform ${open ? "rotate-180" : ""}`}>
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </div>
-        </button>
 
+              {/* ══ MOBILE bar (< md) ══════════════════════════ */}
+              <div className="md:hidden bg-white rounded-2xl overflow-hidden" style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.18)" }}>
+                <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-gray-100">
+                  <IconMountain size={16} className="text-blue-500" />
+                  <div>
+                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">יעד</div>
+                    <div className="text-sm font-bold text-gray-900">Val Thorens</div>
+                  </div>
+                </div>
+                <button onClick={() => setOpen(o => !o)}
+                  className={`w-full grid grid-cols-2 border-b border-gray-100 text-right transition-colors ${open ? "bg-blue-50/60" : "hover:bg-gray-50"}`}>
+                  <div className="px-5 py-3.5 border-l border-gray-100">
+                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">כניסה</div>
+                    <div className="flex items-center gap-1.5">
+                      <IconCalendar size={13} className="text-gray-400" />
+                      <span className="text-sm font-semibold text-gray-900">{range ? fmtFull(range.checkin) : "בחר"}</span>
+                    </div>
+                  </div>
+                  <div className="px-5 py-3.5">
+                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">יציאה</div>
+                    <div className="flex items-center gap-1.5">
+                      <IconCalendar size={13} className="text-gray-400" />
+                      <span className="text-sm font-semibold text-gray-900">{range ? fmtFull(range.checkout) : "-"}</span>
+                    </div>
+                  </div>
+                </button>
+                <div className="flex items-center justify-between px-5 py-3">
+                  <div>
+                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">מחיר</div>
+                    {price !== undefined ? (
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-black text-gray-900 text-sm">€{price.toLocaleString("en-US")}</span>
+                        {selected && <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${TIER_STYLE[priceTier.get(selected) ?? "mid"]}`}>{TIER_LABEL[priceTier.get(selected) ?? "mid"]}</span>}
+                      </div>
+                    ) : <span className="text-gray-400 text-sm">-</span>}
+                  </div>
+                  <button onClick={() => setOpen(o => !o)} className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold px-6 py-2.5 rounded-xl transition-all flex items-center gap-2 text-sm">
+                    <IconCalendar size={14} className="text-white" />
+                    בחירת שבוע
+                  </button>
+                </div>
+              </div>
+            </>
+          );
+        })()}
+
+        {/* ══ Week dropdown ══════════════════════════════════ */}
         {open && (
-          <div className="absolute top-full mt-2 left-0 right-0 bg-white rounded-2xl border border-gray-100 z-50 max-h-96 overflow-y-auto p-2"
+          <div className="absolute top-full mt-2 left-0 right-0 bg-white rounded-2xl border border-gray-100 z-50 max-h-96 overflow-y-auto p-2 md:p-3"
             style={{ boxShadow: "0 16px 50px rgba(0,0,0,0.18)" }}>
             {allWeeks.map(w => {
               const isSelected = selected === w;
