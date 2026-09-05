@@ -419,7 +419,7 @@ function BookPage() {
           <div className="flex-1 space-y-5">
 
             {/* Ski Pass */}
-            <Section title="סקי פס — Trois Vallées" icon={<IconSkis size={18} />}>
+            <Section title="סקי פס" icon={<IconSkis size={18} />}>
               <div className="space-y-2">
                 <button onClick={() => setSelectedPass(null)}
                   className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 text-sm transition-all
@@ -427,16 +427,31 @@ function BookPage() {
                   <span className="font-medium text-gray-600">ללא סקי פס</span>
                   {selectedPass === null && <IconCheck size={15} className="text-blue-600" />}
                 </button>
-                {skiPasses.map(pass => (
-                  <div key={pass.id}
-                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 border-gray-100 text-sm opacity-50 cursor-not-allowed select-none">
-                    <div className="text-right">
-                      <div className="font-semibold text-gray-500">{pass.name}</div>
-                      <div className="text-xs text-gray-400">{pass.duration_days} ימי סקי</div>
+                {(["val_thorens", "trois_vallees", null] as const).map(area => {
+                  const group = skiPasses
+                    .filter(p => p.area === area)
+                    .sort((a, b) => a.duration_days - b.duration_days);
+                  if (!group.length) return null;
+                  const areaLabel = area === "val_thorens" ? "Val Thorens / Orelle" : area === "trois_vallees" ? "Les 3 Vallées" : "ילדים";
+                  return (
+                    <div key={area ?? "child"}>
+                      <div className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-3 mb-1.5">{areaLabel}</div>
+                      {group.map(pass => (
+                        <div key={pass.id}
+                          className="w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 border-gray-100 text-sm opacity-70 cursor-not-allowed select-none mb-2">
+                          <div className="text-right">
+                            <div className="font-semibold text-gray-600">{pass.name}</div>
+                            <div className="text-xs text-gray-400">{pass.duration_days} ימי סקי</div>
+                          </div>
+                          <div className="text-left">
+                            <div className="font-black text-gray-700 text-sm">€{pass.price.toLocaleString("en-US")}</div>
+                            <div className="text-[10px] font-bold text-amber-600">הצעת מחיר בנפרד</div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <span className="text-xs font-bold bg-amber-100 text-amber-700 px-2 py-1 rounded-full">הצעת מחיר בנפרד</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </Section>
 

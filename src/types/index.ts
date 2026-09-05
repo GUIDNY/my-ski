@@ -48,6 +48,7 @@ export type SkiPass = {
   price: number;
   type: "adult" | "child" | "senior";
   available: boolean;
+  area: "val_thorens" | "trois_vallees" | null;
 };
 
 export type Order = {

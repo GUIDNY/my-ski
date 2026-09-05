@@ -112,7 +112,7 @@ export default async function Home() {
   const db = createServerClient();
   const [{ data: featuredApts }, { data: skiPasses }] = await Promise.all([
     db.from("apartments").select("*").eq("available", true).order("price_per_night", { ascending: false }).limit(3),
-    db.from("ski_passes").select("area,price").not("area", "is", null),
+    db.from("ski_passes").select("area,price,duration_days").eq("duration_days", 6).not("area", "is", null),
   ]);
   const apartments: Apartment[] = featuredApts ?? [];
   const valThorensPass = skiPasses?.find(p => p.area === "val_thorens")?.price;
