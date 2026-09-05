@@ -101,12 +101,8 @@ function aptTag(apts: Apartment[], apt: Apartment): { label: string; color: stri
 
 export default async function Home() {
   const db = createServerClient();
-  const [{ data: featuredApts }, { data: weeklyApts }] = await Promise.all([
-    db.from("apartments").select("*").eq("available", true).order("price_per_night", { ascending: false }).limit(3),
-    db.from("apartments").select("images").eq("source", "la_cime").eq("available", true).order("created_at", { ascending: false }).limit(1),
-  ]);
+  const { data: featuredApts } = await db.from("apartments").select("*").eq("available", true).order("price_per_night", { ascending: false }).limit(3);
   const apartments: Apartment[] = featuredApts ?? [];
-  const weeklyImage = weeklyApts?.[0]?.images?.[0] ?? "/hero-ski.jpg";
   return (
     <div className="min-h-screen" style={{ background: "#f7f9fb" }} dir="rtl">
       <Navbar />
@@ -148,7 +144,7 @@ export default async function Home() {
           <div className="bg-white rounded-3xl border border-gray-100 shadow-lg overflow-hidden md:flex">
             <div className="relative h-44 md:h-auto md:w-2/5 flex-shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={weeklyImage} alt="דירת שבת עד שבת" className="w-full h-full object-cover" />
+              <img src="/view.jpg" alt="Val Thorens" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-l from-black/50 to-transparent" />
             </div>
             <div className="p-6 md:p-10 flex-1">
