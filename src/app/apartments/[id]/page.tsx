@@ -2,7 +2,7 @@
 import SkiLoader from "@/components/SkiLoader";
 import { Suspense, useEffect, useState } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
-import type { Apartment } from "@/types";
+import type { Apartment, SkiPass } from "@/types";
 import { calcTotalForRange, getEffectivePrice } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
 import {
@@ -82,6 +82,41 @@ function QtyStepper({ show, label, qty, setQty, max, total }: {
         <button type="button" onClick={() => setQty(Math.min(max, qty + 1))} disabled={qty >= max}
           className="w-7 h-7 rounded-full bg-white border border-blue-200 text-blue-600 font-black disabled:opacity-40 leading-none">+</button>
         <span className="text-xs font-bold text-gray-700 w-16 text-left">= €{total.toLocaleString()}</span>
+      </div>
+    </div>
+  );
+}
+
+/* ── Ski pass area + qty panel (shown once the ski pass toggle is on) ── */
+function SkiPassPanel({ show, area, setArea, qty, setQty, max, tier, total }: {
+  show: boolean; area: "val_thorens" | "trois_vallees"; setArea: (a: "val_thorens" | "trois_vallees") => void;
+  qty: number; setQty: (n: number) => void; max: number; tier: SkiPass | null; total: number;
+}) {
+  if (!show) return null;
+  return (
+    <div className="flex flex-col gap-2 px-3.5 py-2.5 -mt-1.5 mb-1 rounded-b-xl bg-blue-50 border border-t-0 border-blue-200">
+      <div className="flex items-center gap-2">
+        {(["val_thorens", "trois_vallees"] as const).map(a => (
+          <button key={a} type="button" onClick={() => setArea(a)}
+            className={`flex-1 text-xs font-bold py-1.5 rounded-lg border transition-colors ${
+              area === a ? "bg-blue-600 border-blue-600 text-white" : "bg-white border-blue-200 text-blue-700"
+            }`}>
+            {a === "val_thorens" ? "Val Thorens / Orelle" : "Les 3 Vallées"}
+          </button>
+        ))}
+      </div>
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-bold text-blue-700">
+          {tier ? `${tier.duration_days} ימי סקי · כמה אנשים?` : "כמה אנשים?"}
+        </span>
+        <div className="flex items-center gap-2.5">
+          <button type="button" onClick={() => setQty(Math.max(1, qty - 1))} disabled={qty <= 1}
+            className="w-7 h-7 rounded-full bg-white border border-blue-200 text-blue-600 font-black disabled:opacity-40 leading-none">−</button>
+          <span className="font-black text-gray-900 w-5 text-center">{qty}</span>
+          <button type="button" onClick={() => setQty(Math.min(max, qty + 1))} disabled={qty >= max}
+            className="w-7 h-7 rounded-full bg-white border border-blue-200 text-blue-600 font-black disabled:opacity-40 leading-none">+</button>
+          <span className="text-xs font-bold text-gray-700 w-16 text-left">= €{total.toLocaleString()}</span>
+        </div>
       </div>
     </div>
   );
@@ -177,6 +212,9 @@ function ApartmentPage() {
 
   // Add-ons
   const [skiPass,  setSkiPass]  = useState(false);
+  const [skiPasses, setSkiPasses] = useState<SkiPass[]>([]);
+  const [skiArea,  setSkiArea]  = useState<"val_thorens" | "trois_vallees">("trois_vallees");
+  const [skiQty,   setSkiQty]   = useState(1);
   const [transfer, setTransfer] = useState(false);
   const [equipment, setEquipment] = useState(false);
   const [transferQty, setTransferQty] = useState(1); // how many people need transfer
@@ -209,6 +247,17 @@ function ApartmentPage() {
     }).catch(() => setLoading(false));
   }, [id]);
 
+  useEffect(() => {
+    fetch("/api/ski-passes").then(r => r.json()).then(d => setSkiPasses(Array.isArray(d) ? d : [])).catch(() => {});
+  }, []);
+
+  /* Ski pass tier that covers the trip length, for the chosen area (adult only) */
+  const skiTier = (() => {
+    const options = skiPasses.filter(p => p.area === skiArea && p.type === "adult").sort((a, b) => a.duration_days - b.duration_days);
+    if (!options.length) return null;
+    return options.find(p => p.duration_days >= nights) ?? options[options.length - 1];
+  })();
+
   /* ── Flight URLs with actual dates ─────────────────────── */
   const fmtSky = (s: string) => {
     if (!s) return "";
@@ -236,7 +285,7 @@ function ApartmentPage() {
   })();
 
   const avgNightlyPrice = breakdown.length > 0 ? Math.round(aptTotal / nights) : basePrice;
-  const skiTotal        = 0; // Coming soon — price not yet available
+  const skiTotal        = skiPass && skiTier ? skiTier.price * skiQty : 0;
   // add-ons are per-person: price × number of people who need each add-on
   const trTotal         = transfer ? TRANSFER_PRICE * transferQty : 0;
   const equipTotal      = equipment ? equipCost(nights) * equipQty : 0;
@@ -280,7 +329,7 @@ function ApartmentPage() {
       transfer ? `🚐 הסעה הלוך-חזור ל-${transferQty} אנשים (€${trTotal})${transferDetails ? ` · ${transferDetails}` : ""}` : null,
       equipment ? `🎿 השכרת ציוד ל-${equipQty} אנשים (€${equipTotal})` : null,
       cancel === "flexible" ? "✅ מדיניות ביטול גמישה" : cancel === "none" ? "🔒 ללא אפשרות ביטול" : null,
-      skiPass ? "🎿 מעוניין/ת גם בסקי פס" : null,
+      skiPass ? `🎿 סקי פס · ${skiArea === "val_thorens" ? "Val Thorens/Orelle" : "Trois Vallées"}${skiTier ? ` · ${skiTier.duration_days} ימים` : ""} ל-${skiQty} אנשים (€${skiTotal})` : null,
       service === "ai" ? "🤖 ניהול עצמאי (AI)" : null,
     ],
     total: grandTotal,
@@ -417,11 +466,12 @@ function ApartmentPage() {
                     <div className="flex flex-col gap-2">
                       <ToggleRow
                         icon={<IconSkis size={18} />}
-                        label="סקי פס · Trois Vallées"
-                        sublabel="600 ק״מ מסלולים · כל הרמות · איסוף עצמאי מהמכונה"
-                        checked={skiPass} onChange={setSkiPass}
-                        disabled
+                        label={skiArea === "val_thorens" ? "סקי פס · Val Thorens/Orelle" : "סקי פס · Trois Vallées"}
+                        sublabel={skiArea === "val_thorens" ? "מסלולי Val Thorens ו-Orelle · איסוף עצמאי מהמכונה" : "600 ק״מ מסלולים · כל הרמות · איסוף עצמאי מהמכונה"}
+                        price={skiTier ? `€${skiTier.price.toLocaleString()} לאדם` : undefined}
+                        checked={skiPass} onChange={v => { setSkiPass(v); if (v) setSkiQty(Math.min(skiQty || 1, guests) || 1); }}
                       />
+                      <SkiPassPanel show={skiPass} area={skiArea} setArea={setSkiArea} qty={skiQty} setQty={setSkiQty} max={Math.max(guests, 1)} tier={skiTier} total={skiTotal} />
                       <ToggleRow
                         icon={<IconBus size={18} />}
                         label="הסעה הלוך-חזור"
@@ -612,11 +662,12 @@ function ApartmentPage() {
                     <div className="flex flex-col gap-2">
                       <ToggleRow
                         icon={<IconSkis size={18} />}
-                        label="סקי פס · Trois Vallées"
-                        sublabel="600 ק״מ מסלולים · כל הרמות · איסוף עצמאי מהמכונה"
-                        checked={skiPass} onChange={setSkiPass}
-                        disabled
+                        label={skiArea === "val_thorens" ? "סקי פס · Val Thorens/Orelle" : "סקי פס · Trois Vallées"}
+                        sublabel={skiArea === "val_thorens" ? "מסלולי Val Thorens ו-Orelle · איסוף עצמאי מהמכונה" : "600 ק״מ מסלולים · כל הרמות · איסוף עצמאי מהמכונה"}
+                        price={skiTier ? `€${skiTier.price.toLocaleString()} לאדם` : undefined}
+                        checked={skiPass} onChange={v => { setSkiPass(v); if (v) setSkiQty(Math.min(skiQty || 1, guests) || 1); }}
                       />
+                      <SkiPassPanel show={skiPass} area={skiArea} setArea={setSkiArea} qty={skiQty} setQty={setSkiQty} max={Math.max(guests, 1)} tier={skiTier} total={skiTotal} />
                       <ToggleRow
                         icon={<IconBus size={18} />}
                         label="הסעה הלוך-חזור"
@@ -722,9 +773,9 @@ function ApartmentPage() {
                         <span className="font-semibold text-gray-800">€{aptTotal.toLocaleString()}</span>
                       </div>
                       {skiPass && (
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-500">סקי פס × {guests} × {nights} ימים</span>
-                          <span className="text-xs font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">בקרוב</span>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">סקי פס · {skiArea === "val_thorens" ? "Val Thorens/Orelle" : "Trois Vallées"}{skiTier ? ` · ${skiTier.duration_days} ימים` : ""}{skiQty > 1 ? ` · ${skiQty} אנשים` : ""}</span>
+                          <span className="font-semibold text-gray-800">€{skiTotal.toLocaleString()}</span>
                         </div>
                       )}
                       {transfer && (
