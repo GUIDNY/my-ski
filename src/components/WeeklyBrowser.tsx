@@ -20,17 +20,6 @@ function weekRange(iso: string) {
   return { checkin, checkout };
 }
 
-const TIER_STYLE: Record<"cheap" | "mid" | "expensive", string> = {
-  cheap: "bg-green-50 text-green-700",
-  mid: "bg-gray-100 text-gray-500",
-  expensive: "bg-orange-50 text-orange-700",
-};
-const TIER_LABEL: Record<"cheap" | "mid" | "expensive", string> = {
-  cheap: "זול",
-  mid: "ממוצע",
-  expensive: "יקר",
-};
-
 function SpecChip({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
     <span className="flex items-center gap-1.5 bg-gray-50 border border-gray-100 rounded-full px-2.5 py-1 text-[11px] font-semibold text-gray-600">
@@ -56,19 +45,8 @@ export default function WeeklyBrowser({ apartments }: { apartments: Apartment[] 
     [weekMinPrice]
   );
 
-  const priceTier = useMemo(() => {
-    const sorted = allWeeks.map(w => weekMinPrice.get(w)!).sort((a, b) => a - b);
-    const q1 = sorted[Math.floor(sorted.length / 3)];
-    const q2 = sorted[Math.floor((sorted.length * 2) / 3)];
-    const tier = new Map<string, "cheap" | "mid" | "expensive">();
-    for (const w of allWeeks) {
-      const p = weekMinPrice.get(w)!;
-      tier.set(w, p <= q1 ? "cheap" : p >= q2 ? "expensive" : "mid");
-    }
-    return tier;
-  }, [allWeeks, weekMinPrice]);
-
   const [selected, setSelected] = useState<string | null>(allWeeks[0] ?? null);
+  const [guests, setGuests] = useState(2);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -83,13 +61,14 @@ export default function WeeklyBrowser({ apartments }: { apartments: Apartment[] 
   const visible = useMemo(() => {
     if (!selected) return [];
     return apartments
+      .filter(apt => (apt.max_guests ?? 0) >= guests)
       .map(apt => {
         const match = (apt.available_weeks ?? []).find(w => w.week === selected);
         return match ? { apt, price: match.price } : null;
       })
       .filter((x): x is { apt: Apartment; price: number } => x !== null)
       .sort((a, b) => a.price - b.price);
-  }, [apartments, selected]);
+  }, [apartments, selected, guests]);
 
   if (!allWeeks.length) {
     return (
@@ -144,15 +123,23 @@ export default function WeeklyBrowser({ apartments }: { apartments: Apartment[] 
                   <div className="text-[10px] text-blue-500 font-bold mt-0.5">7 לילות</div>
                 </button>
                 <div className="w-px bg-gray-100 my-4" />
+                <div className="flex items-center px-4 py-5">
+                  <div>
+                    <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-1.5">אנשים</div>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => setGuests(g => Math.max(1, g - 1))} className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold text-sm transition-colors">−</button>
+                      <span className="font-bold text-gray-900 w-5 text-center text-sm">{guests}</span>
+                      <button onClick={() => setGuests(g => Math.min(12, g + 1))} className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold text-sm transition-colors">+</button>
+                    </div>
+                  </div>
+                </div>
+                <div className="w-px bg-gray-100 my-4" />
                 <div className="flex items-center px-5 py-5">
                   <div>
                     <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-1.5">מחיר</div>
-                    {price !== undefined ? (
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-black text-gray-900 text-base">€{price.toLocaleString("en-US")}</span>
-                        {selected && <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${TIER_STYLE[priceTier.get(selected) ?? "mid"]}`}>{TIER_LABEL[priceTier.get(selected) ?? "mid"]}</span>}
-                      </div>
-                    ) : <span className="text-gray-400 text-sm">-</span>}
+                    {price !== undefined
+                      ? <span className="font-black text-gray-900 text-base">€{price.toLocaleString("en-US")}</span>
+                      : <span className="text-gray-400 text-sm">-</span>}
                   </div>
                 </div>
                 <div className="flex items-center px-3">
@@ -190,15 +177,20 @@ export default function WeeklyBrowser({ apartments }: { apartments: Apartment[] 
                     </div>
                   </div>
                 </button>
+                <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">אנשים</span>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setGuests(g => Math.max(1, g - 1))} className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold transition-colors">−</button>
+                    <span className="font-bold text-gray-900 w-6 text-center">{guests}</span>
+                    <button onClick={() => setGuests(g => Math.min(12, g + 1))} className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold transition-colors">+</button>
+                  </div>
+                </div>
                 <div className="flex items-center justify-between px-5 py-3">
                   <div>
                     <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">מחיר</div>
-                    {price !== undefined ? (
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-black text-gray-900 text-sm">€{price.toLocaleString("en-US")}</span>
-                        {selected && <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${TIER_STYLE[priceTier.get(selected) ?? "mid"]}`}>{TIER_LABEL[priceTier.get(selected) ?? "mid"]}</span>}
-                      </div>
-                    ) : <span className="text-gray-400 text-sm">-</span>}
+                    {price !== undefined
+                      ? <span className="font-black text-gray-900 text-sm">€{price.toLocaleString("en-US")}</span>
+                      : <span className="text-gray-400 text-sm">-</span>}
                   </div>
                   <button onClick={() => setOpen(o => !o)} className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold px-6 py-2.5 rounded-xl transition-all flex items-center gap-2 text-sm">
                     <IconCalendar size={14} className="text-white" />
@@ -217,7 +209,6 @@ export default function WeeklyBrowser({ apartments }: { apartments: Apartment[] 
             {allWeeks.map(w => {
               const isSelected = selected === w;
               const price = weekMinPrice.get(w);
-              const tier = priceTier.get(w) ?? "mid";
               const { checkin, checkout } = weekRange(w);
               return (
                 <button key={w} onClick={() => { setSelected(w); setOpen(false); }}
@@ -229,7 +220,6 @@ export default function WeeklyBrowser({ apartments }: { apartments: Apartment[] 
                     כניסה {fmtDate(checkin)} ← יציאה {fmtDate(checkout)}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${TIER_STYLE[tier]}`}>{TIER_LABEL[tier]}</span>
                     {price !== undefined && <span className="text-sm font-black text-gray-900">€{price.toLocaleString("en-US")}</span>}
                     {isSelected && <IconCheck size={14} className="text-blue-600" />}
                   </div>
