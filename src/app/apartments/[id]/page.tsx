@@ -3,7 +3,7 @@ import SkiLoader from "@/components/SkiLoader";
 import { Suspense, useEffect, useState } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import type { Apartment, SkiPass } from "@/types";
-import { calcTotalForRange, getEffectivePrice } from "@/lib/pricing";
+import { calcTotalForRange, getEffectivePrice, matchingWeek } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
 import {
   IconMountain, IconSkis, IconBus, IconPlane, IconShield, IconUser, IconBot,
@@ -270,13 +270,20 @@ function ApartmentPage() {
 
   /* ── Price calculation ──────────────────────────────────── */
   const basePrice = apt?.price_per_night ?? 0;
+  // La Cime ("שבת עד שבת") apartments are only real inventory in fixed
+  // Saturday-to-Saturday weeks — always charge the full week's price rather
+  // than a made-up per-night estimate, for any stay that fits inside one.
+  const weekMatch = apt ? matchingWeek(apt, checkin, checkout) : null;
+  const laCimeNoMatch = apt?.source === "la_cime" && !weekMatch;
   const aptTotal  = apt
-    ? (checkin && checkout ? calcTotalForRange(checkin, checkout, basePrice, rules) : basePrice * nights)
+    ? weekMatch ? weekMatch.price
+      : laCimeNoMatch ? 0
+      : (checkin && checkout ? calcTotalForRange(checkin, checkout, basePrice, rules) : basePrice * nights)
     : 0;
 
   /* Per-night breakdown for the collapsible panel */
   const breakdown = (() => {
-    if (!apt || !checkin || !checkout) return [] as { date: Date; price: number }[];
+    if (!apt || !checkin || !checkout || weekMatch || laCimeNoMatch) return [] as { date: Date; price: number }[];
     const out: { date: Date; price: number }[] = [];
     const end = new Date(checkout + "T12:00:00");
     for (let d = new Date(checkin + "T12:00:00"); d < end; d.setDate(d.getDate() + 1))
@@ -604,45 +611,68 @@ function ApartmentPage() {
 
                 {/* Price header */}
                 <div className="px-6 pt-6 pb-4 bg-gradient-to-br from-gray-50 to-blue-50 border-b border-gray-100">
-                  <div className="flex items-end justify-between gap-2">
-                    <div>
-                      <div className="text-3xl font-black text-gray-900">
-                        €{avgNightlyPrice.toLocaleString()}
-                        <span className="text-base font-medium text-gray-400">
-                          {breakdown.length > 1 ? " / לילה ממוצע" : " / לילה"}
-                        </span>
+                  {laCimeNoMatch ? (
+                    <div className="text-sm font-bold text-amber-700 bg-amber-50 border border-amber-100 rounded-xl px-3.5 py-2.5">
+                      {checkin && checkout
+                        ? "הדירה הזו מושכרת שבת עד שבת בלבד — התאריכים שנבחרו לא נופלים בתוך שבוע פנוי. "
+                        : "הדירה הזו מושכרת שבת עד שבת בלבד. "}
+                      <a href="/weekly" className="underline">לצפייה בשבועות הפנויים ←</a>
+                    </div>
+                  ) : weekMatch ? (
+                    <div className="flex items-end justify-between gap-2">
+                      <div>
+                        <div className="text-3xl font-black text-gray-900">
+                          €{weekMatch.price.toLocaleString()}
+                          <span className="text-base font-medium text-gray-400"> / שבת עד שבת</span>
+                        </div>
+                        {nights < 7 && (
+                          <div className="text-xs text-gray-500 mt-1">המחיר קבוע לשבוע מלא, גם אם נשארים פחות לילות</div>
+                        )}
                       </div>
                     </div>
-                    {breakdown.length > 0 && (
-                      <button
-                        onClick={() => setShowBreakdown(v => !v)}
-                        className="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap flex-shrink-0"
-                      >
-                        פירוט מחיר {showBreakdown ? "▲" : "▼"}
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Per-night breakdown panel */}
-                  {showBreakdown && breakdown.length > 0 && (
-                    <div className="mt-3 bg-white rounded-xl border border-blue-100 overflow-hidden">
-                      <div className="max-h-52 overflow-y-auto divide-y divide-gray-50">
-                        {breakdown.map(({ date, price }, i) => (
-                          <div key={i} className="flex justify-between items-center px-4 py-2 text-sm">
-                            <span className="text-gray-500">{fmtDate(`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`)}</span>
-                            <span className={`font-semibold ${price !== basePrice ? "text-blue-600" : "text-gray-800"}`}>
-                              €{price.toLocaleString()}
+                  ) : (
+                    <>
+                      <div className="flex items-end justify-between gap-2">
+                        <div>
+                          <div className="text-3xl font-black text-gray-900">
+                            €{avgNightlyPrice.toLocaleString()}
+                            <span className="text-base font-medium text-gray-400">
+                              {breakdown.length > 1 ? " / לילה ממוצע" : " / לילה"}
                             </span>
                           </div>
-                        ))}
+                        </div>
+                        {breakdown.length > 0 && (
+                          <button
+                            onClick={() => setShowBreakdown(v => !v)}
+                            className="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap flex-shrink-0"
+                          >
+                            פירוט מחיר {showBreakdown ? "▲" : "▼"}
+                          </button>
+                        )}
                       </div>
-                      {breakdown.length > 1 && (
-                        <div className="flex justify-between items-center px-4 py-2.5 bg-blue-50 border-t border-blue-100 text-sm font-bold">
-                          <span className="text-gray-600">ממוצע ללילה</span>
-                          <span className="text-blue-700">€{avgNightlyPrice.toLocaleString()}</span>
+
+                      {/* Per-night breakdown panel */}
+                      {showBreakdown && breakdown.length > 0 && (
+                        <div className="mt-3 bg-white rounded-xl border border-blue-100 overflow-hidden">
+                          <div className="max-h-52 overflow-y-auto divide-y divide-gray-50">
+                            {breakdown.map(({ date, price }, i) => (
+                              <div key={i} className="flex justify-between items-center px-4 py-2 text-sm">
+                                <span className="text-gray-500">{fmtDate(`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`)}</span>
+                                <span className={`font-semibold ${price !== basePrice ? "text-blue-600" : "text-gray-800"}`}>
+                                  €{price.toLocaleString()}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                          {breakdown.length > 1 && (
+                            <div className="flex justify-between items-center px-4 py-2.5 bg-blue-50 border-t border-blue-100 text-sm font-bold">
+                              <span className="text-gray-600">ממוצע ללילה</span>
+                              <span className="text-blue-700">€{avgNightlyPrice.toLocaleString()}</span>
+                            </div>
+                          )}
                         </div>
                       )}
-                    </div>
+                    </>
                   )}
 
                   {checkin && checkout && (
@@ -769,7 +799,7 @@ function ApartmentPage() {
                     <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">סיכום מחיר</div>
                     <div className="flex flex-col gap-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-500">לינה × {nights} לילות</span>
+                        <span className="text-gray-500">{weekMatch ? "לינה · שבת עד שבת" : `לינה × ${nights} לילות`}</span>
                         <span className="font-semibold text-gray-800">€{aptTotal.toLocaleString()}</span>
                       </div>
                       {skiPass && (
@@ -816,6 +846,12 @@ function ApartmentPage() {
                     <p className="text-[11px] text-gray-400 mt-2 leading-relaxed">* ייתכנו עמלות נוספות (כגון עמלת סליקת אשראי 1.9%). המחירים ב-€ והחיוב בש״ח לפי שער ההמרה.</p>
                   </div>
 
+                  {laCimeNoMatch ? (
+                    <div className="text-center text-sm text-amber-700 bg-amber-50 border border-amber-100 rounded-xl p-4">
+                      אי אפשר להזמין את הדירה הזו לתאריכים שנבחרו — יש לבחור שבוע שבת עד שבת פנוי.
+                    </div>
+                  ) : (
+                  <>
                   {/* ── Split payment ─────────────────────────────── */}
                   <div className="rounded-xl border border-gray-100 p-4">
                     <div className="flex items-center justify-between mb-2">
@@ -852,6 +888,8 @@ function ApartmentPage() {
                     split={splitCount > 1 ? { sharesTotal: splitCount, accommodationTotal: grandTotal, shareAmount: shareAccommodation, area: "Val Thorens, Trois Vallées" } : undefined}
                     label={splitCount > 1 ? "שלם/י את חלקך בכרטיס" : undefined}
                     className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-center text-base transition-colors shadow-sm" />
+                  </>
+                  )}
 
                   {/* save + quote side by side */}
                   <div className="flex gap-2">
@@ -894,10 +932,14 @@ function ApartmentPage() {
       {!sheetOpen && (
         <div dir="rtl" className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 shadow-[0_-4px_24px_rgba(0,0,0,0.10)]"
           style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.5rem)" }}>
-          <div className="flex-shrink-0 text-right leading-none">
-            <div className="text-[11px] text-gray-400 mb-0.5">{splitCount > 1 ? "החלק שלך" : `סה״כ · ${nights} לילות`}</div>
-            <div className="text-xl font-black text-gray-900">€{payNow.toLocaleString()}</div>
-          </div>
+          {laCimeNoMatch ? (
+            <div className="flex-1 text-right text-sm font-bold text-amber-700">אי אפשר להזמין לתאריכים שנבחרו</div>
+          ) : (
+            <div className="flex-shrink-0 text-right leading-none">
+              <div className="text-[11px] text-gray-400 mb-0.5">{splitCount > 1 ? "החלק שלך" : weekMatch ? "סה״כ · שבת עד שבת" : `סה״כ · ${nights} לילות`}</div>
+              <div className="text-xl font-black text-gray-900">€{payNow.toLocaleString()}</div>
+            </div>
+          )}
           <button onClick={() => setSheetOpen(true)}
             className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-center text-base transition-colors shadow-sm">
             בחר/י אפשרויות ותשלום ↑

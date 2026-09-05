@@ -9,7 +9,7 @@ import {
 } from "@/components/Icons";
 import Logo from "@/components/Logo";
 import SkiCalendar from "@/components/SkiCalendar";
-import { getEffectivePrice, calcTotalForRange } from "@/lib/pricing";
+import { getEffectivePrice, calcTotalForRange, matchingWeek } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
@@ -26,9 +26,12 @@ function AptCard({ apt, nights, checkin, checkout, guests, rules }: {
   apt: Apartment; nights: number; checkin: string; checkout: string; guests: number;
   rules: PricingRule[];
 }) {
-  const total = checkin && checkout && nights > 0
-    ? calcTotalForRange(checkin, checkout, apt.price_per_night, rules)
-    : apt.price_per_night * nights;
+  const week = matchingWeek(apt, checkin, checkout);
+  const total = week
+    ? week.price
+    : checkin && checkout && nights > 0
+      ? calcTotalForRange(checkin, checkout, apt.price_per_night, rules)
+      : apt.price_per_night * nights;
 
   // Minimum single-night price in the selected period
   const minNightly = (() => {
@@ -87,18 +90,30 @@ function AptCard({ apt, nights, checkin, checkout, guests, rules }: {
         {/* Price + CTA */}
         <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 sm:min-w-[130px] border-t sm:border-t-0 border-gray-100 pt-4 sm:pt-0">
           <div className="text-right">
-            {checkin && checkout && nights > 0 && (
-              <div className="text-xs text-gray-400 font-semibold mb-0.5">החל מ</div>
-            )}
-            <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-black text-gray-900">€{minNightly.toLocaleString()}</span>
-              <span className="text-xs text-gray-400">/ לילה</span>
-            </div>
-            {minNightly !== apt.price_per_night && (
-              <div className="text-xs text-gray-400 line-through">€{apt.price_per_night}</div>
-            )}
-            {nights > 0 && (
-              <div className="text-sm font-bold text-blue-600 mt-0.5">€{total.toLocaleString()} סה״כ</div>
+            {week ? (
+              <>
+                <div className="text-xs text-gray-400 font-semibold mb-0.5">שבת עד שבת</div>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl font-black text-gray-900">€{week.price.toLocaleString()}</span>
+                  <span className="text-xs text-gray-400">/ שבוע</span>
+                </div>
+              </>
+            ) : (
+              <>
+                {checkin && checkout && nights > 0 && (
+                  <div className="text-xs text-gray-400 font-semibold mb-0.5">החל מ</div>
+                )}
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl font-black text-gray-900">€{minNightly.toLocaleString()}</span>
+                  <span className="text-xs text-gray-400">/ לילה</span>
+                </div>
+                {minNightly !== apt.price_per_night && (
+                  <div className="text-xs text-gray-400 line-through">€{apt.price_per_night}</div>
+                )}
+                {nights > 0 && (
+                  <div className="text-sm font-bold text-blue-600 mt-0.5">€{total.toLocaleString()} סה״כ</div>
+                )}
+              </>
             )}
             <div className="flex items-center gap-1 mt-1 justify-end">
               <IconStar size={12} className="text-amber-400" />
@@ -214,14 +229,22 @@ function SearchPage() {
     return () => document.removeEventListener("mousedown", h);
   }, [dateOpen]);
 
-  const available = apartments.filter(a => !blocked.includes(a.id));
+  // La Cime ("שבת עד שבת") apartments only make sense once the searched dates
+  // actually fit inside one of their synced weeks — otherwise they'd show up
+  // with a made-up nightly price for a product that isn't really sold that way.
+  const available = apartments.filter(a =>
+    !blocked.includes(a.id) && (a.source !== "la_cime" || matchingWeek(a, checkin, checkout))
+  );
   const fits = available.filter(a => capacity(a) >= guests);          // single apt holds the group
   const shown = filter === "all" ? fits : fits.filter(a => getCategory(a) === filter);
 
-  const priceFor = (a: Apartment) =>
-    checkin && checkout && nights > 0
+  const priceFor = (a: Apartment) => {
+    const week = matchingWeek(a, checkin, checkout);
+    if (week) return week.price;
+    return checkin && checkout && nights > 0
       ? calcTotalForRange(checkin, checkout, Number(a.price_per_night), rulesMap[a.id] ?? [])
       : Number(a.price_per_night) * Math.max(nights, 1);
+  };
 
   // No single apartment is big enough → suggest combinations of two
   const maxSingleCap = available.length ? Math.max(...available.map(capacity)) : 0;
@@ -232,9 +255,12 @@ function SearchPage() {
         .sort((x, y) => x.total - y.total)
     : [];
 
-  /* Cheapest single night across all apartments for the selected period */
-  const minPrice = apartments.length
-    ? Math.min(...apartments.map(a => {
+  /* Cheapest single night across all apartments for the selected period
+     (La Cime apartments are priced per week, not per night, so they're
+     excluded from this "from €X / night" figure) */
+  const nightlyApts = apartments.filter(a => a.source !== "la_cime");
+  const minPrice = nightlyApts.length
+    ? Math.min(...nightlyApts.map(a => {
         const rules = rulesMap[a.id] ?? [];
         if (!checkin || !checkout || nights === 0) return Number(a.price_per_night);
         const end = new Date(checkout + "T12:00:00");

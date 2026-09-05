@@ -263,7 +263,7 @@ export default function WeeklyBrowser({ apartments }: { apartments: Apartment[] 
                   <SpecChip icon={null} label={`${apt.sqm} מ״ר`} />
                 </div>
                 <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
-                  <a href={`/apartments/${apt.id}`}
+                  <a href={`/apartments/${apt.id}?checkin=${selected}&checkout=${weekRange(selected!).checkout.toISOString().slice(0, 10)}`}
                     className="bg-blue-600 group-hover:bg-blue-700 text-white text-xs font-bold rounded-xl px-4 py-2.5 transition-colors">
                     צפייה בדירה
                   </a>

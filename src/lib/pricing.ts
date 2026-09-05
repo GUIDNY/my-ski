@@ -1,3 +1,26 @@
+import type { Apartment } from "@/types";
+
+/**
+ * La Cime ("שבת עד שבת") apartments are only actually available in fixed
+ * Saturday-to-Saturday blocks — real cost to us is per full week, not per
+ * night. A stay can fall anywhere inside one of those weeks (it doesn't have
+ * to start/end on the Saturdays), but it can't span across two different
+ * weeks, and it's always charged the full week's price regardless of how
+ * many of its nights are actually used.
+ */
+export function matchingWeek(apt: Apartment, checkin: string, checkout: string) {
+  if (apt.source !== "la_cime" || !apt.available_weeks?.length || !checkin || !checkout) return null;
+  const ci = new Date(checkin + "T12:00:00");
+  const co = new Date(checkout + "T12:00:00");
+  if (!(co > ci)) return null;
+  return apt.available_weeks.find(w => {
+    const start = new Date(w.week + "T12:00:00");
+    const end = new Date(start);
+    end.setDate(end.getDate() + 7);
+    return ci >= start && co <= end;
+  }) ?? null;
+}
+
 export type PricingRule = {
   id: string;
   label: string;
