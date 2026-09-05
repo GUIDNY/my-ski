@@ -99,24 +99,14 @@ function aptTag(apts: Apartment[], apt: Apartment): { label: string; color: stri
 
 /* ── Page ─────────────────────────────────────────────────── */
 
-function PriceRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between bg-gray-50 rounded-xl px-3.5 py-2.5">
-      <span className="text-xs text-gray-500 font-medium">{label}</span>
-      <span className="text-sm font-black text-gray-900">{value}</span>
-    </div>
-  );
-}
-
 export default async function Home() {
   const db = createServerClient();
-  const [{ data: featuredApts }, { data: skiPasses }] = await Promise.all([
+  const [{ data: featuredApts }, { data: weeklyApts }] = await Promise.all([
     db.from("apartments").select("*").eq("available", true).order("price_per_night", { ascending: false }).limit(3),
-    db.from("ski_passes").select("area,price,duration_days").eq("duration_days", 6).not("area", "is", null),
+    db.from("apartments").select("images").eq("source", "la_cime").eq("available", true).order("created_at", { ascending: false }).limit(1),
   ]);
   const apartments: Apartment[] = featuredApts ?? [];
-  const valThorensPass = skiPasses?.find(p => p.area === "val_thorens")?.price;
-  const troisValleesPass = skiPasses?.find(p => p.area === "trois_vallees")?.price;
+  const weeklyImage = weeklyApts?.[0]?.images?.[0] ?? "/hero-ski.jpg";
   return (
     <div className="min-h-screen" style={{ background: "#f7f9fb" }} dir="rtl">
       <Navbar />
@@ -158,21 +148,15 @@ export default async function Home() {
           <div className="bg-white rounded-3xl border border-gray-100 shadow-lg overflow-hidden md:flex">
             <div className="relative h-44 md:h-auto md:w-2/5 flex-shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/hero-ski.jpg" alt="Val Thorens" className="w-full h-full object-cover" />
+              <img src={weeklyImage} alt="דירת שבת עד שבת" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-l from-black/50 to-transparent" />
             </div>
             <div className="p-6 md:p-10 flex-1">
               <span className="text-xs font-bold tracking-widest uppercase text-blue-600">הכי נוח לדיל שלם</span>
               <h2 className="font-display text-2xl md:text-3xl font-black text-gray-900 mt-2 mb-3">דירות שבת עד שבת</h2>
-              <p className="text-gray-500 text-sm mb-5 leading-relaxed">
-                שבוע מלא בואל טורנס — דירה, סקי פס, ציוד והסעה, הכל מסודר מראש במחיר לשבוע.
+              <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+                הדירות הכי זולות ונוחות לשבוע שלם בואל טורנס — ואפשר גם לשלב טיסות והסעות.
               </p>
-              <div className="grid grid-cols-2 gap-2.5 mb-6">
-                {valThorensPass && <PriceRow label="סקי פס — ואל טורנס" value={`€${Math.round(valThorensPass)}`} />}
-                {troisValleesPass && <PriceRow label="סקי פס — שלושת העמקים" value={`€${Math.round(troisValleesPass)}`} />}
-                <PriceRow label="ציוד סקי/סנובורד" value="החל מ-€120" />
-                <PriceRow label="הסעה הלוך-חזור" value="€180 לאדם" />
-              </div>
               <div className="flex flex-wrap gap-3">
                 <a href="/weekly" className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-5 py-3 rounded-xl transition-colors">
                   לכל הדירות הזמינות ←
