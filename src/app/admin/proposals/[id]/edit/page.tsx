@@ -211,9 +211,10 @@ function EditorInner() {
     apt_total?: number; grand_total?: number;
   }) => {
     let desc = "";
+    let images: string[] = [];
     if (q.apartment_id) {
       const ar = await fetch(`/api/apartments/${q.apartment_id}`);
-      if (ar.ok) { const a = await ar.json(); desc = a.description || ""; }
+      if (ar.ok) { const a = await ar.json(); desc = a.description || ""; images = Array.isArray(a.images) ? a.images : []; }
     }
     const aptTotal = Number(q.apt_total ?? q.grand_total) || 0;
     const grand = Number(q.grand_total ?? q.apt_total) || 0;
@@ -227,11 +228,13 @@ function EditorInner() {
       ...(q.ski_pass ? ["סקי פס."] : []),
     ] }] };
 
-    // lodging: only the first two sentences + a link to photos/full description
+    // lodging: real photos right in the proposal, plus the first two sentences.
+    // Only fall back to a link when the apartment has no photos to embed.
     const lodgingBlocks: ProposalBlock[] = [];
+    if (images.length) lodgingBlocks.push({ type: "gallery", urls: images.slice(0, 6) });
     const first2 = firstTwoSentences(desc);
     if (first2) lodgingBlocks.push({ type: "text", text: first2 });
-    if (srcUrl.trim()) lodgingBlocks.push({ type: "note", text: `תמונות ותיאור מלא של הדירה זמינים בקישור: ${srcUrl.trim()}` });
+    if (!images.length && srcUrl.trim()) lodgingBlocks.push({ type: "note", text: `תמונות ותיאור מלא של הדירה זמינים בקישור: ${srcUrl.trim()}` });
     const lodging: ProposalSection = { heading: "הלינה", blocks: lodgingBlocks };
 
     const summary: ProposalSection = { heading: "סיכום החופשה", blocks: [{ type: "summary", rows: [
