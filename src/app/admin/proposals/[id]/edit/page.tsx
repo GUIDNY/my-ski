@@ -5,7 +5,7 @@ import AdminGate from "@/components/AdminGate";
 import ProposalDocument, { PROPOSAL_CSS } from "@/components/ProposalDocument";
 import { computeTotals, money, type LineItem } from "@/lib/proposal-pricing";
 import { calcTotalForRange, type PricingRule } from "@/lib/pricing";
-import type { Proposal, ProposalData, ProposalSection, ProposalBlock, ProposalStatus } from "@/types";
+import type { Proposal, ProposalData, ProposalSection, ProposalBlock, ProposalStatus, SkiPass } from "@/types";
 
 const input = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
 const BLOCK_LABELS: Record<string, string> = { flight: "טיסה", banner: "פס טיסה", kv: "מפתח/ערך", summary: "סיכום", list: "רשימה", text: "פסקה", note: "הערה", option: "תיבה ממוסגרת", table: "טבלת מחירים" };
@@ -44,10 +44,15 @@ function EditorInner() {
   const [savedAt, setSavedAt] = useState<string>("");
   const [showPreview, setShowPreview] = useState(false);
   const [srcUrl, setSrcUrl] = useState("");
+  const [skiPasses, setSkiPasses] = useState<SkiPass[]>([]);
 
   useEffect(() => {
     fetch(`/api/proposals/${id}`).then(r => r.json()).then((row: Proposal) => { setP(row); setData(row.data); });
   }, [id]);
+
+  useEffect(() => {
+    fetch("/api/ski-passes").then(r => r.json()).then(setSkiPasses);
+  }, []);
 
   const save = useCallback(async () => {
     if (!p || !data) return;
@@ -274,6 +279,24 @@ function EditorInner() {
     setD({ sections });
   };
 
+  const addPriceNote = (text: string) => {
+    const sections = [...data.sections];
+    let idx = sections.findIndex(s => s.heading === "פירוט מחירים");
+    if (idx < 0) { sections.push({ heading: "פירוט מחירים", blocks: [itemsToTable([], 0, 0, p.currency)] }); idx = sections.length - 1; }
+    const sec = sections[idx];
+    if (sec.blocks.some(b => b.type === "note" && b.text === text)) return;
+    sections[idx] = { ...sec, blocks: [...sec.blocks, { type: "note", text }] };
+    setD({ sections });
+  };
+
+  const addSkiPass = () => {
+    const passes = skiPasses.filter(sp => sp.area === "val_thorens" && sp.type === "adult");
+    const pass = passes.find(sp => sp.duration_days === 6) ?? passes[0];
+    if (!pass) return;
+    addPriceLine(`סקי פס — ואל טורנס, ${pass.duration_days} ימים`, pass.price);
+    addPriceNote("שדרוג לסקי פס שלושת העמקים (Les 3 Vallées) עולה כ-€50 יותר לנוסע — לבירור לפני ההזמנה.");
+  };
+
   const addSection = () => setD({ sections: [...data.sections, { heading: "סעיף חדש", blocks: [] }] });
   const addBlock = (si: number, type: string) => { const s = data.sections[si]; setSection(si, { ...s, blocks: [...s.blocks, emptyBlock(type)] }); };
 
@@ -352,6 +375,7 @@ function EditorInner() {
             <button onClick={addFlightSection} className="border border-blue-200 text-blue-700 bg-blue-50 font-semibold text-xs px-3 py-2 rounded-xl">✈️ הוסף טיסה</button>
             <button onClick={() => addPriceLine("הסעות שדה תעופה הלוך-חזור", 180)} className="border border-gray-200 text-gray-700 font-semibold text-xs px-3 py-2 rounded-xl">🚐 הוסף הסעה</button>
             <button onClick={() => addPriceLine("השכרת ציוד סקי/סנובורד", 120)} className="border border-gray-200 text-gray-700 font-semibold text-xs px-3 py-2 rounded-xl">🎿 הוסף ציוד</button>
+            <button onClick={addSkiPass} disabled={!skiPasses.length} className="border border-gray-200 text-gray-700 font-semibold text-xs px-3 py-2 rounded-xl disabled:opacity-50">⛷️ הוסף סקי פס</button>
           </div>
 
           {/* signature */}
