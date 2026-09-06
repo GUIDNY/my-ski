@@ -8,7 +8,7 @@ import { calcTotalForRange, type PricingRule } from "@/lib/pricing";
 import type { Proposal, ProposalData, ProposalSection, ProposalBlock, ProposalStatus, SkiPass } from "@/types";
 
 const input = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
-const BLOCK_LABELS: Record<string, string> = { flight: "טיסה", banner: "פס טיסה", kv: "מפתח/ערך", summary: "סיכום", list: "רשימה", text: "פסקה", note: "הערה", option: "תיבה ממוסגרת", table: "טבלת מחירים" };
+const BLOCK_LABELS: Record<string, string> = { flight: "טיסה", banner: "פס טיסה", kv: "מפתח/ערך", summary: "סיכום", list: "רשימה", text: "פסקה", note: "הערה", option: "תיבה ממוסגרת", table: "טבלת מחירים", gallery: "גלריית תמונות" };
 const emptyBlock = (type: string): ProposalBlock => {
   switch (type) {
     case "banner": return { type: "banner", text: "" };
@@ -17,6 +17,7 @@ const emptyBlock = (type: string): ProposalBlock => {
     case "list": return { type: "list", items: [""] };
     case "note": return { type: "note", text: "" };
     case "option": return { type: "option", label: "", text: "" };
+    case "gallery": return { type: "gallery", urls: [] };
     case "table": return { type: "table", header: ["פריט", "כמות", "מחיר ליחידה", "סה\"כ"], rows: [], total: [] };
     case "flight": return { type: "flight", direction: "out", date: "", from: "תל אביב (TLV)", to: "", airline: "", depart: "", arrive: "", nonstop: true, price: "" };
     default: return { type: "text", text: "" };
@@ -437,6 +438,9 @@ function BlockEditor({ block, currency, onChange, onMove, onDelete }: {
       </>)}
       {block.type === "list" && (
         <textarea className={input} rows={4} placeholder="פריט בכל שורה" value={block.items.join("\n")} onChange={e => onChange({ ...block, items: e.target.value.split("\n") })} />
+      )}
+      {block.type === "gallery" && (
+        <textarea className={input} dir="ltr" rows={4} placeholder="קישור לתמונה בכל שורה" value={block.urls.join("\n")} onChange={e => onChange({ ...block, urls: e.target.value.split("\n") })} />
       )}
       {(block.type === "kv" || block.type === "summary") && (
         <div className="space-y-1">
