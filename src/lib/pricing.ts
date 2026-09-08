@@ -21,6 +21,15 @@ export function matchingWeek(apt: Apartment, checkin: string, checkout: string) 
   }) ?? null;
 }
 
+/**
+ * A stay of N nights only yields N-1 actual ski days (arrival/departure days
+ * aren't spent on the slopes), so ski pass tiers and equipment rental should
+ * be priced off this, not the raw night count.
+ */
+export function skiDaysFromNights(nights: number): number {
+  return Math.max(nights - 1, 0);
+}
+
 export type PricingRule = {
   id: string;
   label: string;

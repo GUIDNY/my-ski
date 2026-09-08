@@ -4,10 +4,14 @@ import { useParams } from "next/navigation";
 import AdminGate from "@/components/AdminGate";
 import ProposalDocument, { PROPOSAL_CSS } from "@/components/ProposalDocument";
 import { computeTotals, money, type LineItem } from "@/lib/proposal-pricing";
-import { calcTotalForRange, type PricingRule } from "@/lib/pricing";
+import { calcTotalForRange, skiDaysFromNights, type PricingRule } from "@/lib/pricing";
 import type { Proposal, ProposalData, ProposalSection, ProposalBlock, ProposalStatus, SkiPass } from "@/types";
 
 const input = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
+const TRANSFER_PRICE = 180;
+// ski equipment rental: €30/night under a week · €120 for a week · +€20 each extra night
+const equipCost = (n: number) => (n <= 0 ? 0 : n < 6 ? 30 * n : 120 + 20 * (n - 6));
+const TROIS_VALLEES_NOTE = "שדרוג לסקי פס שלושת העמקים (Les 3 Vallées) עולה כ-€50 יותר לנוסע — לבירור לפני ההזמנה.";
 const BLOCK_LABELS: Record<string, string> = { flight: "טיסה", banner: "פס טיסה", kv: "מפתח/ערך", summary: "סיכום", list: "רשימה", text: "פסקה", note: "הערה", option: "תיבה ממוסגרת", table: "טבלת מחירים", gallery: "גלריית תמונות" };
 const emptyBlock = (type: string): ProposalBlock => {
   switch (type) {
@@ -199,7 +203,11 @@ function EditorInner() {
     await buildFromQuote({
       apartment_id: aptId, apartment_name: apt.name,
       checkin: checkin ?? undefined, checkout: checkout ?? undefined,
-      nights, guests: guests ? +guests : undefined, grand_total: total,
+      nights, guests: guests ? +guests : undefined, apt_total: total, grand_total: total,
+      // a raw apartment link carries no add-on selections — default to the full package
+      // (transfer + ski pass + equipment) so the admin gets one ready end-to-end quote;
+      // any line not wanted is one click to delete from the price table.
+      transfer: true, ski_pass: true, equipment: true,
     });
   };
 
@@ -218,8 +226,8 @@ function EditorInner() {
       if (ar.ok) { const a = await ar.json(); desc = a.description || ""; images = Array.isArray(a.images) ? a.images : []; }
     }
     const aptTotal = Number(q.apt_total ?? q.grand_total) || 0;
-    const grand = Number(q.grand_total ?? q.apt_total) || 0;
-    const addonDiff = Math.max(0, grand - aptTotal);
+    const guests = q.guests || 1;
+    const skiDays = skiDaysFromNights(q.nights ?? 0);
 
     const included: ProposalSection = { heading: "החבילה כוללת", blocks: [{ type: "list", items: [
       "טיסות הלוך וחזור.",
@@ -243,11 +251,21 @@ function EditorInner() {
       ["תאריכים", `${fmtHe(q.checkin)} – ${fmtHe(q.checkout)}`], ["לילות", String(q.nights ?? "")], ["אורחים", String(q.guests ?? "")],
     ] as [string, string][] }] };
 
-    // price: lodging line + transfer/equipment as separate lines when present
+    // price: lodging line + real transfer/equipment/ski-pass lines, priced exactly
+    // like the site does — per person (qty = guests), equipment/ski-pass off the
+    // actual ski-day count (nights - 1: arrival/departure days aren't ski days).
     const items: LineItem[] = [{ label: `${q.apartment_name || "לינה"} · ${q.nights ?? ""} לילות`, qty: 1, unitPrice: aptTotal }];
-    if (q.transfer) items.push({ label: "הסעות שדה תעופה הלוך-חזור", qty: 1, unitPrice: addonDiff || 180 });
-    if (q.equipment) items.push({ label: "השכרת ציוד סקי/סנובורד", qty: 1, unitPrice: 0 });
-    const price: ProposalSection = { heading: "פירוט מחירים", blocks: [itemsToTable(items, 0, 0, p.currency)] };
+    if (q.transfer) items.push({ label: "הסעות שדה תעופה הלוך-חזור", qty: guests, unitPrice: TRANSFER_PRICE });
+    if (q.equipment) items.push({ label: `השכרת ציוד סקי/סנובורד · ${skiDays} ימים`, qty: guests, unitPrice: equipCost(skiDays) });
+    let skiTier: SkiPass | undefined;
+    if (q.ski_pass) {
+      const options = skiPasses.filter(sp => sp.area === "val_thorens" && sp.type === "adult").sort((a, b) => a.duration_days - b.duration_days);
+      skiTier = options.find(sp => sp.duration_days >= skiDays) ?? options[options.length - 1];
+      if (skiTier) items.push({ label: `סקי פס — ואל טורנס, ${skiTier.duration_days} ימים`, qty: guests, unitPrice: skiTier.price });
+    }
+    const priceBlocks: ProposalBlock[] = [itemsToTable(items, 0, 0, p.currency)];
+    if (skiTier) priceBlocks.push({ type: "note", text: TROIS_VALLEES_NOTE });
+    const price: ProposalSection = { heading: "פירוט מחירים", blocks: priceBlocks };
 
     const terms = data.sections.filter(s => s.heading === "תנאים");
     const nonTerms = data.sections.filter(s => s.heading !== "תנאים");
@@ -298,7 +316,7 @@ function EditorInner() {
     const pass = passes.find(sp => sp.duration_days === 6) ?? passes[0];
     if (!pass) return;
     addPriceLine(`סקי פס — ואל טורנס, ${pass.duration_days} ימים`, pass.price);
-    addPriceNote("שדרוג לסקי פס שלושת העמקים (Les 3 Vallées) עולה כ-€50 יותר לנוסע — לבירור לפני ההזמנה.");
+    addPriceNote(TROIS_VALLEES_NOTE);
   };
 
   const addSection = () => setD({ sections: [...data.sections, { heading: "סעיף חדש", blocks: [] }] });

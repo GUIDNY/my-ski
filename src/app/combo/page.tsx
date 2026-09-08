@@ -3,7 +3,7 @@ import SkiLoader from "@/components/SkiLoader";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { Apartment } from "@/types";
-import { calcTotalForRange, getEffectivePrice } from "@/lib/pricing";
+import { calcTotalForRange, getEffectivePrice, skiDaysFromNights } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
 import CardPaymentButton from "@/components/CardPaymentButton";
 import SaveTripButton from "@/components/SaveTripButton";
@@ -122,6 +122,8 @@ function ComboInner() {
   const checkin = params.get("checkin") || "", checkout = params.get("checkout") || "";
   const guests = parseInt(params.get("guests") || "2");
   const nights = checkin && checkout ? Math.round((+new Date(checkout) - +new Date(checkin)) / 86400000) : 0;
+  // A stay of N nights only yields N-1 actual ski days (arrival/departure days aren't spent on the slopes)
+  const skiDays = skiDaysFromNights(nights);
 
   const [a, setA] = useState<Apartment | null>(null);
   const [b, setB] = useState<Apartment | null>(null);
@@ -163,7 +165,7 @@ function ComboInner() {
   const totalA = nights > 0 ? calcTotalForRange(checkin, checkout, Number(a.price_per_night), rulesA) : Number(a.price_per_night);
   const totalB = nights > 0 ? calcTotalForRange(checkin, checkout, Number(b.price_per_night), rulesB) : Number(b.price_per_night);
   const trTotal = transfer ? TRANSFER_PRICE : 0;
-  const equipTotal = equipment ? equipCost(nights) : 0;
+  const equipTotal = equipment ? equipCost(skiDays) : 0;
   const flexExtra = cancel === "flexible" ? CANCEL_FLEX : 0;
   const noCancelDiscount = cancel === "none" ? -CANCEL_NONE : 0;
   const aiDiscount = service === "ai" ? -AI_DISCOUNT : 0;
@@ -262,7 +264,7 @@ function ComboInner() {
                 <div className="flex flex-col gap-2">
                   <AddonCard icon={<IconSkis size={18} />} label="סקי פס · Trois Vallées" sublabel="600 ק״מ מסלולים · כל הרמות · איסוף עצמאי מהמכונה" price="מחיר בקרוב" checked={skiPass} onChange={setSkiPass} disabled />
                   <AddonCard icon={<IconBus size={18} />} label="הסעה הלוך-חזור" sublabel="שאטל ישיר משדה התעופה" price={`+€${TRANSFER_PRICE}`} checked={transfer} onChange={setTransfer} />
-                  <AddonCard icon={<IconSkis size={18} />} label="השכרת ציוד סקי/סנובורד" sublabel="€30 ליום · €120 לשבוע · +€20 לכל יום נוסף" price={nights > 0 ? `+€${equipCost(nights)}` : "החל מ-€30"} checked={equipment} onChange={setEquipment} />
+                  <AddonCard icon={<IconSkis size={18} />} label="השכרת ציוד סקי/סנובורד" sublabel="€30 ליום · €120 לשבוע · +€20 לכל יום נוסף" price={skiDays > 0 ? `+€${equipCost(skiDays)}` : "החל מ-€30"} checked={equipment} onChange={setEquipment} />
                   {transfer && (
                     <button onClick={() => setShowTransfer(true)}
                       className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-colors text-sm w-full text-right">
@@ -307,7 +309,7 @@ function ComboInner() {
                 <Row label={a.name} value={`€${totalA.toLocaleString()}`} muted />
                 <Row label={b.name} value={`€${totalB.toLocaleString()}`} muted />
                 {transfer && <Row label="הסעה הלוך-חזור" value={`€${trTotal}`} muted />}
-                {equipment && <Row label={`השכרת ציוד · ${nights} ימים`} value={`€${equipTotal.toLocaleString()}`} muted />}
+                {equipment && <Row label={`השכרת ציוד · ${skiDays} ימים`} value={`€${equipTotal.toLocaleString()}`} muted />}
                 {skiPass && <Row label="סקי פס" value="מחיר בקרוב" muted />}
                 {cancel === "flexible" && <Row label="ביטול גמיש" value={`€${flexExtra.toLocaleString()}`} muted />}
                 {cancel === "none" && <Row label="ללא אפשרות ביטול" value={`−€${CANCEL_NONE.toLocaleString()}`} muted />}

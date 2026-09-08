@@ -3,7 +3,7 @@ import SkiLoader from "@/components/SkiLoader";
 import { Suspense, useEffect, useState } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import type { Apartment, SkiPass } from "@/types";
-import { calcTotalForRange, getEffectivePrice, matchingWeek } from "@/lib/pricing";
+import { calcTotalForRange, getEffectivePrice, matchingWeek, skiDaysFromNights } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
 import {
   IconMountain, IconSkis, IconBus, IconPlane, IconShield, IconUser, IconBot,
@@ -235,6 +235,8 @@ function ApartmentPage() {
 
   const nights = checkin && checkout
     ? Math.round((new Date(checkout).getTime() - new Date(checkin).getTime()) / 86400000) : 7;
+  // A stay of N nights only yields N-1 actual ski days (arrival/departure days aren't spent on the slopes)
+  const skiDays = skiDaysFromNights(nights);
 
   useEffect(() => {
     Promise.all([
@@ -255,7 +257,7 @@ function ApartmentPage() {
   const skiTier = (() => {
     const options = skiPasses.filter(p => p.area === skiArea && p.type === "adult").sort((a, b) => a.duration_days - b.duration_days);
     if (!options.length) return null;
-    return options.find(p => p.duration_days >= nights) ?? options[options.length - 1];
+    return options.find(p => p.duration_days >= skiDays) ?? options[options.length - 1];
   })();
 
   /* ── Flight URLs with actual dates ─────────────────────── */
@@ -295,7 +297,7 @@ function ApartmentPage() {
   const skiTotal        = skiPass && skiTier ? skiTier.price * skiQty : 0;
   // add-ons are per-person: price × number of people who need each add-on
   const trTotal         = transfer ? TRANSFER_PRICE * transferQty : 0;
-  const equipTotal      = equipment ? equipCost(nights) * equipQty : 0;
+  const equipTotal      = equipment ? equipCost(skiDays) * equipQty : 0;
   const flexExtra       = cancel  === "flexible" ? CANCEL_FLEX : 0;
   const noCancelDiscount = cancel === "none"     ? -CANCEL_NONE : 0;
   const aiDiscount      = service === "ai"       ? -AI_DISCOUNT : 0;
@@ -353,7 +355,7 @@ function ApartmentPage() {
           apartment_id: id,
           apartment: apt?.name ?? id,
           checkin, checkout, guests, nights,
-          ski_pass: skiPass, transfer, cancel, service,
+          ski_pass: skiPass, transfer, equipment, cancel, service,
           apt_total: aptTotal, grand_total: grandTotal,
         }),
       });
@@ -491,7 +493,7 @@ function ApartmentPage() {
                         icon={<IconSkis size={18} />}
                         label="השכרת ציוד סקי/סנובורד"
                         sublabel="€30 ליום · €120 לשבוע · +€20 לכל יום נוסף · לאדם"
-                        price={nights > 0 ? `€${equipCost(nights)} לאדם` : "החל מ-€30"}
+                        price={skiDays > 0 ? `€${equipCost(skiDays)} לאדם` : "החל מ-€30"}
                         checked={equipment} onChange={v => { setEquipment(v); if (v) setEquipQty(Math.min(equipQty || 1, guests) || 1); }}
                       />
                       <QtyStepper show={equipment} label="כמה אנשים צריכים ציוד?" qty={equipQty} setQty={setEquipQty} max={Math.max(guests, 1)} total={equipTotal} />
@@ -710,7 +712,7 @@ function ApartmentPage() {
                         icon={<IconSkis size={18} />}
                         label="השכרת ציוד סקי/סנובורד"
                         sublabel="€30 ליום · €120 לשבוע · +€20 לכל יום נוסף · לאדם"
-                        price={nights > 0 ? `€${equipCost(nights)} לאדם` : "החל מ-€30"}
+                        price={skiDays > 0 ? `€${equipCost(skiDays)} לאדם` : "החל מ-€30"}
                         checked={equipment} onChange={v => { setEquipment(v); if (v) setEquipQty(Math.min(equipQty || 1, guests) || 1); }}
                       />
                       <QtyStepper show={equipment} label="כמה אנשים צריכים ציוד?" qty={equipQty} setQty={setEquipQty} max={Math.max(guests, 1)} total={equipTotal} />
@@ -816,7 +818,7 @@ function ApartmentPage() {
                       )}
                       {equipment && (
                         <div className="flex justify-between">
-                          <span className="text-gray-500">השכרת ציוד · {nights} ימים{equipQty > 1 ? ` · ${equipQty} אנשים` : ""}</span>
+                          <span className="text-gray-500">השכרת ציוד · {skiDays} ימים{equipQty > 1 ? ` · ${equipQty} אנשים` : ""}</span>
                           <span className="font-semibold text-gray-800">€{equipTotal.toLocaleString()}</span>
                         </div>
                       )}

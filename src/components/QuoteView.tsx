@@ -7,7 +7,7 @@ import {
   IconUsers, IconUser, IconMoon, IconWhatsApp,
 } from "@/components/Icons";
 import { buildWaHref } from "@/lib/whatsapp";
-import { getEffectivePrice } from "@/lib/pricing";
+import { getEffectivePrice, skiDaysFromNights } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
 import Logo from "@/components/Logo";
 import CardPaymentButton from "@/components/CardPaymentButton";
@@ -144,7 +144,9 @@ export default function QuoteView({ q }: { q: QuoteData }) {
 
   // live total recomputed from the base lodging + currently-selected add-ons
   // add-ons are per-person: price × number of people who need each add-on
-  const equipUnit = equipCost(nights);
+  // A stay of N nights only yields N-1 actual ski days (arrival/departure days aren't spent on the slopes)
+  const skiDays = skiDaysFromNights(nights);
+  const equipUnit = equipCost(skiDays);
   const trTotal = transferOn ? TRANSFER_PRICE * transferQty : 0;
   const equipTotal = equipmentOn ? equipUnit * equipQty : 0;
   const flexExtra = cancel === "flexible" ? 100 : 0;
@@ -297,7 +299,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
         )}
       </div>
       {transferOn      && <Row label="הסעה הלוך־חזור" sub={transferQty > 1 ? `שאטל פרטי · ${transferQty} אנשים` : "שאטל פרטי"} amount={`€${trTotal.toLocaleString()}`} />}
-      {equipmentOn     && <Row label="השכרת ציוד" sub={`${nights} לילות${equipQty > 1 ? ` · ${equipQty} אנשים` : ""}`} amount={`€${equipTotal.toLocaleString()}`} />}
+      {equipmentOn     && <Row label="השכרת ציוד" sub={`${skiDays} ימים${equipQty > 1 ? ` · ${equipQty} אנשים` : ""}`} amount={`€${equipTotal.toLocaleString()}`} />}
       {cancel === "flexible" && <Row label="ביטול גמיש" amount="€100" />}
       {cancel === "none" && <Row label="ללא אפשרות ביטול" amount="−€100" green />}
       {service === "ai" && <Row label="הנחת AI" sub="ניהול עצמאי" amount="−€50" green />}
