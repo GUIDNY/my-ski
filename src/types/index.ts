@@ -90,7 +90,7 @@ export type ProposalBlock =
   | { type: "text"; text: string }
   | { type: "note"; text: string }
   | { type: "option"; label: string; text: string }
-  | { type: "flight"; direction: "out" | "return"; date: string; from: string; to: string; airline: string; depart: string; arrive: string; nonstop: boolean; price: string }
+  | { type: "flight"; direction: "out" | "return"; date: string; from: string; to: string; airline: string; depart: string; arrive: string; nonstop: boolean; price: string; link?: string }
   | { type: "table"; header: string[]; rows: string[][]; total: string[] }
   | { type: "gallery"; urls: string[]; caption?: string };
 

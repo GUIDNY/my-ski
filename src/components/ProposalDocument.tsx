@@ -61,6 +61,7 @@ export const PROPOSAL_CSS = `
 .proposal table.flt td { padding:1.8mm 3mm; border-bottom:1px solid var(--line); }
 .proposal table.flt td.k { color:var(--muted); width:38%; }
 .proposal table.flt td.v { font-weight:bold; }
+.proposal .flight-link { display:inline-block; font-size:9.5pt; font-weight:bold; color:#2563eb; text-decoration:none; margin:-1mm 0 4mm; }
 .proposal .opt { border:1px solid var(--line2); border-radius:2mm; padding:3mm 4mm; margin-bottom:3mm; }
 .proposal .opt .lbl { font-weight:bold; display:block; margin-bottom:1mm; }
 .proposal table.sum { width:100%; border-collapse:collapse; font-size:10pt; margin-bottom:4mm; }
@@ -128,6 +129,7 @@ function Block({ block }: { block: ProposalBlock }) {
             <tr><td className="k">סוג טיסה</td><td className="v">{block.nonstop ? "ישירה" : "עם עצירה"}</td></tr>
             {block.price && <tr><td className="k">מחיר</td><td className="v">{block.price}</td></tr>}
           </tbody></table>
+          {block.link && <a className="flight-link" href={block.link} target="_blank" rel="noopener noreferrer">צפייה בטיסה ←</a>}
         </>
       );
     }

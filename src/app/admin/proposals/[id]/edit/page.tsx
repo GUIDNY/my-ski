@@ -479,6 +479,7 @@ function BlockEditor({ block, currency, onChange, onMove, onDelete }: {
             <input className={input + " flex-1"} placeholder="מחיר (למשל €320)" value={block.price} onChange={e => onChange({ ...block, price: e.target.value })} />
             <label className="flex items-center gap-1.5 text-xs text-gray-600 whitespace-nowrap"><input type="checkbox" checked={block.nonstop} onChange={e => onChange({ ...block, nonstop: e.target.checked })} className="w-4 h-4 accent-blue-600" /> טיסה ישירה</label>
           </div>
+          <input className={input} placeholder="לינק לטיסה (סקייסקנר וכו')" value={block.link ?? ""} onChange={e => onChange({ ...block, link: e.target.value })} />
         </div>
       )}
       {block.type === "table" && <TableEditor block={block} currency={currency} onChange={onChange} />}
