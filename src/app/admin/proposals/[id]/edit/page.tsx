@@ -337,10 +337,11 @@ function EditorInner() {
     addPriceNote(TROIS_VALLEES_NOTE);
   };
 
-  // Generate a real PayPlus payment link for the price table's current grand
-  // total and drop it right under the table as a clickable "pay now" button —
-  // reuses the same /api/payplus/create-link the site's own checkout uses, so
-  // it needs no order/booking record, just an amount.
+  // Generate real PayPlus payment links for the price table's current grand
+  // total — in both EUR and ILS, plus an optional per-person split — and drop
+  // them right under the table as clickable "pay now" buttons. Reuses the
+  // same /api/payplus/create-link the site's own checkout uses (already
+  // converts EUR→ILS itself), so no order/booking record is needed.
   const addPaymentLink = async () => {
     const idx = data.sections.findIndex(s => s.heading === "פירוט מחירים");
     if (idx < 0) { alert("אין עדיין סעיף פירוט מחירים"); return; }
@@ -351,20 +352,39 @@ function EditorInner() {
     const { total } = computeTotals(items, discount, vatRate);
     if (!total || total <= 0) { alert("הסכום הכולל הוא 0"); return; }
 
+    const guestsInput = prompt("לחלק לתשלום נפרד לכל אדם? כמה אנשים (השאר ריק כדי לדלג):", "");
+    const guests = guestsInput ? parseInt(guestsInput, 10) : 0;
+
     setCreatingPayLink(true);
     try {
-      const res = await fetch("/api/payplus/create-link", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: total, currency: p.currency, description: data.title || p.proposal_number || "הצעת מחיר" }),
-      });
-      const j = await res.json();
-      if (!res.ok || !j.url) { alert(j.error || "יצירת קישור התשלום נכשלה"); return; }
+      const desc = data.title || p.proposal_number || "הצעת מחיר";
+      const requests: { label: string; amount: number; currency: string }[] = [
+        { label: `לתשלום ביורו — ${money(total, "EUR")} ←`, amount: total, currency: "EUR" },
+        { label: `לתשלום בשקל — ${money(total, "ILS")} ←`, amount: total, currency: "ILS" },
+      ];
+      if (guests > 1) {
+        const perPerson = Math.round((total / guests) * 100) / 100;
+        requests.push({ label: `לתשלום לאדם (÷${guests}) — ${money(perPerson, "EUR")} ←`, amount: perPerson, currency: "EUR" });
+      }
 
-      const paymentBlock: ProposalBlock = { type: "payment", label: `לתשלום — ${money(total, p.currency)} ←`, url: j.url };
+      const results = await Promise.all(requests.map(async r => {
+        const res = await fetch("/api/payplus/create-link", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount: r.amount, currency: r.currency, description: desc }),
+        });
+        const j = await res.json();
+        return res.ok && j.url ? { label: r.label, url: j.url as string } : null;
+      }));
+
+      const newPayBlocks: ProposalBlock[] = results
+        .filter((r): r is { label: string; url: string } => r !== null)
+        .map(r => ({ type: "payment", label: r.label, url: r.url }));
+      if (!newPayBlocks.length) { alert("יצירת קישורי התשלום נכשלה"); return; }
+
       const withoutOldPay = sec.blocks.filter(b => b.type !== "payment");
       const tbIdx = withoutOldPay.findIndex(b => b.type === "table");
-      const newBlocks = [...withoutOldPay.slice(0, tbIdx + 1), paymentBlock, ...withoutOldPay.slice(tbIdx + 1)];
+      const newBlocks = [...withoutOldPay.slice(0, tbIdx + 1), ...newPayBlocks, ...withoutOldPay.slice(tbIdx + 1)];
       setSection(idx, { ...sec, blocks: newBlocks });
     } catch {
       alert("שגיאה ביצירת קישור התשלום");
