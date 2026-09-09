@@ -358,15 +358,18 @@ function EditorInner() {
     setCreatingPayLink(true);
     try {
       const desc = data.title || p.proposal_number || "הצעת מחיר";
-      const requests: { label: string; amount: number; currency: string }[] = [
-        { label: `לתשלום ביורו — ${money(total, "EUR")} ←`, amount: total, currency: "EUR" },
-        { label: `לתשלום בשקל — ${money(total, "ILS")} ←`, amount: total, currency: "ILS" },
+      const requests: { prefix: string; amount: number; currency: string }[] = [
+        { prefix: "לתשלום ביורו", amount: total, currency: "EUR" },
+        { prefix: "לתשלום בשקל", amount: total, currency: "ILS" },
       ];
       if (guests > 1) {
         const perPerson = Math.round((total / guests) * 100) / 100;
-        requests.push({ label: `לתשלום לאדם (÷${guests}) — ${money(perPerson, "EUR")} ←`, amount: perPerson, currency: "EUR" });
+        requests.push({ prefix: `לתשלום לאדם (÷${guests})`, amount: perPerson, currency: "EUR" });
       }
 
+      // The route converts EUR→ILS server-side and hands back the real
+      // charged amount/currency — label with THAT, not the caller's number,
+      // or the ILS button would show the euro figure with a ₪ sign on it.
       const results = await Promise.all(requests.map(async r => {
         const res = await fetch("/api/payplus/create-link", {
           method: "POST",
@@ -374,7 +377,8 @@ function EditorInner() {
           body: JSON.stringify({ amount: r.amount, currency: r.currency, description: desc }),
         });
         const j = await res.json();
-        return res.ok && j.url ? { label: r.label, url: j.url as string } : null;
+        if (!res.ok || !j.url) return null;
+        return { label: `${r.prefix} — ${money(j.amount ?? r.amount, j.currency ?? r.currency)} ←`, url: j.url as string };
       }));
 
       const newPayBlocks: ProposalBlock[] = results

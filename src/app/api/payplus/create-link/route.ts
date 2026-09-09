@@ -69,7 +69,10 @@ export async function POST(req: NextRequest) {
     const json = await res.json();
     const link = json?.data?.payment_page_link;
     if (json?.results?.status === "success" && link) {
-      return NextResponse.json({ url: link });
+      // Return the actual charged amount/currency too — when converting
+      // EUR→ILS, `amount` here is the real shekel figure, not the caller's
+      // original euro number, so callers can label the link correctly.
+      return NextResponse.json({ url: link, amount, currency: CURRENCY });
     }
     return NextResponse.json({ error: json?.results?.message || "PayPlus error", raw: json }, { status: 400 });
   } catch (e) {
