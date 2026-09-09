@@ -49,6 +49,7 @@ function EditorInner() {
   const [savedAt, setSavedAt] = useState<string>("");
   const [showPreview, setShowPreview] = useState(false);
   const [srcUrl, setSrcUrl] = useState("");
+  const [flightUrl, setFlightUrl] = useState("");
   const [skiPasses, setSkiPasses] = useState<SkiPass[]>([]);
 
   useEffect(() => {
@@ -288,6 +289,21 @@ function EditorInner() {
     setD({ sections: [...nonTerms, flights, ...terms] });
   };
 
+  // Quick add from the top intake row: paste a Skyscanner (or any) flight
+  // link and get a "view flight" button in the document — no manual airline/
+  // times/price entry required.
+  const addFlightFromLink = () => {
+    const link = flightUrl.trim();
+    if (!link) { alert("הדבק/י קישור לטיסה"); return; }
+    const terms = data.sections.filter(s => s.heading === "תנאים");
+    const nonTerms = data.sections.filter(s => s.heading !== "תנאים");
+    const flights: ProposalSection = { heading: "טיסות", blocks: [
+      { type: "flight", direction: "out", date: "", from: "", to: "", airline: "", depart: "", arrive: "", nonstop: true, price: "", link },
+    ] };
+    setD({ sections: [...nonTerms, flights, ...terms] });
+    setFlightUrl("");
+  };
+
   const addPriceLine = (label: string, unitPrice: number) => {
     const sections = [...data.sections];
     let idx = sections.findIndex(s => s.heading === "פירוט מחירים");
@@ -347,6 +363,11 @@ function EditorInner() {
               <button onClick={prefillFromSource} className="whitespace-nowrap bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 rounded-lg">משוך ומלא ↺</button>
               <button onClick={addApartmentOption} title="מוסיף את הדירה כאפשרות נוספת (עם תמונות) בלי למחוק את שאר ההצעה — להשוואה בין כמה דירות"
                 className="whitespace-nowrap border border-blue-200 text-blue-700 bg-white hover:bg-blue-50 font-bold text-xs px-4 rounded-lg">+ הוסף כאפשרות</button>
+            </div>
+            <div className="flex gap-1.5 mb-3 bg-blue-50/60 rounded-xl p-2">
+              <input className={input} dir="ltr" placeholder="לינק לטיסה (סקייסקנר וכו')"
+                value={flightUrl} onChange={e => setFlightUrl(e.target.value)} />
+              <button onClick={addFlightFromLink} className="whitespace-nowrap bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 rounded-lg">+ הוסף טיסה מלינק</button>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <input className={input} placeholder="שם הלקוח" value={p.client_name} onChange={e => setMeta({ client_name: e.target.value })} />
