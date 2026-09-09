@@ -12,7 +12,7 @@ const TRANSFER_PRICE = 180;
 // ski equipment rental: €30/night under a week · €120 for a week · +€20 each extra night
 const equipCost = (n: number) => (n <= 0 ? 0 : n < 6 ? 30 * n : 120 + 20 * (n - 6));
 const TROIS_VALLEES_NOTE = "שדרוג לסקי פס שלושת העמקים (Les 3 Vallées) עולה כ-€50 יותר לנוסע — לבירור לפני ההזמנה.";
-const BLOCK_LABELS: Record<string, string> = { flight: "טיסה", banner: "פס טיסה", kv: "מפתח/ערך", summary: "סיכום", list: "רשימה", text: "פסקה", note: "הערה", option: "תיבה ממוסגרת", table: "טבלת מחירים", gallery: "גלריית תמונות" };
+const BLOCK_LABELS: Record<string, string> = { flight: "טיסה", banner: "פס טיסה", kv: "מפתח/ערך", summary: "סיכום", list: "רשימה", text: "פסקה", note: "הערה", option: "תיבה ממוסגרת", table: "טבלת מחירים", gallery: "גלריית תמונות", payment: "כפתור תשלום" };
 const emptyBlock = (type: string): ProposalBlock => {
   switch (type) {
     case "banner": return { type: "banner", text: "" };
@@ -24,6 +24,7 @@ const emptyBlock = (type: string): ProposalBlock => {
     case "gallery": return { type: "gallery", urls: [] };
     case "table": return { type: "table", header: ["פריט", "כמות", "מחיר ליחידה", "סה\"כ"], rows: [], total: [] };
     case "flight": return { type: "flight", direction: "out", date: "", from: "תל אביב (TLV)", to: "", airline: "", depart: "", arrive: "", nonstop: true, price: "" };
+    case "payment": return { type: "payment", label: "לתשלום ←", url: "" };
     default: return { type: "text", text: "" };
   }
 };
@@ -50,6 +51,7 @@ function EditorInner() {
   const [showPreview, setShowPreview] = useState(false);
   const [srcUrl, setSrcUrl] = useState("");
   const [flightUrl, setFlightUrl] = useState("");
+  const [creatingPayLink, setCreatingPayLink] = useState(false);
   const [skiPasses, setSkiPasses] = useState<SkiPass[]>([]);
 
   useEffect(() => {
@@ -335,6 +337,42 @@ function EditorInner() {
     addPriceNote(TROIS_VALLEES_NOTE);
   };
 
+  // Generate a real PayPlus payment link for the price table's current grand
+  // total and drop it right under the table as a clickable "pay now" button —
+  // reuses the same /api/payplus/create-link the site's own checkout uses, so
+  // it needs no order/booking record, just an amount.
+  const addPaymentLink = async () => {
+    const idx = data.sections.findIndex(s => s.heading === "פירוט מחירים");
+    if (idx < 0) { alert("אין עדיין סעיף פירוט מחירים"); return; }
+    const sec = data.sections[idx];
+    const tb = sec.blocks.find(b => b.type === "table") as (ProposalBlock & TableExtra) | undefined;
+    if (!tb) { alert("אין טבלת מחירים בסעיף"); return; }
+    const { items, discount, vatRate } = tableToItems(tb);
+    const { total } = computeTotals(items, discount, vatRate);
+    if (!total || total <= 0) { alert("הסכום הכולל הוא 0"); return; }
+
+    setCreatingPayLink(true);
+    try {
+      const res = await fetch("/api/payplus/create-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: total, currency: p.currency, description: data.title || p.proposal_number || "הצעת מחיר" }),
+      });
+      const j = await res.json();
+      if (!res.ok || !j.url) { alert(j.error || "יצירת קישור התשלום נכשלה"); return; }
+
+      const paymentBlock: ProposalBlock = { type: "payment", label: `לתשלום — ${money(total, p.currency)} ←`, url: j.url };
+      const withoutOldPay = sec.blocks.filter(b => b.type !== "payment");
+      const tbIdx = withoutOldPay.findIndex(b => b.type === "table");
+      const newBlocks = [...withoutOldPay.slice(0, tbIdx + 1), paymentBlock, ...withoutOldPay.slice(tbIdx + 1)];
+      setSection(idx, { ...sec, blocks: newBlocks });
+    } catch {
+      alert("שגיאה ביצירת קישור התשלום");
+    } finally {
+      setCreatingPayLink(false);
+    }
+  };
+
   const addSection = () => setD({ sections: [...data.sections, { heading: "סעיף חדש", blocks: [] }] });
   const addBlock = (si: number, type: string) => { const s = data.sections[si]; setSection(si, { ...s, blocks: [...s.blocks, emptyBlock(type)] }); };
 
@@ -419,6 +457,8 @@ function EditorInner() {
             <button onClick={() => addPriceLine("הסעות שדה תעופה הלוך-חזור", 180)} className="border border-gray-200 text-gray-700 font-semibold text-xs px-3 py-2 rounded-xl">🚐 הוסף הסעה</button>
             <button onClick={() => addPriceLine("השכרת ציוד סקי/סנובורד", 120)} className="border border-gray-200 text-gray-700 font-semibold text-xs px-3 py-2 rounded-xl">🎿 הוסף ציוד</button>
             <button onClick={addSkiPass} disabled={!skiPasses.length} className="border border-gray-200 text-gray-700 font-semibold text-xs px-3 py-2 rounded-xl disabled:opacity-50">⛷️ הוסף סקי פס</button>
+            <button onClick={addPaymentLink} disabled={creatingPayLink} title="יוצר קישור תשלום PayPlus אמיתי לסכום הכולל הנוכחי בטבלת המחירים"
+              className="border border-green-200 text-green-700 bg-green-50 font-semibold text-xs px-3 py-2 rounded-xl disabled:opacity-50">💳 {creatingPayLink ? "יוצר קישור…" : "צור קישור תשלום"}</button>
           </div>
 
           {/* signature */}
@@ -481,6 +521,10 @@ function BlockEditor({ block, currency, onChange, onMove, onDelete }: {
       {block.type === "gallery" && (
         <textarea className={input} dir="ltr" rows={4} placeholder="קישור לתמונה בכל שורה" value={block.urls.join("\n")} onChange={e => onChange({ ...block, urls: e.target.value.split("\n") })} />
       )}
+      {block.type === "payment" && (<>
+        <input className={input + " mb-1"} placeholder="טקסט הכפתור" value={block.label} onChange={e => onChange({ ...block, label: e.target.value })} />
+        <input className={input} dir="ltr" placeholder="קישור התשלום" value={block.url} onChange={e => onChange({ ...block, url: e.target.value })} />
+      </>)}
       {(block.type === "kv" || block.type === "summary") && (
         <div className="space-y-1">
           {block.rows.map((r, i) => (

@@ -62,6 +62,7 @@ export const PROPOSAL_CSS = `
 .proposal table.flt td.k { color:var(--muted); width:38%; }
 .proposal table.flt td.v { font-weight:bold; }
 .proposal .flight-link { display:inline-block; font-size:9.5pt; font-weight:bold; color:#2563eb; text-decoration:none; margin:-1mm 0 4mm; }
+.proposal .pay-btn { display:block; text-align:center; background:#2563eb; color:#fff; font-weight:bold; font-size:11.5pt; text-decoration:none; border-radius:2mm; padding:4.5mm; margin-bottom:4mm; }
 .proposal .opt { border:1px solid var(--line2); border-radius:2mm; padding:3mm 4mm; margin-bottom:3mm; }
 .proposal .opt .lbl { font-weight:bold; display:block; margin-bottom:1mm; }
 .proposal table.sum { width:100%; border-collapse:collapse; font-size:10pt; margin-bottom:4mm; }
@@ -155,6 +156,10 @@ function Block({ block }: { block: ProposalBlock }) {
           {block.caption && <p className="cap">{block.caption}</p>}
         </div>
       );
+    case "payment":
+      return block.url ? (
+        <a className="pay-btn" href={block.url} target="_blank" rel="noopener noreferrer">{block.label || "לתשלום מאובטח ←"}</a>
+      ) : null;
     default:
       return null;
   }
