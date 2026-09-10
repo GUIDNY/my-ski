@@ -12,6 +12,7 @@ const TRANSFER_PRICE = 180;
 // ski equipment rental: €30/night under a week · €120 for a week · +€20 each extra night
 const equipCost = (n: number) => (n <= 0 ? 0 : n < 6 ? 30 * n : 120 + 20 * (n - 6));
 const TROIS_VALLEES_NOTE = "שדרוג לסקי פס שלושת העמקים (Les 3 Vallées) עולה כ-€50 יותר לנוסע — לבירור לפני ההזמנה.";
+const FLIGHT_PRICE_NOTE = "מחיר הטיסות מוצג לפי הזמינות והמחיר הנוכחיים בזמן הבדיקה — מחירים ומקומות עשויים להשתנות עד לרגע ההזמנה בפועל.";
 const BLOCK_LABELS: Record<string, string> = { flight: "טיסה", banner: "פס טיסה", kv: "מפתח/ערך", summary: "סיכום", list: "רשימה", text: "פסקה", note: "הערה", option: "תיבה ממוסגרת", table: "טבלת מחירים", gallery: "גלריית תמונות", payment: "כפתור תשלום" };
 const emptyBlock = (type: string): ProposalBlock => {
   switch (type) {
@@ -287,6 +288,7 @@ function EditorInner() {
     const flights: ProposalSection = { heading: "טיסות", blocks: [
       { type: "flight", direction: "out", date: "", from: "תל אביב (TLV)", to: "", airline: "", depart: "", arrive: "", nonstop: true, price: "" },
       { type: "flight", direction: "return", date: "", from: "", to: "תל אביב (TLV)", airline: "", depart: "", arrive: "", nonstop: true, price: "" },
+      { type: "note", text: FLIGHT_PRICE_NOTE },
     ] };
     setD({ sections: [...nonTerms, flights, ...terms] });
   };
@@ -301,6 +303,7 @@ function EditorInner() {
     const nonTerms = data.sections.filter(s => s.heading !== "תנאים");
     const flights: ProposalSection = { heading: "טיסות", blocks: [
       { type: "flight", direction: "out", date: "", from: "", to: "", airline: "", depart: "", arrive: "", nonstop: true, price: "", link },
+      { type: "note", text: FLIGHT_PRICE_NOTE },
     ] };
     setD({ sections: [...nonTerms, flights, ...terms] });
     setFlightUrl("");
