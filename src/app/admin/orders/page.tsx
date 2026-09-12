@@ -16,6 +16,7 @@ const CANCEL_LABEL: Record<string, string> = { regular: "ביטול רגיל", n
 const EMPTY_NEW_ORDER = {
   apartment_id: "", extra_apartment_id: "", checkin: "", checkout: "", guests: 2, total_eur: 0,
   customer_name: "", customer_email: "", customer_phone: "", status: "approved" as "approved" | "hold",
+  ski_pass: false, transfer: false, equipment: false, transfer_details: "",
 };
 
 // Searchable apartment picker with a regular/agency (La Cime) toggle — the
@@ -106,6 +107,8 @@ export default function OrdersAdmin() {
           extra_apartment_id: extraApt?.id || null, extra_apartment_name: extraApt?.name || null,
           checkin: newOrder.checkin, checkout: newOrder.checkout, guests: newOrder.guests, nights,
           cancel: "none", service: "human", grand_total: newOrder.total_eur,
+          ski_pass: newOrder.ski_pass, transfer: newOrder.transfer, equipment: newOrder.equipment,
+          transfer_details: newOrder.transfer ? newOrder.transfer_details : "",
           customer_name: newOrder.customer_name, customer_email: newOrder.customer_email, customer_phone: newOrder.customer_phone,
         }),
       });
@@ -221,6 +224,29 @@ export default function OrdersAdmin() {
                     className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </label>
               </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1.5">כלול בהזמנה</label>
+                <div className="flex flex-wrap gap-4">
+                  <label className="flex items-center gap-1.5 text-sm text-gray-700 cursor-pointer">
+                    <input type="checkbox" checked={newOrder.ski_pass} onChange={e => setNewOrder(v => ({ ...v, ski_pass: e.target.checked }))} className="w-4 h-4 rounded accent-amber-600" />
+                    🎿 סקי פס
+                  </label>
+                  <label className="flex items-center gap-1.5 text-sm text-gray-700 cursor-pointer">
+                    <input type="checkbox" checked={newOrder.transfer} onChange={e => setNewOrder(v => ({ ...v, transfer: e.target.checked }))} className="w-4 h-4 rounded accent-blue-600" />
+                    🚐 הסעה
+                  </label>
+                  <label className="flex items-center gap-1.5 text-sm text-gray-700 cursor-pointer">
+                    <input type="checkbox" checked={newOrder.equipment} onChange={e => setNewOrder(v => ({ ...v, equipment: e.target.checked }))} className="w-4 h-4 rounded accent-amber-600" />
+                    🎿 השכרת ציוד
+                  </label>
+                </div>
+                {newOrder.transfer && (
+                  <input placeholder="פרטי טיסה (אופציונלי)" value={newOrder.transfer_details} onChange={e => setNewOrder(v => ({ ...v, transfer_details: e.target.value }))}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                )}
+              </div>
+
               <input placeholder="שם הלקוח" value={newOrder.customer_name} onChange={e => setNewOrder(v => ({ ...v, customer_name: e.target.value }))}
                 className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               <div className="grid grid-cols-2 gap-3">
