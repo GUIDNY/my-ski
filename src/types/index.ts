@@ -76,6 +76,7 @@ export type Order = {
   transfer_details?: string | null;
   group_id?: string | null;
   shares_total?: number | null;
+  extra_apartment_id?: string | null;
   extra_apartment_name?: string | null;
   ops?: Record<string, boolean> | null;
   created_at: string;

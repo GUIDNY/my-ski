@@ -73,6 +73,27 @@ export default function OrdersAdmin() {
   const [newOrder, setNewOrder] = useState(EMPTY_NEW_ORDER);
   const [addBusy, setAddBusy] = useState(false);
   const [showExtraApt, setShowExtraApt] = useState(false);
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+
+  const closeForm = () => {
+    setShowAdd(false);
+    setEditingOrder(null);
+    setNewOrder(EMPTY_NEW_ORDER);
+    setShowExtraApt(false);
+  };
+
+  const startEdit = (o: Order) => {
+    setEditingOrder(o);
+    setNewOrder({
+      apartment_id: o.apartment_id || "", extra_apartment_id: o.extra_apartment_id || "",
+      checkin: o.checkin || "", checkout: o.checkout || "", guests: o.guests, total_eur: Number(o.total_eur) || 0,
+      customer_name: o.customer_name || "", customer_email: o.customer_email || "", customer_phone: o.customer_phone || "",
+      status: (o.status === "hold" ? "hold" : "approved"),
+      ski_pass: !!o.ski_pass, transfer: !!o.transfer, equipment: !!o.equipment, transfer_details: o.transfer_details || "",
+    });
+    setShowExtraApt(!!o.extra_apartment_id);
+    setShowAdd(true);
+  };
 
   const load = async () => {
     setLoading(true);
@@ -88,41 +109,52 @@ export default function OrdersAdmin() {
   // never sets a status (so it defaults to "awaiting", which doesn't block
   // anything — see PATCH /api/orders/[id]), so we immediately follow up
   // with a status PATCH, same as approving/holding any other order.
-  const addOrder = async () => {
+  const submitOrder = async () => {
     const apt = apartments.find(a => a.id === newOrder.apartment_id);
     if (!apt) { alert("בחר/י דירה"); return; }
     if (!newOrder.checkin || !newOrder.checkout) { alert("בחר/י תאריכי הגעה ועזיבה"); return; }
     if (newOrder.checkout <= newOrder.checkin) { alert("תאריך העזיבה חייב להיות אחרי תאריך ההגעה"); return; }
     if (!newOrder.customer_name.trim()) { alert("הזן/י שם לקוח"); return; }
     const extraApt = newOrder.extra_apartment_id ? apartments.find(a => a.id === newOrder.extra_apartment_id) : null;
+    const nights = Math.round((+new Date(newOrder.checkout) - +new Date(newOrder.checkin)) / 86400000);
+    const fields = {
+      apartment_id: apt.id, apartment_name: apt.name,
+      extra_apartment_id: extraApt?.id || null, extra_apartment_name: extraApt?.name || null,
+      checkin: newOrder.checkin, checkout: newOrder.checkout, guests: newOrder.guests, nights,
+      total_eur: newOrder.total_eur,
+      ski_pass: newOrder.ski_pass, transfer: newOrder.transfer, equipment: newOrder.equipment,
+      transfer_details: newOrder.transfer ? newOrder.transfer_details : "",
+      customer_name: newOrder.customer_name, customer_email: newOrder.customer_email, customer_phone: newOrder.customer_phone,
+    };
 
     setAddBusy(true);
     try {
-      const nights = Math.round((+new Date(newOrder.checkout) - +new Date(newOrder.checkin)) / 86400000);
-      const res = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          apartment_id: apt.id, apartment: apt.name,
-          extra_apartment_id: extraApt?.id || null, extra_apartment_name: extraApt?.name || null,
-          checkin: newOrder.checkin, checkout: newOrder.checkout, guests: newOrder.guests, nights,
-          cancel: "none", service: "human", grand_total: newOrder.total_eur,
-          ski_pass: newOrder.ski_pass, transfer: newOrder.transfer, equipment: newOrder.equipment,
-          transfer_details: newOrder.transfer ? newOrder.transfer_details : "",
-          customer_name: newOrder.customer_name, customer_email: newOrder.customer_email, customer_phone: newOrder.customer_phone,
-        }),
-      });
-      const j = await res.json().catch(() => ({}));
-      if (!res.ok || !j.code) { alert(j.error || "יצירת ההזמנה נכשלה"); return; }
+      if (editingOrder) {
+        // Editing an already-blocking order's apartment/dates: free its OLD
+        // blocks first (a plain field update wouldn't move them — inventory
+        // blocking only reacts to a status PATCH, and re-blocking under the
+        // NEW apartment/dates in the same request wouldn't clear the old
+        // ones), then update the fields and re-block under the new values.
+        if (editingOrder.status === "approved" || editingOrder.status === "hold") {
+          await fetch(`/api/orders/${editingOrder.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "cancelled" }) });
+        }
+        await fetch(`/api/orders/${editingOrder.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...fields, status: newOrder.status }) });
+      } else {
+        const res = await fetch("/api/orders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...fields, apartment: apt.name, cancel: "none", service: "human", grand_total: newOrder.total_eur }),
+        });
+        const j = await res.json().catch(() => ({}));
+        if (!res.ok || !j.code) { alert(j.error || "יצירת ההזמנה נכשלה"); return; }
 
-      // POST only returns {code} — fetch the full list to find this row's id for the status PATCH.
-      const list: Order[] = await fetch("/api/orders").then(r => r.json());
-      const created = list.find(o => o.code === j.code);
-      if (created) await fetch(`/api/orders/${created.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: newOrder.status }) });
+        // POST only returns {code} — fetch the full list to find this row's id for the status PATCH.
+        const list: Order[] = await fetch("/api/orders").then(r => r.json());
+        const created = list.find(o => o.code === j.code);
+        if (created) await fetch(`/api/orders/${created.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: newOrder.status }) });
+      }
 
-      setShowAdd(false);
-      setNewOrder(EMPTY_NEW_ORDER);
-      setShowExtraApt(false);
+      closeForm();
       load();
     } finally {
       setAddBusy(false);
@@ -184,10 +216,12 @@ export default function OrdersAdmin() {
       </div>
 
       {showAdd && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 overflow-y-auto" onClick={() => !addBusy && setShowAdd(false)}>
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 overflow-y-auto" onClick={() => !addBusy && closeForm()}>
           <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl my-8" onClick={e => e.stopPropagation()} dir="rtl">
-            <h2 className="text-lg font-black text-gray-900 mb-1">הזמנה חדשה</h2>
-            <p className="text-xs text-gray-400 mb-4">להזמנות שסוכמו בטלפון/וואטסאפ וכד׳ — התאריכים ייחסמו לדירה מיד עם השמירה.</p>
+            <h2 className="text-lg font-black text-gray-900 mb-1">{editingOrder ? `עריכת הזמנה — ${editingOrder.code}` : "הזמנה חדשה"}</h2>
+            <p className="text-xs text-gray-400 mb-4">
+              {editingOrder ? "שינוי דירה/תאריכים יעביר אוטומטית את החסימה בלוח הזמינות." : "להזמנות שסוכמו בטלפון/וואטסאפ וכד׳ — התאריכים ייחסמו לדירה מיד עם השמירה."}
+            </p>
             <div className="space-y-3">
               <ApartmentPicker apartments={apartments} value={newOrder.apartment_id} excludeId={newOrder.extra_apartment_id || undefined}
                 onChange={id => setNewOrder(v => ({ ...v, apartment_id: id }))} label="דירה" />
@@ -270,11 +304,11 @@ export default function OrdersAdmin() {
               </div>
             </div>
             <div className="flex gap-3 mt-5">
-              <button onClick={addOrder} disabled={addBusy}
+              <button onClick={submitOrder} disabled={addBusy}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-bold py-3 rounded-xl text-sm transition-colors">
-                {addBusy ? "שומר…" : "שמור וחסום תאריכים"}
+                {addBusy ? "שומר…" : editingOrder ? "שמור שינויים" : "שמור וחסום תאריכים"}
               </button>
-              <button onClick={() => setShowAdd(false)} disabled={addBusy}
+              <button onClick={closeForm} disabled={addBusy}
                 className="px-5 py-3 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
                 ביטול
               </button>
@@ -317,6 +351,7 @@ export default function OrdersAdmin() {
                   {o.status !== "cancelled" && (
                     <button onClick={() => setStatus(o, "cancelled")} className="border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium text-sm px-3 py-2 rounded-xl transition">בטל</button>
                   )}
+                  <button onClick={() => startEdit(o)} className="border border-gray-200 text-blue-600 hover:bg-blue-50 font-medium text-sm px-3 py-2 rounded-xl transition">עריכה</button>
                   <button onClick={() => remove(o)} className="text-red-500 hover:text-red-700 text-sm px-2">🗑</button>
                 </div>
                </div>
