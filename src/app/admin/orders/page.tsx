@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import type { Order } from "@/types";
+import type { Order, Apartment } from "@/types";
 
 const STATUS: Record<string, { label: string; cls: string }> = {
   awaiting:  { label: "🔥 ליד חם — הגיע לתשלום, לא שילם", cls: "bg-orange-100 text-orange-700" },
@@ -13,11 +13,20 @@ const fmt = (s: string | null) => (s ? new Date(s + "T12:00:00").toLocaleDateStr
 
 const CANCEL_LABEL: Record<string, string> = { regular: "ביטול רגיל", none: "ללא ביטול", flexible: "ביטול גמיש" };
 
+const EMPTY_NEW_ORDER = {
+  apartment_id: "", checkin: "", checkout: "", guests: 2, total_eur: 0,
+  customer_name: "", customer_email: "", customer_phone: "", status: "approved" as "approved" | "hold",
+};
+
 export default function OrdersAdmin() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [open, setOpen] = useState<Record<string, boolean>>({});
+  const [apartments, setApartments] = useState<Apartment[]>([]);
+  const [showAdd, setShowAdd] = useState(false);
+  const [newOrder, setNewOrder] = useState(EMPTY_NEW_ORDER);
+  const [addBusy, setAddBusy] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -26,6 +35,48 @@ export default function OrdersAdmin() {
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
+  useEffect(() => { fetch("/api/apartments?all=1").then(r => r.json()).then(setApartments).catch(() => {}); }, []);
+
+  // Manually add a real booking (e.g. taken by phone) — this is the only
+  // way an admin-created order actually blocks its dates: POST /api/orders
+  // never sets a status (so it defaults to "awaiting", which doesn't block
+  // anything — see PATCH /api/orders/[id]), so we immediately follow up
+  // with a status PATCH, same as approving/holding any other order.
+  const addOrder = async () => {
+    const apt = apartments.find(a => a.id === newOrder.apartment_id);
+    if (!apt) { alert("בחר/י דירה"); return; }
+    if (!newOrder.checkin || !newOrder.checkout) { alert("בחר/י תאריכי הגעה ועזיבה"); return; }
+    if (newOrder.checkout <= newOrder.checkin) { alert("תאריך העזיבה חייב להיות אחרי תאריך ההגעה"); return; }
+    if (!newOrder.customer_name.trim()) { alert("הזן/י שם לקוח"); return; }
+
+    setAddBusy(true);
+    try {
+      const nights = Math.round((+new Date(newOrder.checkout) - +new Date(newOrder.checkin)) / 86400000);
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          apartment_id: apt.id, apartment: apt.name,
+          checkin: newOrder.checkin, checkout: newOrder.checkout, guests: newOrder.guests, nights,
+          cancel: "none", service: "human", grand_total: newOrder.total_eur,
+          customer_name: newOrder.customer_name, customer_email: newOrder.customer_email, customer_phone: newOrder.customer_phone,
+        }),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok || !j.code) { alert(j.error || "יצירת ההזמנה נכשלה"); return; }
+
+      // POST only returns {code} — fetch the full list to find this row's id for the status PATCH.
+      const list: Order[] = await fetch("/api/orders").then(r => r.json());
+      const created = list.find(o => o.code === j.code);
+      if (created) await fetch(`/api/orders/${created.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: newOrder.status }) });
+
+      setShowAdd(false);
+      setNewOrder(EMPTY_NEW_ORDER);
+      load();
+    } finally {
+      setAddBusy(false);
+    }
+  };
 
   const approve = async (o: Order) => {
     if (!o.customer_email) { alert("⚠️ אין מייל ללקוח בהזמנה — לא יישלח אישור."); return; }
@@ -70,10 +121,83 @@ export default function OrdersAdmin() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-black text-gray-900">הזמנות</h1>
-        <p className="text-gray-500 text-sm mt-1">אישור פיקדונות ושליחת אישור הזמנה ללקוח</p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-black text-gray-900">הזמנות</h1>
+          <p className="text-gray-500 text-sm mt-1">אישור פיקדונות ושליחת אישור הזמנה ללקוח</p>
+        </div>
+        <button onClick={() => setShowAdd(true)}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-colors">
+          + הוסף הזמנה חדשה
+        </button>
       </div>
+
+      {showAdd && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 overflow-y-auto" onClick={() => !addBusy && setShowAdd(false)}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl my-8" onClick={e => e.stopPropagation()} dir="rtl">
+            <h2 className="text-lg font-black text-gray-900 mb-1">הזמנה חדשה</h2>
+            <p className="text-xs text-gray-400 mb-4">להזמנות שסוכמו בטלפון/וואטסאפ וכד׳ — התאריכים ייחסמו לדירה מיד עם השמירה.</p>
+            <div className="space-y-3">
+              <select value={newOrder.apartment_id} onChange={e => setNewOrder(v => ({ ...v, apartment_id: e.target.value }))}
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">בחר/י דירה…</option>
+                {apartments.map(a => <option key={a.id} value={a.id}>{a.name}{a.source === "la_cime" ? " (La Cime)" : ""}</option>)}
+              </select>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="text-xs text-gray-500">הגעה
+                  <input type="date" value={newOrder.checkin} onChange={e => setNewOrder(v => ({ ...v, checkin: e.target.value }))}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </label>
+                <label className="text-xs text-gray-500">עזיבה
+                  <input type="date" value={newOrder.checkout} onChange={e => setNewOrder(v => ({ ...v, checkout: e.target.value }))}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </label>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="text-xs text-gray-500">אורחים
+                  <input type="number" min={1} value={newOrder.guests} onChange={e => setNewOrder(v => ({ ...v, guests: +e.target.value }))}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </label>
+                <label className="text-xs text-gray-500">סה״כ (€)
+                  <input type="number" min={0} value={newOrder.total_eur} onChange={e => setNewOrder(v => ({ ...v, total_eur: +e.target.value }))}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </label>
+              </div>
+              <input placeholder="שם הלקוח" value={newOrder.customer_name} onChange={e => setNewOrder(v => ({ ...v, customer_name: e.target.value }))}
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <div className="grid grid-cols-2 gap-3">
+                <input placeholder="טלפון" value={newOrder.customer_phone} onChange={e => setNewOrder(v => ({ ...v, customer_phone: e.target.value }))}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <input placeholder="אימייל" dir="ltr" value={newOrder.customer_email} onChange={e => setNewOrder(v => ({ ...v, customer_email: e.target.value }))}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-right focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1.5">סטטוס</label>
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => setNewOrder(v => ({ ...v, status: "approved" }))}
+                    className={`flex-1 py-2.5 rounded-xl text-sm font-bold border ${newOrder.status === "approved" ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-gray-200 text-gray-500"}`}>
+                    אושר (שולח מייל אישור אם יש)
+                  </button>
+                  <button type="button" onClick={() => setNewOrder(v => ({ ...v, status: "hold" }))}
+                    className={`flex-1 py-2.5 rounded-xl text-sm font-bold border ${newOrder.status === "hold" ? "border-amber-500 bg-amber-50 text-amber-700" : "border-gray-200 text-gray-500"}`}>
+                    פיקדון (חוסם, בלי מייל)
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-5">
+              <button onClick={addOrder} disabled={addBusy}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-bold py-3 rounded-xl text-sm transition-colors">
+                {addBusy ? "שומר…" : "שמור וחסום תאריכים"}
+              </button>
+              <button onClick={() => setShowAdd(false)} disabled={addBusy}
+                className="px-5 py-3 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                ביטול
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <div className="text-center py-20 text-gray-400">טוען...</div>
