@@ -93,6 +93,85 @@ function ImageUploader({ images, onChange }: { images: string[]; onChange: (imgs
   );
 }
 
+/* ── Apartments table (regular or La Cime) ───────────────────
+   La Cime rows show a week-price range + how many weeks are synced
+   instead of a per-night rate, since their real price only exists
+   per fixed Saturday-to-Saturday week (see lib/pricing.ts matchingWeek) —
+   the DB's price_per_night on those rows is just a sort proxy, not a
+   real nightly rate, so showing it here would be misleading. */
+function ApartmentsTable({ title, apartments, isLaCime, onManagePrice, onEdit, onRemove }: {
+  title: string; apartments: Apartment[]; isLaCime?: boolean;
+  onManagePrice: (apt: Apartment) => void; onEdit: (apt: Apartment) => void; onRemove: (id: string) => void;
+}) {
+  if (!apartments.length) {
+    return (
+      <div>
+        <h2 className="text-sm font-bold text-gray-500 mb-2">{title}</h2>
+        <div className="text-center py-10 bg-white rounded-2xl border border-gray-100 text-gray-400 text-sm">אין דירות בקבוצה הזו</div>
+      </div>
+    );
+  }
+  return (
+    <div>
+      <h2 className="text-sm font-bold text-gray-500 mb-2">{title}</h2>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
+        <table className="w-full text-sm min-w-[600px]">
+          <thead className="bg-gray-50 border-b border-gray-100">
+            <tr>
+              {["תמונה", "שם", "סוג", "חדרים", isLaCime ? "שבועות זמינים ומחיר" : "מחיר/לילה", "זמין", "פעולות"].map(h => (
+                <th key={h} className="text-right px-4 py-3 font-semibold text-gray-600">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-50">
+            {apartments.map(apt => {
+              const weeks = apt.available_weeks ?? [];
+              const prices = weeks.map(w => w.price);
+              return (
+                <tr key={apt.id} className="hover:bg-gray-50/50 transition-colors">
+                  <td className="px-4 py-3">
+                    {apt.images?.[0] ? (
+                      <img src={apt.images[0]} alt={apt.name}
+                        className="w-12 h-10 object-cover rounded-lg border border-gray-100" />
+                    ) : (
+                      <div className="w-12 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-300 text-xs">—</div>
+                    )}
+                  </td>
+                  <td className="px-4 py-4 font-semibold text-gray-900">{apt.name}</td>
+                  <td className="px-4 py-4 text-gray-500">{apt.type}</td>
+                  <td className="px-4 py-4 text-gray-500">{apt.beds} · {apt.baths}</td>
+                  <td className="px-4 py-4 font-bold text-gray-900">
+                    {isLaCime
+                      ? (prices.length ? `${weeks.length} שבועות · €${Math.min(...prices).toLocaleString()}–€${Math.max(...prices).toLocaleString()}` : "אין שבועות פנויים")
+                      : `€${Number(apt.price_per_night).toLocaleString()}`}
+                  </td>
+                  <td className="px-4 py-4">
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold
+                      ${apt.available ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+                      {apt.available ? "זמין" : "לא זמין"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="flex gap-3 items-center">
+                      <Link href={`/admin/apartments/${apt.id}`}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-3 py-1.5 rounded-lg transition-colors">
+                        ניהול דירה →
+                      </Link>
+                      {!isLaCime && <button onClick={() => onManagePrice(apt)} className="text-amber-600 hover:text-amber-800 font-medium text-xs">💰 מחיר גלובלי</button>}
+                      <button onClick={() => onEdit(apt)} className="text-blue-600 hover:text-blue-800 font-medium text-xs">עריכה</button>
+                      <button onClick={() => onRemove(apt.id)} className="text-red-500 hover:text-red-700 font-medium text-xs">מחיקה</button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 /* ── Main admin page ──────────────────────────────────────── */
 export default function ApartmentsAdmin() {
   const [apartments, setApartments] = useState<Apartment[]>([]);
@@ -172,6 +251,9 @@ export default function ApartmentsAdmin() {
     setSyncAllMsg(`סונכרנו ${d.apartments} דירות, ${d.synced} ימים עודכנו`);
     setSyncingAll(false);
   };
+
+  const regularApartments = apartments.filter(a => a.source !== "la_cime");
+  const laCimeApartments = apartments.filter(a => a.source === "la_cime");
 
   return (
     <div>
@@ -282,7 +364,10 @@ export default function ApartmentsAdmin() {
         </div>
       )}
 
-      {/* Table */}
+      {/* Table(s) — La Cime ("שבת עד שבת") apartments are synced weekly
+          inventory with their own pricing/availability model, so they're
+          grouped separately from the regular nightly-rate apartments
+          instead of mixed into one flat list of ~90 rows. */}
       {loading ? (
         <div className="text-center py-20 text-gray-400">טוען...</div>
       ) : !apartments.length ? (
@@ -290,52 +375,25 @@ export default function ApartmentsAdmin() {
           <div className="text-gray-500">אין דירות עדיין — הוסף את הראשונה</div>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
-          <table className="w-full text-sm min-w-[600px]">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                {["תמונה", "שם", "סוג", "חדרים", "מחיר/לילה", "זמין", "פעולות"].map(h => (
-                  <th key={h} className="text-right px-4 py-3 font-semibold text-gray-600">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {apartments.map(apt => (
-                <tr key={apt.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-4 py-3">
-                    {apt.images?.[0] ? (
-                      <img src={apt.images[0]} alt={apt.name}
-                        className="w-12 h-10 object-cover rounded-lg border border-gray-100" />
-                    ) : (
-                      <div className="w-12 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-300 text-xs">—</div>
-                    )}
-                  </td>
-                  <td className="px-4 py-4 font-semibold text-gray-900">{apt.name}</td>
-                  <td className="px-4 py-4 text-gray-500">{apt.type}</td>
-                  <td className="px-4 py-4 text-gray-500">{apt.beds} · {apt.baths}</td>
-                  <td className="px-4 py-4 font-bold text-gray-900">€{Number(apt.price_per_night).toLocaleString()}</td>
-                  <td className="px-4 py-4">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold
-                      ${apt.available ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
-                      {apt.available ? "זמין" : "לא זמין"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="flex gap-3 items-center">
-                      <Link href={`/admin/apartments/${apt.id}`}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-3 py-1.5 rounded-lg transition-colors">
-                        ניהול דירה →
-                      </Link>
-                      <button onClick={() => { setAdjApt(apt); setAdjValue(""); }} className="text-amber-600 hover:text-amber-800 font-medium text-xs">💰 מחיר גלובלי</button>
-                      <button onClick={() => edit(apt)} className="text-blue-600 hover:text-blue-800 font-medium text-xs">עריכה</button>
-                      <button onClick={() => remove(apt.id)} className="text-red-500 hover:text-red-700 font-medium text-xs">מחיקה</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <>
+          <ApartmentsTable
+            title={`דירות רגילות (${regularApartments.length})`}
+            apartments={regularApartments}
+            onManagePrice={apt => { setAdjApt(apt); setAdjValue(""); }}
+            onEdit={edit}
+            onRemove={remove}
+          />
+          <div className="mt-8">
+            <ApartmentsTable
+              title={`דירות La Cime — שבת עד שבת (${laCimeApartments.length})`}
+              apartments={laCimeApartments}
+              isLaCime
+              onManagePrice={apt => { setAdjApt(apt); setAdjValue(""); }}
+              onEdit={edit}
+              onRemove={remove}
+            />
+          </div>
+        </>
       )}
 
       {/* ── Global price adjustment ──────────────────────────── */}
