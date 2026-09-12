@@ -14,9 +14,53 @@ const fmt = (s: string | null) => (s ? new Date(s + "T12:00:00").toLocaleDateStr
 const CANCEL_LABEL: Record<string, string> = { regular: "ביטול רגיל", none: "ללא ביטול", flexible: "ביטול גמיש" };
 
 const EMPTY_NEW_ORDER = {
-  apartment_id: "", checkin: "", checkout: "", guests: 2, total_eur: 0,
+  apartment_id: "", extra_apartment_id: "", checkin: "", checkout: "", guests: 2, total_eur: 0,
   customer_name: "", customer_email: "", customer_phone: "", status: "approved" as "approved" | "hold",
 };
+
+// Searchable apartment picker with a regular/agency (La Cime) toggle — the
+// full list is ~90 apartments (6 regular + ~83 synced from La Cime), too
+// long for a plain <select> to browse comfortably.
+function ApartmentPicker({ apartments, value, onChange, label, excludeId }: {
+  apartments: Apartment[]; value: string; onChange: (id: string) => void; label: string; excludeId?: string;
+}) {
+  const [group, setGroup] = useState<"regular" | "la_cime">("regular");
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
+  const selected = apartments.find(a => a.id === value);
+  const pool = apartments.filter(a => (a.source === "la_cime") === (group === "la_cime") && a.id !== excludeId);
+  const filtered = query.trim() ? pool.filter(a => a.name.toLowerCase().includes(query.trim().toLowerCase())) : pool;
+
+  return (
+    <div className="relative">
+      <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1.5">{label}</label>
+      <div className="flex gap-1.5 mb-1.5">
+        <button type="button" onClick={() => setGroup("regular")}
+          className={`flex-1 py-1.5 rounded-lg text-xs font-bold border ${group === "regular" ? "border-blue-500 bg-blue-50 text-blue-700" : "border-gray-200 text-gray-500"}`}>רגיל</button>
+        <button type="button" onClick={() => setGroup("la_cime")}
+          className={`flex-1 py-1.5 rounded-lg text-xs font-bold border ${group === "la_cime" ? "border-blue-500 bg-blue-50 text-blue-700" : "border-gray-200 text-gray-500"}`}>סוכנות (La Cime)</button>
+      </div>
+      <input
+        value={open ? query : (selected?.name ?? "")}
+        onFocus={() => setOpen(true)}
+        onChange={e => { setQuery(e.target.value); setOpen(true); }}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
+        placeholder="הקלד לחיפוש דירה…"
+        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      {open && (
+        <div className="absolute z-20 mt-1 w-full max-h-56 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg">
+          {filtered.length === 0 && <div className="px-4 py-2.5 text-sm text-gray-400">אין תוצאות</div>}
+          {filtered.map(a => (
+            <button key={a.id} type="button" onMouseDown={() => { onChange(a.id); setQuery(""); setOpen(false); }}
+              className="w-full text-right px-4 py-2.5 text-sm hover:bg-gray-50 border-b border-gray-50 last:border-0">
+              {a.name}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function OrdersAdmin() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -27,6 +71,7 @@ export default function OrdersAdmin() {
   const [showAdd, setShowAdd] = useState(false);
   const [newOrder, setNewOrder] = useState(EMPTY_NEW_ORDER);
   const [addBusy, setAddBusy] = useState(false);
+  const [showExtraApt, setShowExtraApt] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -48,6 +93,7 @@ export default function OrdersAdmin() {
     if (!newOrder.checkin || !newOrder.checkout) { alert("בחר/י תאריכי הגעה ועזיבה"); return; }
     if (newOrder.checkout <= newOrder.checkin) { alert("תאריך העזיבה חייב להיות אחרי תאריך ההגעה"); return; }
     if (!newOrder.customer_name.trim()) { alert("הזן/י שם לקוח"); return; }
+    const extraApt = newOrder.extra_apartment_id ? apartments.find(a => a.id === newOrder.extra_apartment_id) : null;
 
     setAddBusy(true);
     try {
@@ -57,6 +103,7 @@ export default function OrdersAdmin() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           apartment_id: apt.id, apartment: apt.name,
+          extra_apartment_id: extraApt?.id || null, extra_apartment_name: extraApt?.name || null,
           checkin: newOrder.checkin, checkout: newOrder.checkout, guests: newOrder.guests, nights,
           cancel: "none", service: "human", grand_total: newOrder.total_eur,
           customer_name: newOrder.customer_name, customer_email: newOrder.customer_email, customer_phone: newOrder.customer_phone,
@@ -72,6 +119,7 @@ export default function OrdersAdmin() {
 
       setShowAdd(false);
       setNewOrder(EMPTY_NEW_ORDER);
+      setShowExtraApt(false);
       load();
     } finally {
       setAddBusy(false);
@@ -138,11 +186,21 @@ export default function OrdersAdmin() {
             <h2 className="text-lg font-black text-gray-900 mb-1">הזמנה חדשה</h2>
             <p className="text-xs text-gray-400 mb-4">להזמנות שסוכמו בטלפון/וואטסאפ וכד׳ — התאריכים ייחסמו לדירה מיד עם השמירה.</p>
             <div className="space-y-3">
-              <select value={newOrder.apartment_id} onChange={e => setNewOrder(v => ({ ...v, apartment_id: e.target.value }))}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">בחר/י דירה…</option>
-                {apartments.map(a => <option key={a.id} value={a.id}>{a.name}{a.source === "la_cime" ? " (La Cime)" : ""}</option>)}
-              </select>
+              <ApartmentPicker apartments={apartments} value={newOrder.apartment_id} excludeId={newOrder.extra_apartment_id || undefined}
+                onChange={id => setNewOrder(v => ({ ...v, apartment_id: id }))} label="דירה" />
+
+              {showExtraApt ? (
+                <div className="relative">
+                  <ApartmentPicker apartments={apartments} value={newOrder.extra_apartment_id} excludeId={newOrder.apartment_id || undefined}
+                    onChange={id => setNewOrder(v => ({ ...v, extra_apartment_id: id }))} label="דירה נוספת (הזמנה משולבת)" />
+                  <button type="button" onClick={() => { setShowExtraApt(false); setNewOrder(v => ({ ...v, extra_apartment_id: "" })); }}
+                    className="absolute left-0 top-0 text-xs text-red-500 hover:text-red-700 font-medium">✕ הסר</button>
+                </div>
+              ) : (
+                <button type="button" onClick={() => setShowExtraApt(true)}
+                  className="text-xs font-semibold text-blue-600 hover:underline">+ הוסף דירה נוספת (הזמנה משולבת בין כמה דירות)</button>
+              )}
+
               <div className="grid grid-cols-2 gap-3">
                 <label className="text-xs text-gray-500">הגעה
                   <input type="date" value={newOrder.checkin} onChange={e => setNewOrder(v => ({ ...v, checkin: e.target.value }))}
