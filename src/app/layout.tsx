@@ -4,6 +4,7 @@ import "./globals.css";
 import MobileTabBar from "@/components/MobileTabBar";
 import CookieConsent from "@/components/CookieConsent";
 import DeepLinkHandler from "@/components/DeepLinkHandler";
+import AiConcierge from "@/components/AiConcierge";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -61,6 +62,7 @@ export default function RootLayout({
         {children}
         <DeepLinkHandler />
         <MobileTabBar />
+        <AiConcierge />
         <CookieConsent />
       </body>
     </html>
