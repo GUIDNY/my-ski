@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
 import { usePathname } from "next/navigation";
 
 type Message = { role: "user" | "assistant"; text: string };
@@ -29,6 +30,9 @@ export default function AiConcierge() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [pendingImage, setPendingImage] = useState<{ file: File; preview: string } | null>(null);
+  const [dragY, setDragY] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const dragStartY = useRef(0);
   const fileRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -54,6 +58,25 @@ export default function AiConcierge() {
   }, [open]);
 
   const hidden = HIDDEN.some(h => pathname === h || pathname.startsWith(h + "/"));
+
+  // Mobile bottom-sheet drag handle — swipe down to close, like a native
+  // sheet. Only wired on the handle bar so it never fights the message
+  // list's own vertical scroll.
+  const onHandlePointerDown = (e: ReactPointerEvent) => {
+    setDragging(true);
+    dragStartY.current = e.clientY;
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  };
+  const onHandlePointerMove = (e: ReactPointerEvent) => {
+    if (!dragging) return;
+    setDragY(Math.max(0, e.clientY - dragStartY.current));
+  };
+  const onHandlePointerUp = () => {
+    if (!dragging) return;
+    setDragging(false);
+    if (dragY > 90) setOpen(false);
+    setDragY(0);
+  };
 
   const send = async () => {
     const text = input.trim();
@@ -97,7 +120,7 @@ export default function AiConcierge() {
         className="fixed z-[60] rounded-full shadow-lg border-2 border-white overflow-hidden
           bottom-[34px] left-1/2 -translate-x-1/2 w-16 h-16
           md:bottom-6 md:left-6 md:right-auto md:translate-x-0 md:w-16 md:h-16
-          bg-blue-600 transition-transform hover:scale-105"
+          bg-blue-600 transition-transform hover:scale-105 active:scale-95"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/ai-guide.png" alt="" className="w-full h-full object-cover object-top" />
@@ -107,9 +130,16 @@ export default function AiConcierge() {
       {open && (
         <div className="fixed inset-0 z-[70] flex items-end md:items-center justify-center md:justify-start bg-black/30 overscroll-none" onClick={() => setOpen(false)}>
           <div dir="rtl" onClick={e => e.stopPropagation()}
+            style={{ transform: `translateY(${dragY}px)`, transition: dragging ? "none" : "transform 200ms ease-out" }}
             className="bg-white w-full md:w-[380px] md:mb-24 md:ms-6 h-[85dvh] max-h-[92dvh] md:h-[560px] rounded-t-3xl md:rounded-3xl shadow-2xl flex flex-col overflow-hidden overscroll-contain">
+            {/* drag handle — mobile-only swipe-down-to-close affordance */}
+            <div className="md:hidden pt-2 pb-1 flex justify-center touch-none cursor-grab active:cursor-grabbing"
+              onPointerDown={onHandlePointerDown} onPointerMove={onHandlePointerMove} onPointerUp={onHandlePointerUp} onPointerCancel={onHandlePointerUp}>
+              <div className="w-10 h-1.5 rounded-full bg-gray-300" />
+            </div>
+
             {/* header */}
-            <div className="flex items-center gap-3 p-4 border-b border-gray-100 bg-blue-50">
+            <div className="flex items-center gap-3 px-4 pb-4 pt-1 md:pt-4 border-b border-gray-100 bg-blue-50">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/ai-guide.png" alt="" className="w-10 h-10 rounded-full object-cover object-top border-2 border-white shadow" />
               <div className="flex-1 min-w-0">
@@ -118,15 +148,16 @@ export default function AiConcierge() {
               </div>
               <button onClick={() => { setMessages([{ role: "assistant", text: WELCOME }]); setInput(""); setPendingImage(null); }}
                 title="להתחיל שיחה חדשה" aria-label="להתחיל שיחה חדשה"
-                className="text-gray-400 hover:text-gray-600 text-base leading-none px-1">↺</button>
-              <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-gray-600 text-xl leading-none px-1">✕</button>
+                className="text-gray-400 hover:text-gray-600 active:scale-90 transition-transform text-lg leading-none w-9 h-9 flex items-center justify-center -mr-1">↺</button>
+              <button onClick={() => setOpen(false)} aria-label="סגירה"
+                className="text-gray-400 hover:text-gray-600 active:scale-90 transition-transform text-xl leading-none w-9 h-9 flex items-center justify-center">✕</button>
             </div>
 
             {/* messages */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
               {messages.map((m, i) => (
                 <div key={i} className={`flex ${m.role === "user" ? "justify-start" : "justify-end"}`}>
-                  <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm whitespace-pre-line ${
+                  <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[15px] leading-relaxed whitespace-pre-line ${
                     m.role === "user" ? "bg-gray-100 text-gray-800" : "bg-blue-600 text-white"
                   }`}>
                     {m.text}
@@ -146,14 +177,14 @@ export default function AiConcierge() {
               )}
             </div>
 
-            {/* input */}
-            <div className="p-3 border-t border-gray-100">
+            {/* input — extra bottom padding clears the home-indicator area on notched phones */}
+            <div className="p-3 border-t border-gray-100" style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
               {pendingImage && (
                 <div className="flex items-center gap-2 mb-2 bg-blue-50 rounded-xl p-2">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={pendingImage.preview} alt="" className="w-10 h-10 rounded-lg object-cover" />
                   <span className="text-xs text-blue-700 flex-1">צילום מסך טיסה מוכן לשליחה</span>
-                  <button onClick={() => setPendingImage(null)} className="text-xs text-red-500 font-bold">✕</button>
+                  <button onClick={() => setPendingImage(null)} className="text-xs text-red-500 font-bold p-1">✕</button>
                 </div>
               )}
               <div className="flex items-center gap-2">
@@ -162,17 +193,17 @@ export default function AiConcierge() {
                     const file = e.target.files?.[0];
                     if (file) setPendingImage({ file, preview: URL.createObjectURL(file) });
                   }} />
-                <button onClick={() => fileRef.current?.click()}
-                  className="flex-shrink-0 w-10 h-10 rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 flex items-center justify-center text-lg">📷</button>
+                <button onClick={() => fileRef.current?.click()} aria-label="צרפו צילום מסך"
+                  className="flex-shrink-0 w-11 h-11 rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 active:scale-90 transition-transform flex items-center justify-center text-lg">📷</button>
                 <input
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter" && !sending) send(); }}
                   placeholder="למשל: 4 אנשים, 8-15 בפברואר"
-                  className="flex-1 border border-gray-200 rounded-full px-4 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 border border-gray-200 rounded-full px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <button onClick={send} disabled={sending || (!input.trim() && !pendingImage)}
-                  className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white flex items-center justify-center">
+                <button onClick={send} disabled={sending || (!input.trim() && !pendingImage)} aria-label="שליחה"
+                  className="flex-shrink-0 w-11 h-11 rounded-full bg-blue-600 hover:bg-blue-700 active:scale-90 disabled:active:scale-100 transition-transform disabled:opacity-40 text-white flex items-center justify-center">
                   ←
                 </button>
               </div>
