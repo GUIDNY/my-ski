@@ -61,6 +61,45 @@ ${transcript}`;
   };
 }
 
+type QAResult = { isQuestion: boolean; answer: string | null };
+
+// Mirrors the Telegram bot's own Q&A follow-up: once a quote has been shown
+// in the conversation, a customer often asks about it ("what's included in
+// the ski pass?") rather than starting a new search. Answer those directly,
+// grounded only in numbers/names already visible in the transcript or in
+// fixed, known pricing rules — never invent policy details (cancellation,
+// deposits, exact check-in times) that aren't in the conversation; hand
+// those off to the real contact channel instead.
+async function answerFollowUp(transcript: string): Promise<QAResult> {
+  const prompt = `אתה עוזר לקוחות ידידותי באתר חופשות סקי בואל טורנס, צרפת (SkiShare). הנה שיחה עם לקוח. בדוק את ההודעה האחרונה של הלקוח בלבד:
+
+- אם היא בקשה לחפש חבילה חדשה, או שינוי תאריכים/כמות אורחים/יעד — זו לא שאלה, החזר is_question:false.
+- אם היא שאלת המשך על מה שכבר הוצג בשיחה (למשל: מה כלול, למה המחיר כזה, איזו דירה, כמה לילות, מה זה "ימי סקי", האם יש ציוד) — ענה עליה ישירות ובקצרה, תוך שימוש רק בנתונים שכבר מופיעים בשיחה עצמה. אם צריך, אפשר להיעזר בכללי התמחור הידועים האלה: הסעה משדה התעופה זה מחיר קבוע ל-180 יורו לאדם הלוך-חזור; השכרת ציוד סקי/סנובורד זה 30 יורו ליום עד שבוע ו-120 יורו לשבוע מלא (ועוד 20 ליום נוסף מעבר לשבוע); "ימי סקי" זה תמיד מספר הלילות פחות אחד; דירות "לה סים" מושכרות רק משבת לשבת, שבוע שלם.
+- אם היא שאלה כללית שאין עליה מידע בשיחה (מדיניות ביטול, פיקדון, שעות צ'ק אין מדויקות, ודומה) — אל תמציא תשובה. תגיד בחום שכדאי לפנות ישירות לצוות ב-054-7701899 או skishareteam@gmail.com לתשובה מדויקת.
+- אם היא שאלה כללית על האזור (ואל טורנס, סקי, טיסות) שאתה יודע עליה תשובה סבירה וכללית — אפשר לענות בקצרה, אבל בלי להתחייב על מספרים מדויקים שלא ניתנו.
+
+החזר אך ורק JSON תקני: {"is_question": true או false, "answer": "התשובה בעברית" או null אם is_question הוא false}.
+
+השיחה:
+${transcript}`;
+
+  const res = await fetch(GEMINI_URL("gemini-2.5-flash-lite"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+  });
+  const json = await res.json();
+  const raw = json?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+  const cleaned = raw.replace(/```json|```/g, "").trim();
+  let parsed: Record<string, unknown> = {};
+  try { parsed = JSON.parse(cleaned); } catch { parsed = {}; }
+
+  return {
+    isQuestion: parsed.is_question === true,
+    answer: typeof parsed.answer === "string" ? parsed.answer : null,
+  };
+}
+
 async function extractFlightFromImage(base64: string, mimeType: string): Promise<FlightData> {
   const prompt = `נתח את צילום המסך הזה של חיפוש טיסות (למשל מ-Skyscanner). זהה עד שתי טיסות (הלוך וחזור אם שתיהן מוצגות). החזר אך ורק אובייקט JSON תקני: {"legs": [{"direction": "out" או "return", "date": "YYYY-MM-DD או ריק", "from": "עיר מוצא", "to": "עיר יעד", "airline": "חברת תעופה", "depart": "HH:MM", "arrive": "HH:MM", "nonstop": true או false}], "total_price_eur": מספר ביורו או null אם לא נראה מחיר}`;
   try {
@@ -92,6 +131,16 @@ export async function POST(req: NextRequest) {
   const image: { base64: string; mimeType: string } | undefined = body.image;
 
   const transcript = messages.map(m => `${m.role === "user" ? "לקוח" : "עוזר"}: ${m.text}`).join("\n");
+
+  // Only worth checking for a follow-up question once the assistant has
+  // actually said something back — the very first message is always the
+  // start of a new search.
+  if (messages.some(m => m.role === "assistant") && !image) {
+    const qa = await answerFollowUp(transcript);
+    if (qa.isQuestion && qa.answer) {
+      return NextResponse.json({ complete: true, reply: qa.answer });
+    }
+  }
 
   const [extracted, flightData] = await Promise.all([
     extractFromConversation(transcript || "(אין הודעות עדיין)"),
