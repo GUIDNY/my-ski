@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
     if (!checkin || !checkout) missing.push("תאריכי הגעה ועזיבה");
     return NextResponse.json({
       complete: false,
-      reply: `עוד חסר לי: ${missing.join(", ")}. תוכלו לספר לי?`,
+      reply: `כמעט! עוד רק תספרו לי ${missing.join(" ו")} ואני קופץ לבדוק 🙂`,
     });
   }
 
@@ -116,33 +116,60 @@ export async function POST(req: NextRequest) {
   const skiDays = skiDaysFromNights(nights);
   const db = createServerClient();
 
-  // Cheapest single option that fits: a regular apartment big enough on its
-  // own, or a La Cime apartment whose fixed Sat–Sat week covers this exact
-  // stay — same matchingWeek() rule as /search and /apartments/[id].
+  // Every available unit that could plausibly house this group, regardless
+  // of its own capacity — a single apartment may not fit a large group on
+  // its own, but a combination of two or three (see bestCombo below) might.
+  // Same matchingWeek() rule as /search and /apartments/[id] for La Cime's
+  // fixed Sat–Sat weeks.
   const [{ data: regularApts }, { data: laCimeApts }, { data: skiPasses }] = await Promise.all([
-    db.from("apartments").select("*").eq("available", true).gte("max_guests", guests)
-      .or("source.is.null,source.neq.la_cime").order("price_per_night", { ascending: true }).limit(1),
-    db.from("apartments").select("*").eq("available", true).eq("source", "la_cime").gte("max_guests", guests),
+    db.from("apartments").select("*").eq("available", true)
+      .or("source.is.null,source.neq.la_cime").order("price_per_night", { ascending: true }),
+    db.from("apartments").select("*").eq("available", true).eq("source", "la_cime"),
     db.from("ski_passes").select("*").eq("available", true).eq("type", "adult").eq("area", ski_area || "val_thorens").order("duration_days", { ascending: true }),
   ]);
 
-  type Candidate = { name: string; total: number; isLaCime: boolean };
-  const candidates: Candidate[] = [];
-  const regular = (regularApts as Apartment[] | null)?.[0];
-  if (regular) candidates.push({ name: regular.name, total: regular.price_per_night * nights, isLaCime: false });
+  type Unit = { name: string; total: number; maxGuests: number; isLaCime: boolean };
+  const pool: Unit[] = [];
+  for (const apt of (regularApts as Apartment[] | null) ?? []) {
+    pool.push({ name: apt.name, total: apt.price_per_night * nights, maxGuests: apt.max_guests ?? 0, isLaCime: false });
+  }
   for (const apt of (laCimeApts as Apartment[] | null) ?? []) {
     const week = matchingWeek(apt, checkin, checkout);
-    if (week) candidates.push({ name: apt.name, total: week.price, isLaCime: true });
+    if (week) pool.push({ name: apt.name, total: week.price, maxGuests: apt.max_guests ?? 0, isLaCime: true });
   }
-  candidates.sort((a, b) => a.total - b.total);
-  const chosen = candidates[0];
 
-  if (!chosen) {
+  // Cheapest combination of up to 4 units whose combined capacity fits the
+  // group — plain apartments and La Cime weeks pooled together, same idea
+  // as /combo and the Telegram bot's multi-apartment matcher.
+  function bestCombo(units: Unit[], need: number, maxUnits = 4): Unit[] | null {
+    const sorted = [...units].sort((a, b) => a.total - b.total);
+    let best: Unit[] | null = null;
+    let bestTotal = Infinity;
+    function search(start: number, picked: Unit[], guestsSoFar: number, totalSoFar: number) {
+      if (guestsSoFar >= need) {
+        if (totalSoFar < bestTotal) { bestTotal = totalSoFar; best = [...picked]; }
+        return;
+      }
+      if (picked.length >= maxUnits || totalSoFar >= bestTotal) return;
+      for (let i = start; i < sorted.length; i++) {
+        picked.push(sorted[i]);
+        search(i + 1, picked, guestsSoFar + sorted[i].maxGuests, totalSoFar + sorted[i].total);
+        picked.pop();
+      }
+    }
+    search(0, [], 0, 0);
+    return best;
+  }
+
+  const combo = bestCombo(pool, guests);
+
+  if (!combo) {
     return NextResponse.json({
       complete: true,
-      reply: `בדקתי ל-${guests} אורחים בין ${checkin} ל-${checkout} — לא מצאתי דירה פנויה שמתאימה. אפשר לנסות תאריכים אחרים, או לעבור ל-${req.nextUrl.origin}/search ולחפש ידנית.`,
+      reply: `חיפשתי בכל הדירות שלנו ל-${guests} אורחים בין ${checkin} ל-${checkout} ופשוט אין לנו מספיק מקום בתאריכים האלה 😕 אפשר לנסות תאריכים אחרים (לחצו ↺ למעלה כדי להתחיל שיחה חדשה), או לעבור ל-${req.nextUrl.origin}/search ולחפש ידנית.`,
     });
   }
+  const chosen = { total: combo.reduce((s, u) => s + u.total, 0) };
 
   const passOptions = (skiPasses as SkiPass[] | null) ?? [];
   const skiTier = passOptions.length ? (passOptions.find(p => p.duration_days >= skiDays) ?? passOptions[passOptions.length - 1]) : null;
@@ -161,9 +188,12 @@ export async function POST(req: NextRequest) {
   const grandTotal = chosen.total + skiPassTotal + equipTotal + transferTotal + flightTotal + baggageTotal;
 
   const lines = [
-    `מצאתי! ${guests} אורחים, ${checkin} עד ${checkout} (${nights} לילות):`,
-    `🏠 ${chosen.name}${chosen.isLaCime ? " (שבת עד שבת, שבוע מלא)" : ""} — ${fmt(chosen.total)}`,
+    `יש! מצאתי לכם משהו טוב — ${guests} אורחים, ${checkin} עד ${checkout} (${nights} לילות):`,
   ];
+  for (const unit of combo) {
+    lines.push(`🏠 ${unit.name}${unit.isLaCime ? " (שבת עד שבת, שבוע מלא)" : ""} — ${fmt(unit.total)}`);
+  }
+  if (combo.length > 1) lines.push(`(${combo.length} דירות ביחד, כדי לתת מקום לכולם)`);
   if (skiTier) lines.push(`⛷️ סקי פס — ${ski_area === "trois_vallees" ? "שלושת העמקים" : "Val Thorens/Orelle"}, ${skiDays} ימי סקי — ${fmt(skiPassTotal)}`);
   if (equipment) lines.push(`🎿 השכרת ציוד, ${skiDays} ימים — ${fmt(equipTotal)}`);
   lines.push(`🚐 הסעה משדה התעופה הלוך-חזור — ${fmt(transferTotal)}`);
@@ -178,6 +208,6 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     complete: true,
     reply: lines.join("\n"),
-    breakdown: { guests, checkin, checkout, nights, chosen, skiPassTotal, equipTotal, transferTotal, flightTotal, baggageTotal, grandTotal },
+    breakdown: { guests, checkin, checkout, nights, units: combo, apartmentsTotal: chosen.total, skiPassTotal, equipTotal, transferTotal, flightTotal, baggageTotal, grandTotal },
   });
 }

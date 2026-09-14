@@ -116,6 +116,9 @@ export default function AiConcierge() {
                 <div className="font-black text-gray-900 text-sm">עוזר החופשה החכם</div>
                 <div className="text-xs text-gray-500">מחפש דירה, סקי פס, הסעה וציוד — הכל בבת אחת</div>
               </div>
+              <button onClick={() => { setMessages([{ role: "assistant", text: WELCOME }]); setInput(""); setPendingImage(null); }}
+                title="להתחיל שיחה חדשה" aria-label="להתחיל שיחה חדשה"
+                className="text-gray-400 hover:text-gray-600 text-base leading-none px-1">↺</button>
               <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-gray-600 text-xl leading-none px-1">✕</button>
             </div>
 
