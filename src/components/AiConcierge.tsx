@@ -36,6 +36,23 @@ export default function AiConcierge() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, open]);
 
+  // The iOS App Store build loads this site inside a Capacitor WKWebView
+  // (contentInset: "always" — see capacitor.config.ts), where a background
+  // page that's still scrollable behind a `fixed` overlay can rubber-band
+  // and detach the overlay from the viewport, looking like the screen
+  // "tears"/blows up. Lock body scroll while the panel is open.
+  useEffect(() => {
+    if (!open) return;
+    const prevBody = document.body.style.overflow;
+    const prevHtml = document.documentElement.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevBody;
+      document.documentElement.style.overflow = prevHtml;
+    };
+  }, [open]);
+
   const hidden = HIDDEN.some(h => pathname === h || pathname.startsWith(h + "/"));
 
   const send = async () => {
@@ -88,9 +105,9 @@ export default function AiConcierge() {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-[70] flex items-end md:items-center justify-center md:justify-start bg-black/30" onClick={() => setOpen(false)}>
+        <div className="fixed inset-0 z-[70] flex items-end md:items-center justify-center md:justify-start bg-black/30 overscroll-none" onClick={() => setOpen(false)}>
           <div dir="rtl" onClick={e => e.stopPropagation()}
-            className="bg-white w-full md:w-[380px] md:mb-24 md:ms-6 h-[85vh] md:h-[560px] rounded-t-3xl md:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+            className="bg-white w-full md:w-[380px] md:mb-24 md:ms-6 h-[85dvh] max-h-[92dvh] md:h-[560px] rounded-t-3xl md:rounded-3xl shadow-2xl flex flex-col overflow-hidden overscroll-contain">
             {/* header */}
             <div className="flex items-center gap-3 p-4 border-b border-gray-100 bg-blue-50">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -149,7 +166,7 @@ export default function AiConcierge() {
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter" && !sending) send(); }}
                   placeholder="למשל: 4 אנשים, 8-15 בפברואר"
-                  className="flex-1 border border-gray-200 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 border border-gray-200 rounded-full px-4 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button onClick={send} disabled={sending || (!input.trim() && !pendingImage)}
                   className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white flex items-center justify-center">

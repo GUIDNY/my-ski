@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Montserrat, Inter } from "next/font/google";
 import "./globals.css";
 import MobileTabBar from "@/components/MobileTabBar";
@@ -46,6 +46,18 @@ export const metadata: Metadata = {
   },
   // iOS Smart App Banner — Safari shows "Open in app" if installed, else App Store
   itunes: { appId: "6782095727" },
+};
+
+// No maximumScale before this: on the iOS App Store app (Capacitor WKWebView,
+// see capacitor.config.ts), focusing any control with a sub-16px computed
+// font triggers WebKit's automatic zoom-to-focused-element, and inside a
+// native WebView (no Safari chrome/pinch-reset) that reads as the whole
+// screen suddenly blowing up huge with no way back — this is what was
+// reported for the AI concierge launcher/chat inputs.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({
