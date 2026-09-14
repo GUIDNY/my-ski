@@ -153,12 +153,12 @@ export default function AiConcierge() {
 
       {open && (
         <div className="fixed inset-0 z-[70] flex items-end md:items-center justify-center md:justify-start bg-black/30 overscroll-none"
-          style={viewport ? { top: viewport.top, height: viewport.height } : undefined}
+          style={viewport ? { top: viewport.top, height: viewport.height, transition: "height 200ms ease-out, top 200ms ease-out" } : undefined}
           onClick={() => setOpen(false)}>
           <div dir="rtl" onClick={e => e.stopPropagation()}
             style={{
               transform: `translateY(${dragY}px)`,
-              transition: dragging ? "none" : "transform 200ms ease-out",
+              transition: dragging ? "none" : "transform 200ms ease-out, height 200ms ease-out",
               ...(viewport ? { height: Math.min(viewport.height * 0.85, viewport.height - 24) } : {}),
             }}
             className="bg-white w-full md:w-[380px] md:mb-24 md:ms-6 h-[85dvh] max-h-[92dvh] md:h-[560px] rounded-t-3xl md:rounded-3xl shadow-2xl flex flex-col overflow-hidden overscroll-contain">

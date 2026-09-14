@@ -133,9 +133,12 @@ export async function POST(req: NextRequest) {
   const transcript = messages.map(m => `${m.role === "user" ? "לקוח" : "עוזר"}: ${m.text}`).join("\n");
 
   // Only worth checking for a follow-up question once the assistant has
-  // actually said something back — the very first message is always the
-  // start of a new search.
-  if (messages.some(m => m.role === "assistant") && !image) {
+  // actually replied at least once for real — the frontend always seeds the
+  // conversation with a static welcome message, so a lone "assistant" entry
+  // there isn't a quote to ask about, and running this check anyway would
+  // add a pointless extra round-trip (and latency) to every very first
+  // message a customer sends.
+  if (messages.filter(m => m.role === "assistant").length >= 2 && !image) {
     const qa = await answerFollowUp(transcript);
     if (qa.isQuestion && qa.answer) {
       return NextResponse.json({ complete: true, reply: qa.answer });
@@ -149,6 +152,16 @@ export async function POST(req: NextRequest) {
 
   const { guests, checkin, checkout, equipment, ski_area } = extracted;
   if (!guests || !checkin || !checkout) {
+    // Nothing at all was extracted — this is a plain "hi"/small talk, not a
+    // failed attempt at giving details, so it shouldn't read like the bot is
+    // scolding them for missing info. Only use the "almost" framing once
+    // they've actually given us something to go on.
+    if (!guests && !checkin && !checkout) {
+      return NextResponse.json({
+        complete: false,
+        reply: "היי! 😊 איזה כיף שאתם מתכננים חופשת סקי. ספרו לי כמה אתם ובאילו תאריכים, ואני כבר קופץ לבדוק לכם דירה, סקי פס והסעה.",
+      });
+    }
     const missing = [];
     if (!guests) missing.push("כמה אורחים תהיו");
     if (!checkin || !checkout) missing.push("תאריכי הגעה ועזיבה");
