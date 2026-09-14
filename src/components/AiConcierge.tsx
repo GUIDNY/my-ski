@@ -32,6 +32,7 @@ export default function AiConcierge() {
   const [pendingImage, setPendingImage] = useState<{ file: File; preview: string } | null>(null);
   const [dragY, setDragY] = useState(0);
   const [dragging, setDragging] = useState(false);
+  const [viewport, setViewport] = useState<{ height: number; top: number } | null>(null);
   const dragStartY = useRef(0);
   const fileRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -54,6 +55,29 @@ export default function AiConcierge() {
     return () => {
       document.body.style.overflow = prevBody;
       document.documentElement.style.overflow = prevHtml;
+    };
+  }, [open]);
+
+  // `dvh` alone isn't enough: on-screen-keyboard resize is reported
+  // differently across mobile browsers/WebViews, and a `fixed` element sized
+  // off the wrong viewport can end up pinned above/behind the keyboard,
+  // looking like the whole chat "disappeared". Track the real visible area
+  // via visualViewport and size the sheet off that directly.
+  useEffect(() => {
+    if (!open) return;
+    // Desktop has its own fixed-size card (md:h-[560px]) and no on-screen
+    // keyboard to dodge — don't let this override that layout.
+    if (typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches) return;
+    const vv = typeof window !== "undefined" ? window.visualViewport : null;
+    if (!vv) return;
+    const update = () => setViewport({ height: vv.height, top: vv.offsetTop });
+    update();
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    return () => {
+      vv.removeEventListener("resize", update);
+      vv.removeEventListener("scroll", update);
+      setViewport(null);
     };
   }, [open]);
 
@@ -128,9 +152,15 @@ export default function AiConcierge() {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-[70] flex items-end md:items-center justify-center md:justify-start bg-black/30 overscroll-none" onClick={() => setOpen(false)}>
+        <div className="fixed inset-0 z-[70] flex items-end md:items-center justify-center md:justify-start bg-black/30 overscroll-none"
+          style={viewport ? { top: viewport.top, height: viewport.height } : undefined}
+          onClick={() => setOpen(false)}>
           <div dir="rtl" onClick={e => e.stopPropagation()}
-            style={{ transform: `translateY(${dragY}px)`, transition: dragging ? "none" : "transform 200ms ease-out" }}
+            style={{
+              transform: `translateY(${dragY}px)`,
+              transition: dragging ? "none" : "transform 200ms ease-out",
+              ...(viewport ? { height: Math.min(viewport.height * 0.85, viewport.height - 24) } : {}),
+            }}
             className="bg-white w-full md:w-[380px] md:mb-24 md:ms-6 h-[85dvh] max-h-[92dvh] md:h-[560px] rounded-t-3xl md:rounded-3xl shadow-2xl flex flex-col overflow-hidden overscroll-contain">
             {/* drag handle — mobile-only swipe-down-to-close affordance */}
             <div className="md:hidden pt-2 pb-1 flex justify-center touch-none cursor-grab active:cursor-grabbing"
