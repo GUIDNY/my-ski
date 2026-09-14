@@ -183,12 +183,26 @@ export async function POST(req: NextRequest) {
   // its own, but a combination of two or three (see bestCombo below) might.
   // Same matchingWeek() rule as /search and /apartments/[id] for La Cime's
   // fixed Sat–Sat weeks.
-  const [{ data: regularApts }, { data: laCimeApts }, { data: skiPasses }] = await Promise.all([
+  const [regularRes, laCimeRes, skiPassRes] = await Promise.all([
     db.from("apartments").select("*").eq("available", true)
       .or("source.is.null,source.neq.la_cime").order("price_per_night", { ascending: true }),
     db.from("apartments").select("*").eq("available", true).eq("source", "la_cime"),
     db.from("ski_passes").select("*").eq("available", true).eq("type", "adult").eq("area", ski_area || "val_thorens").order("duration_days", { ascending: true }),
   ]);
+
+  // A failed query here (timeout, transient connection issue) must not be
+  // silently treated as "zero apartments" — that reads to the customer as
+  // "we have no availability" when the truth is just a technical hiccup.
+  if (regularRes.error || laCimeRes.error) {
+    console.error("ai-concierge: apartment query failed", regularRes.error || laCimeRes.error);
+    return NextResponse.json({
+      complete: false,
+      reply: "משהו השתבש אצלי בבדיקה — זה לא קשור לזמינות, פשוט תקלה רגעית. אפשר לנסות שוב בעוד רגע?",
+    });
+  }
+  const { data: regularApts } = regularRes;
+  const { data: laCimeApts } = laCimeRes;
+  const { data: skiPasses } = skiPassRes;
 
   type Unit = { name: string; total: number; maxGuests: number; isLaCime: boolean };
   const pool: Unit[] = [];
