@@ -37,7 +37,7 @@ const GEMINI_URL = (model: string) =>
   `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
 
 async function extractFromConversation(transcript: string): Promise<Extracted> {
-  const prompt = `היום התאריך ${new Date().toISOString().slice(0, 10)}. אתה עוזר שמנתח שיחה בעברית עם לקוח שמתכנן חופשת סקי בואל טורנס, צרפת. קרא את כל השיחה (כולל הודעות קודמות) וחלץ ממנה, במצטבר: guests (מספר האורחים, מספר שלם, או null אם לא צוין באף הודעה), checkin (תאריך הגעה בפורמט YYYY-MM-DD, או null), checkout (תאריך עזיבה בפורמט YYYY-MM-DD, או null), no_equipment (true רק אם הלקוח אמר במפורש שהוא לא רוצה ציוד סקי/סנובורד; אחרת false — ברירת המחדל היא לכלול ציוד), ski_area ("val_thorens" אם מוזכר ואל טורנס/מקומי, "trois_vallees" אם מוזכר שלושת העמקים/כל האזור, אחרת null). הפורמט העברי לתאריכים הוא יום.חודש — למשל "17-21.1" זה 17-21 בינואר, לא יוני. אם השנה לא צוינה וכבר עברה השנה הנוכחית, קח את השנה הבאה. החזר אך ורק JSON תקני: {"guests": מספר או null, "checkin": מחרוזת או null, "checkout": מחרוזת או null, "no_equipment": true או false, "ski_area": מחרוזת או null}.
+  const prompt = `היום התאריך ${new Date().toISOString().slice(0, 10)}. אתה עוזר שמנתח שיחה בעברית עם לקוח שמתכנן חופשת סקי בואל טורנס, צרפת. קרא את כל השיחה (כולל הודעות קודמות) וחלץ ממנה, במצטבר: guests (מספר האורחים, מספר שלם, או null אם לא צוין באף הודעה), checkin (תאריך הגעה בפורמט YYYY-MM-DD, או null), checkout (תאריך עזיבה בפורמט YYYY-MM-DD, או null), no_equipment (true רק אם הלקוח אמר במפורש שהוא לא רוצה ציוד סקי/סנובורד; אחרת false — ברירת המחדל היא לכלול ציוד), ski_area ("val_thorens" אם מוזכר ואל טורנס/מקומי, "trois_vallees" אם מוזכר שלושת העמקים/כל האזור, אחרת null). הפורמט העברי לתאריכים הוא יום.חודש — למשל "17-21.1" זה 17-21 בינואר, לא יוני. אם השנה לא צוינה וכבר עברה השנה הנוכחית, קח את השנה הבאה. אם הלקוח נותן תיאור כללי במקום תאריכים מדויקים (למשל "אמצע ינואר", "סוף פברואר", "תחילת דצמבר", "שבוע כלשהו בינואר") — אל תחזיר null, אלא בחר שבעה לילות מייצגים שמתאימים לתיאור (אמצע החודש = מה-14 עד ה-21, סוף החודש = מה-22 עד ה-29 (או היום האחרון), תחילת החודש = מה-1 עד ה-8), ותן לתאריכים האלה. החזר אך ורק JSON תקני: {"guests": מספר או null, "checkin": מחרוזת או null, "checkout": מחרוזת או null, "no_equipment": true או false, "ski_area": מחרוזת או null}.
 
 השיחה:
 ${transcript}`;
@@ -160,12 +160,12 @@ export async function POST(req: NextRequest) {
     if (!guests && !checkin && !checkout) {
       return NextResponse.json({
         complete: false,
-        reply: "היי! 😊 איזה כיף שאתם מתכננים חופשת סקי. ספרו לי כמה אתם ובאילו תאריכים, ואני כבר קופץ לבדוק לכם דירה, סקי פס והסעה.",
+        reply: "היי! 😊 איזה כיף שאתם מתכננים חופשת סקי. ספרו לי כמה אתם ובאילו תאריכים (גם תיאור כללי כמו \"אמצע ינואר\" עובד מצוין), ואני כבר קופץ לבדוק לכם דירה, סקי פס והסעה.",
       });
     }
     const missing = [];
     if (!guests) missing.push("כמה אורחים תהיו");
-    if (!checkin || !checkout) missing.push("תאריכי הגעה ועזיבה");
+    if (!checkin || !checkout) missing.push("באילו תאריכים (מספיק גם תיאור כללי כמו \"אמצע ינואר\")");
     return NextResponse.json({
       complete: false,
       reply: `כמעט! עוד רק תספרו לי ${missing.join(" ו")} ואני קופץ לבדוק 🙂`,

@@ -10,6 +10,23 @@ const HIDDEN = ["/admin", "/auth", "/pay", "/quote", "/q"];
 
 const WELCOME = "היי! אני העוזר החכם שלכם לחופשת סקי בואל טורנס 🎿\nספרו לי כמה אתם ובאילו תאריכים, ואני אמצא לכם דירה, סקי פס, הסעה וציוד — הכל במקום אחד.";
 
+// The reply text (e.g. the quote link) is plain text rendered with
+// whitespace-pre-line — a bare URL in there isn't a link on its own, so
+// split it out and render it as one.
+function linkify(text: string, onBlueBg: boolean) {
+  const parts = text.split(/(https?:\/\/[^\s]+)/g);
+  return parts.map((part, i) =>
+    /^https?:\/\//.test(part) ? (
+      <a key={i} href={part} target="_blank" rel="noopener noreferrer"
+        className={onBlueBg ? "underline text-white font-semibold" : "underline text-blue-600 font-semibold"}>
+        {part}
+      </a>
+    ) : (
+      part
+    )
+  );
+}
+
 function fileToBase64(file: File): Promise<{ base64: string; mimeType: string }> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -190,7 +207,7 @@ export default function AiConcierge() {
                   <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[15px] leading-relaxed whitespace-pre-line ${
                     m.role === "user" ? "bg-gray-100 text-gray-800" : "bg-blue-600 text-white"
                   }`}>
-                    {m.text}
+                    {linkify(m.text, m.role === "assistant")}
                   </div>
                 </div>
               ))}
