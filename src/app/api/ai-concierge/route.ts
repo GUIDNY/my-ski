@@ -1,4 +1,5 @@
 import { createServerClient } from "@/lib/supabase-server";
+import { createQuote } from "@/lib/quotes";
 import { matchingWeek, skiDaysFromNights } from "@/lib/pricing";
 import type { Apartment, SkiPass } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
@@ -204,14 +205,14 @@ export async function POST(req: NextRequest) {
   const { data: laCimeApts } = laCimeRes;
   const { data: skiPasses } = skiPassRes;
 
-  type Unit = { name: string; total: number; maxGuests: number; isLaCime: boolean };
+  type Unit = { id: string; name: string; total: number; maxGuests: number; isLaCime: boolean };
   const pool: Unit[] = [];
   for (const apt of (regularApts as Apartment[] | null) ?? []) {
-    pool.push({ name: apt.name, total: apt.price_per_night * nights, maxGuests: apt.max_guests ?? 0, isLaCime: false });
+    pool.push({ id: apt.id, name: apt.name, total: apt.price_per_night * nights, maxGuests: apt.max_guests ?? 0, isLaCime: false });
   }
   for (const apt of (laCimeApts as Apartment[] | null) ?? []) {
     const week = matchingWeek(apt, checkin, checkout);
-    if (week) pool.push({ name: apt.name, total: week.price, maxGuests: apt.max_guests ?? 0, isLaCime: true });
+    if (week) pool.push({ id: apt.id, name: apt.name, total: week.price, maxGuests: apt.max_guests ?? 0, isLaCime: true });
   }
 
   // Cheapest combination of up to 4 units whose combined capacity fits the
@@ -281,9 +282,38 @@ export async function POST(req: NextRequest) {
   }
   lines.push(`\nסה"כ עד כה: ${fmt(grandTotal)} (${fmt(grandTotal / guests)} לאדם)`);
 
+  // A shareable link to the same interactive quote page the site already
+  // uses elsewhere (/q/[id], built on a single real apartment) — only makes
+  // sense for a single apartment, not a multi-unit combo, since that page's
+  // whole layout (images, description, live add-on toggles) is built around
+  // exactly one apartment.
+  let quoteUrl: string | null = null;
+  if (combo.length === 1) {
+    const result = await createQuote(db, {
+      apartment_id: combo[0].id,
+      apartment_name: combo[0].name,
+      checkin, checkout, guests, nights,
+      ski_pass: !!skiTier,
+      transfer: true,
+      equipment,
+      cancel: "none",
+      service: "ai",
+      apt_total: chosen.total,
+      grand_total: grandTotal,
+    });
+    if ("id" in result) {
+      quoteUrl = `${req.nextUrl.origin}/q/${result.id}`;
+      // The linked page is a live, editable quote (its own add-on quantity
+      // steppers default to 1 person, not the group size) rather than a
+      // frozen mirror of this total — say so, so the numbers not matching
+      // at first glance doesn't look like a mistake.
+      lines.push(`\n📄 קישור להצעה שאפשר לשלם דרכה: ${quoteUrl}\n(בדף אפשר לכוון כמויות בעצמכם — הוא לא תמיד יפתח כבר על הסכום המלא לכולם)`);
+    }
+  }
+
   return NextResponse.json({
     complete: true,
     reply: lines.join("\n"),
-    breakdown: { guests, checkin, checkout, nights, units: combo, apartmentsTotal: chosen.total, skiPassTotal, equipTotal, transferTotal, flightTotal, baggageTotal, grandTotal },
+    breakdown: { guests, checkin, checkout, nights, units: combo, apartmentsTotal: chosen.total, skiPassTotal, equipTotal, transferTotal, flightTotal, baggageTotal, grandTotal, quoteUrl },
   });
 }
