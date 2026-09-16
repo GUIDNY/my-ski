@@ -296,8 +296,12 @@ export async function POST(req: NextRequest) {
       ski_pass: !!skiTier,
       transfer: true,
       equipment,
-      cancel: "none",
-      service: "ai",
+      // Plain full-price defaults — "none"/"ai" each carry an automatic
+      // discount (−€100 no-cancellation, −€50 AI-service) in QuoteView, and
+      // a bot-generated quote shouldn't hand those out on its own without a
+      // human deciding to. "regular"/"human" apply no price adjustment.
+      cancel: "regular",
+      service: "human",
       apt_total: chosen.total,
       grand_total: grandTotal,
     });
