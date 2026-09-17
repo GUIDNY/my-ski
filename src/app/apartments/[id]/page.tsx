@@ -13,6 +13,7 @@ import {
 import { buildWaHref } from "@/lib/whatsapp";
 import CardPaymentButton from "@/components/CardPaymentButton";
 import FlightDetailsModal, { EMPTY_FLIGHT, flightToString, flightFilled, type Flight } from "@/components/FlightDetailsModal";
+import FlightPriceBadge from "@/components/FlightPriceBadge";
 import SaveTripButton from "@/components/SaveTripButton";
 import Logo from "@/components/Logo";
 
@@ -512,7 +513,7 @@ function ApartmentPage() {
                         <div className="text-sm font-semibold text-gray-800">טיסה ל-Geneva (GVA)</div>
                         <div className="text-xs text-gray-400">TLV → Geneva · {checkin ? fmtDate(checkin) : "בחר תאריך"} · 2.5h מ-Val Thorens</div>
                       </div>
-                      <span className="text-xs font-bold text-blue-600 flex-shrink-0">Skyscanner ←</span>
+                      <FlightPriceBadge origin="TLV" dest="GVA" checkin={checkin} checkout={checkout} />
                     </a>
                   </div>
 
@@ -731,7 +732,7 @@ function ApartmentPage() {
                         <div className="text-sm font-semibold text-gray-800">טיסה ל-Geneva (GVA)</div>
                         <div className="text-xs text-gray-400">TLV → Geneva · {checkin ? fmtDate(checkin) : "בחר תאריך"} · 2.5h מ-Val Thorens</div>
                       </div>
-                      <span className="text-xs font-bold text-blue-600 flex-shrink-0">Skyscanner ←</span>
+                      <FlightPriceBadge origin="TLV" dest="GVA" checkin={checkin} checkout={checkout} />
                     </a>
                   </div>
 
