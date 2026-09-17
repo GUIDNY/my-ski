@@ -230,9 +230,38 @@ export default function WeeklyBrowser({ apartments }: { apartments: Apartment[] 
         )}
       </div>
 
+      {/* Quick week-chip scroller */}
+      {allWeeks.length > 1 && (
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-6 -mx-1 px-1" style={{ scrollbarWidth: "none" }}>
+          {allWeeks.map(w => {
+            const isSelected = selected === w;
+            const price = weekMinPrice.get(w);
+            const { checkin } = weekRange(w);
+            return (
+              <button key={w} onClick={() => setSelected(w)}
+                className={`shrink-0 flex flex-col items-center gap-0.5 rounded-2xl px-4 py-2.5 border transition-all ${
+                  isSelected
+                    ? "bg-gradient-to-b from-blue-600 to-blue-700 border-blue-700 text-white shadow-md scale-[1.03]"
+                    : "bg-white border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-blue-50/50"
+                }`}>
+                <span className={`text-xs font-bold ${isSelected ? "text-white" : "text-gray-900"}`}>{fmtDate(checkin)}</span>
+                {price !== undefined && (
+                  <span className={`text-[10px] font-semibold ${isSelected ? "text-blue-100" : "text-blue-600"}`}>
+                    מ-€{price.toLocaleString("en-US")}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {/* Results line */}
       <div className="flex items-center justify-between mb-4 px-1">
         <span className="text-sm font-bold text-gray-900">{visible.length} דירות זמינות לשבוע זה</span>
+        {visible.length > 0 && (
+          <span className="text-[11px] text-gray-400 font-medium">ממוין לפי מחיר — הזול ביותר קודם</span>
+        )}
       </div>
 
       {/* Apartments for the selected week */}
@@ -242,7 +271,7 @@ export default function WeeklyBrowser({ apartments }: { apartments: Apartment[] 
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {visible.map(({ apt, price }) => (
+          {visible.map(({ apt, price }, i) => (
             <div key={apt.id}
               className="group bg-white rounded-2xl border border-gray-100 hover:border-blue-200 hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col">
               <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
@@ -250,6 +279,14 @@ export default function WeeklyBrowser({ apartments }: { apartments: Apartment[] 
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={apt.images[0]} alt={apt.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                )}
+                <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/95 backdrop-blur-sm text-blue-700 text-[10px] font-bold rounded-full px-2.5 py-1 shadow-sm">
+                  ✨ שבת עד שבת
+                </div>
+                {i === 0 && (
+                  <div className="absolute top-3 left-3 flex items-center gap-1 bg-green-600 text-white text-[10px] font-bold rounded-full px-2.5 py-1 shadow-sm">
+                    💰 המשתלמת ביותר
+                  </div>
                 )}
               </div>
               <div className="p-4 flex flex-col flex-1">
@@ -268,8 +305,9 @@ export default function WeeklyBrowser({ apartments }: { apartments: Apartment[] 
                     צפייה בדירה
                   </a>
                   <div className="text-left">
-                    <div className="text-[10px] text-gray-400 font-medium">לשבוע</div>
+                    <div className="text-[10px] text-gray-400 font-medium">לשבוע · ל-{guests} אנשים</div>
                     <div className="text-lg font-black text-gray-900">€{price.toLocaleString("en-US")}</div>
+                    <div className="text-[10px] text-blue-500 font-semibold">≈ €{Math.round(price / guests).toLocaleString("en-US")} לאדם</div>
                   </div>
                 </div>
               </div>
