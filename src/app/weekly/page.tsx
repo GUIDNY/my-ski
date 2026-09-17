@@ -4,7 +4,6 @@ import { createServerClient } from "@/lib/supabase-server";
 import { TRANSFER_PRICE, FLIGHT_ESTIMATE, skiPassPerPersonForWeek } from "@/lib/deal-pricing";
 import type { Apartment, SkiPass } from "@/types";
 import WeeklyBrowser from "@/components/WeeklyBrowser";
-import { IconCheck, IconMountain, IconTicket } from "@/components/Icons";
 
 export const metadata = { title: "שבת עד שבת — SkiShare" };
 // Availability + pricing change daily via the sync cron — this page has no
@@ -32,10 +31,6 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
     .order("duration_days", { ascending: true });
   const skiPassPerPerson = skiPassPerPersonForWeek(passOptions as SkiPass[] | null);
 
-  const allPrices = apartments.flatMap(a => (a.available_weeks ?? []).map(w => w.price));
-  const fromPrice = allPrices.length ? Math.min(...allPrices) : null;
-  const weekCount = new Set(apartments.flatMap(a => (a.available_weeks ?? []).map(w => w.week))).size;
-
   return (
     <div className="min-h-screen" style={{ background: "linear-gradient(to bottom, #f7f9fb, #eef2f7)" }} dir="rtl">
       <Navbar />
@@ -61,28 +56,7 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
         </div>
       </section>
 
-      {/* Stats strip */}
-      <div className="max-w-6xl mx-auto px-5 md:px-6 -mt-10 relative z-10">
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 grid grid-cols-3 divide-x divide-x-reverse divide-gray-100 py-5">
-          <div className="text-center px-2">
-            <div className="w-9 h-9 mx-auto rounded-full bg-blue-50 flex items-center justify-center text-blue-600 mb-1.5"><IconMountain size={15} /></div>
-            <div className="text-lg md:text-2xl font-black text-gray-900">{apartments.length}</div>
-            <div className="text-[11px] text-gray-500 font-medium">דירות זמינות</div>
-          </div>
-          <div className="text-center px-2">
-            <div className="w-9 h-9 mx-auto rounded-full bg-blue-50 flex items-center justify-center text-blue-600 mb-1.5"><IconTicket size={15} /></div>
-            <div className="text-lg md:text-2xl font-black text-gray-900">{weekCount}</div>
-            <div className="text-[11px] text-gray-500 font-medium">שבועות פתוחים</div>
-          </div>
-          <div className="text-center px-2">
-            <div className="w-9 h-9 mx-auto rounded-full bg-green-50 flex items-center justify-center text-green-600 mb-1.5"><IconCheck size={15} /></div>
-            <div className="text-lg md:text-2xl font-black text-gray-900">{fromPrice ? `€${fromPrice.toLocaleString("en-US")}` : "-"}</div>
-            <div className="text-[11px] text-gray-500 font-medium">החל מ-</div>
-          </div>
-        </div>
-      </div>
-
-      <div className="pt-10 pb-16 px-5 md:px-6 max-w-6xl mx-auto">
+      <div className="pt-8 pb-16 px-5 md:px-6 max-w-6xl mx-auto">
         <WeeklyBrowser
           apartments={apartments}
           initialDeal={initialDeal}
