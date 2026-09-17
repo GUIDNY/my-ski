@@ -6,6 +6,15 @@ import { IconMountain, IconSnowflake } from "@/components/Icons";
 import { createServerClient } from "@/lib/supabase-server";
 import type { Apartment, SkiPass } from "@/types";
 
+// This page queries live inventory/availability (which apartment is
+// cheapest right now, which La Cime weeks are still open) — it must never
+// be statically pre-rendered at build time, or it'll keep serving whatever
+// the DB looked like at the moment of the last deploy. Confirmed this was
+// actually happening: the La Cime package cards worked in every local test
+// (same live DB) but silently rendered as zero cards in production despite
+// no runtime error, which points squarely at a build-time static snapshot.
+export const dynamic = "force-dynamic";
+
 const TRANSFER_PRICE = 180; // matches the flat per-person add-on used everywhere else on the site
 const PACKAGE_NIGHTS = 7;   // a representative week — real dates are picked on the apartment page itself
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
