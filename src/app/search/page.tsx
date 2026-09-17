@@ -22,8 +22,8 @@ type Filter = "all" | "cozy" | "premium";
 type RulesMap = Record<string, PricingRule[]>;
 
 /* ── Apartment card ───────────────────────────────────────── */
-function AptCard({ apt, nights, checkin, checkout, guests, rules }: {
-  apt: Apartment; nights: number; checkin: string; checkout: string; guests: number;
+function AptCard({ apt, nights, checkin, checkout, guests, deal, rules }: {
+  apt: Apartment; nights: number; checkin: string; checkout: string; guests: number; deal?: string;
   rules: PricingRule[];
 }) {
   const week = matchingWeek(apt, checkin, checkout);
@@ -43,7 +43,7 @@ function AptCard({ apt, nights, checkin, checkout, guests, rules }: {
     return min === Infinity ? apt.price_per_night : min;
   })();
   const cat   = getCategory(apt);
-  const query = new URLSearchParams({ checkin, checkout, guests: String(guests) }).toString();
+  const query = new URLSearchParams({ checkin, checkout, guests: String(guests), ...(deal ? { deal } : {}) }).toString();
 
   return (
     <a href={`/apartments/${apt.id}?${query}`}
@@ -177,6 +177,7 @@ function SearchPage() {
   const checkin  = params.get("checkin")  ?? "";
   const checkout = params.get("checkout") ?? "";
   const guests   = parseInt(params.get("guests") ?? "2");
+  const deal     = params.get("deal") ?? "";
 
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [rulesMap,   setRulesMap]   = useState<RulesMap>({});
@@ -322,6 +323,12 @@ function SearchPage() {
           </button>
         </div>
 
+        {deal === "full" && (
+          <div className="bg-blue-50 border-t border-blue-100 px-4 py-2 text-center">
+            <span className="text-xs font-bold text-blue-700">✨ מציגים דירות לדיל שלם — כולל הסעה, סקי פס לשלושת העמקים, טיסה וכבודה</span>
+          </div>
+        )}
+
         {/* ── Calendar dropdown ─────────────────────────────── */}
         {dateOpen && (
           <div className="absolute top-full left-0 right-0 z-50 px-4 pt-2 pb-4 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-lg">
@@ -436,7 +443,7 @@ function SearchPage() {
           <div className="flex flex-col gap-4">
             {shown.map(apt => (
               <AptCard key={apt.id} apt={apt} nights={nights}
-                checkin={checkin} checkout={checkout} guests={guests}
+                checkin={checkin} checkout={checkout} guests={guests} deal={deal}
                 rules={rulesMap[apt.id] ?? []} />
             ))}
           </div>

@@ -110,6 +110,7 @@ export default function SearchWidget() {
   const [to,      setTo]      = useState<Date | null>(null);
   const [hov,     setHov]     = useState<Date | null>(null);
   const [guests,  setGuests]  = useState(2);
+  const [dealMode, setDealMode] = useState<"apartment" | "full">("apartment");
   const [open,    setOpen]    = useState(false);
   const [picking, setPicking] = useState<"from" | "to">("from");
   const [base,    setBase]    = useState(() => new Date(2026, 11, 1));
@@ -146,6 +147,7 @@ export default function SearchWidget() {
     if (from) p.set("checkin",  toIso(from));
     if (to)   p.set("checkout", toIso(to));
     p.set("guests", String(guests));
+    if (dealMode === "full") p.set("deal", "full");
     window.location.href = `/search?${p.toString()}`;
   };
 
@@ -159,6 +161,27 @@ export default function SearchWidget() {
 
   return (
     <div ref={ref} className="relative w-full max-w-3xl" dir="rtl">
+
+      {/* ══ Deal mode toggle ══════════════════════════════════ */}
+      <div className="flex justify-center mb-3">
+        <div className="inline-flex bg-white/15 backdrop-blur-sm rounded-full p-1 border border-white/25">
+          <button onClick={() => setDealMode("full")}
+            className={`px-4 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-1.5 ${
+              dealMode === "full" ? "bg-white text-blue-700 shadow" : "text-white/90 hover:text-white"}`}>
+            ✨ דיל שלם
+          </button>
+          <button onClick={() => setDealMode("apartment")}
+            className={`px-4 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-1.5 ${
+              dealMode === "apartment" ? "bg-white text-blue-700 shadow" : "text-white/90 hover:text-white"}`}>
+            🏠 רק דירה
+          </button>
+        </div>
+      </div>
+      {dealMode === "full" && (
+        <p className="text-center text-white/90 text-xs font-semibold mb-3 -mt-1">
+          כולל הסעה משדה התעופה · סקי פס לשלושת העמקים · טיסה וכבודה
+        </p>
+      )}
 
       {/* ══ DESKTOP search bar (md+) ══════════════════════════ */}
       <div className="hidden md:flex bg-white items-stretch rounded-2xl" style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.18)" }}>

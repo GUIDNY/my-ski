@@ -1,6 +1,6 @@
 "use client";
 import SkiLoader from "@/components/SkiLoader";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import type { Apartment, SkiPass } from "@/types";
 import { calcTotalForRange, getEffectivePrice, matchingWeek, skiDaysFromNights } from "@/lib/pricing";
@@ -201,6 +201,7 @@ function ApartmentPage() {
   const checkin    = params.get("checkin")  ?? "";
   const checkout   = params.get("checkout") ?? "";
   const guests     = parseInt(params.get("guests") ?? "2");
+  const fullDeal   = params.get("deal") === "full";
 
   const [apt,           setApt]           = useState<Apartment | null>(null);
   const [rules,         setRules]         = useState<PricingRule[]>([]);
@@ -214,21 +215,24 @@ function ApartmentPage() {
   const [qCopied, setQCopied] = useState("");
 
   // Add-ons
-  const [skiPass,  setSkiPass]  = useState(false);
+  // "?deal=full" pre-checks the whole package (transfer, Trois Vallées ski
+  // pass, baggage — flight follows once its live price loads, below) instead
+  // of the customer having to opt into each one individually.
+  const [skiPass,  setSkiPass]  = useState(fullDeal);
   const [skiPasses, setSkiPasses] = useState<SkiPass[]>([]);
-  const [skiArea,  setSkiArea]  = useState<"val_thorens" | "trois_vallees">("val_thorens");
-  const [skiQty,   setSkiQty]   = useState(1);
-  const [transfer, setTransfer] = useState(false);
+  const [skiArea,  setSkiArea]  = useState<"val_thorens" | "trois_vallees">(fullDeal ? "trois_vallees" : "val_thorens");
+  const [skiQty,   setSkiQty]   = useState(guests || 1);
+  const [transfer, setTransfer] = useState(fullDeal);
   const [equipment, setEquipment] = useState(false);
-  const [transferQty, setTransferQty] = useState(1); // how many people need transfer
+  const [transferQty, setTransferQty] = useState(guests || 1); // how many people need transfer
   const [equipQty, setEquipQty] = useState(1);       // how many people need equipment
   const [showTransfer, setShowTransfer] = useState(false);
   const [splitCount, setSplitCount] = useState(1);
   const [flight, setFlight] = useState<Flight>(EMPTY_FLIGHT);
   const [bookFlight, setBookFlight] = useState(false);   // "add the flight itself to the package" toggle
-  const [bookFlightQty, setBookFlightQty] = useState(1);
-  const [baggage, setBaggage] = useState(false);
-  const [baggageQty, setBaggageQty] = useState(1);
+  const [bookFlightQty, setBookFlightQty] = useState(guests || 1);
+  const [baggage, setBaggage] = useState(fullDeal);
+  const [baggageQty, setBaggageQty] = useState(guests || 1);
 
   // Cancellation: "regular" (per terms) | "none" (-€100, signed) | "flexible" (+€100)
   const [cancel, setCancel] = useState<"regular" | "none" | "flexible">("regular");
@@ -275,6 +279,17 @@ function ApartmentPage() {
   const cheaperFlight = gvaFlight.price !== null && (lyonFlight.price === null || gvaFlight.price <= lyonFlight.price)
     ? { ...gvaFlight, airport: "Geneva (GVA)" }
     : { ...lyonFlight, airport: "Lyon (LYS)" };
+  // The flight price isn't known until the live scrape resolves, so it
+  // can't be a useState initial value like the other full-deal defaults —
+  // switch it on once, the moment a price actually lands, without fighting
+  // a customer who deliberately un-checks it afterwards.
+  const autoFlightApplied = useRef(false);
+  useEffect(() => {
+    if (fullDeal && cheaperFlight.price && !autoFlightApplied.current) {
+      autoFlightApplied.current = true;
+      setBookFlight(true);
+    }
+  }, [fullDeal, cheaperFlight.price]);
 
   /* ── Price calculation ──────────────────────────────────── */
   const basePrice = apt?.price_per_night ?? 0;
@@ -428,7 +443,12 @@ function ApartmentPage() {
             <div className="mt-6 mb-6 pb-6 border-b border-gray-100">
               <div className="flex items-start justify-between gap-4 flex-wrap">
                 <div>
-                  <div className="text-xs font-bold tracking-widest uppercase text-blue-600 mb-1">{apt.type}</div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-bold tracking-widest uppercase text-blue-600">{apt.type}</span>
+                    {fullDeal && (
+                      <span className="text-[11px] font-black text-white bg-blue-600 px-2 py-0.5 rounded-full">✨ דיל שלם</span>
+                    )}
+                  </div>
                   <h1 className="text-3xl font-black text-gray-900">{apt.name}</h1>
                   <div className="flex items-center gap-1.5 mt-2 text-gray-500 text-sm">
                     <IconMountain size={14} className="text-blue-500" />
@@ -824,8 +844,17 @@ function ApartmentPage() {
                   </div>
 
                   {/* ── Price breakdown ───────────────────────────── */}
-                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">סיכום מחיר</div>
+                  <div className={fullDeal
+                    ? "rounded-xl p-4 border-2 border-blue-200 bg-gradient-to-b from-blue-50 to-white shadow-sm"
+                    : "bg-gray-50 rounded-xl p-4 border border-gray-100"}>
+                    {fullDeal ? (
+                      <div className="mb-3">
+                        <div className="text-sm font-black text-blue-700">✨ החבילה המלאה שלכם</div>
+                        <div className="text-xs text-gray-400 mt-0.5">דירה, הסעה, סקי פס, טיסה וכבודה — הכל במקום אחד</div>
+                      </div>
+                    ) : (
+                      <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">סיכום מחיר</div>
+                    )}
                     <div className="flex flex-col gap-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-500">{weekMatch ? "לינה · שבת עד שבת" : `לינה × ${nights} לילות`}</span>
