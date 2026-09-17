@@ -15,8 +15,9 @@ import type { Apartment, SkiPass } from "@/types";
 // no runtime error, which points squarely at a build-time static snapshot.
 export const dynamic = "force-dynamic";
 
-const TRANSFER_PRICE = 180; // matches the flat per-person add-on used everywhere else on the site
-const PACKAGE_NIGHTS = 7;   // a representative week — real dates are picked on the apartment page itself
+const TRANSFER_PRICE = 180;  // matches the flat per-person add-on used everywhere else on the site
+const FLIGHT_ESTIMATE = 350; // rough per-person flight estimate for the homepage teaser cards, set by the business
+const LA_CIME_NIGHTS = 7;    // every La Cime week is a fixed Saturday-to-Saturday stay
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const fmtDate = (s: string) => { const d = new Date(s + "T12:00:00"); return `${d.getDate()} ב${HE_MONTHS[d.getMonth()]}`; };
 
@@ -127,47 +128,37 @@ export default async function Home() {
   const { data: passOptions } = await db.from("ski_passes").select("*")
     .eq("available", true).eq("type", "adult").eq("area", "trois_vallees")
     .order("duration_days", { ascending: true });
-  const skiDays = PACKAGE_NIGHTS - 1;
+  const skiDays = LA_CIME_NIGHTS - 1;
   const passes = (passOptions as SkiPass[] | null) ?? [];
   const skiTier = passes.length ? (passes.find(p => p.duration_days >= skiDays) ?? passes[passes.length - 1]) : null;
   const skiPassPerPerson = skiTier ? (skiDays > skiTier.duration_days ? Math.round((skiTier.price / skiTier.duration_days) * skiDays) : skiTier.price) : 0;
 
-  const { data: packageApts } = await db.from("apartments").select("*").eq("available", true)
-    .or("source.is.null,source.neq.la_cime").order("price_per_night", { ascending: true });
-  const packageCandidates = (packageApts as Apartment[] | null) ?? [];
-  const regularPackages = [packageCandidates[0], packageCandidates[Math.floor(packageCandidates.length / 2)], packageCandidates[packageCandidates.length - 1]]
-    .filter((a, i, arr): a is Apartment => !!a && arr.findIndex(b => b?.id === a.id) === i)
-    .map(apt => {
-      const guests = Math.min(apt.max_guests || 2, 2) || 2;
-      const aptTotal = apt.price_per_night * PACKAGE_NIGHTS;
-      const grandTotal = aptTotal + skiPassPerPerson * guests + TRANSFER_PRICE * guests;
-      return { apt, guests, perPerson: Math.round(grandTotal / guests), checkin: null as string | null, checkout: null as string | null };
-    });
-
   // La Cime ("שבת עד שבת") weeks are real, fixed-price inventory — no
   // estimate needed, so these packages show the actual next available week
-  // and its actual price instead of a representative 7-night guess.
+  // and its actual price instead of a representative 7-night guess. A rough
+  // flight estimate (~€350/person, set by the business, not scraped — a
+  // real live lookup per homepage card would be too slow) is folded in so
+  // the headline price isn't misleadingly flight-less; still framed as
+  // "מ-" (starting from) since it's an estimate, not a quote.
   const { data: laCimeApts } = await db.from("apartments").select("*").eq("available", true).eq("source", "la_cime");
   const today = new Date().toISOString().slice(0, 10);
-  const laCimePackages = ((laCimeApts as Apartment[] | null) ?? [])
+  const packages = ((laCimeApts as Apartment[] | null) ?? [])
     .map(apt => {
       const nextWeek = (apt.available_weeks ?? []).filter(w => w.week >= today).sort((a, b) => a.week.localeCompare(b.week))[0];
       return nextWeek ? { apt, week: nextWeek } : null;
     })
     .filter((x): x is { apt: Apartment; week: { week: string; price: number } } => !!x)
-    .slice(0, 2)
+    .slice(0, 3)
     .map(({ apt, week }) => {
       const guests = Math.min(apt.max_guests || 4, 4) || 4;
       const checkinD = new Date(week.week + "T12:00:00");
       const checkoutD = new Date(checkinD); checkoutD.setDate(checkoutD.getDate() + 7);
-      const grandTotal = week.price + skiPassPerPerson * guests + TRANSFER_PRICE * guests;
+      const grandTotal = week.price + skiPassPerPerson * guests + TRANSFER_PRICE * guests + FLIGHT_ESTIMATE * guests;
       return {
         apt, guests, perPerson: Math.round(grandTotal / guests),
         checkin: checkinD.toISOString().slice(0, 10), checkout: checkoutD.toISOString().slice(0, 10),
       };
     });
-
-  const packages = [...laCimePackages, ...regularPackages];
   return (
     <div className="min-h-screen" style={{ background: "#f7f9fb" }} dir="rtl">
       <Navbar />
@@ -218,27 +209,22 @@ export default async function Home() {
         <section className="py-12 md:py-20 px-5 md:px-6 bg-white">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-8 md:mb-12">
-              <span className="text-xs font-bold tracking-widest uppercase text-blue-600">מחיר אחד, הכל כלול</span>
+              <span className="text-xs font-bold tracking-widest uppercase text-blue-600">שבת עד שבת · מחיר אחד, הכל כלול</span>
               <h2 className="font-display text-2xl md:text-4xl font-black text-gray-900 mt-1">חבילות מומלצות</h2>
-              <p className="text-gray-500 text-sm mt-1">דירה + סקי פס לשלושת העמקים + הסעה — מוכן לתאריכים שלכם</p>
+              <p className="text-gray-500 text-sm mt-1">דירה + סקי פס לשלושת העמקים + הסעה + טיסה (הערכה) — שבועות אמיתיים שזמינים עכשיו</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {packages.map(({ apt, guests, perPerson, checkin, checkout }) => (
-                <a key={apt.id}
-                  href={checkin && checkout
-                    ? `/apartments/${apt.id}?checkin=${checkin}&checkout=${checkout}&guests=${guests}&deal=full`
-                    : `/apartments/${apt.id}?guests=${guests}&deal=full`}
+                <a key={apt.id} href="/weekly"
                   className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 block">
                   <div className="relative h-48 overflow-hidden">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={apt.images?.[0] ?? "/hero-ski.jpg"} alt={apt.name}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.35) 0%, transparent 55%)" }} />
-                    <div className="absolute top-3 right-3 text-white text-xs font-black px-3 py-1 rounded-full bg-blue-600">
-                      {checkin ? "✨ שבת עד שבת" : "✨ חבילה מלאה"}
-                    </div>
+                    <div className="absolute top-3 right-3 text-white text-xs font-black px-3 py-1 rounded-full bg-blue-600">✨ שבת עד שבת</div>
                     <div className="absolute bottom-3 right-3 text-white text-xs font-semibold">
-                      {apt.name} · {guests} אנשים · {checkin && checkout ? `${fmtDate(checkin)} — ${fmtDate(checkout)}` : `${PACKAGE_NIGHTS} לילות (לדוגמה)`}
+                      {apt.name} · {guests} אנשים · {fmtDate(checkin)} — {fmtDate(checkout)}
                     </div>
                   </div>
                   <div className="p-5">
@@ -246,15 +232,15 @@ export default async function Home() {
                       <span className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-semibold">🏠 דירה</span>
                       <span className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-semibold">⛷️ סקי פס Trois Vallées</span>
                       <span className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-semibold">🚐 הסעה הלוך-חזור</span>
-                      <span className="text-xs bg-gray-50 text-gray-400 px-2.5 py-1 rounded-full font-semibold border border-gray-200">✈️ טיסה בנפרד</span>
+                      <span className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-semibold">✈️ טיסה (הערכה)</span>
                     </div>
                     <div className="flex items-end justify-between">
                       <div>
                         <div className="text-2xl font-black text-gray-900">מ-€{perPerson.toLocaleString()}</div>
-                        <div className="text-xs text-gray-400">{checkin ? "לאדם, ללא טיסה · שבוע קבוע, זמין עכשיו" : "לאדם, ללא טיסה · תאריכים בוחרים בעמוד הדירה"}</div>
+                        <div className="text-xs text-gray-400">לאדם · שבוע קבוע, זמין עכשיו</div>
                       </div>
                       <span className="text-sm font-black text-blue-600 group-hover:gap-3 flex items-center gap-1.5 transition-all">
-                        צפה בחבילה ←
+                        לכל הדילים ←
                       </span>
                     </div>
                   </div>
