@@ -35,7 +35,7 @@ function MonthGrid({ year, month, from, to, hov, onEnter, onLeave, onClick }: {
   })();
 
   return (
-    <div className="flex-1 min-w-0" dir="ltr">
+    <div className="flex-1 min-w-0" dir="rtl">
       <p className="text-sm font-bold text-gray-900 text-center mb-3">{MONTHS[month]} {year}</p>
       <div className="grid grid-cols-7">
         {DAYS.map(d => (

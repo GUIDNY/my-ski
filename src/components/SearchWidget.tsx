@@ -40,7 +40,7 @@ function MonthGrid({
   const circle = big ? "w-10 h-10 text-base" : "w-9 h-9 text-sm";
 
   return (
-    <div className="flex-1 min-w-0" dir="ltr">
+    <div className="flex-1 min-w-0" dir="rtl">
       <p className="text-sm font-bold text-gray-900 text-center mb-3">{MONTHS[month]} {year}</p>
       <div className="grid grid-cols-7">
         {DAYS.map(d => (
