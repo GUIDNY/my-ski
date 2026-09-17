@@ -41,7 +41,7 @@ export default function Navbar() {
         {/* Logo */}
         <a href="/" className="flex items-center">
           <img src="/skishare-logo.png" alt="SkiShare"
-            className="h-11 w-auto transition-all"
+            className="h-[3.25rem] w-auto transition-all"
             style={{ filter: scrolled ? "none" : "brightness(0) invert(1)" }} />
         </a>
 
@@ -99,11 +99,11 @@ export default function Navbar() {
           ) : (
             <button
               onClick={() => setShowAuth(true)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold transition-all"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-sm font-semibold transition-all"
               style={{
-                background: scrolled ? "#1d4ed8" : "rgba(255,255,255,0.18)",
-                color: "white",
-                border: scrolled ? "none" : "1px solid rgba(255,255,255,0.35)",
+                borderColor: scrolled ? "#d1d5db" : "rgba(255,255,255,0.4)",
+                color: scrolled ? "#374151" : "white",
+                background: scrolled ? "transparent" : "rgba(255,255,255,0.1)",
               }}>
               כניסה / הרשמה
             </button>

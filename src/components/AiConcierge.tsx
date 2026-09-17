@@ -157,7 +157,7 @@ export default function AiConcierge() {
           tab bar; floats bottom-corner on desktop where there's no tab bar. */}
       <button
         onClick={() => setOpen(v => !v)}
-        aria-label="עוזר חכם לחופשת סקי"
+        aria-label="שאל את SkiShare"
         className="fixed z-[60] rounded-full shadow-lg border-2 border-white overflow-hidden
           bottom-[34px] left-1/2 -translate-x-1/2 w-16 h-16
           md:bottom-6 md:left-6 md:right-auto md:translate-x-0 md:w-16 md:h-16
@@ -190,7 +190,7 @@ export default function AiConcierge() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/ai-guide.png" alt="" className="w-10 h-10 rounded-full object-cover object-top border-2 border-white shadow" />
               <div className="flex-1 min-w-0">
-                <div className="font-black text-gray-900 text-sm">עוזר החופשה החכם</div>
+                <div className="font-black text-gray-900 text-sm">שאל את SkiShare</div>
                 <div className="text-xs text-gray-500">מחפש דירה, סקי פס, הסעה וציוד — הכל בבת אחת</div>
               </div>
               <button onClick={() => { setMessages([{ role: "assistant", text: WELCOME }]); setInput(""); setPendingImage(null); }}

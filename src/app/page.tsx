@@ -4,7 +4,10 @@ import FlightSearch from "@/components/FlightSearch";
 import Footer from "@/components/Footer";
 import { IconMountain, IconSnowflake } from "@/components/Icons";
 import { createServerClient } from "@/lib/supabase-server";
-import type { Apartment } from "@/types";
+import type { Apartment, SkiPass } from "@/types";
+
+const TRANSFER_PRICE = 180; // matches the flat per-person add-on used everywhere else on the site
+const PACKAGE_NIGHTS = 7;   // a representative week — real dates are picked on the apartment page itself
 
 /* ── Step icons ───────────────────────────────────────────── */
 const IcoBed = () => (
@@ -103,6 +106,32 @@ export default async function Home() {
   const db = createServerClient();
   const { data: featuredApts } = await db.from("apartments").select("*").eq("available", true).order("price_per_night", { ascending: false }).limit(3);
   const apartments: Apartment[] = featuredApts ?? [];
+
+  // Real bundled-package pricing for the teaser cards below — apartment
+  // nightly rate + an actual Trois Vallées ski pass tier + the flat
+  // transfer fee, all sourced from the same data/prices used everywhere
+  // else on the site (never invented numbers). A representative week and a
+  // 2-guest split, since there's no real customer date/guest count yet on
+  // the homepage — clicking through lets them pick their own real dates.
+  const { data: passOptions } = await db.from("ski_passes").select("*")
+    .eq("available", true).eq("type", "adult").eq("area", "trois_vallees")
+    .order("duration_days", { ascending: true });
+  const skiDays = PACKAGE_NIGHTS - 1;
+  const passes = (passOptions as SkiPass[] | null) ?? [];
+  const skiTier = passes.length ? (passes.find(p => p.duration_days >= skiDays) ?? passes[passes.length - 1]) : null;
+  const skiPassPerPerson = skiTier ? (skiDays > skiTier.duration_days ? Math.round((skiTier.price / skiTier.duration_days) * skiDays) : skiTier.price) : 0;
+
+  const { data: packageApts } = await db.from("apartments").select("*").eq("available", true)
+    .or("source.is.null,source.neq.la_cime").order("price_per_night", { ascending: true });
+  const packageCandidates = (packageApts as Apartment[] | null) ?? [];
+  const packages = [packageCandidates[0], packageCandidates[Math.floor(packageCandidates.length / 2)], packageCandidates[packageCandidates.length - 1]]
+    .filter((a, i, arr): a is Apartment => !!a && arr.findIndex(b => b?.id === a.id) === i)
+    .map(apt => {
+      const guests = Math.min(apt.max_guests || 2, 2) || 2;
+      const aptTotal = apt.price_per_night * PACKAGE_NIGHTS;
+      const grandTotal = aptTotal + skiPassPerPerson * guests + TRANSFER_PRICE * guests;
+      return { apt, guests, perPerson: Math.round(grandTotal / guests) };
+    });
   return (
     <div className="min-h-screen" style={{ background: "#f7f9fb" }} dir="rtl">
       <Navbar />
@@ -129,7 +158,7 @@ export default async function Home() {
             Val Thorens
           </h1>
           <p className="text-xl md:text-2xl text-white/90 font-medium" style={{ textShadow: "0 1px 10px rgba(0,0,0,0.3)" }}>
-            כל מה שאתה צריך נמצא כאן
+            דירות, סקי פס, ציוד והסעות — חופשת הסקי שלך במקום אחד
           </p>
           <SearchWidget />
           <a href="/seasonaires" className="flex items-center gap-2.5 px-6 py-3 rounded-full text-white text-sm font-bold transition-all hover:bg-white/20" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.25)" }}>
@@ -137,6 +166,78 @@ export default async function Home() {
           </a>
         </div>
       </section>
+
+      {/* ── Trust row ────────────────────────────────────── */}
+      <div className="bg-white border-b border-gray-100 py-4 px-5 md:px-6">
+        <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-xs md:text-sm font-bold text-gray-500">
+          <span className="flex items-center gap-1.5">💶 מחיר שקוף מראש</span>
+          <span className="flex items-center gap-1.5">🇮🇱 שירות בעברית</span>
+          <span className="flex items-center gap-1.5">🏠 דירות שבדקנו בעצמנו</span>
+          <span className="flex items-center gap-1.5">🔒 תשלום מאובטח</span>
+        </div>
+      </div>
+
+      {/* ── חבילות מומלצות ───────────────────────────────── */}
+      {packages.length > 0 && (
+        <section className="py-12 md:py-20 px-5 md:px-6 bg-white">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-8 md:mb-12">
+              <span className="text-xs font-bold tracking-widest uppercase text-blue-600">מחיר אחד, הכל כלול</span>
+              <h2 className="font-display text-2xl md:text-4xl font-black text-gray-900 mt-1">חבילות מומלצות</h2>
+              <p className="text-gray-500 text-sm mt-1">דירה + סקי פס לשלושת העמקים + הסעה — מוכן לתאריכים שלכם</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {packages.map(({ apt, guests, perPerson }) => (
+                <a key={apt.id} href={`/apartments/${apt.id}?guests=${guests}&deal=full`}
+                  className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 block">
+                  <div className="relative h-48 overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={apt.images?.[0] ?? "/hero-ski.jpg"} alt={apt.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.35) 0%, transparent 55%)" }} />
+                    <div className="absolute top-3 right-3 text-white text-xs font-black px-3 py-1 rounded-full bg-blue-600">✨ חבילה מלאה</div>
+                    <div className="absolute bottom-3 right-3 text-white text-xs font-semibold">{apt.name} · {guests} אנשים · {PACKAGE_NIGHTS} לילות (לדוגמה)</div>
+                  </div>
+                  <div className="p-5">
+                    <div className="flex flex-wrap gap-1.5 mb-4">
+                      <span className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-semibold">🏠 דירה</span>
+                      <span className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-semibold">⛷️ סקי פס Trois Vallées</span>
+                      <span className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-semibold">🚐 הסעה הלוך-חזור</span>
+                    </div>
+                    <div className="flex items-end justify-between">
+                      <div>
+                        <div className="text-2xl font-black text-gray-900">מ-€{perPerson.toLocaleString()}</div>
+                        <div className="text-xs text-gray-400">לאדם · תאריכים בוחרים בעמוד הדירה</div>
+                      </div>
+                      <span className="text-sm font-black text-blue-600 group-hover:gap-3 flex items-center gap-1.5 transition-all">
+                        צפה בחבילה ←
+                      </span>
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Resort stats ─────────────────────────────────── */}
+      <div className="bg-gray-900 py-8 px-5 md:px-6">
+        <div className="max-w-5xl mx-auto grid grid-cols-3 gap-4 text-center">
+          <div>
+            <div className="text-2xl md:text-4xl font-black text-white">600 ק"מ</div>
+            <div className="text-xs md:text-sm text-white/50 mt-1">מסלולי סקי</div>
+          </div>
+          <div>
+            <div className="text-2xl md:text-4xl font-black text-white">150+</div>
+            <div className="text-xs md:text-sm text-white/50 mt-1">מעליות</div>
+          </div>
+          <div>
+            <div className="text-2xl md:text-4xl font-black text-white">2,300-3,230מ'</div>
+            <div className="text-xs md:text-sm text-white/50 mt-1">גובה פסגות</div>
+          </div>
+        </div>
+      </div>
 
       {/* ── שבת עד שבת ───────────────────────────────────── */}
       <section className="py-12 md:py-20 px-5 md:px-6 bg-gradient-to-b from-blue-50 to-white">
