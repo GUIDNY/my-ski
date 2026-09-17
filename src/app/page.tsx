@@ -246,11 +246,12 @@ export default async function Home() {
                       <span className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-semibold">🏠 דירה</span>
                       <span className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-semibold">⛷️ סקי פס Trois Vallées</span>
                       <span className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-semibold">🚐 הסעה הלוך-חזור</span>
+                      <span className="text-xs bg-gray-50 text-gray-400 px-2.5 py-1 rounded-full font-semibold border border-gray-200">✈️ טיסה בנפרד</span>
                     </div>
                     <div className="flex items-end justify-between">
                       <div>
                         <div className="text-2xl font-black text-gray-900">מ-€{perPerson.toLocaleString()}</div>
-                        <div className="text-xs text-gray-400">{checkin ? "לאדם · שבוע קבוע, זמין עכשיו" : "לאדם · תאריכים בוחרים בעמוד הדירה"}</div>
+                        <div className="text-xs text-gray-400">{checkin ? "לאדם, ללא טיסה · שבוע קבוע, זמין עכשיו" : "לאדם, ללא טיסה · תאריכים בוחרים בעמוד הדירה"}</div>
                       </div>
                       <span className="text-sm font-black text-blue-600 group-hover:gap-3 flex items-center gap-1.5 transition-all">
                         צפה בחבילה ←
