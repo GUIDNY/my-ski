@@ -38,7 +38,8 @@ async function scrapePrice(outDate: string, retDate: string, origin: string, des
     // "Track prices" toast ("Travel Dec 1 – 8 for €230"), which both also
     // end in a €amount but aren't followed by "round trip".
     const lines = bodyText.split("\n").map(l => l.trim());
-    let best: { price: number; nonstop: boolean } | null = null;
+    let cheapestNonstop: number | null = null;
+    let cheapestAny: number | null = null;
     for (let i = 0; i < lines.length - 1; i++) {
       if (lines[i + 1] !== "round trip") continue;
       const priceMatch = lines[i].match(/^€\s?([\d,]+)$/);
@@ -47,9 +48,15 @@ async function scrapePrice(outDate: string, retDate: string, origin: string, des
       if (!Number.isFinite(price)) continue;
       const context = lines.slice(Math.max(0, i - 6), i).join(" ");
       const nonstop = /Nonstop/i.test(context);
-      if (!best || price < best.price) best = { price, nonstop };
+      if (cheapestAny === null || price < cheapestAny) cheapestAny = price;
+      if (nonstop && (cheapestNonstop === null || price < cheapestNonstop)) cheapestNonstop = price;
     }
-    return best ? { price: best.price, nonstop: best.nonstop } : { price: null, nonstop: false };
+    // Prefer the cheapest nonstop option (a connecting flight being a few
+    // euros cheaper isn't what a ski-package customer actually wants) —
+    // only fall back to the cheapest overall when there's no nonstop at all.
+    if (cheapestNonstop !== null) return { price: cheapestNonstop, nonstop: true };
+    if (cheapestAny !== null) return { price: cheapestAny, nonstop: false };
+    return { price: null, nonstop: false };
   } finally {
     await browser?.close();
   }
