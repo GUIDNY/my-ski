@@ -6,7 +6,7 @@ import type { Apartment, SkiPass } from "@/types";
 import { calcTotalForRange, getEffectivePrice, matchingWeek, skiDaysFromNights } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
 import {
-  IconMountain, IconSkis, IconBus, IconPlane, IconShield, IconUser, IconBot,
+  IconMountain, IconSkis, IconBus, IconShield, IconUser, IconBot,
   IconCheck, IconStar, IconCalendar, IconChevronLeft, IconWifi, IconFire,
   IconParking, IconBed, IconSnowflake, IconWhatsApp,
 } from "@/components/Icons";
@@ -508,24 +508,14 @@ function ApartmentPage() {
                         </button>
                       )}
                     </div>
-                    <a href={skyscannerUrl} target="_blank" rel="noopener noreferrer"
-                      className="mt-2 flex items-center gap-2.5 p-3.5 rounded-xl border border-gray-100 bg-white hover:border-blue-200 hover:bg-blue-50 transition-all">
-                      <span className="text-gray-400 flex-shrink-0"><IconPlane size={17} /></span>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-gray-800">טיסה ל-Geneva (GVA)</div>
-                        <div className="text-xs text-gray-400">TLV → Geneva · {checkin ? fmtDate(checkin) : "בחר תאריך"} · 2.5h מ-Val Thorens</div>
-                      </div>
-                      <FlightPriceBadge origin="TLV" dest="GVA" checkin={checkin} checkout={checkout} />
-                    </a>
-                    <a href={skyscannerUrlLyon} target="_blank" rel="noopener noreferrer"
-                      className="mt-2 flex items-center gap-2.5 p-3.5 rounded-xl border border-gray-100 bg-white hover:border-blue-200 hover:bg-blue-50 transition-all">
-                      <span className="text-gray-400 flex-shrink-0"><IconPlane size={17} /></span>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-gray-800">טיסה ל-Lyon (LYS)</div>
-                        <div className="text-xs text-gray-400">TLV → Lyon · {checkin ? fmtDate(checkin) : "בחר תאריך"} · 3h מ-Val Thorens</div>
-                      </div>
-                      <FlightPriceBadge origin="TLV" dest="LYS" checkin={checkin} checkout={checkout} />
-                    </a>
+                    <FlightPriceBadge origin="TLV" dest="GVA" checkin={checkin} checkout={checkout}
+                      label="טיסה ל-Geneva (GVA)"
+                      sublabel={`TLV → Geneva · ${checkin ? fmtDate(checkin) : "בחר תאריך"} · 2.5h מ-Val Thorens`}
+                      fallbackUrl={skyscannerUrl} />
+                    <FlightPriceBadge origin="TLV" dest="LYS" checkin={checkin} checkout={checkout}
+                      label="טיסה ל-Lyon (LYS)"
+                      sublabel={`TLV → Lyon · ${checkin ? fmtDate(checkin) : "בחר תאריך"} · 3h מ-Val Thorens`}
+                      fallbackUrl={skyscannerUrlLyon} />
                   </div>
 
                   {/* ── Cancellation policy ───────────────────────── */}
@@ -736,24 +726,14 @@ function ApartmentPage() {
                         </button>
                       )}
                     </div>
-                    <a href={skyscannerUrl} target="_blank" rel="noopener noreferrer"
-                      className="mt-2 flex items-center gap-2.5 p-3.5 rounded-xl border border-gray-100 bg-white hover:border-blue-200 hover:bg-blue-50 transition-all">
-                      <span className="text-gray-400 flex-shrink-0"><IconPlane size={17} /></span>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-gray-800">טיסה ל-Geneva (GVA)</div>
-                        <div className="text-xs text-gray-400">TLV → Geneva · {checkin ? fmtDate(checkin) : "בחר תאריך"} · 2.5h מ-Val Thorens</div>
-                      </div>
-                      <FlightPriceBadge origin="TLV" dest="GVA" checkin={checkin} checkout={checkout} />
-                    </a>
-                    <a href={skyscannerUrlLyon} target="_blank" rel="noopener noreferrer"
-                      className="mt-2 flex items-center gap-2.5 p-3.5 rounded-xl border border-gray-100 bg-white hover:border-blue-200 hover:bg-blue-50 transition-all">
-                      <span className="text-gray-400 flex-shrink-0"><IconPlane size={17} /></span>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-gray-800">טיסה ל-Lyon (LYS)</div>
-                        <div className="text-xs text-gray-400">TLV → Lyon · {checkin ? fmtDate(checkin) : "בחר תאריך"} · 3h מ-Val Thorens</div>
-                      </div>
-                      <FlightPriceBadge origin="TLV" dest="LYS" checkin={checkin} checkout={checkout} />
-                    </a>
+                    <FlightPriceBadge origin="TLV" dest="GVA" checkin={checkin} checkout={checkout}
+                      label="טיסה ל-Geneva (GVA)"
+                      sublabel={`TLV → Geneva · ${checkin ? fmtDate(checkin) : "בחר תאריך"} · 2.5h מ-Val Thorens`}
+                      fallbackUrl={skyscannerUrl} />
+                    <FlightPriceBadge origin="TLV" dest="LYS" checkin={checkin} checkout={checkout}
+                      label="טיסה ל-Lyon (LYS)"
+                      sublabel={`TLV → Lyon · ${checkin ? fmtDate(checkin) : "בחר תאריך"} · 3h מ-Val Thorens`}
+                      fallbackUrl={skyscannerUrlLyon} />
                   </div>
 
                   {/* ── Cancellation policy ───────────────────────── */}

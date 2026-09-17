@@ -15,6 +15,9 @@ type Props = {
   transfer?: boolean;
   equipment?: boolean;
   transferDetails?: string;
+  flight?: boolean;
+  flightPrice?: number;
+  flightDetails?: string;
   cancel?: string;
   service?: string;
   grandTotal: number;
@@ -71,6 +74,7 @@ export default function CardPaymentButton(p: Props) {
           checkin: p.checkin, checkout: p.checkout,
           guests: p.guests, nights: p.nights, ski_pass: p.skiPass, transfer: p.transfer, equipment: p.equipment,
           transfer_details: p.transferDetails,
+          flight: p.flight, flight_price: p.flightPrice, flight_details: p.flightDetails,
           cancel: p.cancel, service: p.service, grand_total: p.grandTotal,
           group_id: groupId, share_amount: p.split?.shareAmount, shares_total: p.split?.sharesTotal,
           customer_name: name, customer_email: email, customer_phone: phone,
