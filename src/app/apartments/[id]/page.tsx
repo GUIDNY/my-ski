@@ -502,7 +502,13 @@ function ApartmentPage() {
 
             {/* booking choices — inline (mobile + desktop main column) */}
             <div className="lg:hidden bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-5">
-                  {/* ── Ski Pass ──────────────────────────────────── */}
+                  {/* In full-deal mode all of this is pre-decided (see the
+                      defaults above) — showing every individual toggle here
+                      too just duplicated the summary card below and felt
+                      cluttered; only the two things worth adjusting (ski
+                      pass area, baggage) get their own compact controls
+                      right under that summary instead. */}
+                  {!fullDeal && (
                   <div>
                     <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">תוספות</div>
                     <div className="flex flex-col gap-2">
@@ -555,6 +561,7 @@ function ApartmentPage() {
                       <QtyStepper show={baggage} label="כמה תיקי כבודה?" qty={baggageQty} setQty={setBaggageQty} max={Math.max(guests, 1)} total={baggageTotal} />
                     </div>
                   </div>
+                  )}
 
                   {/* ── Cancellation policy ───────────────────────── */}
                   <div>
@@ -728,7 +735,13 @@ function ApartmentPage() {
                 <div className="px-6 py-5 flex flex-col gap-5">
 
                   <div className="hidden lg:flex flex-col gap-5">
-                  {/* ── Ski Pass ──────────────────────────────────── */}
+                  {/* In full-deal mode all of this is pre-decided (see the
+                      defaults above) — showing every individual toggle here
+                      too just duplicated the summary card below and felt
+                      cluttered; only the two things worth adjusting (ski
+                      pass area, baggage) get their own compact controls
+                      right under that summary instead. */}
+                  {!fullDeal && (
                   <div>
                     <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">תוספות</div>
                     <div className="flex flex-col gap-2">
@@ -781,6 +794,7 @@ function ApartmentPage() {
                       <QtyStepper show={baggage} label="כמה תיקי כבודה?" qty={baggageQty} setQty={setBaggageQty} max={Math.max(guests, 1)} total={baggageTotal} />
                     </div>
                   </div>
+                  )}
 
                   {/* ── Cancellation policy ───────────────────────── */}
                   <div>
@@ -911,10 +925,33 @@ function ApartmentPage() {
                     </div>
                     <div className="flex justify-between items-center border-t border-gray-200 pt-3 mt-3">
                       <span className="font-black text-gray-900">סה״כ</span>
-                      <span className="text-2xl font-black text-gray-900">€{grandTotal.toLocaleString()}</span>
+                      <div className="text-left">
+                        <span className="text-2xl font-black text-gray-900">€{grandTotal.toLocaleString()}</span>
+                        {fullDeal && <div className="text-xs font-bold text-blue-600">€{Math.round(grandTotal / Math.max(guests, 1)).toLocaleString()} לאדם</div>}
+                      </div>
                     </div>
                     <p className="text-[11px] text-gray-400 mt-2 leading-relaxed">* ייתכנו עמלות נוספות (כגון עמלת סליקת אשראי 1.9%). המחירים ב-€ והחיוב בש״ח לפי שער ההמרה.</p>
                   </div>
+
+                  {fullDeal && (
+                    <div className="flex items-center gap-2 -mt-3">
+                      <div className="inline-flex bg-gray-100 rounded-full p-0.5 text-xs font-bold">
+                        <button type="button" onClick={() => setSkiArea("trois_vallees")}
+                          className={`px-3 py-1.5 rounded-full transition-colors ${skiArea === "trois_vallees" ? "bg-white text-blue-700 shadow-sm" : "text-gray-500"}`}>
+                          Trois Vallées
+                        </button>
+                        <button type="button" onClick={() => setSkiArea("val_thorens")}
+                          className={`px-3 py-1.5 rounded-full transition-colors ${skiArea === "val_thorens" ? "bg-white text-blue-700 shadow-sm" : "text-gray-500"}`}>
+                          Val Thorens בלבד
+                        </button>
+                      </div>
+                      <button type="button" onClick={() => setBaggage(b => !b)}
+                        className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-colors ${
+                          baggage ? "border-blue-200 bg-blue-50 text-blue-700" : "border-gray-200 text-gray-400"}`}>
+                        {baggage ? "✓" : ""} כבודה נוספת
+                      </button>
+                    </div>
+                  )}
 
                   {laCimeNoMatch ? (
                     <div className="text-center text-sm text-amber-700 bg-amber-50 border border-amber-100 rounded-xl p-4">
