@@ -215,7 +215,7 @@ export default async function Home() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {packages.map(({ apt, guests, perPerson, checkin, checkout }) => (
-                <a key={apt.id} href="/weekly"
+                <a key={apt.id} href="/weekly?deal=full"
                   className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 block">
                   <div className="relative h-48 overflow-hidden">
                     {/* eslint-disable-next-line @next/next/no-img-element */}

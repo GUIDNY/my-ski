@@ -11,7 +11,9 @@ export const metadata = { title: "שבת עד שבת — SkiShare" };
 // gets statically baked in at build time and never reflects the sync.
 export const dynamic = "force-dynamic";
 
-export default async function WeeklyPage() {
+export default async function WeeklyPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const params = await searchParams;
+  const initialDeal = params.deal === "full" ? "full" : "apartment";
   const db = createServerClient();
   const { data } = await db
     .from("apartments")
@@ -72,7 +74,7 @@ export default async function WeeklyPage() {
       </div>
 
       <div className="pt-10 pb-16 px-5 md:px-6 max-w-6xl mx-auto">
-        <WeeklyBrowser apartments={apartments} />
+        <WeeklyBrowser apartments={apartments} initialDeal={initialDeal} />
       </div>
       <Footer />
     </div>

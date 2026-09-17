@@ -28,7 +28,7 @@ function SpecChip({ icon, label }: { icon: React.ReactNode; label: string }) {
   );
 }
 
-export default function WeeklyBrowser({ apartments }: { apartments: Apartment[] }) {
+export default function WeeklyBrowser({ apartments, initialDeal = "apartment" }: { apartments: Apartment[]; initialDeal?: "apartment" | "full" }) {
   const weekMinPrice = useMemo(() => {
     const map = new Map<string, number>();
     for (const apt of apartments) {
@@ -48,6 +48,7 @@ export default function WeeklyBrowser({ apartments }: { apartments: Apartment[] 
   const [selected, setSelected] = useState<string | null>(allWeeks[0] ?? null);
   const [guests, setGuests] = useState(2);
   const [open, setOpen] = useState(false);
+  const [dealMode, setDealMode] = useState<"apartment" | "full">(initialDeal);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -80,6 +81,27 @@ export default function WeeklyBrowser({ apartments }: { apartments: Apartment[] 
 
   return (
     <div>
+      {/* Deal mode toggle */}
+      <div className="flex justify-center mb-4">
+        <div className="inline-flex bg-gray-100 rounded-full p-1 border border-gray-200">
+          <button onClick={() => setDealMode("full")}
+            className={`px-4 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-1.5 ${
+              dealMode === "full" ? "bg-white text-blue-700 shadow" : "text-gray-500 hover:text-gray-700"}`}>
+            ✨ דיל שלם
+          </button>
+          <button onClick={() => setDealMode("apartment")}
+            className={`px-4 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-1.5 ${
+              dealMode === "apartment" ? "bg-white text-blue-700 shadow" : "text-gray-500 hover:text-gray-700"}`}>
+            🏠 רק דירה
+          </button>
+        </div>
+      </div>
+      {dealMode === "full" && (
+        <p className="text-center text-blue-700 text-xs font-semibold mb-4 -mt-1">
+          כולל הסעה משדה התעופה · סקי פס לשלושת העמקים · טיסה וכבודה
+        </p>
+      )}
+
       {/* Explainer */}
       <div className="bg-blue-50/60 border border-blue-100 rounded-2xl p-4 md:p-5 mb-6 text-sm text-gray-700 leading-relaxed">
         הדירות כאן מוצעות לשבוע שלם (שבת עד שבת) ומתאימות במיוחד לחבילה מלאה — אפשר לבקש מאיתנו הצעת מחיר
@@ -300,7 +322,12 @@ export default function WeeklyBrowser({ apartments }: { apartments: Apartment[] 
                   <SpecChip icon={null} label={`${apt.sqm} מ״ר`} />
                 </div>
                 <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
-                  <a href={`/apartments/${apt.id}?checkin=${selected}&checkout=${weekRange(selected!).checkout.toISOString().slice(0, 10)}`}
+                  <a href={`/apartments/${apt.id}?${new URLSearchParams({
+                      checkin: selected!,
+                      checkout: weekRange(selected!).checkout.toISOString().slice(0, 10),
+                      guests: String(guests),
+                      ...(dealMode === "full" ? { deal: "full" } : {}),
+                    }).toString()}`}
                     className="bg-blue-600 group-hover:bg-blue-700 text-white text-xs font-bold rounded-xl px-4 py-2.5 transition-colors">
                     צפייה בדירה
                   </a>
