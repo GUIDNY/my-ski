@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { hasDirectFlight } from "@/lib/direct-flight-days";
 
 const MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const DAYS   = ["א׳","ב׳","ג׳","ד׳","ה׳","ו׳","ש׳"];
@@ -68,6 +69,9 @@ function MonthGrid({ year, month, from, to, hov, onEnter, onLeave, onClick }: {
               ].join(" ")}>
                 {date.getDate()}
               </div>
+              {!disabled && hasDirectFlight(date) && (
+                <span className="absolute bottom-0 z-10 text-[8px] leading-none" title="בדרך כלל יש טיסה ישירה מתל אביב ביום הזה">✈️</span>
+              )}
             </div>
           );
         })}
@@ -154,6 +158,8 @@ export default function SkiCalendar({ initialFrom, initialTo, onSelect, onCancel
             onEnter={setHov} onLeave={() => setHov(null)} onClick={handleDay} />
         </div>
       </div>
+
+      <p className="text-[11px] text-gray-400 text-center -mt-1 mb-3">✈️ = בדרך כלל יש טיסה ישירה מתל אביב ליון ביום הזה</p>
 
       {/* Footer */}
       <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-4">
