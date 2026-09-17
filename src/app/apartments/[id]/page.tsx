@@ -8,13 +8,14 @@ import type { PricingRule } from "@/lib/pricing";
 import {
   IconMountain, IconSkis, IconBus, IconShield, IconUser, IconBot,
   IconCheck, IconStar, IconCalendar, IconChevronLeft, IconWifi, IconFire,
-  IconParking, IconBed, IconSnowflake, IconWhatsApp,
+  IconParking, IconBed, IconSnowflake, IconWhatsApp, IconPlane, IconBriefcase,
 } from "@/components/Icons";
 import { buildWaHref } from "@/lib/whatsapp";
 import CardPaymentButton from "@/components/CardPaymentButton";
 import FlightDetailsModal, { EMPTY_FLIGHT, flightToString, flightFilled, type Flight } from "@/components/FlightDetailsModal";
 import FlightPriceBadge from "@/components/FlightPriceBadge";
 import { buildGoogleFlightsUrl } from "@/lib/google-flights";
+import { useFlightPrice } from "@/lib/useFlightPrice";
 import SaveTripButton from "@/components/SaveTripButton";
 import Logo from "@/components/Logo";
 
@@ -30,6 +31,7 @@ const FLEXIBLE_EXTRA = 100; // per person (legacy)
 const CANCEL_FLEX    = 100; // flexible cancellation surcharge (flat)
 const CANCEL_NONE    = 100; // no-cancellation discount (flat)
 const AI_DISCOUNT    = 50;  // per person
+const BAGGAGE_PRICE  = 120; // checked-bag fee per traveler, matches the AI concierge's default
 
 const AMENITY_ICONS: Record<string, React.ReactNode> = {
   "WiFi":       <IconWifi size={15} />,
@@ -224,6 +226,10 @@ function ApartmentPage() {
   const [showTransfer, setShowTransfer] = useState(false);
   const [splitCount, setSplitCount] = useState(1);
   const [flight, setFlight] = useState<Flight>(EMPTY_FLIGHT);
+  const [bookFlight, setBookFlight] = useState(false);   // "add the flight itself to the package" toggle
+  const [bookFlightQty, setBookFlightQty] = useState(1);
+  const [baggage, setBaggage] = useState(false);
+  const [baggageQty, setBaggageQty] = useState(1);
 
   // Cancellation: "regular" (per terms) | "none" (-€100, signed) | "flexible" (+€100)
   const [cancel, setCancel] = useState<"regular" | "none" | "flexible">("regular");
@@ -272,6 +278,13 @@ function ApartmentPage() {
     : `https://www.google.com/travel/flights?hl=en&gl=us&curr=EUR&q=flights+from+TLV+to+${dest}`;
   const skyscannerUrl = flightUrl("GVA");
   const skyscannerUrlLyon = flightUrl("LYS");
+  const gvaFlight = useFlightPrice("TLV", "GVA", checkin, checkout);
+  const lyonFlight = useFlightPrice("TLV", "LYS", checkin, checkout);
+  // "add flight to package" always offers whichever of the two routes is
+  // actually cheaper right now, rather than making the customer compare.
+  const cheaperFlight = gvaFlight.price !== null && (lyonFlight.price === null || gvaFlight.price <= lyonFlight.price)
+    ? { ...gvaFlight, airport: "Geneva (GVA)" }
+    : { ...lyonFlight, airport: "Lyon (LYS)" };
 
   /* ── Price calculation ──────────────────────────────────── */
   const basePrice = apt?.price_per_night ?? 0;
@@ -301,11 +314,16 @@ function ApartmentPage() {
   // add-ons are per-person: price × number of people who need each add-on
   const trTotal         = transfer ? TRANSFER_PRICE * transferQty : 0;
   const equipTotal      = equipment ? equipCost(skiDays) * equipQty : 0;
+  const bookFlightTotal = bookFlight && cheaperFlight.price ? cheaperFlight.price * bookFlightQty : 0;
+  const baggageTotal    = baggage ? BAGGAGE_PRICE * baggageQty : 0;
   const flexExtra       = cancel  === "flexible" ? CANCEL_FLEX : 0;
   const noCancelDiscount = cancel === "none"     ? -CANCEL_NONE : 0;
   const aiDiscount      = service === "ai"       ? -AI_DISCOUNT : 0;
-  const grandTotal      = aptTotal + skiTotal + trTotal + equipTotal + flexExtra + noCancelDiscount + aiDiscount;
+  const grandTotal      = aptTotal + skiTotal + trTotal + equipTotal + bookFlightTotal + baggageTotal + flexExtra + noCancelDiscount + aiDiscount;
   const transferDetails = transfer ? flightToString(flight) : "";
+  const bookFlightDetails = bookFlight
+    ? `${cheaperFlight.airport}${cheaperFlight.nonstop ? " · ישירה" : ""} · €${cheaperFlight.price} × ${bookFlightQty}${baggage ? ` · כבודה €${BAGGAGE_PRICE} × ${baggageQty}` : ""}`
+    : "";
   // split: divide the FULL total (lodging + all add-ons) equally between payers
   const shareAccommodation = Math.round(grandTotal / splitCount);
   const payNow = splitCount > 1 ? shareAccommodation : grandTotal;
@@ -340,6 +358,8 @@ function ApartmentPage() {
       `👥 אורחים: ${guests}`,
       transfer ? `🚐 הסעה הלוך-חזור ל-${transferQty} אנשים (€${trTotal})${transferDetails ? ` · ${transferDetails}` : ""}` : null,
       equipment ? `🎿 השכרת ציוד ל-${equipQty} אנשים (€${equipTotal})` : null,
+      bookFlight ? `✈️ טיסה ל-${cheaperFlight.airport} ל-${bookFlightQty} אנשים (€${bookFlightTotal})${cheaperFlight.nonstop ? " · ישירה" : ""}` : null,
+      baggage ? `🧳 כבודה נוספת ל-${baggageQty} אנשים (€${baggageTotal})` : null,
       cancel === "flexible" ? "✅ מדיניות ביטול גמישה" : cancel === "none" ? "🔒 ללא אפשרות ביטול" : null,
       skiPass ? `🎿 סקי פס · ${skiArea === "val_thorens" ? "Val Thorens/Orelle" : "Trois Vallées"}${skiTier ? ` · ${skiTier.duration_days} ימים` : ""} ל-${skiQty} אנשים (€${skiTotal})` : null,
       service === "ai" ? "🤖 ניהול עצמאי (AI)" : null,
@@ -508,14 +528,33 @@ function ApartmentPage() {
                         </button>
                       )}
                     </div>
-                    <FlightPriceBadge origin="TLV" dest="GVA" checkin={checkin} checkout={checkout}
+                    <FlightPriceBadge state={gvaFlight}
                       label="טיסה ל-Geneva (GVA)"
                       sublabel={`TLV → Geneva · ${checkin ? fmtDate(checkin) : "בחר תאריך"} · 2.5h מ-Val Thorens`}
                       fallbackUrl={skyscannerUrl} />
-                    <FlightPriceBadge origin="TLV" dest="LYS" checkin={checkin} checkout={checkout}
+                    <FlightPriceBadge state={lyonFlight}
                       label="טיסה ל-Lyon (LYS)"
                       sublabel={`TLV → Lyon · ${checkin ? fmtDate(checkin) : "בחר תאריך"} · 3h מ-Val Thorens`}
                       fallbackUrl={skyscannerUrlLyon} />
+                    <div className="flex flex-col gap-2 mt-2">
+                      <ToggleRow
+                        icon={<IconPlane size={18} />}
+                        label={`הוסיפו את הטיסה ל${cheaperFlight.airport}`}
+                        sublabel={cheaperFlight.price ? `לפי הטיסה הזולה ביותר שמצאנו${cheaperFlight.nonstop ? " · ישירה" : ""}` : "בודקים מחיר טיסה…"}
+                        price={cheaperFlight.price ? `€${cheaperFlight.price} לאדם` : undefined}
+                        checked={bookFlight}
+                        onChange={v => { if (!cheaperFlight.price) return; setBookFlight(v); if (v) setBookFlightQty(guests || 1); }}
+                      />
+                      <QtyStepper show={bookFlight} label="כמה כרטיסי טיסה?" qty={bookFlightQty} setQty={setBookFlightQty} max={Math.max(guests, 1)} total={bookFlightTotal} />
+                      <ToggleRow
+                        icon={<IconBriefcase size={18} />}
+                        label="הוסיפו כבודה"
+                        sublabel="כבודה נוספת לטיסה · €120 לאדם"
+                        price={`€${BAGGAGE_PRICE} לאדם`}
+                        checked={baggage} onChange={v => { setBaggage(v); if (v) setBaggageQty(Math.min(baggageQty || 1, guests) || 1); }}
+                      />
+                      <QtyStepper show={baggage} label="כמה תיקי כבודה?" qty={baggageQty} setQty={setBaggageQty} max={Math.max(guests, 1)} total={baggageTotal} />
+                    </div>
                   </div>
 
                   {/* ── Cancellation policy ───────────────────────── */}
@@ -726,14 +765,33 @@ function ApartmentPage() {
                         </button>
                       )}
                     </div>
-                    <FlightPriceBadge origin="TLV" dest="GVA" checkin={checkin} checkout={checkout}
+                    <FlightPriceBadge state={gvaFlight}
                       label="טיסה ל-Geneva (GVA)"
                       sublabel={`TLV → Geneva · ${checkin ? fmtDate(checkin) : "בחר תאריך"} · 2.5h מ-Val Thorens`}
                       fallbackUrl={skyscannerUrl} />
-                    <FlightPriceBadge origin="TLV" dest="LYS" checkin={checkin} checkout={checkout}
+                    <FlightPriceBadge state={lyonFlight}
                       label="טיסה ל-Lyon (LYS)"
                       sublabel={`TLV → Lyon · ${checkin ? fmtDate(checkin) : "בחר תאריך"} · 3h מ-Val Thorens`}
                       fallbackUrl={skyscannerUrlLyon} />
+                    <div className="flex flex-col gap-2 mt-2">
+                      <ToggleRow
+                        icon={<IconPlane size={18} />}
+                        label={`הוסיפו את הטיסה ל${cheaperFlight.airport}`}
+                        sublabel={cheaperFlight.price ? `לפי הטיסה הזולה ביותר שמצאנו${cheaperFlight.nonstop ? " · ישירה" : ""}` : "בודקים מחיר טיסה…"}
+                        price={cheaperFlight.price ? `€${cheaperFlight.price} לאדם` : undefined}
+                        checked={bookFlight}
+                        onChange={v => { if (!cheaperFlight.price) return; setBookFlight(v); if (v) setBookFlightQty(guests || 1); }}
+                      />
+                      <QtyStepper show={bookFlight} label="כמה כרטיסי טיסה?" qty={bookFlightQty} setQty={setBookFlightQty} max={Math.max(guests, 1)} total={bookFlightTotal} />
+                      <ToggleRow
+                        icon={<IconBriefcase size={18} />}
+                        label="הוסיפו כבודה"
+                        sublabel="כבודה נוספת לטיסה · €120 לאדם"
+                        price={`€${BAGGAGE_PRICE} לאדם`}
+                        checked={baggage} onChange={v => { setBaggage(v); if (v) setBaggageQty(Math.min(baggageQty || 1, guests) || 1); }}
+                      />
+                      <QtyStepper show={baggage} label="כמה תיקי כבודה?" qty={baggageQty} setQty={setBaggageQty} max={Math.max(guests, 1)} total={baggageTotal} />
+                    </div>
                   </div>
 
                   {/* ── Cancellation policy ───────────────────────── */}
@@ -823,6 +881,18 @@ function ApartmentPage() {
                           <span className="font-semibold text-gray-800">€{equipTotal.toLocaleString()}</span>
                         </div>
                       )}
+                      {bookFlight && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">טיסה · {cheaperFlight.airport}{cheaperFlight.nonstop ? " · ישירה" : ""}{bookFlightQty > 1 ? ` · ${bookFlightQty} אנשים` : ""}</span>
+                          <span className="font-semibold text-gray-800">€{bookFlightTotal.toLocaleString()}</span>
+                        </div>
+                      )}
+                      {baggage && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">כבודה נוספת{baggageQty > 1 ? ` · ${baggageQty} אנשים` : ""}</span>
+                          <span className="font-semibold text-gray-800">€{baggageTotal.toLocaleString()}</span>
+                        </div>
+                      )}
                       {cancel === "flexible" && (
                         <div className="flex justify-between">
                           <span className="text-gray-500">ביטול גמיש</span>
@@ -887,6 +957,7 @@ function ApartmentPage() {
                   <CardPaymentButton apartmentId={id} apartment={apt?.name ?? ""} checkin={checkin} checkout={checkout}
                     guests={guests} nights={nights} skiPass={skiPass} transfer={transfer} equipment={equipment} cancel={cancel} service={service}
                     transferDetails={transferDetails}
+                    flight={bookFlight} flightPrice={bookFlightTotal + baggageTotal} flightDetails={bookFlightDetails}
                     grandTotal={payNow}
                     split={splitCount > 1 ? { sharesTotal: splitCount, accommodationTotal: grandTotal, shareAmount: shareAccommodation, area: "Val Thorens, Trois Vallées" } : undefined}
                     label={splitCount > 1 ? "שלם/י את חלקך בכרטיס" : undefined}

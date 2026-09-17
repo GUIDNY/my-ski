@@ -64,6 +64,9 @@ export type Order = {
   ski_pass: boolean;
   transfer: boolean;
   equipment?: boolean;
+  flight?: boolean;
+  flight_price?: number | null;
+  flight_details?: string | null;
   cancel: string;
   service: string;
   total_eur: number;

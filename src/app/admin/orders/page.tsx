@@ -199,6 +199,7 @@ export default function OrdersAdmin() {
   const checklistFor = (o: Order) => {
     const items = [{ key: "address", label: "שליחת כתובת ופרטי צ׳ק-אין ללקוח" }, { key: "keys", label: "הכנת מפתחות בדלת (48ש׳ לפני)" }];
     if (o.transfer) items.unshift({ key: "transfer", label: "תיאום שאטל/הסעה משדה התעופה" });
+    if (o.flight) items.unshift({ key: "flight", label: "הזמנת כרטיסי הטיסה בפועל מול החברה" });
     return items;
   };
 
@@ -361,6 +362,7 @@ export default function OrdersAdmin() {
                   {o.transfer && <span className="text-xs font-semibold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full">🚐 הסעה{o.transfer_details ? ` · ${o.transfer_details}` : " · ללא פרטי טיסה"}</span>}
                   {o.ski_pass && <span className="text-xs font-semibold bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full">🎿 סקי פס</span>}
                   {o.equipment && <span className="text-xs font-semibold bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full">🎿 השכרת ציוד</span>}
+                  {o.flight && <span className="text-xs font-semibold bg-sky-50 text-sky-700 px-2.5 py-1 rounded-full">✈️ טיסה — לתפעל ידנית{o.flight_price ? ` · €${o.flight_price}` : ""}</span>}
                   <span className="text-xs font-semibold bg-gray-50 text-gray-600 px-2.5 py-1 rounded-full">🛡️ {CANCEL_LABEL[o.cancel] || o.cancel}</span>
                   <span className="text-xs font-semibold bg-gray-50 text-gray-600 px-2.5 py-1 rounded-full">{o.service === "ai" ? "🤖 AI" : "👤 שירות אנושי"}</span>
                   {o.group_id && <span className="text-xs font-semibold bg-violet-50 text-violet-700 px-2.5 py-1 rounded-full">👥 תשלום מפוצל ({o.shares_total})</span>}
@@ -386,7 +388,10 @@ export default function OrdersAdmin() {
                           );
                         })}
                         {o.transfer && o.transfer_details && (
-                          <p className="text-xs text-blue-600 bg-blue-50 rounded-lg px-3 py-2 mt-1">✈️ פרטי טיסה: {o.transfer_details}</p>
+                          <p className="text-xs text-blue-600 bg-blue-50 rounded-lg px-3 py-2 mt-1">✈️ פרטי טיסה (להסעה): {o.transfer_details}</p>
+                        )}
+                        {o.flight && o.flight_details && (
+                          <p className="text-xs text-sky-700 bg-sky-50 rounded-lg px-3 py-2 mt-1">🎫 הלקוח הזמין טיסה כחלק מהחבילה — {o.flight_details}. יש להזמין בפועל מול חברת התעופה.</p>
                         )}
                       </div>
                     )}
