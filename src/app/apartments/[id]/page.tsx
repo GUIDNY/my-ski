@@ -213,7 +213,7 @@ function ApartmentPage() {
   // Add-ons
   const [skiPass,  setSkiPass]  = useState(false);
   const [skiPasses, setSkiPasses] = useState<SkiPass[]>([]);
-  const [skiArea,  setSkiArea]  = useState<"val_thorens" | "trois_vallees">("trois_vallees");
+  const [skiArea,  setSkiArea]  = useState<"val_thorens" | "trois_vallees">("val_thorens");
   const [skiQty,   setSkiQty]   = useState(1);
   const [transfer, setTransfer] = useState(false);
   const [equipment, setEquipment] = useState(false);
