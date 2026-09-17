@@ -3,10 +3,9 @@ import { useEffect, useState } from "react";
 
 export type FlightPriceState = { price: number | null; nonstop: boolean; url: string | null; loading: boolean };
 
-// Lifted out of FlightPriceBadge so the parent page can compare the Geneva
-// and Lyon prices against each other (e.g. to pick the cheaper one for an
-// "add flight to package" toggle) instead of each badge only knowing its
-// own number.
+// Shared so the apartment page can compare the Geneva and Lyon prices
+// against each other (to pick the cheaper one for the "add flight to
+// package" toggle) instead of each row only knowing its own number.
 export function useFlightPrice(origin: string, dest: string, checkin: string, checkout: string): FlightPriceState {
   const [state, setState] = useState<FlightPriceState>({ price: null, nonstop: false, url: null, loading: false });
 

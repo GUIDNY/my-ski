@@ -13,8 +13,7 @@ import {
 import { buildWaHref } from "@/lib/whatsapp";
 import CardPaymentButton from "@/components/CardPaymentButton";
 import FlightDetailsModal, { EMPTY_FLIGHT, flightToString, flightFilled, type Flight } from "@/components/FlightDetailsModal";
-import FlightPriceBadge from "@/components/FlightPriceBadge";
-import { buildGoogleFlightsUrl } from "@/lib/google-flights";
+import FlightAddOn from "@/components/FlightAddOn";
 import { useFlightPrice } from "@/lib/useFlightPrice";
 import SaveTripButton from "@/components/SaveTripButton";
 import Logo from "@/components/Logo";
@@ -268,16 +267,7 @@ function ApartmentPage() {
     return options.find(p => p.duration_days >= skiDays) ?? options[options.length - 1];
   })();
 
-  /* ── Flight URLs with actual dates ─────────────────────── */
-  // Link to the exact same Google Flights query the price badge scrapes —
-  // pointing here to a different site (Skyscanner) while showing a Google
-  // Flights price led to a real mismatch (customer clicks through and
-  // can't find the price shown).
-  const flightUrl = (dest: string) => checkin && checkout
-    ? buildGoogleFlightsUrl(checkin, checkout, "TLV", dest)
-    : `https://www.google.com/travel/flights?hl=en&gl=us&curr=EUR&q=flights+from+TLV+to+${dest}`;
-  const skyscannerUrl = flightUrl("GVA");
-  const skyscannerUrlLyon = flightUrl("LYS");
+  /* ── Live flight prices ──────────────────────────────────── */
   const gvaFlight = useFlightPrice("TLV", "GVA", checkin, checkout);
   const lyonFlight = useFlightPrice("TLV", "LYS", checkin, checkout);
   // "add flight to package" always offers whichever of the two routes is
@@ -528,24 +518,13 @@ function ApartmentPage() {
                         </button>
                       )}
                     </div>
-                    <FlightPriceBadge state={gvaFlight}
-                      label="טיסה ל-Geneva (GVA)"
-                      sublabel={`TLV → Geneva · ${checkin ? fmtDate(checkin) : "בחר תאריך"} · 2.5h מ-Val Thorens`}
-                      fallbackUrl={skyscannerUrl} />
-                    <FlightPriceBadge state={lyonFlight}
-                      label="טיסה ל-Lyon (LYS)"
-                      sublabel={`TLV → Lyon · ${checkin ? fmtDate(checkin) : "בחר תאריך"} · 3h מ-Val Thorens`}
-                      fallbackUrl={skyscannerUrlLyon} />
-                    <div className="flex flex-col gap-2 mt-2">
-                      <ToggleRow
-                        icon={<IconPlane size={18} />}
-                        label={`הוסיפו את הטיסה ל${cheaperFlight.airport}`}
-                        sublabel={cheaperFlight.price ? `לפי הטיסה הזולה ביותר שמצאנו${cheaperFlight.nonstop ? " · ישירה" : ""}` : "בודקים מחיר טיסה…"}
-                        price={cheaperFlight.price ? `€${cheaperFlight.price} לאדם` : undefined}
+                    <div className="mt-2">
+                      <FlightAddOn state={cheaperFlight} airport={cheaperFlight.airport}
                         checked={bookFlight}
-                        onChange={v => { if (!cheaperFlight.price) return; setBookFlight(v); if (v) setBookFlightQty(guests || 1); }}
-                      />
-                      <QtyStepper show={bookFlight} label="כמה כרטיסי טיסה?" qty={bookFlightQty} setQty={setBookFlightQty} max={Math.max(guests, 1)} total={bookFlightTotal} />
+                        onToggle={v => { setBookFlight(v); if (v) setBookFlightQty(guests || 1); }}
+                        qty={bookFlightQty} setQty={setBookFlightQty} maxQty={Math.max(guests, 1)} total={bookFlightTotal} />
+                    </div>
+                    <div className="flex flex-col gap-2 mt-2">
                       <ToggleRow
                         icon={<IconBriefcase size={18} />}
                         label="הוסיפו כבודה"
@@ -765,24 +744,13 @@ function ApartmentPage() {
                         </button>
                       )}
                     </div>
-                    <FlightPriceBadge state={gvaFlight}
-                      label="טיסה ל-Geneva (GVA)"
-                      sublabel={`TLV → Geneva · ${checkin ? fmtDate(checkin) : "בחר תאריך"} · 2.5h מ-Val Thorens`}
-                      fallbackUrl={skyscannerUrl} />
-                    <FlightPriceBadge state={lyonFlight}
-                      label="טיסה ל-Lyon (LYS)"
-                      sublabel={`TLV → Lyon · ${checkin ? fmtDate(checkin) : "בחר תאריך"} · 3h מ-Val Thorens`}
-                      fallbackUrl={skyscannerUrlLyon} />
-                    <div className="flex flex-col gap-2 mt-2">
-                      <ToggleRow
-                        icon={<IconPlane size={18} />}
-                        label={`הוסיפו את הטיסה ל${cheaperFlight.airport}`}
-                        sublabel={cheaperFlight.price ? `לפי הטיסה הזולה ביותר שמצאנו${cheaperFlight.nonstop ? " · ישירה" : ""}` : "בודקים מחיר טיסה…"}
-                        price={cheaperFlight.price ? `€${cheaperFlight.price} לאדם` : undefined}
+                    <div className="mt-2">
+                      <FlightAddOn state={cheaperFlight} airport={cheaperFlight.airport}
                         checked={bookFlight}
-                        onChange={v => { if (!cheaperFlight.price) return; setBookFlight(v); if (v) setBookFlightQty(guests || 1); }}
-                      />
-                      <QtyStepper show={bookFlight} label="כמה כרטיסי טיסה?" qty={bookFlightQty} setQty={setBookFlightQty} max={Math.max(guests, 1)} total={bookFlightTotal} />
+                        onToggle={v => { setBookFlight(v); if (v) setBookFlightQty(guests || 1); }}
+                        qty={bookFlightQty} setQty={setBookFlightQty} maxQty={Math.max(guests, 1)} total={bookFlightTotal} />
+                    </div>
+                    <div className="flex flex-col gap-2 mt-2">
                       <ToggleRow
                         icon={<IconBriefcase size={18} />}
                         label="הוסיפו כבודה"
