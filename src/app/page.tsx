@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import { IconMountain, IconSnowflake } from "@/components/Icons";
 import { createServerClient } from "@/lib/supabase-server";
 import { TRANSFER_PRICE, FLIGHT_ESTIMATE, LA_CIME_NIGHTS, skiPassPerPersonForWeek } from "@/lib/deal-pricing";
+import { hasDirectFlight } from "@/lib/direct-flight-days";
 import type { Apartment, SkiPass } from "@/types";
 
 // This page queries live inventory/availability (which apartment is
@@ -148,9 +149,14 @@ export default async function Home() {
       const guests = Math.min(apt.max_guests || 4, 4) || 4;
       const checkinD = new Date(week.week + "T12:00:00");
       const checkoutD = new Date(checkinD); checkoutD.setDate(checkoutD.getDate() + 7);
-      const grandTotal = week.price + skiPassPerPerson * guests + TRANSFER_PRICE * guests + FLIGHT_ESTIMATE * guests;
+      // Only fold the flight estimate in — and only call it "direct" —
+      // for weeks whose Saturday actually falls in the verified nonstop
+      // charter window; otherwise there's no real direct flight that day
+      // and claiming one would be exactly the fabrication we avoid elsewhere.
+      const hasFlight = hasDirectFlight(checkinD);
+      const grandTotal = week.price + skiPassPerPerson * guests + TRANSFER_PRICE * guests + (hasFlight ? FLIGHT_ESTIMATE * guests : 0);
       return {
-        apt, guests, perPerson: Math.round(grandTotal / guests),
+        apt, guests, hasFlight, perPerson: Math.round(grandTotal / guests),
         checkin: checkinD.toISOString().slice(0, 10), checkout: checkoutD.toISOString().slice(0, 10),
       };
     });
@@ -206,10 +212,10 @@ export default async function Home() {
             <div className="text-center mb-8 md:mb-12">
               <span className="text-xs font-bold tracking-widest uppercase text-blue-600">שבת עד שבת · מחיר אחד, הכל כלול</span>
               <h2 className="font-display text-2xl md:text-4xl font-black text-gray-900 mt-1">חבילות מומלצות</h2>
-              <p className="text-gray-500 text-sm mt-1">דירה + סקי פס לשלושת העמקים + הסעה + טיסה (הערכה) — שבועות אמיתיים שזמינים עכשיו</p>
+              <p className="text-gray-500 text-sm mt-1">דירה + סקי פס לשלושת העמקים + הסעה + טיסה ישירה (הערכה, בשבועות עם טיסה ישירה) — שבועות אמיתיים שזמינים עכשיו</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {packages.map(({ apt, guests, perPerson, checkin, checkout }) => (
+              {packages.map(({ apt, guests, hasFlight, perPerson, checkin, checkout }) => (
                 <a key={apt.id} href="/weekly?deal=full"
                   className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 block">
                   <div className="relative h-48 overflow-hidden">
@@ -227,7 +233,11 @@ export default async function Home() {
                       <span className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-semibold">🏠 דירה</span>
                       <span className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-semibold">⛷️ סקי פס Trois Vallées</span>
                       <span className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-semibold">🚐 הסעה הלוך-חזור</span>
-                      <span className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-semibold">✈️ טיסה (הערכה)</span>
+                      {hasFlight ? (
+                        <span className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-semibold">✈️ טיסה ישירה (הערכה)</span>
+                      ) : (
+                        <span className="text-xs bg-gray-50 text-gray-500 px-2.5 py-1 rounded-full font-semibold">✈️ ללא טיסה ישירה בשבוע זה</span>
+                      )}
                     </div>
                     <div className="flex items-end justify-between">
                       <div>

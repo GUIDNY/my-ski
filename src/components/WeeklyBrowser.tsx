@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Apartment } from "@/types";
 import { IconBed, IconUsers, IconMountain, IconCalendar, IconBriefcase, IconCheck } from "@/components/Icons";
+import { hasDirectFlight } from "@/lib/direct-flight-days";
 
 const MONTHS_FULL = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
 
@@ -41,8 +42,6 @@ export default function WeeklyBrowser({
   transferPrice?: number;
   flightEstimate?: number;
 }) {
-  const fullDealExtraPerPerson = skiPassPerPerson + transferPrice + flightEstimate;
-
   const weekMinPrice = useMemo(() => {
     const map = new Map<string, number>();
     for (const apt of apartments) {
@@ -85,12 +84,23 @@ export default function WeeklyBrowser({
       .sort((a, b) => a.price - b.price);
   }, [apartments, selected, guests]);
 
+  // Every La Cime week checks in on a Saturday, and a real nonstop flight
+  // only exists on Saturdays within the verified charter window (see
+  // direct-flight-days.ts) — so the flight estimate only gets folded in,
+  // and only ever called "direct", for weeks where that's actually true.
+  const weekHasDirectFlight = (weekIso: string) => hasDirectFlight(weekRange(weekIso).checkin);
+
   // When "דיל שלם" is on, fold the real ski-pass tier + flat transfer fee +
-  // business flight estimate into every price shown, scaled by the current
-  // guest count — so the headline number always matches what's selected,
-  // never just the bare apartment rate.
-  const displayPrice = (base: number) =>
-    dealMode === "full" ? base + fullDealExtraPerPerson * guests : base;
+  // (week-dependent) flight estimate into every price shown, scaled by the
+  // current guest count — so the headline number always matches what's
+  // selected, never just the bare apartment rate.
+  const displayPrice = (base: number, weekIso: string) => {
+    if (dealMode !== "full") return base;
+    const extra = skiPassPerPerson + transferPrice + (weekHasDirectFlight(weekIso) ? flightEstimate : 0);
+    return base + extra * guests;
+  };
+
+  const selectedHasFlight = selected ? weekHasDirectFlight(selected) : false;
 
   if (!allWeeks.length) {
     return (
@@ -119,15 +129,16 @@ export default function WeeklyBrowser({
       </div>
       {dealMode === "full" && (
         <p className="text-center text-blue-700 text-xs font-semibold mb-4 -mt-1">
-          כולל סקי פס לשלושת העמקים · הסעה · טיסה (הערכה) — לפי מספר האנשים שבחרתם
+          כולל סקי פס לשלושת העמקים · הסעה · טיסה ישירה (הערכה, בשבועות עם טיסה ישירה) — לפי מספר האנשים שבחרתם
         </p>
       )}
 
       {/* Explainer */}
       <div className="bg-blue-50/60 border border-blue-100 rounded-2xl p-4 md:p-5 mb-6 text-sm text-gray-700 leading-relaxed">
         {dealMode === "full" ? (
-          <>המחירים כאן כוללים דירה לשבוע שלם (שבת עד שבת), סקי פס אמיתי לשלושת העמקים, הסעה הלוך-חזור וטיסה
-          (הערכה) — הכל לפי מספר האנשים שבחרתם. הטיסה בהערכה בלבד, ונסגור אותה איתכם ידנית לפי הטיסה הזולה ביותר שנמצא.</>
+          <>המחירים כאן כוללים דירה לשבוע שלם (שבת עד שבת), סקי פס אמיתי לשלושת העמקים, הסעה הלוך-חזור, ובשבועות
+          שיש בהם טיסה ישירה (מסומנים ב-✈️) — גם הערכת מחיר לטיסה ישירה. שבועות ללא טיסה ישירה לא כוללים אותה במחיר.
+          הטיסה בהערכה בלבד, ונסגור אותה איתכם ידנית לפי הטיסה הזולה ביותר שנמצא.</>
         ) : (
           <>הדירות כאן מוצעות לשבוע שלם (שבת עד שבת) במחיר הדירה בלבד — אפשר גם לעבור ל&quot;דיל שלם&quot; למעלה כדי לראות
           מחיר שכולל גם סקי פס, הסעה וטיסה, או פשוט להזמין את הדירה ולסדר את השאר בעצמכם.</>
@@ -139,7 +150,7 @@ export default function WeeklyBrowser({
         {(() => {
           const range = selected ? weekRange(selected) : null;
           const rawPrice = selected ? weekMinPrice.get(selected) : undefined;
-          const price = rawPrice !== undefined ? displayPrice(rawPrice) : undefined;
+          const price = rawPrice !== undefined && selected ? displayPrice(rawPrice, selected) : undefined;
           return (
             <>
               {/* ══ DESKTOP bar (md+) ══════════════════════════ */}
@@ -261,7 +272,7 @@ export default function WeeklyBrowser({
             {allWeeks.map(w => {
               const isSelected = selected === w;
               const rawPrice = weekMinPrice.get(w);
-              const price = rawPrice !== undefined ? displayPrice(rawPrice) : undefined;
+              const price = rawPrice !== undefined ? displayPrice(rawPrice, w) : undefined;
               const { checkin, checkout } = weekRange(w);
               return (
                 <button key={w} onClick={() => { setSelected(w); setOpen(false); }}
@@ -289,7 +300,8 @@ export default function WeeklyBrowser({
           {allWeeks.map(w => {
             const isSelected = selected === w;
             const rawPrice = weekMinPrice.get(w);
-            const price = rawPrice !== undefined ? displayPrice(rawPrice) : undefined;
+            const price = rawPrice !== undefined ? displayPrice(rawPrice, w) : undefined;
+            const weekFlight = weekHasDirectFlight(w);
             const { checkin } = weekRange(w);
             return (
               <button key={w} onClick={() => setSelected(w)}
@@ -298,7 +310,9 @@ export default function WeeklyBrowser({
                     ? "bg-gradient-to-b from-blue-600 to-blue-700 border-blue-700 text-white shadow-md scale-[1.03]"
                     : "bg-white border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-blue-50/50"
                 }`}>
-                <span className={`text-xs font-bold ${isSelected ? "text-white" : "text-gray-900"}`}>{fmtDate(checkin)}</span>
+                <span className={`text-xs font-bold flex items-center gap-1 ${isSelected ? "text-white" : "text-gray-900"}`}>
+                  {fmtDate(checkin)} {dealMode === "full" && weekFlight && <span title="יש טיסה ישירה בשבוע זה">✈️</span>}
+                </span>
                 {price !== undefined && (
                   <span className={`text-[10px] font-semibold ${isSelected ? "text-blue-100" : "text-blue-600"}`}>
                     מ-€{price.toLocaleString("en-US")}
@@ -359,7 +373,11 @@ export default function WeeklyBrowser({
                   <div className="flex flex-wrap gap-1.5 mb-4">
                     <span className="text-[10px] bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-semibold">⛷️ סקי פס</span>
                     <span className="text-[10px] bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-semibold">🚐 הסעה</span>
-                    <span className="text-[10px] bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-semibold">✈️ טיסה (הערכה)</span>
+                    {selectedHasFlight ? (
+                      <span className="text-[10px] bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-semibold">✈️ טיסה ישירה (הערכה)</span>
+                    ) : (
+                      <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-1 rounded-full font-semibold">✈️ ללא טיסה ישירה בשבוע זה</span>
+                    )}
                   </div>
                 )}
                 <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
@@ -376,9 +394,9 @@ export default function WeeklyBrowser({
                     <div className="text-[10px] text-gray-400 font-medium">
                       {dealMode === "full" ? `הכל כלול · ל-${guests} אנשים` : `לשבוע · ל-${guests} אנשים`}
                     </div>
-                    <div className="text-lg font-black text-gray-900">€{displayPrice(price).toLocaleString("en-US")}</div>
+                    <div className="text-lg font-black text-gray-900">€{displayPrice(price, selected!).toLocaleString("en-US")}</div>
                     <div className="text-[10px] text-blue-500 font-semibold">
-                      ≈ €{Math.round(displayPrice(price) / guests).toLocaleString("en-US")} לאדם
+                      ≈ €{Math.round(displayPrice(price, selected!) / guests).toLocaleString("en-US")} לאדם
                     </div>
                   </div>
                 </div>
