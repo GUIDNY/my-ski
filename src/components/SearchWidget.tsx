@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
+import { hasDirectFlight } from "@/lib/direct-flight-days";
 
 const MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const DAYS   = ["א׳","ב׳","ג׳","ד׳","ה׳","ו׳","ש׳"];
@@ -73,6 +74,9 @@ function MonthGrid({
               ].join(" ")}>
                 {date.getDate()}
               </div>
+              {!disabled && hasDirectFlight(date) && (
+                <span className="absolute bottom-0 z-10 text-[8px] leading-none" title="בדרך כלל יש טיסה ישירה מתל אביב ליון ביום הזה">✈️</span>
+              )}
             </div>
           );
         })}
@@ -290,6 +294,8 @@ export default function SearchWidget() {
               </div>
             </div>
           </div>
+
+          <p className="text-[11px] text-gray-400 text-center mt-2">✈️ = בדרך כלל יש טיסה ישירה מתל אביב ליון ביום הזה</p>
 
           {/* Footer */}
           <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-3">
