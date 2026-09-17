@@ -32,5 +32,5 @@ export default function FlightPriceBadge({ origin, dest, checkin, checkout }: {
       </span>
     );
   }
-  return <span className="text-xs font-bold text-blue-600 flex-shrink-0">Skyscanner ←</span>;
+  return <span className="text-xs font-bold text-blue-600 flex-shrink-0">בדקו טיסות ←</span>;
 }

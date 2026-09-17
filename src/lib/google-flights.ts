@@ -1,7 +1,9 @@
 // Build Google Flights' `tfs` query parameter (protobuf-encoded round trip).
 // Structure reverse-engineered from real Google Flights URLs. Shared by the
-// client-side FlightSearch widget and the server-side flight-price scraper
-// so both build the exact same URL.
+// apartment page (as the link a customer actually clicks) and the
+// server-side flight-price scraper, so the displayed price and the page it
+// links to are always the exact same query — using btoa instead of Buffer
+// so this one file works in both the browser and the Node API route.
 function buildTfs(outDate: string, retDate: string, origin: string, dest: string): string {
   const enc = (s: string) => s.split("").map(c => c.charCodeAt(0));
   const makeLeg = (date: string, from: string, to: string) => {
@@ -13,7 +15,7 @@ function buildTfs(outDate: string, retDate: string, origin: string, dest: string
     return [0x1a, leg.length, ...leg];
   };
   const bytes = [0x08, 0x01, 0x10, 0x02, ...makeLeg(outDate, origin, dest), ...makeLeg(retDate, dest, origin)];
-  return Buffer.from(bytes).toString("base64");
+  return btoa(String.fromCharCode(...bytes));
 }
 
 export function buildGoogleFlightsUrl(outDate: string, retDate: string, origin: string, dest: string): string {

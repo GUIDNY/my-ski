@@ -14,6 +14,7 @@ import { buildWaHref } from "@/lib/whatsapp";
 import CardPaymentButton from "@/components/CardPaymentButton";
 import FlightDetailsModal, { EMPTY_FLIGHT, flightToString, flightFilled, type Flight } from "@/components/FlightDetailsModal";
 import FlightPriceBadge from "@/components/FlightPriceBadge";
+import { buildGoogleFlightsUrl } from "@/lib/google-flights";
 import SaveTripButton from "@/components/SaveTripButton";
 import Logo from "@/components/Logo";
 
@@ -262,17 +263,15 @@ function ApartmentPage() {
   })();
 
   /* ── Flight URLs with actual dates ─────────────────────── */
-  const fmtSky = (s: string) => {
-    if (!s) return "";
-    const d = new Date(s);
-    return `${String(d.getFullYear()).slice(2)}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;
-  };
-  const skyscannerUrl = checkin && checkout
-    ? `https://www.skyscanner.co.il/transport/flights/tlv/gva/${fmtSky(checkin)}/${fmtSky(checkout)}/?adultsv2=${guests}&cabinclass=economy&childrenv2=&rtn=1`
-    : `https://www.skyscanner.co.il/transport/flights/tlv/gva/`;
-  const skyscannerUrlLyon = checkin && checkout
-    ? `https://www.skyscanner.co.il/transport/flights/tlv/lys/${fmtSky(checkin)}/${fmtSky(checkout)}/?adultsv2=${guests}&cabinclass=economy&childrenv2=&rtn=1`
-    : `https://www.skyscanner.co.il/transport/flights/tlv/lys/`;
+  // Link to the exact same Google Flights query the price badge scrapes —
+  // pointing here to a different site (Skyscanner) while showing a Google
+  // Flights price led to a real mismatch (customer clicks through and
+  // can't find the price shown).
+  const flightUrl = (dest: string) => checkin && checkout
+    ? buildGoogleFlightsUrl(checkin, checkout, "TLV", dest)
+    : `https://www.google.com/travel/flights?hl=en&gl=us&curr=EUR&q=flights+from+TLV+to+${dest}`;
+  const skyscannerUrl = flightUrl("GVA");
+  const skyscannerUrlLyon = flightUrl("LYS");
 
   /* ── Price calculation ──────────────────────────────────── */
   const basePrice = apt?.price_per_night ?? 0;
