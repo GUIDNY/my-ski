@@ -4,6 +4,7 @@ import FlightSearch from "@/components/FlightSearch";
 import Footer from "@/components/Footer";
 import { IconMountain, IconSnowflake } from "@/components/Icons";
 import { createServerClient } from "@/lib/supabase-server";
+import { TRANSFER_PRICE, FLIGHT_ESTIMATE, LA_CIME_NIGHTS, skiPassPerPersonForWeek } from "@/lib/deal-pricing";
 import type { Apartment, SkiPass } from "@/types";
 
 // This page queries live inventory/availability (which apartment is
@@ -15,9 +16,6 @@ import type { Apartment, SkiPass } from "@/types";
 // no runtime error, which points squarely at a build-time static snapshot.
 export const dynamic = "force-dynamic";
 
-const TRANSFER_PRICE = 180;  // matches the flat per-person add-on used everywhere else on the site
-const FLIGHT_ESTIMATE = 350; // rough per-person flight estimate for the homepage teaser cards, set by the business
-const LA_CIME_NIGHTS = 7;    // every La Cime week is a fixed Saturday-to-Saturday stay
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const fmtDate = (s: string) => { const d = new Date(s + "T12:00:00"); return `${d.getDate()} ב${HE_MONTHS[d.getMonth()]}`; };
 
@@ -128,10 +126,7 @@ export default async function Home() {
   const { data: passOptions } = await db.from("ski_passes").select("*")
     .eq("available", true).eq("type", "adult").eq("area", "trois_vallees")
     .order("duration_days", { ascending: true });
-  const skiDays = LA_CIME_NIGHTS - 1;
-  const passes = (passOptions as SkiPass[] | null) ?? [];
-  const skiTier = passes.length ? (passes.find(p => p.duration_days >= skiDays) ?? passes[passes.length - 1]) : null;
-  const skiPassPerPerson = skiTier ? (skiDays > skiTier.duration_days ? Math.round((skiTier.price / skiTier.duration_days) * skiDays) : skiTier.price) : 0;
+  const skiPassPerPerson = skiPassPerPersonForWeek(passOptions as SkiPass[] | null);
 
   // La Cime ("שבת עד שבת") weeks are real, fixed-price inventory — no
   // estimate needed, so these packages show the actual next available week

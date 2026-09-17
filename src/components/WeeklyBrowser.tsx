@@ -28,7 +28,21 @@ function SpecChip({ icon, label }: { icon: React.ReactNode; label: string }) {
   );
 }
 
-export default function WeeklyBrowser({ apartments, initialDeal = "apartment" }: { apartments: Apartment[]; initialDeal?: "apartment" | "full" }) {
+export default function WeeklyBrowser({
+  apartments,
+  initialDeal = "apartment",
+  skiPassPerPerson = 0,
+  transferPrice = 0,
+  flightEstimate = 0,
+}: {
+  apartments: Apartment[];
+  initialDeal?: "apartment" | "full";
+  skiPassPerPerson?: number;
+  transferPrice?: number;
+  flightEstimate?: number;
+}) {
+  const fullDealExtraPerPerson = skiPassPerPerson + transferPrice + flightEstimate;
+
   const weekMinPrice = useMemo(() => {
     const map = new Map<string, number>();
     for (const apt of apartments) {
@@ -71,6 +85,13 @@ export default function WeeklyBrowser({ apartments, initialDeal = "apartment" }:
       .sort((a, b) => a.price - b.price);
   }, [apartments, selected, guests]);
 
+  // When "דיל שלם" is on, fold the real ski-pass tier + flat transfer fee +
+  // business flight estimate into every price shown, scaled by the current
+  // guest count — so the headline number always matches what's selected,
+  // never just the bare apartment rate.
+  const displayPrice = (base: number) =>
+    dealMode === "full" ? base + fullDealExtraPerPerson * guests : base;
+
   if (!allWeeks.length) {
     return (
       <div className="text-center text-gray-400 py-24 bg-white rounded-3xl border border-gray-100">
@@ -98,22 +119,27 @@ export default function WeeklyBrowser({ apartments, initialDeal = "apartment" }:
       </div>
       {dealMode === "full" && (
         <p className="text-center text-blue-700 text-xs font-semibold mb-4 -mt-1">
-          כולל הסעה משדה התעופה · סקי פס לשלושת העמקים · טיסה וכבודה
+          כולל סקי פס לשלושת העמקים · הסעה · טיסה (הערכה) — לפי מספר האנשים שבחרתם
         </p>
       )}
 
       {/* Explainer */}
       <div className="bg-blue-50/60 border border-blue-100 rounded-2xl p-4 md:p-5 mb-6 text-sm text-gray-700 leading-relaxed">
-        הדירות כאן מוצעות לשבוע שלם (שבת עד שבת) ומתאימות במיוחד לחבילה מלאה — אפשר לבקש מאיתנו הצעת מחיר
-        שכוללת גם טיסה, סקי פס והסעה, או פשוט להזמין את הדירה בלבד ולסדר את השאר בעצמכם. אנחנו מאמינים בגמישות
-        ובחוויית לקוח נוחה.
+        {dealMode === "full" ? (
+          <>המחירים כאן כוללים דירה לשבוע שלם (שבת עד שבת), סקי פס אמיתי לשלושת העמקים, הסעה הלוך-חזור וטיסה
+          (הערכה) — הכל לפי מספר האנשים שבחרתם. הטיסה בהערכה בלבד, ונסגור אותה איתכם ידנית לפי הטיסה הזולה ביותר שנמצא.</>
+        ) : (
+          <>הדירות כאן מוצעות לשבוע שלם (שבת עד שבת) במחיר הדירה בלבד — אפשר גם לעבור ל&quot;דיל שלם&quot; למעלה כדי לראות
+          מחיר שכולל גם סקי פס, הסעה וטיסה, או פשוט להזמין את הדירה ולסדר את השאר בעצמכם.</>
+        )}
       </div>
 
       {/* Week picker — cloned from the homepage search bar */}
       <div ref={ref} className="relative mb-6 sticky top-20 z-20">
         {(() => {
           const range = selected ? weekRange(selected) : null;
-          const price = selected ? weekMinPrice.get(selected) : undefined;
+          const rawPrice = selected ? weekMinPrice.get(selected) : undefined;
+          const price = rawPrice !== undefined ? displayPrice(rawPrice) : undefined;
           return (
             <>
               {/* ══ DESKTOP bar (md+) ══════════════════════════ */}
@@ -158,7 +184,9 @@ export default function WeeklyBrowser({ apartments, initialDeal = "apartment" }:
                 <div className="w-px bg-gray-100 my-4" />
                 <div className="flex items-center px-5 py-5">
                   <div>
-                    <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-1.5">מחיר</div>
+                    <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-1.5">
+                      {dealMode === "full" ? `החל מ- (${guests} אנשים)` : "החל מ-"}
+                    </div>
                     {price !== undefined
                       ? <span className="font-black text-gray-900 text-base">€{price.toLocaleString("en-US")}</span>
                       : <span className="text-gray-400 text-sm">-</span>}
@@ -209,7 +237,9 @@ export default function WeeklyBrowser({ apartments, initialDeal = "apartment" }:
                 </div>
                 <div className="flex items-center justify-between px-5 py-3">
                   <div>
-                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">מחיר</div>
+                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">
+                      {dealMode === "full" ? `החל מ- (${guests} אנשים)` : "החל מ-"}
+                    </div>
                     {price !== undefined
                       ? <span className="font-black text-gray-900 text-sm">€{price.toLocaleString("en-US")}</span>
                       : <span className="text-gray-400 text-sm">-</span>}
@@ -230,7 +260,8 @@ export default function WeeklyBrowser({ apartments, initialDeal = "apartment" }:
             style={{ boxShadow: "0 16px 50px rgba(0,0,0,0.18)" }}>
             {allWeeks.map(w => {
               const isSelected = selected === w;
-              const price = weekMinPrice.get(w);
+              const rawPrice = weekMinPrice.get(w);
+              const price = rawPrice !== undefined ? displayPrice(rawPrice) : undefined;
               const { checkin, checkout } = weekRange(w);
               return (
                 <button key={w} onClick={() => { setSelected(w); setOpen(false); }}
@@ -257,7 +288,8 @@ export default function WeeklyBrowser({ apartments, initialDeal = "apartment" }:
         <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-6 -mx-1 px-1" style={{ scrollbarWidth: "none" }}>
           {allWeeks.map(w => {
             const isSelected = selected === w;
-            const price = weekMinPrice.get(w);
+            const rawPrice = weekMinPrice.get(w);
+            const price = rawPrice !== undefined ? displayPrice(rawPrice) : undefined;
             const { checkin } = weekRange(w);
             return (
               <button key={w} onClick={() => setSelected(w)}
@@ -280,7 +312,9 @@ export default function WeeklyBrowser({ apartments, initialDeal = "apartment" }:
 
       {/* Results line */}
       <div className="flex items-center justify-between mb-4 px-1">
-        <span className="text-sm font-bold text-gray-900">{visible.length} דירות זמינות לשבוע זה</span>
+        <span className="flex items-center gap-1.5 text-sm font-bold text-gray-900">
+          <IconMountain size={13} className="text-blue-500" /> {visible.length} דירות זמינות לשבוע זה
+        </span>
         {visible.length > 0 && (
           <span className="text-[11px] text-gray-400 font-medium">ממוין לפי מחיר — הזול ביותר קודם</span>
         )}
@@ -316,11 +350,18 @@ export default function WeeklyBrowser({ apartments, initialDeal = "apartment" }:
                   <IconMountain size={11} className="text-blue-500" /> Val Thorens
                 </div>
                 <h3 className="font-display font-bold text-base text-gray-900 mb-2 leading-tight">{apt.name}</h3>
-                <div className="flex flex-wrap items-center gap-1.5 mb-4">
+                <div className="flex flex-wrap items-center gap-1.5 mb-3">
                   <SpecChip icon={<IconUsers size={12} />} label={`עד ${apt.max_guests ?? "-"}`} />
                   <SpecChip icon={<IconBed size={12} />} label={`${apt.beds} חדרים`} />
                   <SpecChip icon={null} label={`${apt.sqm} מ״ר`} />
                 </div>
+                {dealMode === "full" && (
+                  <div className="flex flex-wrap gap-1.5 mb-4">
+                    <span className="text-[10px] bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-semibold">⛷️ סקי פס</span>
+                    <span className="text-[10px] bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-semibold">🚐 הסעה</span>
+                    <span className="text-[10px] bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-semibold">✈️ טיסה (הערכה)</span>
+                  </div>
+                )}
                 <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
                   <a href={`/apartments/${apt.id}?${new URLSearchParams({
                       checkin: selected!,
@@ -332,9 +373,13 @@ export default function WeeklyBrowser({ apartments, initialDeal = "apartment" }:
                     צפייה בדירה
                   </a>
                   <div className="text-left">
-                    <div className="text-[10px] text-gray-400 font-medium">לשבוע · ל-{guests} אנשים</div>
-                    <div className="text-lg font-black text-gray-900">€{price.toLocaleString("en-US")}</div>
-                    <div className="text-[10px] text-blue-500 font-semibold">≈ €{Math.round(price / guests).toLocaleString("en-US")} לאדם</div>
+                    <div className="text-[10px] text-gray-400 font-medium">
+                      {dealMode === "full" ? `הכל כלול · ל-${guests} אנשים` : `לשבוע · ל-${guests} אנשים`}
+                    </div>
+                    <div className="text-lg font-black text-gray-900">€{displayPrice(price).toLocaleString("en-US")}</div>
+                    <div className="text-[10px] text-blue-500 font-semibold">
+                      ≈ €{Math.round(displayPrice(price) / guests).toLocaleString("en-US")} לאדם
+                    </div>
                   </div>
                 </div>
               </div>

@@ -1,7 +1,8 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { createServerClient } from "@/lib/supabase-server";
-import type { Apartment } from "@/types";
+import { TRANSFER_PRICE, FLIGHT_ESTIMATE, skiPassPerPersonForWeek } from "@/lib/deal-pricing";
+import type { Apartment, SkiPass } from "@/types";
 import WeeklyBrowser from "@/components/WeeklyBrowser";
 import { IconCheck, IconMountain, IconTicket } from "@/components/Icons";
 
@@ -23,12 +24,20 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
     .order("price_per_night", { ascending: true });
   const apartments: Apartment[] = data ?? [];
 
+  // Real Trois Vallées ski-pass tier for a full La Cime week, so the
+  // "דיל שלם" toggle folds an actual price (not a guess) into the totals
+  // shown in WeeklyBrowser — same source used on the homepage packages.
+  const { data: passOptions } = await db.from("ski_passes").select("*")
+    .eq("available", true).eq("type", "adult").eq("area", "trois_vallees")
+    .order("duration_days", { ascending: true });
+  const skiPassPerPerson = skiPassPerPersonForWeek(passOptions as SkiPass[] | null);
+
   const allPrices = apartments.flatMap(a => (a.available_weeks ?? []).map(w => w.price));
   const fromPrice = allPrices.length ? Math.min(...allPrices) : null;
   const weekCount = new Set(apartments.flatMap(a => (a.available_weeks ?? []).map(w => w.week))).size;
 
   return (
-    <div className="min-h-screen" style={{ background: "#f7f9fb" }} dir="rtl">
+    <div className="min-h-screen" style={{ background: "linear-gradient(to bottom, #f7f9fb, #eef2f7)" }} dir="rtl">
       <Navbar />
 
       {/* Hero */}
@@ -74,7 +83,13 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
       </div>
 
       <div className="pt-10 pb-16 px-5 md:px-6 max-w-6xl mx-auto">
-        <WeeklyBrowser apartments={apartments} initialDeal={initialDeal} />
+        <WeeklyBrowser
+          apartments={apartments}
+          initialDeal={initialDeal}
+          skiPassPerPerson={skiPassPerPerson}
+          transferPrice={TRANSFER_PRICE}
+          flightEstimate={FLIGHT_ESTIMATE}
+        />
       </div>
       <Footer />
     </div>
