@@ -99,6 +99,10 @@ export default function AiConcierge() {
   }, [open]);
 
   const hidden = HIDDEN.some(h => pathname === h || pathname.startsWith(h + "/"));
+  // On mobile the launcher floats above the tab bar on every page, which
+  // turned out to feel like clutter away from the homepage — desktop's
+  // corner bubble is less intrusive so it keeps showing everywhere.
+  const mobileHomeOnly = pathname !== "/";
 
   // Mobile bottom-sheet drag handle — swipe down to close, like a native
   // sheet. Only wired on the handle bar so it never fights the message
@@ -158,10 +162,11 @@ export default function AiConcierge() {
       <button
         onClick={() => setOpen(v => !v)}
         aria-label="שאל את SkiShare"
-        className="fixed z-[60] rounded-full shadow-lg border-2 border-white overflow-hidden
+        className={`fixed z-[60] rounded-full shadow-lg border-2 border-white overflow-hidden
           bottom-[34px] left-1/2 -translate-x-1/2 w-16 h-16
           md:bottom-6 md:left-6 md:right-auto md:translate-x-0 md:w-16 md:h-16
-          bg-blue-600 transition-transform hover:scale-105 active:scale-95"
+          bg-blue-600 transition-transform hover:scale-105 active:scale-95
+          ${mobileHomeOnly ? "hidden md:block" : ""}`}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/ai-guide.png" alt="" className="w-full h-full object-cover object-top" />

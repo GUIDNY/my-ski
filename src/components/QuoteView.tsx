@@ -7,7 +7,7 @@ import {
   IconUsers, IconUser, IconMoon, IconWhatsApp,
 } from "@/components/Icons";
 import { buildWaHref } from "@/lib/whatsapp";
-import { getEffectivePrice, skiDaysFromNights } from "@/lib/pricing";
+import { getEffectivePrice, skiDaysFromNights, equipCost } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
 import Logo from "@/components/Logo";
 import CardPaymentButton from "@/components/CardPaymentButton";
@@ -54,7 +54,6 @@ const TRANSFER_PRICE = 180;
 const FLEXIBLE_EXTRA = 100;
 const AI_DISCOUNT = 50;
 // a "week" = 6 nights → flat €120; under that €30/night; each extra night +€20
-const equipCost = (n: number) => (n <= 0 ? 0 : n < 6 ? 30 * n : 120 + 20 * (n - 6));
 
 function QStep({ show, label, qty, setQty, max, total }: {
   show: boolean; label: string; qty: number; setQty: (n: number) => void; max: number; total: number;

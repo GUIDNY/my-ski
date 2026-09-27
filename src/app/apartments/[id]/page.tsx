@@ -3,7 +3,7 @@ import SkiLoader from "@/components/SkiLoader";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import type { Apartment, SkiPass } from "@/types";
-import { calcTotalForRange, getEffectivePrice, matchingWeek, skiDaysFromNights } from "@/lib/pricing";
+import { calcTotalForRange, getEffectivePrice, matchingWeek, skiDaysFromNights, equipCost } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
 import {
   IconMountain, IconSkis, IconBus, IconShield, IconUser, IconBot,
@@ -25,7 +25,6 @@ const SITE_URL = "https://skisharebook.com";
 const SKI_DAY_PRICE  = 70;
 const TRANSFER_PRICE = 180;
 // ski equipment rental: €30/night under a week · €120 for a week · +€20 each extra night
-const equipCost = (n: number) => (n <= 0 ? 0 : n < 6 ? 30 * n : 120 + 20 * (n - 6));
 const FLEXIBLE_EXTRA = 100; // per person (legacy)
 const CANCEL_FLEX    = 100; // flexible cancellation surcharge (flat)
 const CANCEL_NONE    = 100; // no-cancellation discount (flat)

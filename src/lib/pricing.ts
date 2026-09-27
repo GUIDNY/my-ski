@@ -30,6 +30,18 @@ export function skiDaysFromNights(nights: number): number {
   return Math.max(nights - 1, 0);
 }
 
+/**
+ * Ski/snowboard equipment rental: €30/day, or €120 for a full week (6 ski
+ * days) plus €20/day beyond that. The day rate is capped at the week rate —
+ * without the cap, 5 days (30*5=150) priced out higher than a full 6-day
+ * week (120), which is backwards: fewer days should never cost more.
+ */
+export function equipCost(days: number): number {
+  if (days <= 0) return 0;
+  if (days <= 6) return Math.min(30 * days, 120);
+  return 120 + 20 * (days - 6);
+}
+
 export type PricingRule = {
   id: string;
   label: string;

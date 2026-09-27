@@ -4,13 +4,12 @@ import { useParams } from "next/navigation";
 import AdminGate from "@/components/AdminGate";
 import ProposalDocument, { PROPOSAL_CSS } from "@/components/ProposalDocument";
 import { computeTotals, money, type LineItem } from "@/lib/proposal-pricing";
-import { calcTotalForRange, skiDaysFromNights, type PricingRule } from "@/lib/pricing";
+import { calcTotalForRange, skiDaysFromNights, equipCost, type PricingRule } from "@/lib/pricing";
 import type { Proposal, ProposalData, ProposalSection, ProposalBlock, ProposalStatus, SkiPass } from "@/types";
 
 const input = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
 const TRANSFER_PRICE = 180;
 // ski equipment rental: €30/night under a week · €120 for a week · +€20 each extra night
-const equipCost = (n: number) => (n <= 0 ? 0 : n < 6 ? 30 * n : 120 + 20 * (n - 6));
 const TROIS_VALLEES_NOTE = "שדרוג לסקי פס שלושת העמקים (Les 3 Vallées) עולה כ-€50 יותר לנוסע — לבירור לפני ההזמנה.";
 const FLIGHT_PRICE_NOTE = "מחיר הטיסות מוצג לפי הזמינות והמחיר הנוכחיים בזמן הבדיקה — מחירים ומקומות עשויים להשתנות עד לרגע ההזמנה בפועל.";
 const BLOCK_LABELS: Record<string, string> = { flight: "טיסה", banner: "פס טיסה", kv: "מפתח/ערך", summary: "סיכום", list: "רשימה", text: "פסקה", note: "הערה", option: "תיבה ממוסגרת", table: "טבלת מחירים", gallery: "גלריית תמונות", payment: "כפתור תשלום" };

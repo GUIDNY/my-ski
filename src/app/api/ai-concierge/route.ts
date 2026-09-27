@@ -1,13 +1,12 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { createQuote } from "@/lib/quotes";
-import { matchingWeek, skiDaysFromNights } from "@/lib/pricing";
+import { matchingWeek, skiDaysFromNights, equipCost } from "@/lib/pricing";
 import type { Apartment, SkiPass } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
 
 // Same per-night formula used everywhere else on the site (apartments/[id],
 // /combo, QuoteView): €30/night under a week, €120 for a full week, +€20 per
 // extra night beyond that.
-const equipCost = (n: number) => (n <= 0 ? 0 : n < 6 ? 30 * n : 120 + 20 * (n - 6));
 const TRANSFER_PRICE = 180; // flat, per person — matches the site's own add-on pricing, not a live transfer quote
 const BAGGAGE_PRICE = 120; // default per-traveler checked-bag fee, matches the Telegram bot's default
 
