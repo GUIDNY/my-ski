@@ -2,7 +2,7 @@ import Navbar from "@/components/Navbar";
 import SearchWidget from "@/components/SearchWidget";
 import FlightSearch from "@/components/FlightSearch";
 import Footer from "@/components/Footer";
-import { IconMountain, IconSnowflake } from "@/components/Icons";
+import { IconMountain, IconSnowflake, IconShield } from "@/components/Icons";
 import { createServerClient } from "@/lib/supabase-server";
 import { TRANSFER_PRICE, FLIGHT_ESTIMATE, LA_CIME_NIGHTS, skiPassPerPersonForWeek } from "@/lib/deal-pricing";
 import { hasDirectFlight } from "@/lib/direct-flight-days";
@@ -203,6 +203,23 @@ export default async function Home() {
           <span className="flex items-center gap-1.5">🏠 דירות שבדקנו בעצמנו</span>
           <span className="flex items-center gap-1.5">🔒 תשלום מאובטח</span>
         </div>
+      </div>
+
+      {/* ── מצב חירום / כוח עליון ─────────────────────────── */}
+      <div className="bg-gradient-to-l from-blue-700 to-blue-600 px-5 md:px-6 py-6">
+        <a href="/emergency-policy"
+          className="group max-w-5xl mx-auto flex flex-col sm:flex-row items-center gap-4 sm:gap-6 text-center sm:text-right">
+          <div className="w-12 h-12 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center shrink-0">
+            <IconShield size={22} className="text-white" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-display font-black text-white text-lg">מצב מלחמה: זה מה שאנחנו מציעים לכם</h3>
+            <p className="text-blue-100 text-sm mt-0.5">מדיניות שקופה לטיסות, דירות וסקי פס במקרה של מצב חריג — בלי הפתעות, כמו שהיה עם איראן.</p>
+          </div>
+          <span className="shrink-0 bg-white text-blue-700 text-sm font-bold px-5 py-2.5 rounded-xl group-hover:bg-blue-50 transition-colors">
+            קראו את המדיניות המלאה ←
+          </span>
+        </a>
       </div>
 
       {/* ── חבילות מומלצות ───────────────────────────────── */}
