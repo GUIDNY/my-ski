@@ -213,8 +213,8 @@ export default async function Home() {
             <IconShield size={22} className="text-white" />
           </div>
           <div className="flex-1">
-            <h3 className="font-display font-black text-white text-lg">מצב מלחמה: זה מה שאנחנו מציעים לכם</h3>
-            <p className="text-blue-100 text-sm mt-0.5">מדיניות שקופה לטיסות, דירות וסקי פס במקרה של מצב חריג — בלי הפתעות, כמו שהיה עם איראן.</p>
+            <h3 className="font-display font-black text-white text-lg">עדכון לגבי המצב הנוכחי</h3>
+            <p className="text-blue-100 text-sm mt-0.5">אנא היכנסו לקרוא בדיוק מה מגיע לכם במקרה של סגירת שמיים או ביטולי טיסות.</p>
           </div>
           <span className="shrink-0 bg-white text-blue-700 text-sm font-bold px-5 py-2.5 rounded-xl group-hover:bg-blue-50 transition-colors">
             קראו את המדיניות המלאה ←
