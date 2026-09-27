@@ -104,11 +104,16 @@ export default function SeasonRentalDetail() {
         </div>
       </header>
 
-      {/* Gallery */}
+      {/* Gallery — host-submitted photos come in every aspect ratio/orientation;
+          object-cover alone crops tight ones into an odd zoomed-in detail
+          (e.g. a close-up of a sink), so each slide is a blurred cover
+          backdrop of the same photo behind the full, uncropped photo. */}
       <section className="relative w-full h-80 md:h-[460px] bg-slate-900 overflow-hidden">
         {imgs.map((src, i) => (
-          <img key={i} src={src} alt={r.name}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === idx ? "opacity-100" : "opacity-0"}`} />
+          <div key={i} className={`absolute inset-0 transition-opacity duration-700 ${i === idx ? "opacity-100" : "opacity-0"}`}>
+            <img src={src} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-60" />
+            <img src={src} alt={r.name} className="absolute inset-0 w-full h-full object-contain" />
+          </div>
         ))}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 to-transparent" />
         {imgs.length > 1 && (

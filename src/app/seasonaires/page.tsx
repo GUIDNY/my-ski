@@ -21,8 +21,9 @@ function RentalCard({ r }: { r: SeasonRental }) {
   return (
     <a href={`/seasonaires/${r.id}`}
       className="group bg-white rounded-2xl border border-slate-100 hover:border-blue-200 hover:shadow-lg transition-all overflow-hidden flex flex-col">
-      <div className="relative h-48 overflow-hidden">
-        <img src={img} alt={r.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+      <div className="relative h-48 overflow-hidden bg-slate-900">
+        <img src={img} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-60" />
+        <img src={img} alt={r.name} className="absolute inset-0 w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
         <div className="absolute top-3 right-3 bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">{r.min_months}+ חודשים</div>
         <span className="absolute bottom-3 right-3 text-white text-sm font-semibold drop-shadow">{r.area}</span>
