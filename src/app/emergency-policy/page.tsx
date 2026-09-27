@@ -217,7 +217,7 @@ export default function EmergencyPolicyPage() {
               </div>
               <div className="font-display text-2xl font-black text-gray-800 mb-2">−€50 <span className="text-xs font-semibold text-gray-400">חיסכון</span></div>
               <p className="text-sm text-gray-600 leading-relaxed">
-                במקרה ביטול — כפוף למדיניות הספקים שמוסברת למעלה. אין החזר מובטח מעבר לזה.
+                <strong className="text-gray-900">לא תקבלו החזר כספי כלל</strong> במקרה של ביטול או מצב חריג.
               </p>
             </div>
 
