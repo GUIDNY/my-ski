@@ -1,13 +1,14 @@
 "use client";
 import { usePathname } from "next/navigation";
-import { IconHome, IconBed, IconUser } from "@/components/Icons";
+import { IconHome, IconBed, IconUser, IconShield } from "@/components/Icons";
 import IconCommunity from "@/components/IconCommunity";
 
 const tabs = [
-  { href: "/",            label: "ראשי",    icon: IconHome },
-  { href: "/seasonaires", label: "סיזיונרים", icon: IconCommunity },
-  { href: "/apartments",  label: "דירות",   icon: IconBed },
-  { href: "/my",          label: "אזור אישי", icon: IconUser },
+  { href: "/",                  label: "ראשי",     icon: IconHome },
+  { href: "/seasonaires",       label: "סיזיונרים", icon: IconCommunity },
+  { href: "/apartments",        label: "דירות",    icon: IconBed },
+  { href: "/emergency-policy",  label: "חירום",    icon: IconShield },
+  { href: "/my",                label: "אזור אישי", icon: IconUser },
 ];
 
 // routes with their own full-screen / bottom UI — hide the tab bar there

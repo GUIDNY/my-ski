@@ -20,6 +20,7 @@ export default function Footer() {
               {[
                 { label: "מדריך ואל טורנס", href: "/guide" },
                 { label: "תקנון, הזמנות וביטולים", href: "/terms" },
+                { label: "מצב חירום, מלחמה וכוח עליון", href: "/emergency-policy" },
                 { label: "מדיניות פרטיות", href: "/privacy" },
                 { label: "מדיניות עוגיות", href: "/cookies" },
                 { label: "הצהרת נגישות", href: "/accessibility" },
