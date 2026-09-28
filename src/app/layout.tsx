@@ -60,6 +60,29 @@ export const viewport: Viewport = {
   maximumScale: 1,
 };
 
+// Real registered business details (same ones shown in the site footer/legal
+// pages) — lets Google associate the site with an actual business entity
+// instead of just a set of pages, which matters for how it's surfaced for
+// brand and local-intent searches ("דירות בואל טורנס" etc).
+const organizationLd = {
+  "@context": "https://schema.org",
+  "@type": "TravelAgency",
+  name: "SkiShare",
+  legalName: "סקי שר בע\"מ",
+  url: "https://skisharebook.com",
+  logo: "https://skisharebook.com/skishare-logo.png",
+  image: "https://skisharebook.com/og.jpg",
+  telephone: "+972547701899",
+  email: "skishareteam@gmail.com",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "הזוהר 12",
+    addressLocality: "קיסריה",
+    addressCountry: "IL",
+  },
+  areaServed: { "@type": "Place", name: "Val Thorens, France" },
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -71,6 +94,7 @@ export default function RootLayout({
       className={`${montserrat.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }} />
         {children}
         <DeepLinkHandler />
         <MobileTabBar />
