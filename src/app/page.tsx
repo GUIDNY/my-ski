@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import SearchWidget from "@/components/SearchWidget";
 import FlightSearch from "@/components/FlightSearch";
@@ -7,6 +8,12 @@ import { createServerClient } from "@/lib/supabase-server";
 import { TRANSFER_PRICE, FLIGHT_ESTIMATE, LA_CIME_NIGHTS, skiPassPerPersonForWeek } from "@/lib/deal-pricing";
 import { hasDirectFlight } from "@/lib/direct-flight-days";
 import type { Apartment, SkiPass } from "@/types";
+
+export const metadata: Metadata = {
+  title: "SkiShare — דירות בואל טורנס, סקי פס והסעות",
+  description: "מחפשים דירה בואל טורנס? SkiShare מציעים דירות איכותיות בואל טורנס, סקי פס לשלושת העמקים, הסעות משדה התעופה וציוד סקי — הכל במקום אחד, בעברית ובתשלום מאובטח.",
+  alternates: { canonical: "https://skisharebook.com/" },
+};
 
 // This page queries live inventory/availability (which apartment is
 // cheapest right now, which La Cime weeks are still open) — it must never
@@ -186,7 +193,7 @@ export default async function Home() {
             Val Thorens
           </h1>
           <p className="text-xl md:text-2xl text-white/90 font-medium" style={{ textShadow: "0 1px 10px rgba(0,0,0,0.3)" }}>
-            דירות, סקי פס, ציוד והסעות — חופשת הסקי שלך במקום אחד
+            דירות בואל טורנס, סקי פס, ציוד והסעות — חופשת הסקי שלך במקום אחד
           </p>
           <SearchWidget />
           <a href="/seasonaires" className="flex items-center gap-2.5 px-6 py-3 rounded-full text-white text-sm font-bold transition-all hover:bg-white/20" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.25)" }}>

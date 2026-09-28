@@ -8,13 +8,17 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: "daily" 
   { path: "/", priority: 1, changeFrequency: "daily" },
   { path: "/apartments", priority: 0.9, changeFrequency: "daily" },
   { path: "/search", priority: 0.8, changeFrequency: "daily" },
+  { path: "/weekly", priority: 0.8, changeFrequency: "daily" },
   { path: "/combo", priority: 0.7, changeFrequency: "weekly" },
   { path: "/transfers", priority: 0.6, changeFrequency: "weekly" },
   { path: "/seasonaires", priority: 0.6, changeFrequency: "weekly" },
   { path: "/guide", priority: 0.9, changeFrequency: "weekly" },
+  { path: "/emergency-policy", priority: 0.3, changeFrequency: "monthly" },
   { path: "/cancellation-policy", priority: 0.3, changeFrequency: "monthly" },
   { path: "/terms", priority: 0.2, changeFrequency: "monthly" },
   { path: "/privacy", priority: 0.2, changeFrequency: "monthly" },
+  { path: "/cookies", priority: 0.1, changeFrequency: "monthly" },
+  { path: "/accessibility", priority: 0.1, changeFrequency: "monthly" },
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
