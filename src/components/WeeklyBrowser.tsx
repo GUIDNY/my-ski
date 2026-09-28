@@ -146,7 +146,7 @@ export default function WeeklyBrowser({
       </div>
 
       {/* Week picker — cloned from the homepage search bar */}
-      <div ref={ref} className="relative mb-6 sticky top-20 z-20">
+      <div ref={ref} className="relative mb-6 md:sticky md:top-20 z-20">
         {(() => {
           const range = selected ? weekRange(selected) : null;
           const rawPrice = selected ? weekMinPrice.get(selected) : undefined;

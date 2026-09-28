@@ -32,7 +32,9 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
   const skiPassPerPerson = skiPassPerPersonForWeek(passOptions as SkiPass[] | null);
 
   return (
-    <div className="min-h-screen" style={{ background: "linear-gradient(to bottom, #f7f9fb, #eef2f7)" }} dir="rtl">
+    <div className="min-h-screen" style={{
+      background: "radial-gradient(ellipse 80% 50% at 15% 0%, #e6f0ff 0%, transparent 60%), radial-gradient(ellipse 70% 50% at 100% 20%, #eaf7ff 0%, transparent 55%), #fbfcfe",
+    }} dir="rtl">
       <Navbar />
 
       {/* Hero */}
