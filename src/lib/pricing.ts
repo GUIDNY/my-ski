@@ -55,6 +55,10 @@ export type PricingRule = {
   priority: number;
 };
 
+// December is peak season — regardless of base price or any discount rules
+// stacked on top, no apartment should ever show below this per night.
+const DECEMBER_MIN_NIGHTLY_PRICE = 90;
+
 export function getEffectivePrice(date: Date, basePrice: number, rules: PricingRule[]): number {
   const sorted  = [...rules].sort((a, b) => b.priority - a.priority);
   const iso     = date.toISOString().split("T")[0];
@@ -77,7 +81,9 @@ export function getEffectivePrice(date: Date, basePrice: number, rules: PricingR
     if ((r.price_type ?? "absolute") === "subtract") price -= r.price;
   }
 
-  return Math.max(0, price);
+  price = Math.max(0, price);
+  if (mo === 11) price = Math.max(price, DECEMBER_MIN_NIGHTLY_PRICE);
+  return price;
 }
 
 export function calcTotalForRange(checkin: string, checkout: string, basePrice: number, rules: PricingRule[]): number {

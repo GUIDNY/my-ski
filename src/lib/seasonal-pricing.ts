@@ -1,7 +1,7 @@
 // Default seasonal pricing calendar for Val Thorens (base for every apartment).
 // Each period: [start, end, weekday price (Sun–Thu), weekend price (Fri–Sat)].
 export const SEASONAL_PERIODS: [string, string, number, number][] = [
-  ["2026-12-01", "2026-12-11", 80, 120],
+  ["2026-12-01", "2026-12-11", 90, 120],
   ["2026-12-12", "2026-12-18", 105, 155],
   ["2026-12-19", "2026-12-25", 290, 430],   // Christmas
   ["2026-12-26", "2027-01-01", 480, 725],   // New Year
