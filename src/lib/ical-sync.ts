@@ -36,12 +36,23 @@ export async function syncApartmentIcal(db: SupabaseClient, apartment_id: string
       await db.from("availability_blocks").delete()
         .eq("apartment_id", apartment_id).eq("source", src.platform);
 
+      // Never overwrite our own blocks (site orders / manual admin blocks).
+      // Those dates are exported to Airbnb/Hostex and come back in their feed;
+      // overwriting them here turned them into "external" rows, which the
+      // export then dropped and the next sync deleted — so site bookings
+      // silently disappeared from every calendar after a day or two.
+      const { data: own } = await db.from("availability_blocks").select("date")
+        .eq("apartment_id", apartment_id).in("source", ["manual", "order"]);
+      const ownDates = new Set((own ?? []).map(r => r.date));
+
       const rows: { apartment_id: string; date: string; status: string; source: string; note: string }[] = [];
       for (const ev of events) {
         const start = new Date(ev.start);
         const end   = new Date(ev.end);
         for (let d = new Date(start); d < end; d.setDate(d.getDate() + 1)) {
-          rows.push({ apartment_id, date: d.toISOString().split("T")[0], status: "booked_external", source: src.platform, note: ev.summary });
+          const date = d.toISOString().split("T")[0];
+          if (ownDates.has(date)) continue;
+          rows.push({ apartment_id, date, status: "booked_external", source: src.platform, note: ev.summary });
         }
       }
       // One bulk upsert instead of one round-trip per date — a source with a
