@@ -44,7 +44,7 @@ function ruleDescription(r: PricingRule): string {
 }
 
 /* ── Tabs ────────────────────────────────────────────────── */
-type Tab = "calendar" | "pricing" | "bookings" | "sync" | "owner";
+type Tab = "calendar" | "pricing" | "bookings" | "sync";
 
 /* ── Calendar ────────────────────────────────────────────── */
 function CalendarTab({ aptId, basePrice, rules, reloadRules }: {
@@ -701,98 +701,6 @@ function ExportCalendarBox({ aptId }: { aptId: string }) {
   );
 }
 
-/* ── Owner payments — what WE owe the apartment's owner, tracked
-   separately from customer-facing pricing (never shown to customers). */
-type OwnerPayment = { amount: number; due_date: string; paid?: boolean; label?: string };
-
-function OwnerPaymentsTab({ aptId }: { aptId: string }) {
-  const [payments, setPayments] = useState<OwnerPayment[]>([]);
-  const [loading,  setLoading]  = useState(true);
-  const [saving,   setSaving]   = useState(false);
-  const [msg,      setMsg]      = useState("");
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    const r = await fetch(`/api/apartments/${aptId}`);
-    const d = await r.json();
-    const list: OwnerPayment[] = Array.isArray(d.owner_payments) ? d.owner_payments : [];
-    setPayments([...list].sort((a, b) => a.due_date.localeCompare(b.due_date)));
-    setLoading(false);
-  }, [aptId]);
-  useEffect(() => { load(); }, [load]);
-
-  const save = async (next: OwnerPayment[]) => {
-    setPayments(next);
-    setSaving(true); setMsg("");
-    await fetch(`/api/apartments/${aptId}`, {
-      method: "PATCH", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ owner_payments: next }),
-    });
-    setSaving(false); setMsg("נשמר ✓");
-    setTimeout(() => setMsg(""), 2000);
-  };
-
-  const updateRow = (i: number, patch: Partial<OwnerPayment>) =>
-    save(payments.map((p, idx) => idx === i ? { ...p, ...patch } : p));
-
-  const removeRow = (i: number) => save(payments.filter((_, idx) => idx !== i));
-
-  const addRow = () => save([...payments, { amount: 0, due_date: new Date().toISOString().slice(0, 10), paid: false, label: `תשלום ${payments.length + 1}` }]);
-
-  const total = payments.reduce((s, p) => s + (Number(p.amount) || 0), 0);
-  const paidTotal = payments.filter(p => p.paid).reduce((s, p) => s + (Number(p.amount) || 0), 0);
-
-  if (loading) return <p className="text-sm text-gray-400 text-center py-10">טוען...</p>;
-
-  return (
-    <div dir="rtl">
-      <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-5 text-sm text-amber-700">
-        <p className="font-bold mb-1">תשלומים לבעל הדירה</p>
-        <p className="text-xs leading-relaxed">מה שאנחנו צריכים לשלם לבעל הדירה — לשימוש פנימי בלבד, לא מוצג ללקוחות.</p>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3 mb-5">
-        <div className="bg-white border border-gray-100 rounded-xl p-4">
-          <p className="text-xs text-gray-400 mb-1">סה״כ לשלם</p>
-          <p className="font-black text-gray-900 text-lg">€{total.toLocaleString()}</p>
-        </div>
-        <div className="bg-white border border-gray-100 rounded-xl p-4">
-          <p className="text-xs text-gray-400 mb-1">שולם עד כה</p>
-          <p className="font-black text-green-600 text-lg">€{paidTotal.toLocaleString()}</p>
-        </div>
-      </div>
-
-      <div className="space-y-2.5 mb-5">
-        {payments.map((p, i) => (
-          <div key={i} className={`flex items-center gap-2 border rounded-xl p-3 ${p.paid ? "bg-green-50 border-green-100" : "bg-white border-gray-100"}`}>
-            <input type="checkbox" checked={!!p.paid} onChange={e => updateRow(i, { paid: e.target.checked })}
-              className="w-5 h-5 shrink-0 accent-green-600" />
-            <input value={p.label ?? ""} onChange={e => setPayments(ps => ps.map((x, idx) => idx === i ? { ...x, label: e.target.value } : x))}
-              onBlur={() => save(payments)}
-              placeholder="תיאור" className="w-24 shrink-0 border border-gray-200 rounded-lg px-2 py-2 text-xs" />
-            <input type="date" value={p.due_date} onChange={e => updateRow(i, { due_date: e.target.value })}
-              className="border border-gray-200 rounded-lg px-2 py-2 text-xs" />
-            <div className="flex items-center gap-1 flex-1">
-              <span className="text-gray-400 text-sm">€</span>
-              <input type="number" value={p.amount} onChange={e => setPayments(ps => ps.map((x, idx) => idx === i ? { ...x, amount: Number(e.target.value) } : x))}
-                onBlur={() => save(payments)}
-                className="w-full border border-gray-200 rounded-lg px-2 py-2 text-sm font-bold" />
-            </div>
-            <button onClick={() => removeRow(i)} className="text-red-300 hover:text-red-500 text-lg shrink-0">×</button>
-          </div>
-        ))}
-        {!payments.length && <p className="text-center text-gray-400 text-sm py-6">אין תשלומים רשומים עדיין</p>}
-      </div>
-
-      <button onClick={addRow} disabled={saving}
-        className="w-full py-3 rounded-xl font-bold text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 disabled:opacity-40">
-        + הוסף תשלום
-      </button>
-      {msg && <p className="text-green-600 text-sm font-medium text-center mt-3">{msg}</p>}
-    </div>
-  );
-}
-
 /* ── Main Page ───────────────────────────────────────────── */
 export default function ApartmentAdmin() {
   const { id } = useParams<{ id: string }>();
@@ -820,7 +728,6 @@ export default function ApartmentAdmin() {
     { key:"pricing",  label:"מחירים",  icon:"💰" },
     { key:"bookings", label:"הזמנות",  icon:"👥" },
     { key:"sync",     label:"סינכרון", icon:"🔄" },
-    { key:"owner",    label:"תשלומים לבעלים", icon:"🧾" },
   ];
 
   if (loading) return (
@@ -861,7 +768,6 @@ export default function ApartmentAdmin() {
         {tab === "pricing"  && apt && <PricingTab  aptId={id} basePrice={apt.price_per_night} rules={rules} reload={loadRules} />}
         {tab === "bookings" && <BookingsTab aptId={id} />}
         {tab === "sync"     && <SyncTab aptId={id} />}
-        {tab === "owner"    && <OwnerPaymentsTab aptId={id} />}
       </div>
     </div>
   );
