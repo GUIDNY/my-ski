@@ -50,7 +50,7 @@ export default function FlightAddOn({ state, airport, checked, onToggle, qty, se
           <div className="text-sm font-semibold text-gray-800">הוסיפו טיסה ל-{airport}</div>
           <div className="text-xs text-gray-400 mt-0.5">
             {state.loading ? "בודקים מחיר טיסה…"
-              : state.price ? `${state.nonstop ? "ישירה" : "עם עצירה"} · הזולה ביותר שמצאנו`
+              : state.price ? `${state.nonstop ? "ישירה" : "עם עצירה"}${state.airline ? ` · ${state.airline}` : ""} · הזולה ביותר שמצאנו`
               : "לא נמצא מחיר כרגע"}
             {state.url && (
               <a href={state.url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
