@@ -263,6 +263,19 @@ function ApartmentPage() {
     fetch("/api/ski-passes").then(r => r.json()).then(d => setSkiPasses(Array.isArray(d) ? d : [])).catch(() => {});
   }, []);
 
+  // The dates arrive from the URL, so a direct link could point at nights
+  // already booked on Airbnb or by another order — check before offering payment.
+  const [takenFor, setTakenFor] = useState("");
+  const rangeKey = checkin && checkout ? `${id}|${checkin}|${checkout}` : "";
+  const datesTaken = rangeKey !== "" && takenFor === rangeKey;
+  useEffect(() => {
+    if (!rangeKey) return;
+    fetch(`/api/availability/blocked?checkin=${checkin}&checkout=${checkout}`)
+      .then(r => r.json())
+      .then(d => { if (Array.isArray(d.blocked) && d.blocked.includes(id)) setTakenFor(rangeKey); })
+      .catch(() => {});
+  }, [id, checkin, checkout, rangeKey]);
+
   /* Ski pass tier that covers the trip length, for the chosen area (adult only) */
   const skiTier = (() => {
     const options = skiPasses.filter(p => p.area === skiArea && p.type === "adult").sort((a, b) => a.duration_days - b.duration_days);
@@ -987,6 +1000,12 @@ function ApartmentPage() {
                   </div>
 
                   {/* ── CTA ───────────────────────────────────────── */}
+                  {datesTaken ? (
+                    <div className="w-full py-4 px-3 rounded-xl bg-red-50 border border-red-200 text-red-700 font-bold text-center text-sm">
+                      הדירה כבר תפוסה בחלק מהתאריכים האלה.
+                      <a href={`/search?checkin=${checkin}&checkout=${checkout}&guests=${guests}`} className="block mt-1 underline font-normal">לחיפוש דירות פנויות בתאריכים האלה</a>
+                    </div>
+                  ) : (
                   <CardPaymentButton apartmentId={id} apartment={apt?.name ?? ""} checkin={checkin} checkout={checkout}
                     guests={guests} nights={nights} skiPass={skiPass} transfer={transfer} equipment={equipment} cancel={cancel} service={service}
                     transferDetails={transferDetails}
@@ -995,6 +1014,7 @@ function ApartmentPage() {
                     split={splitCount > 1 ? { sharesTotal: splitCount, accommodationTotal: grandTotal, shareAmount: shareAccommodation, area: "Val Thorens, Trois Vallées" } : undefined}
                     label={splitCount > 1 ? "שלם/י את חלקך בכרטיס" : undefined}
                     className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-center text-base transition-colors shadow-sm" />
+                  )}
                   </>
                   )}
 

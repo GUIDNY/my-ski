@@ -81,6 +81,12 @@ export default function CardPaymentButton(p: Props) {
         }),
       }).then(r => r.json());
 
+      if (order.error === "dates_unavailable") {
+        setErr("מצטערים, התאריכים האלה כבר תפוסים בדירה הזו. בחרו תאריכים אחרים או דברו איתנו בוואטסאפ 🙏");
+        setBusy(false); return;
+      }
+      if (!order.code) { setErr("שגיאה ביצירת ההזמנה. נסו שוב או בוואטסאפ."); setBusy(false); return; }
+
       const res = await fetch("/api/payplus/create-link", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

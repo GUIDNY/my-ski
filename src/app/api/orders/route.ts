@@ -41,6 +41,30 @@ export async function POST(req: NextRequest) {
     customer_email: (b.customer_email || "").toLowerCase(),
     customer_phone: b.customer_phone || "",
   };
+  // Refuse orders for nights that are already taken (Airbnb/Hostex iCal,
+  // other site orders, manual owner blocks). Without this, a direct link to
+  // an apartment page let customers pay for dates booked elsewhere — only
+  // the search page filtered unavailable apartments out. Shares of the same
+  // split-payment group are exempt from each other's blocks. Admin can force.
+  if (row.checkin && row.checkout && b.force !== true) {
+    const ids = [row.apartment_id, row.extra_apartment_id].filter(Boolean) as string[];
+    if (ids.length) {
+      const { data: blocks } = await db.from("availability_blocks")
+        .select("apartment_id,date,note")
+        .in("apartment_id", ids).gte("date", row.checkin).lt("date", row.checkout);
+      let groupCodes: string[] = [];
+      if (row.group_id) {
+        const { data: mates } = await db.from("orders").select("code").eq("group_id", row.group_id);
+        groupCodes = (mates ?? []).map(m => m.code);
+      }
+      const clash = (blocks ?? []).filter(bl => !groupCodes.some(c => (bl.note || "").includes(c)));
+      if (clash.length) {
+        const dates = Array.from(new Set(clash.map(c => c.date))).sort();
+        return NextResponse.json({ error: "dates_unavailable", dates }, { status: 409 });
+      }
+    }
+  }
+
   for (let i = 0; i < 5; i++) {
     const c = code();
     const { data, error } = await db.from("orders").insert({ code: c, ...row }).select("code").single();

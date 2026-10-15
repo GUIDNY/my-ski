@@ -140,12 +140,18 @@ export default function OrdersAdmin() {
         }
         await fetch(`/api/orders/${editingOrder.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...fields, status: newOrder.status }) });
       } else {
-        const res = await fetch("/api/orders", {
+        const post = (force: boolean) => fetch("/api/orders", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...fields, apartment: apt.name, cancel: "none", service: "human", grand_total: newOrder.total_eur }),
+          body: JSON.stringify({ ...fields, apartment: apt.name, cancel: "none", service: "human", grand_total: newOrder.total_eur, force }),
         });
-        const j = await res.json().catch(() => ({}));
+        let res = await post(false);
+        let j = await res.json().catch(() => ({}));
+        if (res.status === 409 && j.error === "dates_unavailable") {
+          if (!confirm(`שים לב: הדירה כבר תפוסה בתאריכים ${(j.dates || []).join(", ")}.\nליצור את ההזמנה בכל זאת?`)) return;
+          res = await post(true);
+          j = await res.json().catch(() => ({}));
+        }
         if (!res.ok || !j.code) { alert(j.error || "יצירת ההזמנה נכשלה"); return; }
 
         // POST only returns {code} — fetch the full list to find this row's id for the status PATCH.
