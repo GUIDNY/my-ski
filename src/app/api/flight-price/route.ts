@@ -36,22 +36,45 @@ function cheapestRoundTripResult(lines: string[]): { price: number; idx: number 
   return best;
 }
 
-// Every result row renders as "<depart time>\n–\n<arrive time>\n<airline>\n
-// <duration>\n...\n€<price>\nround trip" (verified against real nonstop AND
-// connecting results, including multi-leg codeshares like "ITA, Lufthansa").
-// Walking back from the matched price line to the nearest preceding
-// time-dash-time triple and reading the line right after it is more
-// robust than counting a fixed number of lines back, since the block
-// between airline and price varies in length (an extra layover line for
-// connections, an emissions-delta line that isn't always present).
-function airlineForResult(lines: string[], priceIdx: number): string | null {
-  const timeRe = /^\d{1,2}:\d{2}\s?(AM|PM)(\+\d)?$/i;
-  for (let j = priceIdx - 1; j >= 1; j--) {
-    if (lines[j].length <= 3 && timeRe.test(lines[j - 1]) && timeRe.test(lines[j + 1])) {
-      return lines[j + 2]?.trim() || null;
-    }
-  }
-  return null;
+// Puppeteer's default viewport (800×600, what the production scraper
+// actually runs at — confirmed the hard way: a first version of this tuned
+// against a wider local-browser capture mis-read "LYS" the *airport code*
+// as the airline name in production) renders Google Flights' compact
+// layout, where every result row is a fixed sequence with NO separator
+// lines at all:
+//   <depart time>
+//   <origin code, 3 letters>
+//   <arrive time>
+//   <dest code, 3 letters>
+//   €<price>
+//   round trip
+//   <"Nonstop"|"N stop(s)"><duration><airline(s), concatenated, no space>
+//   [emissions line]
+// Verified against real nonstop AND connecting results (13-result list,
+// multi-leg codeshares like "ITA, Lufthansa") captured at this exact
+// viewport — both the pre-price time/code block and the post-price
+// stops+duration+airline line hold for every row, regardless of how many
+// stops or whether an emissions line follows.
+const TIME_RE = /^\d{1,2}:\d{2}\s?(AM|PM)(\+\d)?$/i;
+const AIRPORT_RE = /^[A-Z]{3}$/;
+
+function flightDetailsForResult(lines: string[], priceIdx: number): { departTime: string | null; arriveTime: string | null; airline: string | null } {
+  const departTime = TIME_RE.test(lines[priceIdx - 4] ?? "") ? lines[priceIdx - 4] : null;
+  const arriveTime = TIME_RE.test(lines[priceIdx - 2] ?? "") ? lines[priceIdx - 2] : null;
+  const originOk = AIRPORT_RE.test(lines[priceIdx - 3] ?? "");
+  const destOk = AIRPORT_RE.test(lines[priceIdx - 1] ?? "");
+
+  const infoLine = lines[priceIdx + 2] ?? "";
+  const airline = infoLine
+    .replace(/^(?:Nonstop|\d+\s*stops?)/i, "")
+    .replace(/^\s*\d+\s*hr(?:\s*\d+\s*min)?/i, "")
+    .trim() || null;
+
+  return {
+    departTime: originOk && departTime ? departTime : null,
+    arriveTime: destOk && arriveTime ? arriveTime : null,
+    airline,
+  };
 }
 
 // Previously tried to infer "is this result nonstop?" by checking nearby
@@ -63,7 +86,9 @@ function airlineForResult(lines: string[], priceIdx: number): string | null {
 // no adjacency guessing, since every result on that page is nonstop by
 // definition. Only fall back to an unfiltered scrape when the nonstop
 // query itself returns nothing.
-async function scrapePrice(outDate: string, retDate: string, origin: string, dest: string): Promise<{ price: number | null; nonstop: boolean; url: string; airline: string | null }> {
+type ScrapeResult = { price: number | null; nonstop: boolean; url: string; airline: string | null; departTime: string | null; arriveTime: string | null };
+
+async function scrapePrice(outDate: string, retDate: string, origin: string, dest: string): Promise<ScrapeResult> {
   let browser: Awaited<ReturnType<typeof puppeteer.launch>> | undefined;
   try {
     browser = await puppeteer.launch({
@@ -81,7 +106,7 @@ async function scrapePrice(outDate: string, retDate: string, origin: string, des
     if (!/No results returned/i.test(bodyText)) {
       const lines = bodyText.split("\n").map(l => l.trim());
       const result = cheapestRoundTripResult(lines);
-      if (result) return { price: result.price, nonstop: true, url: nonstopUrl, airline: airlineForResult(lines, result.idx) };
+      if (result) return { price: result.price, nonstop: true, url: nonstopUrl, ...flightDetailsForResult(lines, result.idx) };
     }
 
     // No nonstop option this date — fall back to the plain (any-stops) search.
@@ -91,7 +116,8 @@ async function scrapePrice(outDate: string, retDate: string, origin: string, des
     bodyText = await page.evaluate(() => document.body.innerText);
     const lines = bodyText.split("\n").map(l => l.trim());
     const result = cheapestRoundTripResult(lines);
-    return { price: result?.price ?? null, nonstop: false, url: anyUrl, airline: result ? airlineForResult(lines, result.idx) : null };
+    const details = result ? flightDetailsForResult(lines, result.idx) : { airline: null, departTime: null, arriveTime: null };
+    return { price: result?.price ?? null, nonstop: false, url: anyUrl, ...details };
   } finally {
     await browser?.close();
   }
@@ -113,26 +139,34 @@ export async function GET(req: NextRequest) {
     .select("*").eq("origin", origin).eq("dest", dest).eq("checkin", checkin).eq("checkout", checkout).maybeSingle();
 
   if (cached && Date.now() - new Date(cached.checked_at).getTime() < CACHE_HOURS * 3600_000) {
-    return NextResponse.json({ price: cached.price_eur, nonstop: cached.nonstop, url: cached.url, airline: cached.airline ?? null, checkedAt: cached.checked_at, cached: true });
+    return NextResponse.json({
+      price: cached.price_eur, nonstop: cached.nonstop, url: cached.url,
+      airline: cached.airline ?? null, departTime: cached.depart_time ?? null, arriveTime: cached.arrive_time ?? null,
+      checkedAt: cached.checked_at, cached: true,
+    });
   }
 
   try {
-    const { price, nonstop, url, airline } = await scrapePrice(checkin, checkout, origin, dest);
+    const { price, nonstop, url, airline, departTime, arriveTime } = await scrapePrice(checkin, checkout, origin, dest);
     const checkedAt = new Date().toISOString();
-    // Caching is best-effort — a schema mismatch (e.g. the airline column
-    // not existing yet) must never take down the live price response below.
+    // Caching is best-effort — a schema mismatch (e.g. a new column not
+    // existing yet) must never take down the live price response below.
     try {
       await db.from("flight_price_cache")
-        .upsert({ origin, dest, checkin, checkout, price_eur: price, nonstop, url, airline, checked_at: checkedAt }, { onConflict: "origin,dest,checkin,checkout" });
+        .upsert({ origin, dest, checkin, checkout, price_eur: price, nonstop, url, airline, depart_time: departTime, arrive_time: arriveTime, checked_at: checkedAt }, { onConflict: "origin,dest,checkin,checkout" });
     } catch (cacheErr) {
       console.error("flight-price cache write failed", cacheErr);
     }
-    return NextResponse.json({ price, nonstop, url, airline, checkedAt, cached: false });
+    return NextResponse.json({ price, nonstop, url, airline, departTime, arriveTime, checkedAt, cached: false });
   } catch (e) {
     console.error("flight-price scrape failed", e);
     // Serve stale cache rather than nothing, if we have any at all.
     if (cached) {
-      return NextResponse.json({ price: cached.price_eur, nonstop: cached.nonstop, url: cached.url, airline: cached.airline ?? null, checkedAt: cached.checked_at, cached: true, stale: true });
+      return NextResponse.json({
+        price: cached.price_eur, nonstop: cached.nonstop, url: cached.url,
+        airline: cached.airline ?? null, departTime: cached.depart_time ?? null, arriveTime: cached.arrive_time ?? null,
+        checkedAt: cached.checked_at, cached: true, stale: true,
+      });
     }
     return NextResponse.json({ price: null, error: "לא הצלחנו לבדוק מחיר טיסה כרגע" }, { status: 200 });
   }
