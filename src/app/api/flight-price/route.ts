@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase-server";
 import { buildGoogleFlightsUrl } from "@/lib/google-flights";
-import puppeteer from "puppeteer-core";
+import puppeteer, { type Page } from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
 
 export const runtime = "nodejs";
@@ -88,6 +88,30 @@ function flightDetailsForResult(lines: string[], priceIdx: number): { departTime
 // query itself returns nothing.
 type ScrapeResult = { price: number | null; nonstop: boolean; url: string; airline: string | null; departTime: string | null; arriveTime: string | null };
 
+// A fixed 4.5s wait proved unreliable in production: caught live with real
+// data (TLV-LYS, 2027-02-13) — a genuine nonstop existed (confirmed by
+// reloading the exact same nonstop-filtered URL moments later: "1 result
+// returned", Transavia, €214) but the first read landed while the page
+// still said "Loading results", found no price line, and silently fell
+// through to the any-stops search, wrongly reporting nonstop:false. Poll
+// instead for the actual "N result(s) returned" / "No results returned"
+// marker Google Flights renders once search finishes, and reload once if a
+// transient "Oops, something went wrong" interstitial shows up (also seen
+// live, unrelated to this date actually having no nonstop option).
+async function waitForResults(page: Page): Promise<string> {
+  let reloaded = false;
+  for (let i = 0; i < 7; i++) {
+    const bodyText = await page.evaluate(() => document.body.innerText);
+    if (/\d+\s+results?\s+returned|No results returned/i.test(bodyText)) return bodyText;
+    if (!reloaded && /Oops, something went wrong/i.test(bodyText)) {
+      reloaded = true;
+      await page.reload({ waitUntil: "domcontentloaded", timeout: 45000 });
+    }
+    await new Promise(r => setTimeout(r, 1500));
+  }
+  return await page.evaluate(() => document.body.innerText);
+}
+
 async function scrapePrice(outDate: string, retDate: string, origin: string, dest: string): Promise<ScrapeResult> {
   let browser: Awaited<ReturnType<typeof puppeteer.launch>> | undefined;
   try {
@@ -100,8 +124,7 @@ async function scrapePrice(outDate: string, retDate: string, origin: string, des
 
     const nonstopUrl = buildGoogleFlightsUrl(outDate, retDate, origin, dest, true);
     await page.goto(nonstopUrl, { waitUntil: "domcontentloaded", timeout: 45000 });
-    await new Promise(r => setTimeout(r, 4500));
-    let bodyText = await page.evaluate(() => document.body.innerText);
+    let bodyText = await waitForResults(page);
 
     if (!/No results returned/i.test(bodyText)) {
       const lines = bodyText.split("\n").map(l => l.trim());
@@ -112,8 +135,7 @@ async function scrapePrice(outDate: string, retDate: string, origin: string, des
     // No nonstop option this date — fall back to the plain (any-stops) search.
     const anyUrl = buildGoogleFlightsUrl(outDate, retDate, origin, dest, false);
     await page.goto(anyUrl, { waitUntil: "domcontentloaded", timeout: 45000 });
-    await new Promise(r => setTimeout(r, 4500));
-    bodyText = await page.evaluate(() => document.body.innerText);
+    bodyText = await waitForResults(page);
     const lines = bodyText.split("\n").map(l => l.trim());
     const result = cheapestRoundTripResult(lines);
     const details = result ? flightDetailsForResult(lines, result.idx) : { airline: null, departTime: null, arriveTime: null };
