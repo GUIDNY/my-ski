@@ -18,6 +18,8 @@ function ProposalsInner() {
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
+  const [pasteRef, setPasteRef] = useState("");
+  const [pasteBusy, setPasteBusy] = useState(false);
 
   const load = useCallback(async () => {
     const params = new URLSearchParams();
@@ -46,6 +48,39 @@ function ProposalsInner() {
     if (r.ok) router.push(`/admin/proposals/${p.id}/edit`);
     else alert("שגיאה בשכפול");
   };
+  // Accepts anything someone might have saved from an old quote — a full
+  // admin link (/admin/proposals/<id>/edit or /print), a bare proposal id,
+  // or just the proposal number off the PDF — so you don't need to find it
+  // in the list below first. Resolves it, then reuses the normal duplicate
+  // flow to open it as a fresh editable draft.
+  const loadFromReference = async () => {
+    const raw = pasteRef.trim();
+    if (!raw) return;
+    setPasteBusy(true);
+    try {
+      let id: string | null = null;
+      const match = raw.match(/\/admin\/proposals\/([^/]+)/);
+      if (match) {
+        id = match[1];
+      } else if (/^[0-9a-f-]{20,}$/i.test(raw)) {
+        id = raw;
+      }
+      if (id) {
+        const r = await fetch(`/api/proposals/${id}`);
+        if (!r.ok) id = null;
+      }
+      if (!id) {
+        const r = await fetch(`/api/proposals?q=${encodeURIComponent(raw)}`);
+        const found: Proposal[] = r.ok ? await r.json() : [];
+        id = found[0]?.id ?? null;
+      }
+      if (!id) { alert("לא נמצאה הצעה עבור הקישור/מספר שהודבק"); return; }
+      await duplicate(id);
+    } finally {
+      setPasteBusy(false);
+    }
+  };
+
   const remove = async (id: string) => {
     if (!confirm("למחוק את ההצעה?")) return;
     await fetch(`/api/proposals/${id}`, { method: "DELETE" });
@@ -69,6 +104,18 @@ function ProposalsInner() {
           <option value="">כל הסטטוסים</option>
           {(Object.keys(STATUS) as ProposalStatus[]).map(s => <option key={s} value={s}>{STATUS[s].label}</option>)}
         </select>
+      </div>
+
+      <div className="flex gap-2 mb-6 flex-wrap items-center bg-gray-50 border border-gray-100 rounded-xl p-3">
+        <span className="text-xs font-semibold text-gray-500 whitespace-nowrap">לא מוצא הצעה ישנה ברשימה?</span>
+        <input value={pasteRef} onChange={e => setPasteRef(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter") loadFromReference(); }}
+          placeholder="הדבק כאן קישור להצעה ישנה או מספר הצעה"
+          className="flex-1 min-w-[220px] border border-gray-200 rounded-xl px-4 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <button onClick={loadFromReference} disabled={pasteBusy || !pasteRef.trim()}
+          className="bg-gray-800 hover:bg-gray-900 disabled:opacity-50 text-white font-bold text-xs px-4 py-2 rounded-xl transition whitespace-nowrap">
+          {pasteBusy ? "מאתר…" : "שכפל לעריכה ↺"}
+        </button>
       </div>
 
       {loading ? (
