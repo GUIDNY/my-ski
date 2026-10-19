@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import AdminGate from "@/components/AdminGate";
 import ProposalDocument, { PROPOSAL_CSS } from "@/components/ProposalDocument";
 import { computeTotals, money, type LineItem } from "@/lib/proposal-pricing";
-import { calcTotalForRange, skiDaysFromNights, equipCost, type PricingRule } from "@/lib/pricing";
+import { calcTotalForRange, matchingWeek, skiDaysFromNights, equipCost, type PricingRule } from "@/lib/pricing";
 import type { Proposal, ProposalData, ProposalSection, ProposalBlock, ProposalStatus, SkiPass } from "@/types";
 
 const input = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
@@ -151,7 +151,15 @@ function EditorInner() {
     const rules: PricingRule[] = rulesRes.ok ? await rulesRes.json() : [];
 
     const nights = checkin && checkout ? Math.max(0, Math.round((+new Date(checkout) - +new Date(checkin)) / 86400000)) : 0;
-    const total = nights > 0 ? calcTotalForRange(checkin!, checkout!, Number(apt.price_per_night) || 0, rules) : Number(apt.price_per_night) || 0;
+    // La Cime ("שבת עד שבת") apartments are only real inventory in fixed
+    // Saturday-to-Saturday weeks, always charged the full week's real price —
+    // same matchingWeek() rule the public site uses everywhere. Without this
+    // a pasted La Cime link silently fell back to a generic seasonal nightly
+    // estimate, which can be far below the real price for a high-season week.
+    const weekMatch = checkin && checkout ? matchingWeek(apt, checkin, checkout) : null;
+    const total = weekMatch
+      ? weekMatch.price
+      : nights > 0 ? calcTotalForRange(checkin!, checkout!, Number(apt.price_per_night) || 0, rules) : Number(apt.price_per_night) || 0;
 
     const existingUnits = data.sections.filter(s => s.heading.startsWith("דירה ")).length;
     const letter = HEBREW_LETTERS[existingUnits] ?? String(existingUnits + 1);
@@ -202,7 +210,10 @@ function EditorInner() {
     const apt = await aptRes.json();
     const rules: PricingRule[] = rulesRes.ok ? await rulesRes.json() : [];
     const nights = checkin && checkout ? Math.max(0, Math.round((+new Date(checkout) - +new Date(checkin)) / 86400000)) : 0;
-    const total = checkin && checkout ? calcTotalForRange(checkin, checkout, Number(apt.price_per_night) || 0, rules) : 0;
+    const weekMatch = checkin && checkout ? matchingWeek(apt, checkin, checkout) : null;
+    const total = weekMatch
+      ? weekMatch.price
+      : checkin && checkout ? calcTotalForRange(checkin, checkout, Number(apt.price_per_night) || 0, rules) : 0;
     await buildFromQuote({
       apartment_id: aptId, apartment_name: apt.name,
       checkin: checkin ?? undefined, checkout: checkout ?? undefined,

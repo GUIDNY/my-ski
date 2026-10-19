@@ -3,7 +3,7 @@ import SkiLoader from "@/components/SkiLoader";
 import { Suspense, useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { Apartment } from "@/types";
-import { getEffectivePrice, calcTotalForRange } from "@/lib/pricing";
+import { getEffectivePrice, calcTotalForRange, matchingWeek } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
 import {
   IconMountain, IconCheck, IconStar, IconBed, IconSearch,
@@ -28,9 +28,19 @@ function ApartmentCard({ apt, checkin, checkout, guests, rules }: {
 }) {
   const nights = checkin && checkout
     ? Math.round((new Date(checkout).getTime() - new Date(checkin).getTime()) / 86400000) : 0;
-  const total = checkin && checkout && nights > 0
-    ? calcTotalForRange(checkin, checkout, apt.price_per_night, rules)
-    : apt.price_per_night * nights;
+
+  // La Cime ("שבת עד שבת") apartments are only real inventory in fixed
+  // Saturday-to-Saturday weeks, always charged the full week's real price —
+  // same matchingWeek() rule /search and /apartments/[id] already use. Without
+  // this, this card fell back to the generic seasonal pricing_rules estimate,
+  // which showed a far-too-low price for high-season weeks (caught live: a
+  // real ~€5000 week showing as ~€2,444 here).
+  const weekMatch = matchingWeek(apt, checkin, checkout);
+  const total = weekMatch
+    ? weekMatch.price
+    : checkin && checkout && nights > 0
+      ? calcTotalForRange(checkin, checkout, apt.price_per_night, rules)
+      : apt.price_per_night * nights;
 
   const minNightlyPrice = (() => {
     if (!checkin || !checkout) return apt.price_per_night;
@@ -60,9 +70,11 @@ function ApartmentCard({ apt, checkin, checkout, guests, rules }: {
         </div>
         <div className="absolute bottom-3 left-3 text-white text-sm font-bold px-3 py-1.5 rounded-lg"
           style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)" }}>
-          {checkin && checkout
-            ? <>החל מ €{minNightlyPrice.toLocaleString()} / לילה</>
-            : <>€{apt.price_per_night.toLocaleString()} / לילה</>
+          {weekMatch
+            ? <>€{weekMatch.price.toLocaleString()} / שבוע</>
+            : checkin && checkout
+              ? <>החל מ €{minNightlyPrice.toLocaleString()} / לילה</>
+              : <>€{apt.price_per_night.toLocaleString()} / לילה</>
           }
         </div>
       </div>
@@ -97,7 +109,9 @@ function ApartmentCard({ apt, checkin, checkout, guests, rules }: {
 
         <div className="mt-auto">
           {nights > 0 && (
-            <div className="text-sm font-bold text-blue-600 mb-2">€{total.toLocaleString()} סה״כ ל-{nights} לילות</div>
+            <div className="text-sm font-bold text-blue-600 mb-2">
+              {weekMatch ? <>€{total.toLocaleString()} סה״כ לשבוע (שבת עד שבת)</> : <>€{total.toLocaleString()} סה״כ ל-{nights} לילות</>}
+            </div>
           )}
           <div className="w-full py-2.5 rounded-xl bg-gray-900 group-hover:bg-blue-600 text-white font-bold text-sm text-center transition-colors">
             ← צפה בדירה
@@ -223,7 +237,9 @@ function ApartmentsPage() {
       .catch(() => setBlocked([]));
   }, [checkin, checkout]);
 
-  const available = apartments.filter(a => !blocked.includes(a.id));
+  const available = apartments.filter(a =>
+    !blocked.includes(a.id) && (a.source !== "la_cime" || !checkin || !checkout || matchingWeek(a, checkin, checkout))
+  );
   const shown = filter === "all" ? available : available.filter(a => getCategory(a) === filter);
 
   const nights = checkin && checkout
