@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   // without this, the PDF route's Chromium executablePath() 404s in prod.
   outputFileTracingIncludes: {
     "/api/proposals/\\[id\\]/pdf": ["./node_modules/@sparticuz/chromium/bin/**/*"],
+    "/api/flight-return": ["./node_modules/@sparticuz/chromium/bin/**/*"],
   },
   async headers() {
     return [
