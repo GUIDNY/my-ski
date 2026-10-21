@@ -1,6 +1,7 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { createQuote } from "@/lib/quotes";
-import { matchingWeek, skiDaysFromNights, equipCost } from "@/lib/pricing";
+import { matchingWeek, skiDaysFromNights, equipCost, calcTotalForRange, type PricingRule } from "@/lib/pricing";
+import { takenApartmentIds } from "@/lib/inventory";
 import type { Apartment, SkiPass } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -130,6 +131,9 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
   const messages: ChatMessage[] = Array.isArray(body.messages) ? body.messages : [];
   const image: { base64: string; mimeType: string } | undefined = body.image;
+  // The WhatsApp bot (n8n "helper") calls this route too. Its customers have
+  // no ↺ button and it can't read screenshots, so a few lines are worded for it.
+  const whatsapp = body.channel === "whatsapp";
 
   const transcript = messages.map(m => `${m.role === "user" ? "לקוח" : "עוזר"}: ${m.text}`).join("\n");
 
@@ -201,16 +205,43 @@ export async function POST(req: NextRequest) {
       reply: "משהו השתבש אצלי בבדיקה — זה לא קשור לזמינות, פשוט תקלה רגעית. אפשר לנסות שוב בעוד רגע?",
     });
   }
-  const { data: regularApts } = regularRes;
-  const { data: laCimeApts } = laCimeRes;
+  const regularApts = (regularRes.data as Apartment[] | null) ?? [];
+  const laCimeApts = (laCimeRes.data as Apartment[] | null) ?? [];
   const { data: skiPasses } = skiPassRes;
+
+  // Never offer nights that are already taken (Airbnb/Hostex calendars, site
+  // orders, owner blocks, direct bookings), and price regular apartments by
+  // their seasonal calendar: the /q/ page this reply links to (QuoteView)
+  // and /search both charge that, not the flat base price. If either check
+  // fails, say so rather than quote a booked apartment or a wrong price.
+  const regularIds = regularApts.map(a => a.id);
+  const [taken, rulesRes] = await Promise.all([
+    takenApartmentIds(db, checkin, checkout),
+    regularIds.length
+      ? db.from("pricing_rules").select("*").in("apartment_id", regularIds)
+      : Promise.resolve({ data: [] as PricingRule[], error: null }),
+  ]);
+  if (!taken || rulesRes.error) {
+    console.error("ai-concierge: availability/pricing check failed", rulesRes.error);
+    return NextResponse.json({
+      complete: false,
+      reply: "משהו השתבש אצלי בבדיקה — זה לא קשור לזמינות, פשוט תקלה רגעית. אפשר לנסות שוב בעוד רגע?",
+    });
+  }
+  const rulesByApt = new Map<string, PricingRule[]>();
+  for (const r of (rulesRes.data as (PricingRule & { apartment_id: string })[] | null) ?? []) {
+    rulesByApt.set(r.apartment_id, [...(rulesByApt.get(r.apartment_id) ?? []), r]);
+  }
 
   type Unit = { id: string; name: string; total: number; maxGuests: number; isLaCime: boolean };
   const pool: Unit[] = [];
-  for (const apt of (regularApts as Apartment[] | null) ?? []) {
-    pool.push({ id: apt.id, name: apt.name, total: apt.price_per_night * nights, maxGuests: apt.max_guests ?? 0, isLaCime: false });
+  for (const apt of regularApts) {
+    if (taken.has(apt.id)) continue;
+    const total = calcTotalForRange(checkin, checkout, Number(apt.price_per_night), rulesByApt.get(apt.id) ?? []);
+    pool.push({ id: apt.id, name: apt.name, total, maxGuests: apt.max_guests ?? 0, isLaCime: false });
   }
-  for (const apt of (laCimeApts as Apartment[] | null) ?? []) {
+  for (const apt of laCimeApts) {
+    if (taken.has(apt.id)) continue;
     const week = matchingWeek(apt, checkin, checkout);
     if (week) pool.push({ id: apt.id, name: apt.name, total: week.price, maxGuests: apt.max_guests ?? 0, isLaCime: true });
   }
@@ -243,7 +274,9 @@ export async function POST(req: NextRequest) {
   if (!combo) {
     return NextResponse.json({
       complete: true,
-      reply: `חיפשתי בכל הדירות שלנו ל-${guests} אורחים בין ${checkin} ל-${checkout} ופשוט אין לנו מספיק מקום בתאריכים האלה 😕 אפשר לנסות תאריכים אחרים (לחצו ↺ למעלה כדי להתחיל שיחה חדשה), או לעבור ל-${req.nextUrl.origin}/search ולחפש ידנית.`,
+      reply: whatsapp
+        ? `חיפשתי בכל הדירות שלנו ל-${guests} אורחים בין ${checkin} ל-${checkout} ופשוט אין לנו מספיק מקום בתאריכים האלה 😕 אפשר לנסות תאריכים אחרים, או לחפש באתר: ${req.nextUrl.origin}/search`
+        : `חיפשתי בכל הדירות שלנו ל-${guests} אורחים בין ${checkin} ל-${checkout} ופשוט אין לנו מספיק מקום בתאריכים האלה 😕 אפשר לנסות תאריכים אחרים (לחצו ↺ למעלה כדי להתחיל שיחה חדשה), או לעבור ל-${req.nextUrl.origin}/search ולחפש ידנית.`,
     });
   }
   const chosen = { total: combo.reduce((s, u) => s + u.total, 0) };
@@ -278,7 +311,9 @@ export async function POST(req: NextRequest) {
     lines.push(`✈️ טיסות — ${fmt(flightTotal)}`);
     lines.push(`🧳 כבודה נוספת — ${fmt(baggageTotal)}`);
   } else {
-    lines.push(`✈️ טיסות — עדיין לא כלולות. שלחו לי צילום מסך של חיפוש טיסות מ-Skyscanner ואוסיף גם אותן.`);
+    lines.push(whatsapp
+      ? `✈️ טיסות — לא כלולות בהצעה הזו. אם תרצו, נבדוק ונוסיף גם אותן.`
+      : `✈️ טיסות — עדיין לא כלולות. שלחו לי צילום מסך של חיפוש טיסות מ-Skyscanner ואוסיף גם אותן.`);
   }
   lines.push(`\nסה"כ עד כה: ${fmt(grandTotal)} (${fmt(grandTotal / guests)} לאדם)`);
 
