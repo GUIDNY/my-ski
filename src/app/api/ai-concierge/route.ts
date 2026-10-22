@@ -1,6 +1,8 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { createQuote } from "@/lib/quotes";
-import { matchingWeek, skiDaysFromNights, equipCost, calcTotalForRange, type PricingRule } from "@/lib/pricing";
+import { askHelper, describeImage, helperConfigured, tooManyMessages, validSession } from "@/lib/helper-chat";
+import { matchingWeek, skiDaysFromNights, equipCost, calcTotalForRange } from "@/lib/pricing";
+import { rulesWithAirbnb } from "@/lib/airbnb-calendar";
 import { takenApartmentIds } from "@/lib/inventory";
 import type { Apartment, SkiPass } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
@@ -123,12 +125,38 @@ async function extractFlightFromImage(base64: string, mimeType: string): Promise
 
 const fmt = (n: number) => `€${Math.round(n).toLocaleString("en-US")}`;
 
+// the helper brain can take about a minute on a quote with flights
+export const maxDuration = 180;
+
 export async function POST(req: NextRequest) {
+  const body = await req.json().catch(() => ({}));
+
+  // The site chat now talks to the same helper as WhatsApp (n8n). The flow
+  // below stays as the fallback (n8n not set up or not answering) and for the
+  // old WhatsApp bot, which still calls this route with channel=whatsapp.
+  if (body.channel !== "whatsapp" && validSession(body.sessionId) && helperConfigured()) {
+    const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
+    if (tooManyMessages(`ip:${ip}`, 40, 10 * 60_000) || tooManyMessages(`s:${body.sessionId}`, 25, 10 * 60_000)) {
+      return NextResponse.json({ ok: true, bubbles: ["רגע, הגיעו הרבה הודעות ברצף", "נסו שוב בעוד כמה דקות"], link: null, images: [], contact: null });
+    }
+    let text = String(body.message ?? "").trim().slice(0, 1500);
+    let kind: "text" | "image" = "text";
+    const img = body.image;
+    if (img && typeof img.base64 === "string" && img.base64.length < 6_000_000) {
+      const seen = await describeImage(img.base64, String(img.mimeType ?? "image/jpeg"));
+      text = (seen ? `[הלקוח שלח תמונה: ${seen}] ` : "[הלקוח שלח תמונה] ") + text;
+      kind = "image";
+    }
+    if (text) {
+      const answer = await askHelper({ sessionId: body.sessionId, text, contact: typeof body.contact === "string" ? body.contact : "", kind });
+      if (answer) return NextResponse.json(answer);
+    }
+  }
+
   if (!process.env.GEMINI_API_KEY) {
     return NextResponse.json({ reply: "העוזר החכם עדיין לא מוגדר בשרת — נסו שוב מאוחר יותר." }, { status: 200 });
   }
 
-  const body = await req.json().catch(() => ({}));
   const messages: ChatMessage[] = Array.isArray(body.messages) ? body.messages : [];
   const image: { base64: string; mimeType: string } | undefined = body.image;
   // The WhatsApp bot (n8n "helper") calls this route too. Its customers have
@@ -215,22 +243,16 @@ export async function POST(req: NextRequest) {
   // and /search both charge that, not the flat base price. If either check
   // fails, say so rather than quote a booked apartment or a wrong price.
   const regularIds = regularApts.map(a => a.id);
-  const [taken, rulesRes] = await Promise.all([
+  const [taken, rulesByApt] = await Promise.all([
     takenApartmentIds(db, checkin, checkout),
-    regularIds.length
-      ? db.from("pricing_rules").select("*").in("apartment_id", regularIds)
-      : Promise.resolve({ data: [] as PricingRule[], error: null }),
+    rulesWithAirbnb(db, regularIds),
   ]);
-  if (!taken || rulesRes.error) {
-    console.error("ai-concierge: availability/pricing check failed", rulesRes.error);
+  if (!taken || !rulesByApt) {
+    console.error("ai-concierge: availability/pricing check failed");
     return NextResponse.json({
       complete: false,
       reply: "משהו השתבש אצלי בבדיקה — זה לא קשור לזמינות, פשוט תקלה רגעית. אפשר לנסות שוב בעוד רגע?",
     });
-  }
-  const rulesByApt = new Map<string, PricingRule[]>();
-  for (const r of (rulesRes.data as (PricingRule & { apartment_id: string })[] | null) ?? []) {
-    rulesByApt.set(r.apartment_id, [...(rulesByApt.get(r.apartment_id) ?? []), r]);
   }
 
   type Unit = { id: string; name: string; total: number; maxGuests: number; isLaCime: boolean };

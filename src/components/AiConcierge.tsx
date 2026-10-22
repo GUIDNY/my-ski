@@ -3,22 +3,49 @@ import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import { usePathname } from "next/navigation";
 
-type Message = { role: "user" | "assistant"; text: string };
+// One chat message. The helper answers in a few short messages, then the quote
+// link and apartment photos (when it made a quote or showed an apartment).
+type Message = { role: "user" | "assistant"; text: string; link?: string; images?: string[] };
+
+type Answer = {
+  ok?: boolean;
+  bubbles?: string[];
+  link?: string | null;
+  images?: string[];
+  contact?: string | null;
+  reply?: string; // the old site bot (fallback) answers in one message
+};
 
 // admin/auth/checkout screens don't need the customer-facing chat launcher
 const HIDDEN = ["/admin", "/auth", "/pay", "/quote", "/q"];
 
-const WELCOME = "היי! אני העוזר החכם שלכם לחופשת סקי בואל טורנס 🎿\nספרו לי כמה אתם ובאילו תאריכים, ואני אמצא לכם דירה, סקי פס, הסעה וציוד — הכל במקום אחד.";
+const WELCOME: Message[] = [
+  { role: "assistant", text: "היי, כאן SkiShare" },
+  { role: "assistant", text: "תכתבו כמה אתם ולאיזה תאריכים, ונכין לכם הצעה מלאה עם דירה, סקי פס, הסעה וציוד" },
+];
 
-// The reply text (e.g. the quote link) is plain text rendered with
-// whitespace-pre-line — a bare URL in there isn't a link on its own, so
-// split it out and render it as one.
+// The same helper answers on WhatsApp, so the chat can carry on there.
+const HELPER_WHATSAPP = process.env.NEXT_PUBLIC_HELPER_WHATSAPP || "16623445081";
+const WA_HREF = `https://wa.me/${HELPER_WHATSAPP}?text=${encodeURIComponent("היי, הגעתי מהאתר")}`;
+
+const STORE = "skishare-chat-v2";
+
+function newSessionId(): string {
+  try {
+    return crypto.randomUUID().replace(/-/g, "");
+  } catch {
+    return (Date.now().toString(36) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)).slice(0, 40);
+  }
+}
+
+// The reply text is plain text rendered with whitespace-pre-line — a bare URL
+// in there isn't a link on its own, so split it out and render it as one.
 function linkify(text: string, onBlueBg: boolean) {
   const parts = text.split(/(https?:\/\/[^\s]+)/g);
   return parts.map((part, i) =>
     /^https?:\/\//.test(part) ? (
       <a key={i} href={part} target="_blank" rel="noopener noreferrer"
-        className={onBlueBg ? "underline text-white font-semibold" : "underline text-blue-600 font-semibold"}>
+        className={onBlueBg ? "underline text-white font-semibold break-all" : "underline text-blue-600 font-semibold break-all"}>
         {part}
       </a>
     ) : (
@@ -32,20 +59,54 @@ function fileToBase64(file: File): Promise<{ base64: string; mimeType: string }>
     const reader = new FileReader();
     reader.onload = () => {
       const result = reader.result as string;
-      const base64 = result.split(",")[1] || "";
-      resolve({ base64, mimeType: file.type || "image/jpeg" });
+      resolve({ base64: result.split(",")[1] || "", mimeType: file.type || "image/jpeg" });
     };
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
 }
 
+// Phone photos are several MB; a 1600px JPEG is plenty to read a flight
+// screenshot and keeps the request small.
+async function shrinkImage(file: File): Promise<{ base64: string; mimeType: string }> {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const i = new Image();
+      i.onload = () => resolve(i);
+      i.onerror = reject;
+      i.src = url;
+    });
+    const scale = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+    canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("no canvas");
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    return { base64: canvas.toDataURL("image/jpeg", 0.82).split(",")[1] || "", mimeType: "image/jpeg" };
+  } catch {
+    return fileToBase64(file);
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+// "typing…" between messages for about as long as a quick thumb would take
+const typingMs = (text: string) => Math.min(2600, Math.max(900, 700 + 28 * text.length)) * (0.85 + Math.random() * 0.3);
+
 export default function AiConcierge() {
   const pathname = usePathname() || "/";
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([{ role: "assistant", text: WELCOME }]);
+  const [messages, setMessages] = useState<Message[]>(WELCOME);
+  const [sessionId, setSessionId] = useState("");
+  const [contact, setContact] = useState("");
   const [input, setInput] = useState("");
-  const [sending, setSending] = useState(false);
+  const [busy, setBusy] = useState(false);        // waiting for the answer or still showing it
+  const [typing, setTyping] = useState(false);
+  const [waiting, setWaiting] = useState(false);  // the request is out, no answer yet
+  const [waitSecs, setWaitSecs] = useState(0);
   const [pendingImage, setPendingImage] = useState<{ file: File; preview: string } | null>(null);
   const [dragY, setDragY] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -53,10 +114,39 @@ export default function AiConcierge() {
   const dragStartY = useRef(0);
   const fileRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const restored = useRef(false);
+
+  // Keep the conversation across page changes and reloads in this tab:
+  // picked up again the first time the chat is opened.
+  const restore = () => {
+    if (restored.current) return;
+    restored.current = true;
+    let saved: { sessionId?: string; messages?: Message[]; contact?: string } | null = null;
+    try { saved = JSON.parse(sessionStorage.getItem(STORE) || "null"); } catch { saved = null; }
+    if (saved?.sessionId && Array.isArray(saved.messages) && saved.messages.length) {
+      setSessionId(saved.sessionId);
+      setMessages(saved.messages.slice(-60));
+      setContact(saved.contact || "");
+    } else {
+      setSessionId(newSessionId());
+    }
+  };
+  useEffect(() => {
+    if (!restored.current || !sessionId) return;
+    try { sessionStorage.setItem(STORE, JSON.stringify({ sessionId, messages: messages.slice(-60), contact })); } catch { /* private mode */ }
+  }, [sessionId, messages, contact]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, open]);
+  }, [messages, open, typing, waitSecs]);
+
+  // seconds spent waiting for the answer, for the small status line under "typing…"
+  useEffect(() => {
+    if (!waiting) return;
+    const started = Date.now();
+    const t = setInterval(() => setWaitSecs(Math.floor((Date.now() - started) / 1000)), 1000);
+    return () => clearInterval(t);
+  }, [waiting]);
 
   // The iOS App Store build loads this site inside a Capacitor WKWebView
   // (contentInset: "always" — see capacitor.config.ts), where a background
@@ -123,45 +213,87 @@ export default function AiConcierge() {
     setDragY(0);
   };
 
+  const restart = () => {
+    if (busy) return;
+    setMessages(WELCOME);
+    setSessionId(newSessionId());
+    setContact("");
+    setInput("");
+    setPendingImage(null);
+  };
+
   const send = async () => {
     const text = input.trim();
-    if (!text && !pendingImage) return;
-    const userMsg: Message = { role: "user", text: text || "(שלח/ה תמונה)" };
-    const nextMessages = [...messages, userMsg];
-    setMessages(nextMessages);
+    if ((!text && !pendingImage) || busy) return;
+    const userMsg: Message = { role: "user", text: text || "(שלחתי תמונה)" };
+    const transcript = [...messages, userMsg];
+    setMessages(transcript);
     setInput("");
-    setSending(true);
+    setBusy(true);
+    setTyping(true);
+    setWaitSecs(0);
+    setWaiting(true);
 
     let image: { base64: string; mimeType: string } | undefined;
     if (pendingImage) {
-      image = await fileToBase64(pendingImage.file);
+      image = await shrinkImage(pendingImage.file);
       setPendingImage(null);
     }
 
+    let answer: Answer | null = null;
     try {
       const res = await fetch("/api/ai-concierge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: nextMessages, image }),
+        body: JSON.stringify({
+          sessionId, message: text, contact, image,
+          // only used by the old site bot, if the helper can't answer
+          messages: transcript
+            .filter(m => m.text && !(m.role === "assistant" && WELCOME.some(w => w.text === m.text)))
+            .map(m => ({ role: m.role, text: m.text })).slice(-20),
+        }),
       });
-      const j = await res.json();
-      setMessages(m => [...m, { role: "assistant", text: j.reply || "משהו השתבש, נסו שוב." }]);
+      answer = await res.json();
     } catch {
-      setMessages(m => [...m, { role: "assistant", text: "משהו השתבש, נסו שוב בעוד רגע." }]);
-    } finally {
-      setSending(false);
+      answer = null;
     }
+    setWaiting(false);
+
+    const items: Message[] = [];
+    if (answer?.bubbles?.length) {
+      for (const b of answer.bubbles) items.push({ role: "assistant", text: b });
+      if (answer.link) items.push({ role: "assistant", text: "", link: answer.link });
+      if (answer.images?.length) items.push({ role: "assistant", text: "", images: answer.images });
+      if (answer.contact) setContact(answer.contact);
+    } else {
+      items.push({ role: "assistant", text: answer?.reply || "משהו השתבש אצלנו, אפשר לנסות שוב עוד רגע" });
+    }
+
+    // like WhatsApp: the first message right away (the wait already looked
+    // like typing), then "typing…" before each next one
+    for (let i = 0; i < items.length; i++) {
+      if (i > 0) {
+        setTyping(true);
+        await sleep(items[i].text ? typingMs(items[i].text) : 700);
+      }
+      setTyping(false);
+      setMessages(m => [...m, items[i]]);
+    }
+    setTyping(false);
+    setBusy(false);
   };
 
   if (hidden) return null;
+
+  const status = !waiting ? "" : waitSecs >= 35 ? "עוד רגע, מכינים את ההצעה…" : waitSecs >= 12 ? "בודקים זמינות ומחירים…" : "";
 
   return (
     <>
       {/* Launcher — raised circular avatar, docked in the middle of the mobile
           tab bar; floats bottom-corner on desktop where there's no tab bar. */}
       <button
-        onClick={() => setOpen(v => !v)}
-        aria-label="שאל את SkiShare"
+        onClick={() => { restore(); setOpen(v => !v); }}
+        aria-label="צ'אט עם SkiShare"
         className={`fixed z-[60] rounded-full shadow-lg border-2 border-white overflow-hidden
           bottom-[34px] left-1/2 -translate-x-1/2 w-16 h-16
           md:bottom-6 md:left-6 md:right-auto md:translate-x-0 md:w-16 md:h-16
@@ -195,36 +327,74 @@ export default function AiConcierge() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/ai-guide.png" alt="" className="w-10 h-10 rounded-full object-cover object-top border-2 border-white shadow" />
               <div className="flex-1 min-w-0">
-                <div className="font-black text-gray-900 text-sm">שאל את SkiShare</div>
-                <div className="text-xs text-gray-500">מחפש דירה, סקי פס, הסעה וציוד — הכל בבת אחת</div>
+                <div className="font-black text-gray-900 text-sm flex items-center gap-1.5">
+                  SkiShare
+                  <span className="bg-emerald-500 text-white text-[9px] font-black rounded-full px-1.5 py-0.5">AI</span>
+                </div>
+                <div className="text-xs text-gray-500">חופשות סקי בואל טורנס · דירה, סקי פס, הסעה וציוד</div>
               </div>
-              <button onClick={() => { setMessages([{ role: "assistant", text: WELCOME }]); setInput(""); setPendingImage(null); }}
+              <a href={WA_HREF} target="_blank" rel="noopener noreferrer" title="להמשיך בוואטסאפ" aria-label="להמשיך בוואטסאפ"
+                className="w-9 h-9 flex items-center justify-center rounded-full text-emerald-600 hover:bg-emerald-50 active:scale-90 transition-transform">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+                  <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z" />
+                </svg>
+              </a>
+              <button onClick={restart} disabled={busy}
                 title="להתחיל שיחה חדשה" aria-label="להתחיל שיחה חדשה"
-                className="text-gray-400 hover:text-gray-600 active:scale-90 transition-transform text-lg leading-none w-9 h-9 flex items-center justify-center -mr-1">↺</button>
+                className="text-gray-400 hover:text-gray-600 active:scale-90 transition-transform text-lg leading-none w-9 h-9 flex items-center justify-center disabled:opacity-40">↺</button>
               <button onClick={() => setOpen(false)} aria-label="סגירה"
                 className="text-gray-400 hover:text-gray-600 active:scale-90 transition-transform text-xl leading-none w-9 h-9 flex items-center justify-center">✕</button>
             </div>
 
             {/* messages */}
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
-              {messages.map((m, i) => (
-                <div key={i} className={`flex ${m.role === "user" ? "justify-start" : "justify-end"}`}>
-                  <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[15px] leading-relaxed whitespace-pre-line ${
-                    m.role === "user" ? "bg-gray-100 text-gray-800" : "bg-blue-600 text-white"
-                  }`}>
-                    {linkify(m.text, m.role === "assistant")}
+            <div ref={scrollRef} aria-live="polite" className="flex-1 overflow-y-auto p-4 space-y-2">
+              {messages.map((m, i) => {
+                const mine = m.role === "user";
+                const row = `flex ${mine ? "justify-start" : "justify-end"}`;
+                if (m.link) return (
+                  <div key={i} className={row}>
+                    <a href={m.link} target="_blank" rel="noopener noreferrer"
+                      className="max-w-[85%] flex items-center gap-3 rounded-2xl border border-blue-200 bg-white px-3.5 py-3 shadow-sm hover:bg-blue-50 transition-colors">
+                      <span className="w-9 h-9 shrink-0 rounded-xl bg-red-50 text-red-600 text-[10px] font-black flex items-center justify-center">PDF</span>
+                      <span className="min-w-0">
+                        <span className="block text-sm font-bold text-gray-900">הצעת המחיר שלכם</span>
+                        <span className="block text-xs text-gray-500">כל הפרטים וקישורי תשלום · לחצו לפתיחה</span>
+                      </span>
+                    </a>
                   </div>
-                </div>
-              ))}
-              {sending && (
-                <div className="flex justify-end">
-                  <div className="bg-blue-600 text-white rounded-2xl px-3.5 py-2.5 text-sm">
+                );
+                if (m.images?.length) return (
+                  <div key={i} className={row}>
+                    <div className="max-w-[85%] grid grid-cols-2 gap-1.5">
+                      {m.images.map((src, j) => (
+                        <a key={j} href={src} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-xl bg-gray-100">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={src} alt="" loading="lazy" className="w-full h-24 object-cover hover:scale-105 transition-transform" />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                );
+                return (
+                  <div key={i} className={row}>
+                    <div className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-[15px] leading-relaxed whitespace-pre-line ${
+                      mine ? "bg-gray-100 text-gray-800" : "bg-blue-600 text-white"
+                    }`}>
+                      {linkify(m.text, !mine)}
+                    </div>
+                  </div>
+                );
+              })}
+              {typing && (
+                <div className="flex flex-col items-end gap-1">
+                  <div className="bg-blue-600 text-white rounded-2xl px-3.5 py-2.5 text-sm" aria-label="מקליד">
                     <span className="inline-flex gap-1">
                       <span className="w-1.5 h-1.5 bg-white/80 rounded-full animate-bounce [animation-delay:-.3s]" />
                       <span className="w-1.5 h-1.5 bg-white/80 rounded-full animate-bounce [animation-delay:-.15s]" />
                       <span className="w-1.5 h-1.5 bg-white/80 rounded-full animate-bounce" />
                     </span>
                   </div>
+                  {status && <div className="text-[11px] text-gray-400">{status}</div>}
                 </div>
               )}
             </div>
@@ -235,7 +405,7 @@ export default function AiConcierge() {
                 <div className="flex items-center gap-2 mb-2 bg-blue-50 rounded-xl p-2">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={pendingImage.preview} alt="" className="w-10 h-10 rounded-lg object-cover" />
-                  <span className="text-xs text-blue-700 flex-1">צילום מסך טיסה מוכן לשליחה</span>
+                  <span className="text-xs text-blue-700 flex-1">התמונה מוכנה לשליחה</span>
                   <button onClick={() => setPendingImage(null)} className="text-xs text-red-500 font-bold p-1">✕</button>
                 </div>
               )}
@@ -244,17 +414,19 @@ export default function AiConcierge() {
                   onChange={e => {
                     const file = e.target.files?.[0];
                     if (file) setPendingImage({ file, preview: URL.createObjectURL(file) });
+                    e.target.value = "";
                   }} />
-                <button onClick={() => fileRef.current?.click()} aria-label="צרפו צילום מסך"
+                <button onClick={() => fileRef.current?.click()} aria-label="לצרף תמונה"
                   className="flex-shrink-0 w-11 h-11 rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 active:scale-90 transition-transform flex items-center justify-center text-lg">📷</button>
                 <input
                   value={input}
                   onChange={e => setInput(e.target.value)}
-                  onKeyDown={e => { if (e.key === "Enter" && !sending) send(); }}
+                  onKeyDown={e => { if (e.key === "Enter" && !busy) send(); }}
                   placeholder="למשל: 4 אנשים, 8-15 בפברואר"
+                  maxLength={1500}
                   className="flex-1 border border-gray-200 rounded-full px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <button onClick={send} disabled={sending || (!input.trim() && !pendingImage)} aria-label="שליחה"
+                <button onClick={send} disabled={busy || (!input.trim() && !pendingImage)} aria-label="שליחה"
                   className="flex-shrink-0 w-11 h-11 rounded-full bg-blue-600 hover:bg-blue-700 active:scale-90 disabled:active:scale-100 transition-transform disabled:opacity-40 text-white flex items-center justify-center">
                   ←
                 </button>
