@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import type { Order, Apartment } from "@/types";
+import { authFetch } from "@/lib/auth-fetch";
 
 const STATUS: Record<string, { label: string; cls: string }> = {
   awaiting:  { label: "🔥 ליד חם — הגיע לתשלום, לא שילם", cls: "bg-orange-100 text-orange-700" },
@@ -97,12 +98,12 @@ export default function OrdersAdmin() {
 
   const load = async () => {
     setLoading(true);
-    const r = await fetch("/api/orders");
+    const r = await authFetch("/api/orders");
     setOrders(await r.json());
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
-  useEffect(() => { fetch("/api/apartments?all=1").then(r => r.json()).then(setApartments).catch(() => {}); }, []);
+  useEffect(() => { authFetch("/api/apartments?all=1").then(r => r.json()).then(setApartments).catch(() => {}); }, []);
 
   // Manually add a real booking (e.g. taken by phone) — this is the only
   // way an admin-created order actually blocks its dates: POST /api/orders
@@ -136,11 +137,11 @@ export default function OrdersAdmin() {
         // NEW apartment/dates in the same request wouldn't clear the old
         // ones), then update the fields and re-block under the new values.
         if (editingOrder.status === "approved" || editingOrder.status === "hold") {
-          await fetch(`/api/orders/${editingOrder.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "cancelled" }) });
+          await authFetch(`/api/orders/${editingOrder.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "cancelled" }) });
         }
-        await fetch(`/api/orders/${editingOrder.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...fields, status: newOrder.status }) });
+        await authFetch(`/api/orders/${editingOrder.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...fields, status: newOrder.status }) });
       } else {
-        const post = (force: boolean) => fetch("/api/orders", {
+        const post = (force: boolean) => authFetch("/api/orders", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...fields, apartment: apt.name, cancel: "none", service: "human", grand_total: newOrder.total_eur, force }),
@@ -155,9 +156,9 @@ export default function OrdersAdmin() {
         if (!res.ok || !j.code) { alert(j.error || "יצירת ההזמנה נכשלה"); return; }
 
         // POST only returns {code} — fetch the full list to find this row's id for the status PATCH.
-        const list: Order[] = await fetch("/api/orders").then(r => r.json());
+        const list: Order[] = await authFetch("/api/orders").then(r => r.json());
         const created = list.find(o => o.code === j.code);
-        if (created) await fetch(`/api/orders/${created.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: newOrder.status }) });
+        if (created) await authFetch(`/api/orders/${created.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: newOrder.status }) });
       }
 
       closeForm();
@@ -175,7 +176,7 @@ export default function OrdersAdmin() {
       : `לאשר את ההזמנה של ${o.customer_name || o.code}? (אין פיקדון מקושר — רק אישור + מייל)\nמייל יישלח אל: ${o.customer_email}`;
     if (!confirm(msg)) return;
     setBusy(o.id);
-    const res = await fetch("/api/payplus/capture", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ order_id: o.id }) });
+    const res = await authFetch("/api/payplus/capture", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ order_id: o.id }) });
     const j = await res.json().catch(() => ({}));
     setBusy(null);
     if (res.ok) alert(`✓ ${charges ? "הפיקדון חויב ו" : ""}ההזמנה אושרה. מייל אישור נשלח אל ${o.customer_email}`);
@@ -185,13 +186,13 @@ export default function OrdersAdmin() {
 
   const setStatus = async (o: Order, status: string) => {
     setBusy(o.id);
-    await fetch(`/api/orders/${o.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
+    await authFetch(`/api/orders/${o.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
     setBusy(null); load();
   };
 
   const remove = async (o: Order) => {
     if (!confirm("למחוק את ההזמנה?")) return;
-    await fetch(`/api/orders/${o.id}`, { method: "DELETE" });
+    await authFetch(`/api/orders/${o.id}`, { method: "DELETE" });
     load();
   };
 
@@ -199,7 +200,7 @@ export default function OrdersAdmin() {
   const toggleOp = async (o: Order, key: string) => {
     const ops = { ...(o.ops || {}), [key]: !(o.ops && o.ops[key]) };
     setOrders(prev => prev.map(x => x.id === o.id ? { ...x, ops } : x));   // optimistic
-    await fetch(`/api/orders/${o.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ops }) });
+    await authFetch(`/api/orders/${o.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ops }) });
   };
 
   const checklistFor = (o: Order) => {

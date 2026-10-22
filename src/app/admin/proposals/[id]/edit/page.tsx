@@ -6,6 +6,7 @@ import ProposalDocument, { PROPOSAL_CSS } from "@/components/ProposalDocument";
 import { computeTotals, money, type LineItem } from "@/lib/proposal-pricing";
 import { calcTotalForRange, matchingWeek, skiDaysFromNights, equipCost, type PricingRule } from "@/lib/pricing";
 import type { Proposal, ProposalData, ProposalSection, ProposalBlock, ProposalStatus, SkiPass } from "@/types";
+import { authFetch } from "@/lib/auth-fetch";
 
 const input = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
 const TRANSFER_PRICE = 180;
@@ -55,17 +56,17 @@ function EditorInner() {
   const [skiPasses, setSkiPasses] = useState<SkiPass[]>([]);
 
   useEffect(() => {
-    fetch(`/api/proposals/${id}`).then(r => r.json()).then((row: Proposal) => { setP(row); setData(row.data); });
+    authFetch(`/api/proposals/${id}`).then(r => r.json()).then((row: Proposal) => { setP(row); setData(row.data); });
   }, [id]);
 
   useEffect(() => {
-    fetch("/api/ski-passes").then(r => r.json()).then(setSkiPasses);
+    authFetch("/api/ski-passes").then(r => r.json()).then(setSkiPasses);
   }, []);
 
   const save = useCallback(async () => {
     if (!p || !data) return;
     setSaving(true);
-    await fetch(`/api/proposals/${id}`, {
+    await authFetch(`/api/proposals/${id}`, {
       method: "PATCH", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ client_name: p.client_name, client_email: p.client_email, client_phone: p.client_phone, status: p.status, valid_until: p.valid_until || null, currency: p.currency, data }),
     });
@@ -100,10 +101,10 @@ function EditorInner() {
       return;
     }
     // 1) saved quote (rich: apartment + flights)
-    const qr = await fetch(`/api/quotes/${encodeURIComponent(token)}`);
+    const qr = await authFetch(`/api/quotes/${encodeURIComponent(token)}`);
     if (qr.ok) { await buildFromQuote(await qr.json()); return; }
     // 2) order code
-    const or = await fetch(`/api/orders/code/${encodeURIComponent(token.toLowerCase())}`);
+    const or = await authFetch(`/api/orders/code/${encodeURIComponent(token.toLowerCase())}`);
     if (or.ok) {
       const o = await or.json();
       const summary: ProposalSection = { heading: "סיכום החופשה", blocks: [{ type: "summary", rows: [
@@ -143,8 +144,8 @@ function EditorInner() {
     const checkout = qp.get("checkout");
 
     const [aptRes, rulesRes] = await Promise.all([
-      fetch(`/api/apartments/${aptId}`),
-      fetch(`/api/pricing-rules?apartment_id=${aptId}`),
+      authFetch(`/api/apartments/${aptId}`),
+      authFetch(`/api/pricing-rules?apartment_id=${aptId}`),
     ]);
     if (!aptRes.ok) { alert("הדירה לא נמצאה"); return; }
     const apt = await aptRes.json();
@@ -203,8 +204,8 @@ function EditorInner() {
 
   const buildFromApartment = async (aptId: string, checkin: string | null, checkout: string | null, guests: string | null) => {
     const [aptRes, rulesRes] = await Promise.all([
-      fetch(`/api/apartments/${aptId}`),
-      fetch(`/api/pricing-rules?apartment_id=${aptId}`),
+      authFetch(`/api/apartments/${aptId}`),
+      authFetch(`/api/pricing-rules?apartment_id=${aptId}`),
     ]);
     if (!aptRes.ok) { alert("הדירה לא נמצאה"); return; }
     const apt = await aptRes.json();
@@ -236,7 +237,7 @@ function EditorInner() {
     let desc = "";
     let images: string[] = [];
     if (q.apartment_id) {
-      const ar = await fetch(`/api/apartments/${q.apartment_id}`);
+      const ar = await authFetch(`/api/apartments/${q.apartment_id}`);
       if (ar.ok) { const a = await ar.json(); desc = a.description || ""; images = Array.isArray(a.images) ? a.images : []; }
     }
     const aptTotal = Number(q.apt_total ?? q.grand_total) || 0;
@@ -384,7 +385,7 @@ function EditorInner() {
       // charged amount/currency — label with THAT, not the caller's number,
       // or the ILS button would show the euro figure with a ₪ sign on it.
       const results = await Promise.all(requests.map(async r => {
-        const res = await fetch("/api/payplus/create-link", {
+        const res = await authFetch("/api/payplus/create-link", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ amount: r.amount, currency: r.currency, description: desc }),

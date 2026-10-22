@@ -1,10 +1,13 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/api-auth";
 
 const ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789";
 const code = (n = 6) => Array.from({ length: n }, () => ALPHABET[Math.floor(Math.random() * ALPHABET.length)]).join("");
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
   const db = createServerClient();
   const { data, error } = await db.from("orders").select("*").order("created_at", { ascending: false });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

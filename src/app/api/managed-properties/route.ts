@@ -1,8 +1,11 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/api-auth";
 
 // Internal management of our own seasonal properties & agency properties.
 export async function GET(req: NextRequest) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
   const db = createServerClient();
   const kind = req.nextUrl.searchParams.get("kind");
   let q = db.from("managed_properties").select("*").order("created_at", { ascending: false });
@@ -23,6 +26,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
   const db = createServerClient();
   const body = await req.json();
   const { data, error } = await db.from("managed_properties").insert(body).select().single();

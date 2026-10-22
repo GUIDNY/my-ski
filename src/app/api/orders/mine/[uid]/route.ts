@@ -1,12 +1,17 @@
 import { createServerClient } from "@/lib/supabase-server";
+import { sessionUser } from "@/lib/api-auth";
 import { NextRequest, NextResponse } from "next/server";
 
-// Returns a user's orders. Also auto-links any unclaimed orders whose
-// customer_email matches the logged-in email (passed as ?email=).
+// Returns the signed-in user's orders. Also auto-links any orders whose
+// customer_email matches the user's verified login email. The user and the
+// email come from the session token, never from the URL.
 export async function GET(req: NextRequest, { params }: { params: Promise<{ uid: string }> }) {
-  const db = createServerClient();
+  const user = await sessionUser(req);
   const { uid } = await params;
-  const email = req.nextUrl.searchParams.get("email");
+  if (!user) return NextResponse.json({ error: "login required" }, { status: 401 });
+  if (user.id !== uid) return NextResponse.json({ error: "not your account" }, { status: 403 });
+  const db = createServerClient();
+  const email = user.email_confirmed_at ? user.email : null;
 
   // A verified login email proves ownership: (re)link every order whose
   // customer_email matches — even if it was linked to a stale/old account id.

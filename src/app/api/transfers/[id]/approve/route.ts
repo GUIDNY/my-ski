@@ -1,11 +1,14 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { createBooking } from "@/lib/winteride";
 import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/api-auth";
 
 // The ONLY route that creates a real, billable booking on the Winteride
 // partner account. Only reachable from the admin panel — never called from
 // the public-facing transfers form.
-export async function POST(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
   const { id } = await params;
   const db = createServerClient();
 

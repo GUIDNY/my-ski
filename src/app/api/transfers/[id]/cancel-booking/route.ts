@@ -1,9 +1,12 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { cancelBooking } from "@/lib/winteride";
 import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/api-auth";
 
 // Cancels an already-confirmed Winteride booking (real refund flow on their side).
-export async function POST(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
   const { id } = await params;
   const db = createServerClient();
 

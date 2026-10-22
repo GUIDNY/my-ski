@@ -1,10 +1,13 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { blockDatesForOrder } from "@/lib/inventory";
 import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/api-auth";
 
 // Captures (charges) a held J5 deposit via PayPlus, then marks the order
 // approved and fires the confirmation email via n8n.
 export async function POST(req: NextRequest) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
   const db = createServerClient();
   const { order_id } = await req.json();
   if (!order_id) return NextResponse.json({ error: "missing order_id" }, { status: 400 });

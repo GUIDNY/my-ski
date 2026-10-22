@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import type { SeasonRental } from "@/types";
+import { authFetch } from "@/lib/auth-fetch";
 
 const EMPTY: Partial<SeasonRental> = {
   name: "", area: "Val Thorens", beds: 1, sleeps: 2,
@@ -19,7 +20,7 @@ function ImageUploader({ images, onChange }: { images: string[]; onChange: (imgs
     for (const file of Array.from(files)) {
       const fd = new FormData();
       fd.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const res = await authFetch("/api/upload", { method: "POST", body: fd });
       const { url } = await res.json();
       if (url) urls.push(url);
     }
@@ -77,7 +78,7 @@ export default function SeasonRentalsAdmin() {
 
   const load = async () => {
     setLoading(true);
-    const res = await fetch("/api/season-rentals");
+    const res = await authFetch("/api/season-rentals");
     setRentals(await res.json());
     setLoading(false);
   };
@@ -87,16 +88,16 @@ export default function SeasonRentalsAdmin() {
     setSaving(true);
     const payload = { ...form, available_from: form.available_from || null, available_to: form.available_to || null };
     if (editing) {
-      await fetch(`/api/season-rentals/${editing}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      await authFetch(`/api/season-rentals/${editing}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
     } else {
-      await fetch("/api/season-rentals", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      await authFetch("/api/season-rentals", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
     }
     setSaving(false); setShowForm(false); setEditing(null); setForm(EMPTY); load();
   };
 
   const remove = async (id: string) => {
     if (!confirm("למחוק את הדירה?")) return;
-    await fetch(`/api/season-rentals/${id}`, { method: "DELETE" });
+    await authFetch(`/api/season-rentals/${id}`, { method: "DELETE" });
     load();
   };
 

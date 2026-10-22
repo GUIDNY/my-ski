@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import ProposalDocument, { PROPOSAL_CSS } from "@/components/ProposalDocument";
 import { DEMO_PROPOSAL } from "@/lib/proposal-demo";
 import type { ProposalData } from "@/types";
+import { authFetch } from "@/lib/auth-fetch";
 
 export default function ProposalPrintPage() {
   const { id } = useParams<{ id: string }>();
@@ -12,7 +13,7 @@ export default function ProposalPrintPage() {
 
   useEffect(() => {
     if (id === "demo") { setData(DEMO_PROPOSAL); return; }
-    fetch(`/api/proposals/${id}`)
+    authFetch(`/api/proposals/${id}`)
       .then(r => (r.ok ? r.json() : Promise.reject()))
       .then(p => setData(p.data as ProposalData))
       .catch(() => setNotFound(true));

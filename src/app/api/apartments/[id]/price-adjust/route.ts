@@ -1,10 +1,13 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/api-auth";
 
 // Bulk price change for an apartment: adjust the whole seasonal calendar
 // (all pricing_rules) + the base nightly price by a percentage or fixed amount.
 // value is signed: -10 (percent) = 10% off · -20 (fixed) = €20 off.
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
   const { id } = await params;
   const { mode, value } = await req.json().catch(() => ({}));
   const v = Number(value);

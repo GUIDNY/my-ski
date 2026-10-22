@@ -1,5 +1,6 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/api-auth";
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const db = createServerClient();
@@ -10,6 +11,8 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
   const db = createServerClient();
   const { id } = await params;
   const body = await req.json();

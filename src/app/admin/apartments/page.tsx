@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { Apartment } from "@/types";
+import { authFetch } from "@/lib/auth-fetch";
 
 const EMPTY: Partial<Apartment> = {
   name: "", type: "דירה", beds: 2, baths: 1, sqm: 60, max_guests: 4,
@@ -19,7 +20,7 @@ function ImageUploader({ images, onChange }: { images: string[]; onChange: (imgs
     for (const file of Array.from(files)) {
       const fd = new FormData();
       fd.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const res = await authFetch("/api/upload", { method: "POST", body: fd });
       const { url, error } = await res.json();
       if (url) urls.push(url);
       else console.error("upload error:", error);
@@ -190,7 +191,7 @@ export default function ApartmentsAdmin() {
     if (!isFinite(v) || v === 0) { alert("הזן/י ערך (למשל ‎-10 לאחוז או ‎-20 לסכום)"); return; }
     if (!confirm(`לעדכן את כל המחירון של "${adjApt.name}" ב-${adjMode === "percent" ? `${v}%` : `€${v}`}? פעולה זו משנה את כל הלוח.`)) return;
     setAdjBusy(true);
-    const r = await fetch(`/api/apartments/${adjApt.id}/price-adjust`, {
+    const r = await authFetch(`/api/apartments/${adjApt.id}/price-adjust`, {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: adjMode, value: v }),
     });
     const j = await r.json().catch(() => ({}));
@@ -202,7 +203,7 @@ export default function ApartmentsAdmin() {
 
   const load = async () => {
     setLoading(true);
-    const res = await fetch("/api/apartments?all=1");
+    const res = await authFetch("/api/apartments?all=1");
     const data = await res.json();
     setApartments(data);
     setLoading(false);
@@ -213,11 +214,11 @@ export default function ApartmentsAdmin() {
   const save = async () => {
     setSaving(true);
     if (editing) {
-      await fetch(`/api/apartments/${editing}`, {
+      await authFetch(`/api/apartments/${editing}`, {
         method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form),
       });
     } else {
-      await fetch("/api/apartments", {
+      await authFetch("/api/apartments", {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form),
       });
     }
@@ -230,7 +231,7 @@ export default function ApartmentsAdmin() {
 
   const remove = async (id: string) => {
     if (!confirm("למחוק את הדירה?")) return;
-    await fetch(`/api/apartments/${id}`, { method: "DELETE" });
+    await authFetch(`/api/apartments/${id}`, { method: "DELETE" });
     load();
   };
 
@@ -246,7 +247,7 @@ export default function ApartmentsAdmin() {
   const [syncAllMsg, setSyncAllMsg] = useState("");
   const syncAll = async () => {
     setSyncingAll(true); setSyncAllMsg("");
-    const r = await fetch("/api/ical-sync", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "sync_all" }) });
+    const r = await authFetch("/api/ical-sync", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "sync_all" }) });
     const d = await r.json();
     setSyncAllMsg(`סונכרנו ${d.apartments} דירות, ${d.synced} ימים עודכנו`);
     setSyncingAll(false);

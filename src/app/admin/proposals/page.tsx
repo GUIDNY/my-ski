@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import AdminGate from "@/components/AdminGate";
 import type { Proposal, ProposalStatus } from "@/types";
+import { authFetch } from "@/lib/auth-fetch";
 
 const STATUS: Record<ProposalStatus, { label: string; cls: string }> = {
   draft:    { label: "טיוטה",    cls: "bg-gray-100 text-gray-600" },
@@ -25,7 +26,7 @@ function ProposalsInner() {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
     if (status) params.set("status", status);
-    const r = await fetch(`/api/proposals?${params}`);
+    const r = await authFetch(`/api/proposals?${params}`);
     setRows(r.ok ? await r.json() : []);
     setLoading(false);
   }, [q, status]);
@@ -34,7 +35,7 @@ function ProposalsInner() {
 
   const create = async () => {
     setBusy(true);
-    const r = await fetch("/api/proposals", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+    const r = await authFetch("/api/proposals", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
     const p = await r.json();
     setBusy(false);
     if (r.ok) router.push(`/admin/proposals/${p.id}/edit`);
@@ -42,7 +43,7 @@ function ProposalsInner() {
   };
   const duplicate = async (id: string) => {
     setBusy(true);
-    const r = await fetch(`/api/proposals/${id}/duplicate`, { method: "POST" });
+    const r = await authFetch(`/api/proposals/${id}/duplicate`, { method: "POST" });
     const p = await r.json();
     setBusy(false);
     if (r.ok) router.push(`/admin/proposals/${p.id}/edit`);
@@ -66,11 +67,11 @@ function ProposalsInner() {
         id = raw;
       }
       if (id) {
-        const r = await fetch(`/api/proposals/${id}`);
+        const r = await authFetch(`/api/proposals/${id}`);
         if (!r.ok) id = null;
       }
       if (!id) {
-        const r = await fetch(`/api/proposals?q=${encodeURIComponent(raw)}`);
+        const r = await authFetch(`/api/proposals?q=${encodeURIComponent(raw)}`);
         const found: Proposal[] = r.ok ? await r.json() : [];
         id = found[0]?.id ?? null;
       }
@@ -83,7 +84,7 @@ function ProposalsInner() {
 
   const remove = async (id: string) => {
     if (!confirm("למחוק את ההצעה?")) return;
-    await fetch(`/api/proposals/${id}`, { method: "DELETE" });
+    await authFetch(`/api/proposals/${id}`, { method: "DELETE" });
     load();
   };
 

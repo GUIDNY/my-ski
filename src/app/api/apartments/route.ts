@@ -1,6 +1,7 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { buildSeasonalRules } from "@/lib/seasonal-pricing";
 import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/api-auth";
 
 export async function GET(req: NextRequest) {
   const db = createServerClient();
@@ -13,6 +14,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
   const db = createServerClient();
   const body = await req.json();
   const { data, error } = await db.from("apartments").insert(body).select().single();

@@ -1,8 +1,11 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { blockDatesForOrder, freeDatesForOrder } from "@/lib/inventory";
 import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/api-auth";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
   const db = createServerClient();
   const { id } = await params;
   const body = await req.json();
@@ -54,7 +57,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   return NextResponse.json(data);
 }
 
-export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
   const db = createServerClient();
   const { id } = await params;
   const { data: order } = await db.from("orders").select("apartment_id, extra_apartment_id, code").eq("id", id).single();

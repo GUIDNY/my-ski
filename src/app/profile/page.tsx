@@ -7,6 +7,7 @@ import type { User } from "@supabase/supabase-js";
 import type { Booking } from "@/types";
 import { IconMountain, IconCalendar, IconUser } from "@/components/Icons";
 import Logo from "@/components/Logo";
+import { authFetch } from "@/lib/auth-fetch";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s); return `${d.getDate()} ${HE_MONTHS[d.getMonth()]} ${d.getFullYear()}`; };
@@ -32,7 +33,7 @@ export default function ProfilePage() {
       setUser(session.user);
 
       // Fetch bookings matching this user's email
-      const res  = await fetch("/api/bookings");
+      const res  = await authFetch("/api/bookings");
       const all: Booking[] = await res.json();
       const mine = isAdmin(session.user)
         ? all

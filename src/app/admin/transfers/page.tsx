@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { authFetch } from "@/lib/auth-fetch";
 
 type Transfer = {
   id: string;
@@ -62,7 +63,7 @@ export default function TransfersAdmin() {
 
   const load = async () => {
     setLoading(true);
-    const r = await fetch("/api/transfers");
+    const r = await authFetch("/api/transfers");
     setTransfers(await r.json());
     setLoading(false);
   };
@@ -71,7 +72,7 @@ export default function TransfersAdmin() {
   const approve = async (t: Transfer) => {
     if (!confirm(`לאשר ולהזמין בפועל מול Winteride עבור ${t.customer_name}?\nזו פעולה שיוצרת הזמנה אמיתית ומחייבת (€${t.total_price ?? "?"}).`)) return;
     setBusy(t.id);
-    const res = await fetch(`/api/transfers/${t.id}/approve`, { method: "POST" });
+    const res = await authFetch(`/api/transfers/${t.id}/approve`, { method: "POST" });
     const j = await res.json().catch(() => ({}));
     setBusy(null);
     if (res.ok) alert(`✓ אושר. מספר הזמנה ב-Winteride: ${j.transfer?.winteride_ref ?? "—"}`);
@@ -82,14 +83,14 @@ export default function TransfersAdmin() {
   const reject = async (t: Transfer) => {
     if (!confirm(`לדחות את הבקשה של ${t.customer_name}?`)) return;
     setBusy(t.id);
-    await fetch(`/api/transfers/${t.id}/reject`, { method: "POST" });
+    await authFetch(`/api/transfers/${t.id}/reject`, { method: "POST" });
     setBusy(null); load();
   };
 
   const cancelBooking = async (t: Transfer) => {
     if (!confirm(`לבטל את ההזמנה שכבר אושרה מול Winteride (${t.winteride_ref})? זו פעולה אמיתית.`)) return;
     setBusy(t.id);
-    const res = await fetch(`/api/transfers/${t.id}/cancel-booking`, { method: "POST" });
+    const res = await authFetch(`/api/transfers/${t.id}/cancel-booking`, { method: "POST" });
     const j = await res.json().catch(() => ({}));
     setBusy(null);
     if (!res.ok) alert(`שגיאה: ${j.error || "לא הצלחנו לבטל"}`);

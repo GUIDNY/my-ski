@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getEffectivePrice, calcTotalForRange } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
+import { authFetch } from "@/lib/auth-fetch";
 
 /* ── Types ───────────────────────────────────────────────── */
 type Apt = { id: string; name: string; price_per_night: number; type: string };
@@ -76,7 +77,7 @@ function CalendarTab({ aptId, basePrice, rules, reloadRules }: {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const res = await fetch(`/api/availability?apartment_id=${aptId}&month=${isoMonth(year, month)}`);
+    const res = await authFetch(`/api/availability?apartment_id=${aptId}&month=${isoMonth(year, month)}`);
     const d   = await res.json();
     setBlocks(d.blocks ?? []);
     setBookings(d.bookings ?? []);
@@ -141,9 +142,9 @@ function CalendarTab({ aptId, basePrice, rules, reloadRules }: {
     for (const iso of selectedRange) {
       if (bookedDates.has(iso)) continue;
       if (status === "free")
-        await fetch(`/api/availability?apartment_id=${aptId}&date=${iso}`, { method: "DELETE" });
+        await authFetch(`/api/availability?apartment_id=${aptId}&date=${iso}`, { method: "DELETE" });
       else
-        await fetch("/api/availability", { method:"POST", headers:{"Content-Type":"application/json"},
+        await authFetch("/api/availability", { method:"POST", headers:{"Content-Type":"application/json"},
           body: JSON.stringify({ apartment_id:aptId, date:iso, status:"blocked" }) });
     }
     setSaving(false); clearSelection(); load();
@@ -154,7 +155,7 @@ function CalendarTab({ aptId, basePrice, rules, reloadRules }: {
     setSaving(true);
     const sorted = [...selectedRange].sort();
     const label  = priceLbl.trim() || `מחיר מיוחד ${fmtDate(sorted[0])}–${fmtDate(sorted[sorted.length-1])}`;
-    await fetch("/api/pricing-rules", { method:"POST", headers:{"Content-Type":"application/json"},
+    await authFetch("/api/pricing-rules", { method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ apartment_id:aptId, label, type:"date_range", price_type: priceMode,
         start_date: sorted[0], end_date: sorted[sorted.length-1],
         // 60: a special price set here also beats the automatic Airbnb price (50)
@@ -166,7 +167,7 @@ function CalendarTab({ aptId, basePrice, rules, reloadRules }: {
     if (!bkName.trim() || !selectedCheckin || !selectedCheckout) return;
     setSaving(true);
     const price = bkPrice ? parseFloat(bkPrice) : suggestedBookingTotal;
-    await fetch("/api/bookings", { method: "POST", headers: { "Content-Type": "application/json" },
+    await authFetch("/api/bookings", { method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         apartment_id: aptId, check_in: selectedCheckin, check_out: selectedCheckout, guests: bkGuests,
         total_price: price, status: "confirmed",
@@ -364,7 +365,7 @@ function PricingTab({ aptId, basePrice, rules, reload }: { aptId: string; basePr
   const [showForm, setShowForm] = useState(false);
   const [saving,   setSaving]   = useState(false);
 
-  const del = async (id: string) => { await fetch(`/api/pricing-rules?id=${id}`, { method: "DELETE" }); reload(); };
+  const del = async (id: string) => { await authFetch(`/api/pricing-rules?id=${id}`, { method: "DELETE" }); reload(); };
   const ownRules     = rules.filter(r => r.source !== "airbnb");
   const airbnbNights = rules.filter(r => r.source === "airbnb" && r.type === "date_range");
   const airbnbFee    = rules.find(r => r.source === "airbnb" && r.type === "stay_fee");
@@ -380,7 +381,7 @@ function PricingTab({ aptId, basePrice, rules, reload }: { aptId: string; basePr
     if (form.type === "date_range") { body.start_date = form.start_date; body.end_date = form.end_date; }
     if (form.type === "month")      body.months   = form.months;
     if (form.type === "weekday")    body.weekdays = form.weekdays;
-    await fetch("/api/pricing-rules", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) });
+    await authFetch("/api/pricing-rules", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) });
     setShowForm(false);
     setForm({ label:"", type:"weekday", price_type:"add", start_date:"", end_date:"", months:[], weekdays:[], price:"", priority:"5" });
     setSaving(false); reload();
@@ -558,7 +559,7 @@ function BookingsTab({ aptId }: { aptId: string }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/bookings?apartment_id=${aptId}`)
+    authFetch(`/api/bookings?apartment_id=${aptId}`)
       .then(r => r.json())
       .then(d => { setBookings(Array.isArray(d) ? d.filter((b:{apartment_id:string})=>b.apartment_id===aptId) : []); setLoading(false); })
       .catch(() => setLoading(false));
@@ -608,7 +609,7 @@ function SyncTab({ aptId }: { aptId: string }) {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const r = await fetch(`/api/ical-sync?apartment_id=${aptId}`);
+    const r = await authFetch(`/api/ical-sync?apartment_id=${aptId}`);
     setSources(await r.json());
     setLoading(false);
   }, [aptId]);
@@ -616,20 +617,20 @@ function SyncTab({ aptId }: { aptId: string }) {
 
   const addSource = async () => {
     if (!url) return; setAdding(true);
-    await fetch("/api/ical-sync", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ action:"add_source", apartment_id:aptId, platform, ical_url:url }) });
+    await authFetch("/api/ical-sync", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ action:"add_source", apartment_id:aptId, platform, ical_url:url }) });
     setUrl(""); setAdding(false); load();
   };
 
   const sync = async () => {
     setSyncing(true); setMsg("");
-    const r = await fetch("/api/ical-sync", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ action:"sync", apartment_id:aptId }) });
+    const r = await authFetch("/api/ical-sync", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ action:"sync", apartment_id:aptId }) });
     const d = await r.json();
     setMsg(`סונכרן — ${d.synced} ימים עודכנו`);
     setSyncing(false); load();
   };
 
   const del = async (id: string) => {
-    await fetch("/api/ical-sync", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ action:"delete_source", id }) });
+    await authFetch("/api/ical-sync", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ action:"delete_source", id }) });
     load();
   };
 
@@ -728,15 +729,15 @@ export default function ApartmentAdmin() {
   const [loading, setLoading] = useState(true);
 
   const loadRules = useCallback(async () => {
-    const r    = await fetch(`/api/pricing-rules?apartment_id=${id}`);
+    const r    = await authFetch(`/api/pricing-rules?apartment_id=${id}`);
     const data = await r.json();
     setRules(Array.isArray(data) ? data : []);
   }, [id]);
 
   useEffect(() => {
     Promise.all([
-      fetch(`/api/apartments/${id}`).then(r=>r.json()),
-      fetch(`/api/pricing-rules?apartment_id=${id}`).then(r=>r.json()),
+      authFetch(`/api/apartments/${id}`).then(r=>r.json()),
+      authFetch(`/api/pricing-rules?apartment_id=${id}`).then(r=>r.json()),
     ]).then(([a, r]) => { setApt(a); setRules(Array.isArray(r) ? r : []); setLoading(false); });
   }, [id]);
 

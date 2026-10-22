@@ -2,6 +2,7 @@ import { createServerClient } from "@/lib/supabase-server";
 import { NextRequest, NextResponse } from "next/server";
 import type { ProposalData } from "@/types";
 import { DEFAULT_TERMS_SECTION } from "@/lib/proposal-demo";
+import { requireAdmin } from "@/lib/api-auth";
 
 const EMPTY_DATA: ProposalData = {
   title: "הצעת מחיר לחופשת סקי",
@@ -16,6 +17,8 @@ const EMPTY_DATA: ProposalData = {
 };
 
 export async function GET(req: NextRequest) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
   const db = createServerClient();
   const q = req.nextUrl.searchParams.get("q")?.trim();
   const status = req.nextUrl.searchParams.get("status")?.trim();
@@ -27,6 +30,8 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(data);
 }
 
+// Creating stays open for now: the n8n quote engines (WhatsApp, Telegram, site
+// chat) create proposals here without a session. Listing them is admin-only.
 export async function POST(req: NextRequest) {
   const db = createServerClient();
   const body = await req.json().catch(() => ({}));

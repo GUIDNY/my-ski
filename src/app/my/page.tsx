@@ -7,6 +7,7 @@ import type { User } from "@supabase/supabase-js";
 import { IconWhatsApp } from "@/components/Icons";
 import { buildWaHref } from "@/lib/whatsapp";
 import SkierAvatar from "@/components/SkierAvatar";
+import { authFetch } from "@/lib/auth-fetch";
 
 type OrderView = {
   code: string; apartment_name: string; area: string;
@@ -251,8 +252,8 @@ function MyOrder() {
 
   const loadMine = useCallback(async (u: User) => {
     const [o, s] = await Promise.all([
-      fetch(`/api/orders/mine/${u.id}?email=${encodeURIComponent(u.email || "")}`).then(r => r.ok ? r.json() : []),
-      fetch(`/api/saved?uid=${u.id}`).then(r => r.ok ? r.json() : []),
+      authFetch(`/api/orders/mine/${u.id}?email=${encodeURIComponent(u.email || "")}`).then(r => r.ok ? r.json() : []),
+      authFetch(`/api/saved?uid=${u.id}`).then(r => r.ok ? r.json() : []),
     ]);
     setOrders(Array.isArray(o) ? o : []);
     setSaved(Array.isArray(s) ? s : []);
@@ -260,20 +261,20 @@ function MyOrder() {
 
   const lookupSingle = async (c: string) => {
     if (!c) return; setError("");
-    const r = await fetch(`/api/orders/code/${encodeURIComponent(c.trim().toLowerCase())}`);
+    const r = await authFetch(`/api/orders/code/${encodeURIComponent(c.trim().toLowerCase())}`);
     if (r.ok) setSingle(await r.json()); else setError("קוד לא נמצא. בדוק שוב או פנה אלינו.");
   };
 
   const claim = async (c: string) => {
     if (!c || !user) return; setError("");
-    const r = await fetch("/api/orders/claim", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: c.trim().toLowerCase(), user_id: user.id }) });
+    const r = await authFetch("/api/orders/claim", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: c.trim().toLowerCase(), user_id: user.id }) });
     const j = await r.json();
     if (!r.ok) { setError(j.error || "שגיאה בקישור"); return; }
     setCode(""); loadMine(user);
   };
 
   const removeSaved = async (id: string) => {
-    await fetch(`/api/saved/${id}`, { method: "DELETE" });
+    await authFetch(`/api/saved/${id}`, { method: "DELETE" });
     setSaved(prev => prev.filter(s => s.id !== id));
   };
 
@@ -282,7 +283,7 @@ function MyOrder() {
       const urlCode = params.get("code") || "";
       if (session?.user) {
         setUser(session.user);
-        if (urlCode) await fetch("/api/orders/claim", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: urlCode.toLowerCase(), user_id: session.user.id }) }).catch(() => {});
+        if (urlCode) await authFetch("/api/orders/claim", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: urlCode.toLowerCase(), user_id: session.user.id }) }).catch(() => {});
         await loadMine(session.user);
       } else if (urlCode) { setCode(urlCode); await lookupSingle(urlCode); }
       setLoading(false);
@@ -295,7 +296,7 @@ function MyOrder() {
     if (!confirm("אישור אחרון — למחוק את החשבון?")) return;
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
-    const r = await fetch("/api/account/delete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ access_token: session.access_token }) });
+    const r = await authFetch("/api/account/delete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ access_token: session.access_token }) });
     if (r.ok) { await supabase.auth.signOut(); window.location.href = "/"; }
     else alert("שגיאה במחיקת החשבון. נסו שוב או פנו אלינו בוואטסאפ.");
   };

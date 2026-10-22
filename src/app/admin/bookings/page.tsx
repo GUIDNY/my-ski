@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import type { Booking } from "@/types";
+import { authFetch } from "@/lib/auth-fetch";
 
 const STATUS_COLORS: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-700",
@@ -19,13 +20,13 @@ export default function BookingsAdmin() {
   const [filter, setFilter] = useState("all");
 
   useEffect(() => {
-    fetch("/api/bookings")
+    authFetch("/api/bookings")
       .then(r => r.json())
       .then(data => { setBookings(data); setLoading(false); });
   }, []);
 
   const updateStatus = async (id: string, status: string) => {
-    await fetch(`/api/bookings/${id}`, {
+    await authFetch(`/api/bookings/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),

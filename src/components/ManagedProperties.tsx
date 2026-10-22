@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { authFetch } from "@/lib/auth-fetch";
 
 type Payment = {
   id: string; property_id: string; label: string; month: string | null;
@@ -24,7 +25,7 @@ function SingleImage({ value, onChange }: { value: string | null; onChange: (url
   const upload = async (files: FileList) => {
     setBusy(true);
     const fd = new FormData(); fd.append("file", files[0]);
-    const res = await fetch("/api/upload", { method: "POST", body: fd });
+    const res = await authFetch("/api/upload", { method: "POST", body: fd });
     const { url } = await res.json();
     if (url) onChange(url);
     setBusy(false);
@@ -64,7 +65,7 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
-    const r = await fetch(`/api/managed-properties?kind=${kind}`);
+    const r = await authFetch(`/api/managed-properties?kind=${kind}`);
     setRows(await r.json());
     setLoading(false);
   };
@@ -74,14 +75,14 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
     if (!form.name?.trim()) { alert("שם הדירה חובה"); return; }
     setSaving(true);
     const url = editing ? `/api/managed-properties/${editing}` : "/api/managed-properties";
-    await fetch(url, { method: editing ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
+    await authFetch(url, { method: editing ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
     setSaving(false); setShowForm(false); setEditing(null); setForm(emptyForm()); load();
   };
   const edit = (p: Prop) => { setForm(p); setEditing(p.id); setShowForm(true); };
   const openNew = () => { setForm(emptyForm()); setEditing(null); setShowForm(true); };
   const remove = async (id: string) => {
     if (!confirm("למחוק את הדירה וכל התשלומים שלה?")) return;
-    await fetch(`/api/managed-properties/${id}`, { method: "DELETE" }); load();
+    await authFetch(`/api/managed-properties/${id}`, { method: "DELETE" }); load();
   };
 
   // profit/loss + payments summary
@@ -381,20 +382,20 @@ function PaymentsPanel({ property, onChange }: { property: Prop; onChange: () =>
   const add = async () => {
     if (!np.amount) { alert("הזן/י סכום"); return; }
     setBusy(true);
-    await fetch(`/api/managed-properties/${property.id}/payments`, {
+    await authFetch(`/api/managed-properties/${property.id}/payments`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...np, label: np.label || (np.kind === "deposit" ? "פיקדון" : "שכירות") }),
     });
     setBusy(false); setNp({ label: "", month: "", due_date: "", amount: 0, kind: "rent", note: "" }); onChange();
   };
   const togglePaid = async (pay: Payment) => {
-    await fetch(`/api/property-payments/${pay.id}`, {
+    await authFetch(`/api/property-payments/${pay.id}`, {
       method: "PATCH", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ paid: !pay.paid, paid_date: !pay.paid ? new Date().toISOString().slice(0, 10) : null }),
     });
     onChange();
   };
-  const del = async (id: string) => { if (!confirm("למחוק תשלום?")) return; await fetch(`/api/property-payments/${id}`, { method: "DELETE" }); onChange(); };
+  const del = async (id: string) => { if (!confirm("למחוק תשלום?")) return; await authFetch(`/api/property-payments/${id}`, { method: "DELETE" }); onChange(); };
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-4 mt-3">
