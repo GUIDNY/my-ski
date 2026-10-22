@@ -114,9 +114,11 @@ export type StayBreakdown = {
 };
 
 /**
- * Price of a whole stay, the same way the bots price it: when every night is
- * covered by the Airbnb calendar, (Airbnb nights + cleaning) minus the
+ * Price of a whole stay, the same way the bots price it: when the Airbnb
+ * calendar has a price for every night, (Airbnb nights + cleaning) minus the
  * commission, rounded once; otherwise the site's own rules for every night.
+ * A night replaced by a site rule ranked above the calendar (a special price)
+ * takes that price and the rest of the stay stays on the calendar.
  * The shown nights are rounded, and the cleaning line absorbs the rounding so
  * nights + cleaning always add up to the total.
  */
@@ -126,9 +128,12 @@ export function stayBreakdown(checkin: string, checkout: string, basePrice: numb
     const end = new Date(checkout + "T12:00:00");
     for (let d = new Date(checkin + "T12:00:00"); d < end; d.setDate(d.getDate() + 1)) dates.push(new Date(d));
   }
-  const priced = dates.map(d => nightPrice(d, basePrice, rules));
-  if (dates.length && priced.every(p => p.airbnb)) {
-    const feeRule = rules.find(r => isAirbnb(r) && r.type === "stay_fee");
+  const calendar = rules.filter(isAirbnb);
+  const onCalendar = dates.length > 0 && calendar.length > 0
+    && dates.every(d => nightPrice(d, basePrice, calendar).airbnb);
+  if (onCalendar) {
+    const priced = dates.map(d => nightPrice(d, basePrice, rules));
+    const feeRule = calendar.find(r => r.type === "stay_fee");
     const nights = dates.map((date, i) => ({ date, price: Math.round(priced[i].price) }));
     const shown = nights.reduce((s, n) => s + n.price, 0);
     if (!feeRule) return { nights, fee: 0, total: shown, source: "airbnb" };

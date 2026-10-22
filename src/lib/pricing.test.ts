@@ -53,13 +53,20 @@ test("only site add-ons ranked above the Airbnb calendar adjust an Airbnb night"
   assert.equal(stayBreakdown("2027-01-14", "2027-01-16", 250, rules).total, Math.round((300 + 300 + 46) * 0.845 + 15));
 });
 
-test("a site rule with a higher priority still beats the Airbnb price", () => {
-  const override: PricingRule = { id: "o", label: "מבצע", type: "date_range", price_type: "absolute", start_date: "2027-01-14", end_date: "2027-01-16", price: 199, priority: 60 };
-  const rules = [...seasonal, ...airbnbRules(cal, APT), override];
-  const b = stayBreakdown("2027-01-14", "2027-01-17", 250, rules);
-  assert.equal(b.source, "site");
-  assert.equal(b.total, 199 + 219 + 219); // Friday and Saturday get the site's +20 again
-  assert.equal(b.fee, 0);
+test("a site rule with a higher priority still beats the Airbnb price, night by night", () => {
+  // a special price on the Friday only: Thursday and Saturday stay on the calendar, and so does cleaning
+  const friday: PricingRule = { id: "o", label: "מבצע", type: "date_range", price_type: "absolute", start_date: "2027-01-15", end_date: "2027-01-15", price: 199, priority: 60 };
+  const b = stayBreakdown("2027-01-14", "2027-01-17", 250, [...seasonal, ...airbnbRules(cal, APT), friday]);
+  assert.equal(b.source, "airbnb");
+  assert.deepEqual(b.nights.map(n => n.price), [254, 219, 254]); // the special night gets the site's +20 Friday rule
+  assert.equal(b.total, Math.round(300 * 0.845 + 219 + 300 * 0.845 + 46 * 0.845));
+  assert.equal(b.nights.reduce((s, n) => s + n.price, 0) + b.fee, b.total);
+
+  // the whole stay on a special price: the site's nights, plus the cleaning
+  const all: PricingRule = { ...friday, start_date: "2027-01-14", end_date: "2027-01-16" };
+  const w = stayBreakdown("2027-01-14", "2027-01-17", 250, [...seasonal, ...airbnbRules(cal, APT), all]);
+  assert.deepEqual(w.nights.map(n => n.price), [199, 219, 219]);
+  assert.equal(w.total, Math.round(199 + 219 + 219 + 46 * 0.845));
 });
 
 test("a stay that runs past the Airbnb calendar is priced by the site, like the bots' fallback", () => {
