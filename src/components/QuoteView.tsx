@@ -7,7 +7,7 @@ import {
   IconUsers, IconUser, IconMoon, IconWhatsApp,
 } from "@/components/Icons";
 import { buildWaHref } from "@/lib/whatsapp";
-import { getEffectivePrice, skiDaysFromNights, equipCost } from "@/lib/pricing";
+import { stayBreakdown, skiDaysFromNights, equipCost } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
 import Logo from "@/components/Logo";
 import CardPaymentButton from "@/components/CardPaymentButton";
@@ -130,16 +130,13 @@ export default function QuoteView({ q }: { q: QuoteData }) {
     fetch(`/api/pricing-rules?apartment_id=${apartmentId}`).then(r => r.json()).then(d => setRules(Array.isArray(d) ? d : [])).catch(() => {});
   }, [apartmentId]);
 
-  // per-night breakdown from the seasonal calendar (falls back to the stored total)
-  const nightly = (() => {
-    if (!checkin || !checkout || nights <= 0 || !apt) return [] as { date: Date; price: number }[];
-    const out: { date: Date; price: number }[] = [];
-    const end = new Date(checkout + "T12:00:00");
-    for (let d = new Date(checkin + "T12:00:00"); d < end; d.setDate(d.getDate() + 1))
-      out.push({ date: new Date(d), price: getEffectivePrice(new Date(d), Number(apt.price_per_night || 0), rules) });
-    return out;
-  })();
-  const baseApt = nightly.length ? nightly.reduce((s, n) => s + n.price, 0) : aptTotal;
+  // per-night breakdown, priced like the bots (Airbnb calendar + cleaning for
+  // our own apartments, else the seasonal rules); falls back to the stored total
+  const stay = checkin && checkout && nights > 0 && apt
+    ? stayBreakdown(checkin, checkout, Number(apt.price_per_night || 0), rules) : null;
+  const nightly = stay ? stay.nights : [];
+  const cleaningFee = stay ? stay.fee : 0;
+  const baseApt = nightly.length && stay ? stay.total : aptTotal;
 
   // live total recomputed from the base lodging + currently-selected add-ons
   // add-ons are per-person: price × number of people who need each add-on
@@ -231,7 +228,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   }, [apartmentId]);
 
   const imgs = apt?.images?.length ? apt.images : ["/apt1.jpg", "/apt2.jpg", "/apt3.jpg"];
-  const avgNightly = nights > 0 ? Math.round(baseApt / nights) : baseApt;
+  const avgNightly = nights > 0 ? Math.round((baseApt - cleaningFee) / nights) : baseApt;
   const fmtFull = (d: Date) => `${d.getDate()} ${HE_MONTHS[d.getMonth()]}`;
 
   const bank = {
@@ -280,7 +277,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
         <button onClick={() => setShowNights(v => !v)} className="w-full flex items-center justify-between">
           <div className="text-right">
             <p className="text-sm font-medium text-slate-700">לינה</p>
-            <p className="text-xs text-slate-400">€{avgNightly.toLocaleString()} ממוצע × {nights} לילות · פירוט {showNights ? "▲" : "▼"}</p>
+            <p className="text-xs text-slate-400">€{avgNightly.toLocaleString()} ממוצע × {nights} לילות{cleaningFee > 0 ? ` + €${cleaningFee.toLocaleString()} ניקיון` : ""} · פירוט {showNights ? "▲" : "▼"}</p>
           </div>
           <span className="text-sm font-bold text-slate-900">€{baseApt.toLocaleString()}</span>
         </button>
@@ -293,6 +290,12 @@ export default function QuoteView({ q }: { q: QuoteData }) {
                   <span className="font-semibold text-slate-700">€{n.price.toLocaleString()}</span>
                 </div>
               ))}
+              {cleaningFee > 0 && (
+                <div className="flex items-center justify-between px-3 py-1.5 text-xs">
+                  <span className="text-slate-500">ניקיון (פעם אחת)</span>
+                  <span className="font-semibold text-slate-700">€{cleaningFee.toLocaleString()}</span>
+                </div>
+              )}
             </div>
           </div>
         )}

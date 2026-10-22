@@ -1,5 +1,6 @@
 import { createServerClient } from "@/lib/supabase-server";
-import { matchingWeek, calcTotalForRange, type PricingRule } from "@/lib/pricing";
+import { matchingWeek, stayBreakdown } from "@/lib/pricing";
+import { rulesWithAirbnb } from "@/lib/airbnb-calendar";
 import { takenApartmentIds } from "@/lib/inventory";
 import type { Apartment } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
@@ -10,7 +11,9 @@ import { NextRequest, NextResponse } from "next/server";
  * Read-only: the apartments that are free for the whole stay, exactly as
  * /search sees them (same takenApartmentIds rule), so the n8n quote bots can
  * price a stay without holding a database key of their own.
- *   - regular: our own apartments, with the site's seasonal total (pricing_rules)
+ *   - regular: our own apartments, with the site's total for the stay: Airbnb
+ *     nights + cleaning minus commission where the Airbnb calendar covers the
+ *     stay (price_source "airbnb"), otherwise the seasonal rules ("site")
  *   - la_cime: agency units whose fixed Saturday-to-Saturday week covers the stay,
  *     with that week's price (already includes our markup)
  * Only listing data that is public on the site anyway — no customer data.
@@ -50,17 +53,8 @@ export async function GET(req: NextRequest) {
   const free = (apts as Apartment[]).filter(a => !taken.has(a.id));
   const regularApts = free.filter(a => a.source !== "la_cime");
 
-  const rulesByApt = new Map<string, PricingRule[]>();
-  if (regularApts.length) {
-    const { data: rules, error: rulesError } = await db
-      .from("pricing_rules").select("*").in("apartment_id", regularApts.map(a => a.id));
-    if (rulesError) return NextResponse.json({ error: "pricing check failed" }, { status: 503 });
-    for (const r of (rules ?? []) as (PricingRule & { apartment_id: string })[]) {
-      const list = rulesByApt.get(r.apartment_id) ?? [];
-      list.push(r);
-      rulesByApt.set(r.apartment_id, list);
-    }
-  }
+  const rulesByApt = await rulesWithAirbnb(db, regularApts.map(a => a.id));
+  if (!rulesByApt) return NextResponse.json({ error: "pricing check failed" }, { status: 503 });
 
   const pick = (a: Apartment) => ({
     id: a.id, name: a.name, max_guests: a.max_guests ?? null, beds: a.beds, baths: a.baths, sqm: a.sqm,
@@ -68,10 +62,10 @@ export async function GET(req: NextRequest) {
     price_per_night: Number(a.price_per_night) || 0,
   });
 
-  const regular = regularApts.map(a => ({
-    ...pick(a),
-    site_total: Math.round(calcTotalForRange(checkin, checkout, Number(a.price_per_night) || 0, rulesByApt.get(a.id) ?? [])),
-  }));
+  const regular = regularApts.map(a => {
+    const stay = stayBreakdown(checkin, checkout, Number(a.price_per_night) || 0, rulesByApt.get(a.id) ?? []);
+    return { ...pick(a), site_total: Math.round(stay.total), price_source: stay.source };
+  });
 
   const la_cime = free
     .filter(a => a.source === "la_cime")

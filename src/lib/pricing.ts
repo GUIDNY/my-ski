@@ -45,7 +45,7 @@ export function equipCost(days: number): number {
 export type PricingRule = {
   id: string;
   label: string;
-  type: string;        // "date_range" | "month" | "weekday"
+  type: string;        // "date_range" | "month" | "weekday" | "stay_fee" (once per stay, Airbnb cleaning)
   price_type: string;  // "absolute" | "add" | "subtract"
   start_date?: string;
   end_date?: string;
@@ -53,13 +53,25 @@ export type PricingRule = {
   weekdays?: number[];
   price: number;
   priority: number;
+  // "airbnb": not a database row but generated from the apartment's Airbnb
+  // calendar, already net of the host commission (lib/airbnb-calendar.ts)
+  source?: string;
 };
+
+export const AIRBNB_SOURCE = "airbnb";
+const isAirbnb = (r: PricingRule) => r.source === AIRBNB_SOURCE;
 
 // December is peak season — regardless of base price or any discount rules
 // stacked on top, no apartment should ever show below this per night.
 const DECEMBER_MIN_NIGHTLY_PRICE = 90;
 
-export function getEffectivePrice(date: Date, basePrice: number, rules: PricingRule[]): number {
+/**
+ * One night's price, unrounded. A night covered by the apartment's Airbnb
+ * calendar is what the bots charge for it (Airbnb price minus the
+ * commission), with no December floor; only site rules ranked above the
+ * Airbnb calendar (priority over 50) still replace or adjust it.
+ */
+function nightPrice(date: Date, basePrice: number, rules: PricingRule[]): { price: number; airbnb: boolean } {
   const sorted  = [...rules].sort((a, b) => b.priority - a.priority);
   const iso     = date.toISOString().split("T")[0];
   const wd      = date.getDay();
@@ -73,24 +85,61 @@ export function getEffectivePrice(date: Date, basePrice: number, rules: PricingR
 
   /* Highest-priority absolute rule sets the base; then all delta rules stack */
   const absoluteRule = sorted.find(r => matches(r) && (r.price_type ?? "absolute") === "absolute");
+  const airbnb = !!absoluteRule && isAirbnb(absoluteRule);
   let price = absoluteRule ? absoluteRule.price : basePrice;
 
   for (const r of sorted) {
-    if (!matches(r)) continue;
+    if (!matches(r) || isAirbnb(r)) continue;
+    if (airbnb && r.priority <= absoluteRule!.priority) continue;
     if ((r.price_type ?? "absolute") === "add")      price += r.price;
     if ((r.price_type ?? "absolute") === "subtract") price -= r.price;
   }
 
   price = Math.max(0, price);
-  if (mo === 11) price = Math.max(price, DECEMBER_MIN_NIGHTLY_PRICE);
-  return price;
+  if (!airbnb && mo === 11) price = Math.max(price, DECEMBER_MIN_NIGHTLY_PRICE);
+  return { price, airbnb };
+}
+
+/** The price shown for one night (an Airbnb-priced night is rounded to whole euros). */
+export function getEffectivePrice(date: Date, basePrice: number, rules: PricingRule[]): number {
+  const n = nightPrice(date, basePrice, rules);
+  return n.airbnb ? Math.round(n.price) : n.price;
+}
+
+export type StayBreakdown = {
+  nights: { date: Date; price: number }[];
+  fee: number;               // Airbnb cleaning, once per stay (0 for site-priced stays)
+  total: number;
+  source: "airbnb" | "site";
+};
+
+/**
+ * Price of a whole stay, the same way the bots price it: when every night is
+ * covered by the Airbnb calendar, (Airbnb nights + cleaning) minus the
+ * commission, rounded once; otherwise the site's own rules for every night.
+ * The shown nights are rounded, and the cleaning line absorbs the rounding so
+ * nights + cleaning always add up to the total.
+ */
+export function stayBreakdown(checkin: string, checkout: string, basePrice: number, rules: PricingRule[]): StayBreakdown {
+  const dates: Date[] = [];
+  if (checkin && checkout) {
+    const end = new Date(checkout + "T12:00:00");
+    for (let d = new Date(checkin + "T12:00:00"); d < end; d.setDate(d.getDate() + 1)) dates.push(new Date(d));
+  }
+  const priced = dates.map(d => nightPrice(d, basePrice, rules));
+  if (dates.length && priced.every(p => p.airbnb)) {
+    const feeRule = rules.find(r => isAirbnb(r) && r.type === "stay_fee");
+    const nights = dates.map((date, i) => ({ date, price: Math.round(priced[i].price) }));
+    const shown = nights.reduce((s, n) => s + n.price, 0);
+    if (!feeRule) return { nights, fee: 0, total: shown, source: "airbnb" };
+    const total = Math.round(priced.reduce((s, p) => s + p.price, 0) + feeRule.price);
+    return { nights, fee: total - shown, total, source: "airbnb" };
+  }
+  const siteRules = rules.filter(r => !isAirbnb(r));
+  const nights = dates.map(date => ({ date, price: nightPrice(date, basePrice, siteRules).price }));
+  return { nights, fee: 0, total: nights.reduce((s, n) => s + n.price, 0), source: "site" };
 }
 
 export function calcTotalForRange(checkin: string, checkout: string, basePrice: number, rules: PricingRule[]): number {
-  let total = 0;
-  const start = new Date(checkin + "T12:00:00");
-  const end   = new Date(checkout + "T12:00:00");
-  for (let d = new Date(start); d < end; d.setDate(d.getDate() + 1))
-    total += getEffectivePrice(new Date(d), basePrice, rules);
-  return total;
+  return stayBreakdown(checkin, checkout, basePrice, rules).total;
 }

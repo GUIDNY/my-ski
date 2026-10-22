@@ -3,7 +3,7 @@ import SkiLoader from "@/components/SkiLoader";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import type { Apartment, SkiPass } from "@/types";
-import { calcTotalForRange, getEffectivePrice, matchingWeek, skiDaysFromNights, equipCost } from "@/lib/pricing";
+import { stayBreakdown, matchingWeek, skiDaysFromNights, equipCost } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
 import {
   IconMountain, IconSkis, IconBus, IconShield, IconUser, IconBot,
@@ -310,23 +310,21 @@ function ApartmentPage() {
   // than a made-up per-night estimate, for any stay that fits inside one.
   const weekMatch = apt ? matchingWeek(apt, checkin, checkout) : null;
   const laCimeNoMatch = apt?.source === "la_cime" && !weekMatch;
+  // Our own apartments follow their Airbnb calendar (nights + cleaning, net of
+  // commission), exactly like the WhatsApp/Telegram quotes; see stayBreakdown.
+  const stay = apt && checkin && checkout && !weekMatch && !laCimeNoMatch
+    ? stayBreakdown(checkin, checkout, basePrice, rules) : null;
   const aptTotal  = apt
     ? weekMatch ? weekMatch.price
       : laCimeNoMatch ? 0
-      : (checkin && checkout ? calcTotalForRange(checkin, checkout, basePrice, rules) : basePrice * nights)
+      : (stay ? stay.total : basePrice * nights)
     : 0;
 
-  /* Per-night breakdown for the collapsible panel */
-  const breakdown = (() => {
-    if (!apt || !checkin || !checkout || weekMatch || laCimeNoMatch) return [] as { date: Date; price: number }[];
-    const out: { date: Date; price: number }[] = [];
-    const end = new Date(checkout + "T12:00:00");
-    for (let d = new Date(checkin + "T12:00:00"); d < end; d.setDate(d.getDate() + 1))
-      out.push({ date: new Date(d), price: getEffectivePrice(new Date(d), basePrice, rules) });
-    return out;
-  })();
+  /* Per-night breakdown for the collapsible panel (+ the stay's cleaning fee) */
+  const breakdown = stay ? stay.nights : [];
+  const cleaningFee = stay ? stay.fee : 0;
 
-  const avgNightlyPrice = breakdown.length > 0 ? Math.round(aptTotal / nights) : basePrice;
+  const avgNightlyPrice = breakdown.length > 0 ? Math.round((aptTotal - cleaningFee) / nights) : basePrice;
   const skiTotal        = skiPass && skiTier ? skiTier.price * skiQty : 0;
   // add-ons are per-person: price × number of people who need each add-on
   const trTotal         = transfer ? TRANSFER_PRICE * transferQty : 0;
@@ -701,6 +699,9 @@ function ApartmentPage() {
                               {breakdown.length > 1 ? " / לילה ממוצע" : " / לילה"}
                             </span>
                           </div>
+                          {cleaningFee > 0 && (
+                            <div className="text-xs text-gray-500 mt-0.5">+ €{cleaningFee.toLocaleString()} ניקיון (פעם אחת)</div>
+                          )}
                         </div>
                         {breakdown.length > 0 && (
                           <button
@@ -725,6 +726,12 @@ function ApartmentPage() {
                               </div>
                             ))}
                           </div>
+                          {cleaningFee > 0 && (
+                            <div className="flex justify-between items-center px-4 py-2 text-sm border-t border-gray-100">
+                              <span className="text-gray-500">ניקיון (פעם אחת)</span>
+                              <span className="font-semibold text-gray-800">€{cleaningFee.toLocaleString()}</span>
+                            </div>
+                          )}
                           {breakdown.length > 1 && (
                             <div className="flex justify-between items-center px-4 py-2.5 bg-blue-50 border-t border-blue-100 text-sm font-bold">
                               <span className="text-gray-600">ממוצע ללילה</span>
@@ -883,7 +890,7 @@ function ApartmentPage() {
                     )}
                     <div className="flex flex-col gap-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-500">{weekMatch ? "לינה · שבת עד שבת" : `לינה × ${nights} לילות`}</span>
+                        <span className="text-gray-500">{weekMatch ? "לינה · שבת עד שבת" : `לינה × ${nights} לילות${cleaningFee > 0 ? " · כולל ניקיון" : ""}`}</span>
                         <span className="font-semibold text-gray-800">€{aptTotal.toLocaleString()}</span>
                       </div>
                       {skiPass && (

@@ -1,4 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { getAirbnbCalendar } from "@/lib/airbnb-calendar";
+import { airbnbClosedApartments } from "@/lib/airbnb-rules";
 
 type OrderLike = {
   apartment_id?: string | null;
@@ -21,8 +23,10 @@ function nightsBetween(checkin: string, checkout: string): string[] {
 /**
  * Apartments that can't take a stay of checkin..checkout: any taken night in
  * the range (Airbnb/Hostex iCal, site orders and manual owner blocks all live
- * in availability_blocks) or a non-cancelled direct booking overlapping it.
- * Same rule as /search and the Telegram quote bot. Returns null when a query
+ * in availability_blocks) or a non-cancelled direct booking overlapping it,
+ * plus nights already closed on the apartment's live Airbnb calendar (the
+ * daily iCal sync can lag behind). Same rule as /search and the quote bots.
+ * Returns null when a query
  * fails, so a caller can tell "nothing is taken" from "couldn't check".
  */
 export async function takenApartmentIds(db: SupabaseClient, checkin: string, checkout: string): Promise<Set<string> | null> {
@@ -46,6 +50,7 @@ export async function takenApartmentIds(db: SupabaseClient, checkin: string, che
     .lt("check_in", checkout).gt("check_out", checkin);
   if (error) return null;
   for (const r of bookings ?? []) if (r.apartment_id) taken.add(r.apartment_id);
+  for (const id of airbnbClosedApartments(await getAirbnbCalendar(), checkin, checkout)) taken.add(id);
   return taken;
 }
 

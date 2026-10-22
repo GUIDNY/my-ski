@@ -3,7 +3,7 @@ import SkiLoader from "@/components/SkiLoader";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { Apartment } from "@/types";
-import { calcTotalForRange, getEffectivePrice, skiDaysFromNights, equipCost } from "@/lib/pricing";
+import { stayBreakdown, skiDaysFromNights, equipCost } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
 import CardPaymentButton from "@/components/CardPaymentButton";
 import SaveTripButton from "@/components/SaveTripButton";
@@ -161,8 +161,12 @@ function ComboInner() {
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-gray-50"><SkiLoader /></div>;
   if (!a || !b) return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-500" dir="rtl">השילוב לא נמצא. <a href="/apartments" className="text-blue-600 underline mr-1">חזרה לדירות</a></div>;
 
-  const totalA = nights > 0 ? calcTotalForRange(checkin, checkout, Number(a.price_per_night), rulesA) : Number(a.price_per_night);
-  const totalB = nights > 0 ? calcTotalForRange(checkin, checkout, Number(b.price_per_night), rulesB) : Number(b.price_per_night);
+  // each apartment priced like the bots price it (Airbnb calendar + cleaning for ours)
+  const stayA = nights > 0 ? stayBreakdown(checkin, checkout, Number(a.price_per_night), rulesA) : null;
+  const stayB = nights > 0 ? stayBreakdown(checkin, checkout, Number(b.price_per_night), rulesB) : null;
+  const totalA = stayA ? stayA.total : Number(a.price_per_night);
+  const totalB = stayB ? stayB.total : Number(b.price_per_night);
+  const cleaningFee = (stayA ? stayA.fee : 0) + (stayB ? stayB.fee : 0);
   const trTotal = transfer ? TRANSFER_PRICE : 0;
   const equipTotal = equipment ? equipCost(skiDays) : 0;
   const flexExtra = cancel === "flexible" ? CANCEL_FLEX : 0;
@@ -171,18 +175,10 @@ function ComboInner() {
   const total = totalA + totalB + trTotal + equipTotal + flexExtra + noCancelDiscount + aiDiscount;   // ski pass: price coming soon → not charged
   const transferDetails = transfer ? flightToString(flight) : "";
   const comboName = `${a.name} + ${b.name}`;
-  const avgNightly = nights > 0 ? Math.round((totalA + totalB) / nights) : Number(a.price_per_night) + Number(b.price_per_night);
-  const breakdown = (() => {
-    if (!checkin || !checkout || nights <= 0) return [] as { date: Date; price: number }[];
-    const out: { date: Date; price: number }[] = [];
-    const end = new Date(checkout + "T12:00:00");
-    for (let d = new Date(checkin + "T12:00:00"); d < end; d.setDate(d.getDate() + 1)) {
-      const pa = getEffectivePrice(new Date(d), Number(a.price_per_night), rulesA);
-      const pb = getEffectivePrice(new Date(d), Number(b.price_per_night), rulesB);
-      out.push({ date: new Date(d), price: pa + pb });
-    }
-    return out;
-  })();
+  const avgNightly = nights > 0 ? Math.round((totalA + totalB - cleaningFee) / nights) : Number(a.price_per_night) + Number(b.price_per_night);
+  const breakdown = stayA && stayB && checkin && checkout
+    ? stayA.nights.map((n, i) => ({ date: n.date, price: n.price + (stayB.nights[i]?.price ?? 0) }))
+    : [] as { date: Date; price: number }[];
   const skyscannerUrl = checkin && checkout
     ? `https://www.skyscanner.co.il/transport/flights/tlv/gva/${fmtSky(checkin)}/${fmtSky(checkout)}/?adultsv2=${guests}&cabinclass=economy&childrenv2=&rtn=1`
     : `https://www.skyscanner.co.il/transport/flights/tlv/gva/`;
@@ -249,6 +245,12 @@ function ComboInner() {
                       </div>
                     ))}
                   </div>
+                  {cleaningFee > 0 && (
+                    <div className="flex justify-between items-center px-4 py-2 text-sm border-t border-gray-100">
+                      <span className="font-semibold text-gray-800">€{cleaningFee.toLocaleString()}</span>
+                      <span className="text-gray-500">ניקיון (פעם אחת)</span>
+                    </div>
+                  )}
                   <div className="flex justify-between items-center px-4 py-2.5 bg-blue-50 border-t border-blue-100 text-sm font-bold">
                     <span className="text-blue-700">€{avgNightly.toLocaleString()}</span>
                     <span className="text-gray-600">ממוצע ללילה</span>

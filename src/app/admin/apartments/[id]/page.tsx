@@ -157,7 +157,8 @@ function CalendarTab({ aptId, basePrice, rules, reloadRules }: {
     await fetch("/api/pricing-rules", { method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ apartment_id:aptId, label, type:"date_range", price_type: priceMode,
         start_date: sorted[0], end_date: sorted[sorted.length-1],
-        price: parseFloat(priceVal), priority: 10 }) });
+        // 60: a special price set here also beats the automatic Airbnb price (50)
+        price: parseFloat(priceVal), priority: 60 }) });
     setSaving(false); setSaveMsg(`נשמר`); reloadRules(); clearSelection(); load();
   };
 
@@ -364,6 +365,9 @@ function PricingTab({ aptId, basePrice, rules, reload }: { aptId: string; basePr
   const [saving,   setSaving]   = useState(false);
 
   const del = async (id: string) => { await fetch(`/api/pricing-rules?id=${id}`, { method: "DELETE" }); reload(); };
+  const ownRules     = rules.filter(r => r.source !== "airbnb");
+  const airbnbNights = rules.filter(r => r.source === "airbnb" && r.type === "date_range");
+  const airbnbFee    = rules.find(r => r.source === "airbnb" && r.type === "stay_fee");
 
   const save = async () => {
     if (!form.price) return;
@@ -408,10 +412,23 @@ function PricingTab({ aptId, basePrice, rules, reload }: { aptId: string; basePr
         <p className="text-xs text-blue-400 max-w-[160px] text-left">שינוי מחיר הבסיס בדף ניהול הדירה הראשי</p>
       </div>
 
+      {/* Automatic Airbnb prices (not stored here; they follow the Airbnb calendar) */}
+      {airbnbNights.length > 0 && (
+        <div className="bg-rose-50 border border-rose-100 rounded-xl p-4 mb-5 text-sm text-rose-900 space-y-1">
+          <p className="font-black">מחיר אוטומטי לפי Airbnb</p>
+          <p>
+            כמו בבוטים: מחיר הלילה ב-Airbnb פחות 15.5% עמלה
+            (עכשיו €{Math.round(Math.min(...airbnbNights.map(r => r.price)))}–€{Math.round(Math.max(...airbnbNights.map(r => r.price)))} ללילה)
+            {airbnbFee ? <>, ועוד ניקיון €{Math.round(airbnbFee.price)} פעם אחת לשהייה</> : null}. מתעדכן לבד כל חצי שעה.
+          </p>
+          <p className="text-xs text-rose-700">כלל ידני משנה את המחיר הזה רק אם העדיפות שלו מעל 50 (מחיר מיוחד מלוח השנה תמיד גובר). בלי מחיר ב-Airbnb לתאריך, חלים הכללים שכאן.</p>
+        </div>
+      )}
+
       {/* Rules */}
       <div className="space-y-2.5 mb-5">
-        {rules.length === 0 && <p className="text-sm text-gray-400 text-center py-8 bg-gray-50 rounded-xl">אין כללי מחיר מיוחדים</p>}
-        {rules.map(r => {
+        {ownRules.length === 0 && <p className="text-sm text-gray-400 text-center py-8 bg-gray-50 rounded-xl">אין כללי מחיר מיוחדים</p>}
+        {ownRules.map(r => {
           const pts = r.price_type ?? "absolute";
           const badge = pts === "add" ? "bg-green-100 text-green-700" : pts === "subtract" ? "bg-amber-100 text-amber-700" : "bg-blue-100 text-blue-700";
           const badgeTxt = pts === "add" ? `+€${r.price}` : pts === "subtract" ? `-€${r.price}` : `€${r.price}`;
