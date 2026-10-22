@@ -107,9 +107,6 @@ function AptCard({ apt, nights, checkin, checkout, guests, deal, rules }: {
                   <span className="text-2xl font-black text-gray-900">€{minNightly.toLocaleString()}</span>
                   <span className="text-xs text-gray-400">/ לילה</span>
                 </div>
-                {minNightly !== apt.price_per_night && (
-                  <div className="text-xs text-gray-400 line-through">€{apt.price_per_night}</div>
-                )}
                 {nights > 0 && (
                   <div className="text-sm font-bold text-blue-600 mt-0.5">€{total.toLocaleString()} סה״כ</div>
                 )}
