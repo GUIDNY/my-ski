@@ -3,7 +3,7 @@
   "lang": "en",
   "title": "Where to stay in Val Thorens: the six areas compared",
   "metaTitle": "Where to stay in Val Thorens: the 6 areas compared | SkiShare",
-  "description": "Soleil for families, Grande Rue for nights out, Slalom, Balcons or Plein Sud for quiet: Val Thorens' six areas compared, with ski-in, shuttles and parking.",
+  "description": "Soleil for families, Grande Rue for nights out, Slalom, Balcons or Plein Sud for peace and quiet: Val Thorens' six areas compared, with shuttles and parking.",
   "keywords": [
     "where to stay in val thorens",
     "best area to stay in val thorens",
@@ -16,12 +16,12 @@
   "emoji": "🗺️",
   "published": "2026-10-23",
   "updated": "2026-10-23",
-  "intro": "Val Thorens is one semi-pedestrianised village at 2,300 m with six areas (Soleil, Grande Rue, Balcons, Lombarde, Slalom and Plein Sud), and Les 3 Vallées says you can walk across it in twenty minutes. According to Val Thorens Réservation, the resort's central booking agency, Grande Rue is the lively centre, Soleil, at the bottom of the resort, is ideal for families, and Slalom, Balcons and Plein Sud are quiet. In short: Soleil with young children, Grande Rue for evenings out, and Slalom, Balcons or Plein Sud for early nights. Wherever you stay, ask how many metres the building is from the piste.",
+  "intro": "Val Thorens is a single semi-pedestrianised village at 2,300 m with six areas (Soleil, Grande Rue, Balcons, Lombarde, Slalom and Plein Sud), and Les 3 Vallées says you can walk across it in twenty minutes. According to Val Thorens Réservation, the resort's central booking agency, Grande Rue is the lively centre, Soleil, at the bottom of the resort, is ideal for families, and Slalom, Balcons and Plein Sud are quiet. In short: Soleil with young children, Grande Rue for evenings out, and Slalom, Balcons or Plein Sud for early nights. Wherever you stay, ask how many metres the building is from the piste.",
   "sections": [
     {
       "heading": "How is Val Thorens laid out?",
       "paragraphs": [
-        "Val Thorens is a single village of six areas at 2,300 m. It was designed for skiing from the outset and the pistes come right into it: the green Combe de Thorens runs into the heart of the resort and carries on to the Grenouillère, which Les 3 Vallées calls 'the true backbone of Val Thorens'.",
+        "Val Thorens is a compact village of six areas at 2,300 m. It was designed for skiing from the outset and the pistes come right into it: the green Combe de Thorens runs into the heart of the resort and carries on to the Grenouillère, which Les 3 Vallées calls 'the true backbone of Val Thorens'.",
         "Val Thorens Réservation puts Soleil at the bottom of the resort, Grande Rue right in the centre, Lombarde close to the centre, and Balcons and Plein Sud at the top, and adds that you can do everything on foot."
       ]
     },
@@ -31,26 +31,67 @@
         "This is how Val Thorens Réservation describes each of the six areas, with the car park it recommends to people staying there:"
       ],
       "table": {
-        "caption": "The six areas of Val Thorens, as described by Val Thorens Réservation (checked 23 October 2026)",
-        "head": ["Area", "Where", "What the booking agency says", "Good for", "Car park"],
+        "caption": "The six areas of Val Thorens: description and car park from Val Thorens Réservation, 'Good for' is our summary (checked 23 October 2026)",
+        "head": [
+          "Area",
+          "Where",
+          "What the booking agency says",
+          "Good for",
+          "Car park"
+        ],
         "rows": [
-          ["Grande Rue", "Right in the centre", "Close to shops and restaurants, lively in the evening", "Evenings out", "P0 or P1"],
-          ["Soleil", "Bottom of the resort", "Ideal for families, close to the children's ski areas, ski lessons and daycare", "Families with young children", "P1, P2 or P2D"],
-          ["Lombarde", "Close to the centre", "Near the ski slopes", "Being near the centre and the pistes", "P0"],
-          ["Slalom", "Not stated", "Very quiet, close to the ski slopes", "Quiet nights near the pistes", "P0"],
-          ["Balcons", "Top of the resort", "Residential and quiet; beginners need the shuttle to reach the green slopes", "Quiet stays, past the beginner stage", "P0"],
-          ["Plein Sud", "Top of the resort", "A quiet neighbourhood", "Quiet nights", "P0"]
+          [
+            "Grande Rue",
+            "Right in the centre",
+            "Close to shops and restaurants, lively in the evening",
+            "Evenings out",
+            "P0 or P1"
+          ],
+          [
+            "Soleil",
+            "Bottom of the resort",
+            "Ideal for families, close to the children's ski areas, ski lessons and daycare",
+            "Families with young children",
+            "P1, P2 or P2D"
+          ],
+          [
+            "Lombarde",
+            "Close to the centre",
+            "Near the ski slopes",
+            "Centre and pistes close by",
+            "P0"
+          ],
+          [
+            "Slalom",
+            "Not stated",
+            "Very quiet, close to the ski slopes",
+            "Quiet nights near the pistes",
+            "P0"
+          ],
+          [
+            "Balcons",
+            "Top of the resort",
+            "Residential and quiet; beginners need the shuttle to reach the green slopes",
+            "Quiet stays, past the beginner stage",
+            "P0"
+          ],
+          [
+            "Plein Sud",
+            "Top of the resort",
+            "A quiet neighbourhood",
+            "Quiet nights",
+            "P0"
+          ]
         ]
       },
       "after": [
-        "None of these descriptions says which lift an area is next to: check the building against [SETAM's official maps](https://ski.valthorens.com/en/maps-and-schedule/) before you book, or ask for the walking distance to the nearest piste.",
-        "**Ski access varies from building to building within each area.** On Val Thorens Réservation's own listings (checked 23 October 2026), all six areas had ski-in/ski-out properties and others listed between 20 and 300 metres from the slopes. The longest distances were in Balcons."
+        "None of these descriptions says which lift an area is next to, and ski access varies from building to building: check the building against [SETAM's official maps](https://ski.valthorens.com/en/maps-and-schedule/) before you book, or ask for the walking distance to the nearest piste."
       ]
     },
     {
       "heading": "What does ski-in/ski-out mean in Val Thorens?",
       "paragraphs": [
-        "Ski-in/ski-out (skis aux pieds on French sites) means you clip into your skis, head straight to the lifts and ski back home at the end of the day, in the words of Les 3 Vallées. It says Val Thorens offers 'predominantly ski-in, ski-out accommodation', but also that some properties close to the slopes still need a short walk.",
+        "Ski-in/ski-out (skis aux pieds on French sites) means you clip into your skis, head straight to the lifts and ski back home at the end of the day, in the words of Les 3 Vallées. It says Val Thorens offers 'predominantly ski-in, ski-out accommodation', and warns, for the whole ski area, that some properties close to the slopes still need a short walk.",
         "**It also depends on the piste being open.** Val Thorens Réservation labels such apartments 'Ski in (if the slope is open)', and gives other listings a distance instead, such as '50 m from the slopes'.",
         "**Ask two things about any apartment:** how many metres to the nearest piste, and which piste it is (green, blue or red). Les 3 Vallées adds that ski-in/ski-out properties are the most sought-after, so book early."
       ]
@@ -60,29 +101,29 @@
       "paragraphs": [
         "With young children, stay in Soleil: Val Thorens Réservation calls it ideal for families, at the bottom of the resort and close to the children's ski areas, the ski lessons and the daycare. ESF's nursery, the Garderie Montana, takes children from 3 months and is also at the bottom of the resort, in the Montana building.",
         "For first-timers, SETAM, the lift company, makes four covered magic carpets free: Castor and Pollux on the green Voie Lactée, and Musaraigne and Campagnols beside the green Grenouillère, as its [EasyRider beginners' map for 2026/27](https://ski.valthorens.com/wp-content/uploads/2026/10/PlanEasyRider-2027-MockUp-Web-ValTho_compressed.pdf) shows. If you are a beginner, note that the booking agency says people staying in Balcons need the shuttle to reach the green slopes.",
-        "Check the walk to your lessons, not just the area. ESF's group course for adult beginners starts at the Pionniers chairlift, mornings 9.00–11.30 or afternoons 14.00–16.30 (from 29 November), and [Evolution 2's group lessons for children](https://evolution2.com/val-thorens/cours-ski-collectif-enfant) meet at the bottom of the same chairlift."
+        "Check the walk to your lessons, not just the area. [ESF's group lessons for adult beginners](https://www.ski-school-valthorens.co.uk/adults-discover-and-progress/alpine-skiing/beginners/) start at the Pionniers chairlift: mornings 9am–11.30am from 29 November, afternoons 2pm–4.30pm in the weeks from 19 December to 30 January and 2.30pm–5pm from the week of 6 February. [Evolution 2's group lessons for children](https://evolution2.com/en/val-thorens/kid-ski-group-lessons) meet at the bottom of the same chairlift."
       ]
     },
     {
       "heading": "Where to stay for nightlife, groups and couples",
       "paragraphs": [
         "For nightlife, stay in or near Grande Rue, which Val Thorens Réservation describes as right in the centre and lively in the evening. The clubs are central too: Les 3 Vallées' [guide to going out](https://www.les3vallees.com/en/experiences/where-to-go-out-in-val-thorens) places Klub Summit 'in the central bar district' and Le Malaysia 'beneath the main square'. La Folie Douce, for après-ski in the afternoon, is up on the slopes at the top of the Plein Sud chairlift, says Les 3 Vallées. More in our [Val Thorens après-ski guide](/en/guide/val-thorens-apres-ski).",
-        "**Groups:** Les 3 Vallées lists apartments for up to 16 people in Val Thorens, so a big group can stay under one roof and split one price. For the party atmosphere, the same source points to the club hotels (Club Med, MMV) and the UCPA youth hostel.",
+        "**Groups:** Les 3 Vallées lists apartments for up to 16 people in Val Thorens, so a big group can stay under one roof and share the cost. For the party atmosphere, the same source points to the club hotels (Club Med, MMV) and the UCPA youth hostel.",
         "**Couples:** for quiet evenings, the booking agency describes Slalom as very quiet and Balcons and Plein Sud as quiet; for restaurants on the doorstep, choose Grande Rue."
       ]
     },
     {
       "heading": "Getting around: walking in ski boots and the free shuttle",
       "paragraphs": [
-        "Val Thorens is small enough to walk, about twenty minutes from end to end according to Les 3 Vallées, and a free shuttle links the areas and the car parks just below the resort. Val Thorens Réservation gives its hours as 8am to 8pm every day, every 20 minutes, while Les 3 Vallées' shuttle page gives 8.05am to 8pm Sunday to Friday and 6.15am to 10.20pm on Saturdays.",
-        "Neither page is dated for 2026/27, so check live times and stops in the Zenbus app, as Les 3 Vallées suggests. A second free shuttle runs down the valley to Les Menuires and Saint-Martin-de-Belleville.",
+        "Val Thorens is small enough to walk, about twenty minutes from end to end according to Les 3 Vallées, and a free shuttle links the areas and the car parks just below the resort. The tourist office gives its hours as 8am to 8pm Sunday to Friday and 6.15am to 10pm on Saturdays, from 21 November to 2 May; Val Thorens Réservation says a bus leaves every 20 minutes.",
+        "Check live times and stops in the free Skibus Vallée des Belleville app, which the tourist office recommends. A second free shuttle runs down the valley to Les Menuires and Saint-Martin-de-Belleville, Sunday to Friday only.",
         "**Ski boots are the real test.** Without ski-in/ski-out, Les 3 Vallées writes, you walk for several minutes carrying your equipment, and your children's, or board a shuttle loaded with skis to reach the snow and the ski lessons."
       ]
     },
     {
       "heading": "Driving? Where to park for each area",
       "paragraphs": [
-        "If you drive, the car stays in a car park for the whole stay: street parking is banned from 15 November to 15 May (Val Thorens Réservation), and Les 3 Vallées says you must leave your vehicle in one of the car parks in winter. Book your space online with [Valthoparc](https://www.valthoparc.fr/), the company that runs the resort's car parks: Les 3 Vallées says you have to book at least 7 days before you arrive, and that you are given a place according to your vehicle's height, where you are staying, your dates and availability.",
+        "If you drive, the car stays in a car park for the whole stay: street parking is banned from 15 November to 15 May (Val Thorens Réservation), and Les 3 Vallées says you must leave your vehicle in one of the car parks in winter. Book your space online with [Valthoparc](https://www.valthoparc.fr/), the company that runs the resort's car parks, no later than 7 days before you arrive; after that, the tourist office says, you buy your ticket on arrival, at the machines in P0 and P1 or at the P2 counters. Les 3 Vallées adds that you are given a place according to your vehicle's height, where you are staying, your dates and availability.",
         "Val Thorens Réservation recommends these car parks by area:"
       ],
       "list": [
@@ -92,7 +133,7 @@
         "**P2D:** outdoor, at the bottom of the resort, for Soleil, also with shuttles. For vehicles over 2.20 m."
       ],
       "after": [
-        "Measure your vehicle with any roof box before you book: of these four, only P2D takes anything over 2.20 m. Campervans are banned from the whole resort in winter (Val Thorens Réservation).",
+        "Measure your vehicle with any roof box before you book: of these four car parks, only P2D takes vehicles over 2.20 m. Campervans are banned from the whole resort in winter (Val Thorens Réservation).",
         "Not driving? Les 3 Vallées puts Geneva airport about 2 hours away by road, and Moûtiers-Salins-Brides-les-Bains station about an hour by taxi or bus (winter only). The details are in [how to get to Val Thorens](/en/guide/how-to-get-to-val-thorens)."
       ]
     },
@@ -102,18 +143,18 @@
         "Les 3 Vallées counts four 5-star, five 4-star and four 3-star hotels in Val Thorens, alongside apartments for up to 16 people, tourist residences, chalets, club hotels such as Club Med and MMV, and a UCPA youth hostel. The real difference is what the price includes:"
       ],
       "list": [
-        "**Apartment:** self-catered, with your own kitchen; you book lift passes and lessons yourself, and a family or group splits one price.",
+        "**Apartment:** self-catered, with your own kitchen; you book lift passes and lessons yourself, and a family or group shares the cost.",
         "**Hotel:** no cooking; what the price includes, from breakfast to half board, depends on the hotel.",
-        "**Club:** Club Med sells its Val Thorens resort as all-inclusive, with the lift pass and group lessons with ESF instructors included."
+        "**Club:** Club Med sells Val Thorens Sensations as all-inclusive: its UK site says a 6-day lift pass and group ski or snowboard lessons with ESF instructors are included when you book 7 nights or more, both from the day after you arrive (no lessons on Saturdays and Sundays)."
       ]
     },
     {
       "heading": "How to choose an apartment on SkiShare",
       "paragraphs": [
-        "SkiShare offers two kinds of apartment in Val Thorens: our own, priced per night for your dates, and agency apartments rented by the full week, Saturday to Saturday, at that week's price. On [our apartments page](/en/apartments), enter your dates and the number of guests to see which are free and the price of your stay, then filter between our own apartments and the weekly ones.",
+        "We offer two kinds of apartment in Val Thorens: our own, priced per night for your dates, and agency apartments rented by the full week, Saturday to Saturday, at that week's price. On [our apartments page](/en/apartments), enter your dates and the number of guests to see which are free and the price of your stay, then filter between our own apartments and the weekly ones.",
         "Our own apartments add a cleaning fee when there is one, and because they are priced by the night, a Sunday-to-Sunday stay works when the apartment is free; Les 3 Vallées points out that travelling on a Sunday means quieter airports and roads. Every line of the price is shown before you book, and you pay by card through PayPlus, with a 1.9% card fee shown before you pay.",
         "The amount is held, a SkiShare representative confirms the booking, and only then is your card charged; cancellation follows our [booking terms](/en/terms). If the area or the distance to the piste matters to you, email skishareteam@gmail.com before you book.",
-        "The week changes the price a lot: in our agency apartments, the mid-February weeks cost about three times a week in late November or April. Week-by-week prices are in [Val Thorens apartment prices](/en/guide/val-thorens-apartment-prices), and how to pick your week in [when to ski in Val Thorens](/en/guide/best-time-to-ski-in-val-thorens). This site sells apartments only: SETAM, the lift company, sells lift passes online at [ski.valthorens.com](https://ski.valthorens.com/en/home/)."
+        "Your choice of week changes the price a lot: in the agency apartments we offer, the mid-February weeks cost about three times as much as a week in late November or April. Week-by-week prices are in [Val Thorens apartment prices](/en/guide/val-thorens-apartment-prices), and how to pick your week in [when to ski in Val Thorens](/en/guide/best-time-to-ski-in-val-thorens). This site sells apartments only: SETAM, the lift company, sells lift passes online at [ski.valthorens.com](https://ski.valthorens.com/en/home/)."
       ]
     }
   ],
@@ -136,11 +177,11 @@
     },
     {
       "q": "Is there a free shuttle in Val Thorens?",
-      "a": "Yes. It links the six areas and the car parks below the resort, and Val Thorens Réservation gives 8am to 8pm every day, every 20 minutes. Check live times in the Zenbus app."
+      "a": "Yes. It links the six areas and the car parks below the resort, from 8am to 8pm Sunday to Friday and from 6.15am to 10pm on Saturdays, according to the tourist office. Check live times in the free Skibus Vallée des Belleville app."
     },
     {
       "q": "Where do you park in Val Thorens?",
-      "a": "In a car park booked ahead with Valthoparc, because street parking is banned from 15 November to 15 May. P0 suits every area except Soleil, P1 suits Grande Rue and Soleil, and P2 and P2D suit Soleil; only P2D takes vehicles over 2.20 m."
+      "a": "In one of the resort's car parks, run by Valthoparc, because street parking is banned from 15 November to 15 May; book online no later than 7 days before you arrive, or buy a ticket when you get there. Val Thorens Réservation recommends P0 for every area except Soleil, P1 for Grande Rue and Soleil, and P2 or P2D for Soleil. Of these four, only P2D takes vehicles over 2.20 m."
     },
     {
       "q": "Are there self-catered apartments in Val Thorens?",
@@ -148,15 +189,45 @@
     }
   ],
   "sources": [
-    { "title": "Val Thorens Réservation, the resort's central booking agency: Choose your neighborhood (the six areas)", "url": "https://booking.valthorens.com/choose-your-neighborhood.html" },
-    { "title": "Val Thorens Réservation: Parking (car park for each area, height limits, street parking ban)", "url": "https://booking.valthorens.com/parking.html" },
-    { "title": "Val Thorens Réservation: Resort map, slope map (free shuttle hours)", "url": "https://booking.valthorens.com/resort-map-slope-map.html" },
-    { "title": "Les 3 Vallées: Val Thorens (six areas, twenty minutes on foot, hotels and apartments, car parks)", "url": "https://www.les3vallees.com/en/resort/val-thorens" },
-    { "title": "Les 3 Vallées: Ski-in, ski-out accommodation", "url": "https://www.les3vallees.com/en/guide/ski-in-ski-out-accommodation" },
-    { "title": "Les 3 Vallées: Shuttles in the resorts (Val Thorens timetable, Zenbus app)", "url": "https://www.les3vallees.com/en/guide/shuttle-in-stations" },
-    { "title": "Les 3 Vallées: Car parks (book at least 7 days before arrival)", "url": "https://www.les3vallees.com/en/guide/travel-to-les-3-vallees/car-parks" },
-    { "title": "SETAM, the Val Thorens lift company: EasyRider beginners' map 2026/27 (free covered magic carpets)", "url": "https://ski.valthorens.com/wp-content/uploads/2026/10/PlanEasyRider-2027-MockUp-Web-ValTho_compressed.pdf" },
-    { "title": "ESF Val Thorens: Garderie Montana (from 3 months, Montana building at the bottom of the resort)", "url": "https://www.esf-valthorens.com/garderie-montana-by-esf/offres/" },
-    { "title": "Club Med: Val Thorens Sensations (all-inclusive, lift pass and ESF group lessons included)", "url": "https://www.clubmed.co.uk/r/val-thorens-sensations/y" }
+    {
+      "title": "Val Thorens Réservation, the resort's central booking agency: Choose your neighborhood (the six areas)",
+      "url": "https://booking.valthorens.com/choose-your-neighborhood.html"
+    },
+    {
+      "title": "Val Thorens Réservation: Parking (car park for each area, height limits, street parking ban)",
+      "url": "https://booking.valthorens.com/parking.html"
+    },
+    {
+      "title": "Val Thorens Réservation: Resort map, slope map (free shuttle hours)",
+      "url": "https://booking.valthorens.com/resort-map-slope-map.html"
+    },
+    {
+      "title": "Les 3 Vallées: Val Thorens (six areas, twenty minutes on foot, hotels and apartments, car parks)",
+      "url": "https://www.les3vallees.com/en/resort/val-thorens"
+    },
+    {
+      "title": "Les 3 Vallées: Ski-in, ski-out accommodation",
+      "url": "https://www.les3vallees.com/en/guide/ski-in-ski-out-accommodation"
+    },
+    {
+      "title": "Les 3 Vallées: Shuttles in the resorts (Val Thorens shuttles, valley shuttle Sunday to Friday)",
+      "url": "https://www.les3vallees.com/en/guide/shuttle-in-stations"
+    },
+    {
+      "title": "Val Thorens tourist office: Car parking (online booking up to 7 days before arrival, tickets on arrival, height limits)",
+      "url": "https://www.valthorens.com/en/useful-informations/car-parking"
+    },
+    {
+      "title": "Val Thorens tourist office: The free shuttles (hours, 21 November to 2 May, Skibus Vallée des Belleville app)",
+      "url": "https://www.valthorens.com/en/pages/the-free-shuttles"
+    },
+    {
+      "title": "ESF Val Thorens: Garderie Montana (from 3 months, Montana building at the bottom of the resort)",
+      "url": "https://www.esf-valthorens.com/garderie-montana-by-esf/offres/"
+    },
+    {
+      "title": "Club Med: Val Thorens Sensations (all-inclusive; 6-day lift pass and ESF group lessons included for 7 nights or more)",
+      "url": "https://www.clubmed.co.uk/r/val-thorens-sensations/y"
+    }
   ]
 }

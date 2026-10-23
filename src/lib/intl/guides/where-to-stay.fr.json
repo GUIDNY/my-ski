@@ -16,12 +16,12 @@
   "emoji": "🗺️",
   "published": "2026-10-23",
   "updated": "2026-10-23",
-  "intro": "Val Thorens est une station semi-piétonne à 2 300 m d'altitude, divisée en six quartiers (Soleil, Grande Rue, Balcons, Lombarde, Slalom et Plein Sud), que l'on traverse à pied en vingt minutes, selon Les 3 Vallées. D'après Val Thorens Réservation, la centrale de réservation de la station, Grande Rue est le centre animé le soir, Soleil, en bas de la station, est idéal pour les familles, et Slalom, les Balcons et Plein Sud sont calmes. En résumé : Soleil avec de jeunes enfants, Grande Rue pour sortir, Slalom, Balcons ou Plein Sud pour des nuits tranquilles. En voiture, chaque quartier a son parking conseillé, à réserver à l'avance.",
+  "intro": "Val Thorens est une station semi-piétonne à 2 300 m d'altitude, divisée en six quartiers (Soleil, Grande Rue, Balcons, Lombarde, Slalom et Plein Sud), que l'on traverse à pied en vingt minutes, selon Les 3 Vallées. D'après Val Thorens Réservation, la centrale de la station, Grande Rue est le centre animé le soir, Soleil, en bas de la station, est idéal pour les familles, et Slalom, les Balcons et Plein Sud sont calmes. En résumé : Soleil avec de jeunes enfants, Grande Rue pour sortir, Slalom, les Balcons ou Plein Sud pour des nuits tranquilles. En voiture, chaque quartier a son parking conseillé, réservable en ligne.",
   "sections": [
     {
       "heading": "Comment est organisée la station de Val Thorens ?",
       "paragraphs": [
-        "Val Thorens tient en un seul village de six quartiers, à 2 300 m d'altitude. Pensée pour le ski dès sa création, elle voit les pistes arriver jusqu'en son centre : la Combe de Thorens, une verte, mène au cœur de la station avant de poursuivre vers la Grenouillère, « véritable colonne vertébrale de Val Thorens » pour Les 3 Vallées.",
+        "Val Thorens tient en un seul village de six quartiers, à 2 300 m d'altitude. Conçue pour le ski dès l'origine, elle est traversée par les pistes : la Combe de Thorens, une piste verte, descend jusqu'au cœur de la station, puis la descente se poursuit vers la Grenouillère, « véritable colonne vertébrale de Val Thorens » selon Les 3 Vallées.",
         "Val Thorens Réservation place Soleil en bas de la station, Grande Rue en plein centre, Lombarde près du centre, les Balcons et Plein Sud dans le haut, et rappelle qu'on peut tout faire à pied."
       ]
     },
@@ -31,7 +31,7 @@
         "Voici comment Val Thorens Réservation décrit chacun des six quartiers, avec le parking qu'elle conseille à ceux qui y logent :"
       ],
       "table": {
-        "caption": "Les six quartiers de Val Thorens selon Val Thorens Réservation (vérifié le 23 octobre 2026)",
+        "caption": "Les six quartiers selon Val Thorens Réservation, sauf la colonne « Pour qui », de la rédaction (vérifié le 23 octobre 2026)",
         "head": [
           "Quartier",
           "Où",
@@ -44,55 +44,54 @@
             "Grande Rue",
             "Plein centre",
             "Proche des commerces et restaurants, animé le soir",
-            "Ceux qui sortent le soir",
+            "Les noctambules",
             "P0 ou P1"
           ],
           [
             "Soleil",
             "Bas de la station",
             "Idéal pour les familles, proche des jardins d'enfants, des cours de ski et de la garderie",
-            "Familles avec jeunes enfants",
+            "Les familles avec de jeunes enfants",
             "P1, P2 ou P2D"
           ],
           [
             "Lombarde",
             "Près du centre",
             "Proche des pistes de ski",
-            "Qui veut centre et pistes à proximité",
+            "Ceux qui veulent tout à deux pas",
             "P0"
           ],
           [
             "Slalom",
             "Non précisé",
             "Très calme, proche des pistes de ski",
-            "Qui cherche le calme près des pistes",
+            "Ceux qui cherchent le calme près des pistes",
             "P0"
           ],
           [
             "Balcons",
             "Haut de la station",
             "Résidentiel et calme ; les débutants doivent prendre la navette pour rejoindre les pistes vertes",
-            "Skieurs autonomes en quête de calme",
+            "Les skieurs autonomes en quête de calme",
             "P0"
           ],
           [
             "Plein Sud",
             "Haut de la station",
             "Quartier calme",
-            "Qui veut des nuits calmes",
+            "Ceux qui veulent des nuits calmes",
             "P0"
           ]
         ]
       },
       "after": [
-        "Aucune de ces descriptions ne dit près de quelle remontée se trouve le quartier : vérifiez l'emplacement de l'immeuble sur [les plans officiels de la SETAM](https://ski.valthorens.com/plans-et-horaires/) avant de réserver, ou demandez la distance à pied jusqu'à la piste la plus proche.",
-        "**L'accès aux pistes change d'un immeuble à l'autre, dans chaque quartier.** Sur les annonces de Val Thorens Réservation (consultées le 23 octobre 2026), les six quartiers comptaient des logements skis aux pieds et d'autres situés entre 20 et 300 mètres des pistes ; les distances les plus longues étaient aux Balcons."
+        "Ces descriptions ne disent pas près de quelle remontée se trouve chaque quartier, et l'accès aux pistes varie d'un immeuble à l'autre : situez le logement sur [les plans officiels de la SETAM](https://ski.valthorens.com/plans-et-horaires/), ou demandez la distance à pied jusqu'à la piste la plus proche."
       ]
     },
     {
       "heading": "En voiture : quel parking pour quel quartier ?",
       "paragraphs": [
-        "En hiver, la voiture reste au parking pendant tout le séjour : le stationnement dans les rues est interdit du 15 novembre au 15 mai, et le parking est obligatoire, rappelle Val Thorens Réservation. Réservez votre place en ligne auprès de [Valthoparc](https://www.valthoparc.fr/), qui gère les parkings de la station. Les 3 Vallées précisent que la réservation doit se faire au plus tard 7 jours avant l'arrivée, et que la place est attribuée en fonction de la hauteur du véhicule, de l'emplacement de l'hébergement, des dates du séjour et des disponibilités.",
+        "En hiver, la voiture reste au parking tout le séjour : le stationnement dans les rues est interdit du 15 novembre au 15 mai (Val Thorens Réservation). Réservez votre place en ligne auprès de [Valthoparc](https://www.valthoparc.fr/), qui gère les parkings de la station, au plus tard 7 jours avant l'arrivée : passé ce délai, le ticket s'achète sur place, aux caisses automatiques des parkings P0 et P1 ou aux caisses du P2, indique l'office de tourisme. La place est attribuée, précisent Les 3 Vallées, selon la hauteur du véhicule, l'emplacement de l'hébergement, les dates et les disponibilités.",
         "Les parkings conseillés par Val Thorens Réservation, quartier par quartier :"
       ],
       "list": [
@@ -102,15 +101,15 @@
         "**P2D :** extérieur, en bas de la station, pour Soleil, avec navettes également. Pour les véhicules de plus de 2,20 m."
       ],
       "after": [
-        "Mesurez votre véhicule, coffre de toit compris, avant de réserver : des quatre, seul le P2D accepte plus de 2,20 m. En hiver, les camping-cars sont interdits dans toute la station (Val Thorens Réservation).",
-        "Sans voiture ? Le train vous laisse à la gare de Moûtiers-Salins-Brides-les-Bains, à une heure de route de la station en taxi ou en navette (en hiver seulement), et l'aéroport de Genève est à 2 h de route, selon Les 3 Vallées. Tous les détails dans [comment aller à Val Thorens](/fr/guide/comment-aller-a-val-thorens)."
+        "Mesurez votre véhicule, coffre de toit compris, avant de réserver : de ces quatre parkings, seul le P2D accepte les véhicules de plus de 2,20 m. En hiver, les camping-cars sont interdits dans toute la station (Val Thorens Réservation).",
+        "Sans voiture ? Le train vous laisse à la gare de Moûtiers-Salins-Brides-les-Bains, à une heure de route de la station en taxi ou en navette (en hiver seulement), et l'aéroport de Genève est à 2 h de route, selon Les 3 Vallées. Tous les détails : [comment aller à Val Thorens](/fr/guide/comment-aller-a-val-thorens)."
       ]
     },
     {
       "heading": "Que veut dire « skis aux pieds » à Val Thorens ?",
       "paragraphs": [
-        "Un logement skis aux pieds permet de chausser ses skis, de rejoindre directement les remontées mécaniques et de rentrer en glissant en fin de journée : c'est la définition des 3 Vallées. Pour elles, Val Thorens « propose majoritairement des hébergements skis aux pieds », mais certains logements proches des pistes imposent malgré tout de marcher un peu.",
-        "**Tout dépend aussi de la piste.** Val Thorens Réservation les annonce skis aux pieds « sous condition d'ouverture des pistes » ; pour les autres, elle indique une distance, comme « 50 m des pistes ».",
+        "Un logement skis aux pieds permet de chausser ses skis, de rejoindre directement les remontées mécaniques et de rentrer en glissant en fin de journée : c'est la définition des 3 Vallées. Leur guide note que Val Thorens « propose majoritairement des hébergements skis aux pieds », mais prévient, pour l'ensemble du domaine, que certains logements proches des pistes obligent à marcher un peu.",
+        "**Encore faut-il que la piste soit ouverte.** Val Thorens Réservation n'annonce ses logements skis aux pieds que « sous condition d'ouverture des pistes » et, pour les autres, indique une distance, par exemple « 50 m des pistes ».",
         "**Deux questions à poser pour chaque appartement :** combien de mètres jusqu'à la piste la plus proche, et laquelle (verte, bleue ou rouge). Les 3 Vallées rappellent aussi que les logements skis aux pieds sont les plus prisés : mieux vaut réserver tôt."
       ]
     },
@@ -118,51 +117,51 @@
       "heading": "Où loger avec des enfants ou quand on débute ?",
       "paragraphs": [
         "Avec de jeunes enfants, visez le quartier Soleil : Val Thorens Réservation le juge idéal pour les familles, en bas de la station, près des jardins d'enfants, des cours de ski et de la garderie. La garderie Montana de l'ESF, qui accueille les enfants dès 3 mois, se trouve elle aussi en bas de la station, dans l'immeuble du Montana.",
-        "Pour les débutants, la SETAM, la société des remontées mécaniques, met en accès gratuit quatre tapis couverts : Castor et Pollux sur la verte Voie Lactée, Musaraigne et Campagnols le long de la verte Grenouillère, comme le montre son [plan débutant EasyRider 2026/27](https://ski.valthorens.com/wp-content/uploads/2026/10/PlanEasyRider-2027-MockUp-Web-ValTho_compressed.pdf). Attention : selon la centrale, les débutants logés aux Balcons doivent prendre la navette pour accéder aux pistes vertes.",
-        "Regardez le trajet jusqu'au cours, pas seulement le quartier. Les cours collectifs adultes débutants de l'ESF partent du télésiège des Pionniers, le matin de 9 h à 11 h 30 ou l'après-midi de 14 h à 16 h 30 (à partir du 29 novembre), et les cours collectifs enfants d'[Evolution 2](https://evolution2.com/val-thorens/cours-ski-collectif-enfant) donnent rendez-vous au bas du même télésiège."
+        "Pour les débutants, la SETAM, la société des remontées mécaniques, met en accès gratuit quatre tapis couverts : Castor et Pollux sur la Voie lactée, Musaraigne et Campagnols le long de la Grenouillère, deux pistes vertes (voir son [plan débutant EasyRider 2026/27](https://ski.valthorens.com/wp-content/uploads/2026/10/PlanEasyRider-2027-MockUp-Web-ValTho_compressed.pdf)). Attention : selon la centrale, les débutants logés aux Balcons doivent prendre la navette pour accéder aux pistes vertes.",
+        "Regardez aussi le trajet jusqu'au cours. Les [cours collectifs adultes débutants de l'ESF](https://www.esf-valthorens.com/adultes-decouvrir-et-progresser/ski-alpin/decouverte/) partent du télésiège des Pionniers : le matin de 9 h à 11 h 30 à partir du 29 novembre, l'après-midi de 14 h à 16 h 30 pour les semaines du 19 décembre au 30 janvier, puis de 14 h 30 à 17 h à partir de la semaine du 6 février. Les cours collectifs enfants d'[Evolution 2](https://evolution2.com/val-thorens/cours-ski-collectif-enfant) donnent rendez-vous au bas du même télésiège."
       ]
     },
     {
       "heading": "Où loger pour sortir, en groupe ou en couple ?",
       "paragraphs": [
-        "Pour sortir, logez dans le quartier Grande Rue ou à proximité : Val Thorens Réservation le décrit en plein centre et animé le soir. Les boîtes de nuit sont centrales elles aussi : le [guide des sorties des 3 Vallées](https://www.les3vallees.com/fr/experiences/ou-sortir-a-val-thorens) situe le Klub Summit « dans le quartier central des bars » et le Malaysia « sous la place principale ». La Folie Douce, où l'on prolonge l'après-midi en musique, est sur les pistes, au sommet du télésiège Plein Sud, indiquent Les 3 Vallées. Plus d'adresses dans notre [guide de l'après-ski à Val Thorens](/fr/guide/apres-ski-val-thorens).",
-        "**En groupe :** Les 3 Vallées recensent à Val Thorens des appartements jusqu'à 16 personnes, de quoi loger une grande tribu sous un même toit et partager un seul prix. Pour l'ambiance festive, la même source oriente plutôt vers les hôtels club (Club Med, MMV) et l'auberge de jeunesse de l'UCPA.",
+        "Pour sortir, logez dans le quartier Grande Rue ou à proximité : Val Thorens Réservation le décrit en plein centre et animé le soir. Les boîtes de nuit sont, elles aussi, au centre : le [guide des sorties des 3 Vallées](https://www.les3vallees.com/fr/experiences/ou-sortir-a-val-thorens) situe le Klub Summit « dans le quartier central des bars » et le Malaysia « sous la place principale ». La Folie Douce, où l'on prolonge l'après-midi en musique, est sur les pistes, au sommet du télésiège Plein Sud, indiquent Les 3 Vallées. Plus d'adresses : [notre guide de l'après-ski](/fr/guide/apres-ski-val-thorens).",
+        "**En groupe :** Les 3 Vallées recensent à Val Thorens des appartements jusqu'à 16 personnes, de quoi loger une grande tribu sous un même toit et partager la note. Pour l'ambiance festive, la même source oriente plutôt vers les hôtels club (Club Med, MMV) et l'auberge de jeunesse de l'UCPA.",
         "**En couple :** pour des soirées tranquilles, la centrale décrit Slalom comme très calme, les Balcons et Plein Sud comme calmes ; pour avoir les restaurants au pied de l'immeuble, choisissez Grande Rue."
       ]
     },
     {
       "heading": "Se déplacer : à pied en chaussures de ski et en navette gratuite",
       "paragraphs": [
-        "À Val Thorens, tout se fait à pied : la station se traverse en vingt minutes, d'après Les 3 Vallées, et une navette gratuite dessert les quartiers et les parkings situés en contrebas. Val Thorens Réservation annonce un passage toutes les 20 minutes, tous les jours de 8 h à 20 h ; la page navettes des 3 Vallées donne de 8 h 05 à 20 h du dimanche au vendredi, et de 6 h 15 à 22 h 20 le samedi.",
-        "Aucune des deux pages n'est datée pour 2026/27 : vérifiez horaires et arrêts en temps réel sur l'application Zenbus, que signalent Les 3 Vallées. Une navette vallée, gratuite elle aussi, rejoint Les Menuires et Saint-Martin-de-Belleville.",
-        "**Le vrai test, ce sont les chaussures de ski.** Sans logement skis aux pieds, écrivent Les 3 Vallées, il faut marcher plusieurs minutes avec son matériel et celui des enfants, ou prendre la navette, chargé de tout cet équipement, jusqu'au front de neige et aux cours de ski."
+        "À Val Thorens, tout se fait à pied : la station se traverse en vingt minutes, d'après Les 3 Vallées, et une navette gratuite dessert les quartiers et les parkings situés en contrebas. L'office de tourisme l'annonce du 21 novembre au 2 mai, du dimanche au vendredi de 8 h à 20 h et le samedi de 6 h 15 à 22 h ; Val Thorens Réservation annonce un passage toutes les 20 minutes.",
+        "Vérifiez horaires et arrêts en temps réel sur l'application gratuite Skibus Vallée des Belleville, que recommande l'office de tourisme. Une navette vallée, gratuite elle aussi, rejoint Les Menuires et Saint-Martin-de-Belleville du dimanche au vendredi.",
+        "**Le vrai test, ce sont les chaussures de ski.** Sans logement skis aux pieds, écrivent Les 3 Vallées, il faut marcher plusieurs minutes avec son matériel et celui des enfants, ou prendre la navette, chargé de matériel, jusqu'au front de neige et aux cours de ski."
       ]
     },
     {
       "heading": "Appartement, hôtel ou club ?",
       "paragraphs": [
-        "Val Thorens compte, selon Les 3 Vallées, quatre hôtels 5 étoiles, cinq 4 étoiles et quatre 3 étoiles, à côté des appartements (jusqu'à 16 personnes), des résidences, des chalets, des hôtels club comme le Club Med et MMV, et de l'auberge de jeunesse de l'UCPA. La vraie différence tient à ce que comprend le prix :"
+        "Val Thorens compte, selon Les 3 Vallées, quatre hôtels 5 étoiles, cinq 4 étoiles et quatre 3 étoiles, sans compter les appartements (jusqu'à 16 personnes), les résidences, les chalets, les hôtels club comme le Club Med et MMV, et l'auberge de jeunesse de l'UCPA. Tout dépend de ce que comprend le prix :"
       ],
       "list": [
-        "**Appartement :** vous avez votre cuisine, vous réservez vous-même forfaits et cours, et une famille ou un groupe partage un seul prix.",
+        "**Appartement :** vous avez votre cuisine, vous réservez vous-même forfaits et cours, et la famille ou le groupe se partage la note.",
         "**Hôtel :** pas de cuisine à faire ; ce que comprend le prix, du petit-déjeuner à la demi-pension, dépend de l'hôtel.",
-        "**Club :** le Club Med vend son resort de Val Thorens en tout compris, avec le forfait et les cours collectifs encadrés par l'ESF."
+        "**Club :** le Club Med vend Val Thorens Sensations en formule tout compris, avec un forfait valable six jours à partir du lendemain de l'arrivée et des cours collectifs encadrés par l'ESF (pas de cours le samedi ni le dimanche)."
       ]
     },
     {
       "heading": "Comment choisir son appartement sur SkiShare",
       "paragraphs": [
-        "SkiShare propose deux types d'appartements à Val Thorens : les nôtres, au prix par nuit pour vos dates, et des appartements d'agence en location à la semaine, du samedi au samedi, au prix de la semaine choisie. Sur [notre page des appartements](/fr/apartments), indiquez vos dates et le nombre de voyageurs pour voir ceux qui sont libres et le prix de votre séjour, puis filtrez entre nos appartements et ceux à la semaine.",
-        "Nos appartements ajoutent des frais de ménage quand il y en a, et comme ils se louent à la nuit, un séjour du dimanche au dimanche est possible s'ils sont libres, avec des routes et des gares moins chargées ce jour-là, soulignent Les 3 Vallées. Chaque ligne du prix s'affiche avant la réservation, et le paiement se fait par carte via PayPlus, avec des frais de carte de 1,9 % indiqués avant de payer.",
-        "Le montant est bloqué, un représentant de SkiShare confirme la réservation, et votre carte n'est débitée qu'après cette confirmation ; l'annulation suit nos [conditions de réservation](/fr/terms). Si le quartier ou la distance à la piste compte pour vous, écrivez-nous à skishareteam@gmail.com avant de réserver.",
-        "La semaine pèse lourd dans le prix : dans nos appartements d'agence, les semaines de mi-février coûtent environ trois fois le prix d'une semaine fin novembre ou en avril. Les prix semaine par semaine sont dans [prix de la location d'un appartement à Val Thorens](/fr/guide/prix-location-appartement-val-thorens), et le choix de la semaine dans [quand partir à Val Thorens](/fr/guide/quand-partir-a-val-thorens). Ce site ne vend que des appartements : la SETAM, la société des remontées mécaniques, vend les forfaits en ligne sur [ski.valthorens.com](https://ski.valthorens.com/)."
+        "Nous proposons deux types d'appartements à Val Thorens : les nôtres, au prix par nuit pour vos dates, et des appartements d'agence en location à la semaine, du samedi au samedi, au prix de la semaine choisie. Sur [notre page des appartements](/fr/apartments), indiquez vos dates et le nombre de voyageurs pour voir ceux qui sont libres et le prix de votre séjour, puis affichez au choix nos appartements ou ceux loués à la semaine.",
+        "Nos propres appartements se louent à la nuit, avec des frais de ménage le cas échéant : un séjour du dimanche au dimanche y est donc possible, selon les disponibilités, un jour où routes et gares sont moins chargées, soulignent Les 3 Vallées. Chaque ligne du prix s'affiche avant la réservation, et le paiement se fait par carte via PayPlus, avec 1,9 % de frais de carte, affichés avant le paiement.",
+        "Le montant est bloqué, un représentant de SkiShare confirme la réservation, et votre carte n'est débitée qu'après cette confirmation ; en cas d'annulation, nos [conditions de réservation](/fr/terms) s'appliquent. Si le quartier ou la distance à la piste compte pour vous, écrivez-nous à skishareteam@gmail.com avant de réserver.",
+        "La semaine pèse lourd dans le prix : dans les appartements d'agence que nous proposons, les semaines de la mi-février coûtent environ trois fois plus cher qu'une semaine fin novembre ou en avril. Les prix semaine par semaine sont dans [prix des locations à Val Thorens](/fr/guide/prix-location-appartement-val-thorens), et le choix de la semaine dans [quand partir à Val Thorens](/fr/guide/quand-partir-a-val-thorens). Ce site ne vend que des appartements : la SETAM vend les forfaits en ligne sur [ski.valthorens.com](https://ski.valthorens.com/)."
       ]
     }
   ],
   "faqs": [
     {
       "q": "Quel quartier choisir à Val Thorens ?",
-      "a": "Tout dépend de votre séjour. Selon Val Thorens Réservation, la centrale de la station, Grande Rue est le centre animé le soir, Soleil, en bas de la station, est idéal pour les familles, et Slalom, les Balcons et Plein Sud sont calmes. La station se traverse à pied en vingt minutes."
+      "a": "Tout dépend de votre séjour. Selon Val Thorens Réservation, la centrale de la station, Grande Rue est le centre animé le soir, Soleil, en bas de la station, est idéal pour les familles, et Slalom, les Balcons et Plein Sud sont calmes."
     },
     {
       "q": "Combien de quartiers compte Val Thorens ?",
@@ -170,7 +169,7 @@
     },
     {
       "q": "Toutes les locations à Val Thorens sont-elles skis aux pieds ?",
-      "a": "Non. Selon Les 3 Vallées, la majorité l'est, mais certains logements proches des pistes imposent de marcher un peu, et Val Thorens Réservation précise « sous condition d'ouverture des pistes ». Demandez la distance à la piste la plus proche, en mètres."
+      "a": "Non. Selon Les 3 Vallées, la majorité l'est, mais certains logements proches des pistes imposent de marcher un peu, et Val Thorens Réservation n'annonce ses logements skis aux pieds que « sous condition d'ouverture des pistes »."
     },
     {
       "q": "Quel quartier de Val Thorens pour une famille ?",
@@ -178,11 +177,11 @@
     },
     {
       "q": "Y a-t-il une navette gratuite à Val Thorens ?",
-      "a": "Oui. Elle relie les six quartiers et les parkings situés en contrebas, et Val Thorens Réservation annonce un passage toutes les 20 minutes, de 8 h à 20 h, tous les jours. Vérifiez les horaires en temps réel dans l'application Zenbus."
+      "a": "Oui. Elle relie les six quartiers et les parkings situés en contrebas, du dimanche au vendredi de 8 h à 20 h et le samedi de 6 h 15 à 22 h, selon l'office de tourisme. Vérifiez les horaires en temps réel dans l'application gratuite Skibus Vallée des Belleville."
     },
     {
       "q": "Où se garer à Val Thorens ?",
-      "a": "Dans un parking réservé à l'avance auprès de Valthoparc, car le stationnement dans les rues est interdit du 15 novembre au 15 mai. Le P0 convient à tous les quartiers sauf Soleil, le P1 à Grande Rue et Soleil, le P2 et le P2D à Soleil ; seul le P2D accepte les véhicules de plus de 2,20 m."
+      "a": "Dans l'un des parkings de la station, gérés par Valthoparc, car le stationnement dans les rues est interdit du 15 novembre au 15 mai ; réservez en ligne au plus tard 7 jours avant l'arrivée, ou achetez votre ticket sur place. Val Thorens Réservation conseille le P0 pour tous les quartiers sauf Soleil, le P1 pour Grande Rue et Soleil, le P2 ou le P2D pour Soleil. De ces quatre parkings, seul le P2D accepte les véhicules de plus de 2,20 m."
     }
   ],
   "sources": [
@@ -207,23 +206,23 @@
       "url": "https://www.les3vallees.com/fr/guide/hebergement-ski-au-pied-des-pistes"
     },
     {
-      "title": "Les 3 Vallées : Navettes en stations (horaires de Val Thorens, application Zenbus)",
+      "title": "Les 3 Vallées : Navettes en stations (navettes de Val Thorens, navette vallée du dimanche au vendredi)",
       "url": "https://www.les3vallees.com/fr/guide/navettes-en-stations"
     },
     {
-      "title": "Les 3 Vallées : Stationnement (réservation au plus tard 7 jours avant l'arrivée)",
-      "url": "https://www.les3vallees.com/fr/guide/venir-dans-les-3-vallees/stationnement-parkings"
+      "title": "Office de tourisme de Val Thorens : stationnement (réservation en ligne jusqu'à 7 jours avant l'arrivée, ticket sur place, hauteurs maximales ; page en anglais)",
+      "url": "https://www.valthorens.com/en/useful-informations/car-parking"
     },
     {
-      "title": "SETAM, la société des remontées mécaniques : plan débutant EasyRider 2026/27 (tapis couverts gratuits)",
-      "url": "https://ski.valthorens.com/wp-content/uploads/2026/10/PlanEasyRider-2027-MockUp-Web-ValTho_compressed.pdf"
+      "title": "Office de tourisme de Val Thorens : navettes gratuites (horaires, du 21 novembre au 2 mai, application Skibus Vallée des Belleville ; page en anglais)",
+      "url": "https://www.valthorens.com/en/pages/the-free-shuttles"
     },
     {
       "title": "ESF Val Thorens : garderie Montana (de 3 à 35 mois, immeuble du Montana en bas de la station)",
       "url": "https://www.esf-valthorens.com/garderie-montana-by-esf/offres/"
     },
     {
-      "title": "Club Med : Val Thorens Sensations (tout compris, forfait et cours collectifs ESF inclus)",
+      "title": "Club Med : Val Thorens Sensations (tout compris, forfait de six jours et cours collectifs ESF inclus)",
       "url": "https://www.clubmed.fr/r/val-thorens-sensations/y"
     }
   ]
