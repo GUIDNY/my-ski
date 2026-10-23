@@ -873,10 +873,6 @@ function ApartmentPage() {
               </div>
             )}
 
-            {!hasDates && !agency && (
-              <p className="text-[15px] text-muted -mt-2">מ-{eur(basePrice)} ללילה, לפני ניקיון.</p>
-            )}
-
             {canBook && (
               <>
                 {/* the stay's price */}
@@ -954,7 +950,7 @@ function ApartmentPage() {
                           <span>החלק שלכם לתשלום עכשיו</span>
                           <span>{eur(payNow)}</span>
                         </div>
-                        <p className="text-muted mt-1 leading-relaxed">הסכום הכולל ({eur(grandTotal)}, עם כל התוספות) מתחלק שווה ל-{splitCount}. אחרי התשלום תקבלו קישור לשלוח לחברים, וכל אחד משלם את החלק שלו.</p>
+                        <p className="text-muted mt-1 leading-relaxed">הסה&quot;כ ({eur(grandTotal)}) מתחלק שווה ל-{splitCount}. אחרי התשלום תקבלו קישור לשלוח לחברים.</p>
                       </div>
                     )}
                   </div>
@@ -984,14 +980,14 @@ function ApartmentPage() {
             <div className="grid grid-cols-3 gap-2 -mt-1">
               <SaveTripButton apartmentId={id} checkin={checkin} checkout={checkout} guests={guests}
                 label="שמירה"
-                className="flex items-center justify-center gap-1.5 min-h-[46px] px-2 rounded-xl border border-line hover:border-line-strong bg-white text-ink text-[14px] font-bold transition-colors" />
+                className="flex flex-col min-[400px]:flex-row items-center justify-center gap-1 min-[400px]:gap-1.5 min-h-[56px] min-[400px]:min-h-[46px] px-2 rounded-xl border border-line hover:border-line-strong bg-white text-ink text-[14px] font-bold transition-colors" />
               <button type="button" onClick={handleSendQuote} disabled={creatingQuote || !canBook}
-                className="flex items-center justify-center gap-1.5 min-h-[46px] px-2 rounded-xl border border-line hover:border-line-strong bg-white text-ink text-[14px] font-bold transition-colors disabled:opacity-45 disabled:hover:border-line">
+                className="flex flex-col min-[400px]:flex-row items-center justify-center gap-1 min-[400px]:gap-1.5 min-h-[56px] min-[400px]:min-h-[46px] px-2 rounded-xl border border-line hover:border-line-strong bg-white text-ink text-[14px] font-bold transition-colors disabled:opacity-45 disabled:hover:border-line">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" /><path d="M14 3v6h6M8 13h8M8 17h5" /></svg>
                 {creatingQuote ? "רגע…" : "הצעת מחיר"}
               </button>
               <button type="button" onClick={() => { navigator.clipboard?.writeText("https://skisharebook.com" + window.location.pathname + window.location.search); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-                className="flex items-center justify-center gap-1.5 min-h-[46px] px-2 rounded-xl border border-line hover:border-line-strong bg-white text-ink text-[14px] font-bold transition-colors">
+                className="flex flex-col min-[400px]:flex-row items-center justify-center gap-1 min-[400px]:gap-1.5 min-h-[56px] min-[400px]:min-h-[46px] px-2 rounded-xl border border-line hover:border-line-strong bg-white text-ink text-[14px] font-bold transition-colors">
                 {copied ? <Check size={18} /> : (
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1" /><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" /></svg>
                 )}
@@ -1007,7 +1003,7 @@ function ApartmentPage() {
               </a>,
             ]} />
 
-            {stay?.source === "airbnb" && (
+            {canBook && stay?.source === "airbnb" && (
               <p className="text-[13px] leading-relaxed text-muted -mt-1">המחיר של הדירה לפי איירבנב לתאריכים האלה, ומתעדכן אם הוא משתנה שם.</p>
             )}
           </div>
@@ -1024,7 +1020,7 @@ function ApartmentPage() {
           {!hasDates ? (
             <>
               <div className="font-bold text-[16px] text-ink">{agency ? "בחרו שבוע" : "בחרו תאריכים"}</div>
-              <div className="text-[13px] text-muted">{agency ? "שבת עד שבת" : `מ-${eur(basePrice)} ללילה`}</div>
+              <div className="text-[13px] text-muted">{agency ? "שבת עד שבת" : "המחיר לפי התאריכים"}</div>
             </>
           ) : !canBook ? (
             <div className="font-bold text-[15px] text-warn">{datesTaken ? "תפוס בתאריכים האלה" : "השבוע הזה לא פנוי"}</div>
