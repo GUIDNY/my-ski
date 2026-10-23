@@ -15,13 +15,13 @@
   "emoji": "💰",
   "published": "2026-10-23",
   "updated": "2026-10-23",
-  "intro": "En 2026/2027, une location d'appartement à Val Thorens coûte le moins cher de fin novembre à mi-décembre et de fin mars à fin avril, et le plus cher au Nouvel An et surtout au cœur des vacances d'hiver, où notre appartement d'agence le moins cher encore libre coûte environ trois fois plus qu'en avril. Le tableau ci-dessous donne, pour chaque samedi de la saison, l'appartement d'agence le moins cher encore libre pour la semaine complète, du samedi au samedi, et combien il en reste. Ajoutez le forfait : selon les tarifs officiels de la SETAM, 6 jours coûtent à un adulte 330,50 € ou 367,50 € sur Val Thorens-Orelle, 378,50 € ou 421 € sur les 3 Vallées, selon les dates.",
+  "intro": "En 2026/2027, une location d'appartement à Val Thorens coûte le moins cher fin novembre, la semaine du 12 décembre et de fin mars à fin avril. Elle coûte le plus cher au Nouvel An et surtout au cœur des vacances d'hiver, où l'appartement d'agence le moins cher encore libre sur notre site coûte environ trois fois plus qu'en avril. Le tableau en direct ci-dessous donne, pour chaque samedi, l'appartement d'agence le moins cher encore libre pour la semaine complète et combien il en reste. Comptez aussi les remontées mécaniques : d'après les tarifs officiels de la SETAM, le forfait adulte 6 jours coûte 330,50 € ou 367,50 € sur Val Thorens-Orelle, et 378,50 € ou 421 € sur les 3 Vallées, suivant les dates.",
   "sections": [
     {
       "heading": "Combien coûte une semaine de location à Val Thorens ?",
       "paragraphs": [
         "Tout dépend d'abord de la semaine : dans nos appartements d'agence, une semaine au cœur des vacances de février coûte environ trois fois le prix d'une semaine fin novembre ou en avril. Pour chaque samedi à venir, le tableau donne l'appartement d'agence le moins cher encore libre (appartement entier, semaine complète) et le nombre d'appartements d'agence restants.",
-        "Il est en direct : les prix changent au fil des réservations, et chaque samedi ouvre la liste des appartements libres cette semaine-là."
+        "Le tableau est mis à jour en direct : les prix changent au fil des réservations, et un clic sur un samedi affiche les appartements libres cette semaine-là."
       ],
       "liveWeeks": {
         "notes": {
@@ -40,7 +40,7 @@
         "count": true
       },
       "after": [
-        "Il affiche l'appartement le moins cher, quelle que soit sa taille. Pour le prix de votre groupe, indiquez vos dates et le nombre de voyageurs sur la [page des appartements](/fr/apartments) : seuls s'affichent les appartements libres et assez grands, avec leur prix."
+        "Il affiche l'appartement d'agence le moins cher, quelle que soit sa taille. Pour le prix de votre groupe, indiquez vos dates et le nombre de voyageurs sur la [page des appartements](/fr/apartments) : seuls s'affichent les appartements libres et assez grands, avec leur prix."
       ]
     },
     {
@@ -101,13 +101,13 @@
           ],
           [
             "10–17 avril",
-            "Zones C et A (10–26 avril)",
+            "Zones C (jusqu'au 19 avril) et A (10–26 avril)",
             "",
             ""
           ],
           [
             "17–24 avril",
-            "Zones A et B (17 avril – 3 mai)",
+            "Zones A (jusqu'au 26 avril) et B (17 avril – 3 mai)",
             "",
             ""
           ],
@@ -120,16 +120,16 @@
         ]
       },
       "after": [
-        "En France, les dates vont du samedi de fin des cours au lundi de la reprise ; la zone C comprend Paris, la zone A Lyon et la zone B Lille. Les dates anglaises sont celles de Surrey, Bristol, Ealing, Luton et Stockport (chaque collectivité fixe les siennes) ; aux Pays-Bas, celles de février sont indicatives.",
-        "Dans notre tableau, les semaines les plus chères, celles du 13 et du 20 février, coûtent environ trois fois le prix d'une semaine fin novembre ou en avril ; celle du Nouvel An, un peu plus du double, et celle de Noël, environ une fois et demie. Les moins chères : fin novembre et le 12 décembre, avant Noël, puis chaque semaine du 27 mars à fin avril, Pâques compris, alors même que les vacances de printemps tombent en avril ; les 2 et 9 janvier, juste après les fêtes, s'en approchent.",
-        "Ces comparaisons datent du 23 octobre 2026. Et l'ensemble des 3 Vallées n'est ouvert que du 5 décembre 2026 au 18 avril 2027 ; avant et après, Val Thorens et Orelle fonctionnent seuls (du 21 novembre au 2 mai)."
+        "En France, les dates vont du samedi de fin des cours au lundi de la reprise ; la zone C comprend Paris, la zone A Lyon et la zone B Lille. Les dates anglaises sont celles du Surrey, de Bristol, d'Ealing, de Luton et de Stockport (chaque collectivité fixe les siennes) ; aux Pays-Bas, celles de février sont indicatives.",
+        "Dans notre tableau, les semaines les plus chères, celles du 13 et du 20 février, coûtent environ trois fois le prix d'une semaine fin novembre ou en avril ; celle du Nouvel An, plus du double, et celle de Noël, environ une fois et demie. Les moins chères : fin novembre et la semaine du 12 décembre, avant Noël, puis toutes les semaines du 27 mars à fin avril, y compris celle de Pâques, alors même que les vacances de printemps tombent en avril. Les semaines du 2 et du 9 janvier, juste après les fêtes, ne coûtent qu'environ un quart de plus.",
+        "Ces comparaisons datent du 23 octobre 2026. Et le domaine relié des 3 Vallées n'est ouvert que du 5 décembre 2026 au 18 avril 2027 ; avant et après, Val Thorens et Orelle fonctionnent seuls (du 21 novembre au 2 mai)."
       ]
     },
     {
       "heading": "Un prix pour tout l'appartement, du samedi au samedi",
       "paragraphs": [
         "Le prix du tableau vaut pour l'appartement entier et la semaine complète, du samedi au samedi, pas par personne. Les appartements d'agence ne se louent qu'ainsi, au prix de la semaine : si vos dates tombent dans l'une de leurs semaines libres, vous réservez la semaine entière.",
-        "Les appartements de SkiShare, eux, se louent à la nuit, aux dates de votre choix, plus des frais de ménage le cas échéant. Dans les deux cas, chaque ligne s'affiche avant la réservation, le paiement par carte ajoute 1,9 % de frais et les prix sont en euros."
+        "Les appartements de SkiShare, eux, sont facturés à la nuit, aux dates de votre choix, avec des frais de ménage le cas échéant, et chaque ligne s'affiche avant la réservation. Dans les deux cas, le paiement par carte ajoute 1,9 % de frais, indiqués avant le paiement, et les prix sont en euros."
       ],
       "table": {
         "caption": "Les deux types d'appartements sur SkiShare",
@@ -167,20 +167,20 @@
       ],
       "list": [
         "**Cherchez.** Sur la page des appartements, indiquez vos dates et le nombre de voyageurs, ou partez d'un samedi du tableau.",
-        "**Choisissez.** Sur la page d'un appartement d'agence, sélectionnez l'une de ses semaines libres ; pour l'un des nôtres, vos dates sont calculées nuit par nuit.",
+        "**Choisissez.** Sur la page d'un appartement d'agence, sélectionnez l'une de ses semaines libres ; pour l'un des nôtres, le prix de vos dates est calculé nuit par nuit.",
         "**Vérifiez chaque ligne.** Vous voyez la semaine ou les nuits, les frais de ménage s'il y en a, le total, les frais de carte de 1,9 % et le total par carte.",
         "**Réservez.** Saisissez vos coordonnées, acceptez les conditions de réservation, puis indiquez votre carte sur la page de paiement sécurisée de PayPlus.",
         "**Attendez la confirmation.** Le montant est bloqué, un représentant de SkiShare confirme la réservation, et la carte n'est débitée qu'ensuite."
       ],
       "ordered": true,
       "after": [
-        "L'annulation suit les [conditions de réservation](/fr/terms), et pour toute question avant de réserver : skishareteam@gmail.com."
+        "En cas d'annulation, ce sont les [conditions de réservation](/fr/terms) qui s'appliquent. Une question avant de réserver ? Écrivez à skishareteam@gmail.com."
       ]
     },
     {
       "heading": "Forfait et trajet : les autres dépenses de la semaine",
       "paragraphs": [
-        "L'autre grosse dépense, c'est le forfait : la SETAM, qui exploite les remontées mécaniques de Val Thorens, facture 6 jours de 330,50 € à 421 € à un adulte en 2026/2027, selon le domaine et les dates :"
+        "L'autre grosse dépense, ce sont les remontées mécaniques : à la SETAM, qui les exploite à Val Thorens, le forfait adulte 6 jours coûte de 330,50 € à 421 € en 2026/2027, selon le domaine et les dates :"
       ],
       "table": {
         "caption": "Forfaits 6 jours, tarifs officiels 2026/2027 (SETAM)",
@@ -218,20 +218,20 @@
         ]
       },
       "after": [
-        "Les moins de 5 ans skient gratuitement, sur justificatif de leur date de naissance. La SETAM vend le forfait 6 jours « au prix de 5 », et ses jours sont consécutifs : un jour de repos compte quand même. Tous les forfaits : [le prix du forfait à Val Thorens](/fr/guide/prix-forfait-val-thorens).",
-        "**Le trajet.** Selon le site officiel de Val Thorens, les TGV les plus rapides relient Paris Gare de Lyon à Moûtiers en 4 h 20 environ ; de la gare, à 37 km, la ligne de cars S63 monte à la station. L'Eurostar Snow relie Londres St Pancras à Moûtiers les samedis et dimanches, du 19 décembre au 20 février. Aéroports : Chambéry à 122 km, Lyon à 199 km, Genève à 201 km.",
-        "Le prix des billets dépend des dates : [comment aller à Val Thorens](/fr/guide/comment-aller-a-val-thorens). Matériel, cours, restaurants : demandez les tarifs 2026/2027."
+        "Les moins de 5 ans skient gratuitement, sur justificatif de leur date de naissance et avec une photo d'identité. La SETAM vend le forfait 6 jours « au prix de 5 », et ses jours sont consécutifs : un jour de repos compte quand même. Tous les forfaits : [le prix du forfait à Val Thorens](/fr/guide/prix-forfait-val-thorens).",
+        "Pour le trajet, selon le site officiel de la station, les TGV les plus rapides, vendus par SNCF Connect, relient Paris Gare de Lyon à Moûtiers en 4 h 20 environ. La gare de Moûtiers est à 37 km de la station, où monte la ligne de cars S63 ; les billets se réservent auprès d'[Altibus](https://www.altibus.com/). L'Eurostar Snow part de Londres St Pancras le samedi, du 19 décembre au 20 février, avec une correspondance à Lille Europe ; les retours vers Londres ont lieu surtout le dimanche, jusqu'au 28 février. Aéroports : Chambéry à 122 km, Lyon à 199 km, Genève à 201 km.",
+        "Le prix des billets varie selon les dates : [comment aller à Val Thorens](/fr/guide/comment-aller-a-val-thorens). Location de matériel, cours de ski et restaurants dépendent du loueur, de l'école et de vos habitudes : demandez les tarifs 2026/2027 en réservant."
       ]
     },
     {
       "heading": "Val Thorens pas cher : comment payer moins cher sa semaine ?",
       "paragraphs": [
-        "La plus grosse économie, c'est la semaine : dans notre tableau, une semaine fin novembre ou en avril coûte environ le tiers d'une semaine au cœur des vacances de février, et début janvier reste proche des prix les plus bas. Puis partagez l'appartement et choisissez le bon forfait :"
+        "La plus grosse économie, c'est la semaine : dans notre tableau, une semaine fin novembre ou en avril coûte environ le tiers d'une semaine au cœur des vacances de février. Puis partagez l'appartement et choisissez le bon forfait :"
       ],
       "list": [
         "**Remplir l'appartement.** Divisez le prix de la semaine par le nombre de personnes : dans un appartement pour six, six amis paient chacun un sixième, quatre un quart ; à six, chacun paie donc un tiers de moins. Ajoutez les 1,9 % de frais de carte avant de diviser.",
         "**Skier en début ou en fin de saison.** Le forfait 6 jours adulte Val Thorens-Orelle coûte 330,50 € jusqu'au 18 décembre, contre 367,50 € ensuite (37 € d'écart) ; celui des 3 Vallées, 378,50 € du 5 au 18 décembre et du 10 au 18 avril, contre 421 € entre les deux (42,50 € d'écart).",
-        "**Rester sur Val Thorens-Orelle.** Du 19 décembre au 9 avril, son forfait 6 jours coûte 53,50 € de moins par adulte que celui des 3 Vallées ; du 10 au 18 avril, 11 € de moins seulement. En échange, vous renoncez au reste des 600 km des 3 Vallées.",
+        "**Rester sur Val Thorens-Orelle.** Du 19 décembre au 9 avril, son forfait 6 jours coûte 53,50 € de moins par adulte que celui des 3 Vallées ; du 10 au 18 avril, 11 € de moins seulement. En contrepartie, vous renoncez au reste des 600 km des 3 Vallées.",
         "**En famille, le Family Flex.** Dès trois personnes, avec deux adultes au maximum et au moins un enfant de 5 à 17 ans, tout le monde paie le tarif junior sur un forfait 6 jours, en un seul règlement : pour deux adultes et deux enfants sur Val Thorens-Orelle à partir du 19 décembre, 4 × 301 € = 1 204 € au lieu de 1 337 €."
       ],
       "after": [
@@ -241,7 +241,7 @@
     {
       "heading": "Location du samedi au samedi : pourquoi, et peut-on arriver un autre jour ?",
       "paragraphs": [
-        "Les appartements d'agence se louent uniquement du samedi au samedi ; pour arriver un autre jour, prenez l'un des appartements de SkiShare, loués à la nuit aux dates de votre choix. Selon les 3 Vallées, la plupart des vacanciers voyagent le samedi : leur site conseille de partir du dimanche au dimanche, pour des trajets moins chargés, et rappelle que le samedi, il y a moins de skieurs sur les pistes.",
+        "Les appartements d'agence se louent uniquement du samedi au samedi ; pour arriver un autre jour, prenez l'un des appartements de SkiShare, loués à la nuit aux dates de votre choix. D'après le site des 3 Vallées, la plupart des vacanciers voyagent le samedi : il conseille de séjourner du dimanche au dimanche, pour trouver des routes, des gares et des aéroports moins chargés, et rappelle que le samedi, il y a moins de skieurs sur les pistes.",
         "Du samedi au samedi, on voyage le jour le plus chargé, mais on skie du dimanche au vendredi, soit les six jours du forfait. Dans quel quartier loger : [où loger à Val Thorens](/fr/guide/ou-loger-a-val-thorens)."
       ]
     }
@@ -253,7 +253,7 @@
     },
     {
       "q": "Quand la location à Val Thorens est-elle la moins chère ?",
-      "a": "Dans notre tableau : fin novembre, la semaine du 12 décembre, début janvier et du 27 mars à fin avril. Les plus chères : le Nouvel An et les vacances de février, surtout les semaines du 13 et du 20 février 2027."
+      "a": "Dans notre tableau : fin novembre, la semaine du 12 décembre et du 27 mars à fin avril ; début janvier ne coûte qu'environ un quart de plus. Les plus chères : le Nouvel An et les vacances de février, surtout les semaines du 13 et du 20 février 2027."
     },
     {
       "q": "Le prix est-il par personne ou pour l'appartement ?",
@@ -264,22 +264,14 @@
       "a": "Pas un appartement d'agence : ils se louent à la semaine complète, du samedi au samedi. Les appartements de SkiShare, eux, se louent à la nuit pour les dates de votre choix."
     },
     {
-      "q": "Quand ma carte est-elle débitée ?",
-      "a": "Seulement après la confirmation de la réservation par un représentant de SkiShare ; d'ici là, le montant est bloqué sur votre carte. Les frais de carte de 1,9 % sont indiqués avant le paiement."
-    },
-    {
-      "q": "Combien coûte un forfait 6 jours à Val Thorens en 2026/2027 ?",
-      "a": "Selon la SETAM, pour un adulte : Val Thorens-Orelle 330,50 € jusqu'au 18 décembre 2026, puis 367,50 € ; 3 Vallées 378,50 € du 5 au 18 décembre et du 10 au 18 avril 2027, 421 € entre les deux. Junior (5 à 17 ans) : de 271 € à 345 €. Gratuit avant 5 ans."
-    },
-    {
       "q": "Quelles sont les dates des vacances d'hiver 2027 ?",
       "a": "Zone C du 6 au 22 février, zone A du 13 février au 1er mars, zone B du 20 février au 8 mars 2027. En Belgique francophone, congé de détente du 22 février au 7 mars ; en Flandre, vacances de carnaval du 8 au 14 février."
     }
   ],
   "sources": [
     {
-      "title": "Ministère de l'Éducation nationale : calendrier scolaire 2026-2027, zones A, B et C",
-      "url": "https://www.education.gouv.fr/calendrier-scolaire-100148"
+      "title": "Service-public.gouv.fr : dates des vacances scolaires 2026-2027 par zone (mise à jour du 16 juillet 2026)",
+      "url": "https://www.service-public.gouv.fr/particuliers/actualites/A18563"
     },
     {
       "title": "Fédération Wallonie-Bruxelles : calendrier scolaire 2026-2027",
@@ -314,8 +306,8 @@
       "url": "https://www.surreycc.gov.uk/schools-and-learning/schools/term-dates"
     },
     {
-      "title": "Ealing Council : calendrier scolaire 2026-2027 (en anglais)",
-      "url": "https://www.ealing.gov.uk/info/201123/your_child_at_school/119/term_and_holiday_dates/2/"
+      "title": "Snowcarbon : l'Eurostar Snow 2026/2027 (départs de Londres le samedi dès le 19 décembre, retours jusqu'au 28 février, correspondance à Lille Europe ; en anglais)",
+      "url": "https://snowcarbon.co.uk/blog/eurostar-snow-on-sale-but-different"
     }
   ]
 }
