@@ -34,7 +34,8 @@ export default function CookieConsent() {
     if (pathname !== first.current && notAnswered()) remember();
   }, [pathname]);
 
-  if (!show || pathname?.startsWith("/admin")) return null;
+  // /en and /fr show their own notice (components/intl/IntlCookieNotice.tsx)
+  if (!show || ["/admin", "/en", "/fr"].some(h => pathname === h || pathname?.startsWith(h + "/"))) return null;
 
   return (
     <div dir="rtl" role="region" aria-label="עוגיות"

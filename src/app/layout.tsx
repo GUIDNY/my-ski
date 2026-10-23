@@ -105,16 +105,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    // The English and French site (/en, /fr) sets lang/dir to its own before the
+    // first paint (components/intl/IntlShell.tsx), hence suppressHydrationWarning.
     <html
       lang="he"
       dir="rtl"
+      suppressHydrationWarning
       className={`${montserrat.variable} ${inter.variable} ${heebo.variable} ${rubik.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }} />
         <SiteHeader />
         <div className="flex-1 flex flex-col">{children}</div>
-        <ChromeGate hide={["/admin"]}><Footer /></ChromeGate>
+        <ChromeGate hide={["/admin", "/en", "/fr"]}><Footer /></ChromeGate>
         <DeepLinkHandler />
         <AiConcierge />
         <CookieConsent />
