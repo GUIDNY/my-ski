@@ -53,6 +53,7 @@ export function ListingView({ lang, items, todayIso, search, taken, checking }: 
       </div>
 
       <div className={`${wrap} pt-6 md:pt-8 pb-16 md:pb-20`}>
+        <h2 className="sr-only">{lang === "fr" ? "Les appartements" : "The apartments"}</h2>
         {!search.hasDates && cards.length > 0 && (
           <p className="mb-6 rounded-2xl bg-accent-soft border border-[#CFDAF7] px-4 py-3 text-[15px] text-ink">{t.list.pickPrompt}</p>
         )}
@@ -74,7 +75,7 @@ export function ListingView({ lang, items, todayIso, search, taken, checking }: 
         ) : (
           // a new search starts on "all" again
           <FilterGrid key={`${search.checkin}|${search.checkout}|${search.guests}`} lang={lang} counts={counts}>
-            {cards.map((c, i) => <ApartmentCard key={c.id} c={c} cta={t.common.viewApt} eager={i < 3} />)}
+            {cards.map((c, i) => <ApartmentCard key={c.id} c={c} cta={t.common.viewApt} eager={i < 3} heading="h3" />)}
           </FilterGrid>
         )}
       </div>
