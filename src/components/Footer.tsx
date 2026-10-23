@@ -30,6 +30,7 @@ const PLAN = [
 ];
 
 const INFO = [
+  { label: "אודות SkiShare", href: "/about" },
   { label: "תקנון, הזמנות וביטולים", href: "/terms" },
   { label: "מצב חירום, מלחמה וכוח עליון", href: "/emergency-policy" },
   { label: "מדיניות פרטיות", href: "/privacy" },

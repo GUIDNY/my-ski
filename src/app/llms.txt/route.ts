@@ -25,6 +25,7 @@ SkiShare (סקי שר) מוכרת חופשות סקי בואל טורנס, צר�
 
 ## Main pages
 - [Home](${SITE}/): search apartments and packages in Val Thorens.
+- [About SkiShare](${SITE}/about): who we are: an Israeli company renting apartments in Val Thorens, booked and paid on the site, service in Hebrew.
 - [Apartments in Val Thorens](${SITE}/apartments): every apartment with photos, size, guests and price, and the cheapest open apartment for every Saturday of the season.
 - [Ski packages](${SITE}/packages): a week in an apartment + ski pass + airport transfer, with the price per person (for 2, 4 and 6) for every Saturday of the season.
 - [Saturday to Saturday weeks](${SITE}/weekly): agency apartments by the week, with the price per person.

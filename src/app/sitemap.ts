@@ -17,6 +17,7 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: "daily" 
   { path: "/transfers", priority: 0.6, changeFrequency: "weekly" },
   { path: "/seasonaires", priority: 0.6, changeFrequency: "weekly" },
   { path: "/guide", priority: 0.9, changeFrequency: "weekly" },
+  { path: "/about", priority: 0.6, changeFrequency: "monthly" },
   { path: "/emergency-policy", priority: 0.3, changeFrequency: "monthly" },
   { path: "/cancellation-policy", priority: 0.3, changeFrequency: "monthly" },
   { path: "/terms", priority: 0.2, changeFrequency: "monthly" },
