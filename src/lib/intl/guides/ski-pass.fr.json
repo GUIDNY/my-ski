@@ -3,7 +3,7 @@
   "lang": "fr",
   "title": "Prix du forfait de ski à Val Thorens 2026/2027 : les tarifs officiels",
   "metaTitle": "Prix forfait Val Thorens 2026/2027 : tarifs officiels | SkiShare",
-  "description": "Tarifs officiels 2026/2027 : forfait 6 jours à 367,50 € à Val Thorens-Orelle, 421 € pour les 3 Vallées, journée, enfants, Family Flex et dates moins chères.",
+  "description": "Tarifs officiels 2026/2027 : forfait 6 jours à 367,50 € à Val Thorens-Orelle et 421 € pour les 3 Vallées, journée, enfants, Family Flex et dates les moins chères.",
   "keywords": [
     "prix forfait val thorens",
     "forfait val thorens 2026 2027",
@@ -16,7 +16,7 @@
   "emoji": "🎫",
   "published": "2026-10-23",
   "updated": "2026-10-23",
-  "intro": "Le forfait adulte 6 jours coûte **367,50 € à Val Thorens-Orelle** et **421 € pour l’ensemble des 3 Vallées** à partir du 19 décembre 2026, selon la grille officielle de la SETAM, qui exploite les remontées de Val Thorens. Jusqu’au 18 décembre, comptez 330,50 et 378,50 €, un tarif que le forfait 3 Vallées retrouve du 10 au 18 avril 2027. En pleine saison, la journée vaut 73,50 € à Val Thorens-Orelle et 84,20 € pour les 3 Vallées, et les moins de 5 ans skient gratuitement.",
+  "intro": "Le forfait adulte 6 jours coûte **367,50 € à Val Thorens-Orelle** et **421 € pour l’ensemble des 3 Vallées** à partir du 19 décembre 2026, selon la grille officielle de la SETAM, l’exploitant des remontées de Val Thorens. Jusqu’au 18 décembre, comptez 330,50 € et 378,50 € (les 3 Vallées ouvrent le 5 décembre), un prix que le forfait 3 Vallées retrouve du 10 au 18 avril 2027. En pleine saison, la journée vaut 73,50 € à Val Thorens-Orelle et 84,20 € pour les 3 Vallées, et les moins de 5 ans skient gratuitement.",
   "sections": [
     {
       "heading": "Quand le forfait Val Thorens est-il moins cher en 2026/2027 ?",
@@ -27,7 +27,7 @@
         "caption": "Périodes tarifaires et secteurs ouverts (SETAM, Les 3 Vallées)",
         "head": [
           "Dates",
-          "Ouvert depuis Val Thorens",
+          "Accessible depuis Val Thorens",
           "Forfait Val Thorens-Orelle",
           "Forfait 3 Vallées"
         ],
@@ -35,14 +35,14 @@
           [
             "21 novembre – 4 décembre 2026",
             "Val Thorens et Orelle",
-            "Début de saison",
+            "Tarif réduit",
             "Pas encore ouvert"
           ],
           [
             "5–18 décembre 2026",
             "Les 3 Vallées (Saint-Martin-de-Belleville dès le 12 décembre)",
-            "Début de saison",
-            "Début de saison"
+            "Tarif réduit",
+            "Tarif réduit"
           ],
           [
             "19 décembre 2026 – 9 avril 2027",
@@ -52,9 +52,9 @@
           ],
           [
             "10–18 avril 2027",
-            "Les 3 Vallées",
+            "Les 3 Vallées (Brides-les-Bains ferme le 9 avril)",
             "Pleine saison",
-            "Début de saison"
+            "Tarif réduit"
           ],
           [
             "19 avril – 2 mai 2027",
@@ -65,14 +65,14 @@
         ]
       },
       "after": [
-        "Noël (19 décembre 2026 – 4 janvier 2027), les vacances d’hiver des trois zones (6 février – 8 mars 2027) et le congé de détente belge (22 février – 5 mars) tombent en pleine saison, au tarif de la mi-janvier.",
-        "Au printemps, les zones C (3–19 avril) et A (10–26 avril) profitent en partie du tarif réduit des 3 Vallées. Pour la zone B (17 avril – 3 mai) et la Belgique francophone (26 avril – 7 mai, selon [Infor Jeunes](https://www.jeminforme.be/conges-scolaires)), seul Val Thorens-Orelle reste ouvert après le 18 avril, jusqu’au 2 mai. Neige et affluence : [quand partir à Val Thorens](/fr/guide/quand-partir-a-val-thorens)."
+        "Les vacances de Noël (19 décembre 2026 – 4 janvier 2027), les vacances d’hiver des trois zones (6 février – 8 mars 2027) et le congé de détente en Fédération Wallonie-Bruxelles (22 février – 5 mars) tombent en pleine saison, au tarif de la mi-janvier.",
+        "Au printemps, les zones C (3–19 avril) et A (10–26 avril) profitent en partie du tarif réduit des 3 Vallées. Pour la zone B (17 avril – 3 mai) et la Belgique francophone (26 avril – 7 mai, selon [Infor Jeunes](https://www.jeminforme.be/conges-scolaires/)), seul Val Thorens-Orelle reste ouvert après le 18 avril, jusqu’au 2 mai. Neige et affluence : [quand partir à Val Thorens](/fr/guide/quand-partir-a-val-thorens)."
       ]
     },
     {
       "heading": "Combien coûte un forfait journée à Val Thorens ?",
       "paragraphs": [
-        "La journée adulte coûte 73,50 € à Val Thorens-Orelle et 84,20 € pour les 3 Vallées à partir du 19 décembre 2026, contre 66,10 et 75,70 € en début de saison :"
+        "La journée adulte coûte 73,50 € à Val Thorens-Orelle et 84,20 € pour les 3 Vallées à partir du 19 décembre 2026, contre 66,10 € et 75,70 € au tarif réduit :"
       ],
       "table": {
         "caption": "Tarifs 2026/2027 par personne, en euros (SETAM)",
@@ -130,7 +130,7 @@
       },
       "after": [
         "De 2 à 4 jours, on paie la journée multipliée par le nombre de jours : aucune économie avant 6 jours.",
-        "**Le samedi, en ligne uniquement.** La journée adulte coûte 66,10 € au lieu de 73,50 € à Val Thorens-Orelle et 67,30 € au lieu de 84,20 € pour les 3 Vallées (tarifs dès le 19 décembre 2026), à commander avant le vendredi 23h59. Tout le domaine ne coûte alors que 1,20 € de plus que Val Thorens-Orelle."
+        "**Le samedi, en ligne uniquement.** Commandée au plus tard le vendredi à 23h59, la journée adulte coûte 66,10 € au lieu de 73,50 € à Val Thorens-Orelle et 67,30 € au lieu de 84,20 € pour les 3 Vallées (tarifs dès le 19 décembre 2026). Les 3 Vallées ne coûtent alors que 1,20 € de plus que Val Thorens-Orelle."
       ]
     },
     {
@@ -179,7 +179,7 @@
         ]
       },
       "after": [
-        "La grille n’a pas de forfait 5 jours, seulement « 5 jours + 1 offert » : pour cinq jours de ski, le sixième est offert. Les jours sont consécutifs, repos compris. Au-delà de six jours, chaque jour ajoute 54 € au forfait adulte Val Thorens-Orelle (421,50 € les 7 jours) et 65 € pour les 3 Vallées (486 €) en pleine saison, jusqu’à 15 jours."
+        "La grille n’a pas de forfait 5 jours, seulement « 5 jours + 1 offert » : pour cinq jours de ski, le sixième est offert. Les jours se suivent, journées de repos comprises. Au-delà de six jours, chaque jour ajoute 54 € au forfait adulte Val Thorens-Orelle et 65 € pour les 3 Vallées en pleine saison, jusqu’à 15 jours."
       ]
     },
     {
@@ -188,28 +188,28 @@
         "Prenez Val Thorens-Orelle pour skier autour de la station toute la semaine, et les 3 Vallées pour passer ne serait-ce qu’une journée aux Menuires, à Méribel ou à Courchevel. En pleine saison, l’écart est de 53,50 € pour une semaine adulte."
       ],
       "list": [
-        "**Val Thorens-Orelle.** 150 km de pistes.",
-        "**Les 3 Vallées.** Environ 600 km, avec en plus Les Menuires, Saint-Martin-de-Belleville, Méribel et Courchevel.",
-        "**Une journée ailleurs.** La SETAM vend à ses caisses une extension 3 Vallées d’un jour pour un forfait Val Thorens-Orelle d’au moins 2 jours, affichée à 51 € pour un adulte. En pleine saison, une semaine Val Thorens-Orelle plus une extension (367,50 + 51 = 418,50 €) coûte à peine 2,50 € de moins que le forfait 3 Vallées.",
+        "**Val Thorens-Orelle.** 150 km de pistes autour de Val Thorens et d’Orelle.",
+        "**Les 3 Vallées.** Environ 600 km, avec en plus Les Menuires, Saint-Martin-de-Belleville, Méribel et Courchevel.",
+        "**Une journée ailleurs.** Avec un forfait Val Thorens-Orelle d’au moins 2 jours, une extension 3 Vallées d’une journée coûte 51 € (41,80 € junior) selon l’office de tourisme, uniquement en caisse le matin même, si la météo et les liaisons le permettent. En pleine saison, une semaine Val Thorens-Orelle plus une extension (367,50 + 51 = 418,50 €) coûte à peine 2,50 € de moins que le forfait 3 Vallées.",
         "**Début décembre.** L’écart tombe à 48 €, et une semaine avec une extension (381,50 €) dépasse le forfait 3 Vallées (378,50 €).",
         "**Semaine du 10 avril.** Les 3 Vallées coûtent 378,50 €, Val Thorens-Orelle 367,50 € : 11 € d’écart seulement."
       ],
       "after": [
-        "Quel quartier choisir : [où loger à Val Thorens](/fr/guide/ou-loger-a-val-thorens)."
+        "Règles et prix de l’extension : [office de tourisme de Val Thorens](https://www.valthorens.com/en/ski/forfaits/forfait-6-jours/) (en anglais). Quel quartier choisir : [où loger à Val Thorens](/fr/guide/ou-loger-a-val-thorens)."
       ]
     },
     {
       "heading": "Enfants, seniors, Family Flex : qui paie moins ?",
       "paragraphs": [
-        "Les moins de 5 ans skient gratuitement, les juniors de 5 à 17 ans paient environ 18 % de moins que les adultes et les vétérans de 75 ans et plus environ le quart. Pour la journée ou la semaine, aucune réduction liée à l’âge entre 18 et 74 ans, ni tarif étudiant."
+        "Les moins de 5 ans skient gratuitement, les juniors de 5 à 17 ans paient environ 18 % de moins que les adultes, et les vétérans de 75 ans et plus environ le quart du prix adulte. Pour la journée ou la semaine, aucune réduction liée à l’âge entre 18 et 74 ans, ni tarif étudiant."
       ],
       "list": [
         "**Moins de 5 ans.** Forfait gratuit, à retirer en caisse avec un justificatif d’âge officiel, un passeport par exemple, et une photo récente, prise au besoin par webcam.",
         "**Junior (5 à 17 ans).** Sur justificatif de date de naissance. L’âge retenu est celui du premier jour du forfait.",
         "**Vétéran (75 ans et plus).** En caisse uniquement, avec pièce d’identité et photo.",
-        "**Family Flex.** Tout le groupe paie le tarif junior sur un forfait de 6 jours ou plus : au moins 3 personnes, 2 adultes au maximum et jusqu’à 6 enfants de 5 à 17 ans, même domaine et même durée, un seul règlement. En pleine saison, la semaine revient à 301 € par personne à Val Thorens-Orelle et 345 € pour les 3 Vallées (271 et 310 € en début de saison). Le site des 3 Vallées l’annonce dès 5 jours, au même prix.",
+        "**Family Flex.** Tout le groupe paie le tarif junior sur un forfait de 6 à 21 jours : au moins 3 personnes, dont un ou deux adultes (18 à 74 ans) et un à six enfants de 5 à 17 ans, même domaine et même durée, un seul règlement. En pleine saison, la semaine revient à 301 € par personne à Val Thorens-Orelle et 345 € pour les 3 Vallées (271 € et 310 € au tarif réduit). Le site des 3 Vallées l’annonce dès 5 jours, au même prix.",
         "**Moins de 30 ans.** Le tarif « -30 ans » (30 % de remise) ne vaut que pour les forfaits saison.",
-        "**Handicap.** Tarif réduit sur justificatif : carte mobilité inclusion invalidité ou priorité, ou, pour les non-résidents, document officiel de leur pays de résidence, en français ou traduit."
+        "**Handicap.** Tarif réduit sur justificatif : carte mobilité inclusion (CMI) « invalidité », « priorité » ou « station debout pénible » pour les résidents français ; pour les résidents étrangers, document officiel des autorités de leur pays de résidence, rédigé en français ou accompagné d’une traduction officielle."
       ]
     },
     {
@@ -247,39 +247,39 @@
     {
       "heading": "Où acheter son forfait : en ligne ou à la station ?",
       "paragraphs": [
-        "La SETAM, qui exploite les remontées de Val Thorens, vend les forfaits en ligne sur [ski.valthorens.com](https://ski.valthorens.com/) et à ses caisses et distributeurs dans la station. SkiShare ne vend pas de forfaits sur ce site."
+        "La SETAM vend les forfaits en ligne sur [ski.valthorens.com](https://ski.valthorens.com/) et à ses caisses et distributeurs dans la station. SkiShare ne vend pas de forfaits sur ce site."
       ],
       "list": [
-        "**En ligne.** Envoi gratuit à domicile (commande au moins 10 jours avant le premier jour de ski), retrait à un distributeur de la station avec le code reçu par e-mail, ou rechargement d’une carte que vous avez déjà (numéro commençant par 01-1614), ces deux-là jusqu’à la dernière minute.",
-        "**Caisses.** Forum, Funitel Péclet et Cairn/Caron/P4 tous les jours, Olympiades du samedi au lundi, Montana le week-end. Le samedi, Olympiades, Forum et Montana ouvrent de 8h45 à 19h.",
-        "Les distributeurs (achat, retrait, rechargement) fonctionnent de 7h à 23h à Olympiades, Forum et Montana, et 24h/24 au parking P2 et à la gare routière ([comment aller à Val Thorens](/fr/guide/comment-aller-a-val-thorens)).",
+        "**En ligne.** Envoi gratuit à domicile si vous commandez au moins 10 jours avant le premier jour de ski (pas d’envoi aux États-Unis), retrait à un distributeur de la station avec le code reçu par e-mail, ou rechargement d’une carte que vous avez déjà (numéro commençant par 01-1614). Retrait et rechargement restent possibles jusqu’à la dernière minute.",
+        "**Caisses.** Forum, Funitel Péclet et Cairn/Caron/P4 tous les jours, Olympiades du samedi au lundi, Montana le week-end. Le samedi, les caisses Olympiades, Forum et Montana ouvrent de 8h45 à 19h.",
+        "**Distributeurs** (achat, retrait, rechargement) : de 7h à 23h aux points de vente Olympiades, Forum et Montana, 24h/24 au parking P2 et à la gare routière, et en journée au Funitel Péclet, à Cairn/Caron/P4 et à l’office de tourisme.",
         "**Uniquement en caisse.** Forfaits gratuits des moins de 5 ans, forfaits vétéran, extension 3 Vallées et EasyRider.",
-        "**Paiement.** Carte bancaire, espèces et chèques-vacances ANCV (sans rendu de monnaie) aux caisses ; carte ou PayPal en ligne."
+        "**Paiement.** Carte bancaire, espèces, chèques-vacances ANCV (sans rendu de monnaie) ou ANCV Connect aux caisses ; en ligne, carte bancaire ou Chèque-Vacances Connect, et PayPal à partir de 1 000 € selon le site de la SETAM."
       ],
       "after": [
         "Gardez l’e-mail de commande ou le justificatif de vente : avec lui, la SETAM remplace un forfait perdu ou volé pour les jours restants, moyennant 10 €. Un forfait acheté en ligne et inutilisé s’échange en caisse contre d’autres dates ou un autre domaine.",
-        "Les secours sont payants sur les pistes. L’assurance [Carré Neige](https://ski.valthorens.com/assurance-carre-neige/), achetée avec le forfait pour la même durée, couvre les secours, les frais médicaux et le remboursement des forfaits et des cours de plus de 3 jours après un accident ou une maladie grave ; la SETAM affiche 3,50 € par jour et par personne (de 1 à 7 jours), sans préciser la saison."
+        "Les secours sont payants sur les pistes. L’assurance [Carré Neige](https://ski.valthorens.com/assurance-carre-neige/), achetée avec le forfait et pour la même durée, couvre les secours, les frais médicaux en complément de l’assurance maladie obligatoire et le remboursement des forfaits et des cours de plus de 3 jours après un accident ou une maladie grave. La SETAM l’affiche à 3,50 € par jour et par personne de 1 à 7 jours, et à 28 € de 8 à 21 jours."
       ]
     },
     {
       "heading": "Débutants : remontées gratuites et forfait à moitié prix",
       "paragraphs": [
         "Les débutants commencent gratuitement sur quatre tapis couverts (Campagnols, Musaraigne et les deux tapis Castor & Pollux), puis passent à l’EasyRider de la SETAM, à 50 % du prix public : 36,75 € la journée adulte dès le 19 décembre, 33,05 € avant.",
-        "Valable 4 heures ou une journée, il ouvre les pistes vertes et bleues et cinq remontées : télécabines du Cairn, des 2 Lacs et de Caron, télésièges des Cascades et de la Moutière. La journée junior coûte 30,10 € (27,10 € avant le 19 décembre). Il s’achète uniquement aux caisses.",
+        "Valable 4 heures ou une journée, l’EasyRider donne accès à cinq remontées (télécabines du Cairn, des 2 Lacs et de Caron, télésièges des Cascades et de la Moutière) et aux pistes vertes et bleues qu’elles desservent. La journée junior coûte 30,10 € (27,10 € avant le 19 décembre). Il s’achète uniquement aux caisses.",
         "Au jardin d’enfants de l’ESF (cours Piou-Piou et Sifflote), le forfait est inutile, selon [l’ESF de Val Thorens](https://www.esf-valthorens.com/conseils/choisir-mon-forfait/) ; il devient nécessaire dès la première sortie sur les pistes."
       ]
     },
     {
       "heading": "Semaines au forfait moins cher, et appartements libres",
       "paragraphs": [
-        "Le tarif début de saison couvre toutes les semaines du samedi au samedi entre l’ouverture, le 21 novembre, et la semaine du 12 décembre, plus celle du 10 avril pour les 3 Vallées. Dans nos appartements, les semaines du 28 novembre, du 12 décembre et d’avril comptent aussi parmi les moins chères. Le tableau indique en direct l’appartement entier le moins cher encore libre chaque semaine, au prix de la semaine complète :"
+        "Le tarif réduit couvre les semaines du samedi au samedi de l’ouverture, le 21 novembre, à la semaine du 12 décembre, plus celle du 10 avril pour les 3 Vallées. Dans nos appartements, les semaines du 28 novembre, du 12 décembre et à partir du 10 avril comptent aussi parmi les moins chères. Le tableau indique en direct l’appartement d’agence le moins cher encore libre chaque semaine (appartement entier, au prix de la semaine complète) :"
       ],
       "liveWeeks": {
         "notes": {
-          "2026-11-28": "Début de saison, Val Thorens-Orelle seul",
-          "2026-12-05": "Début de saison, ouverture des 3 Vallées",
-          "2026-12-12": "Début de saison, dernière semaine",
-          "2027-04-10": "3 Vallées au tarif début de saison",
+          "2026-11-28": "Tarif réduit, Val Thorens-Orelle seul",
+          "2026-12-05": "Tarif réduit, ouverture des 3 Vallées",
+          "2026-12-12": "Tarif réduit jusqu’au 18 décembre",
+          "2027-04-10": "3 Vallées au tarif réduit",
           "2027-04-17": "Les 3 Vallées s’arrêtent le 18 avril",
           "2027-04-24": "Dernière semaine, Val Thorens-Orelle"
         },
@@ -305,7 +305,7 @@
     },
     {
       "q": "Le forfait 3 Vallées vaut-il le supplément ?",
-      "a": "Il coûte 53,50 € de plus que Val Thorens-Orelle pour une semaine adulte en pleine saison. Pour une seule journée à Méribel ou à Courchevel, il ne revient qu’à 2,50 € de plus qu’une semaine Val Thorens-Orelle plus une extension d’un jour."
+      "a": "Il coûte 53,50 € de plus que Val Thorens-Orelle pour une semaine adulte en pleine saison. Pour une seule journée à Méribel ou à Courchevel, il ne revient qu’à 2,50 € de plus qu’une semaine Val Thorens-Orelle plus une extension d’un jour à 51 €, vendue en caisse le matin même, et seulement si les liaisons sont ouvertes."
     },
     {
       "q": "Les enfants skient-ils gratuitement à Val Thorens ?",
@@ -313,11 +313,11 @@
     },
     {
       "q": "Qu’est-ce que le forfait Family Flex ?",
-      "a": "Un groupe d’au moins 3 personnes, avec 2 adultes au plus et jusqu’à 6 enfants de 5 à 17 ans, paie le tarif junior sur 6 jours ou plus : en pleine saison, 301 € par personne la semaine à Val Thorens-Orelle et 345 € pour les 3 Vallées."
+      "a": "Un groupe d’au moins 3 personnes, dont un ou deux adultes et un à six enfants de 5 à 17 ans, paie le tarif junior sur un forfait de 6 à 21 jours : en pleine saison, 301 € par personne la semaine à Val Thorens-Orelle et 345 € pour les 3 Vallées."
     },
     {
       "q": "Le forfait est-il moins cher sur internet ?",
-      "a": "La SETAM cite deux avantages : des offres réservées au web, comme la journée adulte du samedi (67,30 € au lieu de 84,20 € pour les 3 Vallées, avant le vendredi 23h59), et l’accès direct aux remontées sans passer en caisse."
+      "a": "Seulement grâce aux offres réservées au web : en ligne, les forfaits classiques coûtent le prix de la grille, mais la journée adulte du samedi revient à 67,30 € au lieu de 84,20 € pour les 3 Vallées, commandée au plus tard le vendredi à 23h59. L’achat en ligne permet aussi d’aller directement aux remontées."
     },
     {
       "q": "Peut-on acheter son forfait auprès de SkiShare ?",
