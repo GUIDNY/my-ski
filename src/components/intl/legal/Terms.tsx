@@ -3,16 +3,20 @@ import LegalPage, { H2, H3, UL } from "./LegalPage";
 
 /*
  * A faithful translation of the parts of the Hebrew terms that apply to
- * booking an apartment: src/app/terms/page.tsx (clause numbers kept; left out
- * are 3.2 passport, 3.7 ILS charge (this site charges in euros) and 5 flights)
- * and the apartment part of src/app/emergency-policy/page.tsx (left out: the
- * flight, ski pass and on-holiday cards and the cancellation-insurance
- * options, which this site doesn't sell). Nothing is added.
+ * booking an apartment: src/app/terms/page.tsx as of October 2026, with
+ * clause 6.4 (clause numbers kept; left out are 3.2 passport, 3.7 ILS charge
+ * (this site charges in euros) and 5 flights) and the apartment part of
+ * src/app/emergency-policy/page.tsx (left out: the flight, ski pass and
+ * on-holiday cards and the cancellation-insurance options, which this site
+ * doesn't sell). Nothing is added.
  */
+
+const box = "my-2 rounded-2xl border border-accent/25 bg-accent-soft/60 p-4 md:p-5 flex flex-col gap-2";
+const boxLink = "inline-flex items-center min-h-[44px]";
 
 function TermsEn() {
   return (
-    <LegalPage lang="en" title="Booking and cancellation terms" updated="June 2026"
+    <LegalPage lang="en" title="Booking and cancellation terms" updated="October 2026"
       intro={<>This page translates the parts of SkiShare&apos;s booking terms (<a href="/terms" hrefLang="he">original in Hebrew</a>) that apply to booking an apartment, and the apartment part of our policy for emergencies, war and force majeure (<a href="/emergency-policy" hrefLang="he">original in Hebrew</a>). Clause numbers are those of the original.</>}>
       <H2>1. Introduction</H2>
       <p>1.1. We are sorry to hear that you wish to cancel your holiday, and we promise to be by your side at every stage of the process.</p>
@@ -47,6 +51,14 @@ function TermsEn() {
       <p>6.1. The company will not be liable for delays, cancellations or disruption of services due to circumstances beyond its control (such as an epidemic, war, a strike or extreme weather).</p>
       <p>6.2. In the event of a cancellation due to force majeure, the company will look with the suppliers into the possibility of an alternative date or a credit voucher, but does not undertake to give a refund.</p>
       <p>6.3. Customers whose insurance includes a cancellation clause for force majeure will be referred to the insurance company.</p>
+      <div className={box}>
+        <p className="font-bold text-ink">6.4. Special clause: emergencies, war and closed airspace (as in the situation with Iran)</p>
+        <p>In a security emergency, war, closure of the airspace or widespread flight cancellations, the company&apos;s extended cancellation policy, &quot;Emergencies, war and force majeure&quot;, also applies. The policy sets out what happens with flights, apartments and ski passes, what happens if you are already on holiday, and how it works with cancellation insurance. The policy is part of these terms.</p>
+        <p className="flex flex-wrap gap-x-5">
+          <a href="#emergency" className={boxLink}>Its apartment part, below&nbsp;<span aria-hidden="true">↓</span></a>
+          <a href="/emergency-policy" hrefLang="he" className={boxLink}>The full policy, in Hebrew&nbsp;<span aria-hidden="true">→</span></a>
+        </p>
+      </div>
 
       <H2>7. Limitation of liability</H2>
       <p>7.1. The company provides intermediary, support and operating services for holiday packages, and is not the direct supplier of most of the services included in the package. The company&apos;s liability is limited to coordination and supervision with the relevant suppliers only.</p>
@@ -92,7 +104,7 @@ function TermsEn() {
 
 function TermsFr() {
   return (
-    <LegalPage lang="fr" title="Conditions de réservation et d'annulation" updated="juin 2026"
+    <LegalPage lang="fr" title="Conditions de réservation et d'annulation" updated="octobre 2026"
       intro={<>Cette page traduit les parties des conditions de réservation de SkiShare (<a href="/terms" hrefLang="he">original en hébreu</a>) qui s&apos;appliquent à la réservation d&apos;un appartement, ainsi que la partie «&nbsp;appartements&nbsp;» de notre politique en cas d&apos;urgence, de guerre et de force majeure (<a href="/emergency-policy" hrefLang="he">original en hébreu</a>). La numérotation des clauses est celle de l&apos;original.</>}>
       <H2>1. Introduction</H2>
       <p>1.1. Nous sommes désolés d&apos;apprendre que vous souhaitez annuler vos vacances, et nous nous engageons à être à vos côtés à chaque étape de la procédure.</p>
@@ -127,6 +139,14 @@ function TermsFr() {
       <p>6.1. La société ne pourra être tenue responsable des retards, annulations ou perturbations des services dus à des circonstances indépendantes de sa volonté (par exemple une épidémie, une guerre, une grève ou des conditions météorologiques extrêmes).</p>
       <p>6.2. En cas d&apos;annulation pour cause de force majeure, la société examinera avec les prestataires la possibilité d&apos;une date de remplacement ou d&apos;un avoir, mais ne s&apos;engage pas à un remboursement.</p>
       <p>6.3. Les clients dont l&apos;assurance comprend une clause d&apos;annulation pour force majeure seront orientés vers leur compagnie d&apos;assurance.</p>
+      <div className={box}>
+        <p className="font-bold text-ink">6.4. Clause spéciale&nbsp;: urgence, guerre et fermeture de l&apos;espace aérien (comme lors de la situation avec l&apos;Iran)</p>
+        <p>En cas d&apos;urgence sécuritaire, de guerre, de fermeture de l&apos;espace aérien ou d&apos;annulations de vols à grande échelle, la politique d&apos;annulation étendue de la société, «&nbsp;Urgences, guerre et force majeure&nbsp;», s&apos;applique également. Cette politique précise ce qui se passe pour les vols, les appartements et les forfaits de ski, ce qui se passe si vous êtes déjà en vacances, et comment cela fonctionne avec l&apos;assurance annulation. Elle fait partie des présentes conditions.</p>
+        <p className="flex flex-wrap gap-x-5">
+          <a href="#emergency" className={boxLink}>Sa partie «&nbsp;appartements&nbsp;», ci-dessous&nbsp;<span aria-hidden="true">↓</span></a>
+          <a href="/emergency-policy" hrefLang="he" className={boxLink}>La politique complète, en hébreu&nbsp;<span aria-hidden="true">→</span></a>
+        </p>
+      </div>
 
       <H2>7. Limitation de responsabilité</H2>
       <p>7.1. La société fournit des services d&apos;intermédiation, d&apos;accompagnement et d&apos;organisation de forfaits de vacances, et n&apos;est pas le prestataire direct de la plupart des services inclus dans le forfait. Sa responsabilité se limite à la coordination et au suivi auprès des prestataires concernés.</p>
