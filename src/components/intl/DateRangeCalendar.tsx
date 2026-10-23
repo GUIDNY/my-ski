@@ -71,7 +71,7 @@ export default function DateRangeCalendar({ lang, min, max, from, to, onChange }
   const grid = (first: string, extra = "") => (
     <div className={`flex-1 min-w-0 ${extra}`}>
       <p className="text-[16px] font-bold text-ink text-center mb-2 capitalize">
-        {monthName(dayOf(first).getMonth(), lang)} {dayOf(first).getFullYear()}
+        {`${monthName(dayOf(first).getMonth(), lang)} ${dayOf(first).getFullYear()}`}
       </p>
       <div className="grid grid-cols-7" aria-hidden="true">
         {WEEK_HEADS[lang].map(h => <div key={h} className="h-8 flex items-center justify-center text-[13px] font-bold text-muted">{h}</div>)}
@@ -124,7 +124,10 @@ export default function DateRangeCalendar({ lang, min, max, from, to, onChange }
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    // translate="no": a browser's page translation (Chrome's Google Translate) swaps
+    // the text for its own copy, and React's later updates then go to text that is
+    // no longer on the page: the month title stayed "November" while the days moved on
+    <div className="flex flex-col gap-4" translate="no">
       <div className="grid grid-cols-2 gap-2">{tab("from")}{tab("to")}</div>
       <div className="relative">
         <button type="button" onClick={() => canPrev && setBase(prevMonth(base))} disabled={!canPrev} aria-label={t.prevMonth}

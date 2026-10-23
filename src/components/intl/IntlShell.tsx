@@ -17,7 +17,15 @@ import IntlCookieNotice from "./IntlCookieNotice";
  */
 export default function IntlShell({ lang, children }: { lang: Lang; children: ReactNode }) {
   const t = DICT[lang];
-  const setHtml = `(function(h){h.lang=${JSON.stringify(lang)};h.dir="ltr"})(document.documentElement)`;
+  // A browser's page translation (Chrome's Google Translate) moves the page's
+  // text into its own <font> elements. React then removes or inserts next to
+  // nodes that are no longer where it left them, and the page crashed ("An
+  // error has occurred" when choosing dates on an apartment page). Ignore
+  // those two calls instead of throwing, the usual guard for this.
+  const setHtml = `(function(h){h.lang=${JSON.stringify(lang)};h.dir="ltr";`
+    + `var N=window.Node&&Node.prototype;if(N&&!N.__gt){N.__gt=1;var r=N.removeChild,i=N.insertBefore;`
+    + `N.removeChild=function(c){return c&&c.parentNode!==this?c:r.apply(this,arguments)};`
+    + `N.insertBefore=function(n,f){return f&&f.parentNode!==this?n:i.apply(this,arguments)}}})(document.documentElement)`;
   return (
     <div lang={lang} dir="ltr" className="flex-1 flex flex-col bg-white text-ink">
       <script dangerouslySetInnerHTML={{ __html: setHtml }} />

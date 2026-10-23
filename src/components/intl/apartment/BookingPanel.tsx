@@ -141,7 +141,8 @@ export default function BookingPanel({ lang, todayIso, apt, rules, rulesOk, from
 
   return (
     <>
-      <section id="book" aria-label={b.aria} className="scroll-mt-[76px] md:scroll-mt-[96px] w-full lg:w-[390px] shrink-0 lg:sticky lg:top-[96px]">
+      {/* translate="no": prices and dates change here, and a translated copy would keep showing the old ones (DateRangeCalendar) */}
+      <section id="book" aria-label={b.aria} translate="no" className="scroll-mt-[76px] md:scroll-mt-[96px] w-full lg:w-[390px] shrink-0 lg:sticky lg:top-[96px]">
         <div className={`${card} shadow-card p-5 flex flex-col gap-4`}>
           {/* the price */}
           <div className="flex items-baseline gap-1.5 flex-wrap min-h-[40px]">
@@ -259,7 +260,7 @@ export default function BookingPanel({ lang, todayIso, apt, rules, rulesOk, from
 
       {/* ── phone: the price bar at the bottom (globals.css keeps the footer clear of it) ── */}
       <div className="h-[92px] lg:hidden" aria-hidden="true" />
-      <div className="phone-price-bar lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-line px-4 pt-3 flex items-center gap-3"
+      <div translate="no" className="phone-price-bar lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-line px-4 pt-3 flex items-center gap-3"
         style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom))", boxShadow: "0 -8px 24px rgba(11,27,51,0.08)" }}>
         <div className="flex-1 min-w-0 leading-tight">
           {stay && state !== "taken" ? (

@@ -21,7 +21,7 @@ export function DatesChips({ lang, todayIso, checkin, checkout, guests, hasDates
   const t = DICT[lang];
   const [open, setOpen] = useState(false);
   return (
-    <div role="group" aria-label={t.list.datesAria} className="mt-5 flex flex-wrap items-center gap-2">
+    <div role="group" aria-label={t.list.datesAria} translate="no" className="mt-5 flex flex-wrap items-center gap-2">
       <button type="button" onClick={() => setOpen(true)} aria-haspopup="dialog" className={chipCls}>
         <span className="text-accent" aria-hidden="true"><IconCalendar size={16} /></span>
         {hasDates ? <>{fmtRange(checkin, checkout, lang)} · {t.common.nights(nightsBetween(checkin, checkout))}</> : t.dates.addDates}

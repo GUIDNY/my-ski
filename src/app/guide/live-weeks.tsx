@@ -104,5 +104,7 @@ export default function LiveWeeks({ initial, ...options }: Options & { initial: 
   if (!prices) return null;
   const table = asTable(prices, options);
   if (table.rows.length === 0) return null;
-  return <Table table={table} />;
+  // translate="no": the prices refresh after the page loads, and a browser's page
+  // translation would keep showing its copy of the old ones (see DateRangeCalendar)
+  return <div translate="no"><Table table={table} /></div>;
 }
