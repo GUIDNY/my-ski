@@ -88,8 +88,12 @@ export default function Home() {
 
       {/* ── HERO ─────────────────────────────────────────── */}
       <section className="relative flex items-center min-h-[560px] md:min-h-[620px]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/hero-ski.jpg" alt="" className="absolute inset-0 w-full h-full object-cover object-center" />
+        {/* WebP (a third of the JPEG), a portrait crop on phones, fetched first: the largest paint */}
+        <picture>
+          <source media="(max-width: 767px)" srcSet="/hero-ski-m.webp" type="image/webp" />
+          <source srcSet="/hero-ski.webp" type="image/webp" />
+          <img src="/hero-ski.jpg" alt="" fetchPriority="high" className="absolute inset-0 w-full h-full object-cover object-center" />
+        </picture>
         <div className="absolute inset-0" style={{ background: "rgba(8,18,38,0.46)" }} />
         <div className="relative z-10 w-full max-w-[1100px] mx-auto px-4 pt-12 pb-14 md:pt-16 md:pb-20 flex flex-col items-center gap-5 md:gap-6 text-center">
           <span className="rounded-full px-4 py-1.5 text-[14px] md:text-[15px] font-medium text-white"

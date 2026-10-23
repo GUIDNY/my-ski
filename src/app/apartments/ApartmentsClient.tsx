@@ -43,8 +43,10 @@ const IcoUsers = () => ico(<><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.
 const IcoArrow = () => ico(<path d="M19 12H5M11 6l-6 6 6 6" />, 18);
 const IcoClose = () => ico(<path d="M6 6l12 12M18 6L6 18" />, 20);
 
-function ApartmentCard({ apt, checkin, checkout, guests, rules, fromNightPrice }: {
+function ApartmentCard({ apt, checkin, checkout, guests, rules, fromNightPrice, priority = false }: {
   apt: Apartment; checkin: string; checkout: string; guests: number; rules: PricingRule[]; fromNightPrice?: number;
+  /** one of the first cards on screen: its photo loads at once (the first is the page's largest paint) */
+  priority?: boolean;
 }) {
   const nights = checkin && checkout
     ? Math.round((new Date(checkout).getTime() - new Date(checkin).getTime()) / 86400000) : 0;
@@ -85,7 +87,7 @@ function ApartmentCard({ apt, checkin, checkout, guests, rules, fromNightPrice }
       className={`${card} group overflow-hidden flex flex-col hover:border-line-strong transition-colors`}>
       <div className="relative h-[210px] bg-soft-2 overflow-hidden shrink-0">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={apt.images?.[0] ?? "/apt1.jpg"} alt={aptDisplayName(apt)} loading="lazy"
+        <img src={apt.images?.[0] ?? "/apt1.jpg"} alt={aptDisplayName(apt)} loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : "auto"}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
         <span className={`absolute top-3.5 right-3.5 ${badgeLight}`}>{isAgency(apt) ? "שבת עד שבת" : "דירה שלנו"}</span>
       </div>
@@ -347,8 +349,8 @@ function ApartmentsPage({ initialApartments, intro, fromNights = {} }: { initial
           />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-            {shown.map(apt => (
-              <ApartmentCard key={apt.id} apt={apt} checkin={checkin} checkout={checkout} guests={guests} rules={rulesMap[apt.id] ?? []} fromNightPrice={fromNights[apt.id]} />
+            {shown.map((apt, i) => (
+              <ApartmentCard key={apt.id} apt={apt} checkin={checkin} checkout={checkout} guests={guests} rules={rulesMap[apt.id] ?? []} fromNightPrice={fromNights[apt.id]} priority={i < 3} />
             ))}
           </div>
         )}

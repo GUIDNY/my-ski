@@ -1,7 +1,7 @@
 // Loading screen: the mountain mark, a moving bar and a short line.
 export default function SkiLoader({ label = "רגע, מכינים את החופשה…" }: { label?: string }) {
   return (
-    <div className="flex-1 min-h-[60vh] w-full flex flex-col items-center justify-center bg-white" dir="rtl" role="status" aria-live="polite">
+    <div className="flex-1 min-h-[100svh] w-full flex flex-col items-center justify-center bg-white" dir="rtl" role="status" aria-live="polite">
       <style>{`
         @keyframes ski-bar { 0% { transform: translateX(110%) } 100% { transform: translateX(-210%) } }
         @keyframes ski-float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-4px) } }
