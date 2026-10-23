@@ -28,7 +28,7 @@ export default function GuideIndex() {
       <div className={`${wrap} py-10 md:py-14 flex flex-col gap-5 md:gap-6`}>
         {/* the full guide first, with a photo */}
         {main && (
-          <Link href={`/guide/${main.slug}`}
+          <Link href={encodeURI(`/guide/${main.slug}`)}
             className={`group ${card} overflow-hidden grid md:grid-cols-[1.1fr_1fr] hover:border-line-strong transition-colors`}>
             <div className="relative h-[220px] md:h-auto md:min-h-[300px] bg-soft">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -45,7 +45,7 @@ export default function GuideIndex() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
           {rest.map(g => (
-            <Link key={g.slug} href={`/guide/${g.slug}`}
+            <Link key={g.slug} href={encodeURI(`/guide/${g.slug}`)}
               className={`group ${card} p-6 flex flex-col gap-3 hover:border-line-strong transition-colors`}>
               <span className="w-12 h-12 rounded-2xl bg-accent-soft text-accent flex items-center justify-center"><GuideIcon emoji={g.emoji} /></span>
               <h2 className="font-display font-bold text-[20px] leading-snug text-ink">{g.title}</h2>

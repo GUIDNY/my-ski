@@ -1,19 +1,63 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { GUIDES, getGuideBySlug } from "@/lib/guides";
+import { GUIDES, getGuideBySlug, plainText, type GuideSection, type GuideTable } from "@/lib/guides";
 import { wrap, card, btn, Crumbs } from "@/components/ui";
 import GuideIcon from "../guide-icon";
+import RichText from "../rich-text";
 import { pageMeta } from "@/lib/page-meta";
-import { ORG_ID, WEBSITE_ID, VAL_THORENS, breadcrumbLd, faqLd, ldJson, siteUrl } from "@/lib/site";
-
-const SITE_URL = "https://skisharebook.com";
+import { ORG_ID, SITE, WEBSITE_ID, VAL_THORENS, breadcrumbLd, faqLd, ldJson, siteUrl } from "@/lib/site";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const fmtUpdated = (iso: string) => {
   const d = new Date(iso + "T12:00:00");
   return isNaN(d.getTime()) ? "" : `${d.getDate()} ב${HE_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 };
+
+const guideHref = (slug: string) => encodeURI(`/guide/${slug}`);
+const hostOf = (url: string) => { try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return ""; } };
+
+// every string of a section, for the reading time
+const sectionStrings = (s: GuideSection) => [
+  s.heading, ...(s.paragraphs ?? []), ...(s.list ?? []),
+  ...(s.table ? [s.table.caption ?? "", ...s.table.head, ...s.table.rows.flat()] : []),
+  ...(s.after ?? []),
+];
+
+const paragraph = "text-[17px] leading-[1.8] text-body";
+const th = "text-start align-bottom font-bold text-ink px-2 md:px-4 py-2.5 bg-soft";
+const td = "text-start align-top px-2 md:px-4 py-2.5 border-t border-line";
+
+/** a table that wraps its cells to fit a phone; only if it still can't fit, it scrolls inside its own box */
+function Table({ table }: { table: GuideTable }) {
+  return (
+    <div className={`${card} overflow-x-auto`}>
+      <table className="w-full text-[14px] md:text-[16px] leading-snug tabular-nums">
+        {table.caption && (
+          <caption className="text-start font-bold text-ink text-[14px] md:text-[15px] px-2 md:px-4 pt-3 pb-2.5">
+            <RichText text={table.caption} />
+          </caption>
+        )}
+        <thead>
+          <tr>
+            {table.head.map((h, i) => h
+              ? <th key={i} scope="col" className={th}><RichText text={h} /></th>
+              : <td key={i} className={th} />)}
+          </tr>
+        </thead>
+        <tbody>
+          {table.rows.map((row, ri) => (
+            <tr key={ri}>
+              {row.map((c, ci) => ci === 0
+                ? <th key={ci} scope="row" className={`${td} font-bold text-ink`}><RichText text={c} /></th>
+                : <td key={ci} className={`${td} text-body`}><RichText text={c} /></td>)}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 // only the guides that exist: any other address is a real 404 (not a page that streams "not found" with a 200)
 export const dynamicParams = false;
@@ -39,6 +83,7 @@ export default async function GuideArticle({ params }: { params: Promise<{ slug:
 
   const url = siteUrl(`/guide/${guide.slug}`);
   const related = GUIDES.filter(g => g.slug !== guide.slug).slice(0, 3);
+  const sources = guide.sources ?? [];
 
   const articleLd = {
     "@context": "https://schema.org",
@@ -46,20 +91,23 @@ export default async function GuideArticle({ params }: { params: Promise<{ slug:
     headline: guide.title,
     description: guide.description,
     inLanguage: "he-IL",
+    ...(guide.published ? { datePublished: guide.published } : {}),
     dateModified: guide.updated,
-    image: [`${SITE_URL}/og.jpg`],
+    image: [`${SITE}/og.jpg`],
     author: { "@id": ORG_ID },
     publisher: { "@id": ORG_ID },
     isPartOf: { "@id": WEBSITE_ID },
     mainEntityOfPage: url,
     about: VAL_THORENS,
+    ...(sources.length ? { citation: sources.map(s => s.url) } : {}),
   };
-  const guideFaqLd = guide.faqs.length ? faqLd(guide.faqs) : null;
+  // the answers as plain text: the same words people see, without the link markup
+  const guideFaqLd = guide.faqs.length ? faqLd(guide.faqs.map(f => ({ q: plainText(f.q), a: plainText(f.a) }))) : null;
   const crumbsLd = breadcrumbLd([["דף הבית", "/"], ["מדריך ואל טורנס", "/guide"], [guide.title, `/guide/${guide.slug}`]]);
 
   // about 200 words a minute
-  const words = [guide.intro, ...guide.sections.flatMap(s => [s.heading, ...(s.paragraphs ?? []), ...(s.list ?? [])]), ...guide.faqs.flatMap(f => [f.q, f.a])]
-    .join(" ").split(/\s+/).filter(Boolean).length;
+  const words = [guide.intro, ...guide.sections.flatMap(sectionStrings), ...guide.faqs.flatMap(f => [f.q, f.a])]
+    .map(plainText).join(" ").split(/\s+/).filter(Boolean).length;
   const minutes = Math.max(1, Math.round(words / 200));
   const updated = fmtUpdated(guide.updated);
 
@@ -87,26 +135,41 @@ export default async function GuideArticle({ params }: { params: Promise<{ slug:
 
       <div className={`${wrap} py-10 md:py-14 flex flex-col lg:flex-row gap-10 lg:gap-14 items-start`}>
         {/* Article */}
-        <article className="flex-1 min-w-0 max-w-[720px]">
-          <p className="text-[18px] md:text-[20px] leading-[1.7] text-body">{guide.intro}</p>
+        {/* w-full: a table wider than a phone scrolls inside its own box, never the page */}
+        <article className="w-full flex-1 min-w-0 max-w-[720px]">
+          <p className="text-[18px] md:text-[20px] leading-[1.7] text-body"><RichText text={guide.intro} /></p>
 
           <div className="mt-10 flex flex-col gap-10">
             {guide.sections.map((s, i) => (
               <section key={i} id={`s-${i + 1}`} className="flex flex-col gap-3.5">
-                <h2 className="font-display font-bold text-[24px] md:text-[28px] leading-snug tracking-tight text-ink">{s.heading}</h2>
+                <h2 className="font-display font-bold text-[24px] md:text-[28px] leading-snug tracking-tight text-ink"><RichText text={s.heading} /></h2>
                 {s.paragraphs?.map((p, pi) => (
-                  <p key={pi} className="text-[17px] leading-[1.8] text-body">{p}</p>
+                  <p key={pi} className={paragraph}><RichText text={p} /></p>
                 ))}
-                {s.list && (
+                {s.list && !s.ordered && (
                   <ul className="flex flex-col gap-2.5">
                     {s.list.map((item, li) => (
                       <li key={li} className="flex gap-3 text-[17px] leading-[1.75] text-body">
                         <span aria-hidden="true" className="mt-[11px] w-2 h-2 rounded-full bg-accent shrink-0" />
-                        <span>{item}</span>
+                        <span><RichText text={item} /></span>
                       </li>
                     ))}
                   </ul>
                 )}
+                {s.list && s.ordered && (
+                  <ol className="flex flex-col gap-2.5">
+                    {s.list.map((item, li) => (
+                      <li key={li} className="flex gap-3 text-[17px] leading-[1.75] text-body">
+                        <span className="mt-[2px] w-[26px] h-[26px] rounded-full bg-accent-soft text-accent text-[14px] font-bold flex items-center justify-center shrink-0 tabular-nums">{li + 1}</span>
+                        <span><RichText text={item} /></span>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+                {s.table && <Table table={s.table} />}
+                {s.after?.map((p, pi) => (
+                  <p key={pi} className={paragraph}><RichText text={p} /></p>
+                ))}
               </section>
             ))}
           </div>
@@ -121,10 +184,33 @@ export default async function GuideArticle({ params }: { params: Promise<{ slug:
                       {f.q}
                       <span aria-hidden="true" className="text-muted text-xl transition-transform group-open:rotate-45">+</span>
                     </summary>
-                    <p className="mt-3 text-[16px] md:text-[17px] leading-[1.7] text-body">{f.a}</p>
+                    <p className="mt-3 text-[16px] md:text-[17px] leading-[1.7] text-body"><RichText text={f.a} /></p>
                   </details>
                 ))}
               </div>
+            </section>
+          )}
+
+          {sources.length > 0 && (
+            <section id="sources" className="mt-14">
+              <h2 className="font-display font-bold text-[24px] md:text-[28px] tracking-tight text-ink mb-4">מקורות</h2>
+              <ul className="flex flex-col gap-2.5">
+                {sources.map((s, i) => {
+                  const own = s.url.startsWith(`${SITE}/`);
+                  const cls = "text-accent hover:text-accent-hover underline underline-offset-2";
+                  return (
+                    <li key={i} className="flex gap-3 text-[15px] md:text-[16px] leading-relaxed text-body">
+                      <span aria-hidden="true" className="mt-[10px] w-1.5 h-1.5 rounded-full bg-line-strong shrink-0" />
+                      <span>
+                        {own
+                          ? <Link href={encodeURI(s.url.slice(SITE.length))} className={cls}><RichText text={s.title} /></Link>
+                          : <a href={s.url} rel="noopener" className={cls}><RichText text={s.title} /></a>}
+                        {" "}<span className="text-muted">(<bdi>{hostOf(s.url)}</bdi>)</span>
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
             </section>
           )}
 
@@ -148,10 +234,13 @@ export default async function GuideArticle({ params }: { params: Promise<{ slug:
               <p className="font-bold text-[15px] text-ink mb-3">בכתבה הזאת</p>
               <nav className="flex flex-col">
                 {guide.sections.map((s, i) => (
-                  <a key={i} href={`#s-${i + 1}`} className="py-2 text-[15px] leading-snug text-body hover:text-accent border-b border-line last:border-0 transition-colors">{s.heading}</a>
+                  <a key={i} href={`#s-${i + 1}`} className="py-2 text-[15px] leading-snug text-body hover:text-accent border-b border-line last:border-0 transition-colors"><RichText text={plainText(s.heading)} /></a>
                 ))}
                 {guide.faqs.length > 0 && (
-                  <a href="#faq" className="py-2 text-[15px] text-body hover:text-accent transition-colors">שאלות נפוצות</a>
+                  <a href="#faq" className="py-2 text-[15px] text-body hover:text-accent border-b border-line last:border-0 transition-colors">שאלות נפוצות</a>
+                )}
+                {sources.length > 0 && (
+                  <a href="#sources" className="py-2 text-[15px] text-body hover:text-accent transition-colors">מקורות</a>
                 )}
               </nav>
             </div>
@@ -165,7 +254,7 @@ export default async function GuideArticle({ params }: { params: Promise<{ slug:
             <h2 className="font-display font-bold text-[24px] md:text-[28px] tracking-tight text-ink mb-6">עוד מדריכים על ואל טורנס</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-5">
               {related.map(g => (
-                <Link key={g.slug} href={`/guide/${g.slug}`}
+                <Link key={g.slug} href={guideHref(g.slug)}
                   className={`group ${card} p-5 flex items-start gap-3.5 hover:border-line-strong transition-colors`}>
                   <span className="w-11 h-11 rounded-xl bg-accent-soft text-accent flex items-center justify-center shrink-0"><GuideIcon emoji={g.emoji} size={22} /></span>
                   <span className="flex flex-col gap-1.5">
