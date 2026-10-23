@@ -11,10 +11,11 @@ import LangSwitch from "./LangSwitch";
 export default function IntlHeader({ lang }: { lang: Lang }) {
   const pathname = usePathname() || `/${lang}`;
   const t = DICT[lang];
-  const link = (href: string, label: string, on: boolean, cls = "") => (
+  // `display` is passed whole ("inline-flex", or "hidden lg:inline-flex"): two display classes would fight
+  const link = (href: string, label: string, on: boolean, display = "inline-flex") => (
     <Link href={href} aria-current={on ? "page" : undefined}
-      className={`inline-flex items-center min-h-[44px] px-3 rounded-lg text-[15px] md:text-[16px] transition-colors ${
-        on ? "text-accent font-bold" : "text-ink font-medium hover:text-accent"} ${cls}`}>
+      className={`${display} items-center min-h-[44px] px-2 md:px-3 rounded-lg text-[15px] md:text-[16px] whitespace-nowrap transition-colors ${
+        on ? "text-accent font-bold" : "text-ink font-medium hover:text-accent"}`}>
       {label}
     </Link>
   );

@@ -58,8 +58,8 @@ function Switch({ lang, search }: { lang: Lang; search: string }) {
       <div ref={box} className="relative md:hidden">
         <button type="button" onClick={() => setOpen(v => !v)} aria-expanded={open} aria-controls="lang-menu"
           aria-label={`${t.nav.language}: ${LANG_NAMES[lang]}`}
-          className="inline-flex items-center gap-1.5 min-h-[44px] px-3 rounded-xl border border-line text-ink text-[15px] font-bold hover:border-line-strong transition-colors">
-          <Globe />{lang.toUpperCase()}<Chevron open={open} />
+          className="inline-flex items-center justify-center gap-1 min-h-[44px] min-w-[44px] px-2.5 rounded-xl border border-line text-ink text-[15px] font-bold hover:border-line-strong transition-colors">
+          <Globe />{lang.toUpperCase()}<span className="hidden min-[400px]:inline-flex"><Chevron open={open} /></span>
         </button>
         {open && (
           <ul id="lang-menu" className="absolute end-0 top-full mt-2 w-[180px] bg-white border border-line rounded-2xl shadow-pop p-1.5 z-[60]">

@@ -138,7 +138,7 @@ export default async function HomePage({ lang }: { lang: Lang }) {
           ))}
         </div>
         <p className="mt-6 text-[15px] text-muted">
-          {h.contactQ} <a href={`mailto:${CONTACT_EMAIL}`} className="font-bold text-accent hover:text-accent-hover break-all">{CONTACT_EMAIL}</a>
+          {h.contactQ} <a href={`mailto:${CONTACT_EMAIL}`} className="font-bold text-accent hover:text-accent-hover wrap-anywhere">{CONTACT_EMAIL}</a>
         </p>
         <p className="mt-3 text-[15px] text-muted">
           {h.alsoIn}{" "}

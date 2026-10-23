@@ -135,7 +135,7 @@ export default function CheckoutDialog({ lang, booking: b, onClose, onTaken }: {
 
         {err && (
           <p role="alert" className="text-[15px] text-danger bg-danger-soft rounded-xl px-3.5 py-2.5 leading-relaxed">
-            {err.text}{err.mail && <> <a href={`mailto:${CONTACT_EMAIL}`} className="font-bold underline break-all">{CONTACT_EMAIL}</a>.</>}
+            {err.text}{err.mail && <> <a href={`mailto:${CONTACT_EMAIL}`} className="font-bold underline wrap-anywhere">{CONTACT_EMAIL}</a>.</>}
           </p>
         )}
 

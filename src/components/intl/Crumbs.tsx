@@ -14,7 +14,7 @@ export default function Crumbs({ lang, items, className = "" }: { lang: Lang; it
           <li key={i} className="flex items-center gap-2 min-w-0">
             {i > 0 && <span aria-hidden="true">›</span>}
             {c.href && i < items.length - 1
-              ? <Link href={c.href} className="inline-flex items-center min-h-[32px] hover:text-ink transition-colors">{c.label}</Link>
+              ? <Link href={c.href} className="inline-flex items-center min-h-[44px] -my-2.5 hover:text-ink transition-colors">{c.label}</Link>
               : <span className={i === items.length - 1 ? "text-ink truncate" : ""} aria-current={i === items.length - 1 ? "page" : undefined}>{c.label}</span>}
           </li>
         ))}

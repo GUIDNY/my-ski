@@ -37,7 +37,7 @@ export default function LegalPage({ lang, title, updated, intro, children }: {
           <p>{c.no} 517332060 · {c.address}</p>
           <p>
             {c.phone} <a href="tel:+972547701899" className="text-accent font-bold">+972 54-770-1899</a>
-            {" · "}{c.email} <a href={`mailto:${CONTACT_EMAIL}`} className="text-accent font-bold break-all">{CONTACT_EMAIL}</a>
+            {" · "}{c.email} <a href={`mailto:${CONTACT_EMAIL}`} className="text-accent font-bold wrap-anywhere">{CONTACT_EMAIL}</a>
           </p>
         </div>
       </div>

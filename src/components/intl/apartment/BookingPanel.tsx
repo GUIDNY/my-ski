@@ -122,7 +122,7 @@ export default function BookingPanel({ lang, todayIso, apt, rules, rulesOk, from
   };
   const mainLabel = canBook ? b.reserve
     : state === "checking" ? b.checking
-    : agency ? (checkin && checkout ? b.changeDates : b.chooseWeek)
+    : agency ? b.chooseWeek
     : checkin && checkout ? b.changeDates : b.addDates;
 
   const head = stay
@@ -211,7 +211,7 @@ export default function BookingPanel({ lang, todayIso, apt, rules, rulesOk, from
                     <span className="flex flex-wrap items-center gap-x-2">
                       {b.nights(stay.nights)}
                       <button type="button" onClick={() => setShowNights(v => !v)} aria-expanded={showNights}
-                        className={`${btn.link} text-[14px] min-h-[36px]`}>{showNights ? b.hideNights : b.showNights}</button>
+                        className={`${btn.link} text-[14px] min-h-[44px] -my-2`}>{showNights ? b.hideNights : b.showNights}</button>
                     </span>,
                     fmtEur(nightsSum, lang),
                   )}
@@ -270,7 +270,7 @@ export default function BookingPanel({ lang, todayIso, apt, rules, rulesOk, from
             </>
           ) : head ? (
             <>
-              <div className="flex items-baseline gap-1">
+              <div className="flex flex-wrap items-baseline gap-x-1">
                 {head.prefix && <span className="text-[13px] text-muted">{head.prefix}</span>}
                 <span className="font-display font-extrabold text-[22px] text-ink">{head.amount}</span>
                 <span className="text-[13px] text-muted">{head.unit}</span>

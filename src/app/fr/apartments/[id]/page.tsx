@@ -4,7 +4,7 @@ import ApartmentPage, { apartmentMetadata } from "@/components/intl/apartment/Ap
 type Props = { params: Promise<{ id: string }> };
 
 // one static page per apartment, made on its first visit and regenerated in
-// the background at most every 5 minutes; an unknown id is a real 404
+// the background at most every 5 minutes; an unknown id shows the 404 page (noindex)
 export const revalidate = 300;
 export async function generateStaticParams() {
   return [];

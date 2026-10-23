@@ -49,7 +49,7 @@ export function PaySuccess({ lang }: { lang: Lang }) {
         </ol>
       </div>
       <p className="text-[14px] text-muted">
-        {t.questions} <a href={`mailto:${CONTACT_EMAIL}${order ? `?subject=${encodeURIComponent(order.toUpperCase())}` : ""}`} className="font-bold text-accent hover:text-accent-hover break-all">{CONTACT_EMAIL}</a>
+        {t.questions} <a href={`mailto:${CONTACT_EMAIL}${order ? `?subject=${encodeURIComponent(order.toUpperCase())}` : ""}`} className="font-bold text-accent hover:text-accent-hover wrap-anywhere">{CONTACT_EMAIL}</a>
       </p>
     </StatusCard>
   );
@@ -70,7 +70,7 @@ export function PayFailure({ lang }: { lang: Lang }) {
         <a href={`mailto:${CONTACT_EMAIL}`} className={btn.outline}>{t.emailUs}</a>
       </>}>
       <p className="text-[16px] md:text-[17px] leading-relaxed text-body max-w-[460px]">{t.failText}</p>
-      <p className="text-[14px] text-muted break-all">{CONTACT_EMAIL}</p>
+      <p className="text-[14px] text-muted wrap-anywhere">{CONTACT_EMAIL}</p>
     </StatusCard>
   );
 }
