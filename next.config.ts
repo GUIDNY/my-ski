@@ -31,6 +31,12 @@ const nextConfig: NextConfig = {
         source: "/api/:path*",
         headers: [{ key: "X-Robots-Tag", value: "noindex" }],
       },
+      // the English and French pages share the Hebrew root layout (<html lang="he">,
+      // fixed in the browser): say their language in the response too (Bing reads it)
+      { source: "/en", headers: [{ key: "Content-Language", value: "en" }] },
+      { source: "/en/:path*", headers: [{ key: "Content-Language", value: "en" }] },
+      { source: "/fr", headers: [{ key: "Content-Language", value: "fr" }] },
+      { source: "/fr/:path*", headers: [{ key: "Content-Language", value: "fr" }] },
     ];
   },
 };
