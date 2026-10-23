@@ -1,7 +1,11 @@
 import Link from "next/link";
 import LegalShell from "@/components/LegalShell";
 
-export const metadata = { title: "מדיניות ביטול — SkiShare" };
+export const metadata = {
+  title: "מדיניות ביטול — SkiShare",
+  description: "מדיניות הביטול של SkiShare: ביטול רגיל, ביטול גמיש ובלי אפשרות ביטול, ומה קורה במצב חירום.",
+  alternates: { canonical: "https://skisharebook.com/cancellation-policy" },
+};
 
 const Yes = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F7A4F" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-label="כן" role="img" className="shrink-0 mt-[5px]"><path d="M5 12l4 4 10-10" /></svg>

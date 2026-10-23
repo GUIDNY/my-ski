@@ -6,6 +6,7 @@ import { wrap, card, btn, Crumbs } from "@/components/ui";
 export const metadata: Metadata = {
   title: "מצב חירום, מלחמה וכוח עליון — SkiShare",
   description: "מה קורה אם יש מצב חריג — טיסות, דירות, סקי פס וגם אם אתם כבר בחופשה. שקוף ומראש, בלי הפתעות.",
+  alternates: { canonical: "https://skisharebook.com/emergency-policy" },
 };
 
 /* ── Icons (stroke, follow the text color) ─────────────────── */

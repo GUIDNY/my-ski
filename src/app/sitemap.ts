@@ -3,13 +3,13 @@ import { createServerClient } from "@/lib/supabase-server";
 import { GUIDES } from "@/lib/guides";
 
 const SITE_URL = "https://skisharebook.com";
+// the apartment list changes with the daily sync: rebuild the sitemap every hour
+export const revalidate = 3600;
 
 const STATIC_ROUTES: { path: string; priority: number; changeFrequency: "daily" | "weekly" | "monthly" }[] = [
   { path: "/", priority: 1, changeFrequency: "daily" },
   { path: "/apartments", priority: 0.9, changeFrequency: "daily" },
-  { path: "/search", priority: 0.8, changeFrequency: "daily" },
   { path: "/weekly", priority: 0.8, changeFrequency: "daily" },
-  { path: "/combo", priority: 0.7, changeFrequency: "weekly" },
   { path: "/transfers", priority: 0.6, changeFrequency: "weekly" },
   { path: "/seasonaires", priority: 0.6, changeFrequency: "weekly" },
   { path: "/guide", priority: 0.9, changeFrequency: "weekly" },
@@ -22,11 +22,9 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: "daily" 
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const now = new Date();
-
+  // no made-up "last modified" dates: only the guides have a real one
   const staticEntries: MetadataRoute.Sitemap = STATIC_ROUTES.map(r => ({
     url: `${SITE_URL}${r.path}`,
-    lastModified: now,
     changeFrequency: r.changeFrequency,
     priority: r.priority,
   }));
@@ -41,10 +39,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let apartmentEntries: MetadataRoute.Sitemap = [];
   try {
     const db = createServerClient();
-    const { data } = await db.from("apartments").select("id, created_at").eq("available", true);
+    const { data } = await db.from("apartments").select("id").eq("available", true);
     apartmentEntries = (data ?? []).map(a => ({
       url: `${SITE_URL}/apartments/${a.id}`,
-      lastModified: a.created_at ? new Date(a.created_at) : now,
       changeFrequency: "daily" as const,
       priority: 0.8,
     }));

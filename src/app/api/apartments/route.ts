@@ -2,11 +2,17 @@ import { createServerClient } from "@/lib/supabase-server";
 import { buildSeasonalRules } from "@/lib/seasonal-pricing";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/api-auth";
+import { PUBLIC_APARTMENT_COLUMNS } from "@/lib/apartment-fields";
 
 export async function GET(req: NextRequest) {
   const db = createServerClient();
-  const all = req.nextUrl.searchParams.has("all"); // admin: include unavailable
-  let q = db.from("apartments").select("*").order("created_at", { ascending: false });
+  // ?all: the admin list, every apartment and every column
+  const all = req.nextUrl.searchParams.has("all");
+  if (all) {
+    const denied = await requireAdmin(req);
+    if (denied) return denied;
+  }
+  let q = db.from("apartments").select(all ? "*" : PUBLIC_APARTMENT_COLUMNS).order("created_at", { ascending: false });
   if (!all) q = q.eq("available", true);
   const { data, error } = await q;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

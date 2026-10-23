@@ -3,7 +3,11 @@ import type { Apartment, SkiPass } from "@/types";
 import WeeklyBrowser from "@/components/WeeklyBrowser";
 import { wrap, PageTop } from "@/components/ui";
 
-export const metadata = { title: "שבת עד שבת — SkiShare" };
+export const metadata = {
+  title: "דירות בואל טורנס לשבוע, שבת עד שבת — SkiShare",
+  description: "דירות בואל טורנס לשבוע שלם, מכניסה בשבת עד שבת. רואים מה פנוי בכל שבוע ובכמה, ואפשר לקבל מחיר לאדם עם סקי פס והסעה.",
+  alternates: { canonical: "https://skisharebook.com/weekly" },
+};
 // Availability + pricing change daily via the sync cron — this page has no
 // searchParams to force dynamic rendering on its own, so without this it
 // gets statically baked in at build time and never reflects the sync.

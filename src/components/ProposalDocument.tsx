@@ -85,7 +85,12 @@ export const PROPOSAL_CSS = `
 .proposal .line { border-bottom:1px solid var(--ink); height:8mm; margin-bottom:1.5mm; }
 .proposal .cap { font-size:8.5pt; color:var(--muted); }
 .proposal .note { font-size:9.5pt; color:var(--muted); }
-.proposal section { page-break-inside:avoid; }
+/* sections may run over two pages; a heading stays with what follows it, and
+   tables, photos and boxes never split */
+.proposal section { page-break-inside:auto; }
+.proposal h2 { break-after:avoid; page-break-after:avoid; }
+.proposal table, .proposal .route, .proposal .opt, .proposal .intro, .proposal .pay-btn, .proposal .note { break-inside:avoid; page-break-inside:avoid; }
+.proposal .doc-foot { break-before:avoid; page-break-before:avoid; }
 .proposal .gallery { display:grid; grid-template-columns:repeat(3, 1fr); gap:2mm; margin-bottom:4mm; page-break-inside:avoid; }
 .proposal .gallery img { width:100%; height:34mm; object-fit:cover; border-radius:2.5mm; }
 .proposal .doc-foot { margin-top:9mm; padding-top:4mm; border-top:1px solid var(--line); display:flex; justify-content:space-between; gap:4mm; font-size:8.5pt; color:var(--muted); }

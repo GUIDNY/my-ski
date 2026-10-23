@@ -13,6 +13,9 @@ const fmtUpdated = (iso: string) => {
   return isNaN(d.getTime()) ? "" : `${d.getDate()} ב${HE_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 };
 
+// only the guides that exist: any other address is a real 404 (not a page that streams "not found" with a 200)
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return GUIDES.map(g => ({ slug: g.slug }));
 }

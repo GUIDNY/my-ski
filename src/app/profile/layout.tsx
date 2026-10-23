@@ -1,0 +1,8 @@
+import type { Metadata } from "next";
+
+// a personal page: not for search results
+export const metadata: Metadata = { title: "הפרופיל שלי — SkiShare", robots: { index: false, follow: true } };
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return children;
+}

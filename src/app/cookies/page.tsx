@@ -1,7 +1,11 @@
 import Link from "next/link";
 import LegalShell, { H2, UL } from "@/components/LegalShell";
 
-export const metadata = { title: "מדיניות עוגיות (Cookies) — SkiShare" };
+export const metadata = {
+  title: "מדיניות עוגיות (Cookies) — SkiShare",
+  description: "באילו עוגיות האתר של SkiShare משתמש ולמה.",
+  alternates: { canonical: "https://skisharebook.com/cookies" },
+};
 
 export default function CookiesPage() {
   return (

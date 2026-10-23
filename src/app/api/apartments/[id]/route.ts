@@ -1,11 +1,14 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/api-auth";
+import { requireAdmin, sessionUser, isAdminUser } from "@/lib/api-auth";
+import { PUBLIC_APARTMENT_COLUMNS } from "@/lib/apartment-fields";
 
-export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const db = createServerClient();
   const { id } = await params;
-  const { data, error } = await db.from("apartments").select("*").eq("id", id).single();
+  // the admin editor gets every column; everyone else only the public ones
+  const admin = req.headers.get("authorization") ? isAdminUser(await sessionUser(req)) : false;
+  const { data, error } = await db.from("apartments").select(admin ? "*" : PUBLIC_APARTMENT_COLUMNS).eq("id", id).single();
   if (error) return NextResponse.json({ error: error.message }, { status: 404 });
   return NextResponse.json(data);
 }

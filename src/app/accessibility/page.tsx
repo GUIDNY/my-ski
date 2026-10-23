@@ -1,6 +1,10 @@
 import LegalShell, { H2, UL } from "@/components/LegalShell";
 
-export const metadata = { title: "הצהרת נגישות — SkiShare" };
+export const metadata = {
+  title: "הצהרת נגישות — SkiShare",
+  description: "הצהרת הנגישות של האתר SkiShare ודרכים לפנות אלינו בנושא נגישות.",
+  alternates: { canonical: "https://skisharebook.com/accessibility" },
+};
 
 export default function AccessibilityPage() {
   return (

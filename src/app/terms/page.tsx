@@ -1,7 +1,11 @@
 import Link from "next/link";
 import LegalShell, { H2, UL } from "@/components/LegalShell";
 
-export const metadata = { title: "תקנון, הזמנות וביטולים — SkiShare" };
+export const metadata = {
+  title: "תקנון, הזמנות וביטולים — SkiShare",
+  description: "התקנון של SkiShare: הזמנות, ביטולים והחזרים, תנאים כלליים, כוח עליון ומצב חירום.",
+  alternates: { canonical: "https://skisharebook.com/terms" },
+};
 
 export default function TermsPage() {
   return (
