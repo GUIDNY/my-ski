@@ -16,12 +16,12 @@
   "emoji": "⛷️",
   "published": "2026-10-23",
   "updated": "2026-10-23",
-  "intro": "Val Thorens-Orelle has 150 km of pistes and 88 runs, according to SETAM, the Val Thorens lift company, and a 3 Vallées pass opens 600 km and 334 pistes: 53 green, 136 blue, 108 red and 37 black (Les 3 Vallées 2026/27 press kit). The top of the Val Thorens side is Cime Caron, at 3,195 m, and a lift in the Orelle sector reaches 3,230 m. Beginners start on four free covered carpet lifts, while experts have black runs such as Combe de Caron and Combe de Rosaël. The Val Thorens lifts run from 21 November 2026 to 2 May 2027, and the links to the other valleys from 5 December 2026 to 18 April 2027.",
+  "intro": "Val Thorens-Orelle has 88 runs over 150 km of pistes, according to SETAM, the Val Thorens lift company. A 3 Vallées pass covers 600 km and 334 pistes: 53 green, 136 blue, 108 red and 37 black (Les 3 Vallées 2026/27 press kit). The highest point the lifts reach on the Val Thorens side is Cime Caron, at 3,200 m on the official piste map, and a chairlift in the Orelle sector reaches 3,230 m. Beginners start on four free covered magic carpets, while experts head for black runs such as Combe de Caron and Combe de Rosaël. The Val Thorens lifts run from 21 November 2026 to 2 May 2027, and the links to the other valleys from 5 December 2026 to 18 April 2027.",
   "sections": [
     {
       "heading": "How big is the Val Thorens ski area?",
       "paragraphs": [
-        "Val Thorens-Orelle, the area of the local lift pass, has 150 km of pistes and 88 runs, according to SETAM. Les 3 Vallées as a whole has 600 km."
+        "Val Thorens-Orelle, the area covered by the local lift pass, has 88 runs over 150 km of pistes, according to SETAM. Les 3 Vallées as a whole has 600 km."
       ],
       "table": {
         "caption": "Val Thorens-Orelle and Les 3 Vallées in numbers (SETAM; Les 3 Vallées, 2026/27)",
@@ -31,20 +31,20 @@
           ["By colour", "Not published by SETAM", "53 green, 136 blue, 108 red, 37 black"],
           ["Resorts", "Val Thorens (village at 2,300 m) and Orelle", "7, from Courchevel to Orelle"],
           ["Altitude", "99% of the area above 2,000 m", "85% of the area above 1,800 m"],
-          ["Top of the lifts", "3,230 m in Orelle; Cime Caron 3,195 m", "3,230 m, in Orelle"],
+          ["Top of the lifts", "3,230 m in Orelle; Cime Caron 3,200 m", "3,230 m, in Orelle"],
           ["Season 2026/27", "21 November 2026 – 2 May 2027", "5 December 2026 – 18 April 2027"],
           ["Lift pass", "Val Thorens-Orelle", "3 Vallées"]
         ]
       },
       "after": [
-        "On the official piste map, green means easy, blue average difficulty, red difficult and black very difficult, so a French blue is not a first-day run. Saint-Martin-de-Belleville opens on 12 December 2026, a week after the rest of Les 3 Vallées."
+        "On the official piste map, green means easy, blue average difficulty, red difficult and black very difficult; SETAM's EasyRider map picks out the green and blue runs suited to beginners. Saint-Martin-de-Belleville opens on 12 December 2026, a week after the rest of Les 3 Vallées."
       ]
     },
     {
       "heading": "Is Val Thorens good for beginners?",
       "paragraphs": [
-        "Yes: beginners learn on four covered carpet lifts that are free, so you can start without a lift pass. SETAM's 2026/27 EasyRider map describes three sectors in the heart of the ski area with wide, gentle slopes. According to the resort's website, the Castor and Pollux carpets are next to the green Voie Lactée, and the Musaraigne and Campagnols carpets next to the green Grenouillère.",
-        "Next comes the EasyRider pass, for 4 hours or a day at half the public price. It opens many green and blue runs and five lifts: the Cairn, 2 Lacs and Caron gondolas and the Cascades and Moutière chairlifts. SETAM sells it at its ticket offices, where you can also pick up the beginners' map."
+        "Yes: four covered magic carpets are free, so beginners can start without a lift pass. SETAM's 2026/27 EasyRider map describes three sectors in the heart of the ski area with wide, gentle slopes. According to the resort's website, the Castor and Pollux carpets are next to the green Voie Lactée, and the Musaraigne and Campagnols carpets next to the green Grenouillère.",
+        "Next comes the EasyRider pass, for 4 hours or a day at half the public price. It covers many green and blue runs and five lifts: the Cairn, 2 Lacs and Caron gondolas and the Cascades and Moutière chairlifts. SETAM sells it at its ticket offices, where you can also pick up the beginners' map."
       ],
       "list": [
         "**Green runs on the beginners' map:** Combe de Thorens, Voie Lactée, Grenouillère, Espace débutant, Roc, Traversée des 2 Lacs, 2 Combes and Flocon, among others.",
@@ -55,77 +55,78 @@
     {
       "heading": "Where should intermediates ski?",
       "paragraphs": [
-        "Intermediates have blue runs from as high as 3,000 m. Les 3 Vallées and SETAM point to these:"
+        "Intermediates have blue runs starting as high as 3,000 m. Les 3 Vallées recommends these:"
       ],
       "list": [
-        "**Tête Ronde (blue):** from the top of the Péclet Funitel at 3,000 m, below the Aiguilles de Péclet, with wide curves and easy turns.",
+        "**Tête Ronde (blue):** from the top of the Péclet Funitel at 3,000 m, facing the Aiguilles de Péclet, with wide curves and easy turns.",
         "**Lory (blue), to Orelle:** from the top of the Thorens Funitel through the Bouchet glacial valley into the Orelle sector, which Les 3 Vallées calls quiet and sunny. Orelle is included in the Val Thorens-Orelle pass.",
         "**Boismint sector:** sunny from early morning, with wide, easy, little-used runs such as the blue Blanchot and Tétras; the Plan de l'Eau chairlift takes you back up.",
         "**Pluviomètre (blue):** a wide, smooth run towards the village, on every official route home from Méribel and Les Menuires."
       ],
       "after": [
-        "With a 3 Vallées pass you can change valleys on blue runs only: Les 3 Vallées publishes a day from Val Thorens to Courchevel and another from Courchevel to Orelle."
+        "With a 3 Vallées pass you can cross from valley to valley on blue runs alone: Les 3 Vallées publishes a one-day itinerary from Val Thorens to Courchevel and another from Courchevel to Orelle."
       ]
     },
     {
       "heading": "Which black runs and steep pistes suit experts?",
       "paragraphs": [
-        "The black runs of Val Thorens include Combe de Caron, from the Cime Caron cable car, and Goitschel, which starts at 2,900 m; Orelle adds Combe de Rosaël. Here is how the resort and Les 3 Vallées describe them:"
+        "The black runs of Val Thorens include Combe de Caron, from the Cime Caron cable car, and Goitschel, from the top of the 3 Vallées chairlift (VT5); Orelle adds Combe de Rosaël. Here is how the resort and Les 3 Vallées describe them:"
       ],
       "list": [
-        "**Combe de Caron (black):** steep at the top, through a narrow bottleneck, then wide valleys. It faces north and, says the resort, needs endurance and technical mastery.",
-        "**Goitschel (black):** steep and sustained from 2,900 m in the south-facing Plein Sud sector. The resort suggests the morning, after grooming, before skiers come back from the 3 Vallées.",
-        "**Combe de Rosaël (black):** the only black run in the Orelle sector, from Cime Caron, with 500 m of vertical over 2 km. It faces south, so Les 3 Vallées advises early season or early morning.",
+        "**Combe de Caron (black):** steep at the top, then through a narrow bottleneck into wide valleys. It faces north and, says the resort, needs endurance and technical mastery.",
+        "**Goitschel (black):** steep and sustained from 2,900 m in the south-facing Plein Sud sector. The resort suggests skiing it in the morning, after grooming, before skiers return from the other valleys at the end of the day.",
+        "**Combe de Rosaël (black):** the only black run in the Orelle sector, from Cime Caron, with a 500 m drop over 2 km. It faces south, so Les 3 Vallées advises early season or early morning.",
         "**Les Asters (red):** from the Thorens Funitel at about 3,000 m, north-facing and steep at the start, with a big drop over a short distance.",
         "**Christine (red):** from the Péclet Funitel, technical turns down a secluded valley below the Péclet glaciers, over about 700 m of vertical."
       ],
       "after": [
-        "A 3 Vallées pass also opens L'Éclipse in Courchevel, the longest black run in Les 3 Vallées: 3.3 km, 970 m of vertical and a 30% average gradient, rebuilt for the speed races of the 2023 World Championships."
+        "A 3 Vallées pass also takes you to L'Éclipse in Courchevel, rebuilt for the speed events of the 2023 World Championships and the longest black run in Les 3 Vallées: 3.3 km, a 970 m drop and a 30% average gradient."
       ]
     },
     {
-      "heading": "What is the highest point, and where are the glaciers?",
+      "heading": "What is the highest point of the ski area, and where are the glaciers?",
       "paragraphs": [
-        "The highest point on the Val Thorens side is Cime Caron, at 3,195 m according to Les 3 Vallées (the resort and the piste map round it to 3,200 m). The Cime Caron cable car and the Orelle-Caron gondola go up, and from the top Les 3 Vallées counts more than 1,000 Alpine summits, including Mont Blanc.",
-        "The highest lift in Les 3 Vallées is in Orelle: the 2026/27 map puts the summit of Les 3 Vallées, 3,230 m, at the top of the Bouchet lift (OR5).",
+        "The highest point the lifts reach on the Val Thorens side is Cime Caron, at 3,200 m on the official piste map and the resort's website (one Les 3 Vallées page gives 3,195 m). The Cime Caron cable car and the Orelle-Caron gondola go up to it, and from the top, says Les 3 Vallées, you can see more than 1,000 Alpine summits, Mont Blanc among them.",
+        "The highest lift in Les 3 Vallées is in Orelle: the 2026/27 map puts the summit of Les 3 Vallées, 3,230 m, at the top of the Bouchet chairlift (OR5).",
         "According to the [resort's website](https://www.valthorens.com/en/ski/domaine-skiable/), six glaciers overlook Val Thorens; the map names the Péclet, Thorens, Borgne, Gébroulaz and Bouchet glaciers. The blue Lory crosses the Bouchet glacial valley, while the Gébroulaz glacier, with its crevasses, is off-piste terrain where the resort advises going with a mountain guide."
       ]
     },
     {
       "heading": "Other valleys: which pass, and how to get back before the lifts close?",
       "paragraphs": [
-        "To ski Les Menuires, Saint-Martin, Méribel or Courchevel you need a 3 Vallées pass (600 km); the Val Thorens-Orelle pass covers 150 km. From 19 December 2026 to 9 April 2027, SETAM's [price list](https://ski.valthorens.com/wp-content/uploads/2026/08/TARIFS-HIVER-20262027-2.pdf) puts a 6-day adult pass at €367.50 for Val Thorens-Orelle and €421 for Les 3 Vallées. Its ticket offices also sell a one-day 3 Vallées extension for Val Thorens passes of two days or more. More in our guide to [Val Thorens ski pass prices](/en/guide/val-thorens-ski-pass-prices).",
-        "The 2026/27 piste map tells you to start back to your resort at least two hours before the lifts close. Closing times are firm: stuck in another valley, you get home at your own cost, by inter-resort bus or taxi. Each lift shows its closing time at the bottom station, next to a clock."
+        "To ski Les Menuires, Saint-Martin, Méribel or Courchevel you need a 3 Vallées pass (600 km); the Val Thorens-Orelle pass covers 150 km. From 19 December 2026 to 9 April 2027, SETAM's [price list](https://ski.valthorens.com/wp-content/uploads/2026/08/TARIFS-HIVER-20262027-2.pdf) puts a 6-day adult pass at €367.50 for Val Thorens-Orelle and €421 for Les 3 Vallées. SETAM's ticket offices also sell a one-day 3 Vallées extension for Val Thorens passes of two days or more. More in our guide to [Val Thorens ski pass prices](/en/guide/val-thorens-ski-pass-prices).",
+        "The 2026/27 piste map tells you to start back to your resort at least two hours before the lifts close. Closing times are firm: if you are stuck in another valley, getting home by inter-resort bus or taxi is at your own cost. Each lift shows its closing time at the bottom station, next to a clock."
       ],
       "table": {
         "caption": "Last departures back to Val Thorens (official 2026/27 piste map)",
         "head": ["Coming back from", "Last lift", "Until 5 February 2027", "From 6 February 2027"],
         "rows": [
-          ["Méribel, Méribel-Mottaret, Courchevel, Brides-les-Bains", "Côte Brune chairlift", "16:15", "16:40"],
+          ["Méribel, Méribel-Mottaret, Courchevel, Brides-les-Bains", "Côte Brune gondola", "16:15", "16:40"],
           ["Les Menuires, Saint-Martin-de-Belleville", "Mont de la Chambre chairlift", "16:25", "16:55"],
           ["Les Menuires, via the Roc 1 gondola", "Bruyères 1, then Bruyères 2 gondola", "16:20, then 16:25", "16:50, then 16:55"],
-          ["Orelle", "Orelle-Caron gondola", "15:45", "16:15"]
+          ["Orelle (Les 3 Vallées route)", "Orelle-Caron gondola", "15:45*", "16:15*"],
+          ["Orelle, over the Col de Rosaël", "Rosaël chairlift (OR3)", "16:10*", "16:40*"]
         ]
       },
       "after": [
-        "These lifts end the official routes back published by Les 3 Vallées. The map's times are non-contractual, and its Val Thorens-Orelle table still has last season's dates in the header: check at the lift or in the Les 3 Vallées app.",
-        "Allow more time in the school holidays, when the pistes are busier ([when to go](/en/guide/best-time-to-ski-in-val-thorens)). In uncertain weather, stay in your own sector: the map advises against the 3 Vallées circuit then."
+        "These lifts end the official routes back published by Les 3 Vallées, except Rosaël, which the map marks as another way back. *The Orelle times come from the map's Val Thorens-Orelle table, which still has last season's dates in the header. None of the map's times is contractual: check at the lift or in the Les 3 Vallées app.",
+        "Allow more time in the school holidays, when the pistes are busier ([when to go](/en/guide/best-time-to-ski-in-val-thorens)). In uncertain weather, stay in your own sector: the map advises against the 3 Vallées circuit on such days."
       ]
     },
     {
       "heading": "Off-piste in Val Thorens: what are the risks and the rules?",
       "paragraphs": [
-        "Off-piste is skied at your own risk, on terrain that is neither marked nor secured, and avalanches kill an average of 31 people a year in France, with 26 injured, according to [Météo-France](https://meteofrance.com/vigilance-et-securite/avalanche-quels-dangers-comment-reagir-et-sinformer). More than 90% of these accidents are dry slab avalanches, in most cases set off by the victim or someone in their group."
+        "Off-piste skiing is at your own risk, on terrain that is neither marked nor made safe. In France, avalanches kill 31 people and injure 26 in an average year, according to [Météo-France](https://meteofrance.com/vigilance-et-securite/avalanche-quels-dangers-comment-reagir-et-sinformer). More than 90% of these accidents are dry slab avalanches, in most cases set off by the victim or someone in their group."
       ],
       "ordered": true,
       "list": [
-        "**Go with a professional:** a high mountain guide or a specialist instructor, as the resort, Les 3 Vallées and the lift company all advise.",
+        "**Go with a professional:** a qualified mountain guide or a specialist instructor, as the resort, Les 3 Vallées and the lift company all advise.",
         "**Carry the kit and know how to use it:** an avalanche transceiver (DVA in French), a shovel and a probe.",
         "**Read the avalanche bulletin (BERA) that morning:** [Météo-France](https://meteofrance.com/meteo-montagne/alpes-du-nord/risques-avalanche) publishes it throughout the season for 35 massifs, rating the danger from 1 (low) to 5 (very high). The resort's snow page refers to the bulletin for the Vanoise massif.",
-        "**Keep off closed pistes:** one of the rules on the official map. Rescue on the pistes is charged, so check your insurance before you go."
+        "**Keep off closed pistes:** it is one of the rules on the official map. And check your insurance before you go: you pay for rescue on the pistes."
       ],
       "after": [
-        "The classic off-piste from Cime Caron is the Lac du Lou: a wide valley with no lifts in sight and 1,400 m of vertical down to the bottom of the Plan de l'Eau chairlift, with lines for experts and for skiers with little off-piste experience, according to Les 3 Vallées. Conditions must be assessed on the day, the resort adds."
+        "A classic off-piste route from Cime Caron is the Lac du Lou: a wide valley with no lifts in sight and 1,400 m of vertical down to the bottom of the Plan de l'Eau chairlift, with lines for experts and for skiers with little off-piste experience, according to Les 3 Vallées. The resort adds that conditions must be assessed on the day and recommends going with a professional who knows the area."
       ]
     },
     {
@@ -152,19 +153,19 @@
     },
     {
       "q": "Is Val Thorens good for beginners?",
-      "a": "Yes. Four covered carpet lifts are free, and the EasyRider pass, for 4 hours or a day at half price, opens green and blue runs. Start on green: a French blue means average difficulty."
+      "a": "Yes. Four covered magic carpets are free, and the EasyRider pass, for 4 hours or a day at half price, covers green and blue runs. Start on green: a French blue means average difficulty."
     },
     {
       "q": "How many black runs does Val Thorens have?",
       "a": "Les 3 Vallées has 37 black pistes in all; SETAM gives no split by colour for Val Thorens-Orelle. Named blacks include Combe de Caron and Goitschel in Val Thorens, and Combe de Rosaël in Orelle."
     },
     {
-      "q": "What is the highest point in Val Thorens?",
-      "a": "Cime Caron: 3,195 m according to Les 3 Vallées, 3,200 m on the piste map, reached by cable car or by the Orelle-Caron gondola. The Bouchet lift in Orelle goes higher, to 3,230 m."
+      "q": "What is the highest point of the Val Thorens ski area?",
+      "a": "Cime Caron, at 3,200 m on the official piste map (3,195 m on one Les 3 Vallées page), reached by cable car or by the Orelle-Caron gondola. In Orelle, the Bouchet chairlift goes higher, to 3,230 m."
     },
     {
       "q": "Do I need a Val Thorens pass or a 3 Vallées pass?",
-      "a": "The Val Thorens-Orelle pass covers 150 km, the 3 Vallées pass 600 km. From 19 December 2026 to 9 April 2027, a 6-day adult pass costs €367.50 or €421; SETAM's ticket offices also sell a one-day 3 Vallées extension for Val Thorens passes of two days or more."
+      "a": "The Val Thorens-Orelle pass covers 150 km, the 3 Vallées pass 600 km. From 19 December 2026 to 9 April 2027, a 6-day adult pass costs €367.50 for Val Thorens-Orelle or €421 for Les 3 Vallées; SETAM's ticket offices also sell a one-day 3 Vallées extension for Val Thorens passes of two days or more."
     },
     {
       "q": "What time do the last lifts back to Val Thorens leave?",
