@@ -42,7 +42,7 @@ export default function IntlFooter({ lang }: { lang: Lang }) {
                 <li key={h.code}>
                   {/* a full page load: the other language has its own frame */}
                   <a href={h.href} hrefLang={h.code} lang={h.code} aria-current={h.code === lang ? "true" : undefined}
-                    className={`${linkCls} ${h.code === lang ? "font-bold text-ink" : ""}`}>{LANG_NAMES[h.code]}</a>
+                    className={`${linkCls} min-w-[44px] ${h.code === lang ? "font-bold text-ink" : ""}`}>{LANG_NAMES[h.code]}</a>
                 </li>
               ))}
             </ul>
