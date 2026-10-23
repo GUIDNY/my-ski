@@ -9,7 +9,7 @@ import { alternatesFor } from "@/lib/intl/metadata";
 
 export const metadata = pageMeta({
   title: "חופשת סקי בואל טורנס: דירות לחבר'ה, סקי פס והסעה | SkiShare",
-  description: "SkiShare, חברה ישראלית להשכרת דירות בואל טורנס: דירה לחבר'ה, לקבוצה או לזוג, הזמנה ותשלום באתר, ומוסיפים סקי פס, הסעה מהשדה, ציוד וטיסה ישירה כשיש. כל אחד משלם את החלק שלו.",
+  description: "SkiShare, חברה ישראלית להשכרת דירות בואל טורנס: מזמינים ומשלמים באתר, ומוסיפים סקי פס, הסעה, ציוד וטיסה ישירה. כל אחד משלם את החלק שלו.",
   path: "/",
   languages: alternatesFor(""),
 });
@@ -95,7 +95,7 @@ export default function Home() {
         <picture>
           <source media="(max-width: 767px)" srcSet="/hero-ski-m.webp" type="image/webp" />
           <source srcSet="/hero-ski.webp" type="image/webp" />
-          <img src="/hero-ski.jpg" alt="" fetchPriority="high" className="absolute inset-0 w-full h-full object-cover object-center" />
+          <img src="/hero-ski.jpg" alt="פסגות מושלגות באלפים מעל ים של עננים בשקיעה" fetchPriority="high" className="absolute inset-0 w-full h-full object-cover object-center" />
         </picture>
         <div className="absolute inset-0" style={{ background: "rgba(8,18,38,0.46)" }} />
         <div className="relative z-10 w-full max-w-[1100px] mx-auto px-4 pt-12 pb-14 md:pt-16 md:pb-20 flex flex-col items-center gap-5 md:gap-6 text-center">
@@ -273,7 +273,7 @@ export default function Home() {
       {/* ── SEASONAIRES ──────────────────────────────────── */}
       <section className="relative py-20 md:py-24 px-5 md:px-6 overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/view.jpg" alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover object-center" />
+        <img src="/view.jpg" alt="הכפר ואל טורנס בשלג" loading="lazy" className="absolute inset-0 w-full h-full object-cover object-center" />
         <div className="absolute inset-0" style={{ background: "rgba(8,18,40,0.82)" }} />
         <div className="relative z-10 max-w-[1240px] mx-auto">
           <div className="max-w-2xl text-right">

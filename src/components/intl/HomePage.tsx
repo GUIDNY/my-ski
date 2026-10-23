@@ -51,7 +51,7 @@ export default async function HomePage({ lang }: { lang: Lang }) {
         <picture>
           <source media="(max-width: 767px)" srcSet="/hero-ski-m.webp" type="image/webp" />
           <source srcSet="/hero-ski.webp" type="image/webp" />
-          <img src="/hero-ski.jpg" alt="" fetchPriority="high" className="absolute inset-0 w-full h-full object-cover object-center" />
+          <img src="/hero-ski.jpg" alt={lang === "fr" ? "Sommets enneigés des Alpes au-dessus d'une mer de nuages au coucher du soleil" : "Snowy Alpine peaks above a sea of clouds at sunset"} fetchPriority="high" className="absolute inset-0 w-full h-full object-cover object-center" />
         </picture>
         <div className="absolute inset-0" style={{ background: "rgba(8,18,38,0.46)" }} />
         <div className="relative z-10 w-full max-w-[1100px] mx-auto px-4 pt-12 pb-14 md:pt-16 md:pb-20 flex flex-col items-center gap-5 md:gap-6 text-center">
