@@ -16,8 +16,8 @@ import type { Apartment, SkiPass } from "@/types";
 
 const GUESTS = 4;
 const NIGHTS = 7;
-const FIRST_WEEK = "2026-12-05"; // first Saturday of the season on sale
-const LAST_WEEK = "2027-04-24";
+const FIRST_WEEK = "2026-12-05"; // the whole 3 Vallées area opens on 5.12.2026
+const LAST_WEEK = "2027-04-10";  // last full week before it closes on 18.4.2027 (the package has a 3V pass)
 const APT_FIELDS = "id,name,price_per_night,max_guests,beds,sqm,images,source,available_weeks,available";
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 
@@ -28,7 +28,7 @@ const eur = (n: number) => `€${Math.round(n).toLocaleString("en-US")}`;
 function weekLabel(ci: string, co: string): string {
   const a = new Date(ci + "T12:00:00Z"), b = new Date(co + "T12:00:00Z");
   return a.getUTCMonth() === b.getUTCMonth()
-    ? `${a.getUTCDate()}–${b.getUTCDate()} ב${HE_MONTHS[b.getUTCMonth()]}`
+    ? `${a.getUTCDate()}\u2060–\u2060${b.getUTCDate()} ב${HE_MONTHS[b.getUTCMonth()]}` // "12–19" stays on one line
     : `${a.getUTCDate()} ב${HE_MONTHS[a.getUTCMonth()]} – ${b.getUTCDate()} ב${HE_MONTHS[b.getUTCMonth()]}`;
 }
 
@@ -79,9 +79,8 @@ async function loadPackages(): Promise<{ label: string; cards: Card[] } | null> 
     if (!rules) return null;
     const card = (a: Apartment, lodging: number): Card => {
       const total = Math.round(lodging) + GUESTS * addOnsPerPerson;
-      const beds = Number(a.beds) || 0;
-      const meta = [`עד ${a.max_guests} אנשים`, beds > 1 ? `${beds} חדרי שינה` : beds === 1 ? "חדר שינה" : "", a.sqm ? `${a.sqm} מ"ר` : ""]
-        .filter(Boolean).join(" · ");
+      // (beds is the number of beds, not bedrooms, so it isn't shown here)
+      const meta = [`עד ${a.max_guests} אנשים`, a.sqm ? `${a.sqm} מ"ר` : ""].filter(Boolean).join(" · ");
       return {
         id: a.id, name: a.name, img: a.images?.[0] ?? "/hero-ski.jpg", ownApartment: a.source !== "la_cime", meta,
         href: `/apartments/${a.id}?checkin=${checkin}&checkout=${checkout}&guests=${GUESTS}`,

@@ -18,7 +18,7 @@ const day = (s: string) => new Date(s + "T12:00:00");
 const rangeLabel = (ci: string, co: string) => {
   const a = day(ci), b = day(co);
   return a.getMonth() === b.getMonth()
-    ? `${a.getDate()}–${b.getDate()} ב${HE_MONTHS[b.getMonth()]}`
+    ? `${a.getDate()}\u2060–\u2060${b.getDate()} ב${HE_MONTHS[b.getMonth()]}` // word joiners: "16–23" never splits across lines
     : `${a.getDate()} ב${HE_MONTHS[a.getMonth()]} – ${b.getDate()} ב${HE_MONTHS[b.getMonth()]}`;
 };
 /** "שבת 16.1" */
