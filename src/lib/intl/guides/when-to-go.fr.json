@@ -1,73 +1,337 @@
 {
   "key": "when-to-go",
   "lang": "fr",
-  "title": "PLACEHOLDER when-to-go fr",
-  "metaTitle": "PLACEHOLDER when-to-go | SkiShare",
-  "description": "placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder ",
+  "title": "Quand partir à Val Thorens ? Le calendrier de la saison 2026-2027",
+  "metaTitle": "Quand partir à Val Thorens en 2026-2027 ? | SkiShare",
+  "description": "Val Thorens est ouverte du 21 novembre 2026 au 2 mai 2027. Vacances par zone et en Belgique, neige mois par mois, semaines calmes : le calendrier pour bien choisir.",
   "keywords": [
-    "a",
-    "b",
-    "c"
+    "quand partir à val thorens",
+    "meilleure période ski val thorens",
+    "vacances de février 2027 zones",
+    "val thorens nouvel an",
+    "ouverture val thorens 2026",
+    "vacances d'hiver 2027 zone a b c",
+    "val thorens en janvier",
+    "val thorens pâques 2027"
   ],
-  "emoji": "🎫",
+  "emoji": "📅",
   "published": "2026-10-23",
   "updated": "2026-10-23",
-  "intro": "Intro with [a link](/fr/apartments) and **bold**.",
+  "intro": "Les remontées de Val Thorens tournent du 21 novembre 2026 au 2 mai 2027, et les 3 Vallées sont reliées du 5 décembre au 18 avril. Pour skier plus au calme sur tout le domaine, visez une semaine hors vacances : du 12 au 19 décembre, du 9 janvier au 6 février ou du 6 au 20 mars. Les vacances se concentrent à Noël et du 13 au 27 février : ces semaines-là, nos appartements coûtent environ le triple de fin novembre ou d'avril. La neige est la plus épaisse de février à avril, 140 à 152 cm en moyenne au village selon Météo-France.",
   "sections": [
     {
-      "heading": "Section one",
+      "heading": "Quand ouvre Val Thorens en 2026-2027 ?",
       "paragraphs": [
-        "Para 5–18 December."
-      ],
-      "list": [
-        "x",
-        "y"
+        "Val Thorens et Orelle ouvrent le samedi 21 novembre 2026 et ferment le dimanche 2 mai 2027, selon la SETAM, qui exploite les remontées ; le reste des 3 Vallées, 600 km de pistes au total, est relié du 5 décembre 2026 au 18 avril 2027."
       ],
       "table": {
-        "caption": "Cap",
+        "caption": "La saison 2026-2027 (3 Vallées, SETAM, calendriers scolaires officiels)",
         "head": [
-          "A",
-          "B"
+          "Dates",
+          "Ce qui se passe"
         ],
         "rows": [
           [
-            "1",
-            "2"
+            "21 novembre 2026",
+            "Ouverture, avec La Grande Première, week-end de lancement (21 et 22 novembre)"
+          ],
+          [
+            "5 décembre",
+            "3 Vallées reliées (Courchevel dès le 4 décembre, Saint-Martin-de-Belleville dès le 12)"
+          ],
+          [
+            "19 décembre",
+            "Début des tarifs de haute saison"
+          ],
+          [
+            "19 décembre – 3 janvier",
+            "Vacances de Noël"
+          ],
+          [
+            "6 février – 7 mars",
+            "Vacances d'hiver des zones C, A puis B ; carnaval belge"
+          ],
+          [
+            "26 mars – 11 avril",
+            "Vacances de Pâques anglaises et flamandes (Pâques le 28 mars)"
+          ],
+          [
+            "3 avril – 2 mai",
+            "Vacances de printemps des zones C, A puis B"
+          ],
+          [
+            "10–18 avril",
+            "Forfait 3 Vallées de nouveau réduit"
+          ],
+          [
+            "18 avril",
+            "Dernier jour des 3 Vallées"
+          ],
+          [
+            "2 mai 2027",
+            "Dernier jour à Val Thorens et Orelle"
           ]
         ]
-      }
+      },
+      "after": [
+        "Selon la grille de la SETAM, la journée adulte Val Thorens-Orelle coûte 66,10 € jusqu'au 18 décembre, puis 73,50 € ; six jours sur les 3 Vallées, 378,50 € du 5 au 18 décembre et du 10 au 18 avril, 421 € entre les deux. Forfaits en ligne et aux caisses de la SETAM : [prix du forfait à Val Thorens](/fr/guide/prix-forfait-val-thorens) ; pour venir en train depuis Paris : [comment aller à Val Thorens](/fr/guide/comment-aller-a-val-thorens)."
+      ]
     },
     {
-      "heading": "Live",
+      "heading": "Vacances scolaires 2026-2027 : zones A, B, C et Belgique",
+      "paragraphs": [
+        "En février 2027, la zone C part la première, le 6, puis la A le 13 et la B le 20, avec une reprise les lundis 22 février, 1er mars et 8 mars. En Belgique, le congé de détente francophone court du 22 février au 5 mars, la krokusvakantie flamande du 8 au 14 février."
+      ],
+      "table": {
+        "caption": "Vacances scolaires pendant la saison 2026-2027 (calendriers officiels ; Royaume-Uni et Scandinavie : exemples)",
+        "head": [
+          "",
+          "Noël",
+          "Février",
+          "Pâques et printemps"
+        ],
+        "rows": [
+          [
+            "France, zone A",
+            "19 déc. – 3 janv.",
+            "13–28 févr.",
+            "10–25 avr."
+          ],
+          [
+            "France, zone B",
+            "19 déc. – 3 janv.",
+            "20 févr. – 7 mars",
+            "17 avr. – 2 mai"
+          ],
+          [
+            "France, zone C",
+            "19 déc. – 3 janv.",
+            "6–21 févr.",
+            "3–18 avr."
+          ],
+          [
+            "Belgique, Fédération Wallonie-Bruxelles",
+            "21 déc. – 1er janv.",
+            "22 févr. – 5 mars",
+            "26 avr. – 7 mai"
+          ],
+          [
+            "Belgique, Flandre",
+            "21 déc. – 3 janv.",
+            "8–14 févr.",
+            "29 mars – 11 avr."
+          ],
+          [
+            "Pays-Bas, nord et centre",
+            "19 déc. – 3 janv.",
+            "20–28 févr.",
+            "24 avr. – 2 mai"
+          ],
+          [
+            "Pays-Bas, sud",
+            "19 déc. – 3 janv.",
+            "13–21 févr.",
+            "24 avr. – 2 mai"
+          ],
+          [
+            "Angleterre (Surrey, Southwark, Plymouth)",
+            "19 déc. – 3 janv. (Plymouth : 4 janv.)",
+            "15–19 févr.",
+            "26 mars – 11 avr."
+          ],
+          [
+            "Écosse (Édimbourg)",
+            "21 déc. – 5 janv.",
+            "15–19 févr.",
+            "5–19 avr."
+          ],
+          [
+            "Oslo",
+            "21 déc. – 1er janv.",
+            "22–26 févr.",
+            "22–30 mars"
+          ],
+          [
+            "Copenhague (calendrier indicatif)",
+            "21 déc. – 1er janv.",
+            "15–19 févr.",
+            "22–29 mars"
+          ],
+          [
+            "Göteborg",
+            "19 déc. – 10 janv.",
+            "15–19 févr.",
+            "26 mars – 2 avr."
+          ]
+        ]
+      },
+      "after": [
+        "**Les zones :** les vacances vont du samedi, après les cours, au dimanche qui précède la reprise. La zone A comprend notamment les académies de Lyon, Grenoble et Bordeaux, la B celles de Lille, Nantes, Strasbourg et Aix-Marseille, la C celles de Paris, Créteil, Versailles, Montpellier et Toulouse.",
+        "**Belgique et Pays-Bas :** depuis la réforme des rythmes scolaires, écoles francophones et flamandes n'ont plus le même calendrier ; aux Pays-Bas, les dates de février sont indicatives, et les écoles peuvent les déplacer, par exemple pour le carnaval."
+      ]
+    },
+    {
+      "heading": "Quelles semaines sont les plus chargées, et les moins chères ?",
+      "paragraphs": [
+        "Les vacances se concentrent du 21 décembre au 1er janvier, quand tous les calendriers du tableau sont en congé, et du 13 au 27 février, quand deux zones françaises partent avec des élèves belges, néerlandais ou anglais. Dans nos appartements d'agence, les semaines du 13 et du 20 février coûtent environ trois fois une semaine de fin novembre ou d'avril, le Nouvel An plus du double, Noël environ une fois et demie (relevé du 23 octobre 2026).",
+        "Les moins chères : fin novembre, le 12 décembre et du 27 mars à la fin avril ; le 2 et le 9 janvier coûtent moins que la suite du mois. Le tableau donne, pour chaque samedi, l'appartement d'agence le moins cher encore libre et combien restent libres ; cliquez sur un samedi pour les voir."
+      ],
       "liveWeeks": {
         "notes": {
-          "2026-12-26": "New Year"
+          "2026-11-28": "Seul Val Thorens-Orelle jusqu'au 5 déc.",
+          "2026-12-05": "3 Vallées reliées, hors vacances",
+          "2026-12-12": "Tout ouvert ; forfait réduit au 18 déc.",
+          "2026-12-19": "Vacances de Noël",
+          "2026-12-26": "Vacances du Nouvel An",
+          "2027-01-02": "Rentrée le 4 janvier",
+          "2027-01-09": "Hors vacances (FR, BE, NL, R.-U.)",
+          "2027-01-16": "Hors vacances scolaires",
+          "2027-01-23": "Hors vacances scolaires",
+          "2027-01-30": "Hors vacances scolaires",
+          "2027-02-06": "Zone C ; Flandre dès le 8 févr.",
+          "2027-02-13": "Zones A et C ; half-term anglais",
+          "2027-02-20": "Zones A et B ; FWB ; Pays-Bas",
+          "2027-02-27": "Zone B ; FWB jusqu'au 5 mars",
+          "2027-03-06": "Fin de la zone B le 7 mars",
+          "2027-03-13": "Hors vacances scolaires",
+          "2027-03-20": "Oslo, Copenhague ; R.-U. dès le 26 mars",
+          "2027-03-27": "Pâques : vacances anglaises et flamandes",
+          "2027-04-03": "Zone C ; Pâques anglaises et flamandes",
+          "2027-04-10": "Zones A et C ; forfait 3 Vallées réduit",
+          "2027-04-17": "Zones A et B ; fin des 3 Vallées le 18",
+          "2027-04-24": "Zone B, FWB, Pays-Bas ; fin de saison"
         },
         "count": true
-      }
+      },
+      "after": [
+        "Les appartements propres à SkiShare se louent à la nuit, frais de ménage éventuels en sus. Tous les appartements libres à vos dates : [la page des appartements](/fr/apartments) ; les prix sur la saison : [prix de location d'un appartement à Val Thorens](/fr/guide/prix-location-appartement-val-thorens)."
+      ]
     },
     {
-      "heading": "Ordered",
-      "list": [
-        "a",
-        "b"
+      "heading": "Fin novembre et début décembre : moins cher, pas tout ouvert",
+      "paragraphs": [
+        "Fin novembre et début décembre comptent parmi les semaines les moins chères, sans vacances scolaires, mais seuls Val Thorens et Orelle sont ouverts jusqu'au 5 décembre, et l'enneigement varie le plus d'un hiver à l'autre. Dès le 12 décembre, tous les secteurs des 3 Vallées tournent, et le forfait reste au tarif réduit jusqu'au 18.",
+        "À la station Météo-France du village (2 277 m), la hauteur moyenne de neige allait de 4 cm (2020) à 38 cm (2023) en novembre sur sept hivers, et de 37 à 115 cm en décembre, mais le sol est resté blanc chaque jour de décembre. L'ESF lance ses cours collectifs enfants le 6 décembre (3 et 4 ans) et le 7 (dès 5 ans)."
       ],
-      "ordered": true,
       "after": [
-        "after"
+        "Bon compromis : [du 12 au 19 décembre](/fr/apartments?checkin=2026-12-12&checkout=2026-12-19), tout ouvert, hors vacances, avec un forfait du dimanche au vendredi au tarif réduit."
+      ]
+    },
+    {
+      "heading": "Noël et Nouvel An à Val Thorens",
+      "paragraphs": [
+        "Du 21 décembre au 1er janvier, tous les pays du tableau sont en vacances, seul moment de la saison où c'est le cas ; les vacances françaises vont du 19 décembre au 3 janvier, et les écoles belges, néerlandaises et britanniques du tableau rentrent entre le 4 et le 6 janvier. Forfait au tarif de haute saison dès le 19 décembre.",
+        "Dans nos appartements, le Nouvel An (semaine du 26 décembre) coûte plus du double d'une semaine de fin novembre, Noël environ une fois et demie, et la semaine de la rentrée, le 2 janvier, nettement moins. Côté froid : −7,4 °C de minimale moyenne en décembre, 0,1 °C de maximale, et 14 jours sans dégel."
+      ]
+    },
+    {
+      "heading": "Val Thorens en janvier",
+      "paragraphs": [
+        "Janvier offre la plus longue période sans vacances scolaires : aucune dans les calendriers du tableau du 11 janvier au 5 février. C'est aussi le mois le plus froid au village : −10,3 °C de minimale moyenne, −2,1 °C de maximale, 20 jours sans dégel, et un record de −21,6 °C le 11 janvier 2019 en huit hivers.",
+        "La neige est installée : 113 cm en moyenne, et plus de 30 cm chaque jour de janvier à avril lors des sept derniers hivers. Dans nos appartements, le 2 et le 9 janvier coûtent moins que la suite du mois. Une semaine calme : [du 9 au 16 janvier](/fr/apartments?checkin=2027-01-09&checkout=2027-01-16) ; la météo mois par mois : [météo et enneigement à Val Thorens](/fr/guide/meteo-enneigement-val-thorens)."
+      ]
+    },
+    {
+      "heading": "Février 2027 : les vacances d'hiver, zone par zone",
+      "paragraphs": [
+        "Du 6 février au 7 mars, au moins une zone française est en vacances ; les autres congés du tableau tombent surtout sur les deux semaines du milieu. Du samedi au samedi :"
+      ],
+      "list": [
+        "**6–13 février :** zone C (dont Paris) et Flandre (8–14 février).",
+        "**13–20 février :** zones A et C, half-term anglais, Édimbourg, Copenhague et Göteborg (15–19 février), sud des Pays-Bas.",
+        "**20–27 février :** zones A et B, Fédération Wallonie-Bruxelles (dès le 22 février), nord et centre des Pays-Bas, Oslo.",
+        "**27 février – 6 mars :** zone B et Fédération Wallonie-Bruxelles (jusqu'au 5 mars)."
+      ],
+      "after": [
+        "Dans nos appartements, le 13 et le 20 février sont les semaines les plus chères de la saison ; le 27 février l'est moins, le 6 mars moins encore. La station mesure 140 cm de neige en moyenne en février, le mois le moins arrosé de la saison : 7 jours d'au moins 1 mm de pluie ou de neige, contre 12 en décembre."
+      ]
+    },
+    {
+      "heading": "Val Thorens en mars",
+      "paragraphs": [
+        "Mars affiche la plus forte hauteur de neige moyenne au village, 152 cm, et du 8 au 21 mars aucun calendrier du tableau ne prévoit de vacances ; les vacances de Pâques débutent le 22 mars à Oslo et Copenhague, le 26 en Angleterre. Les maximales montent à 2,0 °C en moyenne, mais les minimales restent à −8,0 °C, comme en février.",
+        "Dans nos appartements, mars coûte moins que les vacances de février, mais plus qu'avril. Entre deux vacances : [du 13 au 20 mars](/fr/apartments?checkin=2027-03-13&checkout=2027-03-20)."
+      ]
+    },
+    {
+      "heading": "Avril et Pâques 2027 : la fin de saison",
+      "paragraphs": [
+        "Pâques tombe le dimanche 28 mars 2027 : les vacances anglaises et flamandes occupent les semaines du 27 mars et du 3 avril, Édimbourg suit du 5 au 19 avril, et les zones françaises s'enchaînent du 3 avril au 2 mai. Le reste des 3 Vallées ferme le 18 avril, avec un forfait moins cher dès le 10 ; seul le domaine Val Thorens-Orelle, 150 km de pistes selon la SETAM, reste ensuite ouvert, jusqu'au 2 mai.",
+        "En avril, la station a mesuré 143 cm de neige en moyenne, et plus de 30 cm chaque jour lors des sept derniers hivers. Cette neige de printemps est en général dure le matin, après le gel (26 jours sur 30 en moyenne), et plus souple vers midi, avec 4,4 °C de maximale moyenne.",
+        "Dernière semaine, dès le 24 avril : zone B, meivakantie néerlandaise (24 avril – 2 mai) et Fédération Wallonie-Bruxelles (dès le 26) ; la garderie de l'ESF ferme alors pour rénovation, sans cours Piou-Piou cette semaine-là. Dans nos appartements, les semaines du 27 mars à la fin avril coûtent à peu près le prix d'une semaine de fin novembre."
       ]
     }
   ],
   "faqs": [
     {
-      "q": "Question?",
-      "a": "Answer."
+      "q": "Quand ouvre Val Thorens en 2026 ?",
+      "a": "Val Thorens et Orelle ouvrent le samedi 21 novembre 2026 et ferment le dimanche 2 mai 2027 ; les 3 Vallées sont reliées du 5 décembre 2026 au 18 avril 2027."
+    },
+    {
+      "q": "Quelles sont les dates des vacances de février 2027 par zone ?",
+      "a": "Zone C : du samedi 6 au lundi 22 février 2027 ; zone A : du samedi 13 février au lundi 1er mars ; zone B : du samedi 20 février au lundi 8 mars. Les cours reprennent le lundi."
+    },
+    {
+      "q": "Quand sont les vacances de carnaval 2027 en Belgique ?",
+      "a": "En Fédération Wallonie-Bruxelles, le congé de détente va du lundi 22 février au vendredi 5 mars 2027 ; en Flandre, la krokusvakantie va du lundi 8 au dimanche 14 février."
+    },
+    {
+      "q": "Peut-on skier à Val Thorens au Nouvel An ?",
+      "a": "Oui : tous les secteurs des 3 Vallées sont ouverts dès le 12 décembre. C'est la seule période où les écoles françaises, belges, néerlandaises et britanniques sont toutes en vacances ; le forfait est au tarif de haute saison."
+    },
+    {
+      "q": "Quelle est la meilleure période pour skier à Val Thorens ?",
+      "a": "Pour skier plus au calme sur tout le domaine : du 12 au 19 décembre, du 9 janvier au 6 février ou du 6 au 20 mars, hors vacances scolaires. La neige est la plus épaisse, en moyenne, de février à avril."
+    },
+    {
+      "q": "Quand y a-t-il le plus de neige à Val Thorens ?",
+      "a": "À la station Météo-France du village, de février à avril : 140 à 152 cm en moyenne sur les hivers 2019-2020 à 2025-2026. Ce sont des moyennes : vérifiez l'enneigement avant de partir."
+    },
+    {
+      "q": "Peut-on skier à Val Thorens fin avril ?",
+      "a": "Oui : le domaine Val Thorens-Orelle reste ouvert jusqu'au 2 mai 2027, avec 150 km de pistes selon la SETAM, mais le reste des 3 Vallées ferme le 18 avril."
     }
   ],
   "sources": [
     {
-      "title": "Src",
-      "url": "https://www.valthorens.com/"
+      "title": "Ministère de l'Éducation nationale : calendrier scolaire 2026-2027, zones A, B et C",
+      "url": "https://www.education.gouv.fr/calendrier-scolaire-100148"
+    },
+    {
+      "title": "Service-public.fr : vacances scolaires 2026-2027 et académies de chaque zone",
+      "url": "https://www.service-public.gouv.fr/particuliers/actualites/A18563"
+    },
+    {
+      "title": "Infor Jeunes : congés scolaires 2026-2027 en Fédération Wallonie-Bruxelles",
+      "url": "https://www.jeminforme.be/conges-scolaires/"
+    },
+    {
+      "title": "Vlaanderen.be : schoolvakanties 2026-2027 (Flandre)",
+      "url": "https://www.vlaanderen.be/onderwijs-en-vorming/wat-mag-en-moet-op-school/schoolvakanties-vrije-dagen-en-afwezigheden/schoolvakanties"
+    },
+    {
+      "title": "Rijksoverheid : schoolvakanties 2026-2027 (Pays-Bas)",
+      "url": "https://www.rijksoverheid.nl/themas/onderwijs/schoolvakanties/overzicht-schoolvakanties-per-schooljaar/overzicht-schoolvakanties-2026-2027"
+    },
+    {
+      "title": "Surrey County Council : school term dates 2026 to 2027 (Angleterre)",
+      "url": "https://www.surreycc.gov.uk/schools-and-learning/schools/term-dates"
+    },
+    {
+      "title": "Les 3 Vallées : dossier de presse de l'hiver 2026-2027 (dates d'ouverture de chaque station)",
+      "url": "https://press.les3vallees.com/media/download/the-place-to-ski.pdf"
+    },
+    {
+      "title": "SETAM : tarifs des forfaits hiver 2026-2027, Val Thorens-Orelle et 3 Vallées (PDF)",
+      "url": "https://ski.valthorens.com/wp-content/uploads/2026/08/TARIFS-HIVER-20262027-2.pdf"
+    },
+    {
+      "title": "Météo-France : données climatologiques mensuelles, Savoie, station VAL THORENS_SAPC (2 277 m)",
+      "url": "https://object.files.data.gouv.fr/meteofrance/data/synchro_ftp/BASE/MENS/MENSQ_73_previous-1950-2024.csv.gz"
+    },
+    {
+      "title": "ESF Val Thorens : cours collectifs enfants (début le 7 décembre)",
+      "url": "https://www.esf-valthorens.com/enfants-ados/cours-collectifs-de-ski/"
     }
   ]
 }
