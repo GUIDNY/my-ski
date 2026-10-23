@@ -3,6 +3,7 @@ import { GUIDES } from "@/lib/guides";
 import { PageTop, wrap, card, btn } from "@/components/ui";
 import GuideIcon from "./guide-icon";
 import { pageMeta } from "@/lib/page-meta";
+import { breadcrumbLd, ldJson, siteUrl } from "@/lib/site";
 
 export const metadata = pageMeta({
   title: "מדריך ואל טורנס 2026/27: עונה, מחירים, הגעה ולינה | SkiShare",
@@ -12,15 +13,29 @@ export const metadata = pageMeta({
 
 export default function GuideIndex() {
   const [main, ...rest] = GUIDES;
+  // the list of guides, for search engines and AI answers
+  const listLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "מדריך ואל טורנס",
+    url: siteUrl("/guide"),
+    inLanguage: "he-IL",
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: GUIDES.map((g, i) => ({ "@type": "ListItem", position: i + 1, url: siteUrl(`/guide/${g.slug}`), name: g.title })),
+    },
+  };
   return (
     <div className="bg-white text-ink" dir="rtl">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(listLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(breadcrumbLd([["דף הבית", "/"], ["מדריך ואל טורנס", "/guide"]])) }} />
       <PageTop soft
         crumbs={[{ label: "דף הבית", href: "/" }, { label: "מדריך ואל טורנס" }]}
         title="כל מה שצריך לדעת על ואל טורנס"
         sub={
           <span className="block max-w-[760px]">
-            מדריכים מקיפים לתכנון חופשת הסקי בואל טורנס — עונה ומזג אוויר, איך מגיעים מישראל,
-            מחירי סקי פס, מסלולים, חיי לילה, לינה ועוד. כל המידע שצריך לפני שסוגרים טיסות.
+            מדריכים לתכנון חופשת סקי בואל טורנס: מתי לנסוע, איך מגיעים מישראל, כמה עולה סקי פס,
+            איפה לישון, מסלולים, משפחות ואפרה סקי. כל מספר עם מקור, מעודכן לעונת 2026/27.
           </span>
         }
       />

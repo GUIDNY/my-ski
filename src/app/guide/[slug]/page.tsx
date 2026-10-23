@@ -199,8 +199,8 @@ export default async function GuideArticle({ params }: { params: Promise<{ slug:
               <Link href="/apartments" className="inline-flex items-center justify-center min-h-[52px] px-6 rounded-[14px] bg-white text-ink font-bold text-[16px] hover:bg-accent-soft transition-colors">
                 דירות בואל טורנס
               </Link>
-              <Link href="/weekly" className="inline-flex items-center justify-center min-h-[52px] px-6 rounded-[14px] border border-white/45 text-white font-bold text-[16px] hover:bg-white/10 transition-colors">
-                מחיר לכל שבוע בעונה
+              <Link href="/packages" className="inline-flex items-center justify-center min-h-[52px] px-6 rounded-[14px] border border-white/45 text-white font-bold text-[16px] hover:bg-white/10 transition-colors">
+                חבילת סקי: מחיר לכל שבוע
               </Link>
             </div>
           </div>
