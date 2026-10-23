@@ -1,10 +1,24 @@
+import Link from "next/link";
+import OpenChatButton from "@/components/OpenChatButton";
+import { btn } from "@/components/ui";
+import { StatusCard } from "@/components/checkout/Checkout";
+import { helperWaHref } from "@/lib/helper-whatsapp";
+
 export default function PayFailure() {
   return (
-    <div className="min-h-screen bg-[#f7f9fb] flex flex-col items-center justify-center text-center px-6" dir="rtl">
-      <div className="w-20 h-20 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-5 text-4xl">✕</div>
-      <h1 className="font-display text-3xl font-black text-slate-900 mb-2">התשלום לא הושלם</h1>
-      <p className="text-slate-500 max-w-md mb-8">משהו השתבש או שהתשלום בוטל. אפשר לנסות שוב, או לדבר איתנו בוואטסאפ ונשמח לעזור.</p>
-      <a href="/" className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3.5 rounded-xl transition">חזרה לאתר</a>
-    </div>
+    <StatusCard tone="danger" title="התשלום לא הושלם"
+      actions={<>
+        <a href={helperWaHref("היי, ניסיתי לשלם באתר והתשלום לא הושלם")} target="_blank" rel="noopener noreferrer" className={btn.primary}>
+          לכתוב לנו בוואטסאפ
+        </a>
+        <Link href="/" className={btn.outline}>חזרה לאתר</Link>
+      </>}>
+      <p className="text-[16px] md:text-[17px] leading-relaxed text-body max-w-[460px]">
+        משהו השתבש או שהתשלום בוטל. אפשר לנסות שוב, או לדבר איתנו ונשמח לעזור לסגור את ההזמנה.
+      </p>
+      <p className="text-[14px] text-muted">
+        אפשר גם <OpenChatButton className="font-bold text-accent hover:text-accent-hover">לכתוב לעוזר שלנו בצ&apos;אט</OpenChatButton>
+      </p>
+    </StatusCard>
   );
 }

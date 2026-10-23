@@ -1,30 +1,95 @@
 "use client";
 import SkiLoader from "@/components/SkiLoader";
 import { Suspense, useEffect, useState, useRef } from "react";
+import type { ReactNode } from "react";
+import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { Apartment } from "@/types";
-import {
-  IconMountain, IconHome, IconDiamond, IconCheck, IconStar,
-  IconCalendar, IconUser, IconSearch, IconBed,
-} from "@/components/Icons";
-import Logo from "@/components/Logo";
 import SkiCalendar from "@/components/SkiCalendar";
+import OpenChatButton from "@/components/OpenChatButton";
+import { wrap, card, btn, badgeLight, badgeDark, Check, EmptyState, Skeleton } from "@/components/ui";
 import { getEffectivePrice, calcTotalForRange, matchingWeek } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
-const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s + "T12:00:00"); return `${d.getDate()} ${HE_MONTHS[d.getMonth()]}`; };
+const WEEKDAYS = ["יום א׳","יום ב׳","יום ג׳","יום ד׳","יום ה׳","יום ו׳","שבת"];
+const day = (s: string) => new Date(s + "T12:00:00");
+/** "16–23 בינואר" / "28 בפברואר – 7 במרץ" */
+const rangeLabel = (ci: string, co: string) => {
+  const a = day(ci), b = day(co);
+  return a.getMonth() === b.getMonth()
+    ? `${a.getDate()}–${b.getDate()} ב${HE_MONTHS[b.getMonth()]}`
+    : `${a.getDate()} ב${HE_MONTHS[a.getMonth()]} – ${b.getDate()} ב${HE_MONTHS[b.getMonth()]}`;
+};
+/** "שבת 16.1" */
+const dayLabel = (s: string) => { const d = day(s); return `${WEEKDAYS[d.getDay()]} ${d.getDate()}.${d.getMonth() + 1}`; };
+/** the date n days after an ISO date, as an ISO date */
+const addDaysIso = (iso: string, n: number) => { const d = new Date(iso + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+const eur = (n: number) => `€${n.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
 
-const getCategory = (apt: Apartment) => apt.price_per_night < 600 ? "cozy" : "premium";
 const capacity = (apt: Apartment) => apt.max_guests || apt.beds * 2 || 2;
+const isAgency = (apt: Apartment) => apt.source === "la_cime";
+/** a type worth showing next to the name ("סטודיו", "3 חדרים"), not "cozy"/"דירה" or what the name already says */
+const typeLabel = (apt: Apartment) => {
+  const t = (apt.type || "").trim();
+  return /[א-ת]/.test(t) && t !== "דירה" && !apt.name.includes(t) ? t : "";
+};
+const metaLine = (apt: Apartment) => [
+  typeLabel(apt),
+  apt.max_guests ? `עד ${apt.max_guests} אנשים` : "",
+  apt.sqm ? `${apt.sqm} מ"ר` : "",
+  apt.baths ? (apt.baths === 1 ? "חדר רחצה" : `${apt.baths} חדרי רחצה`) : "",
+].filter(Boolean).join(" · ");
 
-type Filter = "all" | "cozy" | "premium";
+type Kind = "all" | "own" | "agency";
+type Sort = "recommended" | "price";
 type RulesMap = Record<string, PricingRule[]>;
 
-/* ── Apartment card ───────────────────────────────────────── */
-function AptCard({ apt, nights, checkin, checkout, guests, deal, rules }: {
+// what the full deal adds on the apartment page (?deal=full pre-selects these)
+const FULL_DEAL = ["סקי פס לשלושת העמקים", "הסעה הלוך וחזור מהשדה", "טיסה וכבודה"];
+
+/* ── Icons (stroke, follow the text color) ─────────────────── */
+const ico = (path: ReactNode, size = 18) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{path}</svg>
+);
+const IcoCal = ({ size = 18 }: { size?: number }) => ico(<><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></>, size);
+const IcoUsers = () => ico(<><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0" /><path d="M16 4.5a3.5 3.5 0 0 1 0 7" /><path d="M18 14a6 6 0 0 1 3.5 6" /></>);
+const IcoChat = () => ico(<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z" />, 16);
+const IcoArrow = () => ico(<path d="M19 12H5M11 6l-6 6 6 6" />, 18);
+const IcoPin = () => ico(<><path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z" /><circle cx="12" cy="10" r="2.5" /></>, 16);
+
+/* ── Guests stepper ───────────────────────────────────────── */
+function Stepper({ value, onChange, min = 1, max = 12 }: { value: number; onChange: (n: number) => void; min?: number; max?: number }) {
+  const b = "w-10 h-10 rounded-full border border-line-strong flex items-center justify-center text-ink text-[18px] leading-none hover:border-ink transition-colors disabled:opacity-40 disabled:hover:border-line-strong";
+  return (
+    <div className="flex items-center gap-2" role="group" aria-label="כמה אתם">
+      <button type="button" className={b} onClick={() => onChange(Math.max(min, value - 1))} disabled={value <= min} aria-label="פחות אנשים">−</button>
+      <span className="w-6 text-center font-bold text-[17px] text-ink" aria-live="polite">{value}</span>
+      <button type="button" className={b} onClick={() => onChange(Math.min(max, value + 1))} disabled={value >= max} aria-label="עוד אנשים">+</button>
+    </div>
+  );
+}
+
+/* ── Deal type: full deal / apartment only ────────────────── */
+function DealToggle({ value, onChange }: { value: "full" | ""; onChange: (v: "full" | "") => void }) {
+  const opt = (v: "full" | "", label: string) => (
+    <button type="button" aria-pressed={value === v} onClick={() => onChange(v)}
+      className={`flex-1 min-h-[40px] px-3 rounded-[10px] text-[15px] font-bold transition-colors ${value === v ? "bg-ink text-white" : "text-ink hover:bg-soft"}`}>
+      {label}
+    </button>
+  );
+  return (
+    <div className="flex gap-1 p-1 rounded-xl border border-line-strong bg-white" role="group" aria-label="מה בא לכם?">
+      {opt("full", "דיל שלם")}
+      {opt("", "רק דירה")}
+    </div>
+  );
+}
+
+/* ── Result card ──────────────────────────────────────────── */
+function AptCard({ apt, nights, checkin, checkout, guests, deal, rules, badge }: {
   apt: Apartment; nights: number; checkin: string; checkout: string; guests: number; deal?: string;
-  rules: PricingRule[];
+  rules: PricingRule[]; badge?: string;
 }) {
   const week = matchingWeek(apt, checkin, checkout);
   const total = week
@@ -42,87 +107,79 @@ function AptCard({ apt, nights, checkin, checkout, guests, deal, rules }: {
       min = Math.min(min, getEffectivePrice(new Date(d), apt.price_per_night, rules));
     return min === Infinity ? apt.price_per_night : min;
   })();
-  const cat   = getCategory(apt);
   const query = new URLSearchParams({ checkin, checkout, guests: String(guests), ...(deal ? { deal } : {}) }).toString();
+  const hasDates = !!(checkin && checkout && nights > 0);
+  const full = deal === "full";
+  const included = full ? FULL_DEAL : (apt.amenities ?? []).slice(0, 3);
 
   return (
-    <a href={`/apartments/${apt.id}?${query}`}
-      className="group flex flex-col sm:flex-row bg-white rounded-2xl border border-gray-100 hover:border-blue-200 hover:shadow-lg transition-all duration-300 overflow-hidden">
-
-      {/* Image */}
-      <div className="relative sm:w-56 h-48 sm:h-auto flex-shrink-0 overflow-hidden">
-        <img src={apt.images?.[0] ?? "/hero-ski.jpg"} alt={apt.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.2) 0%, transparent 50%)" }} />
-        <div className={`absolute top-3 right-3 text-xs font-bold px-2.5 py-1 rounded-full text-white
-          ${cat === "cozy" ? "bg-blue-600" : "bg-amber-500"}`}>
-          {cat === "cozy" ? "Cozy" : "Premium"}
-        </div>
+    <Link href={`/apartments/${apt.id}?${query}`}
+      className={`${card} group overflow-hidden flex flex-col sm:flex-row hover:border-line-strong transition-colors`}>
+      {/* photo */}
+      <div className="relative sm:w-[300px] lg:w-[320px] shrink-0 h-[210px] sm:h-auto sm:min-h-[230px] bg-soft-2 overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={apt.images?.[0] ?? "/hero-ski.jpg"} alt={apt.name} loading="lazy"
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+        <span className={`absolute top-3.5 right-3.5 ${badgeLight}`}>{isAgency(apt) ? "שבת עד שבת" : "דירה שלנו"}</span>
+        {badge && <span className={`absolute bottom-3.5 right-3.5 ${badgeDark}`}>{badge}</span>}
       </div>
 
-      {/* Info */}
-      <div className="flex-1 p-5 flex flex-col sm:flex-row gap-4 text-right" dir="rtl">
-        <div className="flex-1 min-w-0">
-          <div className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-0.5">{apt.type}</div>
-          <h3 className="text-lg font-black text-gray-900 mb-1">{apt.name}</h3>
-          <p className="text-xs text-gray-400 mb-3 flex items-center gap-1">
-            <IconMountain size={12} className="text-blue-400" />
-            Val Thorens, Trois Vallées
-          </p>
-
-          <div className="flex flex-wrap gap-1.5 mb-3">
-            {apt.amenities?.slice(0, 4).map((a, i) => (
-              <span key={i} className="flex items-center gap-1 text-xs text-gray-600 bg-gray-50 px-2.5 py-1 rounded-full">
-                <IconCheck size={10} className="text-green-500" /> {a}
-              </span>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-3 text-xs text-gray-400">
-            <span className="flex items-center gap-1"><IconBed size={12} /> {apt.beds} חד׳</span>
-            <span>·</span>
-            <span>{apt.baths} אמב׳</span>
-            <span>·</span>
-            <span>{apt.sqm} מ״ר</span>
-          </div>
+      {/* details + price */}
+      <div className="flex-1 min-w-0 p-5 md:p-6 flex flex-col md:flex-row gap-5 justify-between">
+        <div className="flex-1 min-w-0 flex flex-col gap-2">
+          <h2 className="font-display font-bold text-[21px] md:text-[23px] leading-snug text-ink">{apt.name}</h2>
+          <div className="text-[15px] text-muted">{metaLine(apt) || "ואל טורנס"}</div>
+          {hasDates && (
+            <div className="flex items-center gap-2 text-[15px] text-body">
+              <span className="text-muted"><IcoCal size={16} /></span>
+              {week ? <>{dayLabel(week.week)} עד {dayLabel(addDaysIso(week.week, 7))} · שבוע מלא</>
+                : <>{dayLabel(checkin)} עד {dayLabel(checkout)} · {nights} לילות</>}
+            </div>
+          )}
+          {included.length > 0 && (
+            <ul className="mt-1 flex flex-col gap-1.5 text-[15px] text-ink">
+              {included.map(f => <li key={f} className="flex items-center gap-2"><Check />{f}</li>)}
+            </ul>
+          )}
         </div>
 
-        {/* Price + CTA */}
-        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 sm:min-w-[130px] border-t sm:border-t-0 border-gray-100 pt-4 sm:pt-0">
-          <div className="text-right">
+        <div className="md:w-[210px] shrink-0 flex flex-col gap-3 border-t md:border-t-0 border-line pt-4 md:pt-0 md:items-end md:text-left md:justify-between">
+          <div className="flex flex-col gap-0.5 md:items-end">
+            {full && (hasDates || week) && <span className="text-[13px] font-bold text-muted">מחיר הדירה</span>}
             {week ? (
               <>
-                <div className="text-xs text-gray-400 font-semibold mb-0.5">שבת עד שבת</div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-black text-gray-900">€{week.price.toLocaleString()}</span>
-                  <span className="text-xs text-gray-400">/ שבוע</span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="font-display font-extrabold text-[28px] md:text-[30px] leading-none text-ink">{eur(week.price)}</span>
+                  <span className="text-[15px] text-muted">לשבוע</span>
                 </div>
+                {guests > 1 && <span className="text-[14px] text-muted">≈ {eur(Math.round(week.price / guests))} לאדם{full ? " על הדירה" : ""}</span>}
+              </>
+            ) : hasDates ? (
+              <>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="font-display font-extrabold text-[28px] md:text-[30px] leading-none text-ink">{eur(total)}</span>
+                  <span className="text-[15px] text-muted">ל-{nights} לילות</span>
+                </div>
+                <span className="text-[14px] text-muted">
+                  {guests > 1 ? <>≈ {eur(Math.round(total / guests))} לאדם{full ? " על הדירה" : ""} · </> : null}מ-{eur(minNightly)} ללילה
+                </span>
               </>
             ) : (
               <>
-                {checkin && checkout && nights > 0 && (
-                  <div className="text-xs text-gray-400 font-semibold mb-0.5">החל מ</div>
-                )}
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-black text-gray-900">€{minNightly.toLocaleString()}</span>
-                  <span className="text-xs text-gray-400">/ לילה</span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="font-display font-extrabold text-[28px] md:text-[30px] leading-none text-ink">{eur(minNightly)}</span>
+                  <span className="text-[15px] text-muted">ללילה</span>
                 </div>
-                {nights > 0 && (
-                  <div className="text-sm font-bold text-blue-600 mt-0.5">€{total.toLocaleString()} סה״כ</div>
-                )}
+                <span className="text-[14px] text-muted">בחרו תאריכים למחיר מדויק</span>
               </>
             )}
-            <div className="flex items-center gap-1 mt-1 justify-end">
-              <IconStar size={12} className="text-amber-400" />
-              <span className="text-xs font-bold text-gray-700">4.9</span>
-            </div>
           </div>
-          <div className="bg-gray-900 group-hover:bg-blue-600 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-colors whitespace-nowrap">
-            ← בחר
-          </div>
+          <span className={`${btn.primary} w-full`}>
+            {full ? "לחבילה" : "לדירה"} <IcoArrow />
+          </span>
         </div>
       </div>
-    </a>
+    </Link>
   );
 }
 
@@ -133,36 +190,53 @@ function ComboCard({ a, b, total, cap, checkin, checkout, guests, nights }: {
 }) {
   const query = new URLSearchParams({ a: a.id, b: b.id, checkin, checkout, guests: String(guests) }).toString();
   return (
-    <div className="bg-white rounded-2xl border border-blue-200 shadow-sm overflow-hidden" dir="rtl">
-      <div className="flex flex-col sm:flex-row">
-        {/* two thumbnails */}
-        <div className="relative sm:w-56 h-40 sm:h-auto flex-shrink-0 flex">
-          <img src={a.images?.[0] ?? "/hero-ski.jpg"} alt={a.name} className="w-1/2 h-full object-cover" />
-          <img src={b.images?.[0] ?? "/hero-ski.jpg"} alt={b.name} className="w-1/2 h-full object-cover" />
-          <span className="absolute top-2 right-2 bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow">חבילה משולבת</span>
+    <Link href={`/combo?${query}`} className={`${card} group overflow-hidden flex flex-col sm:flex-row hover:border-line-strong transition-colors`}>
+      <div className="relative sm:w-[300px] lg:w-[320px] shrink-0 h-[190px] sm:h-auto sm:min-h-[210px] flex bg-soft-2">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={a.images?.[0] ?? "/hero-ski.jpg"} alt={a.name} loading="lazy" className="w-1/2 h-full object-cover" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={b.images?.[0] ?? "/hero-ski.jpg"} alt={b.name} loading="lazy" className="w-1/2 h-full object-cover border-r-2 border-white" />
+        <span className={`absolute top-3.5 right-3.5 ${badgeDark}`}>שתי דירות יחד</span>
+      </div>
+      <div className="flex-1 min-w-0 p-5 md:p-6 flex flex-col md:flex-row gap-5 justify-between">
+        <div className="flex-1 min-w-0 flex flex-col gap-2">
+          <h2 className="font-display font-bold text-[21px] md:text-[23px] leading-snug text-ink">{a.name} + {b.name}</h2>
+          <div className="text-[15px] text-muted">עד {cap} אנשים בשתי הדירות</div>
+          {nights > 0 && (
+            <div className="flex items-center gap-2 text-[15px] text-body">
+              <span className="text-muted"><IcoCal size={16} /></span>
+              {dayLabel(checkin)} עד {dayLabel(checkout)} · {nights} לילות
+            </div>
+          )}
+          <ul className="mt-1 flex flex-col gap-1.5 text-[15px] text-ink">
+            <li className="flex items-center gap-2"><Check />הזמנה אחת לשתי הדירות</li>
+            <li className="flex items-center gap-2"><Check />כל החבורה באותו מקום</li>
+          </ul>
         </div>
-        <div className="flex-1 p-5 flex flex-col sm:flex-row gap-4">
-          <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-black text-gray-900 mb-1">{a.name} + {b.name}</h3>
-            <p className="text-xs text-gray-400 mb-3 flex items-center gap-1"><IconMountain size={12} className="text-blue-400" /> Val Thorens · 2 דירות צמודות</p>
-            <div className="flex items-center gap-3 text-xs text-gray-500">
-              <span className="flex items-center gap-1 font-bold text-blue-600"><IconUser size={12} /> עד {cap} אורחים</span>
-              <span>·</span>
-              <span className="flex items-center gap-1"><IconBed size={12} /> {a.beds + b.beds} חד׳ סה״כ</span>
+        <div className="md:w-[210px] shrink-0 flex flex-col gap-3 border-t md:border-t-0 border-line pt-4 md:pt-0 md:items-end md:justify-between">
+          <div className="flex flex-col gap-0.5 md:items-end">
+            <div className="flex items-baseline gap-1.5">
+              <span className="font-display font-extrabold text-[28px] md:text-[30px] leading-none text-ink">{eur(total)}</span>
+              <span className="text-[15px] text-muted">לשתיהן</span>
             </div>
+            {guests > 1 && <span className="text-[14px] text-muted">≈ {eur(Math.round(total / guests))} לאדם</span>}
           </div>
-          <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 sm:min-w-[150px] border-t sm:border-t-0 border-gray-100 pt-4 sm:pt-0">
-            <div className="text-right">
-              {nights > 0 && <div className="text-xs text-gray-400 font-semibold mb-0.5">{nights} לילות · 2 דירות</div>}
-              <div className="text-2xl font-black text-blue-600">€{total.toLocaleString()}</div>
-              <div className="text-xs text-gray-400">סה״כ לשתי הדירות</div>
-            </div>
-            <a href={`/combo?${query}`} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-colors whitespace-nowrap">
-              ← המשך להזמנה
-            </a>
-          </div>
+          <span className={`${btn.primary} w-full`}>להמשך הזמנה <IcoArrow /></span>
         </div>
       </div>
+    </Link>
+  );
+}
+
+/* ── "Can't find?" box ────────────────────────────────────── */
+function HelpBox() {
+  return (
+    <div className="bg-soft rounded-2xl p-4 flex flex-col gap-2">
+      <span className="font-bold text-[15px] text-ink">לא מוצאים?</span>
+      <span className="text-[14px] leading-relaxed text-muted">תכתבו לעוזר שלנו מה אתם מחפשים, והוא יבנה לכם הצעה.</span>
+      <OpenChatButton className={`${btn.link} text-[15px] w-fit`}>
+        <IcoChat />לפתוח צ&apos;אט
+      </OpenChatButton>
     </div>
   );
 }
@@ -173,17 +247,20 @@ function SearchPage() {
   const router   = useRouter();
   const checkin  = params.get("checkin")  ?? "";
   const checkout = params.get("checkout") ?? "";
-  const guests   = parseInt(params.get("guests") ?? "2");
+  const guests   = parseInt(params.get("guests") ?? "2") || 2;
   const deal     = params.get("deal") ?? "";
 
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [rulesMap,   setRulesMap]   = useState<RulesMap>({});
   const [loading,    setLoading]    = useState(true);
-  const [filter,     setFilter]     = useState<Filter>("all");
+  const [kind,       setKind]       = useState<Kind>("all");
+  const [sort,       setSort]       = useState<Sort>("recommended");
   const [dateOpen,   setDateOpen]   = useState(!checkin || !checkout);
+  const [editOpen,   setEditOpen]   = useState(!checkin || !checkout); // phone: the search form is folded under a summary
   const [gDraft,     setGDraft]     = useState(guests);
-  const [blocked,    setBlocked]    = useState<string[]>([]);
-  const calendarRef  = useRef<HTMLDivElement>(null);
+  const [dealDraft,  setDealDraft]  = useState<"full" | "">(deal === "full" ? "full" : "");
+  const [blockedFor, setBlockedFor] = useState<{ key: string; ids: string[] }>({ key: "", ids: [] });
+  const barRef       = useRef<HTMLDivElement>(null);
 
   const nights = checkin && checkout
     ? Math.round((new Date(checkout).getTime() - new Date(checkin).getTime()) / 86400000) : 0;
@@ -210,18 +287,22 @@ function SearchPage() {
   }, []);
 
   /* Which apartments are booked/unavailable for the selected dates */
+  const rangeKey = checkin && checkout ? `${checkin}|${checkout}` : "";
   useEffect(() => {
-    if (!checkin || !checkout) { setBlocked([]); return; }
+    if (!rangeKey) return;
+    let cancelled = false;
     fetch(`/api/availability/blocked?checkin=${checkin}&checkout=${checkout}`)
       .then(r => r.json())
-      .then(d => setBlocked(Array.isArray(d.blocked) ? d.blocked : []))
-      .catch(() => setBlocked([]));
-  }, [checkin, checkout]);
+      .then(d => { if (!cancelled) setBlockedFor({ key: rangeKey, ids: Array.isArray(d.blocked) ? d.blocked : [] }); })
+      .catch(() => { if (!cancelled) setBlockedFor({ key: rangeKey, ids: [] }); });
+    return () => { cancelled = true; };
+  }, [rangeKey, checkin, checkout]);
+  const blocked = rangeKey && blockedFor.key === rangeKey ? blockedFor.ids : [];
 
-  /* Close calendar on outside click */
+  /* Close the calendar on a click outside the search bar */
   useEffect(() => {
     const h = (e: MouseEvent) => {
-      if (calendarRef.current && !calendarRef.current.contains(e.target as Node)) setDateOpen(false);
+      if (barRef.current && !barRef.current.contains(e.target as Node)) setDateOpen(false);
     };
     if (dateOpen) document.addEventListener("mousedown", h);
     return () => document.removeEventListener("mousedown", h);
@@ -234,7 +315,8 @@ function SearchPage() {
     !blocked.includes(a.id) && (a.source !== "la_cime" || matchingWeek(a, checkin, checkout))
   );
   const fits = available.filter(a => capacity(a) >= guests);          // single apt holds the group
-  const shown = filter === "all" ? fits : fits.filter(a => getCategory(a) === filter);
+  const counts = { all: fits.length, own: fits.filter(a => !isAgency(a)).length, agency: fits.filter(isAgency).length };
+  const filtered = kind === "all" ? fits : fits.filter(a => (kind === "agency") === isAgency(a));
 
   const priceFor = (a: Apartment) => {
     const week = matchingWeek(a, checkin, checkout);
@@ -243,6 +325,9 @@ function SearchPage() {
       ? calcTotalForRange(checkin, checkout, Number(a.price_per_night), rulesMap[a.id] ?? [])
       : Number(a.price_per_night) * Math.max(nights, 1);
   };
+  const shown = sort === "price" ? [...filtered].sort((x, y) => priceFor(x) - priceFor(y)) : filtered;
+  const cheapestId = shown.length > 1 && checkin && checkout
+    ? shown.reduce((best, a) => (priceFor(a) < priceFor(best) ? a : best), shown[0]).id : "";
 
   // No single apartment is big enough → suggest combinations of two
   const maxSingleCap = available.length ? Math.max(...available.map(capacity)) : 0;
@@ -269,194 +354,243 @@ function SearchPage() {
       }))
     : null;
 
-  const applyDates = (ci: string, co: string) => {
-    router.replace(`/search?checkin=${ci}&checkout=${co}&guests=${gDraft}`);
-    setDateOpen(false);
+  const searchUrl = (ci: string, co: string, g: number, d: string) => {
+    const q = new URLSearchParams();
+    if (ci) q.set("checkin", ci);
+    if (co) q.set("checkout", co);
+    q.set("guests", String(g));
+    if (d === "full") q.set("deal", "full");
+    return `/search?${q.toString()}`;
   };
 
-  // apply the current draft (guest count + existing dates) — for guest-only changes
-  const applySearch = () => {
-    const q = new URLSearchParams();
-    if (checkin) q.set("checkin", checkin);
-    if (checkout) q.set("checkout", checkout);
-    q.set("guests", String(gDraft));
-    router.replace(`/search?${q.toString()}`);
+  const applyDates = (ci: string, co: string) => {
+    router.replace(searchUrl(ci, co, gDraft, dealDraft));
     setDateOpen(false);
+    setEditOpen(false);
   };
+
+  // apply the current draft (guests, deal type + existing dates)
+  const applySearch = () => {
+    router.replace(searchUrl(checkin, checkout, gDraft, dealDraft));
+    setDateOpen(false);
+    if (checkin && checkout) setEditOpen(false);
+  };
+
+  const hasDates = !!(checkin && checkout);
+  const title = hasDates
+    ? `ואל טורנס · ${rangeLabel(checkin, checkout)} · ${guests} ${guests === 1 ? "אדם" : "אנשים"}`
+    : "דירות בואל טורנס";
+  const summary = hasDates
+    ? `${rangeLabel(checkin, checkout)} · ${guests} ${guests === 1 ? "אדם" : "אנשים"}${deal === "full" ? " · דיל שלם" : ""}`
+    : "בחרו תאריכים";
+
+  const kinds: { key: Kind; label: string }[] = [
+    { key: "all", label: "הכל" },
+    { key: "own", label: "הדירות שלנו" },
+    { key: "agency", label: "שבת עד שבת" },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50" dir="rtl">
+    <div className="flex-1 bg-soft" dir="rtl">
 
-      {/* ── Sticky header ─────────────────────────────────── */}
-      <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-3 flex-wrap">
-          <a href="/" className="flex-shrink-0"><Logo className="h-9" /></a>
+      {/* ── Search bar ─────────────────────────────────────── */}
+      <div ref={barRef} className="relative z-30 bg-white border-b border-line">
+        <div className={`${wrap} py-3 md:py-4`}>
+          {/* phone: a summary that opens the form */}
+          <button type="button" onClick={() => setEditOpen(o => !o)} aria-expanded={editOpen}
+            className="md:hidden w-full flex items-center justify-between gap-3 min-h-[52px] px-4 rounded-2xl border border-line-strong bg-white text-right">
+            <span className="flex items-center gap-2.5 min-w-0">
+              <span className="text-accent shrink-0"><IcoCal /></span>
+              <span className="text-[16px] font-bold text-ink truncate">{summary}</span>
+            </span>
+            <span className="text-[15px] font-bold text-accent shrink-0">{editOpen ? "סגירה" : "שינוי"}</span>
+          </button>
 
-          {/* Clickable search pill */}
-          <button onClick={() => setDateOpen(o => !o)}
-            className={`flex-1 flex items-center gap-2 rounded-xl px-4 py-2.5 border min-w-0 overflow-hidden transition-colors text-right
-              ${dateOpen ? "bg-blue-50 border-blue-300" : "bg-gray-50 border-gray-100 hover:border-blue-200"}`}>
-            <IconMountain size={13} className="text-blue-500 flex-shrink-0" />
-            <span className="text-sm font-bold text-gray-700 whitespace-nowrap hidden sm:inline">Val Thorens</span>
-            <span className="text-gray-200 text-xs hidden sm:block">|</span>
-            <span className={`hidden sm:flex items-center gap-1.5 text-sm whitespace-nowrap ${checkin && checkout ? "text-gray-700 font-semibold" : "text-blue-500 font-bold"}`}>
-              <IconCalendar size={13} />
-              {checkin && checkout ? `${fmtDate(checkin)} — ${fmtDate(checkout)}` : "לחץ לבחירת תאריכים ←"}
-            </span>
-            <span className="text-gray-200 text-xs hidden sm:block">|</span>
-            <span className="hidden sm:flex items-center gap-1.5 text-sm text-gray-500">
-              <IconUser size={13} /> {guests} אנשים
-            </span>
-            {nights > 0 && (
-              <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full flex-shrink-0 border border-blue-100">
-                {nights} לילות
+          <form role="search" aria-label="שינוי החיפוש" onSubmit={e => { e.preventDefault(); applySearch(); }}
+            className={`${editOpen ? "flex" : "hidden"} md:flex flex-col md:flex-row md:flex-wrap md:items-stretch gap-2 mt-3 md:mt-0`}>
+            <button type="button" onClick={() => setDateOpen(o => !o)} aria-expanded={dateOpen}
+              className={`md:flex-[1_1_240px] flex items-center gap-2.5 min-h-[52px] md:min-h-[48px] px-4 rounded-xl border text-right transition-colors ${dateOpen ? "border-accent bg-accent-soft" : "border-line-strong bg-white hover:border-ink"}`}>
+              <span className="text-accent shrink-0"><IcoCal /></span>
+              <span className="flex flex-col leading-tight min-w-0">
+                <span className="text-[12px] font-bold text-muted">מתי?</span>
+                <span className={`text-[15px] truncate ${hasDates ? "text-ink font-medium" : "text-accent font-bold"}`}>
+                  {hasDates ? `${rangeLabel(checkin, checkout)} · ${nights} לילות` : "בחרו תאריכים"}
+                </span>
               </span>
-            )}
-          </button>
-
-          <button onClick={() => router.push("/")}
-            className="text-sm text-blue-600 font-semibold hover:underline whitespace-nowrap flex-shrink-0">
-            שנה חיפוש
-          </button>
+            </button>
+            <div className="md:flex-[0_0_auto] flex items-center justify-between gap-4 min-h-[52px] md:min-h-[48px] px-4 rounded-xl border border-line-strong bg-white">
+              <span className="flex items-center gap-2.5">
+                <span className="text-accent"><IcoUsers /></span>
+                <span className="text-[15px] font-bold text-ink whitespace-nowrap">כמה אתם?</span>
+              </span>
+              <Stepper value={gDraft} onChange={setGDraft} />
+            </div>
+            <div className="md:flex-[0_1_230px]">
+              <DealToggle value={dealDraft} onChange={setDealDraft} />
+            </div>
+            <button type="submit" className={`${btn.primary} md:px-7`}>עדכון</button>
+          </form>
         </div>
 
-        {deal === "full" && (
-          <div className="bg-blue-50 border-t border-blue-100 px-4 py-2 text-center">
-            <span className="text-xs font-bold text-blue-700">✨ מציגים דירות לדיל שלם — כולל הסעה, סקי פס לשלושת העמקים, טיסה וכבודה</span>
-          </div>
-        )}
-
-        {/* ── Calendar dropdown ─────────────────────────────── */}
+        {/* ── Calendar ───────────────────────────────────────── */}
         {dateOpen && (
-          <div className="absolute top-full left-0 right-0 z-50 px-4 pt-2 pb-4 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-lg">
-            <div className="max-w-5xl mx-auto" ref={calendarRef}>
-              {/* Guests row above calendar */}
-              <div className="flex items-center justify-between mb-3 pt-1">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-bold text-gray-500">אנשים:</span>
-                  <div className="flex items-center gap-2">
-                    <button type="button" onClick={() => setGDraft(g => Math.max(1, g - 1))}
-                      className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold text-sm transition-colors">−</button>
-                    <span className="font-bold text-gray-900 w-5 text-center text-sm">{gDraft}</span>
-                    <button type="button" onClick={() => setGDraft(g => Math.min(12, g + 1))}
-                      className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold text-sm transition-colors">+</button>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button onClick={applySearch}
-                    className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-5 py-2 rounded-xl transition-colors shadow-sm">
-                    שמור חיפוש ←
-                  </button>
-                  {checkin && checkout && (
-                    <button onClick={() => setDateOpen(false)} className="text-sm text-gray-400 hover:text-gray-600">סגור ×</button>
-                  )}
-                </div>
+          <div className="md:absolute md:top-full md:inset-x-0 md:z-40">
+            <div className={`${wrap} pb-4 md:pt-2`}>
+              <div className="md:max-w-[760px] md:shadow-pop md:rounded-2xl">
+                <SkiCalendar
+                  initialFrom={checkin || undefined}
+                  initialTo={checkout || undefined}
+                  onSelect={applyDates}
+                  onCancel={hasDates ? () => setDateOpen(false) : undefined}
+                />
               </div>
-              <SkiCalendar
-                initialFrom={checkin || undefined}
-                initialTo={checkout || undefined}
-                onSelect={applyDates}
-                onCancel={checkin && checkout ? () => setDateOpen(false) : undefined}
-              />
             </div>
           </div>
         )}
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <main className={`${wrap} pt-6 md:pt-8 pb-16 md:pb-20 flex gap-7 items-start`}>
 
-        {/* ── Title + filter pills ──────────────────────────── */}
-        <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
-          <div>
-            <h1 className="text-2xl font-black text-gray-900">
-              {loading ? "טוען דירות..." : `${shown.length} דירות זמינות`}
-            </h1>
-            <p className="text-sm text-gray-400 mt-1 flex items-center gap-2 flex-wrap">
-              {nights > 0 && <span>{nights} לילות · {guests} {guests === 1 ? "אדם" : "אנשים"}</span>}
-              {!loading && minPrice !== null && (
-                <span className="flex items-center gap-1">
-                  {nights > 0 && <span className="text-gray-300">·</span>}
-                  <span className="font-bold text-gray-700">החל מ <span className="text-blue-600">€{minPrice}</span> ללילה</span>
-                </span>
-              )}
+        {/* ── Filters (desktop) ──────────────────────────────── */}
+        <aside aria-label="סינון" className="hidden lg:flex w-[290px] shrink-0 flex-col gap-6 bg-white border border-line rounded-[20px] p-5 sticky top-[96px]">
+          <div className="flex items-center justify-between">
+            <span className="font-bold text-[18px] text-ink">סינון</span>
+            {(kind !== "all" || sort !== "recommended") && (
+              <button type="button" onClick={() => { setKind("all"); setSort("recommended"); }}
+                className="min-h-[44px] px-1 text-[14px] font-bold text-accent hover:text-accent-hover">ניקוי</button>
+            )}
+          </div>
+          {combos.length === 0 && <>
+          <fieldset className="flex flex-col gap-2.5">
+            <legend className="font-bold text-[15px] text-ink mb-2">סוג הדירה</legend>
+            {kinds.map(k => (
+              <label key={k.key} className="flex items-center gap-2.5 text-[15px] text-ink min-h-[32px] cursor-pointer">
+                <input type="radio" name="kind" checked={kind === k.key} onChange={() => setKind(k.key)}
+                  className="w-[18px] h-[18px] accent-accent" />
+                {k.label}{k.key === "agency" ? ", סוכנות" : ""} <span className="text-muted">({counts[k.key]})</span>
+              </label>
+            ))}
+          </fieldset>
+          <fieldset className="flex flex-col gap-2.5">
+            <legend className="font-bold text-[15px] text-ink mb-2">סידור</legend>
+            {([["recommended", "מומלץ"], ["price", "המחיר הנמוך קודם"]] as [Sort, string][]).map(([k, label]) => (
+              <label key={k} className="flex items-center gap-2.5 text-[15px] text-ink min-h-[32px] cursor-pointer">
+                <input type="radio" name="sort" checked={sort === k} onChange={() => setSort(k)}
+                  className="w-[18px] h-[18px] accent-accent" />
+                {label}
+              </label>
+            ))}
+          </fieldset>
+          </>}
+          {deal === "full" && (
+            <div className="flex flex-col gap-2">
+              <span className="font-bold text-[15px] text-ink">בדיל השלם</span>
+              <ul className="flex flex-col gap-1.5 text-[14px] text-body">
+                {FULL_DEAL.map(f => <li key={f} className="flex items-center gap-2"><Check size={15} />{f}</li>)}
+              </ul>
+            </div>
+          )}
+          <HelpBox />
+        </aside>
+
+        {/* ── Results ────────────────────────────────────────── */}
+        <section aria-label="תוצאות" className="flex-1 min-w-0 flex flex-col gap-4 md:gap-[18px]">
+          <div className="flex flex-col gap-1.5">
+            <h1 className="font-display font-bold text-[26px] leading-tight md:text-[32px] tracking-tight text-ink text-balance">{title}</h1>
+            <p className="text-[15px] md:text-[16px] text-muted">
+              {loading ? "בודקים מה פנוי…"
+                : combos.length > 0 ? `אין דירה אחת לכל ${guests} האנשים, אז חיברנו שתי דירות יחד.`
+                : shown.length === 0 ? (hasDates ? "לא מצאנו דירה מתאימה לתאריכים האלה." : "לא מצאנו דירה מתאימה.")
+                : <>
+                    {shown.length === 1 ? "אפשרות אחת פנויה" : `${shown.length} אפשרויות פנויות`}{hasDates ? " לתאריכים האלה" : ""}.
+                    {minPrice !== null && <> החל מ-{eur(minPrice)} ללילה בדירות שלנו.</>}
+                    {deal === "full" && " בדיל שלם מוסיפים בעמוד הדירה סקי פס, הסעה וטיסה."}
+                  </>}
             </p>
           </div>
 
-          {/* Category pills */}
-          <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-xl">
-            <button onClick={() => setFilter("all")}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all
-                ${filter === "all" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
-              <IconSearch size={14} />
-              הכל
-            </button>
-            <button onClick={() => setFilter("cozy")}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all
-                ${filter === "cozy" ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
-              <IconHome size={14} />
-              Cozy
-            </button>
-            <button onClick={() => setFilter("premium")}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all
-                ${filter === "premium" ? "bg-white text-amber-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
-              <IconDiamond size={14} />
-              Premium
-            </button>
-          </div>
-        </div>
-
-        {/* ── Apartment list ──────────────────────────────────── */}
-        {loading ? (
-          <div className="flex flex-col gap-4">
-            {[1,2,3].map(i => (
-              <div key={i} className="h-44 bg-white rounded-2xl border border-gray-100 animate-pulse" />
-            ))}
-          </div>
-        ) : combos.length > 0 ? (
-          <div dir="rtl">
-            <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 mb-5 text-center">
-              <p className="font-black text-blue-900 text-lg mb-1">אין דירה בודדת ל-{guests} אורחים — אבל יש פתרון! 🎿</p>
-              <p className="text-blue-700 text-sm">שילבנו עבורכם שתי דירות צמודות שמתאימות יחד לכל הקבוצה. מחיר כולל, הזמנה אחת.</p>
+          {/* phone: filter chips + sort */}
+          {!loading && combos.length === 0 && fits.length > 0 && (
+            <div className="lg:hidden flex flex-wrap items-center gap-2">
+              {kinds.map(k => (
+                <button key={k.key} type="button" aria-pressed={kind === k.key} onClick={() => setKind(k.key)}
+                  className={`min-h-[40px] px-4 rounded-full border text-[15px] font-bold transition-colors ${kind === k.key ? "bg-ink border-ink text-white" : "bg-white border-line-strong text-ink"}`}>
+                  {k.label} <span className={kind === k.key ? "text-white/70" : "text-muted"}>{counts[k.key]}</span>
+                </button>
+              ))}
+              <label className="ms-auto flex items-center gap-2 text-[14px] text-muted">
+                <span className="sr-only md:not-sr-only">סידור</span>
+                <select value={sort} onChange={e => setSort(e.target.value as Sort)} aria-label="סידור"
+                  className="min-h-[40px] rounded-full border border-line-strong bg-white px-3 text-[15px] text-ink">
+                  <option value="recommended">מומלץ</option>
+                  <option value="price">המחיר הנמוך</option>
+                </select>
+              </label>
             </div>
+          )}
+
+          {loading ? (
+            <div className="flex flex-col gap-4">
+              {[1, 2, 3].map(i => (
+                <div key={i} className={`${card} overflow-hidden flex flex-col sm:flex-row`}>
+                  <Skeleton className="rounded-none sm:w-[300px] h-[210px] sm:h-[230px]" />
+                  <div className="flex-1 p-6 flex flex-col gap-3">
+                    <Skeleton className="h-7 w-48" />
+                    <Skeleton className="h-4 w-64" />
+                    <Skeleton className="h-4 w-40" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : combos.length > 0 ? (
             <div className="flex flex-col gap-4">
               {combos.map(c => (
                 <ComboCard key={c.a.id + c.b.id} a={c.a} b={c.b} total={c.total} cap={c.cap}
                   checkin={checkin} checkout={checkout} guests={guests} nights={nights} />
               ))}
             </div>
-          </div>
-        ) : shown.length === 0 ? (
-          <div className="text-center py-24">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gray-100 mb-4">
-              <IconSearch size={24} className="text-gray-400" />
+          ) : shown.length === 0 ? (
+            <EmptyState
+              title={fits.length > 0 ? "אין דירות מהסוג הזה לתאריכים האלה" : `לא מצאנו דירה פנויה${guests > 1 ? ` ל-${guests} אנשים` : ""}`}
+              text={fits.length > 0 ? "אפשר לראות את כל הסוגים, או לנסות תאריכים אחרים." : "נסו תאריכים אחרים, או תכתבו לעוזר שלנו ונמצא לכם משהו מתאים."}
+              action={<>
+                {kind !== "all" && fits.length > 0 && (
+                  <button type="button" onClick={() => setKind("all")} className={btn.outline}>לכל הדירות</button>
+                )}
+                <button type="button" onClick={() => { setDateOpen(true); setEditOpen(true); window.scrollTo({ top: 0, behavior: "smooth" }); }} className={btn.outline}>תאריכים אחרים</button>
+                <OpenChatButton className={btn.primary}><IcoChat />לכתוב לעוזר</OpenChatButton>
+              </>}
+            />
+          ) : (
+            <div className="flex flex-col gap-4 md:gap-[18px]">
+              {shown.map(apt => (
+                <AptCard key={apt.id} apt={apt} nights={nights}
+                  checkin={checkin} checkout={checkout} guests={guests} deal={deal}
+                  rules={rulesMap[apt.id] ?? []} badge={apt.id === cheapestId ? "הכי זול" : undefined} />
+              ))}
             </div>
-            <p className="text-gray-500 text-lg font-medium">לא נמצאו דירות מתאימות{guests > 1 ? ` ל-${guests} אורחים` : ""}</p>
-            <button onClick={() => setFilter("all")}
-              className="mt-3 text-sm text-blue-600 font-semibold hover:underline">
-              הצג את כל הדירות
-            </button>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-4">
-            {shown.map(apt => (
-              <AptCard key={apt.id} apt={apt} nights={nights}
-                checkin={checkin} checkout={checkout} guests={guests} deal={deal}
-                rules={rulesMap[apt.id] ?? []} />
-            ))}
-          </div>
-        )}
-      </div>
+          )}
+
+          {!loading && (shown.length > 0 || combos.length > 0) && (
+            <p className="flex items-start gap-2 text-[14px] text-muted mt-1">
+              <span className="mt-0.5 shrink-0"><IcoPin /></span>
+              {hasDates
+                ? "המחירים לתאריכים שבחרתם. בדירות שלנו המחיר הוא לכל הלילות, ובדירות הסוכנות מחיר השבוע המלא (שבת עד שבת)."
+                : "כל הדירות בואל טורנס. בחרו תאריכים כדי לראות מה פנוי ובכמה."}
+            </p>
+          )}
+
+          {/* phone: the chat box at the end of the list (the empty state has its own button) */}
+          {(loading || shown.length > 0 || combos.length > 0) && <div className="lg:hidden"><HelpBox /></div>}
+        </section>
+      </main>
     </div>
   );
 }
 
 export default function SearchPageWrapper() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <SkiLoader />
-      </div>
-    }>
+    <Suspense fallback={<SkiLoader />}>
       <SearchPage />
     </Suspense>
   );

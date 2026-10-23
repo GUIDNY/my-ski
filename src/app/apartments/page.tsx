@@ -1,27 +1,52 @@
 "use client";
 import SkiLoader from "@/components/SkiLoader";
 import { Suspense, useEffect, useState, useRef } from "react";
+import type { ReactNode } from "react";
+import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { Apartment } from "@/types";
 import { getEffectivePrice, calcTotalForRange, matchingWeek } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
-import {
-  IconMountain, IconCheck, IconStar, IconBed, IconSearch,
-} from "@/components/Icons";
 import SkiCalendar from "@/components/SkiCalendar";
-import Logo from "@/components/Logo";
+import { wrap, card, btn, badgeLight, Check, Crumbs, EmptyState, Skeleton } from "@/components/ui";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
-const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s + "T12:00:00"); return `${d.getDate()} ${HE_MONTHS[d.getMonth()]}`; };
+const day = (s: string) => new Date(s + "T12:00:00");
+/** "16–23 בינואר" / "28 בפברואר – 7 במרץ" */
+const rangeLabel = (ci: string, co: string) => {
+  const a = day(ci), b = day(co);
+  return a.getMonth() === b.getMonth()
+    ? `${a.getDate()}–${b.getDate()} ב${HE_MONTHS[b.getMonth()]}`
+    : `${a.getDate()} ב${HE_MONTHS[a.getMonth()]} – ${b.getDate()} ב${HE_MONTHS[b.getMonth()]}`;
+};
+const eur = (n: number) => `€${n.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
 
-const getCategory = (apt: Apartment) => apt.price_per_night < 600 ? "cozy" : "premium";
+const isAgency = (apt: Apartment) => apt.source === "la_cime";
+/** a type worth showing ("סטודיו", "3 חדרים"), not "cozy"/"דירה" or what the name already says */
+const typeLabel = (apt: Apartment) => {
+  const t = (apt.type || "").trim();
+  return /[א-ת]/.test(t) && t !== "דירה" && !apt.name.includes(t) ? t : "";
+};
+const metaLine = (apt: Apartment) => [
+  typeLabel(apt),
+  apt.max_guests ? `עד ${apt.max_guests} אנשים` : "",
+  apt.sqm ? `${apt.sqm} מ"ר` : "",
+].filter(Boolean).join(" · ");
 
-type Filter = "all" | "cozy" | "premium";
+type Filter = "all" | "own" | "agency";
 const FILTERS: { key: Filter; label: string }[] = [
-  { key: "all",     label: "הכל" },
-  { key: "cozy",    label: "Cozy Trip" },
-  { key: "premium", label: "Premium Trip" },
+  { key: "all",    label: "הכל" },
+  { key: "own",    label: "הדירות שלנו" },
+  { key: "agency", label: "שבת עד שבת" },
 ];
+
+const ico = (path: ReactNode, size = 18) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{path}</svg>
+);
+const IcoCal = () => ico(<><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></>, 16);
+const IcoUsers = () => ico(<><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0" /><path d="M16 4.5a3.5 3.5 0 0 1 0 7" /><path d="M18 14a6 6 0 0 1 3.5 6" /></>, 16);
+const IcoArrow = () => ico(<path d="M19 12H5M11 6l-6 6 6 6" />, 18);
+const IcoClose = () => ico(<path d="M6 6l12 12M18 6L6 18" />, 20);
 
 function ApartmentCard({ apt, checkin, checkout, guests, rules }: {
   apt: Apartment; checkin: string; checkout: string; guests: number; rules: PricingRule[];
@@ -51,78 +76,63 @@ function ApartmentCard({ apt, checkin, checkout, guests, rules }: {
     return min === Infinity ? apt.price_per_night : min;
   })();
 
-  const cat    = getCategory(apt);
-  const query  = new URLSearchParams({ checkin, checkout, guests: String(guests) }).toString();
+  const query = new URLSearchParams({ checkin, checkout, guests: String(guests) }).toString();
 
   return (
-    <a href={`/apartments/${apt.id}?${query}`}
-      className="group bg-white rounded-2xl border border-gray-100 hover:border-blue-200 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col">
-
-      <div className="relative h-52 overflow-hidden flex-shrink-0">
-        <img
-          src={apt.images?.[0] ?? "/apt1.jpg"} alt={apt.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-        />
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.3) 0%, transparent 55%)" }} />
-        <div className={`absolute top-3 right-3 text-xs font-bold px-2.5 py-1 rounded-full text-white
-          ${cat === "cozy" ? "bg-blue-600" : "bg-amber-500"}`}>
-          {cat === "cozy" ? "Cozy" : "Premium"}
-        </div>
-        <div className="absolute bottom-3 left-3 text-white text-sm font-bold px-3 py-1.5 rounded-lg"
-          style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)" }}>
-          {weekMatch
-            ? <>€{weekMatch.price.toLocaleString()} / שבוע</>
-            : checkin && checkout
-              ? <>החל מ €{minNightlyPrice.toLocaleString()} / לילה</>
-              : <>€{apt.price_per_night.toLocaleString()} / לילה</>
-          }
-        </div>
+    <Link href={`/apartments/${apt.id}?${query}`}
+      className={`${card} group overflow-hidden flex flex-col hover:border-line-strong transition-colors`}>
+      <div className="relative h-[210px] bg-soft-2 overflow-hidden shrink-0">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={apt.images?.[0] ?? "/apt1.jpg"} alt={apt.name} loading="lazy"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+        <span className={`absolute top-3.5 right-3.5 ${badgeLight}`}>{isAgency(apt) ? "שבת עד שבת" : "דירה שלנו"}</span>
       </div>
 
-      <div className="p-5 flex flex-col flex-1 text-right" dir="rtl">
-        <div className="flex justify-between items-start mb-2">
-          <div className="min-w-0">
-            <div className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-0.5">{apt.type}</div>
-            <h3 className="font-black text-gray-900 text-base truncate">{apt.name}</h3>
-          </div>
-          <div className="flex items-center gap-1 flex-shrink-0 mr-2">
-            <IconStar size={13} className="text-amber-400" />
-            <span className="text-sm font-bold text-gray-800">4.9</span>
-          </div>
-        </div>
+      <div className="p-5 flex flex-col gap-2 flex-1">
+        <h2 className="font-display font-bold text-[20px] md:text-[21px] leading-snug text-ink">{apt.name}</h2>
+        <div className="text-[15px] text-muted">{metaLine(apt) || "ואל טורנס"}</div>
+        {(apt.amenities?.length ?? 0) > 0 && (
+          <ul className="flex flex-col gap-1.5 text-[14px] text-ink">
+            {apt.amenities.slice(0, 3).map((a, i) => <li key={i} className="flex items-center gap-2"><Check size={15} />{a}</li>)}
+          </ul>
+        )}
 
-        <div className="flex gap-3 text-xs text-gray-400 py-3 border-t border-gray-100 mb-3">
-          <span className="flex items-center gap-1"><IconBed size={12} /> {apt.beds} חד׳</span>
-          <span>·</span>
-          <span>{apt.baths} אמב׳</span>
-          <span>·</span>
-          <span>{apt.sqm} מ״ר</span>
-        </div>
-
-        <div className="flex gap-1.5 flex-wrap mb-4">
-          {apt.amenities?.slice(0, 3).map((a, i) => (
-            <span key={i} className="flex items-center gap-1 text-xs text-gray-600 bg-gray-50 px-2 py-0.5 rounded-full">
-              <IconCheck size={10} className="text-green-500" /> {a}
-            </span>
-          ))}
-        </div>
-
-        <div className="mt-auto">
-          {nights > 0 && (
-            <div className="text-sm font-bold text-blue-600 mb-2">
-              {weekMatch ? <>€{total.toLocaleString()} סה״כ לשבוע (שבת עד שבת)</> : <>€{total.toLocaleString()} סה״כ ל-{nights} לילות</>}
-            </div>
-          )}
-          <div className="w-full py-2.5 rounded-xl bg-gray-900 group-hover:bg-blue-600 text-white font-bold text-sm text-center transition-colors">
-            ← צפה בדירה
+        <div className="mt-auto pt-3.5 border-t border-line flex flex-col gap-3">
+          <div className="flex items-baseline justify-between gap-2 flex-wrap">
+            {weekMatch ? (
+              <>
+                <span className="flex items-baseline gap-1.5">
+                  <span className="font-display font-extrabold text-[26px] leading-none text-ink">{eur(weekMatch.price)}</span>
+                  <span className="text-[14px] text-muted">לשבוע</span>
+                </span>
+                <span className="text-[14px] text-muted">שבוע מלא</span>
+              </>
+            ) : nights > 0 ? (
+              <>
+                <span className="flex items-baseline gap-1.5">
+                  <span className="font-display font-extrabold text-[26px] leading-none text-ink">{eur(total)}</span>
+                  <span className="text-[14px] text-muted">ל-{nights} לילות</span>
+                </span>
+                <span className="text-[14px] text-muted">מ-{eur(minNightlyPrice)} ללילה</span>
+              </>
+            ) : (
+              <>
+                <span className="flex items-baseline gap-1.5">
+                  <span className="font-display font-extrabold text-[26px] leading-none text-ink">{eur(apt.price_per_night)}</span>
+                  <span className="text-[14px] text-muted">ללילה</span>
+                </span>
+                {isAgency(apt) && <span className="text-[14px] text-muted">שבת עד שבת</span>}
+              </>
+            )}
           </div>
+          <span className={`${btn.primary} w-full`}>לדירה <IcoArrow /></span>
         </div>
       </div>
-    </a>
+    </Link>
   );
 }
 
-/* ── Calendar overlay ─────────────────────────────────── */
+/* ── Dates dialog ─────────────────────────────────────────── */
 function CalendarOverlay({ guests, onApply, onClose }: {
   guests: number;
   onApply: (ci: string, co: string, g: number) => void;
@@ -135,48 +145,41 @@ function CalendarOverlay({ guests, onApply, onClose }: {
     const handler = (e: MouseEvent) => {
       if (cardRef.current && !cardRef.current.contains(e.target as Node)) onClose();
     };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", handler); document.removeEventListener("keydown", onKey); };
   }, [onClose]);
 
+  const stepBtn = "w-11 h-11 rounded-full border border-line-strong flex items-center justify-center text-ink text-[18px] leading-none hover:border-ink transition-colors disabled:opacity-40";
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(3px)" }}>
-      <div ref={cardRef} className="w-full max-w-2xl" dir="rtl">
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-          <div className="px-6 pt-5 pb-2 border-b border-gray-100 flex items-center justify-between">
-            <div>
-              <h2 className="font-black text-gray-900 text-lg">בחר תאריכי שהייה</h2>
-              <p className="text-sm text-gray-400 mt-0.5">עונת סקי: דצמבר 2026 – מאי 2027</p>
-            </div>
-            <button onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors text-lg font-light">
-              ✕
-            </button>
+    <div className="fixed inset-0 z-[80] flex items-end md:items-center justify-center md:p-4 bg-ink/45" role="dialog" aria-modal="true" aria-labelledby="dates-title">
+      <div ref={cardRef} className="w-full md:max-w-[760px] max-h-[92dvh] overflow-y-auto bg-white rounded-t-[24px] md:rounded-card" dir="rtl">
+        <div className="sticky top-0 z-10 bg-white px-5 md:px-6 pt-5 pb-4 border-b border-line flex items-start justify-between gap-4">
+          <div>
+            <h2 id="dates-title" className="font-display font-bold text-[22px] text-ink">מתי אתם באים?</h2>
+            <p className="text-[14px] text-muted mt-0.5">עונת הסקי: דצמבר 2026 עד מאי 2027</p>
           </div>
+          <button type="button" onClick={onClose} aria-label="סגירה"
+            className="w-11 h-11 shrink-0 flex items-center justify-center rounded-full text-muted hover:text-ink hover:bg-soft transition-colors">
+            <IcoClose />
+          </button>
+        </div>
 
-          <div className="p-5">
-            <SkiCalendar
-              onSelect={(from, to) => onApply(from, to, g)}
-              onCancel={onClose}
-            />
-
-            <div className="mt-4 pt-4 border-t border-gray-100 flex items-center gap-4" dir="rtl">
-              <label className="text-sm font-semibold text-gray-700 whitespace-nowrap">מספר אנשים</label>
-              <div className="flex items-center gap-2">
-                <button onClick={() => setG(v => Math.max(1, v - 1))}
-                  className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors font-bold">
-                  −
-                </button>
-                <span className="w-8 text-center font-bold text-gray-900">{g}</span>
-                <button onClick={() => setG(v => Math.min(8, v + 1))}
-                  className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors font-bold">
-                  +
-                </button>
-              </div>
-              <span className="text-sm text-gray-400">{g === 1 ? "אדם אחד" : `${g} אנשים`}</span>
+        <div className="p-4 md:p-6 flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-line px-4 py-3">
+            <span className="text-[15px] font-bold text-ink">כמה אתם?</span>
+            <div className="flex items-center gap-2" role="group" aria-label="כמה אתם">
+              <button type="button" className={stepBtn} onClick={() => setG(v => Math.max(1, v - 1))} disabled={g <= 1} aria-label="פחות אנשים">−</button>
+              <span className="w-7 text-center font-bold text-[17px] text-ink" aria-live="polite">{g}</span>
+              <button type="button" className={stepBtn} onClick={() => setG(v => Math.min(8, v + 1))} disabled={g >= 8} aria-label="עוד אנשים">+</button>
             </div>
           </div>
+          <SkiCalendar
+            onSelect={(from, to) => onApply(from, to, g)}
+            onCancel={onClose}
+          />
         </div>
       </div>
     </div>
@@ -188,24 +191,14 @@ function ApartmentsPage() {
   const router   = useRouter();
   const checkin  = params.get("checkin")  ?? "";
   const checkout = params.get("checkout") ?? "";
-  const guests   = parseInt(params.get("guests") ?? "2");
+  const guests   = parseInt(params.get("guests") ?? "2") || 2;
 
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [loading,    setLoading]    = useState(true);
   const [filter,     setFilter]     = useState<Filter>("all");
-  const [showCal,    setShowCal]    = useState(false);
+  const [showCal,    setShowCal]    = useState(!checkin || !checkout); // no dates yet: ask for them first
   const [rulesMap,   setRulesMap]   = useState<Record<string, PricingRule[]>>({});
-  const [blocked,    setBlocked]    = useState<string[]>([]);
-
-  const noDates = !checkin || !checkout;
-
-  const autoOpened = useRef(false);
-  useEffect(() => {
-    if (noDates && !autoOpened.current) {
-      autoOpened.current = true;
-      setShowCal(true);
-    }
-  }, [noDates]);
+  const [blockedFor, setBlockedFor] = useState<{ key: string; ids: string[] }>({ key: "", ids: [] });
 
   const applyDates = (ci: string, co: string, g: number) => {
     router.replace(`/apartments?checkin=${ci}&checkout=${co}&guests=${g}`);
@@ -229,24 +222,31 @@ function ApartmentsPage() {
     ).then(entries => setRulesMap(Object.fromEntries(entries)));
   }, [apartments]);
 
+  const rangeKey = checkin && checkout ? `${checkin}|${checkout}` : "";
   useEffect(() => {
-    if (!checkin || !checkout) { setBlocked([]); return; }
+    if (!rangeKey) return;
+    let cancelled = false;
     fetch(`/api/availability/blocked?checkin=${checkin}&checkout=${checkout}`)
       .then(r => r.json())
-      .then(d => setBlocked(Array.isArray(d.blocked) ? d.blocked : []))
-      .catch(() => setBlocked([]));
-  }, [checkin, checkout]);
+      .then(d => { if (!cancelled) setBlockedFor({ key: rangeKey, ids: Array.isArray(d.blocked) ? d.blocked : [] }); })
+      .catch(() => { if (!cancelled) setBlockedFor({ key: rangeKey, ids: [] }); });
+    return () => { cancelled = true; };
+  }, [rangeKey, checkin, checkout]);
+  const blocked = rangeKey && blockedFor.key === rangeKey ? blockedFor.ids : [];
 
   const available = apartments.filter(a =>
     !blocked.includes(a.id) && (a.source !== "la_cime" || !checkin || !checkout || matchingWeek(a, checkin, checkout))
   );
-  const shown = filter === "all" ? available : available.filter(a => getCategory(a) === filter);
+  const shown = filter === "all" ? available : available.filter(a => (filter === "agency") === isAgency(a));
+  const counts = { all: available.length, own: available.filter(a => !isAgency(a)).length, agency: available.filter(isAgency).length };
 
   const nights = checkin && checkout
     ? Math.round((new Date(checkout).getTime() - new Date(checkin).getTime()) / 86400000) : 0;
+  const hasDates = !!(checkin && checkout);
+  const searchHref = hasDates ? `/search?checkin=${checkin}&checkout=${checkout}&guests=${guests}` : "/search";
 
   return (
-    <div className="min-h-screen bg-gray-50" dir="rtl">
+    <div className="flex-1 bg-white" dir="rtl">
 
       {showCal && (
         <CalendarOverlay
@@ -256,80 +256,75 @@ function ApartmentsPage() {
         />
       )}
 
-      {/* ── Nav ──────────────────────────────────────────────── */}
-      <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3 flex-wrap">
-          <a href="/" className="flex items-center"><Logo className="h-9" /></a>
-          <span className="text-gray-200">/</span>
-          {checkin && checkout ? (
-            <button onClick={() => setShowCal(true)}
-              className="text-sm text-gray-600 flex items-center gap-1.5 hover:text-blue-600 transition-colors">
-              <span>{fmtDate(checkin)} — {fmtDate(checkout)}</span>
-              {nights > 0 && <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">{nights} לילות</span>}
-              <span className="text-xs text-gray-400 hover:text-blue-500">✏️</span>
+      {/* ── Page top ──────────────────────────────────────────── */}
+      <div className="bg-soft border-b border-line">
+        <div className={`${wrap} pt-6 md:pt-8 pb-7 md:pb-9`}>
+          <Crumbs items={[{ label: "דף הבית", href: "/" }, { label: "דירות" }]} className="mb-3 md:mb-4" />
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div className="flex flex-col gap-2 min-w-0">
+              <h1 className="font-display font-extrabold text-[32px] leading-[1.1] md:text-[44px] tracking-tight text-ink">הדירות בואל טורנס</h1>
+              <p className="text-[16px] md:text-[17px] text-muted">
+                {loading ? "טוענים את הדירות…" : `${shown.length} ${shown.length === 1 ? "דירה" : "דירות"}${hasDates ? " פנויות לתאריכים שבחרתם" : ""}. הדירות שלנו, ודירות הסוכנות לשבוע שלם.`}
+              </p>
+            </div>
+            <Link href={searchHref} className={`${btn.link} text-[16px]`}>לחיפוש חבילות <IcoArrow /></Link>
+          </div>
+
+          <div className="mt-5 flex flex-wrap items-center gap-2">
+            <button type="button" onClick={() => setShowCal(true)}
+              className="inline-flex items-center gap-2 min-h-[44px] px-4 rounded-full bg-white border border-line-strong text-[15px] font-bold text-ink hover:border-ink transition-colors">
+              <span className="text-accent"><IcoCal /></span>
+              {hasDates ? <>{rangeLabel(checkin, checkout)}{nights > 0 ? ` · ${nights} לילות` : ""}</> : "בחרו תאריכים"}
             </button>
-          ) : (
-            <button onClick={() => setShowCal(true)}
-              className="text-sm font-semibold text-blue-600 flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-full transition-colors">
-              📅 בחר תאריכים
+            <button type="button" onClick={() => setShowCal(true)}
+              className="inline-flex items-center gap-2 min-h-[44px] px-4 rounded-full bg-white border border-line-strong text-[15px] font-bold text-ink hover:border-ink transition-colors">
+              <span className="text-accent"><IcoUsers /></span>
+              {guests} {guests === 1 ? "אדם" : "אנשים"}
             </button>
-          )}
-          <div className="flex-1" />
-          <a href={`/search?checkin=${checkin}&checkout=${checkout}&guests=${guests}`}
-            className="text-sm text-blue-600 font-semibold hover:underline whitespace-nowrap">
-            → חזור לחבילות
-          </a>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-10">
-
-        {/* ── Header ────────────────────────────────────────── */}
-        <div className="flex items-end justify-between mb-8 flex-wrap gap-4">
-          <div>
-            <p className="text-blue-600 font-semibold text-sm tracking-widest uppercase mb-1">Val Thorens</p>
-            <h1 className="text-3xl font-black text-gray-900">כל הדירות</h1>
-            {!loading && (
-              <p className="text-gray-500 mt-1 text-sm">
-                {shown.length} {shown.length === 1 ? "דירה" : "דירות"} זמינות
-              </p>
-            )}
-          </div>
-
-          <div className="flex gap-2">
+      <div className={`${wrap} pt-6 md:pt-8 pb-16 md:pb-20`}>
+        {/* ── Filters ───────────────────────────────────────── */}
+        {!loading && apartments.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-6" role="group" aria-label="סוג הדירה">
             {FILTERS.map(f => (
-              <button key={f.key} onClick={() => setFilter(f.key)}
-                className={`px-4 py-2 rounded-full text-sm font-semibold transition-all
-                  ${filter === f.key
-                    ? "bg-gray-900 text-white shadow-sm"
-                    : "bg-white text-gray-600 border border-gray-200 hover:border-gray-300"
-                  }`}>
-                {f.label}
+              <button key={f.key} type="button" aria-pressed={filter === f.key} onClick={() => setFilter(f.key)}
+                className={`min-h-[44px] px-4 rounded-full border text-[15px] font-bold transition-colors ${
+                  filter === f.key ? "bg-ink border-ink text-white" : "bg-white border-line-strong text-ink hover:border-ink"
+                }`}>
+                {f.label} <span className={filter === f.key ? "text-white/70" : "text-muted"}>{counts[f.key]}</span>
               </button>
             ))}
           </div>
-        </div>
+        )}
 
         {/* ── Grid ──────────────────────────────────────────── */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1,2,3,4,5,6].map(i => (
-              <div key={i} className="h-80 bg-white rounded-2xl border border-gray-100 animate-pulse" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+            {[1, 2, 3, 4, 5, 6].map(i => (
+              <div key={i} className={`${card} overflow-hidden`}>
+                <Skeleton className="rounded-none h-[210px]" />
+                <div className="p-5 flex flex-col gap-3">
+                  <Skeleton className="h-6 w-40" />
+                  <Skeleton className="h-4 w-52" />
+                  <Skeleton className="h-11 w-full mt-3" />
+                </div>
+              </div>
             ))}
           </div>
         ) : shown.length === 0 ? (
-          <div className="text-center py-24">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gray-100 mb-4">
-              <IconSearch size={24} className="text-gray-400" />
-            </div>
-            <p className="text-gray-500 text-lg font-medium">לא נמצאו דירות</p>
-            <button onClick={() => setFilter("all")}
-              className="mt-4 text-sm text-blue-600 font-semibold hover:underline">
-              הצג את כל הדירות
-            </button>
-          </div>
+          <EmptyState
+            title={hasDates ? "אין דירות פנויות לתאריכים האלה" : "לא מצאנו דירות"}
+            text={hasDates ? "נסו תאריכים אחרים, או את כל סוגי הדירות." : undefined}
+            action={<>
+              {filter !== "all" && <button type="button" onClick={() => setFilter("all")} className={btn.outline}>לכל הדירות</button>}
+              <button type="button" onClick={() => setShowCal(true)} className={btn.primary}>לבחור תאריכים</button>
+            </>}
+          />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
             {shown.map(apt => (
               <ApartmentCard key={apt.id} apt={apt} checkin={checkin} checkout={checkout} guests={guests} rules={rulesMap[apt.id] ?? []} />
             ))}
@@ -342,11 +337,7 @@ function ApartmentsPage() {
 
 export default function ApartmentsPageWrapper() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <SkiLoader />
-      </div>
-    }>
+    <Suspense fallback={<SkiLoader />}>
       <ApartmentsPage />
     </Suspense>
   );

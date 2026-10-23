@@ -1,9 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import type { SeasonRental } from "@/types";
-import {
-  IconBed, IconUsers, IconCalendar, IconWhatsApp, IconParty, IconBriefcase,
-} from "@/components/Icons";
+import { wrap, card, btn, badgeLight, SectionHead, EmptyState, Skeleton } from "@/components/ui";
 import { buildWaHref } from "@/lib/whatsapp";
 
 // Community WhatsApp group invite
@@ -16,60 +15,73 @@ const fmtDate = (s: string | null) => {
   return `${d.getDate()} ${HE_MONTHS[d.getMonth()]}`;
 };
 
+/* ── Icons (stroke, follow the text color) ─────────────────── */
+const ico = (path: React.ReactNode, size = 20) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{path}</svg>
+);
+const IcoBed = ({ size = 16 }: { size?: number }) => ico(<><path d="M3 18V6" /><path d="M3 14h18v4" /><path d="M21 14v-3a3 3 0 0 0-3-3h-7v6" /><circle cx="7" cy="11" r="2" /></>, size);
+const IcoUsers = ({ size = 16 }: { size?: number }) => ico(<><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0" /><path d="M16 4.5a3.5 3.5 0 0 1 0 7" /><path d="M18 14a6 6 0 0 1 3.5 6" /></>, size);
+const IcoCal = ({ size = 16 }: { size?: number }) => ico(<><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></>, size);
+const IcoParty = ({ size = 26 }: { size?: number }) => ico(<><path d="M4 20l5-14 9 9z" /><path d="M14 4l1 2M19 6l-2 1M20 11l-2-.5M11 3.5V5" /></>, size);
+const IcoBriefcase = ({ size = 26 }: { size?: number }) => ico(<><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18" /></>, size);
+const IcoCommunity = ({ size = 18 }: { size?: number }) => ico(<><circle cx="12" cy="7" r="3" /><circle cx="5" cy="10" r="2.2" /><circle cx="19" cy="10" r="2.2" /><path d="M7 20a5 5 0 0 1 10 0" /><path d="M2 19a3.5 3.5 0 0 1 5-3.2M22 19a3.5 3.5 0 0 0-5-3.2" /></>, size);
+const IcoWhatsApp = ({ size = 22 }: { size?: number }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" aria-hidden="true">
+    <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z" />
+  </svg>
+);
+
 function RentalCard({ r }: { r: SeasonRental }) {
   const img = r.images?.[0] ?? "/apt1.jpg";
   return (
-    <a href={`/seasonaires/${r.id}`}
-      className="group bg-white rounded-2xl border border-slate-100 hover:border-blue-200 hover:shadow-lg transition-all overflow-hidden flex flex-col">
-      <div className="relative h-48 overflow-hidden bg-slate-900">
+    <Link href={`/seasonaires/${r.id}`}
+      className={`group ${card} overflow-hidden flex flex-col hover:border-line-strong transition-colors`}>
+      {/* host photos come in every shape: the whole photo over a blurred copy of itself */}
+      <div className="relative h-[210px] overflow-hidden bg-ink">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={img} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-60" />
-        <img src={img} alt={r.name} className="absolute inset-0 w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-        <div className="absolute top-3 right-3 bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">{r.min_months}+ חודשים</div>
-        <span className="absolute bottom-3 right-3 text-white text-sm font-semibold drop-shadow">{r.area}</span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={img} alt={r.name} loading="lazy" className="absolute inset-0 w-full h-full object-contain group-hover:scale-[1.03] transition-transform duration-500" />
+        <span className={`absolute top-3.5 right-3.5 ${badgeLight}`}>{r.min_months}+ חודשים</span>
       </div>
-      <div className="p-5 flex flex-col flex-1 text-right" dir="rtl">
-        <h3 className="font-display font-black text-slate-900 text-lg mb-1">{r.name}</h3>
-        <div className="flex items-center gap-3 text-xs text-slate-400 mb-3">
-          <span className="flex items-center gap-1"><IconBed size={13} /> {r.beds} חד׳</span>
-          <span>·</span>
-          <span className="flex items-center gap-1"><IconUsers size={13} /> עד {r.sleeps}</span>
-          {r.available_from && (<><span>·</span><span className="flex items-center gap-1"><IconCalendar size={12} /> מ-{fmtDate(r.available_from)}</span></>)}
+      <div className="p-5 flex flex-col gap-2.5 flex-1">
+        <h3 className="font-display text-[21px] font-bold text-ink leading-snug">{r.name}</h3>
+        <div className="text-[15px] text-muted"><bdi>{r.area}</bdi></div>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[15px] text-body">
+          <span className="flex items-center gap-1.5"><IcoBed /> {r.beds} חד׳</span>
+          <span className="flex items-center gap-1.5"><IcoUsers /> עד {r.sleeps}</span>
+          {r.available_from && <span className="flex items-center gap-1.5"><IcoCal /> מ-{fmtDate(r.available_from)}</span>}
         </div>
-        <div className="flex gap-1.5 flex-wrap mb-4">
-          {r.amenities?.slice(0, 3).map((a, i) => (
-            <span key={i} className="text-xs text-slate-600 bg-slate-50 px-2 py-0.5 rounded-full">{a}</span>
-          ))}
-        </div>
-        <div className="mt-auto flex items-end justify-between">
-          <div>
-            <span className="font-display text-2xl font-black text-slate-900">€{r.price_per_month.toLocaleString()}</span>
-            <span className="text-sm text-slate-400"> / חודש</span>
+        {r.amenities?.length > 0 && (
+          <div className="flex gap-1.5 flex-wrap">
+            {r.amenities.slice(0, 3).map((a, i) => (
+              <span key={i} className="text-[13px] text-ink bg-soft border border-line px-2.5 py-0.5 rounded-full">{a}</span>
+            ))}
           </div>
-          <span className="text-sm font-bold text-blue-600 group-hover:underline">פרטים ←</span>
+        )}
+        <div className="mt-auto pt-3.5 border-t border-line flex items-end justify-between gap-3">
+          <div className="flex items-baseline gap-1.5">
+            <span className="font-display text-[28px] font-extrabold text-ink leading-none">€{r.price_per_month.toLocaleString()}</span>
+            <span className="text-[15px] text-muted">לחודש</span>
+          </div>
+          <span className="text-[16px] font-bold text-accent group-hover:text-accent-hover">לפרטים ←</span>
         </div>
       </div>
-    </a>
+    </Link>
   );
 }
 
-function SectionHead({ kicker, title, sub }: { kicker: string; title: string; sub?: string }) {
+function ComingSoon({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
   return (
-    <div className="mb-6">
-      <span className="text-xs font-bold tracking-widest uppercase text-blue-600">{kicker}</span>
-      <h2 className="font-display text-3xl font-black text-slate-900 mt-1">{title}</h2>
-      {sub && <p className="text-slate-500 mt-1">{sub}</p>}
-    </div>
-  );
-}
-
-function ComingSoon({ icon, tint, title, desc }: { icon: React.ReactNode; tint: string; title: string; desc: string }) {
-  return (
-    <div className="relative bg-white rounded-2xl border border-dashed border-slate-200 p-8 text-center overflow-hidden">
-      <span className="absolute top-4 left-4 text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full">בקרוב · Coming soon</span>
-      <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl ${tint} mb-4`}>{icon}</div>
-      <h3 className="font-display text-xl font-black text-slate-800 mb-2">{title}</h3>
-      <p className="text-slate-500 text-sm max-w-md mx-auto leading-relaxed">{desc}</p>
+    <div className="relative rounded-card border border-dashed border-line-strong bg-[#FBFCFE] p-6 md:p-8 flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
+      <span className="w-14 h-14 rounded-2xl bg-accent-soft text-accent flex items-center justify-center shrink-0">{icon}</span>
+      <div className="flex-1 min-w-0">
+        <div className="flex flex-wrap items-center gap-2 mb-1.5">
+          <h3 className="font-display text-[20px] font-bold text-ink">{title}</h3>
+          <span className="text-[13px] font-bold text-warn bg-warn-soft px-2.5 py-0.5 rounded-full">בקרוב</span>
+        </div>
+        <p className="text-[15px] md:text-[16px] text-body leading-relaxed max-w-[640px]">{desc}</p>
+      </div>
     </div>
   );
 }
@@ -91,86 +103,100 @@ export default function SeasonairesPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#f7f9fb]" dir="rtl">
+    <div className="bg-white text-ink" dir="rtl">
 
       {/* Hero */}
-      <section className="relative h-[420px] bg-slate-900 overflow-hidden">
-        <img src="/view.jpg" alt="Val Thorens" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/92 via-slate-900/45 to-slate-900/55" />
-        <div className="relative max-w-5xl mx-auto px-6 h-full flex flex-col justify-end pb-12 text-white">
-          <a href="/" className="absolute top-6 right-6">
-            <img src="/skishare-logo.png" alt="SkiShare" className="h-12 w-auto" style={{ filter: "brightness(0) invert(1)" }} />
-          </a>
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-xs font-bold tracking-widest uppercase mb-4 w-fit">
-            <img src="/community.svg" alt="" className="w-5 h-5" style={{ filter: "brightness(0) invert(1)" }} /> קהילת הסיזיונרים
-          </div>
-          <h1 className="font-display text-5xl md:text-6xl font-black leading-none">אזור הסיזיונרים</h1>
-          <p className="text-white/80 text-lg mt-4 max-w-2xl">
+      <section className="relative overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/view.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0" style={{ background: "rgba(8,18,38,0.55)" }} />
+        <div className={`relative ${wrap} pt-14 pb-20 md:pt-20 md:pb-28 flex flex-col items-start gap-4 md:gap-5 text-white`}>
+          <span className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[14px] md:text-[15px] font-medium"
+            style={{ background: "rgba(255,255,255,0.16)", border: "1px solid rgba(255,255,255,0.32)" }}>
+            <IcoCommunity /> קהילת הסיזיונרים
+          </span>
+          <h1 className="font-display font-extrabold text-[40px] leading-[1.08] md:text-[60px] md:leading-[1.05] tracking-tight">אזור הסיזיונרים</h1>
+          <p className="text-[17px] md:text-[20px] leading-relaxed text-[#F1F5FB] max-w-[680px]">
             הבית של מי שעושה עונה שלמה ב-Val Thorens — קהילה, לוח דירות לטווח ארוך, אירועים, עבודות ומידע. הכל במקום אחד.
           </p>
+          <div className="flex flex-wrap gap-3 mt-2">
+            <a href="#board" className="inline-flex items-center justify-center min-h-[52px] px-6 rounded-[14px] bg-white text-ink font-bold text-[16px] hover:bg-accent-soft transition-colors">ללוח הדירות</a>
+            <a href={WHATSAPP_GROUP_URL} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 min-h-[52px] px-6 rounded-[14px] border border-white/45 text-white font-bold text-[16px] hover:bg-white/10 transition-colors">
+              <IcoWhatsApp size={20} /> לקבוצת הוואטסאפ
+            </a>
+          </div>
         </div>
       </section>
 
       {/* WhatsApp community banner */}
-      <section className="max-w-5xl mx-auto px-6 -mt-10 relative z-10">
+      <section className={`${wrap} -mt-10 md:-mt-12 relative z-10`}>
         <a href={WHATSAPP_GROUP_URL} target="_blank" rel="noopener noreferrer"
-          className="group flex items-center gap-4 bg-[#25D366] rounded-2xl p-5 md:p-6 shadow-lg shadow-emerald-600/20 hover:-translate-y-0.5 transition-transform text-white">
-          <span className="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center flex-shrink-0"><IconWhatsApp size={28} /></span>
+          className={`group ${card} shadow-card flex flex-col sm:flex-row sm:items-center gap-4 p-5 md:p-6 hover:border-line-strong transition-colors`}>
+          <span className="w-14 h-14 rounded-2xl bg-ok-soft text-[#128C4B] flex items-center justify-center shrink-0"><IcoWhatsApp size={28} /></span>
           <div className="flex-1 min-w-0">
-            <p className="font-display font-black text-lg md:text-xl leading-tight">הצטרפו לקבוצת הוואטסאפ של הסיזיונרים</p>
-            <p className="text-white/85 text-sm mt-0.5">דירות, טיפים, אירועים ועבודות — כל הקהילה במקום אחד</p>
+            <p className="font-display font-bold text-[19px] md:text-[21px] text-ink leading-tight">הצטרפו לקבוצת הוואטסאפ של הסיזיונרים</p>
+            <p className="text-[15px] text-muted mt-1">דירות, טיפים, אירועים ועבודות — כל הקהילה במקום אחד</p>
           </div>
-          <span className="font-bold flex-shrink-0 group-hover:-translate-x-1 transition-transform">הצטרפו ←</span>
+          <span className={`${btn.primary} shrink-0 w-full sm:w-auto`}>הצטרפו ←</span>
         </a>
       </section>
 
       {/* Long-term apartments board */}
-      <section id="board" className="max-w-5xl mx-auto px-6 pt-14 scroll-mt-6">
-        <SectionHead kicker="לוח דירות" title="דירות לטווח ארוך" sub="חודשיים ומעלה · מחיר חודשי · מתעדכן כל הזמן" />
+      <section id="board" className={`${wrap} pt-14 md:pt-20`}>
+        <SectionHead title="דירות לטווח ארוך" sub="חודשיים ומעלה · מחיר חודשי · מתעדכן כל הזמן" />
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1,2,3].map(i => <div key={i} className="h-80 bg-white rounded-2xl border border-slate-100 animate-pulse" />)}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6" aria-busy="true" aria-label="טוען דירות">
+            {[1, 2, 3].map(i => (
+              <div key={i} className={`${card} overflow-hidden`}>
+                <Skeleton className="h-[210px] rounded-none" />
+                <div className="p-5 flex flex-col gap-3"><Skeleton className="h-6 w-40" /><Skeleton className="h-4 w-52" /><Skeleton className="h-8 w-28 mt-3" /></div>
+              </div>
+            ))}
           </div>
         ) : rentals.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-2xl border border-slate-100">
-            <p className="text-slate-500">אין כרגע דירות זמינות — דברו איתנו ונמצא לכם משהו.</p>
-          </div>
+          <EmptyState
+            title="אין כרגע דירות זמינות"
+            text="דברו איתנו ונמצא לכם משהו."
+            action={<a href={waContact} target="_blank" rel="noopener noreferrer" className={btn.primary}><IcoWhatsApp size={20} /> דברו איתנו</a>}
+          />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
             {rentals.map(r => <RentalCard key={r.id} r={r} />)}
           </div>
         )}
       </section>
 
       {/* Events — coming soon */}
-      <section id="events" className="max-w-5xl mx-auto px-6 pt-14 scroll-mt-6">
-        <SectionHead kicker="קהילה" title="אירועים קרובים" />
-        <ComingSoon icon={<IconParty size={28} className="text-violet-600" />} tint="bg-violet-50"
+      <section id="events" className={`${wrap} pt-14 md:pt-20`}>
+        <SectionHead title="אירועים קרובים" />
+        <ComingSoon icon={<IcoParty />}
           title="אירועי קהילה בדרך"
           desc="מפגשי סיזיונרים, ערבי אפטר-סקי, טריפים וחוויות משותפות. הצטרפו לקבוצת הוואטסאפ כדי להיות הראשונים לדעת." />
       </section>
 
       {/* Jobs — coming soon */}
-      <section id="jobs" className="max-w-5xl mx-auto px-6 pt-14 pb-16 scroll-mt-6">
-        <SectionHead kicker="עבודה על ההר" title="חיפוש עבודות" />
-        <ComingSoon icon={<IconBriefcase size={28} className="text-amber-600" />} tint="bg-amber-50"
+      <section id="jobs" className={`${wrap} pt-14 md:pt-20`}>
+        <SectionHead title="חיפוש עבודות" />
+        <ComingSoon icon={<IcoBriefcase />}
           title="לוח דרושים לסיזיונרים בדרך"
           desc="משרות באתר הסקי — מסעדות, בארים, חנויות ציוד, בתי מלון ועוד. עם דרכון אירופאי אפשר לעבוד ולממן את העונה. הלוח ייפתח בקרוב." />
       </section>
 
       {/* Final CTA */}
-      <section className="max-w-5xl mx-auto px-6 pb-20">
-        <div className="bg-slate-900 rounded-3xl p-8 md:p-12 text-center text-white relative overflow-hidden">
-          <div className="absolute -left-16 -top-16 w-56 h-56 rounded-full bg-blue-500/10 blur-3xl" />
-          <h2 className="relative font-display text-3xl font-black mb-3">רוצים להיות חלק מהקהילה?</h2>
-          <p className="relative text-white/70 mb-6 max-w-xl mx-auto">הצטרפו לקבוצת הוואטסאפ של הסיזיונרים, או דברו איתנו ישירות על דירה, סקי פס ועבודה.</p>
-          <div className="relative flex flex-col sm:flex-row gap-3 justify-center">
+      <section className={`${wrap} py-14 md:py-20`}>
+        <div className="bg-ink rounded-card px-6 py-10 md:px-12 md:py-14 text-white flex flex-col md:flex-row md:items-center gap-6 md:gap-10">
+          <div className="flex-1 min-w-0">
+            <h2 className="font-display text-[28px] md:text-[36px] font-bold leading-tight mb-3">רוצים להיות חלק מהקהילה?</h2>
+            <p className="text-[16px] md:text-[18px] leading-relaxed text-[#D6DEEA] max-w-[560px]">הצטרפו לקבוצת הוואטסאפ של הסיזיונרים, או דברו איתנו ישירות על דירה, סקי פס ועבודה.</p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 shrink-0">
             <a href={WHATSAPP_GROUP_URL} target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1ebe5a] text-white font-display font-bold px-8 py-4 rounded-xl transition">
-              <IconWhatsApp size={20} /> הצטרפו לקבוצה
+              className="inline-flex items-center justify-center gap-2 min-h-[52px] px-6 rounded-[14px] bg-white text-ink font-bold text-[16px] hover:bg-accent-soft transition-colors">
+              <span className="text-[#128C4B]"><IcoWhatsApp size={20} /></span> הצטרפו לקבוצה
             </a>
             <a href={waContact} target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 border border-white/15 text-white font-display font-bold px-8 py-4 rounded-xl transition">
+              className="inline-flex items-center justify-center min-h-[52px] px-6 rounded-[14px] border border-white/45 text-white font-bold text-[16px] hover:bg-white/10 transition-colors">
               דברו איתנו
             </a>
           </div>

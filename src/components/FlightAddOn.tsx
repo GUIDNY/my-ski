@@ -9,7 +9,7 @@ import type { FlightPriceState } from "@/lib/useFlightPrice";
 function useCountUp(target: number | null, duration = 700): number {
   const [value, setValue] = useState(0);
   useEffect(() => {
-    if (target === null) { setValue(0); return; }
+    if (target === null) return;
     let start: number | null = null;
     let raf = 0;
     const step = (ts: number) => {
@@ -21,64 +21,73 @@ function useCountUp(target: number | null, duration = 700): number {
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
   }, [target, duration]);
-  return value;
+  return target === null ? 0 : value;
 }
 
-// One consolidated flight card — replaces what used to be two separate
-// "check the price" info rows (Geneva + Lyon) plus a third "add flight"
-// toggle for the cheaper of the two: same information, a third of the
-// visual weight. Still links out to the exact scraped Google Flights page
-// via a small inline "צפו" link for anyone who wants to double-check it.
-export default function FlightAddOn({ state, airport, checked, onToggle, qty, setQty, maxQty, total }: {
+// One consolidated flight card: the cheaper of the Geneva and Lyon flights
+// for the dates, a toggle to add it, and how many tickets. Still links out
+// to the exact scraped Google Flights page for anyone who wants to check it.
+export default function FlightAddOn({ state, airport, checked, onToggle, qty, setQty, maxQty, total, emptyText }: {
   state: FlightPriceState; airport: string;
   checked: boolean; onToggle: (v: boolean) => void;
   qty: number; setQty: (n: number) => void; maxQty: number; total: number;
+  /** shown instead of "no price found" when there is nothing to look up yet */
+  emptyText?: string;
 }) {
   const displayed = useCountUp(state.price);
-  const [revealed, setRevealed] = useState(false);
+  const [revealedFor, setRevealedFor] = useState<number | null>(null);
   useEffect(() => {
-    if (state.price) { const id = requestAnimationFrame(() => setRevealed(true)); return () => cancelAnimationFrame(id); }
-    setRevealed(false);
+    if (!state.price) return;
+    const price = state.price;
+    const id = requestAnimationFrame(() => setRevealedFor(price));
+    return () => cancelAnimationFrame(id);
   }, [state.price]);
+  const revealed = !!state.price && revealedFor === state.price;
+  const step = "w-10 h-10 rounded-full border border-line-strong bg-white text-ink text-[20px] leading-none flex items-center justify-center transition-colors hover:border-ink disabled:opacity-35";
 
   return (
-    <div className={`rounded-xl border overflow-hidden transition-colors ${checked ? "border-blue-300 bg-blue-50" : "border-gray-100 bg-white"}`}>
-      <button type="button" onClick={() => state.price && onToggle(!checked)} disabled={!state.price}
-        className={`w-full flex items-center gap-3 p-3.5 text-right ${!state.price ? "cursor-default" : "cursor-pointer"}`}>
-        <span className={`flex-shrink-0 ${checked ? "text-blue-600" : "text-gray-400"}`}><IconPlane size={18} /></span>
-        <div className="flex-1 min-w-0">
-          <div className="text-sm font-semibold text-gray-800">הוסיפו טיסה ל-{airport}</div>
-          <div className="text-xs text-gray-400 mt-0.5">
+    <div className={`rounded-[18px] border transition-colors ${checked ? "border-accent ring-1 ring-accent bg-accent-soft/50" : state.price ? "border-line bg-white hover:border-line-strong" : "border-dashed border-line-strong bg-[#FBFCFE]"}`}>
+      <button type="button" role="checkbox" aria-checked={checked} aria-disabled={!state.price}
+        onClick={() => state.price && onToggle(!checked)}
+        className={`w-full flex items-start gap-3.5 p-4 md:p-[18px] text-start rounded-[18px] ${state.price ? "cursor-pointer" : "cursor-default"}`}>
+        <span className={`mt-0.5 w-[22px] h-[22px] shrink-0 rounded-md border-2 flex items-center justify-center ${checked ? "border-accent bg-accent text-white" : "border-line-strong bg-white"} ${state.price ? "" : "opacity-50"}`} aria-hidden="true">
+          {checked && <IconCheck size={13} />}
+        </span>
+        <span className={`mt-px shrink-0 ${checked ? "text-accent" : "text-muted"}`} aria-hidden="true"><IconPlane size={20} /></span>
+        <span className="flex-1 min-w-0 flex flex-col gap-1">
+          <span className="font-bold text-[16px] md:text-[17px] text-ink">טיסה ל-{airport}</span>
+          <span className="text-[14px] md:text-[15px] leading-relaxed text-muted">
             {state.loading ? "בודקים מחיר טיסה…"
-              : state.price ? `${state.nonstop ? "ישירה" : "עם עצירה"}${state.airline ? ` · ${state.airline}` : ""} · הזולה ביותר שמצאנו`
-              : "לא נמצא מחיר כרגע"}
-            {state.url && (
-              <a href={state.url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
-                className="text-blue-500 font-semibold hover:underline mr-1.5">צפו ←</a>
-            )}
-          </div>
-        </div>
-        {state.price ? (
-          <span className={`text-sm font-black flex-shrink-0 text-blue-600 transition-all duration-500 ${revealed ? "opacity-100 scale-100" : "opacity-0 scale-75"}`}>
-            €{displayed} <span className="font-normal text-gray-400">לאדם</span>
+              : state.price ? `${state.nonstop ? "ישירה" : "עם עצירה"}${state.airline ? ` · ${state.airline}` : ""} · הכי זולה שמצאנו`
+              : (emptyText ?? "לא מצאנו מחיר טיסה כרגע")}
           </span>
-        ) : (
-          <span className="w-4 h-4 rounded-full border-2 border-gray-300 border-t-blue-400 animate-spin flex-shrink-0" />
-        )}
-        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${checked ? "border-blue-500 bg-blue-500" : "border-gray-300"}`}>
-          {checked && <IconCheck size={11} className="text-white" />}
-        </div>
+          {state.price ? (
+            <span className={`mt-0.5 font-bold text-[15px] md:text-[16px] text-ink transition-all duration-500 ${revealed ? "opacity-100" : "opacity-0"}`}>
+              €{displayed.toLocaleString("en-US")} לאדם
+            </span>
+          ) : state.loading ? (
+            <span className="mt-1 w-4 h-4 rounded-full border-2 border-line-strong border-t-accent animate-spin" aria-hidden="true" />
+          ) : null}
+        </span>
       </button>
+      {state.url && (
+        <div className="ps-[86px] md:ps-[88px] pe-4 pb-3.5 -mt-2">
+          <a href={state.url} target="_blank" rel="noopener noreferrer"
+            className="text-[14px] font-bold text-accent hover:text-accent-hover">לבדוק את הטיסה בגוגל טיסות</a>
+        </div>
+      )}
       {checked && (
-        <div className="flex items-center justify-between px-3.5 pb-3 pt-1 border-t border-blue-100">
-          <span className="text-xs font-bold text-blue-700">כמה כרטיסים?</span>
-          <div className="flex items-center gap-2.5">
-            <button type="button" onClick={() => setQty(Math.max(1, qty - 1))} disabled={qty <= 1}
-              className="w-7 h-7 rounded-full bg-white border border-blue-200 text-blue-600 font-black disabled:opacity-40 leading-none">−</button>
-            <span className="font-black text-gray-900 w-5 text-center">{qty}</span>
-            <button type="button" onClick={() => setQty(Math.min(maxQty, qty + 1))} disabled={qty >= maxQty}
-              className="w-7 h-7 rounded-full bg-white border border-blue-200 text-blue-600 font-black disabled:opacity-40 leading-none">+</button>
-            <span className="text-xs font-bold text-blue-700 w-16 text-left">= €{total.toLocaleString()}</span>
+        <div className="px-4 md:px-[18px] pb-4">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-2xl bg-white border border-line px-4 py-2.5">
+            <span className="text-[15px] font-medium text-ink">כמה כרטיסים?</span>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5" role="group" aria-label="כמה כרטיסים">
+                <button type="button" onClick={() => setQty(Math.max(1, qty - 1))} disabled={qty <= 1} aria-label="פחות" className={step}>−</button>
+                <span className="w-8 text-center font-display font-bold text-[18px] text-ink" aria-live="polite">{qty}</span>
+                <button type="button" onClick={() => setQty(Math.min(maxQty, qty + 1))} disabled={qty >= maxQty} aria-label="עוד" className={step}>+</button>
+              </div>
+              <span className="min-w-[68px] text-left font-bold text-[15px] text-ink">€{total.toLocaleString("en-US")}</span>
+            </div>
           </div>
         </div>
       )}

@@ -1,17 +1,22 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { ReactNode } from "react";
+import Link from "next/link";
 import type { Apartment } from "@/types";
-import { IconBed, IconUsers, IconMountain, IconCalendar, IconBriefcase, IconCheck } from "@/components/Icons";
 import { hasDirectFlight } from "@/lib/direct-flight-days";
+import { card, btn, badgeLight, badgeDark, Check, EmptyState } from "@/components/ui";
 
 const MONTHS_FULL = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
 
 function fmtDate(d: Date) {
-  return `${String(d.getDate()).padStart(2, "0")}.${String(d.getMonth() + 1).padStart(2, "0")}`;
+  return `${d.getDate()}.${d.getMonth() + 1}`;
 }
 
-function fmtFull(d: Date) {
-  return `${d.getDate()} ${MONTHS_FULL[d.getMonth()]}`;
+/** "12–19 בדצמבר" / "27 בפברואר – 6 במרץ" */
+function fmtRange(a: Date, b: Date) {
+  return a.getMonth() === b.getMonth()
+    ? `${a.getDate()}–${b.getDate()} ב${MONTHS_FULL[b.getMonth()]}`
+    : `${a.getDate()} ב${MONTHS_FULL[a.getMonth()]} – ${b.getDate()} ב${MONTHS_FULL[b.getMonth()]}`;
 }
 
 function weekRange(iso: string) {
@@ -21,13 +26,16 @@ function weekRange(iso: string) {
   return { checkin, checkout };
 }
 
-function SpecChip({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <span className="flex items-center gap-1.5 bg-gray-50 border border-gray-100 rounded-full px-2.5 py-1 text-[11px] font-semibold text-gray-600">
-      {icon} {label}
-    </span>
-  );
-}
+const eur = (n: number) => `€${n.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
+
+const ico = (path: ReactNode, size = 18) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{path}</svg>
+);
+const IcoCal = () => ico(<><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></>);
+const IcoUsers = () => ico(<><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0" /><path d="M16 4.5a3.5 3.5 0 0 1 0 7" /><path d="M18 14a6 6 0 0 1 3.5 6" /></>);
+const IcoPlane = ({ size = 14 }: { size?: number }) => ico(<path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z" />, size);
+const IcoChevron = () => ico(<path d="M6 9l6 6 6-6" />, 18);
+const IcoArrow = () => ico(<path d="M19 12H5M11 6l-6 6 6 6" />, 18);
 
 export default function WeeklyBrowser({
   apartments,
@@ -104,189 +112,107 @@ export default function WeeklyBrowser({
 
   if (!allWeeks.length) {
     return (
-      <div className="text-center text-gray-400 py-24 bg-white rounded-3xl border border-gray-100">
-        אין כרגע דירות זמינות בקטגוריה זו — נסה שוב מאוחר יותר.
-      </div>
+      <EmptyState title="אין כרגע שבועות פנויים" text="הדירות של הסוכנות מתעדכנות כל יום. אפשר לחזור לכאן בקרוב, או לחפש בדירות שלנו." />
     );
   }
 
+  const range = selected ? weekRange(selected) : null;
+  const rawFrom = selected ? weekMinPrice.get(selected) : undefined;
+  const fromPrice = rawFrom !== undefined && selected ? displayPrice(rawFrom, selected) : undefined;
+  const full = dealMode === "full";
+  const stepBtn = "w-10 h-10 rounded-full border border-line-strong flex items-center justify-center text-ink text-[18px] leading-none hover:border-ink transition-colors disabled:opacity-40";
+
   return (
-    <div>
-      {/* Deal mode toggle */}
-      <div className="flex justify-center mb-4">
-        <div className="inline-flex bg-gray-100 rounded-full p-1 border border-gray-200">
-          <button onClick={() => setDealMode("full")}
-            className={`px-4 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-1.5 ${
-              dealMode === "full" ? "bg-white text-blue-700 shadow" : "text-gray-500 hover:text-gray-700"}`}>
-            ✨ דיל שלם
-          </button>
-          <button onClick={() => setDealMode("apartment")}
-            className={`px-4 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-1.5 ${
-              dealMode === "apartment" ? "bg-white text-blue-700 shadow" : "text-gray-500 hover:text-gray-700"}`}>
-            🏠 רק דירה
-          </button>
+    <div className="flex flex-col gap-5 md:gap-6">
+      {/* ── Controls: week, guests, deal type ───────────────── */}
+      <div className={`${card} p-3 md:p-4`}>
+        <div className="flex flex-col md:flex-row md:flex-wrap md:items-stretch gap-2">
+          <div ref={ref} className="relative md:flex-[1_1_300px]">
+            <button type="button" onClick={() => setOpen(o => !o)} aria-expanded={open} aria-haspopup="listbox"
+              className={`w-full h-full flex items-center justify-between gap-3 min-h-[56px] px-4 rounded-xl border text-right transition-colors ${open ? "border-accent bg-accent-soft" : "border-line-strong bg-white hover:border-ink"}`}>
+              <span className="flex items-center gap-2.5 min-w-0">
+                <span className="text-accent shrink-0"><IcoCal /></span>
+                <span className="flex flex-col leading-tight min-w-0">
+                  <span className="text-[12px] font-bold text-muted">איזה שבוע?</span>
+                  <span className="text-[16px] font-bold text-ink truncate">
+                    {range ? `${fmtRange(range.checkin, range.checkout)} · 7 לילות` : "בחרו שבוע"}
+                  </span>
+                </span>
+              </span>
+              <span className="flex items-center gap-2 shrink-0 text-muted">
+                {fromPrice !== undefined && <span className="hidden sm:inline text-[14px]">מ-<b className="text-ink">{eur(fromPrice)}</b></span>}
+                <IcoChevron />
+              </span>
+            </button>
+
+            {/* ══ Week list ══ */}
+            {open && (
+              <div role="listbox" aria-label="השבועות הפנויים"
+                className="absolute top-full mt-2 inset-x-0 z-40 bg-white rounded-2xl border border-line shadow-pop max-h-[min(420px,60dvh)] overflow-y-auto p-2">
+                {allWeeks.map(w => {
+                  const isSelected = selected === w;
+                  const rp = weekMinPrice.get(w);
+                  const price = rp !== undefined ? displayPrice(rp, w) : undefined;
+                  const { checkin, checkout } = weekRange(w);
+                  return (
+                    <button key={w} type="button" role="option" aria-selected={isSelected}
+                      onClick={() => { setSelected(w); setOpen(false); }}
+                      className={`w-full flex items-center justify-between gap-3 rounded-xl px-3 min-h-[48px] text-right transition-colors ${isSelected ? "bg-accent-soft" : "hover:bg-soft"}`}>
+                      <span className="flex items-center gap-2 text-[15px] text-ink">
+                        {isSelected ? <Check /> : <span className="w-4" aria-hidden="true" />}
+                        {fmtRange(checkin, checkout)}
+                        {full && weekHasDirectFlight(w) && <span className="text-muted" title="יש טיסה ישירה בשבוע הזה"><IcoPlane /></span>}
+                      </span>
+                      {price !== undefined && <span className="text-[15px] font-bold text-ink">מ-{eur(price)}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="md:flex-[0_0_auto] flex items-center justify-between gap-4 min-h-[56px] px-4 rounded-xl border border-line-strong bg-white">
+            <span className="flex items-center gap-2.5">
+              <span className="text-accent"><IcoUsers /></span>
+              <span className="text-[15px] font-bold text-ink whitespace-nowrap">כמה אתם?</span>
+            </span>
+            <div className="flex items-center gap-2" role="group" aria-label="כמה אתם">
+              <button type="button" className={stepBtn} onClick={() => setGuests(g => Math.max(1, g - 1))} disabled={guests <= 1} aria-label="פחות אנשים">−</button>
+              <span className="w-6 text-center font-bold text-[17px] text-ink" aria-live="polite">{guests}</span>
+              <button type="button" className={stepBtn} onClick={() => setGuests(g => Math.min(12, g + 1))} disabled={guests >= 12} aria-label="עוד אנשים">+</button>
+            </div>
+          </div>
+
+          <div className="md:flex-[0_1_260px] flex gap-1 p-1 rounded-xl border border-line-strong bg-white" role="group" aria-label="מה בא לכם?">
+            {([["full", "דיל שלם"], ["apartment", "רק דירה"]] as const).map(([v, label]) => (
+              <button key={v} type="button" aria-pressed={dealMode === v} onClick={() => setDealMode(v)}
+                className={`flex-1 min-h-[46px] px-3 rounded-[10px] text-[15px] font-bold transition-colors ${dealMode === v ? "bg-ink text-white" : "text-ink hover:bg-soft"}`}>
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
-      {dealMode === "full" && (
-        <p className="text-center text-blue-700 text-xs font-semibold mb-4 -mt-1">
-          כולל סקי פס לשלושת העמקים · הסעה · טיסה ישירה (הערכה, בשבועות עם טיסה ישירה) — לפי מספר האנשים שבחרתם
-        </p>
-      )}
 
-      {/* Explainer */}
-      <div className="bg-blue-50/60 border border-blue-100 rounded-2xl p-4 md:p-5 mb-6 text-sm text-gray-700 leading-relaxed">
-        {dealMode === "full" ? (
-          <>המחירים כאן כוללים דירה לשבוע שלם (שבת עד שבת), סקי פס אמיתי לשלושת העמקים, הסעה הלוך-חזור, ובשבועות
-          שיש בהם טיסה ישירה (מסומנים ב-✈️) — גם הערכת מחיר לטיסה ישירה. שבועות ללא טיסה ישירה לא כוללים אותה במחיר.
-          הטיסה בהערכה בלבד, ונסגור אותה איתכם ידנית לפי הטיסה הזולה ביותר שנמצא.</>
-        ) : (
-          <>הדירות כאן מוצעות לשבוע שלם (שבת עד שבת) במחיר הדירה בלבד — אפשר גם לעבור ל&quot;דיל שלם&quot; למעלה כדי לראות
-          מחיר שכולל גם סקי פס, הסעה וטיסה, או פשוט להזמין את הדירה ולסדר את השאר בעצמכם.</>
-        )}
-      </div>
-
-      {/* Week picker — cloned from the homepage search bar */}
-      <div ref={ref} className="relative mb-6 md:sticky md:top-20 z-20">
-        {(() => {
-          const range = selected ? weekRange(selected) : null;
-          const rawPrice = selected ? weekMinPrice.get(selected) : undefined;
-          const price = rawPrice !== undefined && selected ? displayPrice(rawPrice, selected) : undefined;
-          return (
-            <>
-              {/* ══ DESKTOP bar (md+) ══════════════════════════ */}
-              <div className="hidden md:flex bg-white items-stretch rounded-2xl" style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.18)" }}>
-                <div className="flex-1 px-6 py-5 text-right">
-                  <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-1.5">יעד</div>
-                  <div className="flex items-center gap-2">
-                    <IconMountain size={16} className="text-blue-500" />
-                    <span className="text-gray-900 font-bold text-sm">Val Thorens</span>
-                  </div>
-                </div>
-                <div className="w-px bg-gray-100 my-4" />
-                <button onClick={() => setOpen(o => !o)}
-                  className={`flex-1 px-5 py-5 text-right transition-colors hover:bg-gray-50 ${open ? "bg-blue-50/60" : ""}`}>
-                  <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-1.5">כניסה</div>
-                  <div className="flex items-center gap-2">
-                    <IconCalendar size={14} className="text-gray-400" />
-                    <span className="text-sm font-semibold text-gray-900">{range ? fmtFull(range.checkin) : "בחר שבוע"}</span>
-                  </div>
-                </button>
-                <div className="w-px bg-gray-100 my-4" />
-                <button onClick={() => setOpen(o => !o)}
-                  className={`flex-1 px-5 py-5 text-right transition-colors hover:bg-gray-50 ${open ? "bg-blue-50/60" : ""}`}>
-                  <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-1.5">יציאה</div>
-                  <div className="flex items-center gap-2">
-                    <IconCalendar size={14} className="text-gray-400" />
-                    <span className="text-sm font-semibold text-gray-900">{range ? fmtFull(range.checkout) : "-"}</span>
-                  </div>
-                  <div className="text-[10px] text-blue-500 font-bold mt-0.5">7 לילות</div>
-                </button>
-                <div className="w-px bg-gray-100 my-4" />
-                <div className="flex items-center px-4 py-5">
-                  <div>
-                    <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-1.5">אנשים</div>
-                    <div className="flex items-center gap-2">
-                      <button onClick={() => setGuests(g => Math.max(1, g - 1))} className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold text-sm transition-colors">−</button>
-                      <span className="font-bold text-gray-900 w-5 text-center text-sm">{guests}</span>
-                      <button onClick={() => setGuests(g => Math.min(12, g + 1))} className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold text-sm transition-colors">+</button>
-                    </div>
-                  </div>
-                </div>
-                <div className="w-px bg-gray-100 my-4" />
-                <div className="flex items-center px-5 py-5">
-                  <div>
-                    <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-1.5">
-                      {dealMode === "full" ? `החל מ- (${guests} אנשים)` : "החל מ-"}
-                    </div>
-                    {price !== undefined
-                      ? <span className="font-black text-gray-900 text-base">€{price.toLocaleString("en-US")}</span>
-                      : <span className="text-gray-400 text-sm">-</span>}
-                  </div>
-                </div>
-                <div className="flex items-center px-3">
-                  <button onClick={() => setOpen(o => !o)}
-                    className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold px-7 py-4 rounded-xl transition-all flex items-center gap-2 text-sm">
-                    <IconCalendar size={16} className="text-white" />
-                    בחירת שבוע
-                  </button>
-                </div>
-              </div>
-
-              {/* ══ MOBILE bar (< md) ══════════════════════════ */}
-              <div className="md:hidden bg-white rounded-2xl overflow-hidden" style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.18)" }}>
-                <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-gray-100">
-                  <IconMountain size={16} className="text-blue-500" />
-                  <div>
-                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">יעד</div>
-                    <div className="text-sm font-bold text-gray-900">Val Thorens</div>
-                  </div>
-                </div>
-                <button onClick={() => setOpen(o => !o)}
-                  className={`w-full grid grid-cols-2 border-b border-gray-100 text-right transition-colors ${open ? "bg-blue-50/60" : "hover:bg-gray-50"}`}>
-                  <div className="px-5 py-3.5 border-l border-gray-100">
-                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">כניסה</div>
-                    <div className="flex items-center gap-1.5">
-                      <IconCalendar size={13} className="text-gray-400" />
-                      <span className="text-sm font-semibold text-gray-900">{range ? fmtFull(range.checkin) : "בחר"}</span>
-                    </div>
-                  </div>
-                  <div className="px-5 py-3.5">
-                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">יציאה</div>
-                    <div className="flex items-center gap-1.5">
-                      <IconCalendar size={13} className="text-gray-400" />
-                      <span className="text-sm font-semibold text-gray-900">{range ? fmtFull(range.checkout) : "-"}</span>
-                    </div>
-                  </div>
-                </button>
-                <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">אנשים</span>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => setGuests(g => Math.max(1, g - 1))} className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold transition-colors">−</button>
-                    <span className="font-bold text-gray-900 w-6 text-center">{guests}</span>
-                    <button onClick={() => setGuests(g => Math.min(12, g + 1))} className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold transition-colors">+</button>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between px-5 py-3">
-                  <div>
-                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">
-                      {dealMode === "full" ? `החל מ- (${guests} אנשים)` : "החל מ-"}
-                    </div>
-                    {price !== undefined
-                      ? <span className="font-black text-gray-900 text-sm">€{price.toLocaleString("en-US")}</span>
-                      : <span className="text-gray-400 text-sm">-</span>}
-                  </div>
-                  <button onClick={() => setOpen(o => !o)} className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold px-6 py-2.5 rounded-xl transition-all flex items-center gap-2 text-sm">
-                    <IconCalendar size={14} className="text-white" />
-                    בחירת שבוע
-                  </button>
-                </div>
-              </div>
-            </>
-          );
-        })()}
-
-        {/* ══ Week dropdown ══════════════════════════════════ */}
-        {open && (
-          <div className="absolute top-full mt-2 left-0 right-0 bg-white rounded-2xl border border-gray-100 z-50 max-h-96 overflow-y-auto p-2 md:p-3"
-            style={{ boxShadow: "0 16px 50px rgba(0,0,0,0.18)" }}>
+        {/* quick week chips */}
+        {allWeeks.length > 1 && (
+          <div className="mt-3 -mx-3 md:-mx-4 px-3 md:px-4 flex items-center gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
             {allWeeks.map(w => {
               const isSelected = selected === w;
-              const rawPrice = weekMinPrice.get(w);
-              const price = rawPrice !== undefined ? displayPrice(rawPrice, w) : undefined;
-              const { checkin, checkout } = weekRange(w);
+              const rp = weekMinPrice.get(w);
+              const price = rp !== undefined ? displayPrice(rp, w) : undefined;
+              const { checkin } = weekRange(w);
               return (
-                <button key={w} onClick={() => { setSelected(w); setOpen(false); }}
-                  className={`w-full flex items-center justify-between gap-3 rounded-xl px-3 py-3 text-right transition-colors ${
-                    isSelected ? "bg-blue-50" : "hover:bg-gray-50"
+                <button key={w} type="button" onClick={() => setSelected(w)} aria-pressed={isSelected}
+                  className={`shrink-0 flex flex-col items-center justify-center min-h-[56px] px-4 rounded-2xl border transition-colors ${
+                    isSelected ? "bg-ink border-ink text-white" : "bg-white border-line-strong text-ink hover:border-ink"
                   }`}>
-                  <div className="flex items-center gap-2 text-xs font-semibold text-gray-700">
-                    <IconBriefcase size={12} className="text-blue-500 shrink-0" />
-                    כניסה {fmtDate(checkin)} ← יציאה {fmtDate(checkout)}
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {price !== undefined && <span className="text-sm font-black text-gray-900">€{price.toLocaleString("en-US")}</span>}
-                    {isSelected && <IconCheck size={14} className="text-blue-600" />}
-                  </div>
+                  <span className="text-[15px] font-bold flex items-center gap-1">
+                    שבת {fmtDate(checkin)}
+                    {full && weekHasDirectFlight(w) && <span className={isSelected ? "text-white/80" : "text-muted"} title="יש טיסה ישירה בשבוע הזה"><IcoPlane size={12} /></span>}
+                  </span>
+                  {price !== undefined && (
+                    <span className={`text-[13px] ${isSelected ? "text-white/75" : "text-muted"}`}>מ-{eur(price)}</span>
+                  )}
                 </button>
               );
             })}
@@ -294,115 +220,89 @@ export default function WeeklyBrowser({
         )}
       </div>
 
-      {/* Quick week-chip scroller */}
-      {allWeeks.length > 1 && (
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-6 -mx-1 px-1" style={{ scrollbarWidth: "none" }}>
-          {allWeeks.map(w => {
-            const isSelected = selected === w;
-            const rawPrice = weekMinPrice.get(w);
-            const price = rawPrice !== undefined ? displayPrice(rawPrice, w) : undefined;
-            const weekFlight = weekHasDirectFlight(w);
-            const { checkin } = weekRange(w);
-            return (
-              <button key={w} onClick={() => setSelected(w)}
-                className={`shrink-0 flex flex-col items-center gap-0.5 rounded-2xl px-4 py-2.5 border transition-all ${
-                  isSelected
-                    ? "bg-gradient-to-b from-blue-600 to-blue-700 border-blue-700 text-white shadow-md scale-[1.03]"
-                    : "bg-white border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-blue-50/50"
-                }`}>
-                <span className={`text-xs font-bold flex items-center gap-1 ${isSelected ? "text-white" : "text-gray-900"}`}>
-                  {fmtDate(checkin)} {dealMode === "full" && weekFlight && <span title="יש טיסה ישירה בשבוע זה">✈️</span>}
-                </span>
-                {price !== undefined && (
-                  <span className={`text-[10px] font-semibold ${isSelected ? "text-blue-100" : "text-blue-600"}`}>
-                    מ-€{price.toLocaleString("en-US")}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Results line */}
-      <div className="flex items-center justify-between mb-4 px-1">
-        <span className="flex items-center gap-1.5 text-sm font-bold text-gray-900">
-          <IconMountain size={13} className="text-blue-500" /> {visible.length} דירות זמינות לשבוע זה
-        </span>
-        {visible.length > 0 && (
-          <span className="text-[11px] text-gray-400 font-medium">ממוין לפי מחיר — הזול ביותר קודם</span>
+      {/* ── What the price includes ─────────────────────────── */}
+      <div className="bg-soft rounded-2xl px-4 py-3.5 md:px-5 text-[15px] leading-relaxed text-body">
+        {full ? (
+          <>המחיר כולל דירה לשבוע שלם (שבת עד שבת), סקי פס לשלושת העמקים והסעה הלוך וחזור, לפי מספר האנשים שבחרתם.
+          בשבועות עם טיסה ישירה (מסומנים במטוס) הוא כולל גם הערכה לטיסה, ואת הטיסה עצמה נסגור איתכם לפי הזולה ביותר שנמצא.</>
+        ) : (
+          <>המחיר הוא של הדירה בלבד, לשבוע שלם משבת עד שבת. בדיל שלם רואים מחיר שכולל גם סקי פס, הסעה וטיסה,
+          ואפשר גם להזמין רק את הדירה ולסדר את השאר לבד.</>
         )}
       </div>
 
-      {/* Apartments for the selected week */}
+      {/* ── Results ─────────────────────────────────────────── */}
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <h2 className="font-display font-bold text-[22px] md:text-[26px] text-ink">
+          {visible.length === 1 ? "דירה אחת פנויה" : `${visible.length} דירות פנויות`}{range ? ` ל-${fmtRange(range.checkin, range.checkout)}` : ""}
+        </h2>
+        {visible.length > 1 && <span className="text-[14px] text-muted">מהזולה ליקרה</span>}
+      </div>
+
       {visible.length === 0 ? (
-        <div className="text-center text-gray-400 py-16 bg-white rounded-3xl border border-gray-100">
-          אין דירות פנויות בשבוע הזה — נסה שבוע אחר.
-        </div>
+        <EmptyState
+          title="אין דירה פנויה בשבוע הזה"
+          text={guests > 1 ? `לא מצאנו דירה פנויה ל-${guests} אנשים בשבוע הזה. נסו שבוע אחר או פחות אנשים בדירה.` : "נסו שבוע אחר."}
+        />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {visible.map(({ apt, price }, i) => (
-            <div key={apt.id}
-              className="group bg-white rounded-2xl border border-gray-100 hover:border-blue-200 hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col">
-              <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
-                {apt.images?.[0] && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={apt.images[0]} alt={apt.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                )}
-                <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/95 backdrop-blur-sm text-blue-700 text-[10px] font-bold rounded-full px-2.5 py-1 shadow-sm">
-                  ✨ שבת עד שבת
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+          {visible.map(({ apt, price }, i) => {
+            const total = displayPrice(price, selected!);
+            const href = `/apartments/${apt.id}?${new URLSearchParams({
+              checkin: selected!,
+              checkout: weekRange(selected!).checkout.toISOString().slice(0, 10),
+              guests: String(guests),
+              ...(full ? { deal: "full" } : {}),
+            }).toString()}`;
+            const meta = [apt.max_guests ? `עד ${apt.max_guests} אנשים` : "", apt.sqm ? `${apt.sqm} מ"ר` : ""].filter(Boolean).join(" · ");
+            return (
+              <Link key={apt.id} href={href}
+                className={`${card} group overflow-hidden flex flex-col hover:border-line-strong transition-colors`}>
+                <div className="relative h-[210px] bg-soft-2 overflow-hidden">
+                  {apt.images?.[0] && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={apt.images[0]} alt={apt.name} loading="lazy"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+                  )}
+                  <span className={`absolute top-3.5 right-3.5 ${badgeLight}`}>שבת עד שבת</span>
+                  {i === 0 && visible.length > 1 && <span className={`absolute top-3.5 left-3.5 ${badgeDark}`}>הכי משתלם</span>}
                 </div>
-                {i === 0 && (
-                  <div className="absolute top-3 left-3 flex items-center gap-1 bg-green-600 text-white text-[10px] font-bold rounded-full px-2.5 py-1 shadow-sm">
-                    💰 המשתלמת ביותר
-                  </div>
-                )}
-              </div>
-              <div className="p-4 flex flex-col flex-1">
-                <div className="flex items-center gap-1 text-[11px] text-gray-400 font-medium mb-1">
-                  <IconMountain size={11} className="text-blue-500" /> Val Thorens
-                </div>
-                <h3 className="font-display font-bold text-base text-gray-900 mb-2 leading-tight">{apt.name}</h3>
-                <div className="flex flex-wrap items-center gap-1.5 mb-3">
-                  <SpecChip icon={<IconUsers size={12} />} label={`עד ${apt.max_guests ?? "-"}`} />
-                  <SpecChip icon={<IconBed size={12} />} label={`${apt.beds} חדרים`} />
-                  <SpecChip icon={null} label={`${apt.sqm} מ״ר`} />
-                </div>
-                {dealMode === "full" && (
-                  <div className="flex flex-wrap gap-1.5 mb-4">
-                    <span className="text-[10px] bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-semibold">⛷️ סקי פס</span>
-                    <span className="text-[10px] bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-semibold">🚐 הסעה</span>
-                    {selectedHasFlight ? (
-                      <span className="text-[10px] bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-semibold">✈️ טיסה ישירה (הערכה)</span>
+                <div className="p-5 flex flex-col gap-2.5 flex-1">
+                  <h3 className="font-display font-bold text-[20px] md:text-[21px] leading-snug text-ink">{apt.name}</h3>
+                  {meta && <div className="text-[15px] text-muted">ואל טורנס · {meta}</div>}
+                  {full && (
+                    <ul className="flex flex-col gap-1.5 text-[15px] text-ink">
+                      <li className="flex items-center gap-2"><Check />סקי פס לשלושת העמקים</li>
+                      <li className="flex items-center gap-2"><Check />הסעה מהשדה</li>
+                      {selectedHasFlight
+                        ? <li className="flex items-center gap-2"><Check />טיסה ישירה (הערכה)</li>
+                        : <li className="flex items-center gap-2 text-muted"><span className="w-4 text-center" aria-hidden="true">–</span>בלי טיסה ישירה בשבוע הזה</li>}
+                    </ul>
+                  )}
+                  <div className="mt-auto pt-3.5 border-t border-line flex flex-col gap-3">
+                    {full ? (
+                      <div className="flex flex-col gap-0.5">
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="font-display font-extrabold text-[30px] leading-none text-ink">{eur(Math.round(total / guests))}</span>
+                          <span className="text-[15px] text-muted">לאדם</span>
+                        </div>
+                        <span className="text-[14px] text-muted">{eur(total)} לכל החבורה, {guests} {guests === 1 ? "אדם" : "אנשים"}</span>
+                      </div>
                     ) : (
-                      <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-1 rounded-full font-semibold">✈️ ללא טיסה ישירה בשבוע זה</span>
+                      <div className="flex flex-col gap-0.5">
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="font-display font-extrabold text-[30px] leading-none text-ink">{eur(total)}</span>
+                          <span className="text-[15px] text-muted">לשבוע</span>
+                        </div>
+                        <span className="text-[14px] text-muted">≈ {eur(Math.round(total / guests))} לאדם, {guests} {guests === 1 ? "אדם" : "אנשים"}</span>
+                      </div>
                     )}
-                  </div>
-                )}
-                <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
-                  <a href={`/apartments/${apt.id}?${new URLSearchParams({
-                      checkin: selected!,
-                      checkout: weekRange(selected!).checkout.toISOString().slice(0, 10),
-                      guests: String(guests),
-                      ...(dealMode === "full" ? { deal: "full" } : {}),
-                    }).toString()}`}
-                    className="bg-blue-600 group-hover:bg-blue-700 text-white text-xs font-bold rounded-xl px-4 py-2.5 transition-colors">
-                    צפייה בדירה
-                  </a>
-                  <div className="text-left">
-                    <div className="text-[10px] text-gray-400 font-medium">
-                      {dealMode === "full" ? `הכל כלול · ל-${guests} אנשים` : `לשבוע · ל-${guests} אנשים`}
-                    </div>
-                    <div className="text-lg font-black text-gray-900">€{displayPrice(price, selected!).toLocaleString("en-US")}</div>
-                    <div className="text-[10px] text-blue-500 font-semibold">
-                      ≈ €{Math.round(displayPrice(price, selected!) / guests).toLocaleString("en-US")} לאדם
-                    </div>
+                    <span className={`${btn.primary} w-full`}>{full ? "לחבילה" : "לדירה"} <IcoArrow /></span>
                   </div>
                 </div>
-              </div>
-            </div>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>

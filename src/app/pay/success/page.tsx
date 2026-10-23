@@ -1,7 +1,16 @@
 "use client";
 import { Suspense, useEffect } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { IconCheck } from "@/components/Icons";
+import { btn, chip } from "@/components/ui";
+import { StatusCard } from "@/components/checkout/Checkout";
+import { helperWaHref } from "@/lib/helper-whatsapp";
+
+const NEXT_STEPS = [
+  "אנחנו בודקים שהכל פנוי ומאשרים את ההזמנה.",
+  "רק אחרי האישור הכרטיס מחויב בפועל.",
+  "אישור ההזמנה מגיע אליכם במייל, ואפשר לראות אותה גם באזור האישי.",
+];
 
 function PaySuccessInner() {
   const params = useSearchParams();
@@ -18,20 +27,34 @@ function PaySuccessInner() {
   }, [order]);
 
   return (
-    <div className="min-h-screen bg-[#f7f9fb] flex flex-col items-center justify-center text-center px-6" dir="rtl">
-      <div className="w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-5">
-        <IconCheck size={36} />
+    <StatusCard tone="ok" title="קיבלנו את הפרטים"
+      actions={<>
+        <Link href="/my" className={btn.primary}>לאזור האישי</Link>
+        <Link href="/" className={btn.outline}>לאתר</Link>
+      </>}>
+      {order && <span className={chip}>מספר הזמנה <b dir="ltr" className="font-bold">{order.toUpperCase()}</b></span>}
+      <p className="text-[16px] md:text-[17px] leading-relaxed text-body max-w-[480px]">
+        פרטי התשלום נקלטו והסכום נשמר כפיקדון. נציג SkiShare יאשר את ההזמנה, ורק אחרי האישור יבוצע החיוב בפועל.
+      </p>
+      <div className="w-full text-start bg-soft border border-line rounded-2xl p-4 md:p-5">
+        <div className="font-bold text-[16px] text-ink mb-3">מה קורה עכשיו</div>
+        <ol className="flex flex-col gap-2.5">
+          {NEXT_STEPS.map((s, i) => (
+            <li key={i} className="flex items-start gap-3 text-[15px] text-body leading-relaxed">
+              <span className="shrink-0 w-6 h-6 rounded-full bg-white border border-line text-ink text-[13px] font-bold flex items-center justify-center" aria-hidden="true">{i + 1}</span>
+              <span>{s}</span>
+            </li>
+          ))}
+        </ol>
       </div>
-      <h1 className="font-display text-3xl font-black text-slate-900 mb-2">קיבלנו את הפרטים! 🎿</h1>
-      <p className="text-slate-500 max-w-md mb-8">פרטי התשלום נקלטו והסכום נשמר כפיקדון. נציג SkiShare יאשר את ההזמנה, ורק לאחר האישור יבוצע החיוב בפועל. אישור הזמנה יישלח אליך במייל.</p>
-      <div className="flex gap-3">
-        <a href="/my" className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3.5 rounded-xl transition">לאזור האישי</a>
-        <a href="/" className="border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-bold px-8 py-3.5 rounded-xl transition">לאתר</a>
-      </div>
-    </div>
+      <p className="text-[14px] text-muted">
+        שאלה על ההזמנה?{" "}
+        <a href={helperWaHref("היי, שילמתי באתר ויש לי שאלה על ההזמנה")} target="_blank" rel="noopener noreferrer" className="font-bold text-accent hover:text-accent-hover">כתבו לנו בוואטסאפ</a>
+      </p>
+    </StatusCard>
   );
 }
 
 export default function PaySuccess() {
-  return <Suspense fallback={<div className="min-h-screen bg-[#f7f9fb]" />}><PaySuccessInner /></Suspense>;
+  return <Suspense fallback={<div className="flex-1 bg-soft" />}><PaySuccessInner /></Suspense>;
 }

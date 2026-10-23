@@ -2,6 +2,7 @@ import { createServerClient } from "@/lib/supabase-server";
 import { TRANSFER_PRICE, FLIGHT_ESTIMATE, skiPassPerPersonForWeek } from "@/lib/deal-pricing";
 import type { Apartment, SkiPass } from "@/types";
 import WeeklyBrowser from "@/components/WeeklyBrowser";
+import { wrap, PageTop } from "@/components/ui";
 
 export const metadata = { title: "שבת עד שבת — SkiShare" };
 // Availability + pricing change daily via the sync cron — this page has no
@@ -30,32 +31,15 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
   const skiPassPerPerson = skiPassPerPersonForWeek(passOptions as SkiPass[] | null);
 
   return (
-    <div className="min-h-screen" style={{
-      background: "radial-gradient(ellipse 80% 50% at 15% 0%, #e6f0ff 0%, transparent 60%), radial-gradient(ellipse 70% 50% at 100% 20%, #eaf7ff 0%, transparent 55%), #fbfcfe",
-    }} dir="rtl">
+    <div className="flex-1 bg-white" dir="rtl">
+      <PageTop
+        soft
+        crumbs={[{ label: "דף הבית", href: "/" }, { label: "שבת עד שבת" }]}
+        title="שבת עד שבת"
+        sub="דירות של הסוכנות לשבוע שלם, מכניסה בשבת עד שבת. בוחרים שבוע, רואים מה פנוי ובכמה, ומזמינים."
+      />
 
-      {/* Hero */}
-      <section className="relative flex flex-col items-center justify-center overflow-hidden" style={{ height: "52vh", minHeight: 420 }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/hero-ski.jpg" alt="Val Thorens" className="absolute inset-0 w-full h-full object-cover object-center scale-105" style={{ zIndex: 0 }} />
-        <div className="absolute inset-0" style={{
-          zIndex: 1,
-          background: "linear-gradient(to bottom, rgba(10,20,35,0.6) 0%, rgba(10,20,35,0.2) 45%, rgba(10,20,35,0.75) 100%)",
-        }} />
-        <div className="relative z-10 flex flex-col items-center gap-4 px-4 text-center w-full max-w-2xl mx-auto">
-          <span className="flex items-center gap-1.5 text-xs font-bold tracking-widest uppercase text-white bg-white/15 backdrop-blur-sm border border-white/25 rounded-full px-4 py-1.5">
-            ✨ שכירות שבועית בואל טורנס
-          </span>
-          <h1 className="font-display text-3xl md:text-5xl font-black text-white leading-tight" style={{ textShadow: "0 2px 20px rgba(0,0,0,0.35)" }}>
-            דירות שבת עד שבת
-          </h1>
-          <p className="text-sm md:text-base text-white/85 max-w-lg leading-relaxed">
-            מחיר לשבוע שלם — בוחרים שבוע פנוי, רואים איזה דירות זמינות ובאיזה מחיר, ומזמינים.
-          </p>
-        </div>
-      </section>
-
-      <div className="pt-8 pb-16 px-5 md:px-6 max-w-6xl mx-auto">
+      <div className={`${wrap} pt-6 md:pt-8 pb-16 md:pb-20`}>
         <WeeklyBrowser
           apartments={apartments}
           initialDeal={initialDeal}
