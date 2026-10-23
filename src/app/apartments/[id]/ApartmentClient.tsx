@@ -870,6 +870,23 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
               </div>
             </div>
           </Section>
+
+          {/* where to read more before booking (also how search engines find these pages) */}
+          <nav aria-labelledby="more-title" className="flex flex-col gap-3 rounded-[18px] bg-soft border border-line p-4 md:p-5">
+            <h2 id="more-title" className="font-display font-bold text-[18px] md:text-[20px] text-ink">לפני שמזמינים</h2>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 text-[15px] md:text-[16px]">
+              {[
+                ["/apartments", "כל הדירות בואל טורנס"],
+                ["/weekly", "דירות שבת עד שבת: מחיר לכל שבוע"],
+                ["/transfers", "הסעה מז'נבה או מליון"],
+                ["/guide/מחיר-סקי-פס-ואל-טורנס", "סקי פס ואל טורנס: מחירים"],
+                ["/guide/איך-מגיעים-לואל-טורנס-מישראל", "איך מגיעים לואל טורנס מישראל"],
+                ["/emergency-policy", "מה קורה במצב חירום או מלחמה"],
+              ].map(([href, label]) => (
+                <li key={href}><Link href={href} className="font-bold text-accent hover:text-accent-hover">{label}</Link></li>
+              ))}
+            </ul>
+          </nav>
           </div>
         </div>
 
