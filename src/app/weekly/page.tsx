@@ -4,6 +4,7 @@ import { pageMeta } from "@/lib/page-meta";
 import { breadcrumbLd, ldJson } from "@/lib/site";
 import type { Apartment, SkiPass } from "@/types";
 import WeeklyBrowser from "@/components/WeeklyBrowser";
+import WeeklyGuide from "./WeeklyGuide";
 import { wrap, PageTop } from "@/components/ui";
 
 export const metadata = pageMeta({
@@ -54,6 +55,7 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
           initialWeek={week}
           passes={passes}
         />
+        <WeeklyGuide apartments={apartments} />
       </div>
     </div>
   );
