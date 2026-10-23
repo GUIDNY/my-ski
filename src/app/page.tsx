@@ -82,7 +82,7 @@ export default function Home() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/hero-ski.jpg" alt="" className="absolute inset-0 w-full h-full object-cover object-center" />
         <div className="absolute inset-0" style={{ background: "rgba(8,18,38,0.46)" }} />
-        <div className="relative z-10 w-full max-w-[1100px] mx-auto px-4 pt-28 pb-14 md:pt-32 md:pb-20 flex flex-col items-center gap-5 md:gap-6 text-center">
+        <div className="relative z-10 w-full max-w-[1100px] mx-auto px-4 pt-24 pb-14 md:pt-32 md:pb-20 flex flex-col items-center gap-5 md:gap-6 text-center">
           <span className="rounded-full px-4 py-1.5 text-[14px] md:text-[15px] font-medium text-white"
             style={{ background: "rgba(255,255,255,0.16)", border: "1px solid rgba(255,255,255,0.32)" }}>
             עונת 2026/27 פתוחה להזמנות
@@ -96,7 +96,8 @@ export default function Home() {
           <SearchWidget />
           <OpenChatButton className="inline-flex items-center gap-2.5 rounded-full bg-white/95 hover:bg-white text-[#0B1B33] px-5 py-2.5 text-[15px] md:text-[16px] font-medium min-h-[44px] transition-colors">
             <span className="text-[#1652F0]"><IcoChat size={18} /></span>
-            לא בטוחים בתאריכים? תכתבו לעוזר שלנו מה בא לכם
+            <span className="md:hidden">לא בטוחים? תכתבו לעוזר שלנו</span>
+            <span className="hidden md:inline">לא בטוחים בתאריכים? תכתבו לעוזר שלנו מה בא לכם</span>
           </OpenChatButton>
         </div>
       </section>
