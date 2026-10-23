@@ -63,9 +63,11 @@ function MonthGrid({ year, month, from, to, hov, onEnter, onLeave, onClick }: {
             <button key={i} type="button" disabled={disabled}
               aria-label={`${date.getDate()} ב${MONTHS[date.getMonth()]}${flight ? ", בדרך כלל יש טיסה ישירה" : ""}`}
               aria-pressed={isStart || isEnd}
-              className={`relative h-11 flex items-center justify-center ${disabled ? "cursor-default" : "cursor-pointer"}`}
-              onMouseEnter={() => !disabled && onEnter(date)}
-              onMouseLeave={onLeave}
+              className={`relative h-11 flex items-center justify-center touch-manipulation ${disabled ? "cursor-default" : "cursor-pointer"}`}
+              // the range preview follows a mouse only: a tap on a phone sends a "hover"
+              // first, and iOS drops the tap when that hover changes the page
+              onPointerEnter={e => { if (e.pointerType === "mouse" && !disabled) onEnter(date); }}
+              onPointerLeave={e => { if (e.pointerType === "mouse") onLeave(); }}
               onClick={() => !disabled && onClick(date)}
             >
               {between   && <span className="absolute inset-y-1 inset-x-0 bg-accent-soft" />}

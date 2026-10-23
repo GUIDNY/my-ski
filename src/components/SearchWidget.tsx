@@ -2,6 +2,9 @@
 import { useState, useRef, useEffect } from "react";
 import { hasDirectFlight } from "@/lib/direct-flight-days";
 
+/** focus that came from the keyboard (Tab), not from a tap or a click */
+const keyboardFocus = (el: Element) => { try { return el.matches(":focus-visible"); } catch { return false; } };
+
 const MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const DAYS   = ["א׳","ב׳","ג׳","ד׳","ה׳","ו׳","ש׳"];
 
@@ -69,10 +72,12 @@ function MonthGrid({
             <button type="button" key={i} disabled={disabled}
               aria-label={`${fmtLong(date)}${!disabled && hasDirectFlight(date) ? ", בדרך כלל יש טיסה ישירה" : ""}`}
               aria-pressed={isStart || isEnd}
-              className={`relative ${cell} flex items-center justify-center ${disabled ? "cursor-default" : "cursor-pointer"} focus-visible:outline-2 focus-visible:outline-[#1652F0] rounded-full`}
-              onMouseEnter={() => !disabled && onEnter(date)}
-              onFocus={() => !disabled && onEnter(date)}
-              onMouseLeave={onLeave}
+              className={`relative ${cell} flex items-center justify-center touch-manipulation ${disabled ? "cursor-default" : "cursor-pointer"} focus-visible:outline-2 focus-visible:outline-[#1652F0] rounded-full`}
+              // the range preview follows a mouse (and the keyboard) only: a tap on a phone
+              // sends a "hover" first, and iOS drops the tap when that hover changes the page
+              onPointerEnter={e => { if (e.pointerType === "mouse" && !disabled) onEnter(date); }}
+              onFocus={e => { if (!disabled && keyboardFocus(e.currentTarget)) onEnter(date); }}
+              onPointerLeave={e => { if (e.pointerType === "mouse") onLeave(); }}
               onClick={() => !disabled && onClick(date)}
             >
               {between   && <span className="absolute top-1.5 bottom-1.5 left-0 right-0 bg-blue-50" />}
@@ -170,7 +175,7 @@ export default function SearchWidget({ initialDeal = "apartment", flat = false }
 
   const navBtn = (disabled: boolean, onClick: () => void, children: React.ReactNode, label: string) => (
     <button type="button" aria-label={label} disabled={disabled} onClick={() => !disabled && onClick()}
-      className={`w-9 h-9 flex items-center justify-center rounded-full border transition-colors
+      className={`w-9 h-9 flex items-center justify-center rounded-full border transition-colors touch-manipulation
         ${disabled ? "border-gray-100 text-gray-300 cursor-not-allowed" : "border-gray-200 text-gray-600 hover:border-blue-400 hover:text-blue-600"}`}>
       {children}
     </button>

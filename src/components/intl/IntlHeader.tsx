@@ -14,7 +14,7 @@ export default function IntlHeader({ lang }: { lang: Lang }) {
   // `display` is passed whole ("inline-flex", or "hidden lg:inline-flex"): two display classes would fight
   const link = (href: string, label: string, on: boolean, display = "inline-flex") => (
     <Link href={href} aria-current={on ? "page" : undefined}
-      className={`${display} items-center min-h-[44px] px-2 md:px-3 rounded-lg text-[15px] md:text-[16px] whitespace-nowrap transition-colors ${
+      className={`${display} items-center min-h-[44px] px-1.5 min-[380px]:px-2 md:px-3 rounded-lg text-[15px] md:text-[16px] whitespace-nowrap transition-colors ${
         on ? "text-accent font-bold" : "text-ink font-medium hover:text-accent"}`}>
       {label}
     </Link>
@@ -26,7 +26,8 @@ export default function IntlHeader({ lang }: { lang: Lang }) {
         <Link href={`/${lang}`} aria-label={t.nav.homeAria} className="shrink-0 flex items-center min-h-[44px]"><Brand /></Link>
         <div className="flex items-center gap-1 md:gap-2 min-w-0">
           <nav aria-label={t.nav.main} className="flex items-center gap-0.5 md:gap-1">
-            {link(`/${lang}/apartments`, t.nav.apartments, pathname.startsWith(`/${lang}/apartments`))}
+            {/* below 340px the header can't hold it (the hero search and the footer link there) */}
+            {link(`/${lang}/apartments`, t.nav.apartments, pathname.startsWith(`/${lang}/apartments`), "hidden min-[340px]:inline-flex")}
             {link(`/${lang}/guide`, t.guides.nav, pathname.startsWith(`/${lang}/guide`), "hidden md:inline-flex")}
             {link(`/${lang}/terms`, t.nav.terms, pathname === `/${lang}/terms`, "hidden lg:inline-flex")}
           </nav>

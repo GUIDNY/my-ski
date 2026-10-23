@@ -87,9 +87,12 @@ export default function DateRangeCalendar({ lang, min, max, from, to, onChange }
             <button key={d} type="button" disabled={disabled}
               aria-label={fmtLong(d, lang)} aria-pressed={isStart || isEnd}
               onClick={() => pick(d)}
-              onMouseEnter={() => { if (!disabled) setHover(d); }}
-              onMouseLeave={() => setHover(null)}
-              className={`relative h-11 flex items-center justify-center ${disabled ? "cursor-default" : "cursor-pointer"}`}>
+              // the range preview follows a mouse only: on a phone a tap sends a
+              // "hover" first, and iOS drops the tap itself when the hover changes
+              // the page (the day, or the next tap on the month arrows, needed two taps)
+              onPointerEnter={e => { if (e.pointerType === "mouse" && !disabled) setHover(d); }}
+              onPointerLeave={e => { if (e.pointerType === "mouse") setHover(null); }}
+              className={`relative h-11 flex items-center justify-center touch-manipulation ${disabled ? "cursor-default" : "cursor-pointer"}`}>
               {between && <span className="absolute inset-y-1 inset-x-0 bg-accent-soft" />}
               {isStart && span && <span className="absolute inset-y-1 left-1/2 right-0 bg-accent-soft" />}
               {isEnd && span && <span className="absolute inset-y-1 left-0 right-1/2 bg-accent-soft" />}
@@ -113,7 +116,7 @@ export default function DateRangeCalendar({ lang, min, max, from, to, onChange }
     const on = picking === w;
     return (
       <button type="button" onClick={() => { if (w === "from" || from) setPicking(w); }} aria-pressed={on}
-        className={`min-h-[56px] px-3.5 rounded-xl border text-start transition-colors ${on ? "border-accent bg-accent-soft" : "border-line hover:border-line-strong"}`}>
+        className={`min-h-[56px] px-3.5 rounded-xl border text-start transition-colors touch-manipulation ${on ? "border-accent bg-accent-soft" : "border-line hover:border-line-strong"}`}>
         <span className="block text-[12px] font-bold text-muted">{w === "from" ? t.checkin : t.checkout}</span>
         <span className={`block text-[15px] ${v ? "text-ink font-bold" : "text-muted"}`}>{v ? fmtDay(v, lang) : t.addDate}</span>
       </button>
@@ -125,11 +128,11 @@ export default function DateRangeCalendar({ lang, min, max, from, to, onChange }
       <div className="grid grid-cols-2 gap-2">{tab("from")}{tab("to")}</div>
       <div className="relative">
         <button type="button" onClick={() => canPrev && setBase(prevMonth(base))} disabled={!canPrev} aria-label={t.prevMonth}
-          className="absolute -top-2 left-0 z-10 w-11 h-11 flex items-center justify-center rounded-full border border-line-strong text-ink hover:border-ink transition-colors disabled:border-line disabled:text-line-strong disabled:cursor-not-allowed">
+          className="absolute -top-2 left-0 z-10 w-11 h-11 flex items-center justify-center rounded-full border border-line-strong text-ink hover:border-ink transition-colors touch-manipulation disabled:border-line disabled:text-line-strong disabled:cursor-not-allowed">
           <Chev dir="l" />
         </button>
         <button type="button" onClick={() => canNext && setBase(nextMonth(base))} disabled={!canNext} aria-label={t.nextMonth}
-          className="absolute -top-2 right-0 z-10 w-11 h-11 flex items-center justify-center rounded-full border border-line-strong text-ink hover:border-ink transition-colors disabled:border-line disabled:text-line-strong disabled:cursor-not-allowed">
+          className="absolute -top-2 right-0 z-10 w-11 h-11 flex items-center justify-center rounded-full border border-line-strong text-ink hover:border-ink transition-colors touch-manipulation disabled:border-line disabled:text-line-strong disabled:cursor-not-allowed">
           <Chev dir="r" />
         </button>
         <div className="flex gap-6">
