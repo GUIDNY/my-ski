@@ -74,7 +74,7 @@ export default async function PackagesPage() {
     },
     {
       q: "איזה סקי פס יש בחבילה?",
-      a: `סקי פס לשלושת העמקים כשכל האזור פתוח, מ-${dmy(tvOpen)} עד ${dmy(tvClose)}. בשבועות שלפני ואחרי, סקי פס לואל טורנס ואורל. הפס הוא ל-${passDays} ימי סקי בשבוע של 7 לילות.`,
+      a: `סקי פס לשלושת העמקים כששלושת העמקים פתוחים, מ-${dmy(tvOpen)} עד ${dmy(tvClose)}. בשבועות שלפני ואחרי, סקי פס לואל טורנס ואורל. הפס הוא ל-${passDays} ימי סקי בשבוע של 7 לילות.`,
     },
     {
       q: "אפשר להזמין רק דירה?",
@@ -110,7 +110,7 @@ export default async function PackagesPage() {
           <h2 id="whats-in" className={h2}>מה יש בחבילה</h2>
           <CheckList className={p} items={[
             <span key="apt"><strong className="text-ink">דירה לשבוע בואל טורנס,</strong> משבת לשבת, לכל החבורה.</span>,
-            <span key="pass"><strong className="text-ink">סקי פס ל-{passDays} ימים</strong> שמתאים לתאריכים: שלושת העמקים כשהכל פתוח, ואל טורנס ואורל בתחילת העונה ובסופה.</span>,
+            <span key="pass"><strong className="text-ink">סקי פס ל-{passDays} ימים</strong> שמתאים לתאריכים: שלושת העמקים כשהם פתוחים, ואל טורנס ואורל בתחילת העונה ובסופה.</span>,
             <span key="transfer"><strong className="text-ink">הסעה מהשדה, הלוך וחזור,</strong> מז&apos;נבה או מליון: {eur(TRANSFER_PRICE)} לאדם.</span>,
           ]} />
           <p className={p}>
