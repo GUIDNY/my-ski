@@ -19,6 +19,25 @@ const nextConfig: NextConfig = {
     "/api/proposals/\\[id\\]/pdf": ["./node_modules/@sparticuz/chromium/bin/**/*"],
     "/api/flight-return": ["./node_modules/@sparticuz/chromium/bin/**/*"],
   },
+  // Addresses of the site that was on this domain before. Google still has
+  // them (Search Console: "Not found (404)"), so the ones with a page here now
+  // move to it for good. Matching ignores case (/home is also /Home), so a
+  // source must never equal its destination in another case (/Quote → /quote
+  // would loop). The rest (old admin, payment and sales pages) stay 404.
+  async redirects() {
+    const FULL_GUIDE = "/guide/" + encodeURIComponent("המדריך-המלא-לואל-טורנס");
+    return [
+      { source: "/home", destination: "/", permanent: true },
+      { source: "/PrivacyPolicy", destination: "/privacy", permanent: true },
+      { source: "/termsandconditions", destination: "/terms", permanent: true },
+      { source: "/ValThorensInfo", destination: FULL_GUIDE, permanent: true },
+      { source: "/valthorens", destination: FULL_GUIDE, permanent: true },
+      { source: "/cabins", destination: "/apartments", permanent: true },
+      { source: "/SearchResults", destination: "/apartments", permanent: true },
+      { source: "/LongTermApartments", destination: "/seasonaires", permanent: true },
+      { source: "/PersonalArea", destination: "/my", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {
