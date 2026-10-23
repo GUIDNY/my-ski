@@ -45,3 +45,6 @@ ios/App/build/
 ios/App/App/public/
 **/xcuserdata/
 .DS_Store
+
+# card-size photo copies, made before every build (scripts/thumbs.mjs)
+/public/thumbs/

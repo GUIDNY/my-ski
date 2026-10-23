@@ -10,6 +10,7 @@ import type { PricingRule } from "@/lib/pricing";
 import SkiCalendar from "@/components/SkiCalendar";
 import { aptShortName, aptDisplayName, aptKind, aptParts, forWho, minWeekPrice } from "@/lib/apartment-display";
 import { wrap, card, btn, badgeLight, Check, Crumbs, EmptyState, Skeleton } from "@/components/ui";
+import { cardImage } from "@/lib/thumbs";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const day = (s: string) => new Date(s + "T12:00:00");
@@ -87,7 +88,7 @@ function ApartmentCard({ apt, checkin, checkout, guests, rules, fromNightPrice, 
       className={`${card} group overflow-hidden flex flex-col hover:border-line-strong transition-colors`}>
       <div className="relative h-[210px] bg-soft-2 overflow-hidden shrink-0">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={apt.images?.[0] ?? "/apt1.jpg"} alt={aptDisplayName(apt)} loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : "auto"}
+        <img {...cardImage(apt.images?.[0], "/apt1.jpg")} alt={aptDisplayName(apt)} loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : "auto"}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
         <span className={`absolute top-3.5 right-3.5 ${badgeLight}`}>{isAgency(apt) ? "שבת עד שבת" : "דירה שלנו"}</span>
       </div>

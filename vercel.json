@@ -1,6 +1,13 @@
 {
+  "buildCommand": "npm run build",
   "crons": [
-    { "path": "/api/cron/ical-sync", "schedule": "0 5 * * *" },
-    { "path": "/api/cron/la-cime-sync", "schedule": "10 5 * * *" }
+    {
+      "path": "/api/cron/ical-sync",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/la-cime-sync",
+      "schedule": "10 5 * * *"
+    }
   ]
 }

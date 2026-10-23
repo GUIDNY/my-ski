@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { badgeLight, card } from "@/components/ui";
 import type { CardData } from "@/lib/intl/cards";
+import { cardImage } from "@/lib/thumbs";
 
 const IcoArrow = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
@@ -17,7 +18,7 @@ export default function ApartmentCard({ c, cta, heading = "h2", eager = false }:
       className={`${card} group overflow-hidden flex flex-col hover:border-line-strong transition-colors`}>
       <div className="relative h-[210px] bg-soft-2 overflow-hidden shrink-0">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={c.img} alt={c.name} loading={eager ? "eager" : "lazy"}
+        <img {...cardImage(c.img, "/apt1.jpg")} alt={c.name} loading={eager ? "eager" : "lazy"}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
         <span className={`absolute top-3.5 start-3.5 ${badgeLight}`}>{c.badge}</span>
       </div>

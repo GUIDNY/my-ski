@@ -8,6 +8,7 @@ import { weekPackageExtras, PASS_AREA_LABEL } from "@/lib/deal-pricing";
 import { useDirectFlight } from "@/lib/useFlightPrice";
 import { aptDisplayName, aptShortName, aptParts } from "@/lib/apartment-display";
 import { card, btn, badgeLight, badgeDark, Check, EmptyState } from "@/components/ui";
+import { cardImage } from "@/lib/thumbs";
 
 const MONTHS_FULL = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
 
@@ -275,7 +276,7 @@ export default function WeeklyBrowser({
                 <div className="relative h-[210px] bg-soft-2 overflow-hidden">
                   {apt.images?.[0] && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={apt.images[0]} alt={aptDisplayName(apt)} loading="lazy"
+                    <img {...cardImage(apt.images[0], "/apt1.jpg")} alt={aptDisplayName(apt)} loading="lazy"
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
                   )}
                   <span className={`absolute top-3.5 right-3.5 ${badgeLight}`}>שבת עד שבת</span>

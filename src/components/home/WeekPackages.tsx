@@ -6,6 +6,7 @@ import { rulesWithAirbnb } from "@/lib/airbnb-calendar";
 import { equipCost, matchingWeek, skiDaysFromNights, stayBreakdown } from "@/lib/pricing";
 import { skiPassPerPersonForWeek, TRANSFER_PRICE } from "@/lib/deal-pricing";
 import type { Apartment, SkiPass } from "@/types";
+import { cardImage } from "@/lib/thumbs";
 
 /**
  * Homepage packages: real prices for one upcoming Saturday-to-Saturday week
@@ -130,7 +131,7 @@ export default async function WeekPackages() {
           <article key={c.id} className="bg-white border border-[#E3E9F2] rounded-[22px] overflow-hidden flex flex-col">
             <div className="relative h-[210px]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={c.img} alt={c.name} loading="lazy" className="w-full h-full object-cover" />
+              <img {...cardImage(c.img, "/hero-ski.jpg")} alt={c.name} loading="lazy" className="w-full h-full object-cover" />
               <span className="absolute top-3.5 right-3.5 bg-white text-[#0B1B33] rounded-full px-3 py-1 text-[13px] font-bold">
                 {c.ownApartment ? "דירה שלנו" : "שבת עד שבת"}
               </span>
