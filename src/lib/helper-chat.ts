@@ -6,6 +6,8 @@
  * made, and apartment photos. Server-only.
  */
 
+import { N8N_UA } from "@/lib/airbnb-calendar";
+
 export type HelperAnswer = {
   ok: true;
   bubbles: string[];
@@ -45,7 +47,7 @@ export async function askHelper(input: { sessionId: string; text: string; name?:
   try {
     const res = await fetch(`${process.env.N8N_SITE_URL}/chat`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "User-Agent": N8N_UA },
       body: JSON.stringify({
         sessionId: input.sessionId,
         text: input.text.slice(0, 1500),
@@ -57,7 +59,7 @@ export async function askHelper(input: { sessionId: string; text: string; name?:
       signal: AbortSignal.timeout(170_000),
     });
     if (!res.ok) {
-      if (res.status === 404 || res.status >= 500) downUntil = Date.now() + 60_000;
+      if (res.status === 403 || res.status === 404 || res.status >= 500) downUntil = Date.now() + 60_000;
       return null;
     }
     const j = await res.json() as Record<string, unknown>;

@@ -15,8 +15,16 @@ import { parseAirbnbCalendar, airbnbRules, type AirbnbCalendar } from "@/lib/air
  * nothing is cached yet) apartments keep the site's own seasonal pricing.
  */
 
+// n8n's webhooks "ignore bots": a plain server fetch (user agent "node") gets
+// 403 "Authorization data is wrong!", so say who we are in a browser-style UA.
+export const N8N_UA = "Mozilla/5.0 (Linux x86_64) SkiShareSite/1.0";
+
 async function fetchAirbnbCalendar(): Promise<AirbnbCalendar> {
-  const res = await fetch(`${process.env.N8N_SITE_URL}/prices`, { cache: "no-store", signal: AbortSignal.timeout(20000) });
+  const res = await fetch(`${process.env.N8N_SITE_URL}/prices`, {
+    cache: "no-store",
+    headers: { "User-Agent": N8N_UA },
+    signal: AbortSignal.timeout(20000),
+  });
   if (!res.ok) throw new Error(`airbnb calendar: n8n answered ${res.status}`);
   return parseAirbnbCalendar(await res.json());
 }
