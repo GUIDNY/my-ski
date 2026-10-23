@@ -86,15 +86,9 @@ function MonthGrid({
 }
 
 /* ── Icons ─────────────────────────────────────────────────── */
-const IconMountain = () => (
-  <svg width="16" height="14" viewBox="0 0 32 28" fill="none">
-    <polygon points="16,2 30,26 2,26" fill="#dbeafe" stroke="#2563eb" strokeWidth="2.2" strokeLinejoin="round"/>
-    <polygon points="16,10 23,26 9,26" fill="white" stroke="#2563eb" strokeWidth="1.5" strokeLinejoin="round"/>
-  </svg>
-);
 const IconCal = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1652F0" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>
   </svg>
 );
 const IconChevL = () => (
@@ -159,123 +153,59 @@ export default function SearchWidget() {
     </button>
   );
 
+  const pill = (active: boolean) =>
+    `min-h-[40px] rounded-xl border text-[15px] font-bold transition-colors ${
+      active ? "border-[#0B1B33] bg-[#0B1B33] text-white" : "border-[#CBD5E3] bg-white text-[#0B1B33] hover:border-[#0B1B33]"}`;
+  const stepBtn = "w-9 h-9 rounded-full border border-[#CBD5E3] flex items-center justify-center text-[#0B1B33] hover:border-[#1652F0] hover:text-[#1652F0] font-bold transition-colors";
+
   return (
-    <div ref={ref} className="relative w-full max-w-3xl" dir="rtl">
+    <div ref={ref} className="relative w-full max-w-5xl" dir="rtl">
+      <form role="search" aria-label="חיפוש חופשה" onSubmit={e => { e.preventDefault(); handleSearch(); }}
+        className="bg-white rounded-[22px] p-2.5 md:p-3 grid grid-cols-1 md:grid-cols-[1.3fr_1fr_1.15fr_auto] gap-2 md:gap-2.5 text-right"
+        style={{ boxShadow: "0 24px 60px rgba(8,18,38,0.35)" }}>
 
-      {/* ══ Deal mode toggle ══════════════════════════════════ */}
-      <div className="flex justify-center mb-3">
-        <div className="inline-flex bg-white/15 backdrop-blur-sm rounded-full p-1 border border-white/25">
-          <button onClick={() => setDealMode("full")}
-            className={`px-4 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-1.5 ${
-              dealMode === "full" ? "bg-white text-blue-700 shadow" : "text-white/90 hover:text-white"}`}>
-            ✨ דיל שלם
-          </button>
-          <button onClick={() => setDealMode("apartment")}
-            className={`px-4 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-1.5 ${
-              dealMode === "apartment" ? "bg-white text-blue-700 shadow" : "text-white/90 hover:text-white"}`}>
-            🏠 רק דירה
-          </button>
-        </div>
-      </div>
-      {dealMode === "full" && (
-        <p className="text-center text-white/90 text-xs font-semibold mb-3 -mt-1">
-          כולל הסעה משדה התעופה · סקי פס לשלושת העמקים · טיסה וכבודה
-        </p>
-      )}
-
-      {/* ══ DESKTOP search bar (md+) ══════════════════════════ */}
-      <div className="hidden md:flex bg-white items-stretch rounded-2xl" style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.18)" }}>
-        <div className="flex-1 px-6 py-5 text-right">
-          <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-1.5">יעד</div>
-          <div className="flex items-center gap-2">
-            <IconMountain />
-            <span className="text-gray-900 font-bold text-sm">Val Thorens</span>
-          </div>
-        </div>
-        <div className="w-px bg-gray-100 my-4" />
-        <button onClick={() => openPicker("from")}
-          className={`flex-1 px-5 py-5 text-right transition-colors hover:bg-gray-50 ${open && picking === "from" ? "bg-blue-50/60" : ""}`}>
-          <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-1.5">יציאה</div>
-          <div className="flex items-center gap-2">
+        {/* When */}
+        <button type="button" onClick={() => openPicker(from && !to ? "to" : "from")} aria-expanded={open}
+          className={`flex flex-col items-start justify-center gap-1 rounded-2xl border px-4 py-3 md:px-5 text-right transition-colors min-h-[64px] ${
+            open ? "border-[#1652F0] bg-[#F5F8FF]" : "border-[#E3E9F2] hover:border-[#CBD5E3]"}`}>
+          <span className="text-[13px] font-bold text-[#51607A]">מתי?</span>
+          <span className="flex items-center gap-2 text-[16px] md:text-[17px] font-medium text-[#0B1B33]">
             <IconCal />
-            <span className={`text-sm font-semibold ${from ? "text-gray-900" : "text-gray-400"}`}>{fmt(from) ?? "הוסף תאריך"}</span>
-          </div>
+            {from && to
+              ? <>{fmt(from)} – {fmt(to)}{nights ? <span className="text-[#51607A]"> · {nights} לילות</span> : null}</>
+              : from ? <>{fmt(from)} – <span className="text-[#51607A]">בחרו חזרה</span></>
+              : <span className="text-[#51607A]">בחרו תאריכים</span>}
+          </span>
         </button>
-        <div className="w-px bg-gray-100 my-4" />
-        <button onClick={() => openPicker("to")}
-          className={`flex-1 px-5 py-5 text-right transition-colors hover:bg-gray-50 ${open && picking === "to" ? "bg-blue-50/60" : ""}`}>
-          <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-1.5">חזרה</div>
-          <div className="flex items-center gap-2">
-            <IconCal />
-            <span className={`text-sm font-semibold ${to ? "text-gray-900" : "text-gray-400"}`}>{fmt(to) ?? "הוסף תאריך"}</span>
-          </div>
-          {nights && <div className="text-[10px] text-blue-500 font-bold mt-0.5">{nights} לילות</div>}
-        </button>
-        <div className="w-px bg-gray-100 my-4" />
-        <div className="flex items-center px-4 py-5">
-          <div>
-            <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-1.5">אנשים</div>
-            <div className="flex items-center gap-2">
-              <button onClick={() => setGuests(g => Math.max(1, g - 1))} className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold text-sm transition-colors">−</button>
-              <span className="font-bold text-gray-900 w-5 text-center text-sm">{guests}</span>
-              <button onClick={() => setGuests(g => Math.min(12, g + 1))} className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold text-sm transition-colors">+</button>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center px-3">
-          <button onClick={handleSearch} className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold px-7 py-4 rounded-xl transition-all flex items-center gap-2 text-sm">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            חפש
-          </button>
-        </div>
-      </div>
 
-      {/* ══ MOBILE search bar (< md) ══════════════════════════ */}
-      <div className="md:hidden bg-white rounded-2xl overflow-hidden" style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.18)" }}>
-        {/* Destination row */}
-        <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-gray-100">
-          <IconMountain />
-          <div>
-            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">יעד</div>
-            <div className="text-sm font-bold text-gray-900">Val Thorens</div>
-          </div>
-        </div>
-        {/* Dates row */}
-        <div className="grid grid-cols-2 border-b border-gray-100">
-          <button onClick={() => openPicker("from")}
-            className={`px-5 py-3.5 text-right border-l border-gray-100 transition-colors ${open && picking === "from" ? "bg-blue-50" : "hover:bg-gray-50"}`}>
-            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">יציאה</div>
-            <div className="flex items-center gap-1.5">
-              <IconCal />
-              <span className={`text-sm font-semibold ${from ? "text-gray-900" : "text-gray-400"}`}>{fmt(from) ?? "בחר"}</span>
-            </div>
-          </button>
-          <button onClick={() => openPicker("to")}
-            className={`px-5 py-3.5 text-right transition-colors ${open && picking === "to" ? "bg-blue-50" : "hover:bg-gray-50"}`}>
-            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">חזרה</div>
-            <div className="flex items-center gap-1.5">
-              <IconCal />
-              <span className={`text-sm font-semibold ${to ? "text-gray-900" : "text-gray-400"}`}>{fmt(to) ?? "בחר"}</span>
-            </div>
-            {nights && <div className="text-[10px] text-blue-500 font-bold mt-0.5">{nights} לילות</div>}
-          </button>
-        </div>
-        {/* Guests + Search */}
-        <div className="flex items-center justify-between px-5 py-3">
+        {/* Guests */}
+        <div className="flex items-center justify-between md:flex-col md:items-start md:justify-center gap-1 rounded-2xl border border-[#E3E9F2] px-4 py-3 md:px-5 min-h-[64px]">
+          <span className="text-[13px] font-bold text-[#51607A]">כמה אתם?</span>
           <div className="flex items-center gap-3">
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">אנשים</span>
-            <div className="flex items-center gap-2">
-              <button onClick={() => setGuests(g => Math.max(1, g - 1))} className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold transition-colors">−</button>
-              <span className="font-bold text-gray-900 w-6 text-center">{guests}</span>
-              <button onClick={() => setGuests(g => Math.min(12, g + 1))} className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-blue-500 hover:text-blue-600 font-bold transition-colors">+</button>
-            </div>
+            <button type="button" aria-label="פחות אנשים" onClick={() => setGuests(g => Math.max(1, g - 1))} className={stepBtn}>−</button>
+            <span className="font-bold text-[17px] text-[#0B1B33] w-6 text-center" aria-live="polite">{guests}</span>
+            <button type="button" aria-label="יותר אנשים" onClick={() => setGuests(g => Math.min(12, g + 1))} className={stepBtn}>+</button>
           </div>
-          <button onClick={handleSearch} className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold px-6 py-2.5 rounded-xl transition-all flex items-center gap-2 text-sm">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            חפש
-          </button>
         </div>
-      </div>
+
+        {/* What */}
+        <div className="flex flex-col justify-center gap-1.5 rounded-2xl border border-[#E3E9F2] px-4 py-3 min-h-[64px]">
+          <span className="text-[13px] font-bold text-[#51607A]">מה בא לכם?</span>
+          <div className="grid grid-cols-2 gap-1.5" role="group" aria-label="סוג החיפוש">
+            <button type="button" aria-pressed={dealMode === "full"} onClick={() => setDealMode("full")} className={pill(dealMode === "full")}>דיל שלם</button>
+            <button type="button" aria-pressed={dealMode === "apartment"} onClick={() => setDealMode("apartment")} className={pill(dealMode === "apartment")}>רק דירה</button>
+          </div>
+        </div>
+
+        <button type="submit"
+          className="rounded-2xl bg-[#1652F0] hover:bg-[#0E3FC2] active:scale-[0.98] text-white font-bold text-[18px] md:text-[19px] px-7 min-h-[56px] md:min-h-[64px] flex items-center justify-center gap-2 transition-all">
+          {dealMode === "full" ? "מצאו לי חבילה" : "מצאו לי דירה"}
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" /></svg>
+        </button>
+      </form>
+      {dealMode === "full" && (
+        <p className="text-center text-white/90 text-sm font-medium mt-3">דיל שלם: הדירה, הסעה מהשדה, סקי פס לשלושת העמקים, טיסה וכבודה</p>
+      )}
 
       {/* ══ Calendar dropdown ══════════════════════════════════ */}
       {open && (

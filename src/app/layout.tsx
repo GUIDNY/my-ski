@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Montserrat, Inter } from "next/font/google";
+import { Montserrat, Inter, Heebo, Rubik } from "next/font/google";
 import "./globals.css";
 import MobileTabBar from "@/components/MobileTabBar";
 import CookieConsent from "@/components/CookieConsent";
@@ -16,6 +16,20 @@ const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+});
+
+// Hebrew glyphs: Montserrat and Inter have none, so Hebrew text used to fall
+// back to whatever the device had. Heebo for body text, Rubik for headings.
+const heebo = Heebo({
+  variable: "--font-heebo",
+  subsets: ["hebrew"],
+  weight: ["400", "500", "700", "800"],
+});
+
+const rubik = Rubik({
+  variable: "--font-rubik",
+  subsets: ["hebrew"],
+  weight: ["600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -91,7 +105,7 @@ export default function RootLayout({
   return (
     <html
       lang="he"
-      className={`${montserrat.variable} ${inter.variable} h-full antialiased`}
+      className={`${montserrat.variable} ${inter.variable} ${heebo.variable} ${rubik.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }} />

@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import { usePathname } from "next/navigation";
+import { helperWaHref, OPEN_CHAT_EVENT } from "@/lib/helper-whatsapp";
 
 // One chat message. The helper answers in a few short messages, then the quote
 // link and apartment photos (when it made a quote or showed an apartment).
@@ -25,8 +26,7 @@ const WELCOME: Message[] = [
 ];
 
 // The same helper answers on WhatsApp, so the chat can carry on there.
-const HELPER_WHATSAPP = process.env.NEXT_PUBLIC_HELPER_WHATSAPP || "16623445081";
-const WA_HREF = `https://wa.me/${HELPER_WHATSAPP}?text=${encodeURIComponent("היי, הגעתי מהאתר")}`;
+const WA_HREF = helperWaHref();
 
 const STORE = "skishare-chat-v2";
 
@@ -131,6 +131,12 @@ export default function AiConcierge() {
       setSessionId(newSessionId());
     }
   };
+  // "Write to our assistant" buttons elsewhere on the page open the chat
+  useEffect(() => {
+    const onOpen = () => { restore(); setOpen(true); };
+    window.addEventListener(OPEN_CHAT_EVENT, onOpen);
+    return () => window.removeEventListener(OPEN_CHAT_EVENT, onOpen);
+  }, []);
   useEffect(() => {
     if (!restored.current || !sessionId) return;
     try { sessionStorage.setItem(STORE, JSON.stringify({ sessionId, messages: messages.slice(-60), contact })); } catch { /* private mode */ }
