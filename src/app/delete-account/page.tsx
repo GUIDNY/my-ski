@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase-client";
-import Logo from "@/components/Logo";
+import { PageTop, card, wrap } from "@/components/ui";
 
 export default function DeleteAccountPage() {
   const [email, setEmail] = useState<string | null>(null);
@@ -12,61 +13,62 @@ export default function DeleteAccountPage() {
   }, []);
 
   const deleteAccount = async () => {
-    if (!confirm("למחוק את החשבון לצמיתות? כל הנתונים האישיים שלך יימחקו. פעולה זו אינה הפיכה.")) return;
-    if (!confirm("אישור אחרון — למחוק את החשבון?")) return;
+    if (!confirm("למחוק את החשבון לצמיתות? כל הנתונים האישיים שלכם יימחקו, ואי אפשר לבטל את זה.")) return;
+    if (!confirm("אישור אחרון: למחוק את החשבון?")) return;
     setBusy(true);
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) { window.location.href = "/auth"; return; }
     const r = await fetch("/api/account/delete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ access_token: session.access_token }) });
-    if (r.ok) { await supabase.auth.signOut(); alert("החשבון נמחק. תודה שהיית איתנו 🎿"); window.location.href = "/"; }
-    else { setBusy(false); alert("שגיאה במחיקת החשבון. נסו שוב או פנו אלינו."); }
+    if (r.ok) { await supabase.auth.signOut(); alert("החשבון נמחק. תודה שהייתם איתנו."); window.location.href = "/"; }
+    else { setBusy(false); alert("לא הצלחנו למחוק את החשבון. נסו שוב או כתבו לנו."); }
   };
 
+  const linkCls = "font-bold text-accent hover:text-accent-hover";
+
   return (
-    <div className="min-h-screen bg-[#f8f9ff]" dir="rtl">
-      <header className="bg-white border-b border-gray-100">
-        <div className="max-w-2xl mx-auto px-5 h-16 flex items-center justify-between">
-          <a href="/" className="text-sm text-gray-500 hover:text-gray-900">→ לאתר</a>
-          <a href="/"><Logo className="h-8" /></a>
-        </div>
-      </header>
+    <div className="flex-1 bg-white" dir="rtl">
+      <PageTop soft
+        crumbs={[{ label: "דף הבית", href: "/" }, { label: "מחיקת חשבון" }]}
+        title="מחיקת חשבון SkiShare"
+        sub="אפשר למחוק את החשבון בכל עת, מכאן או מהאזור האישי באפליקציה." />
 
-      <main className="max-w-2xl mx-auto px-5 py-10">
-        <h1 className="font-display text-3xl font-black text-gray-900 mb-2">מחיקת חשבון SkiShare</h1>
-        <p className="text-gray-500 mb-8">אפשר למחוק את חשבון SkiShare שלך בכל עת, ישירות מכאן או מהאזור האישי באפליקציה.</p>
-
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
-          <h2 className="font-display text-lg font-black text-gray-900 mb-3">איך מוחקים?</h2>
-          <ol className="space-y-2 text-gray-600 text-sm list-decimal pr-5">
-            <li>התחברו לחשבון שלכם.</li>
-            <li>היכנסו ל<a href="/my" className="text-blue-600 hover:underline font-semibold">אזור האישי</a> (או לחצו על הכפתור למטה).</li>
-            <li>לחצו על <b>"מחיקת חשבון לצמיתות"</b> ואשרו.</li>
+      <div className={`${wrap} py-8 md:py-10`}>
+      <div className="max-w-[760px] flex flex-col gap-5">
+        <section className={`${card} p-5 md:p-6`}>
+          <h2 className="font-display font-bold text-[20px] text-ink mb-3">איך מוחקים?</h2>
+          <ol className="flex flex-col gap-2 text-[16px] text-body list-decimal pr-5 leading-relaxed">
+            <li>מתחברים לחשבון.</li>
+            <li>נכנסים ל<Link href="/my?tab=account" className={linkCls}>אזור האישי</Link>, או לוחצים על הכפתור כאן למטה.</li>
+            <li>לוחצים על &quot;למחוק את החשבון לצמיתות&quot; ומאשרים.</li>
           </ol>
-        </div>
+        </section>
 
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
-          <h2 className="font-display text-lg font-black text-gray-900 mb-3">מה נמחק?</h2>
-          <ul className="space-y-1.5 text-gray-600 text-sm list-disc pr-5">
-            <li>חשבון ההתחברות שלך (אימייל וסיסמה).</li>
-            <li>החופשות השמורות והעדפותיך.</li>
-            <li>הקישור בין ההזמנות לחשבון מנותק.</li>
+        <section className={`${card} p-5 md:p-6`}>
+          <h2 className="font-display font-bold text-[20px] text-ink mb-3">מה נמחק?</h2>
+          <ul className="flex flex-col gap-1.5 text-[16px] text-body list-disc pr-5 leading-relaxed">
+            <li>חשבון ההתחברות (המייל והסיסמה).</li>
+            <li>החופשות השמורות וההעדפות.</li>
+            <li>הקישור בין ההזמנות לחשבון.</li>
           </ul>
-          <p className="text-xs text-gray-400 mt-3 leading-relaxed">שים/י לב: רשומות הזמנה ותשלום עשויות להישמר לתקופה מוגבלת לצורכי חשבונאות וחוק, בהתאם ל<a href="/privacy" className="text-blue-600 hover:underline">מדיניות הפרטיות</a>, אך לא יהיו מקושרות עוד לחשבונך.</p>
-        </div>
+          <p className="text-[14px] text-muted mt-4 leading-relaxed">
+            חשוב לדעת: רשומות של הזמנות ותשלומים יכולות להישמר לזמן מוגבל לצורכי הנהלת חשבונות וחוק, לפי <Link href="/privacy" className={linkCls}>מדיניות הפרטיות</Link>, אבל הן כבר לא יהיו מקושרות לחשבון.
+          </p>
+        </section>
 
-        <button onClick={deleteAccount} disabled={busy}
-          className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white font-display font-black py-3.5 rounded-xl transition mb-3">
-          {busy ? "מוחק…" : email ? `מחק את החשבון (${email})` : "התחבר/י ומחק/י את החשבון"}
+        <button type="button" onClick={deleteAccount} disabled={busy}
+          className="w-full min-h-[52px] rounded-[14px] bg-danger hover:bg-[#912018] disabled:opacity-60 text-white font-display font-bold text-[17px] px-5 transition-colors">
+          {busy ? "מוחקים…" : email ? <>למחוק את החשבון (<span dir="ltr">{email}</span>)</> : "להתחבר ולמחוק את החשבון"}
         </button>
 
-        <div className="flex items-center justify-center gap-4 text-sm">
-          <a href="/privacy" className="text-blue-600 hover:underline">מדיניות פרטיות</a>
-          <span className="text-gray-300">·</span>
-          <a href="/terms" className="text-blue-600 hover:underline">תנאי שימוש</a>
-          <span className="text-gray-300">·</span>
-          <a href="https://wa.me/972547701899" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">צור קשר</a>
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[15px]">
+          <Link href="/privacy" className={linkCls}>מדיניות פרטיות</Link>
+          <span className="text-line-strong" aria-hidden="true">·</span>
+          <Link href="/terms" className={linkCls}>תנאי שימוש</Link>
+          <span className="text-line-strong" aria-hidden="true">·</span>
+          <a href="https://wa.me/972547701899" target="_blank" rel="noopener noreferrer" className={linkCls}>צרו קשר</a>
         </div>
-      </main>
+      </div>
+      </div>
     </div>
   );
 }

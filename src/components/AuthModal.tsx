@@ -1,64 +1,34 @@
 "use client";
-import Logo from "@/components/Logo";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import type { FormEvent } from "react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase-client";
+import { buildWaHref } from "@/lib/whatsapp";
+import { btn, field, fieldLabel } from "@/components/ui";
 
-/* ── Stars ─────────────────────────────────────────────────── */
-const STARS = Array.from({ length: 90 }, (_, i) => ({
-  id: i,
-  left:    `${Math.random() * 100}%`,
-  top:     `${Math.random() * 72}%`,
-  size:     Math.random() * 1.8 + 0.4,
-  opacity:  Math.random() * 0.65 + 0.2,
-  dur:      Math.random() * 4 + 2,
-  delay:    Math.random() * 4,
-}));
+/*
+ * Sign in / sign up. AuthForm is the form itself (also used by the /auth page);
+ * AuthModal opens it over the page: a centered card on desktop, a full-screen
+ * sheet on the phone.
+ */
 
-function Stars() {
-  return (
-    <>
-      <style>{`
-        @keyframes twinkle {
-          0%, 100% { opacity: var(--star-op); }
-          50%       { opacity: calc(var(--star-op) * 0.25); }
-        }
-      `}</style>
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {STARS.map(s => (
-          <div key={s.id} style={{
-            position:     "absolute",
-            left:          s.left,
-            top:           s.top,
-            width:         s.size,
-            height:        s.size,
-            borderRadius: "50%",
-            background:   "white",
-            "--star-op":   s.opacity,
-            opacity:       s.opacity,
-            animation:    `twinkle ${s.dur}s ${s.delay}s ease-in-out infinite`,
-          } as React.CSSProperties} />
-        ))}
-      </div>
-    </>
-  );
+// Supabase answers in English: show the common cases in simple Hebrew.
+function heError(message: string): string {
+  const m = (message || "").toLowerCase();
+  if (m.includes("invalid login") || m.includes("invalid credentials")) return "אימייל או סיסמה שגויים";
+  if (m.includes("email not confirmed")) return "עוד לא אישרתם את המייל. חפשו אצלכם מייל מ-SkiShare (גם בספאם) ולחצו על הקישור.";
+  if (m.includes("already registered") || m.includes("already been registered") || m.includes("already exists")) return "יש כבר חשבון עם המייל הזה. אפשר להיכנס בלשונית \"כניסה\".";
+  if (m.includes("password") && (m.includes("at least") || m.includes("6 characters") || m.includes("weak"))) return "הסיסמה צריכה להיות לפחות 6 תווים";
+  if (m.includes("rate limit") || m.includes("too many") || m.includes("security purposes")) return "היו יותר מדי ניסיונות. נסו שוב בעוד כמה דקות.";
+  if (m.includes("invalid email") || m.includes("unable to validate email") || m.includes("invalid format")) return "כתובת המייל לא נראית תקינה";
+  return "משהו לא עבד. נסו שוב, ואם זה חוזר כתבו לנו בוואטסאפ.";
 }
 
-/* ── Mountain silhouette ───────────────────────────────────── */
-function Mountains() {
-  return (
-    <svg viewBox="0 0 1200 280" preserveAspectRatio="xMidYMax slice"
-      className="absolute bottom-0 left-0 right-0 w-full pointer-events-none" style={{ height: 280 }}>
-      <polygon points="0,280 160,110 300,170 430,70 570,145 700,55 840,125 1000,65 1120,130 1200,85 1200,280" fill="#0e2a42" />
-      <polygon points="0,280 110,155 230,195 340,105 470,165 600,82 730,155 870,95 1010,152 1140,105 1200,130 1200,280" fill="#091f33" />
-      <polygon points="0,280 80,205 200,238 310,162 420,215 530,145 650,205 780,155 900,212 1050,168 1160,200 1200,178 1200,280" fill="#061525" />
-    </svg>
-  );
-}
+const FORGOT_HREF = buildWaHref({ intro: "היי, שכחתי את הסיסמה לאזור האישי באתר", lines: [] });
 
-/* ── Modal ─────────────────────────────────────────────────── */
-type Props = { onClose: () => void; onAuth: () => void };
-
-export default function AuthModal({ onClose, onAuth }: Props) {
+/** The sign in / sign up form. onDone runs once the visitor is signed in. */
+export function AuthForm({ onDone, autoFocus = false, titleAs = "h2" }: { onDone: () => void; autoFocus?: boolean; titleAs?: "h1" | "h2" }) {
+  const uid = useId();
   const [tab,      setTab]      = useState<"login" | "signup">("login");
   const [name,     setName]     = useState("");
   const [email,    setEmail]    = useState("");
@@ -67,6 +37,122 @@ export default function AuthModal({ onClose, onAuth }: Props) {
   const [loading,  setLoading]  = useState(false);
   const [error,    setError]    = useState("");
   const [success,  setSuccess]  = useState("");
+
+  const reset = () => { setError(""); setSuccess(""); };
+
+  const login = async () => {
+    setLoading(true); reset();
+    const { error: e } = await supabase.auth.signInWithPassword({ email, password });
+    if (e) { setError(heError(e.message)); setLoading(false); return; }
+    setLoading(false);
+    onDone();
+  };
+
+  const signup = async () => {
+    if (password !== confirm) { setError("הסיסמאות לא זהות"); return; }
+    if (password.length < 6)  { setError("הסיסמה צריכה להיות לפחות 6 תווים"); return; }
+    setLoading(true); reset();
+    const { data, error: e } = await supabase.auth.signUp({
+      email, password,
+      options: { data: { full_name: name, role: "user" } },
+    });
+    if (e) { setError(heError(e.message)); setLoading(false); return; }
+    setLoading(false);
+    if (data.session) { onDone(); return; }   // no email confirmation needed: already signed in
+    setSuccess("נרשמתם! שלחנו לכם מייל לאישור. אחרי שתלחצו על הקישור במייל אפשר להיכנס.");
+  };
+
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    if (loading || !email || !password) return;
+    if (tab === "login") login(); else signup();
+  };
+
+  const isLogin = tab === "login";
+  const id = (k: string) => `${uid}-${k}`;
+  const Title = titleAs;
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col items-center gap-3 text-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/skishare-mark.png" alt="" aria-hidden="true" className="h-8 w-auto" />
+        <Title id={id("title")} className="font-display font-bold text-[26px] leading-tight text-ink">
+          {isLogin ? "כניסה לאזור האישי" : "יצירת חשבון"}
+        </Title>
+        <p className="text-[15px] leading-relaxed text-muted max-w-[320px]">
+          ההזמנות שלכם והחופשות ששמרתם, במקום אחד.
+        </p>
+      </div>
+
+      <div role="tablist" aria-label="כניסה או הרשמה" className="grid grid-cols-2 gap-1 p-1 bg-soft rounded-[14px]">
+        {(["login", "signup"] as const).map(t => (
+          <button key={t} type="button" role="tab" aria-selected={tab === t}
+            onClick={() => { setTab(t); reset(); }}
+            className={`min-h-[44px] rounded-[11px] text-[15px] font-bold transition-colors ${tab === t ? "bg-white text-ink shadow-[0_1px_3px_rgba(11,27,51,0.12)]" : "text-muted hover:text-ink"}`}>
+            {t === "login" ? "כניסה" : "הרשמה"}
+          </button>
+        ))}
+      </div>
+
+      <form onSubmit={submit} noValidate className="flex flex-col gap-4">
+        {!isLogin && (
+          <div>
+            <label htmlFor={id("name")} className={fieldLabel}>שם מלא</label>
+            <input id={id("name")} value={name} onChange={e => setName(e.target.value)} autoComplete="name" className={field} />
+          </div>
+        )}
+        <div>
+          <label htmlFor={id("email")} className={fieldLabel}>אימייל</label>
+          <input id={id("email")} type="email" inputMode="email" autoComplete="email" dir="ltr" autoFocus={autoFocus}
+            value={email} onChange={e => setEmail(e.target.value)} placeholder="name@example.com"
+            className={`${field} text-left`} />
+        </div>
+        <div>
+          <label htmlFor={id("password")} className={fieldLabel}>סיסמה</label>
+          <input id={id("password")} type="password" dir="ltr" autoComplete={isLogin ? "current-password" : "new-password"}
+            value={password} onChange={e => setPassword(e.target.value)} placeholder={isLogin ? "" : "לפחות 6 תווים"}
+            className={`${field} text-left`} />
+          {isLogin && (
+            <a href={FORGOT_HREF} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center min-h-[36px] mt-1 text-[14px] text-muted hover:text-ink transition-colors">
+              שכחתם את הסיסמה? כתבו לנו
+            </a>
+          )}
+        </div>
+        {!isLogin && (
+          <div>
+            <label htmlFor={id("confirm")} className={fieldLabel}>הסיסמה שוב</label>
+            <input id={id("confirm")} type="password" dir="ltr" autoComplete="new-password"
+              value={confirm} onChange={e => setConfirm(e.target.value)} className={`${field} text-left`} />
+          </div>
+        )}
+
+        {error && <div role="alert" className="text-[14px] leading-relaxed text-danger bg-danger-soft rounded-xl px-4 py-3">{error}</div>}
+        {success && <div role="status" className="text-[14px] leading-relaxed text-ok-text bg-ok-soft rounded-xl px-4 py-3">{success}</div>}
+
+        <button type="submit" disabled={loading || !email || !password} className={`${btn.primary} w-full mt-1`}>
+          {loading ? (
+            <span className="flex items-center justify-center gap-2">
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+              רגע…
+            </span>
+          ) : isLogin ? "כניסה" : "יצירת חשבון"}
+        </button>
+      </form>
+
+      <p className="text-[13px] leading-relaxed text-muted text-center">
+        בכניסה אתם מסכימים ל<Link href="/terms" className="font-bold text-accent hover:text-accent-hover">תנאי השירות</Link>.
+        {" "}<Link href="/delete-account" className="underline hover:text-ink">אפשר למחוק את החשבון בכל עת</Link>.
+      </p>
+    </div>
+  );
+}
+
+/* ── Modal ─────────────────────────────────────────────────── */
+type Props = { onClose: () => void; onAuth: () => void };
+
+export default function AuthModal({ onClose, onAuth }: Props) {
   const backdropRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -76,136 +162,23 @@ export default function AuthModal({ onClose, onAuth }: Props) {
     return () => { document.removeEventListener("keydown", handler); document.body.style.overflow = ""; };
   }, [onClose]);
 
-  const reset = () => { setError(""); setSuccess(""); };
-
-  const login = async () => {
-    setLoading(true); reset();
-    const { error: e } = await supabase.auth.signInWithPassword({ email, password });
-    if (e) { setError(e.message); setLoading(false); return; }
-    onAuth();
-    onClose();
-  };
-
-  const signup = async () => {
-    if (password !== confirm) { setError("הסיסמאות אינן תואמות"); return; }
-    if (password.length < 6)  { setError("סיסמה חייבת להכיל לפחות 6 תווים"); return; }
-    setLoading(true); reset();
-    const { error: e } = await supabase.auth.signUp({
-      email, password,
-      options: { data: { full_name: name, role: "user" } },
-    });
-    if (e) { setError(e.message); setLoading(false); return; }
-    setSuccess("נרשמת! תוכל להתחבר עכשיו.");
-    setLoading(false);
-  };
-
-  const inp = "w-full bg-white border border-gray-200 rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all";
-
   return (
     <div
       ref={backdropRef}
       onClick={e => { if (e.target === backdropRef.current) onClose(); }}
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center"
-      style={{
-        background: "linear-gradient(160deg, #060f1e 0%, #0a1e35 35%, #0b2535 65%, #07141f 100%)",
-      }}
+      className="fixed inset-0 z-[100] flex items-stretch md:items-center justify-center bg-ink/45 md:p-6"
+      dir="rtl"
     >
-      {/* Stars */}
-      <Stars />
-
-      {/* Mountains */}
-      <Mountains />
-
-      {/* Card */}
-      <div
-        className="relative z-10 w-full max-w-sm mx-4 rounded-2xl overflow-hidden"
-        style={{
-          background:     "rgba(10, 22, 45, 0.82)",
-          border:         "1px solid rgba(255,255,255,0.1)",
-          backdropFilter: "blur(24px)",
-          boxShadow:      "0 32px 80px rgba(0,0,0,0.6)",
-        }}
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="px-8 pt-8 pb-7">
-
-          {/* Close */}
-          <button onClick={onClose}
-            className="absolute top-4 left-4 w-8 h-8 rounded-full flex items-center justify-center text-white/30 hover:text-white hover:bg-white/10 transition-all">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-
-          {/* Logo */}
-          <div className="text-center mb-7">
-            <div className="inline-flex items-center justify-center mb-2">
-              <Logo className="h-12" white />
-            </div>
-            <p className="text-white/35 text-[10px] tracking-[0.2em] uppercase">Val Thorens · Trois Vallées</p>
-          </div>
-
-          {/* Tabs */}
-          <div className="flex mb-6 rounded-xl overflow-hidden border border-white/10">
-            {(["login", "signup"] as const).map(t => (
-              <button key={t} onClick={() => { setTab(t); reset(); }}
-                className={`flex-1 py-2.5 text-sm font-bold transition-all ${
-                  tab === t
-                    ? "bg-blue-600 text-white"
-                    : "text-white/40 hover:text-white/70 bg-transparent"
-                }`}>
-                {t === "login" ? "כניסה" : "הרשמה"}
-              </button>
-            ))}
-          </div>
-
-          {/* Form */}
-          <div className="space-y-3" dir="rtl">
-            {tab === "signup" && (
-              <input value={name} onChange={e => setName(e.target.value)}
-                placeholder="שם מלא" className={inp} />
-            )}
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-              placeholder="כתובת אימייל" className={inp} dir="ltr" />
-            <div>
-              <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-                placeholder="סיסמה" className={inp} dir="ltr" />
-              {tab === "login" && (
-                <button className="text-xs text-white/35 hover:text-white/60 mt-1.5 mr-1 transition-colors">
-                  שכחת סיסמה?
-                </button>
-              )}
-            </div>
-            {tab === "signup" && (
-              <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)}
-                placeholder="אימות סיסמה" className={inp} dir="ltr" />
-            )}
-
-            {error   && <div className="text-red-300 text-xs bg-red-500/15 rounded-xl px-4 py-2.5 border border-red-400/20 text-right">{error}</div>}
-            {success && <div className="text-green-300 text-xs bg-green-500/15 rounded-xl px-4 py-2.5 border border-green-400/20 text-right">{success}</div>}
-
-            <button
-              onClick={tab === "login" ? login : signup}
-              disabled={loading || !email || !password}
-              className="w-full py-3.5 rounded-xl font-black text-sm transition-all mt-1 text-white shadow-lg disabled:opacity-40 disabled:cursor-not-allowed"
-              style={{ background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)" }}
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  רגע...
-                </span>
-              ) : tab === "login" ? "← כניסה" : "← הרשמה"}
-            </button>
-          </div>
-
+      <div role="dialog" aria-modal="true" aria-label="כניסה לאזור האישי"
+        className="relative w-full h-[100dvh] md:h-auto md:max-h-[calc(100dvh-48px)] md:max-w-[440px] bg-white md:rounded-card md:border md:border-line overflow-y-auto overscroll-contain shadow-pop"
+        onClick={e => e.stopPropagation()}>
+        <button type="button" onClick={onClose} aria-label="סגירה"
+          className="absolute top-3 left-3 w-11 h-11 rounded-full flex items-center justify-center text-muted hover:text-ink hover:bg-soft transition-colors">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
+        <div className="px-5 md:px-8 pt-14 md:pt-10 pb-8" style={{ paddingBottom: "max(2rem, env(safe-area-inset-bottom))" }}>
+          <AuthForm autoFocus onDone={() => { onAuth(); onClose(); }} />
         </div>
-      </div>
-
-      {/* Footer */}
-      <div className="relative z-10 mt-8 flex flex-col items-center gap-2">
-        <a href="/delete-account" className="text-white/40 hover:text-white/80 text-xs underline transition-colors">ניתן למחוק את החשבון בכל עת</a>
-        <p className="text-white/20 text-[10px] tracking-widest uppercase">SKISHARE. ALL RIGHTS RESERVED 2026 ©</p>
       </div>
     </div>
   );

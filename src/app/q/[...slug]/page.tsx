@@ -2,7 +2,7 @@
 import SkiLoader from "@/components/SkiLoader";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import QuoteView, { type QuoteData } from "@/components/QuoteView";
+import QuoteView, { QuoteNotFound, type QuoteData } from "@/components/QuoteView";
 import OpenInAppBanner from "@/components/OpenInAppBanner";
 
 export default function ShortQuotePage() {
@@ -34,20 +34,9 @@ export default function ShortQuotePage() {
       .catch(() => setNotFound(true));
   }, [id]);
 
-  if (notFound) return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#f7f9fb] text-center px-6" dir="rtl">
-      <p className="text-5xl mb-4">🏔️</p>
-      <h1 className="font-display text-2xl font-black text-slate-900 mb-2">ההצעה לא נמצאה</h1>
-      <p className="text-slate-500 text-sm">ייתכן שהקישור פג תוקף. פנה אלינו לקבלת הצעה חדשה.</p>
-      <a href="/" className="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition">חזרה לאתר</a>
-    </div>
-  );
+  if (notFound) return <QuoteNotFound />;
 
-  if (!q) return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f7f9fb]">
-      <SkiLoader />
-    </div>
-  );
+  if (!q) return <SkiLoader label="רגע, פותחים את ההצעה…" />;
 
   return <><OpenInAppBanner /><QuoteView q={q} /></>;
 }

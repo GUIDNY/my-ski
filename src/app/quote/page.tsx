@@ -25,11 +25,7 @@ function QuotePage() {
 
 export default function QuotePageWrapper() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-[#f7f9fb]">
-        <SkiLoader />
-      </div>
-    }>
+    <Suspense fallback={<SkiLoader label="רגע, פותחים את ההצעה…" />}>
       <QuotePage />
     </Suspense>
   );

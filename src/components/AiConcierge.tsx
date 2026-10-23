@@ -291,12 +291,13 @@ export default function AiConcierge() {
 
   return (
     <>
-      {/* Launcher: desktop only, bottom corner. On phones the chat opens from
-          the header's chat button and the "write to us" buttons on the page. */}
+      {/* Launcher: desktop only, bottom right (the start side, next to the main
+          column: the sticky price summaries sit on the left). On phones the
+          chat opens from the header's chat button and the page's buttons. */}
       <button
         onClick={() => { restore(); setOpen(v => !v); }}
         aria-label="צ'אט עם SkiShare"
-        className="hidden md:block fixed z-[60] bottom-6 left-6 w-[60px] h-[60px] rounded-full border-[3px] border-white bg-soft-2 overflow-visible transition-transform hover:scale-105 active:scale-95"
+        className="hidden md:block fixed z-[60] bottom-6 right-6 w-[60px] h-[60px] rounded-full border-[3px] border-white bg-soft-2 overflow-visible transition-transform hover:scale-105 active:scale-95"
         style={{ boxShadow: "0 10px 28px rgba(11,27,51,0.28)" }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -315,7 +316,7 @@ export default function AiConcierge() {
               ...(viewport ? { height: Math.min(viewport.height * 0.88, viewport.height - 16) } : {}),
             }}
             className="bg-white w-full h-[88dvh] max-h-[94dvh] rounded-t-[24px] flex flex-col overflow-hidden overscroll-contain
-              md:absolute md:left-6 md:bottom-[100px] md:w-[400px] md:h-[600px] md:max-h-[calc(100dvh-130px)] md:rounded-card md:border md:border-line"
+              md:absolute md:right-6 md:bottom-[100px] md:w-[400px] md:h-[600px] md:max-h-[calc(100dvh-130px)] md:rounded-card md:border md:border-line"
             >
             {/* drag handle — mobile-only swipe-down-to-close affordance */}
             <div className="md:hidden pt-2.5 pb-1 flex justify-center touch-none cursor-grab active:cursor-grabbing"
