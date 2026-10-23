@@ -3,6 +3,7 @@ import OpenChatButton from "@/components/OpenChatButton";
 import { Brand } from "@/components/SiteHeader";
 import { helperWaHref } from "@/lib/helper-whatsapp";
 import FooterLangLinks from "@/components/FooterLangLinks";
+import { SOCIAL } from "@/lib/site";
 
 const VACATION = [
   { label: "חבילות סקי לואל טורנס", href: "/packages" },
@@ -74,6 +75,8 @@ export default function Footer() {
             <a href={helperWaHref()} target="_blank" rel="noopener noreferrer" className={linkCls}>וואטסאפ</a>
             <OpenChatButton className={`${linkCls} text-start w-fit`}>צ&apos;אט באתר</OpenChatButton>
             <a href="mailto:skishareteam@gmail.com" className={linkCls}>skishareteam@gmail.com</a>
+            <a href={SOCIAL.instagram} target="_blank" rel="noopener me" className={linkCls}>אינסטגרם</a>
+            <a href={SOCIAL.facebook} target="_blank" rel="noopener me" className={linkCls}>פייסבוק</a>
           </div>
         </div>
 

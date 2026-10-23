@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Brand } from "@/components/SiteHeader";
 import { CONTACT_EMAIL, GUIDE_PAIRS, type Lang } from "@/lib/intl/config";
 import { DICT, LANG_NAMES } from "@/lib/intl/dict";
+import { SOCIAL } from "@/lib/site";
 
 const linkCls = "inline-flex items-center min-h-[44px] text-[15px] text-body hover:text-ink transition-colors";
 
@@ -44,6 +45,8 @@ export default function IntlFooter({ lang }: { lang: Lang }) {
           <div className="col-span-2 md:col-span-1 flex flex-col">
             <span className="font-bold text-[15px] text-ink mb-1">{t.footer.contact}</span>
             <a href={`mailto:${CONTACT_EMAIL}`} className={`${linkCls} wrap-anywhere`}>{CONTACT_EMAIL}</a>
+            <a href={SOCIAL.instagram} target="_blank" rel="noopener me" className={linkCls}>Instagram</a>
+            <a href={SOCIAL.facebook} target="_blank" rel="noopener me" className={linkCls}>Facebook</a>
             <span className="font-bold text-[15px] text-ink mt-4 mb-1">{t.footer.languages}</span>
             <ul className="flex flex-wrap gap-x-4">
               {homes.map(h => (

@@ -4,6 +4,8 @@
  * sameAs links point to pages that exist.
  */
 export const SITE = "https://skisharebook.com";
+/** the business on social networks (footer, about page, Organization sameAs) */
+export const SOCIAL = { instagram: "https://www.instagram.com/ski_share/", facebook: "https://www.facebook.com/profile.php?id=100094751621075" };
 export const ORG_ID = `${SITE}/#org`;
 export const WEBSITE_ID = `${SITE}/#website`;
 export const VT_ID = `${SITE}/#val-thorens`;
@@ -50,7 +52,7 @@ export const SITE_LD = {
         telephone: "+972547701899",
         availableLanguage: ["he", "en"],
       }],
-      sameAs: ["https://apps.apple.com/app/id6782095727"],
+      sameAs: ["https://apps.apple.com/app/id6782095727", "https://www.instagram.com/ski_share/", "https://www.facebook.com/profile.php?id=100094751621075"],
     },
     {
       "@type": "WebSite",

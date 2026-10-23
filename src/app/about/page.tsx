@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { wrap, card, btn, h2, Crumbs } from "@/components/ui";
 import { pageMeta } from "@/lib/page-meta";
-import { ORG_ID, SITE, breadcrumbLd, faqLd, ldJson } from "@/lib/site";
+import { ORG_ID, SITE, SOCIAL, breadcrumbLd, faqLd, ldJson } from "@/lib/site";
 import { buildWaHref } from "@/lib/whatsapp";
 
 /*
@@ -130,7 +130,9 @@ export default function AboutPage() {
             עוד: <Link href="/terms" className="underline">תקנון וביטולים</Link> ·{" "}
             <Link href="/emergency-policy" className="underline">מצב חירום וכוח עליון</Link> ·{" "}
             <Link href="/en" className="underline">English</Link> ·{" "}
-            <Link href="/fr" className="underline">Français</Link>
+            <Link href="/fr" className="underline">Français</Link> ·{" "}
+            <a href={SOCIAL.instagram} target="_blank" rel="noopener me" className="underline">אינסטגרם</a> ·{" "}
+            <a href={SOCIAL.facebook} target="_blank" rel="noopener me" className="underline">פייסבוק</a>
           </p>
         </section>
       </main>

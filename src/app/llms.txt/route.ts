@@ -21,7 +21,7 @@ SkiShare (סקי שר) מוכרת חופשות סקי בואל טורנס, צר�
 - Adult ski pass on SkiShare: Val Thorens/Orelle 1 day €73.5, 3 days €220.5, 6 days €367.5, 7 days €421.5. Les 3 Vallées 1 day €84.2, 3 days €252.6, 6 days €421, 7 days €486. The same price all season. Child passes: ask us.
 - Airport transfer (shuttle from Geneva or Lyon to the apartment, there and back): €180 per person when booked with an apartment.
 - Ski or snowboard equipment: €30 a day, €120 for a week.
-- Card payments by PayPlus (1.9% card fee). Contact: skishareteam@gmail.com. The chat on the site and on WhatsApp is a digital (AI) assistant that answers in Hebrew; you can ask for a person at any time.
+- Card payments by PayPlus (1.9% card fee). Contact: skishareteam@gmail.com. Instagram: https://www.instagram.com/ski_share/. Facebook: https://www.facebook.com/profile.php?id=100094751621075. The chat on the site and on WhatsApp is a digital (AI) assistant that answers in Hebrew; you can ask for a person at any time.
 
 ## Main pages
 - [Home](${SITE}/): search apartments and packages in Val Thorens.
