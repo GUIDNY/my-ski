@@ -14,7 +14,7 @@ import type { Apartment } from "@/types";
 type Text = { name: string; type: string; description: string };
 const T = translations as unknown as Record<string, Partial<Record<Lang, Partial<Text>>>>;
 
-export type AptFields = Pick<Apartment, "id" | "name" | "type" | "beds" | "baths" | "sqm" | "max_guests" | "source" | "amenities">;
+export type AptFields = Pick<Apartment, "id" | "name" | "type" | "baths" | "sqm" | "max_guests" | "source" | "amenities">;
 
 export const isAgency = (a: { source?: string | null }) => a.source === "la_cime";
 
@@ -30,8 +30,6 @@ export function typeFromData(type: string | null | undefined, lang: Lang): strin
   if (s === "דירה") return lang === "fr" ? "Appartement" : "Apartment";
   return null; // free text such as "cozy" is not a type
 }
-
-export const isStudio = (a: Pick<Apartment, "type">) => (a.type || "").trim() === "סטודיו";
 
 /**
  * The name when there is no translation: the Hebrew type words translated,
@@ -51,20 +49,17 @@ export function fallbackName(a: Pick<Apartment, "name" | "type">, lang: Lang): s
   return s.trim() || generic;
 }
 
-/** Bedrooms are only stated where the data says so reliably: agency apartments that aren't studios. */
-export function bedroomsOf(a: AptFields): number | null {
-  if (!isAgency(a) || isStudio(a)) return null;
-  const n = Number(a.beds) || 0;
-  return n > 0 ? n : null;
-}
+/*
+ * Not stated anywhere on these pages: `beds`. It counts bedrooms for agency
+ * apartments but beds for our own, so it is neither "bedrooms" nor "rooms".
+ * The facts are guests, the type, bathrooms and m².
+ */
 
 /** "Studio in Val Thorens for up to 4 guests: 1 bathroom, 28 m²." built from the fields only. */
 function fallbackDescription(a: AptFields, lang: Lang): string {
   const t = DICT[lang].common;
   const type = typeFromData(a.type, lang) ?? (lang === "fr" ? "Appartement" : "Apartment");
-  const beds = bedroomsOf(a);
   const parts = [
-    beds ? t.bedrooms(beds) : "",
     a.baths ? t.bathrooms(Number(a.baths)) : "",
     a.sqm ? t.sqm(Number(a.sqm)) : "",
   ].filter(Boolean);

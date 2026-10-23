@@ -4,6 +4,7 @@ import { rulesWithAirbnb } from "@/lib/airbnb-calendar";
 import { takenApartmentIds } from "@/lib/inventory";
 import { AIRBNB_SOURCE, type PricingRule } from "@/lib/pricing";
 import type { Apartment } from "@/types";
+import { SEASON_END, SEASON_START } from "./config";
 import { isoOf } from "./format";
 
 /*
@@ -15,10 +16,10 @@ import { isoOf } from "./format";
  * may end up in the page sent to the browser.
  */
 
-const FIELDS = "id,name,type,beds,baths,sqm,max_guests,map_url,price_per_night,images,amenities,available,source,available_weeks";
+const FIELDS = "id,name,type,baths,sqm,max_guests,map_url,price_per_night,images,amenities,available,source,available_weeks";
 
 export type PublicApartment = Pick<Apartment,
-  "id" | "name" | "type" | "beds" | "baths" | "sqm" | "max_guests" | "map_url" | "price_per_night"
+  "id" | "name" | "type" | "baths" | "sqm" | "max_guests" | "map_url" | "price_per_night"
   | "images" | "amenities" | "available" | "source" | "available_weeks">;
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -43,7 +44,12 @@ export const getApartments = cache(async (): Promise<PublicApartment[] | null> =
 });
 
 /* Only what lib/pricing.ts reads, in the order /api/pricing-rules returns it
-   (the Airbnb calendar first, then the site's rules by priority). */
+   (the Airbnb calendar first, then the site's rules by priority). Date rules
+   outside the bookable season can't touch any price here, so they stay out
+   of the page. */
+const inSeason = (r: PricingRule) =>
+  r.type !== "date_range" || ((r.end_date ?? "") >= SEASON_START && (r.start_date ?? "") <= SEASON_END);
+
 function forPricing(rules: PricingRule[]): PricingRule[] {
   const strip = (r: PricingRule): PricingRule => ({
     id: r.id, label: "", type: r.type, price_type: r.price_type ?? "absolute",
@@ -53,7 +59,7 @@ function forPricing(rules: PricingRule[]): PricingRule[] {
   });
   const airbnb = rules.filter(r => r.source === AIRBNB_SOURCE);
   const site = rules.filter(r => r.source !== AIRBNB_SOURCE).sort((a, b) => b.priority - a.priority);
-  return [...airbnb, ...site].map(strip);
+  return [...airbnb, ...site].filter(inSeason).map(strip);
 }
 
 const rulesByKey = cache(async (key: string): Promise<Record<string, PricingRule[]> | null> => {
