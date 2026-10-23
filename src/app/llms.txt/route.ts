@@ -12,7 +12,7 @@ export function GET() {
 
 > SkiShare is an Israeli company that sells ski holidays in Val Thorens, France, in Hebrew. It has its own apartments in Val Thorens and also offers agency apartments by the week (Saturday to Saturday). Each trip is built from the apartment up: a ski pass (Val Thorens or the whole 3 Vallées), an airport transfer, ski or snowboard equipment, and a direct flight from Tel Aviv when one exists on the dates. Prices are shown per person, and every member of a group can pay their own share.
 
-SkiShare (סקי שר בע״מ) מוכרת חופשות סקי בואל טורנס, צרפת, בעברית: דירות שלה בואל טורנס, דירות סוכנות לשבוע (שבת עד שבת), ובנוסף לבחירה סקי פס, הסעה מהשדה, ציוד, וטיסה ישירה מתל אביב כשיש. המחיר מוצג לאדם, וכל אחד בחבורה יכול לשלם את החלק שלו.
+SkiShare (סקי שר) מוכרת חופשות סקי בואל טורנס, צרפת, בעברית: דירות שלה בואל טורנס, דירות סוכנות לשבוע (שבת עד שבת), ובנוסף לבחירה סקי פס, הסעה מהשדה, ציוד, וטיסה ישירה מתל אביב כשיש. המחיר מוצג לאדם, וכל אחד בחבורה יכול לשלם את החלק שלו.
 
 ## Facts (season 2026/27)
 - Val Thorens lifts: 21 November 2026 to 2 May 2027. The whole 3 Vallées area: 5 December 2026 to 18 April 2027.

@@ -649,11 +649,14 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
   const images = apt.images?.length ? apt.images : FALLBACK_IMAGES;
   const agency = apt.source === "la_cime";
   const maxGuests = Math.max(guests, 1);
-  const rooms = Number(apt.beds) || 0;
+  // "beds" means bedrooms for agency listings but beds for ours, so it isn't
+  // shown as rooms; the type ("סטודיו", "2 חדרים") is, unless the name says it
+  const typeRaw = (apt.type || "").trim();
+  const typeText = /[א-ת]/.test(typeRaw) && typeRaw !== "דירה" && !apt.name.includes(typeRaw) ? typeRaw : "";
   const meta = [
     "ואל טורנס",
+    typeText,
     apt.max_guests ? `עד ${apt.max_guests} אנשים` : "",
-    rooms ? (rooms === 1 ? "חדר אחד" : `${rooms} חדרים`) : "",
     apt.sqm ? `${apt.sqm} מ"ר` : "",
     agency ? "דירת סוכנות, שבת עד שבת" : "דירה שלנו",
   ].filter(Boolean).join(" · ");
@@ -676,7 +679,6 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
   const datesLine = hasDates ? `${fmtDay(checkin)} עד ${fmtDay(checkout)} · ${nights} ${nights === 1 ? "לילה" : "לילות"}` : "";
   const facts = [
     apt.max_guests ? { v: `עד ${apt.max_guests}`, l: "אנשים" } : null,
-    rooms ? { v: String(rooms), l: rooms === 1 ? "חדר" : "חדרים" } : null,
     apt.baths ? { v: String(apt.baths), l: apt.baths === 1 ? "חדר רחצה" : "חדרי רחצה" } : null,
     apt.sqm ? { v: `${apt.sqm} מ"ר`, l: "גודל" } : null,
   ].filter((f): f is { v: string; l: string } => !!f);

@@ -377,11 +377,9 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const avgNightly = nights > 0 ? Math.round((baseApt - cleaningFee) / nights) : baseApt;
   const fmtFull = (d: Date) => `${d.getDate()} ${HE_MONTHS[d.getMonth()]}`;
   const mapHref = mapLink(apt?.map_url);
-  const beds = Number(apt?.beds) || 0;
   const meta = [
     "ואל טורנס",
     apt?.max_guests ? `עד ${apt.max_guests} אנשים` : "",
-    beds > 1 ? `${beds} חדרי שינה` : beds === 1 ? "חדר שינה" : "",
     apt?.sqm ? `${apt.sqm} מ"ר` : "",
   ].filter(Boolean).join(" · ");
 
@@ -616,7 +614,6 @@ export default function QuoteView({ q }: { q: QuoteData }) {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
                   apt.max_guests ? { v: `עד ${apt.max_guests}`, l: "אנשים" } : null,
-                  beds ? { v: String(beds), l: beds === 1 ? "חדר שינה" : "חדרי שינה" } : null,
                   apt.baths ? { v: String(apt.baths), l: apt.baths === 1 ? "חדר רחצה" : "חדרי רחצה" } : null,
                   apt.sqm ? { v: `${apt.sqm} מ"ר`, l: "גודל" } : null,
                 ].filter((x): x is { v: string; l: string } => !!x).map(f => (

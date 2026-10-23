@@ -56,7 +56,6 @@ function OfferPage() {
   const mapHref = mapLink(apt.map_url);
   const facts = [
     apt.max_guests ? { v: `עד ${apt.max_guests}`, l: "אנשים" } : null,
-    apt.beds ? { v: String(apt.beds), l: apt.beds === 1 ? "חדר שינה" : "חדרי שינה" } : null,
     apt.baths ? { v: String(apt.baths), l: apt.baths === 1 ? "חדר רחצה" : "חדרי רחצה" } : null,
     apt.sqm ? { v: `${apt.sqm} מ"ר`, l: "גודל" } : null,
   ].filter((x): x is { v: string; l: string } => !!x);

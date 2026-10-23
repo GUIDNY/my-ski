@@ -7,14 +7,16 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const db = createServerClient();
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
-  const { data } = await db.from("apartments").select("name, description, price_per_night, images, beds, max_guests").eq("id", id).maybeSingle();
-  const apt = data as Pick<Apartment, "name" | "description" | "price_per_night" | "images" | "beds" | "max_guests"> | null;
+  const { data } = await db.from("apartments").select("name, description, price_per_night, images, max_guests, sqm, source").eq("id", id).maybeSingle();
+  const apt = data as Pick<Apartment, "name" | "description" | "price_per_night" | "images" | "max_guests" | "sqm" | "source"> | null;
 
   // a wrong or removed apartment: a real 404, not an empty page with a 200
   if (!apt) notFound();
 
   const title = `${apt.name} — דירה בואל טורנס | SkiShare`;
-  const description = `${apt.name}: דירה בואל טורנס עם ${apt.beds} חדרים, עד ${apt.max_guests ?? "-"} אורחים, החל מ-€${apt.price_per_night}/לילה. סקי פס, הסעה וציוד סקי אפשר להוסיף לאותה הזמנה.`;
+  const size = [apt.max_guests ? `עד ${apt.max_guests} אנשים` : "", apt.sqm ? `${apt.sqm} מ"ר` : ""].filter(Boolean).join(", ");
+  const how = apt.source === "la_cime" ? "לשבוע שלם, שבת עד שבת" : `החל מ-€${Math.round(apt.price_per_night)} ללילה`;
+  const description = `${apt.name}: דירה בואל טורנס${size ? `, ${size}` : ""}, ${how}. אפשר להוסיף לאותה הזמנה סקי פס, הסעה מהשדה וציוד.`;
   const url = `https://skisharebook.com/apartments/${id}`;
 
   return {

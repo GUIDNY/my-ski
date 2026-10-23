@@ -39,7 +39,6 @@ export default async function ApartmentPage({ params, searchParams }: Props) {
     url,
     ...(a.description ? { description: plain(a.description).slice(0, 600) } : {}),
     ...(a.images?.length ? { image: a.images.slice(0, 6) } : {}),
-    ...(a.beds ? { numberOfRooms: a.beds } : {}),
     ...(a.baths ? { numberOfBathroomsTotal: a.baths } : {}),
     ...(a.sqm ? { floorSize: { "@type": "QuantitativeValue", value: a.sqm, unitCode: "MTK" } } : {}),
     ...(a.max_guests ? { occupancy: { "@type": "QuantitativeValue", maxValue: a.max_guests } } : {}),
