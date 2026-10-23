@@ -20,6 +20,7 @@ import { TRANSFER_PRICE, BAGGAGE_PRICE, LIFT_DATES, PASS_AREA_LABEL, liftsOpenFo
 import { encodeExtras } from "@/lib/quote-extras";
 import SaveTripButton from "@/components/SaveTripButton";
 import { wrap, card, h1, h2, btn, field, fieldLabel, chip, badgeDark, Check, CheckList, Crumbs, PerPerson, EmptyState } from "@/components/ui";
+import { aptDisplayName, aptShortName, aptParts } from "@/lib/apartment-display";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const HE_DAYS = ["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"];
@@ -178,7 +179,7 @@ function Lightbox({ images, start, name, onClose }: { images: string[]; start: n
           if (Math.abs(dx) > 45) { if (dx > 0) next(); else prev(); }
         }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={images[i]} alt={`${name}, תמונה ${i + 1}`} className="max-h-full max-w-full object-contain rounded-xl select-none" draggable={false} />
+        <img src={images[i]} alt={`${name}, תמונה ${i + 1} מתוך ${n}`} className="max-h-full max-w-full object-contain rounded-xl select-none" draggable={false} />
         {n > 1 && (
           <>
             <button type="button" onClick={prev} aria-label="התמונה הקודמת"
@@ -221,7 +222,7 @@ function Photos({ images, name, onOpen }: { images: string[]; name: string; onOp
   const img = (src: string, i: number, cls: string) => (
     <button key={i} type="button" onClick={() => onOpen(i)} className={`relative overflow-hidden bg-soft-2 group ${cls}`} aria-label={`להגדלת התמונה ${i + 1} מתוך ${n}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={i === 0 ? name : ""} loading={i === 0 ? "eager" : "lazy"} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" />
+      <img src={src} alt={`${name}, תמונה ${i + 1} מתוך ${n}`} loading={i === 0 ? "eager" : "lazy"} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" />
     </button>
   );
 
@@ -233,7 +234,7 @@ function Photos({ images, name, onOpen }: { images: string[]; name: string; onOp
           {images.map((src, i) => (
             <button key={i} type="button" onClick={() => onOpen(i)} className="snap-center shrink-0 w-full h-[290px] bg-soft-2" aria-label={`להגדלת התמונה ${i + 1} מתוך ${n}`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={src} alt={i === 0 ? name : ""} loading={i === 0 ? "eager" : "lazy"} className="w-full h-full object-cover" />
+              <img src={src} alt={`${name}, תמונה ${i + 1} מתוך ${n}`} loading={i === 0 ? "eager" : "lazy"} className="w-full h-full object-cover" />
             </button>
           ))}
         </div>
@@ -651,21 +652,22 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
   const maxGuests = Math.max(guests, 1);
   // "beds" means bedrooms for agency listings but beds for ours, so it isn't
   // shown as rooms; the type ("סטודיו", "2 חדרים") is, unless the name says it
-  const typeRaw = (apt.type || "").trim();
-  const typeText = /[א-ת]/.test(typeRaw) && typeRaw !== "דירה" && !apt.name.includes(typeRaw) ? typeRaw : "";
+  // the heading says what the apartment is ("סטודיו ל-4 אנשים בואל טורנס · 25 מ״ר");
+  // the agency's code stays visible in small print, for questions about it
+  const displayName = aptDisplayName(apt);
+  const shortName = aptShortName(apt);
+  const { code } = aptParts(apt);
   const meta = [
-    "ואל טורנס",
-    typeText,
-    apt.max_guests ? `עד ${apt.max_guests} אנשים` : "",
-    apt.sqm ? `${apt.sqm} מ"ר` : "",
     agency ? "דירת סוכנות, שבת עד שבת" : "דירה שלנו",
+    !agency && apt.sqm ? `${apt.sqm} מ"ר` : "",
+    code ? `קוד דירה ${code}` : "",
   ].filter(Boolean).join(" · ");
   const crumbs = [
     { label: "דף הבית", href: "/" },
     hasDates
       ? { label: `${fullDeal ? "חבילות" : "דירות"} ל-${fmtRange(checkin, checkout)}`, href: `/search?checkin=${checkin}&checkout=${checkout}&guests=${guests}${fullDeal ? "&deal=full" : ""}` }
       : { label: "דירות", href: "/apartments" },
-    { label: apt.name },
+    { label: shortName },
   ];
   const mapEmbed = apt.map_url?.match(/src="(https:\/\/www\.google\.com\/maps\/embed\?[^"]+)"/)?.[1] ?? null;
   const mapLink = apt.map_url && !apt.map_url.includes("<") && /^https?:\/\//.test(apt.map_url) ? apt.map_url : null;
@@ -704,7 +706,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
         <div className="flex flex-wrap items-end justify-between gap-4 mb-5 md:mb-6">
           <div className="flex flex-col gap-2 min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className={h1}>{apt.name}</h1>
+              <h1 className={h1}>{displayName}</h1>
               {fullDeal && <span className={badgeDark}>דיל שלם</span>}
             </div>
             <p className="text-[15px] md:text-[17px] text-muted">{meta}</p>
@@ -724,7 +726,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
             </button>
           </div>
         </div>
-        <Photos images={images} name={apt.name} onOpen={setLightbox} />
+        <Photos images={images} name={displayName} onOpen={setLightbox} />
       </div>
 
       <div className={`${wrap} pt-6 md:pt-8 pb-12 md:pb-24 flex flex-col lg:flex-row gap-10 lg:gap-12 items-start`}>
@@ -777,7 +779,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
             <div className="flex flex-col gap-2.5">
               <h3 className="font-bold text-[17px] text-ink">איפה זה</h3>
               {mapEmbed && (
-                <iframe src={mapEmbed} title={`המיקום של ${apt.name} במפה`} loading="lazy" referrerPolicy="strict-origin-when-cross-origin"
+                <iframe src={mapEmbed} title={`המיקום של ${shortName} במפה`} loading="lazy" referrerPolicy="strict-origin-when-cross-origin"
                   className="w-full h-[260px] md:h-[320px] rounded-[18px] border border-line bg-soft" />
               )}
               <div className="rounded-[18px] bg-soft border border-line p-4 md:p-5 flex flex-wrap items-center justify-between gap-3">
@@ -1070,7 +1072,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
       </div>
 
       {/* ── Photos, full screen ──────────────────────────────── */}
-      {lightbox !== null && <Lightbox images={images} start={lightbox} name={apt.name} onClose={() => setLightbox(null)} />}
+      {lightbox !== null && <Lightbox images={images} start={lightbox} name={shortName} onClose={() => setLightbox(null)} />}
 
       {/* ── No-cancellation confirmation + signature ───────────── */}
       {showNoCancel && (

@@ -1,16 +1,16 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import SearchWidget from "@/components/SearchWidget";
 import OpenChatButton from "@/components/OpenChatButton";
 import WeekPackages, { WeekPackagesSkeleton } from "@/components/home/WeekPackages";
 import { helperWaHref } from "@/lib/helper-whatsapp";
+import { pageMeta } from "@/lib/page-meta";
 
-export const metadata: Metadata = {
-  title: "SkiShare — דירות בואל טורנס, סקי פס והסעות",
-  description: "מחפשים דירה בואל טורנס? SkiShare מציעים דירות איכותיות בואל טורנס, סקי פס לשלושת העמקים, הסעות משדה התעופה וציוד סקי — הכל במקום אחד, בעברית ובתשלום מאובטח.",
-  alternates: { canonical: "https://skisharebook.com/" },
-};
+export const metadata = pageMeta({
+  title: "חופשת סקי בואל טורנס: דירות לחבר'ה, סקי פס והסעה | SkiShare",
+  description: "חופשת סקי בואל טורנס בהרכבה: דירה לחבר'ה, לקבוצה או לזוג, ומוסיפים סקי פס, הסעה מהשדה, ציוד וטיסה ישירה כשיש. כל אחד מהחבורה משלם את החלק שלו.",
+  path: "/",
+});
 
 // The packages section prices live inventory (which apartments are free for
 // the week, today's Airbnb prices) — never pre-render it at build time.
@@ -42,11 +42,11 @@ const trust = [
 
 // "build your own trip": the apartment is the base, everything else is picked
 const included = [
-  { icon: <IcoBed />, title: "הדירה", text: "דירות שלנו בואל טורנס, לחבורה או לזוג. ניקיון כלול במחיר", badge: "הבסיס", kind: "base" },
-  { icon: <IcoTicket />, title: "סקי פס", text: "ואל טורנס, או כל 600 הק\"מ של שלושת העמקים", badge: "לבחירה", kind: "pick" },
-  { icon: <IcoVan />, title: "הסעה מהשדה", text: "שאטל ישיר עד הדירה, הלוך וחזור", badge: "לבחירה", kind: "pick" },
-  { icon: <IcoSkis />, title: "ציוד", text: "סקי או סנובורד לכל ימי הגלישה", badge: "לבחירה", kind: "pick" },
-  { icon: <IcoPlane />, title: "טיסה ישירה", text: "רק כשיש ישירה מתל אביב בתאריכים שלכם, במחיר האמיתי", badge: "כשיש ישירה", kind: "flight" },
+  { icon: <IcoBed />, title: "הדירה", text: "דירות שלנו בואל טורנס, לחבורה או לזוג. ניקיון כלול במחיר", badge: "הבסיס", kind: "base", link: { href: "/apartments", label: "דירות בואל טורנס" } },
+  { icon: <IcoTicket />, title: "סקי פס", text: "ואל טורנס, או כל 600 הק\"מ של שלושת העמקים", badge: "לבחירה", kind: "pick", link: { href: "/guide/מחיר-סקי-פס-ואל-טורנס", label: "מחירי סקי פס" } },
+  { icon: <IcoVan />, title: "הסעה מהשדה", text: "שאטל ישיר עד הדירה, הלוך וחזור", badge: "לבחירה", kind: "pick", link: { href: "/transfers", label: "הסעות" } },
+  { icon: <IcoSkis />, title: "ציוד", text: "סקי או סנובורד לכל ימי הגלישה", badge: "לבחירה", kind: "pick", link: null },
+  { icon: <IcoPlane />, title: "טיסה ישירה", text: "רק כשיש ישירה מתל אביב בתאריכים שלכם, במחיר האמיתי", badge: "כשיש ישירה", kind: "flight", link: { href: "/guide/איך-מגיעים-לואל-טורנס-מישראל", label: "איך מגיעים" } },
 ];
 
 const resortFacts = [
@@ -145,6 +145,7 @@ export default function Home() {
               <span className={`w-[52px] h-[52px] rounded-2xl flex items-center justify-center ${i.kind === "flight" ? "bg-[#FFF1E8] text-[#C2410C]" : "bg-[#EEF3FF] text-[#1652F0]"}`}>{i.icon}</span>
               <div className="font-bold text-[17px] md:text-[19px]">{i.title}</div>
               <div className="text-[14px] md:text-[15px] leading-relaxed text-[#51607A]">{i.text}</div>
+              {i.link && <Link href={i.link.href} className="text-[14px] md:text-[15px] font-bold text-[#1652F0] hover:text-[#0F3FC2]">{i.link.label}</Link>}
               <span className={`self-start rounded-full px-3 py-1 text-[13px] font-bold mt-auto ${
                 i.kind === "base" ? "bg-[#1652F0] text-white" : i.kind === "flight" ? "bg-[#FFF1E8] text-[#B33A06]" : "bg-[#E7F6EE] text-[#0F6B45]"}`}>
                 {i.badge}

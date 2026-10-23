@@ -5,11 +5,19 @@ import { helperWaHref } from "@/lib/helper-whatsapp";
 
 const VACATION = [
   { label: "חבילות", href: "/search?deal=full" },
-  { label: "דירות", href: "/apartments" },
-  { label: "שבת עד שבת", href: "/weekly" },
-  { label: "הסעות", href: "/transfers" },
+  { label: "דירות בואל טורנס", href: "/apartments" },
+  { label: "דירות שבת עד שבת", href: "/weekly" },
+  { label: "הסעות לואל טורנס", href: "/transfers" },
   { label: "סיזיונרים", href: "/seasonaires" },
-  { label: "מדריך ואל טורנס", href: "/guide" },
+];
+
+// planning the trip: the guides people look for before booking
+const PLAN = [
+  { label: "המדריך לואל טורנס", href: "/guide" },
+  { label: "סקי פס ואל טורנס: מחירים", href: "/guide/מחיר-סקי-פס-ואל-טורנס" },
+  { label: "איך מגיעים לואל טורנס", href: "/guide/איך-מגיעים-לואל-טורנס-מישראל" },
+  { label: "מתי לנסוע לואל טורנס", href: "/guide/מתי-לנסוע-לואל-טורנס" },
+  { label: "ואל טורנס, מריבל או קורשבל", href: "/guide/ואל-טורנס-מול-קורשבל-ומריבל" },
 ];
 
 const INFO = [
@@ -27,7 +35,7 @@ export default function Footer() {
   return (
     <footer className="bg-soft border-t border-line mt-auto" dir="rtl">
       <div className="max-w-[1240px] mx-auto px-4 md:px-6 pt-12 md:pt-14 pb-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-x-6 gap-y-10">
           <div className="col-span-2 md:col-span-1 flex flex-col gap-3">
             <Link href="/" aria-label="SkiShare, לדף הבית" className="w-fit"><Brand small /></Link>
             <p className="text-[15px] leading-relaxed text-muted max-w-[300px]">
@@ -38,6 +46,11 @@ export default function Footer() {
           <nav aria-label="חופשה" className="flex flex-col gap-2.5">
             <span className="font-bold text-[15px] text-ink mb-1">חופשה</span>
             {VACATION.map(i => <Link key={i.href} href={i.href} className={linkCls}>{i.label}</Link>)}
+          </nav>
+
+          <nav aria-label="תכנון החופשה" className="flex flex-col gap-2.5">
+            <span className="font-bold text-[15px] text-ink mb-1">תכנון החופשה</span>
+            {PLAN.map(i => <Link key={i.href} href={i.href} className={linkCls}>{i.label}</Link>)}
           </nav>
 
           <nav aria-label="מידע" className="flex flex-col gap-2.5">

@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { GUIDES, getGuideBySlug } from "@/lib/guides";
 import { wrap, card, btn, Crumbs } from "@/components/ui";
 import GuideIcon from "../guide-icon";
+import { pageMeta } from "@/lib/page-meta";
+import { ORG_ID, WEBSITE_ID, VAL_THORENS, breadcrumbLd, faqLd, ldJson, siteUrl } from "@/lib/site";
 
 const SITE_URL = "https://skisharebook.com";
 
@@ -24,27 +26,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const guide = getGuideBySlug(slug);
   if (!guide) return {};
-  const url = `${SITE_URL}/guide/${guide.slug}`;
   return {
-    title: guide.metaTitle,
-    description: guide.description,
+    ...pageMeta({ title: guide.metaTitle, description: guide.description, path: `/guide/${guide.slug}`, type: "article", imageAlt: guide.title }),
     keywords: guide.keywords,
-    alternates: { canonical: url },
-    openGraph: {
-      type: "article",
-      title: guide.metaTitle,
-      description: guide.description,
-      url,
-      siteName: "SkiShare",
-      locale: "he_IL",
-      images: [{ url: "/og.jpg", width: 1200, height: 630, alt: guide.title }],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: guide.metaTitle,
-      description: guide.description,
-      images: ["/og.jpg"],
-    },
   };
 }
 
@@ -53,7 +37,7 @@ export default async function GuideArticle({ params }: { params: Promise<{ slug:
   const guide = getGuideBySlug(slug);
   if (!guide) notFound();
 
-  const url = `${SITE_URL}/guide/${guide.slug}`;
+  const url = siteUrl(`/guide/${guide.slug}`);
   const related = GUIDES.filter(g => g.slug !== guide.slug).slice(0, 3);
 
   const articleLd = {
@@ -63,31 +47,15 @@ export default async function GuideArticle({ params }: { params: Promise<{ slug:
     description: guide.description,
     inLanguage: "he-IL",
     dateModified: guide.updated,
-    author: { "@type": "Organization", name: "SkiShare" },
-    publisher: { "@type": "Organization", name: "SkiShare", url: SITE_URL },
+    image: [`${SITE_URL}/og.jpg`],
+    author: { "@id": ORG_ID },
+    publisher: { "@id": ORG_ID },
+    isPartOf: { "@id": WEBSITE_ID },
     mainEntityOfPage: url,
-    about: "Val Thorens",
+    about: VAL_THORENS,
   };
-  const faqLd = guide.faqs.length
-    ? {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        mainEntity: guide.faqs.map(f => ({
-          "@type": "Question",
-          name: f.q,
-          acceptedAnswer: { "@type": "Answer", text: f.a },
-        })),
-      }
-    : null;
-  const breadcrumbLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "בית", item: SITE_URL },
-      { "@type": "ListItem", position: 2, name: "מדריך ואל טורנס", item: `${SITE_URL}/guide` },
-      { "@type": "ListItem", position: 3, name: guide.title, item: url },
-    ],
-  };
+  const guideFaqLd = guide.faqs.length ? faqLd(guide.faqs) : null;
+  const crumbsLd = breadcrumbLd([["דף הבית", "/"], ["מדריך ואל טורנס", "/guide"], [guide.title, `/guide/${guide.slug}`]]);
 
   // about 200 words a minute
   const words = [guide.intro, ...guide.sections.flatMap(s => [s.heading, ...(s.paragraphs ?? []), ...(s.list ?? [])]), ...guide.faqs.flatMap(f => [f.q, f.a])]
@@ -97,9 +65,9 @@ export default async function GuideArticle({ params }: { params: Promise<{ slug:
 
   return (
     <div className="bg-white text-ink" dir="rtl">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
-      {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(articleLd) }} />
+      {guideFaqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(guideFaqLd) }} />}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(crumbsLd) }} />
 
       {/* Title */}
       <header className="bg-soft border-b border-line">
@@ -164,10 +132,10 @@ export default async function GuideArticle({ params }: { params: Promise<{ slug:
             <p className="font-display font-bold text-[24px] md:text-[28px] leading-tight">מתכננים חופשת סקי בואל טורנס?</p>
             <div className="flex flex-wrap gap-3">
               <Link href="/apartments" className="inline-flex items-center justify-center min-h-[52px] px-6 rounded-[14px] bg-white text-ink font-bold text-[16px] hover:bg-accent-soft transition-colors">
-                צפו בדירות
+                דירות בואל טורנס
               </Link>
-              <Link href="/search" className="inline-flex items-center justify-center min-h-[52px] px-6 rounded-[14px] border border-white/45 text-white font-bold text-[16px] hover:bg-white/10 transition-colors">
-                בדקו זמינות
+              <Link href="/weekly" className="inline-flex items-center justify-center min-h-[52px] px-6 rounded-[14px] border border-white/45 text-white font-bold text-[16px] hover:bg-white/10 transition-colors">
+                מחיר לכל שבוע בעונה
               </Link>
             </div>
           </div>

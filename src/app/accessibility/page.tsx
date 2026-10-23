@@ -1,10 +1,11 @@
 import LegalShell, { H2, UL } from "@/components/LegalShell";
+import { pageMeta } from "@/lib/page-meta";
 
-export const metadata = {
-  title: "הצהרת נגישות — SkiShare",
+export const metadata = pageMeta({
+  title: "הצהרת נגישות | SkiShare",
   description: "הצהרת הנגישות של האתר SkiShare ודרכים לפנות אלינו בנושא נגישות.",
-  alternates: { canonical: "https://skisharebook.com/accessibility" },
-};
+  path: "/accessibility",
+});
 
 export default function AccessibilityPage() {
   return (

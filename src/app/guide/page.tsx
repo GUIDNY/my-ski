@@ -1,21 +1,14 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { GUIDES } from "@/lib/guides";
 import { PageTop, wrap, card, btn } from "@/components/ui";
 import GuideIcon from "./guide-icon";
+import { pageMeta } from "@/lib/page-meta";
 
-export const metadata: Metadata = {
-  title: "מדריך ואל טורנס — כל מה שצריך לדעת | SkiShare",
-  description:
-    "המדריך המקיף לחופשת סקי בואל טורנס: מתי לנסוע, איך מגיעים, מחירי סקי פס, המלצות למשפחות, אפרה סקי ועוד — כל המידע שצריך לפני שטסים.",
-  alternates: { canonical: "/guide" },
-  openGraph: {
-    type: "website",
-    title: "מדריך ואל טורנס — כל מה שצריך לדעת",
-    description: "המדריך המקיף לחופשת סקי בואל טורנס — עונה, טיסות, סקי פס, משפחות, אפרה סקי ועוד.",
-    url: "/guide",
-  },
-};
+export const metadata = pageMeta({
+  title: "מדריך ואל טורנס 2026/27: עונה, מחירים, הגעה ולינה | SkiShare",
+  description: "מדריכים בעברית לחופשת סקי בואל טורנס: מתי לנסוע, איך מגיעים מישראל, כמה עולה סקי פס, איפה לישון ומה ההבדל ממריבל וקורשבל. מעודכן לעונת 2026/27.",
+  path: "/guide",
+});
 
 export default function GuideIndex() {
   const [main, ...rest] = GUIDES;

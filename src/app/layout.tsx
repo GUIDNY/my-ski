@@ -7,6 +7,7 @@ import ChromeGate from "@/components/ChromeGate";
 import CookieConsent from "@/components/CookieConsent";
 import DeepLinkHandler from "@/components/DeepLinkHandler";
 import AiConcierge from "@/components/AiConcierge";
+import { SITE_LD, ldJson } from "@/lib/site";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -36,8 +37,10 @@ const rubik = Rubik({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://skisharebook.com"),
-  title: "SkiShare — Val Thorens",
-  description: "חופשות וסקי בוואל טורנס — דירות, סקי פס, הסעות, ואזור הסיזיונרים. SkiShare.",
+  // pages set their own title, description, canonical and share preview
+  // (src/lib/page-meta.ts); these are only the fallbacks
+  title: "SkiShare: חופשת סקי בואל טורנס",
+  description: "חופשות סקי בואל טורנס בעברית: דירות לחבר'ה ולזוגות, סקי פס, הסעה משדה התעופה וציוד. כל אחד מהחבורה משלם את החלק שלו.",
   icons: {
     icon: [
       { url: "/favicon.png", type: "image/png" },
@@ -45,19 +48,19 @@ export const metadata: Metadata = {
     ],
     apple: "/apple-touch-icon.png",
   },
+  // no og:url here: a page that forgot its own would point at the home page
   openGraph: {
     type: "website",
     siteName: "SkiShare",
-    url: "https://skisharebook.com",
-    title: "SkiShare — חופשות סקי בוואל טורנס",
-    description: "דירות, סקי פס, הסעות ואזור הסיזיונרים — חופשת הסקי המושלמת ב-Val Thorens.",
+    title: "SkiShare: חופשת סקי בואל טורנס",
+    description: "דירות לחבר'ה ולזוגות בואל טורנס, ומוסיפים סקי פס, הסעה וציוד.",
     locale: "he_IL",
     images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "SkiShare · Val Thorens" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "SkiShare — חופשות סקי בוואל טורנס",
-    description: "דירות, סקי פס, הסעות ואזור הסיזיונרים ב-Val Thorens.",
+    title: "SkiShare: חופשת סקי בואל טורנס",
+    description: "דירות לחבר'ה ולזוגות בואל טורנס, ומוסיפים סקי פס, הסעה וציוד.",
     images: ["/og.jpg"],
   },
   // iOS Smart App Banner — Safari shows "Open in app" if installed, else App Store
@@ -76,29 +79,6 @@ export const viewport: Viewport = {
   maximumScale: 1,
 };
 
-// Real registered business details (same ones shown in the site footer/legal
-// pages) — lets Google associate the site with an actual business entity
-// instead of just a set of pages, which matters for how it's surfaced for
-// brand and local-intent searches ("דירות בואל טורנס" etc).
-const organizationLd = {
-  "@context": "https://schema.org",
-  "@type": "TravelAgency",
-  name: "SkiShare",
-  legalName: "סקי שר בע\"מ",
-  url: "https://skisharebook.com",
-  logo: "https://skisharebook.com/skishare-logo.png",
-  image: "https://skisharebook.com/og.jpg",
-  telephone: "+972547701899",
-  email: "skishareteam@gmail.com",
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: "הזוהר 12",
-    addressLocality: "קיסריה",
-    addressCountry: "IL",
-  },
-  areaServed: { "@type": "Place", name: "Val Thorens, France" },
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -111,7 +91,7 @@ export default function RootLayout({
       className={`${montserrat.variable} ${inter.variable} ${heebo.variable} ${rubik.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(SITE_LD) }} />
         <SiteHeader />
         <div className="flex-1 flex flex-col">{children}</div>
         <ChromeGate hide={["/admin", "/quote/print"]}><Footer /></ChromeGate>

@@ -6,6 +6,7 @@ import type { Apartment, SkiPass } from "@/types";
 import { hasDirectFlightBothWays } from "@/lib/direct-flight-days";
 import { weekPackageExtras, PASS_AREA_LABEL } from "@/lib/deal-pricing";
 import { useDirectFlight } from "@/lib/useFlightPrice";
+import { aptDisplayName, aptShortName, aptParts } from "@/lib/apartment-display";
 import { card, btn, badgeLight, badgeDark, Check, EmptyState } from "@/components/ui";
 
 const MONTHS_FULL = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
@@ -51,10 +52,13 @@ const IcoArrow = () => ico(<path d="M19 12H5M11 6l-6 6 6 6" />, 18);
 export default function WeeklyBrowser({
   apartments,
   initialDeal = "apartment",
+  initialWeek = null,
   passes = [],
 }: {
   apartments: Apartment[];
   initialDeal?: "apartment" | "full";
+  /** a week to open on (from a link like /weekly?week=2027-01-16) */
+  initialWeek?: string | null;
   passes?: SkiPass[];
 }) {
   const allWeeks = useMemo(() => {
@@ -63,7 +67,8 @@ export default function WeeklyBrowser({
     return [...set].sort();
   }, [apartments]);
 
-  const [selected, setSelected] = useState<string | null>(allWeeks[0] ?? null);
+  const [selected, setSelected] = useState<string | null>(
+    initialWeek && allWeeks.includes(initialWeek) ? initialWeek : allWeeks[0] ?? null);
   const [guests, setGuests] = useState(2);
   const [open, setOpen] = useState(false);
   const [dealMode, setDealMode] = useState<"apartment" | "full">(initialDeal);
@@ -260,21 +265,21 @@ export default function WeeklyBrowser({
               guests: String(guests),
               ...(full ? { deal: "full" } : {}),
             }).toString()}`;
-            const meta = [apt.max_guests ? `עד ${apt.max_guests} אנשים` : "", apt.sqm ? `${apt.sqm} מ"ר` : ""].filter(Boolean).join(" · ");
+            const meta = [apt.sqm ? `${apt.sqm} מ"ר` : "", aptParts(apt).code ? `קוד ${aptParts(apt).code}` : ""].filter(Boolean).join(" · ");
             return (
               <Link key={apt.id} href={href}
                 className={`${card} group overflow-hidden flex flex-col hover:border-line-strong transition-colors`}>
                 <div className="relative h-[210px] bg-soft-2 overflow-hidden">
                   {apt.images?.[0] && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={apt.images[0]} alt={apt.name} loading="lazy"
+                    <img src={apt.images[0]} alt={aptDisplayName(apt)} loading="lazy"
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
                   )}
                   <span className={`absolute top-3.5 right-3.5 ${badgeLight}`}>שבת עד שבת</span>
                   {i === 0 && visible.length > 1 && <span className={`absolute top-3.5 left-3.5 ${badgeDark}`}>הכי משתלם</span>}
                 </div>
                 <div className="p-5 flex flex-col gap-2.5 flex-1">
-                  <h3 className="font-display font-bold text-[20px] md:text-[21px] leading-snug text-ink">{apt.name}</h3>
+                  <h3 className="font-display font-bold text-[20px] md:text-[21px] leading-snug text-ink">{aptShortName(apt)}</h3>
                   {meta && <div className="text-[15px] text-muted">ואל טורנס · {meta}</div>}
                   {full && (
                     <ul className="flex flex-col gap-1.5 text-[15px] text-ink">

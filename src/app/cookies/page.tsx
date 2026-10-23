@@ -1,11 +1,12 @@
 import Link from "next/link";
 import LegalShell, { H2, UL } from "@/components/LegalShell";
+import { pageMeta } from "@/lib/page-meta";
 
-export const metadata = {
-  title: "מדיניות עוגיות (Cookies) — SkiShare",
-  description: "באילו עוגיות האתר של SkiShare משתמש ולמה.",
-  alternates: { canonical: "https://skisharebook.com/cookies" },
-};
+export const metadata = pageMeta({
+  title: "מדיניות עוגיות (Cookies) | SkiShare",
+  description: "באילו עוגיות האתר של SkiShare משתמש ולמה, ואיך בוחרים מה לאשר.",
+  path: "/cookies",
+});
 
 export default function CookiesPage() {
   return (

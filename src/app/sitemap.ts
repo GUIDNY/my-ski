@@ -1,8 +1,8 @@
 import type { MetadataRoute } from "next";
 import { createServerClient } from "@/lib/supabase-server";
 import { GUIDES } from "@/lib/guides";
+import { siteUrl } from "@/lib/site";
 
-const SITE_URL = "https://skisharebook.com";
 // the apartment list changes with the daily sync: rebuild the sitemap every hour
 export const revalidate = 3600;
 
@@ -24,13 +24,14 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: "daily" 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // no made-up "last modified" dates: only the guides have a real one
   const staticEntries: MetadataRoute.Sitemap = STATIC_ROUTES.map(r => ({
-    url: `${SITE_URL}${r.path}`,
+    url: siteUrl(r.path),
     changeFrequency: r.changeFrequency,
     priority: r.priority,
   }));
 
   const guideEntries: MetadataRoute.Sitemap = GUIDES.map(g => ({
-    url: `${SITE_URL}/guide/${g.slug}`,
+    // Hebrew addresses percent-encoded, as Google asks for in sitemaps
+    url: siteUrl(`/guide/${g.slug}`),
     lastModified: new Date(g.updated),
     changeFrequency: "monthly",
     priority: 0.7,
@@ -41,7 +42,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const db = createServerClient();
     const { data } = await db.from("apartments").select("id").eq("available", true);
     apartmentEntries = (data ?? []).map(a => ({
-      url: `${SITE_URL}/apartments/${a.id}`,
+      url: siteUrl(`/apartments/${a.id}`),
       changeFrequency: "daily" as const,
       priority: 0.8,
     }));

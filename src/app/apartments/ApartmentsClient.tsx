@@ -8,6 +8,7 @@ import type { Apartment } from "@/types";
 import { getEffectivePrice, calcTotalForRange, matchingWeek } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
 import SkiCalendar from "@/components/SkiCalendar";
+import { aptShortName, aptDisplayName, aptKind, aptParts, forWho, minWeekPrice } from "@/lib/apartment-display";
 import { wrap, card, btn, badgeLight, Check, Crumbs, EmptyState, Skeleton } from "@/components/ui";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
@@ -22,16 +23,10 @@ const rangeLabel = (ci: string, co: string) => {
 const eur = (n: number) => `€${n.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
 
 const isAgency = (apt: Apartment) => apt.source === "la_cime";
-/** a type worth showing ("סטודיו", "3 חדרים"), not "cozy"/"דירה" or what the name already says */
-const typeLabel = (apt: Apartment) => {
-  const t = (apt.type || "").trim();
-  return /[א-ת]/.test(t) && t !== "דירה" && !apt.name.includes(t) ? t : "";
-};
-const metaLine = (apt: Apartment) => [
-  typeLabel(apt),
-  apt.max_guests ? `עד ${apt.max_guests} אנשים` : "",
-  apt.sqm ? `${apt.sqm} מ"ר` : "",
-].filter(Boolean).join(" · ");
+/** under the name: what it is and its size; agency ones also their code */
+const metaLine = (apt: Apartment) => isAgency(apt)
+  ? [apt.sqm ? `${apt.sqm} מ"ר` : "", aptParts(apt).code ? `קוד ${aptParts(apt).code}` : ""].filter(Boolean).join(" · ")
+  : [`${aptKind(apt)}${forWho(apt.max_guests) ? ` ${forWho(apt.max_guests)}` : ""}`, apt.sqm ? `${apt.sqm} מ"ר` : ""].filter(Boolean).join(" · ");
 
 type Filter = "all" | "own" | "agency";
 const FILTERS: { key: Filter; label: string }[] = [
@@ -76,6 +71,9 @@ function ApartmentCard({ apt, checkin, checkout, guests, rules }: {
     return min === Infinity ? apt.price_per_night : min;
   })();
 
+  // agency apartments are rented by the week: without dates, their cheapest open week
+  const fromWeek = isAgency(apt) ? minWeekPrice(apt) : null;
+
   // a plain address when nothing was chosen (the one search engines should index)
   const q = new URLSearchParams();
   if (checkin && checkout) { q.set("checkin", checkin); q.set("checkout", checkout); }
@@ -87,13 +85,13 @@ function ApartmentCard({ apt, checkin, checkout, guests, rules }: {
       className={`${card} group overflow-hidden flex flex-col hover:border-line-strong transition-colors`}>
       <div className="relative h-[210px] bg-soft-2 overflow-hidden shrink-0">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={apt.images?.[0] ?? "/apt1.jpg"} alt={apt.name} loading="lazy"
+        <img src={apt.images?.[0] ?? "/apt1.jpg"} alt={aptDisplayName(apt)} loading="lazy"
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
         <span className={`absolute top-3.5 right-3.5 ${badgeLight}`}>{isAgency(apt) ? "שבת עד שבת" : "דירה שלנו"}</span>
       </div>
 
       <div className="p-5 flex flex-col gap-2 flex-1">
-        <h2 className="font-display font-bold text-[20px] md:text-[21px] leading-snug text-ink">{apt.name}</h2>
+        <h3 className="font-display font-bold text-[20px] md:text-[21px] leading-snug text-ink">{aptShortName(apt)}</h3>
         <div className="text-[15px] text-muted">{metaLine(apt) || "ואל טורנס"}</div>
         {(apt.amenities?.length ?? 0) > 0 && (
           <ul className="flex flex-col gap-1.5 text-[14px] text-ink">
@@ -118,6 +116,15 @@ function ApartmentCard({ apt, checkin, checkout, guests, rules }: {
                   <span className="text-[14px] text-muted">ל-{nights} לילות</span>
                 </span>
                 <span className="text-[14px] text-muted">מ-{eur(minNightlyPrice)} ללילה</span>
+              </>
+            ) : isAgency(apt) && fromWeek ? (
+              <>
+                <span className="flex items-baseline gap-1.5">
+                  <span className="text-[14px] text-muted">מ-</span>
+                  <span className="font-display font-extrabold text-[26px] leading-none text-ink">{eur(fromWeek)}</span>
+                  <span className="text-[14px] text-muted">לשבוע</span>
+                </span>
+                <span className="text-[14px] text-muted">שבת עד שבת</span>
               </>
             ) : (
               <>
@@ -190,7 +197,7 @@ function CalendarOverlay({ guests, onApply, onClose }: {
   );
 }
 
-function ApartmentsPage({ initialApartments }: { initialApartments: Apartment[] }) {
+function ApartmentsPage({ initialApartments, intro }: { initialApartments: Apartment[]; intro?: ReactNode }) {
   const params   = useSearchParams();
   const router   = useRouter();
   const checkin  = params.get("checkin")  ?? "";
@@ -266,10 +273,11 @@ function ApartmentsPage({ initialApartments }: { initialApartments: Apartment[] 
           <Crumbs items={[{ label: "דף הבית", href: "/" }, { label: "דירות" }]} className="mb-3 md:mb-4" />
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="flex flex-col gap-2 min-w-0">
-              <h1 className="font-display font-extrabold text-[32px] leading-[1.1] md:text-[44px] tracking-tight text-ink">הדירות בואל טורנס</h1>
+              <h1 className="font-display font-extrabold text-[32px] leading-[1.1] md:text-[44px] tracking-tight text-ink">דירות בואל טורנס</h1>
               <p className="text-[16px] md:text-[17px] text-muted">
                 {loading ? "טוענים את הדירות…" : `${shown.length} ${shown.length === 1 ? "דירה" : "דירות"}${hasDates ? " פנויות לתאריכים שבחרתם" : ""}. הדירות שלנו, ודירות הסוכנות לשבוע שלם.`}
               </p>
+              {intro && !hasDates && <div className="max-w-[760px] flex flex-col gap-2 text-[15px] md:text-[16px] leading-relaxed text-body">{intro}</div>}
             </div>
             <Link href={searchHref} className={`${btn.link} text-[16px]`}>לחיפוש חבילות <IcoArrow /></Link>
           </div>
@@ -305,6 +313,7 @@ function ApartmentsPage({ initialApartments }: { initialApartments: Apartment[] 
         )}
 
         {/* ── Grid ──────────────────────────────────────────── */}
+        <h2 className="sr-only">{hasDates ? "הדירות הפנויות לתאריכים שבחרתם" : "כל הדירות בואל טורנס"}</h2>
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
             {[1, 2, 3, 4, 5, 6].map(i => (
@@ -339,10 +348,10 @@ function ApartmentsPage({ initialApartments }: { initialApartments: Apartment[] 
   );
 }
 
-export default function ApartmentsClient({ initialApartments }: { initialApartments: Apartment[] }) {
+export default function ApartmentsClient({ initialApartments, intro }: { initialApartments: Apartment[]; intro?: ReactNode }) {
   return (
     <Suspense fallback={<SkiLoader />}>
-      <ApartmentsPage initialApartments={initialApartments} />
+      <ApartmentsPage initialApartments={initialApartments} intro={intro} />
     </Suspense>
   );
 }

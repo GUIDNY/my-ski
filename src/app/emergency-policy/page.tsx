@@ -1,13 +1,13 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { buildWaHref } from "@/lib/whatsapp";
 import { wrap, card, btn, Crumbs } from "@/components/ui";
+import { pageMeta } from "@/lib/page-meta";
 
-export const metadata: Metadata = {
-  title: "מצב חירום, מלחמה וכוח עליון — SkiShare",
-  description: "מה קורה אם יש מצב חריג — טיסות, דירות, סקי פס וגם אם אתם כבר בחופשה. שקוף ומראש, בלי הפתעות.",
-  alternates: { canonical: "https://skisharebook.com/emergency-policy" },
-};
+export const metadata = pageMeta({
+  title: "ביטול חופשת סקי במצב חירום או מלחמה: מה מגיע לכם | SkiShare",
+  description: "סגירת שמיים, ביטול טיסה או מלחמה: מה קורה עם הטיסה, הדירה והסקי פס, ומה אם כבר נמצאים בואל טורנס. המדיניות שלנו, בשקיפות ומראש.",
+  path: "/emergency-policy",
+});
 
 /* ── Icons (stroke, follow the text color) ─────────────────── */
 const ico = (path: React.ReactNode, size = 22) => (
