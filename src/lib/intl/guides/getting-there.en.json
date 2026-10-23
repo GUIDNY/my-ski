@@ -17,51 +17,45 @@
   "emoji": "✈️",
   "published": "2026-10-23",
   "updated": "2026-10-23",
-  "intro": "Val Thorens has no railway station or airport: the nearest station is Moûtiers-Salins-Brides-les-Bains, 37 km below the resort, and the main airports are Geneva (201 km, about 2 hours by road) and Lyon Saint-Exupéry (199 km, about 2 hours 30 minutes). From London you can fly to either, or take Eurostar Snow, which leaves St Pancras every Saturday from 19 December 2026 to 20 February 2027 and, after a change at Lille, stops at Moûtiers. The last stretch by road is the D117 up from Moûtiers, and from 1 November to 31 March every car in Savoie needs winter tyres or chains.",
+  "intro": "Val Thorens has no railway station or airport: the nearest station is Moûtiers-Salins-Brides-les-Bains, 37 km below the resort, and the main airports are Geneva (201 km) and Lyon Saint-Exupéry (199 km). By road, Les 3 Vallées counts about 2 hours from either city to Moûtiers, then about an hour up to the resort. From London you can fly, or take Eurostar Snow, which leaves St Pancras every Saturday from 19 December 2026 to 20 February 2027 and, after a change at Lille, stops at Moûtiers. From 1 November to 31 March every car in Savoie needs winter tyres or chains.",
   "sections": [
     {
-      "heading": "Val Thorens nearest airport and train station",
+      "heading": "Nearest airport and railway station to Val Thorens",
       "paragraphs": [
         "The nearest airport is Chambéry, 122 km away, and the nearest railway station is Moûtiers-Salins-Brides-les-Bains, 37 km down the valley. Geneva and Lyon Saint-Exupéry, both about 200 km away, have the most coach companies running to the resort, according to [Val Thorens' bus-station page](https://www.valthorens.com/en/sejour/infos-pratiques/gare-routiere-bus-taxi/)."
       ],
       "table": {
-        "caption": "Distances: valthorens.com. Road times: Les 3 Vallées. S63 bus: Val Thorens Réservation.",
+        "caption": "Distances: valthorens.com. Coaches: valthorens.com and Altibus.",
         "head": [
           "From",
           "Distance to Val Thorens",
-          "By road",
           "Bus or coach to the resort"
         ],
         "rows": [
           [
             "Moûtiers-Salins-Brides-les-Bains station",
             "37 km",
-            "about 1 hr 15 min by bus",
-            "S63 bus, all year"
+            "S63 bus, about 1 hr 15 min, all year"
           ],
           [
             "Chambéry airport (CMF)",
             "122 km",
-            "about 1 hr 30 min",
-            "None direct: taxi or VTC"
+            "None direct: taxi, VTC, or shuttle, train and S63"
           ],
           [
             "Grenoble airport (GNB)",
             "194 km",
-            "about 1 hr 50 min",
             "Ben's Bus, Alpine Fleet"
           ],
           [
             "Lyon Saint-Exupéry airport (LYS)",
             "199 km",
-            "about 2 hr 30 min",
-            "Altibus LYS'Express and four other companies"
+            "LYS'Express (sold by Altibus) and four coach companies"
           ],
           [
             "Geneva airport (GVA)",
             "201 km",
-            "about 2 hours",
-            "Altibus and four other companies"
+            "Line sold by Altibus (change at Moûtiers), four coach companies"
           ]
         ]
       }
@@ -69,7 +63,7 @@
     {
       "heading": "London to Val Thorens: fly or take the train",
       "paragraphs": [
-        "From London, you either fly to Geneva or Lyon and continue about 200 km by road, or take the train to Moûtiers and the bus for the last 37 km. Eurostar puts London to Bourg-Saint-Maurice, the terminus beyond Moûtiers, at just under 8 hours on Eurostar Snow, and London to Moûtiers at typically 8 hours with a connection on other days."
+        "From London, you either fly to Geneva or Lyon and continue about 200 km by road, or take the train to Moûtiers and the bus for the last 37 km: Eurostar Snow on winter Saturdays, with a change at Lille, or on other days Eurostar and a TGV, typically 8 hours to Moûtiers with a change in Paris."
       ],
       "table": {
         "caption": "London to Val Thorens, winter 2026/27",
@@ -81,18 +75,18 @@
         "rows": [
           [
             "Fly to Geneva",
-            "201 km, about 2 hours by road",
-            "Altibus coach, 18 December – 27 March"
+            "201 km by road",
+            "Airport coach sold by Altibus, 18 December – 27 March, change at Moûtiers"
           ],
           [
             "Fly to Lyon Saint-Exupéry",
-            "199 km, about 2 hr 30 min",
-            "LYS'Express, Fridays to Sundays, 11 December – 3 April"
+            "199 km by road",
+            "LYS'Express, Fridays to Sundays by destination, 11 December – 3 April"
           ],
           [
             "Fly to Chambéry",
-            "122 km, about 1 hr 30 min",
-            "Taxi or VTC only"
+            "122 km by road",
+            "Taxi or VTC direct, or shuttle, train and S63"
           ],
           [
             "Eurostar Snow, Saturdays 19 December – 20 February",
@@ -107,23 +101,23 @@
         ]
       },
       "after": [
-        "Chambéry and Grenoble are closer but served mainly from the UK: on 23 October 2026, [Chambéry airport's destination list](https://www.chambery-airport.com/fr/vols-et-destinations/nos-destinations) was entirely British, London City and Gatwick included, and Grenoble's mostly so."
+        "Chambéry and Grenoble are closer, and most of their flights are from the UK: on 23 October 2026 every destination on [Chambéry airport's list](https://www.chambery-airport.com/fr/vols-et-destinations/nos-destinations) was British."
       ]
     },
     {
       "heading": "Geneva or Lyon airport to Val Thorens: coaches and transfers",
       "paragraphs": [
-        "From Geneva airport, the [Altibus coach line](https://www.altibus.com/en/arriving-by-plane/geneva-airport/) to the Tarentaise resorts, Val Thorens included, runs daily from 18 December 2026 to 27 March 2027 ('depending on the destination', Altibus adds), from €47 for an adult economy ticket. From Lyon Saint-Exupéry, the [LYS'Express](https://www.altibus.com/en/arriving-by-plane/lyon-saint-exupery-airport/) runs on Fridays, Saturdays and Sundays from 11 December 2026 to 3 April 2027, from €55 for an adult, and most of its Val Thorens journeys are direct, with a break at Moûtiers.",
-        "On both lines, children under 3 travel free and children aged 3 to 12 get 30% off. At Lyon the coaches leave from the airport bus station, Terminal 1, level 0, and for the trip home Altibus asks you to allow at least 3 hours between the coach's arrival and your flight.",
-        "Neither line runs before 11 December or after 3 April, though the lifts open on 21 November 2026 and close on 2 May 2027; in those weeks, try another coach company, the train and the S63, a taxi or a hire car.",
-        "The resort's bus-station page also lists Ben's Bus, Alpybus, Flixbus and Alpine Fleet from Geneva and Lyon. [Go Val Thorens](https://www.govalthorens.com/en), the resort's planner, books trains, flights, buses and taxis in one basket. SkiShare sells apartments only, so book transfers with these companies."
+        "From Geneva airport, Altibus sells a [coach line](https://www.altibus.com/en/arriving-by-plane/alpskibus-shuttles/) to the Tarentaise that runs daily from 18 December 2026 to 27 March 2027 ('depending on the destination', Altibus adds); for Val Thorens you change at Moûtiers, and fares on the line start at €47 for an adult economy ticket. From Lyon Saint-Exupéry, the [LYS'Express](https://www.altibus.com/en/arriving-by-plane/lyon-saint-exupery-airport/) runs on Fridays, Saturdays and Sundays, depending on the destination, from 11 December 2026 to 3 April 2027; adult fares on the line start at €55, and most of its Val Thorens journeys are direct, with a break at Moûtiers.",
+        "On both lines, children under 3 travel free and children aged 3 to 12 get 30% off. Altibus only sells the tickets: the coaches are run by Transdev and Faure Savoie (and EBA Eurobus from Geneva), so don't look for an Altibus bus.",
+        "Neither line runs before 11 December or after 3 April, though the lifts open on 21 November 2026 and close on 2 May 2027; in those weeks, try another coach company, the train and the S63, a taxi or a hire car. The resort's bus-station page also lists Ben's Bus, Alpybus, Flixbus and Alpine Fleet from Geneva and Lyon. SkiShare sells apartments only, so book transfers with these companies."
       ]
     },
     {
       "heading": "Train to Val Thorens: Eurostar Snow, TGV and OUIGO to Moûtiers",
       "paragraphs": [
-        "All trains for Val Thorens stop at Moûtiers-Salins-Brides-les-Bains, 37 km below the resort. [Eurostar Snow](https://www.eurostar.com/rw-en/train/ski-train) leaves London St Pancras every Saturday from 19 December 2026 to 20 February 2027; you change at Lille onto the ski train, which calls at Chambéry, Albertville, Moûtiers, Aime-La-Plagne, Landry and Bourg-Saint-Maurice. Trains back leave Bourg-Saint-Maurice on Sunday mornings and selected Saturday afternoons, from 27 December 2026 to 28 February 2027.",
-        "Each adult can take two bags up to 85 cm long, a piece of hand luggage, and skis or a snowboard. There is no Eurostar Snow from London in March or April: on other dates, take Eurostar to Paris Gare du Nord, cross to Gare de Lyon (around 30 minutes, says Eurostar) and continue by TGV."
+        "The railway station for Val Thorens is Moûtiers-Salins-Brides-les-Bains, 37 km below the resort. Eurostar Snow leaves London St Pancras every Saturday from 19 December 2026 to 20 February 2027, says [Val Thorens](https://www.valthorens.com/en/sejour/venir-a-val-thorens/comment-venir/); you change at Lille onto the ski train, which also calls at Chambéry, Albertville, Aime-La-Plagne, Landry and Bourg-Saint-Maurice.",
+        "Trains back run every Sunday from 27 December 2026 to 28 February 2027 and on five Saturdays, 26 December, 2 January, 9 January, 20 February and 27 February, according to Eurostar's announcement as reported by [PlanetSKI](https://planetski.eu/2026/07/15/eurostar-snow-tickets-on-sale/). A Saturday-to-Saturday week therefore works both ways only if you leave London on 19 or 26 December, 2 January, or 13 or 20 February.",
+        "On 23 October 2026, Eurostar's [booking page](https://www.eurostar.com/uk-en/train/ski-train) still showed last winter's timetable, so check the times there. There is no Eurostar Snow from London in March or April: on other dates, take Eurostar to Paris Gare du Nord, cross to Gare de Lyon (around 30 minutes, says Eurostar) and continue by TGV."
       ],
       "table": {
         "caption": "Fastest trains to Moûtiers",
@@ -141,13 +135,13 @@
             "Some direct, others change at Chambéry"
           ],
           [
-            "Roissy-CDG 2 or Marne-la-Vallée-Chessy",
+            "Paris (check the station when booking)",
             "OUIGO",
             "about 5 hours",
             "No change; daily, 17 December – 29 March"
           ],
           [
-            "Paris Austerlitz; Amsterdam, Antwerp, Brussels",
+            "Paris Austerlitz; Brussels, Antwerp",
             "Travelski Night Express",
             "Overnight",
             "Friday evening to Saturday morning"
@@ -155,7 +149,7 @@
           [
             "Brussels, Antwerp, Amsterdam, Rotterdam",
             "Eurostar Snow",
-            "Brussels to Albertville 5 hours",
+            "5 hours to Albertville, the stop before Moûtiers",
             "Direct; Saturdays, 19 December – 3 April"
           ],
           [
@@ -179,68 +173,72 @@
         ]
       },
       "after": [
-        "Book on [SNCF Connect](https://www.sncf-connect.com/) or [OUIGO](https://www.ouigo.com/train-paris-moutiers), whose tickets for 13 December 2026 to 2 July 2027 have been on sale since 30 September. [Travelski](https://www.travelski.com/transport/travelski-night-express) sells night-train tickets alone or with a package; with a ticket only, you arrange your own transfer from the station."
+        "Book TGV INOUI on [SNCF Connect](https://www.sncf-connect.com/) and OUIGO on [ouigo.com](https://www.ouigo.com/destinations/moutiers): OUIGO's tickets for travel from 13 December 2026 to 2 July 2027 have been on sale since 30 September, and its pages give different Paris stations for this train, so check yours when booking. [Travelski](https://www.travelski.com/transport/travelski-night-express) sells night-train tickets alone or with a package."
       ]
     },
     {
       "heading": "Moûtiers to Val Thorens by bus: the S63",
       "paragraphs": [
-        "The S63 bus takes about 1 hour 15 minutes from Moûtiers station to Place des Arolles, Val Thorens' bus station, according to [Val Thorens Réservation](https://booking.valthorens.com/altibus-moutiersar/round-trip-bus-from-moutiers-to-val-thorens.html), the resort's booking centre. It runs all year, several times a day and more often in winter, from the Moûtiers bus station in the SNCF station car park.",
-        "Tickets are sold online by [Altibus](https://www.altibus.com/en/top-destinations/val-thorens/), 10% cheaper if you book more than 48 hours ahead; winter 2026/27 bookings open this autumn. A ticket covers one piece of hand luggage, one hold bag and a pair of skis or a snowboard, and Altibus advises leaving 1 hour 30 minutes between train and bus.",
-        "Taxis are available at Moûtiers station, and Les 3 Vallées suggests booking one ahead; you can also call a VTC. Val Thorens' bus station at Place des Arolles is open daily in winter and has a left-luggage service."
+        "The S63 bus takes about 1 hour 15 minutes from Moûtiers station to Place des Arolles, Val Thorens' bus station, according to [Val Thorens Réservation](https://booking.valthorens.com/altibus-moutiersar/round-trip-bus-from-moutiers-to-val-thorens.html), the resort's booking centre. It runs all year, several times a day and more often in winter, from the Moûtiers bus station in the SNCF station car park. Until 18 December 2026, though, Altibus lists only the off-season timetable, built around school services, so check the times if you arrive before then.",
+        "Tickets are sold online by [Altibus](https://www.altibus.com/en/top-destinations/val-thorens/), 10% cheaper if you book more than 48 hours ahead; winter 2026/27 bookings open this autumn. A ticket covers one piece of hand luggage, one hold bag and a pair of skis or a snowboard.",
+        "Taxis are available at Moûtiers station (Les 3 Vallées suggests booking ahead), or book a VTC, a private-hire car with a driver. Val Thorens' bus station at Place des Arolles is open daily in winter and has a left-luggage service."
       ]
     },
     {
       "heading": "Driving to Val Thorens: route, winter tyres and chains",
       "paragraphs": [
-        "Every road route ends the same way: the N90 dual carriageway to Moûtiers, exit 40, then about 37 km up the D117 to Val Thorens, at 2,300 m. From Lyon take the A43 towards Chambéry and Albertville, from Geneva the A41 towards Annecy and Albertville, and from Paris the A6 to Lyon first; [Les 3 Vallées](https://www.les3vallees.com/en/guide/travel-to-les-3-vallees/by-car) puts Moûtiers about 630 km and 6 hours 30 minutes to 7 hours from Paris."
+        "Every road route ends the same way: the N90 dual carriageway to Moûtiers, exit 40, then about 37 km up the D117 to Val Thorens, at 2,300 m, which takes about another hour. [Les 3 Vallées](https://www.les3vallees.com/en/guide/travel-to-les-3-vallees/by-car) gives these figures for routes that end on the N90 at Moûtiers:"
       ],
       "table": {
-        "caption": "Driving to Val Thorens (valthorens.com, Les 3 Vallées)",
+        "caption": "To Moûtiers: Les 3 Vallées. Moûtiers to Val Thorens: valthorens.com and Les 3 Vallées.",
         "head": [
           "From",
-          "Route",
-          "Distance",
-          "Driving time"
+          "Route to Moûtiers",
+          "Distance and time"
         ],
         "rows": [
           [
             "Paris",
-            "A6, A43, A430, N90, then D117",
-            "about 630 km to Moûtiers, then about 37 km",
-            "6 hr 30 min to 7 hours to Moûtiers"
+            "A6, A43, A430, N90",
+            "about 630 km, 6 hr 30 min to 7 hours"
           ],
           [
-            "Lyon Saint-Exupéry airport",
-            "A43, A430, N90, D117",
-            "199 km",
-            "about 2 hr 30 min"
+            "Lyon",
+            "A43, A430, N90",
+            "about 186 km, about 2 hours"
           ],
           [
-            "Geneva airport",
-            "A41 towards Annecy, Albertville, N90, D117",
-            "201 km",
+            "Geneva",
+            "A41 towards Annecy, then Albertville and the N90",
             "about 2 hours"
           ],
           [
-            "Chambéry airport",
-            "A430, N90, D117",
-            "122 km",
-            "about 1 hr 30 min"
+            "Grenoble",
+            "A41, A430, N90",
+            "about 107 km, about 1 hr 10 min"
+          ],
+          [
+            "Chambéry",
+            "A430, N90",
+            "about 77 km, about 55 min"
+          ],
+          [
+            "Moûtiers to Val Thorens",
+            "Exit 40, then the D117",
+            "about 37 km, about 1 hour"
           ]
         ]
       },
       "after": [
-        "[Les 3 Vallées](https://www.les3vallees.com/en/guide/travel-to-les-3-vallees/road-conditions) advises staying on the N90 rather than following sat-nav shortcuts onto small side roads. If the road is snowy, there are chain-fitting areas on the way up, at Champ Mouton below Fontaine-le-Puits and at Pont de la Combe.",
+        "[Les 3 Vallées](https://www.les3vallees.com/en/guide/travel-to-les-3-vallees/road-conditions) advises staying on the N90 rather than following sat-nav shortcuts onto small side roads, and lists [chain-fitting areas](https://www.les3vallees.com/en/resort/val-thorens) on the way up, at Champ Mouton below Fontaine-le-Puits and at Pont de la Combe.",
         "**Winter equipment is compulsory from 1 November to 31 March across the whole of Savoie**, says the [Savoie prefecture](https://www.savoie.gouv.fr/Actions-de-l-Etat/Transports-deplacements-et-securite-routiere/Securite-routiere/Equipements-obligatoires-en-periode-hivernale-soyez-prets): four winter tyres marked 3PMSF (the three-peak mountain and snowflake symbol), or at least two chains or snow socks for the driving wheels, carried in the car. Since 1 November 2024, tyres marked only M+S no longer count without chains or socks, and all-season tyres count only with the 3PMSF mark.",
-        "After 31 March, a B26 sign can still make chains compulsory on snowy roads, and the Val Thorens lifts run until 2 May 2027.",
-        "From the Maurienne valley, another way in is A43 exit 29 (Saint-Michel-de-Maurienne), the D1006 to Orelle and the lifts up: 45 minutes with luggage, says the resort."
+        "After 31 March, a B26 sign can still make chains compulsory on snowy roads, and the Val Thorens lifts run until 2 May 2027."
       ]
     },
     {
       "heading": "Parking in Val Thorens: book a space before you go",
       "paragraphs": [
-        "In winter your car stays in one of Val Thorens' car parks for the whole stay: the resort is semi-pedestrian, street parking is banned from 15 November to 15 May, and motorhomes are banned throughout the resort in winter. Book a space online with [Valthoparc](https://www.valthoparc.fr/), the semi-public company that runs the car parks; [Les 3 Vallées](https://www.les3vallees.com/en/guide/travel-to-les-3-vallees/car-parks) says you have to book at least 7 days before you arrive.",
+        "In winter your car stays in one of Val Thorens' car parks for the whole stay: the resort is largely pedestrianised, street parking is banned from 15 November to 15 May, and motorhomes are banned throughout the resort in winter. Book a space online with [Valthoparc](https://www.valthoparc.fr/), the semi-public company that runs the car parks; [Les 3 Vallées](https://www.les3vallees.com/en/guide/travel-to-les-3-vallees/car-parks) says you have to book at least 7 days before you arrive.",
         "Spaces are allocated by your vehicle's height, where you are staying, your dates and what is left, so measure your car first, roof box included."
       ],
       "table": {
@@ -285,26 +283,26 @@
     {
       "heading": "Arrival day: Saturday traffic and timing",
       "paragraphs": [
-        "Saturday is the day most holidaymakers travel, so allow extra time: for Christmas, [Bison Futé](https://www.bison-fute.gouv.fr/IMG/pdf/Calendrier_Bison_Fute_2026.pdf), the French government's traffic forecaster, expects difficult traffic in Auvergne-Rhône-Alpes, the region that includes Savoie, on Saturday 26 December 2026 and very difficult traffic on Saturday 2 January 2027, in both directions. Its 2027 calendar, covering February, is not out yet; its detailed forecasts come out a few days before each busy period."
+        "Saturday is the day most holidaymakers travel, so allow extra time: over Christmas and New Year, [Bison Futé](https://www.bison-fute.gouv.fr/IMG/pdf/Calendrier_Bison_Fute_2026.pdf), the French government's traffic forecaster, expects difficult traffic in Auvergne-Rhône-Alpes, which includes Savoie, on Saturday 26 December 2026 and very difficult traffic on Saturday 2 January 2027, both ways. Its 2027 calendar, covering February, is not out yet; detailed forecasts come out a few days before each busy period."
       ],
       "list": [
         "**Arrive the night before** on a long drive: Les 3 Vallées suggests a night near Chambéry, Albertville or Moûtiers, or a Sunday-to-Sunday week.",
-        "**Leave margins**: Altibus advises 1 hour 30 minutes between train and bus, and 3 hours between the coach back and your flight.",
-        "**Book the car park** at least 7 days ahead.",
+        "**Allow time between connections**: Altibus advises 1 hour 30 minutes between train and bus, and 3 hours between the coach back and your flight.",
         "**Buy the lift pass online** to save time on arrival, as Les 3 Vallées suggests: prices in our [ski pass guide](/en/guide/val-thorens-ski-pass-prices)."
       ],
       "after": [
-        "Our agency apartments are rented by the full week, Saturday to Saturday; SkiShare's own apartments are priced per night, so you can arrive on another day. The table shows each Saturday, the cheapest agency apartment still free, how many are left and a travel note. Choose a district with [where to stay in Val Thorens](/en/guide/where-to-stay-in-val-thorens) and dates with [when to go to Val Thorens](/en/guide/best-time-to-ski-in-val-thorens), then book on [our apartments page](/en/apartments)."
+        "Our agency apartments are rented by the full week, Saturday to Saturday; SkiShare's own apartments are priced per night for the dates you choose, so you can arrive on another day. The table shows, for each Saturday, the cheapest agency apartment still free, how many are left and a travel note; see also [where to stay in Val Thorens](/en/guide/where-to-stay-in-val-thorens) and [when to go to Val Thorens](/en/guide/best-time-to-ski-in-val-thorens), then book on [our apartments page](/en/apartments)."
       ],
       "liveWeeks": {
         "notes": {
-          "2026-11-28": "No Altibus airport coaches yet",
-          "2026-12-12": "LYS'Express runs; Geneva coach not yet",
+          "2026-11-28": "No airport coach on Altibus yet",
+          "2026-12-12": "LYS'Express season open, Geneva not yet",
           "2026-12-19": "First Eurostar Snow, London and Brussels",
           "2026-12-26": "Bison Futé: difficult traffic",
           "2027-01-02": "Bison Futé: very difficult traffic",
           "2027-02-20": "Last Eurostar Snow from London",
-          "2027-03-27": "Last day of the Geneva Altibus coach",
+          "2027-02-27": "Last Saturday Eurostar Snow to London",
+          "2027-03-27": "Last day of the Geneva airport coach",
           "2027-04-03": "Last LYS'Express and Brussels Eurostar"
         },
         "count": true
@@ -314,11 +312,11 @@
   "faqs": [
     {
       "q": "What is the nearest airport to Val Thorens?",
-      "a": "Chambéry, 122 km away, but only taxis and VTCs go direct from there. Geneva (201 km) and Lyon Saint-Exupéry (199 km), about 2 hours and 2 hours 30 minutes by road, have airport coaches in winter."
+      "a": "Chambéry, 122 km away, but no coach goes direct from there: take a taxi or a VTC (a private-hire car), or a shuttle to Chambéry station, the train to Moûtiers and the S63 bus. Geneva (201 km) and Lyon Saint-Exupéry (199 km) have airport coaches in winter."
     },
     {
       "q": "How do I get from Geneva to Val Thorens?",
-      "a": "It is 201 km, about 2 hours by road. Altibus sells a daily coach from 18 December 2026 to 27 March 2027, from €47 for an adult economy ticket; otherwise take a taxi, another coach company, or the train to Moûtiers and the S63 bus."
+      "a": "It is 201 km: about 2 hours from Geneva to Moûtiers by road, then about an hour up, according to Les 3 Vallées. Altibus sells a daily airport coach from 18 December 2026 to 27 March 2027, with a change at Moûtiers; the lowest adult fare on the line is €47. Otherwise take a taxi, another coach company, or the train."
     },
     {
       "q": "Is there a train station in Val Thorens?",
@@ -326,20 +324,16 @@
     },
     {
       "q": "Does the Eurostar ski train go to Val Thorens in 2026/27?",
-      "a": "Eurostar Snow leaves London St Pancras every Saturday from 19 December 2026 to 20 February 2027, changes at Lille and stops at Moûtiers, the station for Val Thorens. From Brussels and Amsterdam it runs direct on Saturdays until 3 April 2027."
+      "a": "Eurostar Snow leaves London St Pancras every Saturday from 19 December 2026 to 20 February 2027, with a change at Lille, and stops at Moûtiers, the station for Val Thorens. Trains back run on Sundays and five Saturdays, so Saturday-to-Saturday weeks work both ways only from 19 or 26 December, 2 January, or 13 or 20 February."
     },
     {
       "q": "Do I need winter tyres or snow chains to drive to Val Thorens?",
       "a": "Yes, from 1 November to 31 March, in the whole of Savoie: four winter tyres marked 3PMSF, or chains or snow socks carried in the car. Tyres marked only M+S have not counted since 1 November 2024."
-    },
-    {
-      "q": "Can you drive into Val Thorens and park?",
-      "a": "You can drive up, but in winter the car must stay in one of the resort's car parks; street parking is banned from 15 November to 15 May. Book a space with Valthoparc at least 7 days ahead."
     }
   ],
   "sources": [
     {
-      "title": "Val Thorens official site: how to get to Val Thorens (distances, trains, roads, winter equipment, parking)",
+      "title": "Val Thorens official site: how to get to Val Thorens (distances, trains, Eurostar Snow 2026/27, roads, winter equipment, parking)",
       "url": "https://www.valthorens.com/en/sejour/venir-a-val-thorens/comment-venir/"
     },
     {
@@ -347,24 +341,28 @@
       "url": "https://www.valthorens.com/en/sejour/infos-pratiques/gare-routiere-bus-taxi/"
     },
     {
-      "title": "Eurostar: Eurostar Snow ski train from London, winter 2026/27",
-      "url": "https://www.eurostar.com/rw-en/train/ski-train"
+      "title": "PlanetSKI: Eurostar Snow 2026/27 on sale, outbound and return dates (15 July 2026)",
+      "url": "https://planetski.eu/2026/07/15/eurostar-snow-tickets-on-sale/"
+    },
+    {
+      "title": "Eurostar: Eurostar Snow booking page (still showing the 2025/26 timetable on 23 October 2026)",
+      "url": "https://www.eurostar.com/uk-en/train/ski-train"
     },
     {
       "title": "Eurostar: Eurostar Snow from Brussels and Amsterdam, winter 2026/27",
       "url": "https://www.eurostar.com/us-en/deals/eurostar-snow"
     },
     {
-      "title": "Altibus: buses to Val Thorens (S63 from Moûtiers, Geneva and Lyon airport lines)",
-      "url": "https://www.altibus.com/en/top-destinations/val-thorens/"
+      "title": "Altibus: Geneva airport line to the Tarentaise, 2026/27 (change at Moûtiers for Val Thorens)",
+      "url": "https://www.altibus.com/en/arriving-by-plane/alpskibus-shuttles/"
     },
     {
       "title": "Altibus: LYS'Express from Lyon airport, dates and fares 2026/27",
       "url": "https://www.altibus.com/en/arriving-by-plane/lyon-saint-exupery-airport/"
     },
     {
-      "title": "Les 3 Vallées: Val Thorens (road times from the airports, car parks, chain-fitting areas)",
-      "url": "https://www.les3vallees.com/en/resort/val-thorens"
+      "title": "Les 3 Vallées: getting there by car (routes and times to Moûtiers)",
+      "url": "https://www.les3vallees.com/en/guide/travel-to-les-3-vallees/by-car"
     },
     {
       "title": "Préfecture de la Savoie: compulsory winter equipment, 1 November to 31 March",
@@ -373,10 +371,6 @@
     {
       "title": "Val Thorens Réservation: the resort's car parks, heights and parking rules",
       "url": "https://booking.valthorens.com/parking.html"
-    },
-    {
-      "title": "Bison Futé: 2026 traffic forecast calendar, to 7 January 2027 (PDF)",
-      "url": "https://www.bison-fute.gouv.fr/IMG/pdf/Calendrier_Bison_Fute_2026.pdf"
     }
   ]
 }
