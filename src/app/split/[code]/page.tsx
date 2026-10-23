@@ -82,7 +82,7 @@ export default function SplitPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-[1fr_380px] gap-5 md:gap-7 items-start">
           {/* your share (first on the phone) */}
-          <aside aria-label="החלק שלך" className="md:order-2 md:sticky md:top-[96px]">
+          <aside id="split-pay" aria-label="החלק שלך" className="scroll-mt-[76px] md:order-2 md:sticky md:top-[96px]">
             {full ? (
               <div className="rounded-card border border-[#BFE3CF] bg-ok-soft p-6 md:p-7 flex flex-col items-center text-center gap-3">
                 <span className="w-14 h-14 rounded-full bg-white text-ok flex items-center justify-center"><IconCheck size={28} /></span>
@@ -161,7 +161,10 @@ export default function SplitPage() {
             <span className="font-display font-extrabold text-[22px] leading-none text-ink">€{myShare.toLocaleString()}</span>
             <span className="text-[13px] text-muted mt-1">החלק שלך</span>
           </div>
-          <div className="flex-1">{payButton(`${btn.primary} w-full`, "לתשלום")}</div>
+          <button type="button" className={`${btn.primary} flex-1`}
+            onClick={() => document.getElementById("split-pay")?.scrollIntoView({ behavior: "smooth", block: "start" })}>
+            לתשלום החלק שלי
+          </button>
         </MobileBar>
       )}
     </div>

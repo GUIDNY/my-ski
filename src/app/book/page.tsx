@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import type { Apartment, SkiPass } from "@/types";
 import { IconSkis, IconBus, IconPlane, IconShield, IconUser, IconBot, IconCalendar, IconUsers, IconMinus, IconPlus } from "@/components/Icons";
-import { btn, chip, field, fieldLabel, wrap, PageTop } from "@/components/ui";
+import { btn, chip, field, fieldLabel, wrap, PageTop, EmptyState } from "@/components/ui";
 import { FormSection, OptionCard, Tag, SumRow, Note, TrustList, MobileBar, StatusCard, IcoLock, Ltr } from "@/components/checkout/Checkout";
 
 /* ── Constants ──────────────────────────────────────────────── */
@@ -310,6 +310,15 @@ function BookPage() {
   );
 
   if (loading) return <SkiLoader />;
+
+  // no apartment in the link (or it no longer exists): there is nothing to book
+  if (!apt) return (
+    <div className={`${wrap} max-w-[720px] py-12 md:py-16`}>
+      <EmptyState title="לא נבחרה דירה"
+        text="כדי להשלים הזמנה צריך לבחור דירה ותאריכים. אפשר לחפש לפי התאריכים שלכם."
+        action={<><Link href="/search" className={btn.primary}>לחיפוש דירות</Link><Link href="/apartments" className={btn.outline}>לכל הדירות</Link></>} />
+    </div>
+  );
 
   // the summary's button runs the same checks; when something is missing it
   // brings the visitor to the message above the main button
