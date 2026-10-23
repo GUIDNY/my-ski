@@ -605,7 +605,6 @@ function ApartmentPage() {
     const p = new URLSearchParams(params.toString());
     p.set("checkin", ci); p.set("checkout", co); p.set("guests", String(g));
     setEditDates(false);
-    console.log("DBG applyDates", p.toString());
     router.replace(`/apartments/${id}?${p.toString()}`, { scroll: false });
   };
   const toSummary = (openDates = false) => {
