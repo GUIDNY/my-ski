@@ -1,0 +1,41 @@
+# SEO and AI-search agent: playbook and log
+
+The daily SEO/GEO run reads this first and appends to the log at the end.
+Goal: skisharebook.com first in Google, Google AI Overviews, ChatGPT, Gemini
+and Perplexity for Val Thorens ski holiday searches in Hebrew (main), English
+and French. Main competitor: houski.co.il (also Global Ski, SkiDeal).
+
+## Rules (do not break)
+- Facts only from the site itself, official sources (valthorens.com, 3vallees.com,
+  airlines, airports) or what Idan said. Never invent prices, dates, reviews,
+  testimonials, awards or numbers of customers. No fake reviews anywhere.
+- Never write about competitors by name in a negative way.
+- Hebrew pages (Hebrew path) never use `revalidate` / ISR. ASCII intl guide pages may use revalidate 3600.
+- French typography: U+00A0 before : ; ? ! € %, never U+202F. No em dashes in copy.
+- Reset src/lib/thumbs.json to `{}` before every commit.
+- Never put secrets in the repo or docs (Supabase service key, WhatsApp token, n8n webhook path, phone numbers, guest data).
+- Never log in with passwords, create accounts, accept terms, or change DNS. Those go to Idan's basket.
+- Do not touch: booking, payment (PayPlus), pricing workflow, the WhatsApp/Telegram bots.
+- Small, safe changes. Each change must build. One topic per commit.
+
+## Deploy
+1. Work on branch `site-redesign`. Commit as `idan guindy <idanguindy@gmail.com>`.
+2. Push. Check the preview deployment on Vercel (team team_u47XiOrlKWEV0QngyrJCKBWx,
+   project prj_sBdvefyrZfCF4c9NwToASlcKWm0q) is READY.
+3. Production: fast-forward `main` to `site-redesign` and push `main`.
+4. After it is live: `python3 -I scripts/seo/indexnow.py <changed urls>` and `bash scripts/seo/sweep.sh` (all 200).
+
+## Daily menu (pick what moves the needle most, 1 to 3 items)
+- Search Console (sc-domain:skisharebook.com, via Idan's Chrome if connected):
+  pages not indexed, queries at positions 4 to 20 (improve those pages' title,
+  H1, intro, FAQ), request indexing for new or changed pages (daily quota).
+- New guide pages for real Hebrew queries we don't cover yet (check the
+  Hebrew guides in src/lib/guides.ts and EN/FR in src/lib/intl/guides/), with
+  FAQ JSON-LD that matches the visible text, internal links, hreflang twins when relevant.
+- GEO: pages that state clearly who SkiShare is ("חברה ישראלית להשכרת דירות בואל טורנס"),
+  /about, llms.txt, Organization JSON-LD, short direct answers at the top of guides.
+- Check AI answers: web search the main queries and note whether SkiShare appears.
+- Technical: Core Web Vitals, broken links, canonical/hreflang, sitemap.
+
+## Log (newest last, max 8 lines per day)
+- 2026-10-24: /about page live (Israeli company renting apartments in Val Thorens), home description and Organization JSON-LD updated, IndexNow 212 URLs. www.skisharebook.com has no DNS record at IONOS (Vercel side is ready): waiting on Idan.
