@@ -76,7 +76,9 @@ function ApartmentCard({ apt, checkin, checkout, guests, rules }: {
     return min === Infinity ? apt.price_per_night : min;
   })();
 
-  const query = new URLSearchParams({ checkin, checkout, guests: String(guests) }).toString();
+  const q = new URLSearchParams({ guests: String(guests) });
+  if (checkin && checkout) { q.set("checkin", checkin); q.set("checkout", checkout); }
+  const query = q.toString();
 
   return (
     <Link href={`/apartments/${apt.id}?${query}`}
@@ -196,7 +198,7 @@ function ApartmentsPage() {
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [loading,    setLoading]    = useState(true);
   const [filter,     setFilter]     = useState<Filter>("all");
-  const [showCal,    setShowCal]    = useState(!checkin || !checkout); // no dates yet: ask for them first
+  const [showCal,    setShowCal]    = useState(false); // opens from the dates chip; the list shows without dates too
   const [rulesMap,   setRulesMap]   = useState<Record<string, PricingRule[]>>({});
   const [blockedFor, setBlockedFor] = useState<{ key: string; ids: string[] }>({ key: "", ids: [] });
 
