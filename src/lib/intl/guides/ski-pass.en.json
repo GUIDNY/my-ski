@@ -1,73 +1,214 @@
 {
   "key": "ski-pass",
   "lang": "en",
-  "title": "PLACEHOLDER ski-pass en",
-  "metaTitle": "PLACEHOLDER ski-pass | SkiShare",
-  "description": "placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder ",
+  "title": "Val Thorens ski pass prices 2026/27: official rates and which to buy",
+  "metaTitle": "Val Thorens ski pass prices 2026/27: official rates | SkiShare",
+  "description": "Official 2026/27 Val Thorens lift pass prices: €367.50 for 6 days, €421 for the 3 Vallées, day passes, child rates, Family Flex and the cheaper early-season dates.",
   "keywords": [
-    "a",
-    "b",
-    "c"
+    "val thorens ski pass price",
+    "val thorens lift pass 2026/27",
+    "3 vallees lift pass price",
+    "how much is a ski pass in val thorens",
+    "val thorens 6 day lift pass",
+    "family flex 3 vallees",
+    "val thorens beginner lift pass"
   ],
   "emoji": "🎫",
   "published": "2026-10-23",
   "updated": "2026-10-23",
-  "intro": "Intro with [a link](/en/apartments) and **bold**.",
+  "intro": "An adult 6-day lift pass costs **€367.50 for Val Thorens-Orelle** and **€421 for the whole of Les 3 Vallées** from 19 December 2026, according to the official 2026/27 price list of SETAM, the Val Thorens lift company. Until 18 December the same passes cost €330.50 and €378.50, and the 3 Vallées pass drops back to €378.50 from 10 to 18 April 2027. A main-season day pass costs €73.50 for Val Thorens-Orelle or €84.20 for the 3 Vallées, and children under 5 ski free.",
   "sections": [
     {
-      "heading": "Section one",
+      "heading": "When is the Val Thorens lift pass cheaper in 2026/27?",
       "paragraphs": [
-        "Para 5–18 December."
-      ],
-      "list": [
-        "x",
-        "y"
+        "The pass is cheaper from 21 November to 18 December 2026 for Val Thorens-Orelle, and from 5 to 18 December and 10 to 18 April 2027 for the 3 Vallées. Val Thorens-Orelle has no late-season rate."
       ],
       "table": {
-        "caption": "Cap",
-        "head": [
-          "A",
-          "B"
-        ],
+        "caption": "2026/27 rate periods and open areas (SETAM, Les 3 Vallées)",
+        "head": ["Dates", "Open from Val Thorens", "Val Thorens-Orelle pass", "3 Vallées pass"],
         "rows": [
-          [
-            "1",
-            "2"
-          ]
+          ["21 November – 4 December 2026", "Val Thorens and Orelle", "Early rate", "Not open yet"],
+          ["5–18 December 2026", "All of Les 3 Vallées (Saint-Martin-de-Belleville from 12 December)", "Early rate", "Early rate"],
+          ["19 December 2026 – 9 April 2027", "All of Les 3 Vallées", "Main rate", "Main rate"],
+          ["10–18 April 2027", "All of Les 3 Vallées", "Main rate", "Early rate again"],
+          ["19 April – 2 May 2027", "Val Thorens and Orelle", "Main rate", "Closed"]
         ]
-      }
+      },
+      "after": [
+        "Christmas, New Year, February half-term and Easter (Good Friday 26 March to Easter Monday 29 March 2027, according to [gov.uk](https://www.gov.uk/bank-holidays)) all fall in the main period, at the same price as mid-January. Snow and crowds week by week: [when to ski in Val Thorens](/en/guide/best-time-to-ski-in-val-thorens)."
+      ]
     },
     {
-      "heading": "Live",
+      "heading": "How much is a day pass in Val Thorens?",
+      "paragraphs": [
+        "An adult day pass costs €73.50 for Val Thorens-Orelle and €84.20 for the 3 Vallées from 19 December 2026, and €66.10 and €75.70 at the early rate:"
+      ],
+      "table": {
+        "caption": "Official 2026/27 prices per person (SETAM)",
+        "head": ["Pass", "Dates", "Adult 18–74", "Junior 5–17", "Veteran 75+"],
+        "rows": [
+          ["Val Thorens-Orelle, 1 day", "21 November – 18 December", "€66.10", "€54.20", "€16.50"],
+          ["Val Thorens-Orelle, 1 day", "19 December – 2 May", "€73.50", "€60.20", "€18.30"],
+          ["3 Vallées, 1 day", "5–18 December and 10–18 April", "€75.70", "€62", "€18.90"],
+          ["3 Vallées, 1 day", "19 December – 9 April", "€84.20", "€69", "€21"],
+          ["Val Thorens-Orelle, 4 hours", "19 December – 2 May", "€65.50", "€53.70", "€16.30"],
+          ["3 Vallées, 4 hours", "19 December – 9 April", "€75.10", "€61.50", "€18.70"]
+        ]
+      },
+      "after": [
+        "Passes of 2 to 4 days cost the day price times the number of days, so there is no saving below six days.",
+        "**Saturday, online only:** the adult day pass costs €66.10 instead of €73.50 at Val Thorens-Orelle and €67.30 instead of €84.20 for the 3 Vallées (prices from 19 December 2026) if bought by 11.59pm on Friday, which makes the whole 3 Vallées just €1.20 dearer than Val Thorens-Orelle on a Saturday."
+      ]
+    },
+    {
+      "heading": "How much is a 6-day ski pass in Val Thorens?",
+      "paragraphs": [
+        "An adult 6-day pass costs €367.50 for Val Thorens-Orelle and €421 for the 3 Vallées from 19 December 2026, because every 6-day pass is sold at the price of five days:"
+      ],
+      "table": {
+        "caption": "Official 2026/27 week prices per person (SETAM)",
+        "head": ["Pass", "Dates", "Adult 18–74", "Junior 5–17", "Veteran 75+"],
+        "rows": [
+          ["Val Thorens-Orelle, 6 days", "21 November – 18 December", "€330.50", "€271", "€82.50"],
+          ["Val Thorens-Orelle, 6 days", "19 December – 2 May", "€367.50", "€301", "€91.50"],
+          ["3 Vallées, 6 days", "5–18 December and 10–18 April", "€378.50", "€310", "€94.50"],
+          ["3 Vallées, 6 days", "19 December – 9 April", "€421", "€345", "€105"]
+        ]
+      },
+      "after": [
+        "The list has no 5-day pass, only ‘5 days + 1 free’: if you plan five days, the sixth is free. Days run consecutively, rest days included. Beyond six days, each extra main-season day adds €54 to an adult pass at Val Thorens-Orelle (€421.50 for 7 days) and €65 for the 3 Vallées (€486), up to 15 days."
+      ]
+    },
+    {
+      "heading": "Val Thorens-Orelle or 3 Vallées: which pass should you buy?",
+      "paragraphs": [
+        "Take the Val Thorens-Orelle pass to ski around Val Thorens all week, and the 3 Vallées pass for even one day in Les Menuires, Méribel or Courchevel. In the main season the difference is €53.50 for an adult week."
+      ],
+      "list": [
+        "**Val Thorens-Orelle:** 150 km of pistes around Val Thorens and Orelle.",
+        "**Les 3 Vallées:** about 600 km, adding Les Menuires, Saint-Martin-de-Belleville, Méribel and Courchevel.",
+        "**One day elsewhere:** SETAM sells a one-day 3 Vallées extension for Val Thorens-Orelle passes of 2 days or more, at its ticket offices only, listed at €51 for an adult. A main-season week plus one extension (€367.50 + €51 = €418.50) is just €2.50 cheaper than the 3 Vallées pass.",
+        "**Early December:** the gap falls to €48 (€330.50 against €378.50), and a week plus one extension (€381.50) costs more than the 3 Vallées pass.",
+        "**Week of 10 April:** the 3 Vallées pass costs €378.50 and Val Thorens-Orelle €367.50, only €11 apart."
+      ],
+      "after": [
+        "Which part of the village suits you: [where to stay in Val Thorens](/en/guide/where-to-stay-in-val-thorens)."
+      ]
+    },
+    {
+      "heading": "Children, seniors and Family Flex: who pays less?",
+      "paragraphs": [
+        "Children under 5 ski free, juniors aged 5 to 17 pay about 18% less than adults and veterans aged 75 and over about a quarter of the adult price. Day and week passes have no age reduction from 18 to 74, and the list has no student rate."
+      ],
+      "list": [
+        "**Under 5:** free, collected at a SETAM ticket office with an official proof of age, such as a passport, and a recent photo (SETAM can take one by webcam).",
+        "**Junior, 5 to 17:** on proof of date of birth. The age that counts is the age on the pass’s first day.",
+        "**Veteran, 75 and over:** ticket offices only, with ID and a photo.",
+        "**Family Flex:** the whole group pays the junior rate on passes of 6 days or more: at least 3 people, at most 2 adults (18 to 74) and up to 6 children (5 to 17), the same area and length for all, one payment. A main-season week then costs €301 each for Val Thorens-Orelle and €345 for the 3 Vallées (€271 and €310 at the early rates). Les 3 Vallées’ own page offers it from 5 days, at the same €345.",
+        "**Under 30:** the ‘-30 ans’ rate (30% off) is for season passes only.",
+        "**Disability:** a reduced rate on valid proof. Visitors from abroad need an official document from their country of residence, in French or officially translated."
+      ]
+    },
+    {
+      "heading": "Example: lift passes for a family of four",
+      "paragraphs": [
+        "Two adults and two children aged 8 and 12, skiing Sunday to Friday in the main season, pay €1,380 for 3 Vallées passes with Family Flex instead of €1,532, a saving of €152:"
+      ],
+      "table": {
+        "caption": "Six-day passes for 2 adults and 2 children aged 5 to 17 (SETAM 2026/27 prices)",
+        "head": ["Pass and period", "Standard rates", "With Family Flex", "Saving"],
+        "rows": [
+          ["3 Vallées, 19 December – 9 April", "2 × €421 + 2 × €345 = €1,532", "4 × €345 = €1,380", "€152"],
+          ["Val Thorens-Orelle, 19 December – 2 May", "2 × €367.50 + 2 × €301 = €1,337", "4 × €301 = €1,204", "€133"]
+        ]
+      },
+      "after": [
+        "As the children pay the junior rate either way, the saving is twice the gap between the adult and junior prices. A child under 5 keeps the free pass. The rest of the budget: [Val Thorens apartment prices](/en/guide/val-thorens-apartment-prices)."
+      ]
+    },
+    {
+      "heading": "Where can you buy a Val Thorens lift pass?",
+      "paragraphs": [
+        "SETAM, the Val Thorens lift company, sells passes online at [ski.valthorens.com](https://ski.valthorens.com/en/home/) and at its ticket offices and machines in the resort. SkiShare does not sell lift passes on this site."
+      ],
+      "list": [
+        "**Online:** free delivery by post if you order at least 10 days before your first day, collection from a resort machine with the code SETAM emails you, or reloading a card you already have (numbers starting 01-1614), the last two up to the last minute.",
+        "**Ticket offices:** Forum, Funitel Péclet and Cairn/Caron/P4 open daily, Olympiades from Saturday to Monday and Montana at weekends. On Saturdays Olympiades, Forum and Montana open from 8.45am to 7pm.",
+        "Machines for buying, collecting and reloading run from 7am to 11pm at Olympiades, Forum and Montana, and 24 hours a day at car park P2 and the bus station ([how to get to Val Thorens](/en/guide/how-to-get-to-val-thorens)).",
+        "**Ticket office only:** free under-5 passes, veteran passes, the 3 Vallées extension and the EasyRider beginner pass.",
+        "**Payment:** cards, cash and ANCV holiday vouchers at the ticket offices; card or PayPal online."
+      ],
+      "after": [
+        "Keep the order email or receipt: with it, SETAM replaces a lost or stolen pass for the remaining days for €10. Unused passes bought online can be exchanged at a ticket office for other dates or another area.",
+        "Piste rescue is charged in Val Thorens. [Carré Neige](https://ski.valthorens.com/assurance-carre-neige/) insurance, bought with the pass for the same days, covers rescue, medical costs and a refund of passes and lessons of more than 3 days after an accident or serious illness; SETAM’s page lists €3.50 per person per day (1 to 7 days), with no season stated."
+      ]
+    },
+    {
+      "heading": "Beginners: free lifts and a half-price pass",
+      "paragraphs": [
+        "Beginners can start for free on four covered carpet lifts (Campagnols, Musaraigne and the two Castor & Pollux carpets), then move to SETAM’s EasyRider pass at half the public price: €36.75 for an adult day from 19 December, €33.05 before.",
+        "EasyRider, for 4 hours or a day, covers green and blue runs and five lifts: the Cairn, 2 Lacs and Caron gondolas and the Cascades and Moutière chairlifts. A junior day costs €30.10 (€27.10 before 19 December). It is sold only at the ticket offices.",
+        "Children in ESF’s ski kindergarten (the Piou-Piou and Sifflote classes) need no pass, according to [ESF Val Thorens](https://www.esf-valthorens.com/conseils/choisir-mon-forfait/). Once they ski on the pistes, they do."
+      ]
+    },
+    {
+      "heading": "Cheaper pass weeks, and apartments for them",
+      "paragraphs": [
+        "The early rates cover the Saturday-to-Saturday weeks from the opening on 21 November to the week starting 12 December, plus the 3 Vallées week starting 10 April. In our apartments, the weeks of 28 November, 12 December and April are among the cheapest too. The table shows, live, the cheapest whole apartment still free each week, at the full week’s price:"
+      ],
       "liveWeeks": {
         "notes": {
-          "2026-12-26": "New Year"
+          "2026-11-28": "Early rate, Val Thorens-Orelle only",
+          "2026-12-05": "Early rate, 3 Vallées open from 5 Dec",
+          "2026-12-12": "Early rate, last week before 19 Dec",
+          "2027-04-10": "3 Vallées early rate again",
+          "2027-04-17": "3 Vallées closes 18 April",
+          "2027-04-24": "Last week, Val Thorens-Orelle only"
         },
+        "only": ["2026-11-28", "2026-12-05", "2026-12-12", "2027-04-10", "2027-04-17", "2027-04-24"],
         "count": true
-      }
-    },
-    {
-      "heading": "Ordered",
-      "list": [
-        "a",
-        "b"
-      ],
-      "ordered": true,
+      },
       "after": [
-        "after"
+        "Agency apartments are rented by the full week, Saturday to Saturday; SkiShare’s own apartments are priced per night for your dates. See them all on [apartments in Val Thorens](/en/apartments)."
       ]
     }
   ],
   "faqs": [
     {
-      "q": "Question?",
-      "a": "Answer."
+      "q": "How much is a ski pass in Val Thorens for 2026/27?",
+      "a": "From 19 December 2026 an adult day pass costs €73.50 for Val Thorens-Orelle and €84.20 for the 3 Vallées, and a 6-day pass €367.50 and €421, according to SETAM. Until 18 December, Val Thorens-Orelle costs €66.10 a day and €330.50 for 6 days."
+    },
+    {
+      "q": "Is the 3 Vallées lift pass worth the extra?",
+      "a": "It costs €53.50 more than Val Thorens-Orelle for a main-season adult week. If you want even one day in Méribel or Courchevel, it is only €2.50 more than a Val Thorens-Orelle week plus a one-day 3 Vallées extension."
+    },
+    {
+      "q": "Do children ski free in Val Thorens?",
+      "a": "Children under 5 do, with a free pass collected at a SETAM ticket office on proof of age. Juniors aged 5 to 17 pay a reduced rate, such as €301 for a main-season week at Val Thorens-Orelle."
+    },
+    {
+      "q": "What is the Family Flex pass?",
+      "a": "A deal in which a group of at least 3 people, with at most 2 adults and up to 6 children aged 5 to 17, all pay the junior rate on passes of 6 days or more. A main-season week then costs €301 each at Val Thorens-Orelle and €345 for the 3 Vallées."
+    },
+    {
+      "q": "Is it cheaper to buy a Val Thorens lift pass online?",
+      "a": "SETAM names two advantages: web-only offers such as the adult Saturday day pass (€67.30 instead of €84.20 for the 3 Vallées, bought by 11.59pm on Friday), and going straight to the lifts without a ticket office."
+    },
+    {
+      "q": "Can I buy my lift pass from SkiShare?",
+      "a": "No. On this site SkiShare rents apartments only. Lift passes are sold by SETAM, the Val Thorens lift company, online at ski.valthorens.com and in the resort."
     }
   ],
   "sources": [
-    {
-      "title": "Src",
-      "url": "https://www.valthorens.com/"
-    }
+    { "title": "SETAM: official winter 2026/27 lift pass price list (PDF, 6 August 2026)", "url": "https://ski.valthorens.com/wp-content/uploads/2026/08/TARIFS-HIVER-20262027-2.pdf" },
+    { "title": "SETAM: FAQ on buying online, reloading, free and veteran passes and the 3 Vallées extension", "url": "https://ski.valthorens.com/en/faq-2/" },
+    { "title": "SETAM: Saturday Val Thorens/Orelle online offer", "url": "https://ski.valthorens.com/en/saturday-val-thorens-orelle/" },
+    { "title": "SETAM: Saturday 3 Vallées online offer", "url": "https://ski.valthorens.com/en/saturday-3-vallees/" },
+    { "title": "SETAM: Family Flex, the family deal in Les 3 Vallées", "url": "https://ski.valthorens.com/en/familyflex-the-family-friendly-deal-in-les-3-vallees/" },
+    { "title": "SETAM: beginners, free carpet lifts and the EasyRider pass", "url": "https://ski.valthorens.com/en/beginners/" },
+    { "title": "Val Thorens tourist office: EasyRider beginner pass prices 2026/27", "url": "https://www.valthorens.com/en/ski/forfaits/forfait-debutant/" },
+    { "title": "SETAM: general conditions of sale of passes, winter 2026/27 (PDF)", "url": "https://ski.valthorens.com/wp-content/uploads/2026/10/CondVentes26-27-GB.pdf" },
+    { "title": "SETAM: ticket offices and pass machines, 2026/27 opening hours (PDF)", "url": "https://ski.valthorens.com/wp-content/uploads/2026/08/Plan-Caisses-RM-Horraires-2026-2027.pdf" },
+    { "title": "Les 3 Vallées: winter 2026/27 press kit, opening dates by resort (PDF, in French)", "url": "https://press.les3vallees.com/media/download/the-place-to-ski.pdf" }
   ]
 }
