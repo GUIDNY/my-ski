@@ -1,9 +1,12 @@
-"use client";
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { SeasonRental } from "@/types";
-import { wrap, card, btn, badgeLight, SectionHead, EmptyState, Skeleton } from "@/components/ui";
+import { createServerClient } from "@/lib/supabase-server";
+import { wrap, card, btn, badgeLight, SectionHead, EmptyState } from "@/components/ui";
 import { buildWaHref } from "@/lib/whatsapp";
+import { breadcrumbLd, ldJson } from "@/lib/site";
+
+// the board changes when rentals are added: read it on every visit
+export const dynamic = "force-dynamic";
 
 // Community WhatsApp group invite
 const WHATSAPP_GROUP_URL = "https://chat.whatsapp.com/HBxs0bCitS4FYxSSKlSlsF?mode=ac_t";
@@ -86,16 +89,16 @@ function ComingSoon({ icon, title, desc }: { icon: React.ReactNode; title: strin
   );
 }
 
-export default function SeasonairesPage() {
-  const [rentals, setRentals] = useState<SeasonRental[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch("/api/season-rentals")
-      .then(r => r.json())
-      .then(d => { setRentals(Array.isArray(d) ? d : []); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, []);
+/*
+ * The seasonaires' area. The rentals board is read on the server, so the
+ * page arrives with the list and a plain link to every rental (it used to
+ * load in the browser, and search engines saw an empty board).
+ */
+export default async function SeasonairesPage() {
+  const db = createServerClient();
+  const { data } = await db.from("season_rentals").select("*")
+    .eq("available", true).order("price_per_month", { ascending: true });
+  const rentals = (data ?? []) as SeasonRental[];
 
   const waContact = buildWaHref({
     intro: "היי! 👋 אני מתעניין/ת בעונת סקי שלמה (סיזיונר) ב-Val Thorens.",
@@ -104,6 +107,7 @@ export default function SeasonairesPage() {
 
   return (
     <div className="bg-white text-ink" dir="rtl">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(breadcrumbLd([["דף הבית", "/"], ["אזור הסיזיונרים", "/seasonaires"]])) }} />
 
       {/* Hero */}
       <section className="relative overflow-hidden">
@@ -145,16 +149,7 @@ export default function SeasonairesPage() {
       {/* Long-term apartments board */}
       <section id="board" className={`${wrap} pt-14 md:pt-20`}>
         <SectionHead title="דירות לטווח ארוך" sub="חודשיים ומעלה · מחיר חודשי · מתעדכן כל הזמן" />
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6" aria-busy="true" aria-label="טוען דירות">
-            {[1, 2, 3].map(i => (
-              <div key={i} className={`${card} overflow-hidden`}>
-                <Skeleton className="h-[210px] rounded-none" />
-                <div className="p-5 flex flex-col gap-3"><Skeleton className="h-6 w-40" /><Skeleton className="h-4 w-52" /><Skeleton className="h-8 w-28 mt-3" /></div>
-              </div>
-            ))}
-          </div>
-        ) : rentals.length === 0 ? (
+        {rentals.length === 0 ? (
           <EmptyState
             title="אין כרגע דירות זמינות"
             text="דברו איתנו ונמצא לכם משהו."
