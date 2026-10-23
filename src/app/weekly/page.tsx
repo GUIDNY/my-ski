@@ -1,5 +1,4 @@
 import { createServerClient } from "@/lib/supabase-server";
-import { TRANSFER_PRICE, FLIGHT_ESTIMATE, skiPassPerPersonForWeek } from "@/lib/deal-pricing";
 import type { Apartment, SkiPass } from "@/types";
 import WeeklyBrowser from "@/components/WeeklyBrowser";
 import { wrap, PageTop } from "@/components/ui";
@@ -22,13 +21,12 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
     .order("price_per_night", { ascending: true });
   const apartments: Apartment[] = data ?? [];
 
-  // Real Trois Vallées ski-pass tier for a full La Cime week, so the
-  // "דיל שלם" toggle folds an actual price (not a guess) into the totals
-  // shown in WeeklyBrowser — same source used on the homepage packages.
+  // The real adult ski-pass tiers (both areas), so "דיל שלם" folds actual
+  // prices into the week prices: the pass that fits each week's dates.
   const { data: passOptions } = await db.from("ski_passes").select("*")
-    .eq("available", true).eq("type", "adult").eq("area", "trois_vallees")
+    .eq("available", true).eq("type", "adult")
     .order("duration_days", { ascending: true });
-  const skiPassPerPerson = skiPassPerPersonForWeek(passOptions as SkiPass[] | null);
+  const passes = (passOptions ?? []) as SkiPass[];
 
   return (
     <div className="flex-1 bg-white" dir="rtl">
@@ -43,9 +41,7 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
         <WeeklyBrowser
           apartments={apartments}
           initialDeal={initialDeal}
-          skiPassPerPerson={skiPassPerPerson}
-          transferPrice={TRANSFER_PRICE}
-          flightEstimate={FLIGHT_ESTIMATE}
+          passes={passes}
         />
       </div>
     </div>

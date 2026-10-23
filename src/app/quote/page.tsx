@@ -3,6 +3,7 @@ import SkiLoader from "@/components/SkiLoader";
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import QuoteView, { type QuoteData } from "@/components/QuoteView";
+import { decodeExtras } from "@/lib/quote-extras";
 
 function QuotePage() {
   const params = useSearchParams();
@@ -15,6 +16,8 @@ function QuotePage() {
     nights:      parseInt(params.get("nights") ?? "1"),
     skiPass:     params.get("ski_pass") === "true",
     transfer:    params.get("transfer") === "true",
+    equipment:   params.get("equipment") === "true",
+    extras:      decodeExtras(params.get("x")),
     cancel:      params.get("cancel") ?? "none",
     service:     params.get("service") ?? "human",
     aptTotal:    parseInt(params.get("apt_total") ?? "0"),

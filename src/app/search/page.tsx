@@ -4,12 +4,14 @@ import { Suspense, useEffect, useState, useRef } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import type { Apartment } from "@/types";
+import type { Apartment, SkiPass } from "@/types";
 import SkiCalendar from "@/components/SkiCalendar";
 import OpenChatButton from "@/components/OpenChatButton";
 import { wrap, card, btn, badgeLight, badgeDark, Check, EmptyState, Skeleton } from "@/components/ui";
 import { getEffectivePrice, calcTotalForRange, matchingWeek } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
+import { packageExtras, PASS_AREA_LABEL } from "@/lib/deal-pricing";
+import { useDirectFlight, type DirectFlightState } from "@/lib/useFlightPrice";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const WEEKDAYS = ["יום א׳","יום ב׳","יום ג׳","יום ד׳","יום ה׳","יום ו׳","שבת"];
@@ -45,8 +47,22 @@ type Kind = "all" | "own" | "agency";
 type Sort = "recommended" | "price";
 type RulesMap = Record<string, PricingRule[]>;
 
-// what the full deal adds on the apartment page (?deal=full pre-selects these)
-const FULL_DEAL = ["סקי פס לשלושת העמקים", "הסעה הלוך וחזור מהשדה", "טיסה וכבודה"];
+type Extras = ReturnType<typeof packageExtras>;
+
+/* What a full deal adds per person on top of the apartment, as a list: the
+   pass that fits the dates and the transfer (real prices, in the price), and
+   a direct flight only when one really exists (live price, not in the price). */
+function dealItems(extras: Extras | null, flight: DirectFlightState): { text: string; muted?: boolean; plane?: boolean }[] {
+  const items: { text: string; muted?: boolean; plane?: boolean }[] = [];
+  if (extras?.area && extras.tier) items.push({ text: `סקי פס ${PASS_AREA_LABEL[extras.area]}, ${extras.tier.duration_days} ימים` });
+  else if (!extras) items.push({ text: "סקי פס לפי התאריכים" });
+  items.push({ text: "הסעה הלוך וחזור מהשדה" });
+  if (flight.status === "found" && flight.flight)
+    items.push({ text: `טיסה ישירה הלוך וחזור ל${flight.flight.city}: עוד ${eur(flight.flight.price)} לאדם, מוסיפים בעמוד הדירה`, plane: true });
+  else if (flight.status === "loading") items.push({ text: "בודקים טיסה ישירה…", muted: true, plane: true });
+  return items;
+}
+const IcoPlane = () => ico(<path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z" />, 15);
 
 /* ── Icons (stroke, follow the text color) ─────────────────── */
 const ico = (path: ReactNode, size = 18) => (
@@ -87,9 +103,11 @@ function DealToggle({ value, onChange }: { value: "full" | ""; onChange: (v: "fu
 }
 
 /* ── Result card ──────────────────────────────────────────── */
-function AptCard({ apt, nights, checkin, checkout, guests, deal, rules, badge }: {
+function AptCard({ apt, nights, checkin, checkout, guests, deal, rules, badge, extras, flight }: {
   apt: Apartment; nights: number; checkin: string; checkout: string; guests: number; deal?: string;
   rules: PricingRule[]; badge?: string;
+  /** full deal: what it adds per person for these dates (null before the dates or the pass prices are known) */
+  extras: Extras | null; flight: DirectFlightState;
 }) {
   const week = matchingWeek(apt, checkin, checkout);
   const total = week
@@ -110,7 +128,11 @@ function AptCard({ apt, nights, checkin, checkout, guests, deal, rules, badge }:
   const query = new URLSearchParams({ checkin, checkout, guests: String(guests), ...(deal ? { deal } : {}) }).toString();
   const hasDates = !!(checkin && checkout && nights > 0);
   const full = deal === "full";
-  const included = full ? FULL_DEAL : (apt.amenities ?? []).slice(0, 3);
+  const included = full ? dealItems(hasDates ? extras : null, flight) : (apt.amenities ?? []).slice(0, 3).map(text => ({ text } as { text: string; muted?: boolean; plane?: boolean }));
+  // the package for one person: their share of the apartment + the pass + the transfer
+  const dealReady = full && (hasDates || !!week) && !!extras;
+  const pkgPerPerson = dealReady ? Math.round(total / guests + extras!.perPerson) : 0;
+  const pkgTotal = dealReady ? Math.round(total + extras!.perPerson * guests) : 0;
 
   return (
     <Link href={`/apartments/${apt.id}?${query}`}
@@ -138,21 +160,35 @@ function AptCard({ apt, nights, checkin, checkout, guests, deal, rules, badge }:
           )}
           {included.length > 0 && (
             <ul className="mt-1 flex flex-col gap-1.5 text-[15px] text-ink">
-              {included.map(f => <li key={f} className="flex items-center gap-2"><Check />{f}</li>)}
+              {full && <li className="flex items-center gap-2"><Check />{week ? "דירה לשבוע, שבת עד שבת" : hasDates ? `דירה ל-${nights} לילות` : "דירה"}</li>}
+              {included.map(f => (
+                <li key={f.text} className={`flex items-start gap-2 ${f.muted ? "text-muted" : f.plane ? "text-body" : ""}`}>
+                  {f.plane ? <span className="mt-0.5 shrink-0 text-accent"><IcoPlane /></span> : <span className="mt-0.5 shrink-0"><Check /></span>}
+                  <span>{f.text}</span>
+                </li>
+              ))}
             </ul>
           )}
         </div>
 
         <div className="md:w-[210px] shrink-0 flex flex-col gap-3 border-t md:border-t-0 border-line pt-4 md:pt-0 md:items-end md:text-left md:justify-between">
           <div className="flex flex-col gap-0.5 md:items-end">
-            {full && (hasDates || week) && <span className="text-[13px] font-bold text-muted">מחיר הדירה</span>}
-            {week ? (
+            {dealReady ? (
+              <>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="font-display font-extrabold text-[28px] md:text-[30px] leading-none text-ink">{eur(pkgPerPerson)}</span>
+                  <span className="text-[15px] text-muted">לאדם</span>
+                </div>
+                <span className="text-[14px] text-muted">{eur(pkgTotal)} לכל החבורה, {guests} {guests === 1 ? "אדם" : "אנשים"}</span>
+                <span className="text-[13px] text-muted">דירה, סקי פס והסעה</span>
+              </>
+            ) : week ? (
               <>
                 <div className="flex items-baseline gap-1.5">
                   <span className="font-display font-extrabold text-[28px] md:text-[30px] leading-none text-ink">{eur(week.price)}</span>
                   <span className="text-[15px] text-muted">לשבוע</span>
                 </div>
-                {guests > 1 && <span className="text-[14px] text-muted">≈ {eur(Math.round(week.price / guests))} לאדם{full ? " על הדירה" : ""}</span>}
+                {guests > 1 && <span className="text-[14px] text-muted">{eur(Math.round(week.price / guests))} לאדם, {guests} אנשים</span>}
               </>
             ) : hasDates ? (
               <>
@@ -161,7 +197,7 @@ function AptCard({ apt, nights, checkin, checkout, guests, deal, rules, badge }:
                   <span className="text-[15px] text-muted">ל-{nights} לילות</span>
                 </div>
                 <span className="text-[14px] text-muted">
-                  {guests > 1 ? <>≈ {eur(Math.round(total / guests))} לאדם{full ? " על הדירה" : ""} · </> : null}מ-{eur(minNightly)} ללילה
+                  {guests > 1 ? <>{eur(Math.round(total / guests))} לאדם · </> : null}מ-{eur(minNightly)} ללילה
                 </span>
               </>
             ) : (
@@ -170,7 +206,7 @@ function AptCard({ apt, nights, checkin, checkout, guests, deal, rules, badge }:
                   <span className="font-display font-extrabold text-[28px] md:text-[30px] leading-none text-ink">{eur(minNightly)}</span>
                   <span className="text-[15px] text-muted">ללילה</span>
                 </div>
-                <span className="text-[14px] text-muted">בחרו תאריכים למחיר מדויק</span>
+                <span className="text-[14px] text-muted">{full ? "בחרו תאריכים למחיר החבילה לאדם" : "בחרו תאריכים למחיר מדויק"}</span>
               </>
             )}
           </div>
@@ -260,6 +296,7 @@ function SearchPage() {
   const [gDraft,     setGDraft]     = useState(guests);
   const [dealDraft,  setDealDraft]  = useState<"full" | "">(deal === "full" ? "full" : "");
   const [blockedFor, setBlockedFor] = useState<{ key: string; ids: string[] }>({ key: "", ids: [] });
+  const [passes,     setPasses]     = useState<SkiPass[] | null>(null);
   const barRef       = useRef<HTMLDivElement>(null);
 
   const nights = checkin && checkout
@@ -285,6 +322,15 @@ function SearchPage() {
       });
     });
   }, []);
+
+  /* Full deal: the real ski-pass prices, and a direct flight only if there is one */
+  const full = deal === "full";
+  useEffect(() => {
+    if (!full) return;
+    fetch("/api/ski-passes").then(r => r.json()).then(d => setPasses(Array.isArray(d) ? d : [])).catch(() => setPasses([]));
+  }, [full]);
+  const extras = full && passes && checkin && checkout && nights > 0 ? packageExtras(passes, checkin, checkout, nights) : null;
+  const flight = useDirectFlight(full ? checkin : "", full ? checkout : "");
 
   /* Which apartments are booked/unavailable for the selected dates */
   const rangeKey = checkin && checkout ? `${checkin}|${checkout}` : "";
@@ -482,12 +528,19 @@ function SearchPage() {
             ))}
           </fieldset>
           </>}
-          {deal === "full" && (
+          {full && (
             <div className="flex flex-col gap-2">
-              <span className="font-bold text-[15px] text-ink">בדיל השלם</span>
+              <span className="font-bold text-[15px] text-ink">בדיל השלם, לכל אחד</span>
               <ul className="flex flex-col gap-1.5 text-[14px] text-body">
-                {FULL_DEAL.map(f => <li key={f} className="flex items-center gap-2"><Check size={15} />{f}</li>)}
+                <li className="flex items-center gap-2"><Check size={15} />דירה</li>
+                {dealItems(extras, flight).map(f => (
+                  <li key={f.text} className={`flex items-start gap-2 ${f.muted ? "text-muted" : ""}`}>
+                    {f.plane ? <span className="mt-0.5 shrink-0 text-accent"><IcoPlane /></span> : <span className="mt-0.5 shrink-0"><Check size={15} /></span>}
+                    <span>{f.text}</span>
+                  </li>
+                ))}
               </ul>
+              {hasDates && flight.status === "none" && <p className="text-[13px] text-muted leading-relaxed">אין טיסה ישירה הלוך וחזור בתאריכים האלה, אז אין טיסה בחבילה.</p>}
             </div>
           )}
           <HelpBox />
@@ -504,7 +557,8 @@ function SearchPage() {
                 : <>
                     {shown.length === 1 ? "אפשרות אחת פנויה" : `${shown.length} אפשרויות פנויות`}{hasDates ? " לתאריכים האלה" : ""}.
                     {minPrice !== null && <> החל מ-{eur(minPrice)} ללילה בדירות שלנו.</>}
-                    {deal === "full" && " בדיל שלם מוסיפים בעמוד הדירה סקי פס, הסעה וטיסה."}
+                    {full && " המחיר לאדם כולל דירה, סקי פס והסעה."}
+                    {full && hasDates && flight.status === "none" && " אין טיסה ישירה בתאריכים האלה."}
                   </>}
             </p>
           </div>
@@ -566,7 +620,8 @@ function SearchPage() {
               {shown.map(apt => (
                 <AptCard key={apt.id} apt={apt} nights={nights}
                   checkin={checkin} checkout={checkout} guests={guests} deal={deal}
-                  rules={rulesMap[apt.id] ?? []} badge={apt.id === cheapestId ? "הכי זול" : undefined} />
+                  rules={rulesMap[apt.id] ?? []} badge={apt.id === cheapestId ? "הכי זול" : undefined}
+                  extras={extras} flight={flight} />
               ))}
             </div>
           )}

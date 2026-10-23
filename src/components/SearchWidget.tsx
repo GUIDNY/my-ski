@@ -204,7 +204,7 @@ export default function SearchWidget() {
         </button>
       </form>
       {dealMode === "full" && (
-        <p className="text-center text-white/90 text-sm font-medium mt-3">דיל שלם: הדירה, הסעה מהשדה, סקי פס לשלושת העמקים, טיסה וכבודה</p>
+        <p className="text-center text-white/90 text-sm font-medium mt-3">דיל שלם: הדירה, סקי פס והסעה מהשדה, ומחיר לאדם. טיסה ישירה מוסיפים כשיש.</p>
       )}
 
       {/* ══ Calendar dropdown ══════════════════════════════════ */}

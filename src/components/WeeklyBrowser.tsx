@@ -2,8 +2,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
-import type { Apartment } from "@/types";
-import { hasDirectFlight } from "@/lib/direct-flight-days";
+import type { Apartment, SkiPass } from "@/types";
+import { hasDirectFlightBothWays } from "@/lib/direct-flight-days";
+import { weekPackageExtras, PASS_AREA_LABEL } from "@/lib/deal-pricing";
+import { useDirectFlight } from "@/lib/useFlightPrice";
 import { card, btn, badgeLight, badgeDark, Check, EmptyState } from "@/components/ui";
 
 const MONTHS_FULL = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
@@ -15,18 +17,20 @@ function fmtDate(d: Date) {
 /** "12–19 בדצמבר" / "27 בפברואר – 6 במרץ" */
 function fmtRange(a: Date, b: Date) {
   return a.getMonth() === b.getMonth()
-    ? `${a.getDate()}–${b.getDate()} ב${MONTHS_FULL[b.getMonth()]}`
+    ? `${a.getDate()}⁠–⁠${b.getDate()} ב${MONTHS_FULL[b.getMonth()]}`
     : `${a.getDate()} ב${MONTHS_FULL[a.getMonth()]} – ${b.getDate()} ב${MONTHS_FULL[b.getMonth()]}`;
 }
+
+const isoOf = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
 function weekRange(iso: string) {
   const checkin = new Date(iso + "T12:00:00");
   const checkout = new Date(checkin);
   checkout.setDate(checkout.getDate() + 7);
-  return { checkin, checkout };
+  return { checkin, checkout, checkoutIso: isoOf(checkout) };
 }
 
-const eur = (n: number) => `€${n.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
+const eur = (n: number) => `€${Math.round(n).toLocaleString("en-US")}`;
 
 const ico = (path: ReactNode, size = 18) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{path}</svg>
@@ -37,34 +41,27 @@ const IcoPlane = ({ size = 14 }: { size?: number }) => ico(<path d="M21 16v-2l-8
 const IcoChevron = () => ico(<path d="M6 9l6 6 6-6" />, 18);
 const IcoArrow = () => ico(<path d="M19 12H5M11 6l-6 6 6 6" />, 18);
 
+/*
+ * La Cime weeks (Saturday to Saturday). Every price is per person for the
+ * group size chosen: the apartment alone, or with "דיל שלם" the apartment +
+ * the ski pass that fits the week + the transfer, all real prices. A flight
+ * is never folded in with a guess: weeks with a direct flight both ways get
+ * a plane, and for the chosen week the live direct price shows on its own line.
+ */
 export default function WeeklyBrowser({
   apartments,
   initialDeal = "apartment",
-  skiPassPerPerson = 0,
-  transferPrice = 0,
-  flightEstimate = 0,
+  passes = [],
 }: {
   apartments: Apartment[];
   initialDeal?: "apartment" | "full";
-  skiPassPerPerson?: number;
-  transferPrice?: number;
-  flightEstimate?: number;
+  passes?: SkiPass[];
 }) {
-  const weekMinPrice = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const apt of apartments) {
-      for (const w of apt.available_weeks ?? []) {
-        const cur = map.get(w.week);
-        if (cur === undefined || w.price < cur) map.set(w.week, w.price);
-      }
-    }
-    return map;
+  const allWeeks = useMemo(() => {
+    const set = new Set<string>();
+    for (const apt of apartments) for (const w of apt.available_weeks ?? []) set.add(w.week);
+    return [...set].sort();
   }, [apartments]);
-
-  const allWeeks = useMemo(
-    () => [...weekMinPrice.keys()].sort(),
-    [weekMinPrice]
-  );
 
   const [selected, setSelected] = useState<string | null>(allWeeks[0] ?? null);
   const [guests, setGuests] = useState(2);
@@ -80,6 +77,19 @@ export default function WeeklyBrowser({
     return () => document.removeEventListener("mousedown", h);
   }, []);
 
+  // the cheapest apartment of each week that fits the group
+  const weekMinPrice = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const apt of apartments) {
+      if ((apt.max_guests ?? 0) < guests) continue;
+      for (const w of apt.available_weeks ?? []) {
+        const cur = map.get(w.week);
+        if (cur === undefined || w.price < cur) map.set(w.week, w.price);
+      }
+    }
+    return map;
+  }, [apartments, guests]);
+
   const visible = useMemo(() => {
     if (!selected) return [];
     return apartments
@@ -92,23 +102,20 @@ export default function WeeklyBrowser({
       .sort((a, b) => a.price - b.price);
   }, [apartments, selected, guests]);
 
-  // Every La Cime week checks in on a Saturday, and a real nonstop flight
-  // only exists on Saturdays within the verified charter window (see
-  // direct-flight-days.ts) — so the flight estimate only gets folded in,
-  // and only ever called "direct", for weeks where that's actually true.
-  const weekHasDirectFlight = (weekIso: string) => hasDirectFlight(weekRange(weekIso).checkin);
+  const full = dealMode === "full";
+  const range = selected ? weekRange(selected) : null;
+  const extras = (weekIso: string) => weekPackageExtras(passes, weekIso);
+  /** what one person pays for the week, for the apartment's price */
+  const perPerson = (aptPrice: number, weekIso: string) =>
+    Math.round(aptPrice / guests + (full ? extras(weekIso).perPerson : 0));
+  const groupTotal = (aptPrice: number, weekIso: string) =>
+    Math.round(aptPrice + (full ? extras(weekIso).perPerson * guests : 0));
 
-  // When "דיל שלם" is on, fold the real ski-pass tier + flat transfer fee +
-  // (week-dependent) flight estimate into every price shown, scaled by the
-  // current guest count — so the headline number always matches what's
-  // selected, never just the bare apartment rate.
-  const displayPrice = (base: number, weekIso: string) => {
-    if (dealMode !== "full") return base;
-    const extra = skiPassPerPerson + transferPrice + (weekHasDirectFlight(weekIso) ? flightEstimate : 0);
-    return base + extra * guests;
-  };
-
-  const selectedHasFlight = selected ? weekHasDirectFlight(selected) : false;
+  // the live direct flight, only for the chosen week of a package
+  const live = useDirectFlight(full && range ? selected! : "", full && range ? range.checkoutIso : "");
+  /** a plane on weeks with a direct flight both ways (the checked schedule), unless the live check said there is none */
+  const weekHasDirect = (w: string) =>
+    hasDirectFlightBothWays(w, weekRange(w).checkoutIso) && !(w === selected && live.status === "none");
 
   if (!allWeeks.length) {
     return (
@@ -116,10 +123,9 @@ export default function WeeklyBrowser({
     );
   }
 
-  const range = selected ? weekRange(selected) : null;
   const rawFrom = selected ? weekMinPrice.get(selected) : undefined;
-  const fromPrice = rawFrom !== undefined && selected ? displayPrice(rawFrom, selected) : undefined;
-  const full = dealMode === "full";
+  const fromPrice = rawFrom !== undefined && selected ? perPerson(rawFrom, selected) : undefined;
+  const selExtras = selected ? extras(selected) : null;
   const stepBtn = "w-10 h-10 rounded-full border border-line-strong flex items-center justify-center text-ink text-[18px] leading-none hover:border-ink transition-colors disabled:opacity-40";
 
   return (
@@ -140,7 +146,7 @@ export default function WeeklyBrowser({
                 </span>
               </span>
               <span className="flex items-center gap-2 shrink-0 text-muted">
-                {fromPrice !== undefined && <span className="hidden sm:inline text-[14px]">מ-<b className="text-ink">{eur(fromPrice)}</b></span>}
+                {fromPrice !== undefined && <span className="hidden sm:inline text-[14px]">מ-<b className="text-ink">{eur(fromPrice)}</b> לאדם</span>}
                 <IcoChevron />
               </span>
             </button>
@@ -152,7 +158,6 @@ export default function WeeklyBrowser({
                 {allWeeks.map(w => {
                   const isSelected = selected === w;
                   const rp = weekMinPrice.get(w);
-                  const price = rp !== undefined ? displayPrice(rp, w) : undefined;
                   const { checkin, checkout } = weekRange(w);
                   return (
                     <button key={w} type="button" role="option" aria-selected={isSelected}
@@ -161,9 +166,11 @@ export default function WeeklyBrowser({
                       <span className="flex items-center gap-2 text-[15px] text-ink">
                         {isSelected ? <Check /> : <span className="w-4" aria-hidden="true" />}
                         {fmtRange(checkin, checkout)}
-                        {full && weekHasDirectFlight(w) && <span className="text-muted" title="יש טיסה ישירה בשבוע הזה"><IcoPlane /></span>}
+                        {full && weekHasDirect(w) && <span className="text-muted" title="יש טיסה ישירה הלוך וחזור בשבוע הזה"><IcoPlane /></span>}
                       </span>
-                      {price !== undefined && <span className="text-[15px] font-bold text-ink">מ-{eur(price)}</span>}
+                      {rp !== undefined
+                        ? <span className="text-[15px] text-ink">מ-<b>{eur(perPerson(rp, w))}</b> <span className="text-muted text-[14px]">לאדם</span></span>
+                        : <span className="text-[14px] text-muted">אין מקום ל-{guests}</span>}
                     </button>
                   );
                 })}
@@ -193,13 +200,12 @@ export default function WeeklyBrowser({
           </div>
         </div>
 
-        {/* quick week chips */}
+        {/* quick week chips: the lowest price per person that week */}
         {allWeeks.length > 1 && (
           <div className="mt-3 -mx-3 md:-mx-4 px-3 md:px-4 flex items-center gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
             {allWeeks.map(w => {
               const isSelected = selected === w;
               const rp = weekMinPrice.get(w);
-              const price = rp !== undefined ? displayPrice(rp, w) : undefined;
               const { checkin } = weekRange(w);
               return (
                 <button key={w} type="button" onClick={() => setSelected(w)} aria-pressed={isSelected}
@@ -208,11 +214,11 @@ export default function WeeklyBrowser({
                   }`}>
                   <span className="text-[15px] font-bold flex items-center gap-1">
                     שבת {fmtDate(checkin)}
-                    {full && weekHasDirectFlight(w) && <span className={isSelected ? "text-white/80" : "text-muted"} title="יש טיסה ישירה בשבוע הזה"><IcoPlane size={12} /></span>}
+                    {full && weekHasDirect(w) && <span className={isSelected ? "text-white/80" : "text-muted"} title="יש טיסה ישירה הלוך וחזור בשבוע הזה"><IcoPlane size={12} /></span>}
                   </span>
-                  {price !== undefined && (
-                    <span className={`text-[13px] ${isSelected ? "text-white/75" : "text-muted"}`}>מ-{eur(price)}</span>
-                  )}
+                  <span className={`text-[13px] ${isSelected ? "text-white/80" : "text-muted"}`}>
+                    {rp !== undefined ? `מ-${eur(perPerson(rp, w))} לאדם` : "אין מקום"}
+                  </span>
                 </button>
               );
             })}
@@ -223,11 +229,10 @@ export default function WeeklyBrowser({
       {/* ── What the price includes ─────────────────────────── */}
       <div className="bg-soft rounded-2xl px-4 py-3.5 md:px-5 text-[15px] leading-relaxed text-body">
         {full ? (
-          <>המחיר כולל דירה לשבוע שלם (שבת עד שבת), סקי פס לשלושת העמקים והסעה הלוך וחזור, לפי מספר האנשים שבחרתם.
-          בשבועות עם טיסה ישירה (מסומנים במטוס) הוא כולל גם הערכה לטיסה, ואת הטיסה עצמה נסגור איתכם לפי הזולה ביותר שנמצא.</>
+          <>המחיר לאדם כולל דירה לשבוע שלם (שבת עד שבת), סקי פס והסעה הלוך וחזור מהשדה, לפי מספר האנשים שבחרתם.
+          טיסה לא כלולה במחיר: כשיש טיסה ישירה הלוך וחזור, השבוע מסומן במטוס ואת הטיסה מוסיפים בעמוד הדירה, במחיר האמיתי.</>
         ) : (
-          <>המחיר הוא של הדירה בלבד, לשבוע שלם משבת עד שבת. בדיל שלם רואים מחיר שכולל גם סקי פס, הסעה וטיסה,
-          ואפשר גם להזמין רק את הדירה ולסדר את השאר לבד.</>
+          <>המחיר הוא של הדירה בלבד, לשבוע שלם משבת עד שבת, מחולק לפי מספר האנשים. בדיל שלם המחיר לאדם כולל גם סקי פס והסעה.</>
         )}
       </div>
 
@@ -247,10 +252,11 @@ export default function WeeklyBrowser({
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
           {visible.map(({ apt, price }, i) => {
-            const total = displayPrice(price, selected!);
+            const pp = perPerson(price, selected!);
+            const total = groupTotal(price, selected!);
             const href = `/apartments/${apt.id}?${new URLSearchParams({
               checkin: selected!,
-              checkout: weekRange(selected!).checkout.toISOString().slice(0, 10),
+              checkout: range!.checkoutIso,
               guests: String(guests),
               ...(full ? { deal: "full" } : {}),
             }).toString()}`;
@@ -272,18 +278,24 @@ export default function WeeklyBrowser({
                   {meta && <div className="text-[15px] text-muted">ואל טורנס · {meta}</div>}
                   {full && (
                     <ul className="flex flex-col gap-1.5 text-[15px] text-ink">
-                      <li className="flex items-center gap-2"><Check />סקי פס לשלושת העמקים</li>
-                      <li className="flex items-center gap-2"><Check />הסעה מהשדה</li>
-                      {selectedHasFlight
-                        ? <li className="flex items-center gap-2"><Check />טיסה ישירה (הערכה)</li>
-                        : <li className="flex items-center gap-2 text-muted"><span className="w-4 text-center" aria-hidden="true">–</span>בלי טיסה ישירה בשבוע הזה</li>}
+                      <li className="flex items-center gap-2"><Check />דירה לשבוע, שבת עד שבת</li>
+                      {selExtras?.area && selExtras.tier && (
+                        <li className="flex items-center gap-2"><Check />סקי פס {PASS_AREA_LABEL[selExtras.area]}, {selExtras.tier.duration_days} ימים</li>
+                      )}
+                      <li className="flex items-center gap-2"><Check />הסעה הלוך וחזור מהשדה</li>
+                      {live.status === "found" && live.flight ? (
+                        <li className="flex items-start gap-2 text-body"><span className="mt-0.5 text-accent shrink-0"><IcoPlane size={15} /></span>
+                          <span>טיסה ישירה הלוך וחזור ל{live.flight.city}: עוד {eur(live.flight.price)} לאדם, מוסיפים בעמוד הדירה</span></li>
+                      ) : live.status === "loading" && weekHasDirect(selected!) ? (
+                        <li className="flex items-center gap-2 text-muted"><span className="shrink-0"><IcoPlane size={15} /></span>בודקים טיסה ישירה…</li>
+                      ) : null}
                     </ul>
                   )}
                   <div className="mt-auto pt-3.5 border-t border-line flex flex-col gap-3">
                     {full ? (
                       <div className="flex flex-col gap-0.5">
                         <div className="flex items-baseline gap-1.5">
-                          <span className="font-display font-extrabold text-[30px] leading-none text-ink">{eur(Math.round(total / guests))}</span>
+                          <span className="font-display font-extrabold text-[30px] leading-none text-ink">{eur(pp)}</span>
                           <span className="text-[15px] text-muted">לאדם</span>
                         </div>
                         <span className="text-[14px] text-muted">{eur(total)} לכל החבורה, {guests} {guests === 1 ? "אדם" : "אנשים"}</span>
@@ -294,7 +306,7 @@ export default function WeeklyBrowser({
                           <span className="font-display font-extrabold text-[30px] leading-none text-ink">{eur(total)}</span>
                           <span className="text-[15px] text-muted">לשבוע</span>
                         </div>
-                        <span className="text-[14px] text-muted">≈ {eur(Math.round(total / guests))} לאדם, {guests} {guests === 1 ? "אדם" : "אנשים"}</span>
+                        <span className="text-[14px] text-muted">{eur(pp)} לאדם, {guests} {guests === 1 ? "אדם" : "אנשים"}</span>
                       </div>
                     )}
                     <span className={`${btn.primary} w-full`}>{full ? "לחבילה" : "לדירה"} <IcoArrow /></span>

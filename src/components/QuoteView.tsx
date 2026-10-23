@@ -2,14 +2,20 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
-import type { Apartment } from "@/types";
+import type { Apartment, SkiPass } from "@/types";
 import {
   IconCalendar, IconChevronLeft, IconImage, IconBank, IconCreditCard,
   IconUsers, IconWhatsApp, IconShield, IconUser, IconBot, IconBus, IconMountain,
 } from "@/components/Icons";
 import { buildWaHref } from "@/lib/whatsapp";
-import { stayBreakdown, skiDaysFromNights, equipCost } from "@/lib/pricing";
+import { skiDaysFromNights, equipCost } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
+import { TRANSFER_PRICE, BAGGAGE_PRICE, LIFT_DATES, liftsOpenForStay, packagePassArea, passTier, shortDate, type PassArea } from "@/lib/deal-pricing";
+import { encodeExtras, type QuoteExtras } from "@/lib/quote-extras";
+import { quoteLines, nightsBetween, FLEXIBLE_EXTRA, NO_CANCEL_DISCOUNT, AI_DISCOUNT } from "@/lib/quote-lines";
+import { useDirectFlight, useReturnLeg } from "@/lib/useFlightPrice";
+import { flightOrderText } from "@/lib/flight-format";
+import FlightAddOn from "@/components/FlightAddOn";
 import CardPaymentButton from "@/components/CardPaymentButton";
 import FlightDetailsModal, { EMPTY_FLIGHT, flightToString, flightFilled, type Flight } from "@/components/FlightDetailsModal";
 import { wrap, card, h1, h2, btn, chip, Crumbs, CheckList, Check, PerPerson, EmptyState } from "@/components/ui";
@@ -50,6 +56,12 @@ export type QuoteData = {
   service: string;
   aptTotal: number;
   grandTotal: number;
+  /** equipment from the quote row (older rows have none) */
+  equipment?: boolean;
+  /** what was picked on the apartment page, from the quote link (?x=) */
+  extras?: QuoteExtras | null;
+  /** the short quote id, for its PDF */
+  quoteId?: string | null;
 };
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
@@ -68,11 +80,7 @@ const rangeLabel = (ci: string, co: string) => {
 };
 const eur = (n: number) => `€${Math.round(n).toLocaleString()}`;
 
-const TRANSFER_PRICE = 180;
-const FLEXIBLE_EXTRA = 100;
-const NO_CANCEL_DISCOUNT = 100;
-const AI_DISCOUNT = 50;
-// a "week" = 6 nights → flat €120; under that €30/night; each extra night +€20
+// prices: deal-pricing.ts (transfer, bag) and quote-lines.ts (cancellation, AI service)
 
 // the page address, read in the browser only (for the WhatsApp message)
 const noSubscribe = () => () => {};
@@ -122,6 +130,30 @@ function QStep({ show, label, qty, setQty, max, total }: {
     </div>
   );
 }
+
+/** An add-on that can be switched on and off, as a card. */
+function AddOnToggle({ icon, title, sub, price, on, onToggle, disabled }: {
+  icon: ReactNode; title: string; sub: string; price?: string; on: boolean; onToggle: () => void; disabled?: boolean;
+}) {
+  return (
+    <button type="button" role="checkbox" aria-checked={on} aria-disabled={disabled || undefined} onClick={() => { if (!disabled) onToggle(); }}
+      className={`w-full flex items-start gap-3.5 p-4 rounded-[18px] border text-start transition-colors ${disabled ? "border-dashed border-line-strong bg-soft/60 cursor-not-allowed" : on ? "border-accent ring-1 ring-accent bg-accent-soft/60" : "border-line bg-white hover:border-line-strong"}`}>
+      <span className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-colors ${on ? "bg-accent text-white" : disabled ? "bg-white text-muted" : "bg-accent-soft text-accent"}`}>{icon}</span>
+      <span className="flex-1 min-w-0">
+        <span className="block text-[16px] font-bold text-ink">{title}</span>
+        <span className="block text-[14px] text-muted leading-snug mt-0.5">{sub}</span>
+        {price && <span className={`block text-[15px] font-bold mt-1.5 tabular-nums ${disabled ? "text-muted" : "text-ink"}`}>{price}</span>}
+      </span>
+      <span className={`mt-0.5 w-6 h-6 rounded-md border-2 flex items-center justify-center shrink-0 ${on ? "bg-accent border-accent text-white" : "border-line-strong bg-white"}`} aria-hidden="true">
+        {on && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l4 4 10-10" /></svg>}
+      </span>
+    </button>
+  );
+}
+
+const IcoPdf = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" /><path d="M14 3v6h6" /><path d="M12 12v6M9.5 15.5 12 18l2.5-2.5" /></svg>
+);
 
 /** One choice in a group (cancellation, service level), as a selectable card. */
 function QRadio({ label, sublabel, badge, badgeTone = "neutral", selected, onClick }: {
@@ -248,10 +280,10 @@ export function Lightbox({ imgs, index, setIndex, name }: {
 }
 
 export default function QuoteView({ q }: { q: QuoteData }) {
-  const {
-    apartmentId, apartment, checkin, checkout, guests, nights,
-    skiPass, transfer, aptTotal,
-  } = q;
+  const { apartmentId, apartment, checkin, checkout } = q;
+  const guests = Math.max(q.guests || 1, 1);
+  const ex = q.extras ?? null;
+  const dealArea = packagePassArea(checkin, checkout);
 
   const [apt, setApt] = useState<Apartment | null>(null);
   const [imgIdx, setImgIdx] = useState(0);
@@ -259,22 +291,33 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const pageUrl = useSyncExternalStore(noSubscribe, () => window.location.href, () => "");
   const [showTransfer, setShowTransfer] = useState(false);
   const [flight, setFlight] = useState<Flight>(EMPTY_FLIGHT);
-  const [transferOn, setTransferOn] = useState(transfer);
-  const [equipmentOn, setEquipmentOn] = useState(false);
   const [rules, setRules] = useState<PricingRule[]>([]);
+  const [passes, setPasses] = useState<SkiPass[]>([]);
   const [showNights, setShowNights] = useState(false);
   const [showBank, setShowBank] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [showDesc, setShowDesc] = useState(false);
   const [splitCount, setSplitCount] = useState(1);
-  const [transferQty, setTransferQty] = useState(1);
-  const [equipQty, setEquipQty] = useState(1);
+  // What's picked: what the quote link carries (?x=, from the apartment
+  // page), else the quote's own yes/no fields; the whole group by default.
+  const [passOn, setPassOn] = useState(ex ? !!ex.pass : q.skiPass && !!dealArea);
+  const [passArea, setPassArea] = useState<PassArea>(ex?.pass?.area ?? dealArea ?? "val_thorens");
+  const [passQty, setPassQty] = useState(ex?.pass?.qty ?? guests);
+  const [transferOn, setTransferOn] = useState(ex ? !!ex.transfer : q.transfer);
+  const [transferQty, setTransferQty] = useState(ex?.transfer?.qty ?? guests);
+  const [equipmentOn, setEquipmentOn] = useState(ex ? !!ex.equipment : !!q.equipment);
+  const [equipQty, setEquipQty] = useState(ex?.equipment?.qty ?? guests);
+  const [flightOn, setFlightOn] = useState(!!ex?.flight);
+  const [flightQty, setFlightQty] = useState(ex?.flight?.qty ?? guests);
+  const [bagOn, setBagOn] = useState(!!ex?.bag);
+  const [bagQty, setBagQty] = useState(ex?.bag?.qty ?? guests);
   const [cancel, setCancel] = useState(q.cancel === "flexible" || q.cancel === "none" ? q.cancel : "regular");
   const [service, setService] = useState(q.service === "ai" ? "ai" : "human");
   const [showNoCancel, setShowNoCancel] = useState(false);
   const [noCancelAgreed, setNoCancelAgreed] = useState(false);
   const [signature, setSignature] = useState("");
   const [showSummary, setShowSummary] = useState(false);
+  const [pdfState, setPdfState] = useState<"" | "busy" | "error" | "link">("");
   const transferDetails = transferOn ? flightToString(flight) : "";
 
   useEffect(() => {
@@ -284,29 +327,46 @@ export default function QuoteView({ q }: { q: QuoteData }) {
 
   useEffect(() => {
     if (!apartmentId) return;
-    fetch(`/api/apartments/${apartmentId}`).then(r => r.json()).then(setApt).catch(() => {});
+    fetch(`/api/apartments/${apartmentId}`).then(r => r.json()).then(d => setApt(d && d.id ? d : null)).catch(() => {});
   }, [apartmentId]);
 
-  // per-night breakdown, priced like the bots (Airbnb calendar + cleaning for
-  // our own apartments, else the seasonal rules); falls back to the stored total
-  const stay = checkin && checkout && nights > 0 && apt
-    ? stayBreakdown(checkin, checkout, Number(apt.price_per_night || 0), rules) : null;
-  const nightly = stay ? stay.nights : [];
-  const cleaningFee = stay ? stay.fee : 0;
-  const baseApt = nightly.length && stay ? stay.total : aptTotal;
+  useEffect(() => {
+    fetch("/api/ski-passes").then(r => r.json()).then(d => setPasses(Array.isArray(d) ? d : [])).catch(() => {});
+  }, []);
 
-  // live total recomputed from the base lodging + currently-selected add-ons
-  // add-ons are per-person: price × number of people who need each add-on
-  // A stay of N nights only yields N-1 actual ski days (arrival/departure days aren't spent on the slopes)
+  /* the flight: only a real direct round trip, at its live price */
+  const direct = useDirectFlight(checkin, checkout);
+  const directFlight = direct.status === "found" ? direct.flight : null;
+  const flightEff = flightOn && !!directFlight;
+  const bagEff = bagOn && flightEff;
+  const returnLeg = useReturnLeg(directFlight, checkin, checkout, flightEff);
+
+  const nights = nightsBetween(checkin, checkout) || q.nights;
+  // a stay of N nights gives N-1 ski days (arrival and departure days aren't on the slopes)
   const skiDays = skiDaysFromNights(nights);
   const equipUnit = equipCost(skiDays);
-  const trTotal = transferOn ? TRANSFER_PRICE * transferQty : 0;
-  const equipTotal = equipmentOn ? equipUnit * equipQty : 0;
-  const flexExtra = cancel === "flexible" ? FLEXIBLE_EXTRA : 0;
-  const noCancelDiscount = cancel === "none" ? -NO_CANCEL_DISCOUNT : 0;
-  const aiDisc = service === "ai" ? AI_DISCOUNT : 0;
-  const liveTotal = baseApt + trTotal + equipTotal + flexExtra + noCancelDiscount - aiDisc;
-  const perPerson = guests > 0 ? Math.round(liveTotal / guests) : liveTotal;
+  const passOpen = (a: PassArea) => liftsOpenForStay(a, checkin, checkout);
+  const tierOf = (a: PassArea) => passTier(passes, a, skiDays);
+  const passEff = passOn && passOpen(passArea) && !!tierOf(passArea);
+
+  const picked: QuoteExtras = {
+    pass: passEff ? { area: passArea, qty: passQty } : undefined,
+    transfer: transferOn ? { qty: transferQty } : undefined,
+    equipment: equipmentOn && skiDays > 0 ? { qty: equipQty } : undefined,
+    flight: flightEff ? { qty: flightQty } : undefined,
+    bag: bagEff ? { qty: bagQty } : undefined,
+  };
+  // every line and the total, priced live, the same way the PDF prices them
+  const calc = quoteLines({ apt, rules, passes, checkin, checkout, guests, extras: picked, cancel, service, flight: directFlight, fallbackAptTotal: q.aptTotal });
+  const amountOf = (key: string) => calc.lines.find(l => l.key === key)?.amount ?? 0;
+  const liveTotal = calc.total;
+  const perPerson = calc.perPerson;
+  const nightly = calc.stay?.nights ?? [];
+  const cleaningFee = calc.cleaningFee;
+  const baseApt = calc.aptTotal;
+  const flightText = flightEff && directFlight
+    ? flightOrderText(directFlight, returnLeg.leg, checkin, checkout, flightQty, bagEff ? { qty: bagQty, unit: BAGGAGE_PRICE } : null)
+    : "";
 
   // split payment: divide the FULL total (lodging + all add-ons) equally between payers
   const shareBase = Math.round(liveTotal / splitCount);
@@ -325,6 +385,56 @@ export default function QuoteView({ q }: { q: QuoteData }) {
     apt?.sqm ? `${apt.sqm} מ"ר` : "",
   ].filter(Boolean).join(" · ");
 
+  /* ── The quote as a PDF, as picked right now ─────────────── */
+  const pickedCode = encodeExtras(picked);
+  const pdfHref = `/api/quote-pdf?${new URLSearchParams({
+    apartment_id: apartmentId, name: apartment, checkin, checkout, guests: String(guests), cancel, service,
+    ...(pickedCode ? { x: pickedCode } : {}),
+    ...(q.quoteId ? { q: q.quoteId } : {}),
+    ...(flightEff && returnLeg.leg?.departTime && returnLeg.leg.arriveTime ? { rd: returnLeg.leg.departTime, ra: returnLeg.leg.arriveTime } : {}),
+  }).toString()}`;
+  // Phones (and the app) get the share sheet with the file: save it, send it
+  // on WhatsApp. Without it, the app opens the PDF in Safari from a link the
+  // person taps; a computer downloads the file.
+  const getPdf = async () => {
+    if (pdfState === "busy") return;
+    const w = window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } };
+    const inApp = !!w.Capacitor?.isNativePlatform?.();
+    const phone = inApp || /iPhone|iPad|Android|Mobile/i.test(navigator.userAgent);
+    setPdfState("busy");
+    try {
+      const res = await fetch(pdfHref);
+      if (!res.ok) throw new Error(String(res.status));
+      const blob = await res.blob();
+      const fileName = `SkiShare - ${apartment}.pdf`.replace(/[\\/:*?"<>|]/g, "");
+      const file = new File([blob], fileName, { type: "application/pdf" });
+      if (phone && typeof navigator.canShare === "function" && navigator.canShare({ files: [file] })) {
+        try { await navigator.share({ files: [file], title: `הצעת מחיר, ${apartment}` }); } catch { /* the share sheet was closed */ }
+        setPdfState("");
+      } else if (phone) {
+        setPdfState("link");
+      } else {
+        const href = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = href; a.download = fileName;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(href), 30000);
+        setPdfState("");
+      }
+    } catch {
+      setPdfState("error");
+    }
+  };
+  const pdfButton = (
+    <div className="flex flex-col gap-1.5">
+      <button type="button" onClick={getPdf} disabled={pdfState === "busy"} className={`${btn.outline} w-full`}>
+        <IcoPdf /> {pdfState === "busy" ? "מכינים את ה-PDF…" : "הצעת המחיר כ-PDF"}
+      </button>
+      {pdfState === "link" && <a href={pdfHref} target="_blank" rel="noopener" className={`${btn.link} self-center min-h-[44px]`}>לפתוח את ה-PDF</a>}
+      {pdfState === "error" && <p className="text-[13px] text-danger text-center">לא הצלחנו להכין PDF כרגע. אפשר לנסות שוב עוד רגע.</p>}
+    </div>
+  );
+
   const bank = {
     name:    process.env.NEXT_PUBLIC_BANK_NAME    || "בנק הפועלים (12)",
     branch:  "673",
@@ -341,34 +451,27 @@ export default function QuoteView({ q }: { q: QuoteData }) {
       `🏔️ דירה: ${apartment}`,
       `📅 תאריכים: ${fmtDate(checkin)} — ${fmtDate(checkout)} (${nights} לילות)`,
       `👥 אורחים: ${guests}`,
-      transferOn ? `🚐 כולל הסעה הלוך-חזור${transferDetails ? ` (${transferDetails})` : ""}` : null,
-      equipmentOn ? `🎿 כולל השכרת ציוד (€${equipTotal})` : null,
-      cancel === "flexible" ? "✅ מדיניות ביטול גמישה" : cancel === "none" ? "🔒 ללא אפשרות ביטול" : null,
-      skiPass ? "🎿 מעוניין/ת גם בסקי פס" : null,
-      service === "ai" ? "🤖 ניהול עצמאי (AI)" : null,
+      ...calc.lines.filter(l => l.key !== "stay").map(l => `• ${l.label}: ${l.amount < 0 ? `−€${-l.amount}` : `€${l.amount}`}`),
+      transferDetails ? `🚐 פרטי הטיסה להסעה: ${transferDetails}` : null,
+      flightText ? `✈️ ${flightText}` : null,
     ],
     total: liveTotal,
     pageUrl: pageUrl ? `ההצעה: ${pageUrl}` : undefined,
   });
 
-  const ADDONS = [
-    { key: "transfer", icon: <AdShuttle size={22} />, title: "הסעה הלוך וחזור", sub: `שאטל משדה התעופה עד הדירה · ${eur(TRANSFER_PRICE)} לאדם`, price: TRANSFER_PRICE * transferQty, on: transferOn, toggle: () => { setTransferOn(v => !v); if (!transferOn) setTransferQty(Math.min(transferQty || 1, guests) || 1); } },
-    { key: "equipment", icon: <AdSkis size={22} />, title: "ציוד סקי או סנובורד", sub: `${eur(equipUnit)} לאדם ל-${skiDays} ימי גלישה (€30 ליום, עד €120 לשבוע)`, price: equipUnit * equipQty, on: equipmentOn, toggle: () => { setEquipmentOn(v => !v); if (!equipmentOn) setEquipQty(Math.min(equipQty || 1, guests) || 1); } },
-    { key: "skipass", icon: <AdPass size={22} />, title: "סקי פס", sub: "שלושת העמקים, 600 ק\"מ. בינתיים מוסיפים בוואטסאפ", soon: true },
-    { key: "lessons", icon: <AdLesson size={22} />, title: "שיעורי סקי או סנובורד", sub: "מדריך מוסמך, לכל הרמות", soon: true },
-  ];
-
   const breakdownRows = (
     <>
       <div className="py-2.5">
-        <button type="button" onClick={() => setShowNights(v => !v)} aria-expanded={showNights}
+        <button type="button" onClick={() => setShowNights(v => !v)} aria-expanded={showNights} disabled={!nightly.length}
           className="w-full flex items-start justify-between gap-3 text-start">
           <span className="min-w-0">
-            <span className="block text-[15px] text-ink">לינה, {nights} לילות{cleaningFee > 0 ? ", כולל ניקיון" : ""}</span>
-            <span className="flex items-center gap-1 text-[13px] text-muted mt-0.5">
-              {eur(avgNightly)} ממוצע ללילה{cleaningFee > 0 ? ` + ${eur(cleaningFee)} ניקיון` : ""}
-              {nightly.length > 0 && <span className="inline-flex items-center gap-0.5 text-accent font-bold">· פירוט <IcoChevron open={showNights} /></span>}
-            </span>
+            <span className="block text-[15px] text-ink">{calc.weekly ? "לינה, שבוע שלם (שבת עד שבת)" : `לינה, ${nights} לילות${cleaningFee > 0 ? ", כולל ניקיון" : ""}`}</span>
+            {!calc.weekly && (
+              <span className="flex items-center gap-1 text-[13px] text-muted mt-0.5">
+                {eur(avgNightly)} ממוצע ללילה{cleaningFee > 0 ? ` + ${eur(cleaningFee)} ניקיון` : ""}
+                {nightly.length > 0 && <span className="inline-flex items-center gap-0.5 text-accent font-bold">· פירוט <IcoChevron open={showNights} /></span>}
+              </span>
+            )}
           </span>
           <span className="text-[15px] font-bold tabular-nums text-ink shrink-0">{eur(baseApt)}</span>
         </button>
@@ -391,17 +494,9 @@ export default function QuoteView({ q }: { q: QuoteData }) {
           </div>
         )}
       </div>
-      {transferOn && <PriceRow label={`הסעה × ${transferQty}`} sub="שאטל הלוך וחזור" amount={eur(trTotal)} />}
-      {equipmentOn && <PriceRow label={`ציוד × ${equipQty}`} sub={`${skiDays} ימי גלישה`} amount={eur(equipTotal)} />}
-      {cancel === "flexible" && <PriceRow label="ביטול גמיש" amount={eur(FLEXIBLE_EXTRA)} />}
-      {cancel === "none" && <PriceRow label="ללא אפשרות ביטול" amount={`−${eur(NO_CANCEL_DISCOUNT)}`} good />}
-      {service === "ai" && <PriceRow label="הנחת שירות AI" sub="ניהול עצמאי" amount={`−${eur(AI_DISCOUNT)}`} good />}
-      {skiPass && (
-        <div className="flex items-center justify-between gap-3 py-2.5">
-          <div><p className="text-[15px] text-ink">סקי פס</p><p className="text-[13px] text-muted mt-0.5">מוסיפים בוואטסאפ</p></div>
-          <span className="text-[12px] font-bold text-warn bg-warn-soft px-2.5 py-1 rounded-full shrink-0">בקרוב באתר</span>
-        </div>
-      )}
+      {calc.lines.filter(l => l.key !== "stay").map(l => (
+        <PriceRow key={l.key} label={l.label} sub={l.sub} amount={l.amount < 0 ? `−${eur(-l.amount)}` : eur(l.amount)} good={l.amount < 0} />
+      ))}
     </>
   );
 
@@ -432,7 +527,8 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const payLabel = splitCount > 1 ? "לתשלום החלק שלי בכרטיס" : undefined;
   const payButton = (
     <CardPaymentButton apartmentId={apartmentId} apartment={apartment} checkin={checkin} checkout={checkout}
-      guests={guests} nights={nights} skiPass={skiPass} transfer={transferOn} equipment={equipmentOn} transferDetails={transferDetails} cancel={cancel} service={service}
+      guests={guests} nights={nights} skiPass={passEff} transfer={transferOn} equipment={!!picked.equipment} transferDetails={transferDetails} cancel={cancel} service={service}
+      flight={flightEff} flightPrice={amountOf("flight") + amountOf("bag")} flightDetails={flightText || undefined}
       grandTotal={payNow} split={splitProp} label={payLabel}
       className={`${btn.primaryLg} w-full`} />
   );
@@ -484,6 +580,9 @@ export default function QuoteView({ q }: { q: QuoteData }) {
               <span className={chip}><span className="text-accent"><IconCalendar size={16} /></span>{rangeLabel(checkin, checkout)} · {nights} לילות</span>
             )}
             <span className={chip}><span className="text-accent"><IconUsers size={16} /></span>{guests} אנשים</span>
+            <button type="button" onClick={getPdf} disabled={pdfState === "busy"} className={`${chip} hover:border-line-strong transition-colors`}>
+              <span className="text-accent"><IcoPdf /></span>{pdfState === "busy" ? "מכינים…" : "PDF"}
+            </button>
           </div>
         </div>
         <div className="mt-5 md:mt-6">
@@ -543,65 +642,82 @@ export default function QuoteView({ q }: { q: QuoteData }) {
           </section>
 
           {/* add-ons */}
-          <section id="extras" className="flex flex-col gap-4" aria-labelledby="extras-h">
+          <section id="extras" className="flex flex-col gap-7" aria-labelledby="extras-h">
             <div className="flex flex-col gap-1.5">
               <h2 id="extras-h" className={h2}>תוספות</h2>
               <p className="text-[15px] md:text-[16px] text-muted">מוסיפים מה שצריך, והמחיר מתעדכן מיד.</p>
             </div>
+
+            {/* ski pass: one of the two areas, or none */}
+            <div className="flex flex-col gap-3">
+              <h3 className="text-[17px] font-bold text-ink">סקי פס{skiDays > 0 ? ` ל-${skiDays} ימי גלישה` : ""}</h3>
+              <div role="group" aria-label="סקי פס" className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
+                {(["trois_vallees", "val_thorens"] as const).map(a => {
+                  const t = tierOf(a);
+                  const open = passOpen(a);
+                  const on = passEff && passArea === a;
+                  return (
+                    <AddOnToggle key={a} icon={<AdPass size={22} />} on={on} disabled={!open || (!t && passes.length > 0)}
+                      title={a === "trois_vallees" ? "שלושת העמקים" : "ואל טורנס ואורל"}
+                      sub={a === "trois_vallees" ? '600 ק"מ מסלולים, כל האזור' : "המסלולים של הכפר עצמו"}
+                      price={!open ? `סגור בתאריכים האלה (פתוח ${shortDate(LIFT_DATES[a][0])}–${shortDate(LIFT_DATES[a][1])})` : t ? `${eur(t.price)} לאדם · ${t.duration_days} ימים` : passes.length ? undefined : "בודקים מחיר…"}
+                      onToggle={() => { if (on) setPassOn(false); else { setPassArea(a); setPassOn(true); } }} />
+                  );
+                })}
+              </div>
+              <QStep show={passEff} label="כמה אנשים צריכים סקי פס?" qty={passQty} setQty={setPassQty} max={guests} total={amountOf("pass")} />
+              <p className="text-[13px] text-muted px-1 leading-relaxed">את הסקי פס אוספים בעצמכם מהמכונה בכפר.</p>
+            </div>
+
+            {/* transfer and equipment */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
-              {ADDONS.map((a) => {
-                const soon = "soon" in a && a.soon;
-                const selected = "on" in a && !!a.on;
-                return (
-                  <div key={a.key} className="flex flex-col gap-2">
-                    {soon ? (
-                      <div className="w-full flex items-start gap-3.5 p-4 rounded-[18px] border border-dashed border-line-strong bg-soft/60">
-                        <span className="w-11 h-11 rounded-xl bg-white text-muted flex items-center justify-center shrink-0">{a.icon}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[16px] font-bold text-ink">{a.title}</p>
-                          <p className="text-[14px] text-muted leading-snug mt-0.5">{a.sub}</p>
-                        </div>
-                        <span className="text-[12px] font-bold text-warn bg-warn-soft px-2.5 py-1 rounded-full shrink-0">בקרוב באתר</span>
-                      </div>
-                    ) : (
-                      <button type="button" role="checkbox" aria-checked={selected} onClick={() => "toggle" in a && a.toggle?.()}
-                        className={`w-full flex items-start gap-3.5 p-4 rounded-[18px] border text-start transition-colors ${selected ? "border-accent ring-1 ring-accent bg-accent-soft/60" : "border-line bg-white hover:border-line-strong"}`}>
-                        <span className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-colors ${selected ? "bg-accent text-white" : "bg-accent-soft text-accent"}`}>{a.icon}</span>
-                        <span className="flex-1 min-w-0">
-                          <span className="block text-[16px] font-bold text-ink">{a.title}</span>
-                          <span className="block text-[14px] text-muted leading-snug mt-0.5">{a.sub}</span>
-                          <span className="block text-[15px] font-bold text-ink mt-1.5 tabular-nums">+{eur((a as { price: number }).price)}</span>
-                        </span>
-                        <span className={`mt-0.5 w-6 h-6 rounded-md border-2 flex items-center justify-center shrink-0 ${selected ? "bg-accent border-accent text-white" : "border-line-strong bg-white"}`} aria-hidden="true">
-                          {selected && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l4 4 10-10" /></svg>}
-                        </span>
-                      </button>
-                    )}
+              <div className="flex flex-col gap-2">
+                <AddOnToggle icon={<AdShuttle size={22} />} on={transferOn} title="הסעה הלוך וחזור"
+                  sub={`שאטל משדה התעופה עד הדירה · ${eur(TRANSFER_PRICE)} לאדם`} price={`+${eur(TRANSFER_PRICE * transferQty)}`}
+                  onToggle={() => { const v = !transferOn; setTransferOn(v); if (v) setTransferQty(n => Math.min(n || guests, guests) || 1); }} />
+                {transferOn && (
+                  <>
+                    <QStep show label="כמה אנשים צריכים הסעה?" qty={transferQty} setQty={setTransferQty} max={guests} total={amountOf("transfer")} />
+                    <button type="button" onClick={() => setShowTransfer(true)}
+                      className="flex items-center justify-between gap-3 w-full min-h-[52px] px-4 rounded-2xl border border-line bg-white hover:border-ink transition-colors text-start">
+                      <span className={`flex items-center gap-2 text-[15px] font-bold ${flightFilled(flight) ? "text-ok-text" : "text-accent"}`}>
+                        {flightFilled(flight) ? <><Check size={16} /> פרטי הטיסה נשמרו, לעריכה</> : "למלא את פרטי הטיסה להסעה"}
+                      </span>
+                      <span className="text-[13px] text-muted shrink-0">הגעה וחזרה</span>
+                    </button>
+                  </>
+                )}
+              </div>
+              <div className="flex flex-col gap-2">
+                <AddOnToggle icon={<AdSkis size={22} />} on={!!picked.equipment} disabled={skiDays < 1} title="ציוד סקי או סנובורד"
+                  sub={`${eur(equipUnit)} לאדם ל-${skiDays} ימי גלישה (€30 ליום, עד €120 לשבוע)`} price={`+${eur(equipUnit * equipQty)}`}
+                  onToggle={() => { const v = !equipmentOn; setEquipmentOn(v); if (v) setEquipQty(n => Math.min(n || guests, guests) || 1); }} />
+                {picked.equipment && (
+                  <>
+                    <QStep show label="כמה אנשים צריכים ציוד?" qty={equipQty} setQty={setEquipQty} max={guests} total={amountOf("equipment")} />
+                    <p className="text-[13px] text-muted px-1 leading-relaxed">ציוד פרמיום אפשר לשדרג בתוספת תשלום בחנות ההשכרה עצמה.</p>
+                  </>
+                )}
+              </div>
+            </div>
 
-                    {/* equipment: how many people, under the equipment card */}
-                    {a.key === "equipment" && equipmentOn && (
-                      <>
-                        <QStep show label="כמה אנשים צריכים ציוד?" qty={equipQty} setQty={setEquipQty} max={Math.max(guests, 1)} total={equipTotal} />
-                        <p className="text-[13px] text-muted px-1 leading-relaxed">ציוד פרמיום אפשר לשדרג בתוספת תשלום בחנות ההשכרה עצמה.</p>
-                      </>
-                    )}
+            {/* the flight: only a direct round trip */}
+            <div className="flex flex-col gap-3">
+              <h3 className="text-[17px] font-bold text-ink">טיסה</h3>
+              <FlightAddOn state={direct} ret={returnLeg} checkin={checkin} checkout={checkout}
+                checked={flightEff} onToggle={v => { setFlightOn(v); if (v) setFlightQty(n => Math.min(n || guests, guests) || 1); }}
+                qty={flightQty} setQty={setFlightQty} maxQty={guests} total={amountOf("flight")}
+                bag={{ on: bagEff, unit: BAGGAGE_PRICE, qty: bagQty, setQty: setBagQty, total: amountOf("bag"), toggle: () => setBagOn(v => !v) }} />
+            </div>
 
-                    {/* transfer: how many people + flight details, under the transfer card */}
-                    {a.key === "transfer" && transferOn && (
-                      <>
-                        <QStep show label="כמה אנשים צריכים הסעה?" qty={transferQty} setQty={setTransferQty} max={Math.max(guests, 1)} total={trTotal} />
-                        <button type="button" onClick={() => setShowTransfer(true)}
-                          className="flex items-center justify-between gap-3 w-full min-h-[52px] px-4 rounded-2xl border border-line bg-white hover:border-ink transition-colors text-start">
-                          <span className={`flex items-center gap-2 text-[15px] font-bold ${flightFilled(flight) ? "text-ok-text" : "text-accent"}`}>
-                            {flightFilled(flight) ? <><Check size={16} /> פרטי הטיסה נשמרו, לעריכה</> : "למלא את פרטי הטיסה להסעה"}
-                          </span>
-                          <span className="text-[13px] text-muted shrink-0">הגעה וחזרה</span>
-                        </button>
-                      </>
-                    )}
-                  </div>
-                );
-              })}
+            {/* lessons: not bookable on the site yet */}
+            <div className="flex items-start gap-3.5 p-4 rounded-[18px] border border-dashed border-line-strong bg-soft/60 sm:max-w-[calc(50%-6px)]">
+              <span className="w-11 h-11 rounded-xl bg-white text-muted flex items-center justify-center shrink-0"><AdLesson size={22} /></span>
+              <div className="flex-1 min-w-0">
+                <p className="text-[16px] font-bold text-ink">שיעורי סקי או סנובורד</p>
+                <p className="text-[14px] text-muted leading-snug mt-0.5">מדריך מוסמך, לכל הרמות. בינתיים מוסיפים בוואטסאפ.</p>
+              </div>
+              <span className="text-[12px] font-bold text-warn bg-warn-soft px-2.5 py-1 rounded-full shrink-0">בקרוב באתר</span>
             </div>
           </section>
 
@@ -687,6 +803,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             {splitSelector}
             {payButton}
             {waButton}
+            {pdfButton}
           </div>
         </aside>
       </div>
@@ -735,6 +852,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
           {splitSelector}
           {payButton}
           {waButton}
+          {pdfButton}
           <a href="#payment" onClick={() => setSheetOpen(false)} className={`${btn.link} self-center min-h-[44px]`}>פרטים להעברה בנקאית</a>
           {trust}
         </div>

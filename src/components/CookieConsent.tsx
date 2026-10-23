@@ -34,7 +34,7 @@ export default function CookieConsent() {
     if (pathname !== first.current && notAnswered()) remember();
   }, [pathname]);
 
-  if (!show || pathname?.startsWith("/admin")) return null;
+  if (!show || pathname?.startsWith("/admin") || pathname?.startsWith("/quote/print")) return null;
 
   return (
     <div dir="rtl" role="region" aria-label="עוגיות"

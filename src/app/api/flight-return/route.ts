@@ -18,9 +18,10 @@ export const maxDuration = 60;
 // return rows, it falls back to a one-way nonstop search on the return date,
 // preferring the outbound's airline.
 //
-// Not cached on purpose: the quote bot calls it once per quote, only for the
-// airport it already chose with /api/flight-price, and keeps the result with
-// the quote.
+// The quote bot calls it once per quote, and the apartment page once a
+// direct flight is added (for the return times). A found result is kept at
+// the edge for a few hours, like /api/flight-price's cache, so the same dates
+// don't start a new browser every time; failures are never kept.
 
 function isValidAirport(code: string) {
   return /^[A-Z]{3}$/.test(code);
@@ -136,7 +137,7 @@ export async function GET(req: NextRequest) {
       source,
       checkedAt: new Date().toISOString(),
       ...(debug ? { pages } : {}),
-    });
+    }, debug || !ret ? undefined : { headers: { "Cache-Control": "public, s-maxage=21600, stale-while-revalidate=3600" } });
   } catch (e) {
     console.error("flight-return scrape failed", e);
     return NextResponse.json({ ok: false, error: "לא הצלחנו לבדוק את הטיסות כרגע", ...(debug ? { pages } : {}) }, { status: 200 });

@@ -3,14 +3,19 @@ import { useState, useSyncExternalStore } from "react";
 
 const APP_STORE_URL = "https://apps.apple.com/il/app/skishare/id6782095727?l=he";
 
-// Promo banner on shared pages: "open in app / download it".
-// On iOS the native Smart App Banner (apple-itunes-app meta) also appears and
-// shows OPEN when the app is installed — this banner is the cross-platform fallback.
+// Promo banner on shared pages (a quote link opened in the phone's browser):
+// "open in the app / download it". On iPhone the native Smart App Banner
+// (apple-itunes-app meta, set on the quote pages) also shows OPEN when the
+// app is installed; this banner is the cross-platform fallback.
 const HIDDEN_EVT = "skishare:app-banner";
 const subscribe = (cb: () => void) => { window.addEventListener(HIDDEN_EVT, cb); return () => window.removeEventListener(HIDDEN_EVT, cb); };
-// not inside the app's own webview (Capacitor), and not after it was closed in this tab
+// never inside the app itself, and not after it was closed in this tab
+const inApp = () => {
+  const w = window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } };
+  return !!w.Capacitor?.isNativePlatform?.() || /skishare/i.test(navigator.userAgent);
+};
 const shouldShow = () => {
-  if (/skishare/i.test(navigator.userAgent)) return false;
+  if (inApp()) return false;
   try { return !sessionStorage.getItem("appBannerHidden"); } catch { return true; }
 };
 
@@ -21,18 +26,12 @@ export default function OpenInAppBanner() {
   if (!show) return null;
 
   const hide = () => { try { sessionStorage.setItem("appBannerHidden", "1"); } catch {} window.dispatchEvent(new Event(HIDDEN_EVT)); };
-  // try to open the installed app via its custom URL scheme; if nothing happens
-  // (app not installed) fall back to the App Store after a short delay.
+  // Opens the installed app on this same page (skishare://open?path=...).
+  // No automatic jump to the App Store: on iPhone the "open in SkiShare?"
+  // question keeps the page visible, so a timer sent people who have the app
+  // to the store. Without the app, "להורדה" is right next to it.
   const openApp = () => {
     const path = window.location.pathname + window.location.search;
-    const started = Date.now();
-    const fallback = setTimeout(() => {
-      // if we're still here & the page didn't go to background, the app isn't installed
-      if (Date.now() - started < 2000 && document.visibilityState === "visible") {
-        window.location.href = APP_STORE_URL;
-      }
-    }, 1400);
-    window.addEventListener("pagehide", () => clearTimeout(fallback), { once: true });
     window.location.href = "skishare://open?path=" + encodeURIComponent(path);
   };
 

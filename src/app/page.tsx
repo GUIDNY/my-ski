@@ -30,21 +30,23 @@ const IcoVan = () => ico(<><rect x="3" y="6" width="18" height="10" rx="2" /><pa
 const IcoSkis = () => ico(<><path d="M7 3l5 18" /><path d="M17 3l-5 18" /><path d="M4 19h5" /><path d="M15 19h5" /></>, 26);
 const IcoPlane = () => ico(<path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z" />, 26);
 const IcoShield = () => ico(<><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z" /><path d="M9 12l2 2 4-4" /></>, 20);
+const IcoUser = () => ico(<><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>);
 
 /* ── Content ───────────────────────────────────────────────── */
 const trust = [
-  { icon: <IcoHome />, title: "הדירות שלנו", text: "בואל טורנס, בלי מתווך באמצע" },
-  { icon: <IcoTag />, title: "מחיר אחד לכל החבילה", text: "לינה, סקי פס, הסעה וציוד" },
-  { icon: <IcoChat />, title: "עונים בעברית", text: "בוואטסאפ ובצ'אט באתר" },
+  { icon: <IcoHome />, title: "דירות לחבר'ה ולקבוצות", text: "דירות שלנו בואל טורנס, מזוג ועד 7 בדירה" },
+  { icon: <IcoTag />, title: "חופשה בהרכבה", text: "דירה, ומוסיפים רק מה שצריך" },
   { icon: <IcoSplit />, title: "כל אחד משלם את החלק שלו", text: "קישור תשלום נפרד לכל אחד מהחבורה" },
+  { icon: <IcoUser />, title: "אזור אישי", text: "ההזמנות והחופשות ששמרתם, במקום אחד" },
 ];
 
+// "build your own trip": the apartment is the base, everything else is picked
 const included = [
-  { icon: <IcoBed />, title: "דירה לכל השבוע", text: "דירות שלנו בואל טורנס, ניקיון כבר בפנים", optional: false },
-  { icon: <IcoTicket />, title: "סקי פס", text: "ואל טורנס, או כל 600 הק\"מ של שלושת העמקים", optional: false },
-  { icon: <IcoVan />, title: "הסעה מהשדה", text: "שאטל ישיר עד הדירה, הלוך וחזור", optional: false },
-  { icon: <IcoSkis />, title: "ציוד סקי", text: "סקי או סנובורד לכל ימי הגלישה", optional: false },
-  { icon: <IcoPlane />, title: "טיסה ישירה", text: "מתל אביב, ואנחנו מחפשים לכם את הכי מתאימה", optional: true },
+  { icon: <IcoBed />, title: "הדירה", text: "דירות שלנו בואל טורנס, לחבורה או לזוג. ניקיון כלול במחיר", badge: "הבסיס", kind: "base" },
+  { icon: <IcoTicket />, title: "סקי פס", text: "ואל טורנס, או כל 600 הק\"מ של שלושת העמקים", badge: "לבחירה", kind: "pick" },
+  { icon: <IcoVan />, title: "הסעה מהשדה", text: "שאטל ישיר עד הדירה, הלוך וחזור", badge: "לבחירה", kind: "pick" },
+  { icon: <IcoSkis />, title: "ציוד", text: "סקי או סנובורד לכל ימי הגלישה", badge: "לבחירה", kind: "pick" },
+  { icon: <IcoPlane />, title: "טיסה ישירה", text: "רק כשיש ישירה מתל אביב בתאריכים שלכם, במחיר האמיתי", badge: "כשיש ישירה", kind: "flight" },
 ];
 
 const resortFacts = [
@@ -62,7 +64,7 @@ const steps = [
 ];
 
 const faq = [
-  { q: "מה כלול במחיר?", a: "הדירה לכל השבוע כולל ניקיון, סקי פס, הסעה הלוך וחזור מהשדה וציוד סקי. טיסה אפשר להוסיף." },
+  { q: "מה כלול במחיר?", a: "הדירה, כולל ניקיון בדירות שלנו. אליה מוסיפים מה שצריך: סקי פס, הסעה הלוך וחזור מהשדה וציוד סקי. טיסה ישירה מוסיפים כשיש בתאריכים שלכם, במחיר האמיתי." },
   { q: "אפשר שכל אחד ישלם בנפרד?", a: "כן. כל אחד מהחבורה מקבל קישור ומשלם את החלק שלו." },
   { q: "ומה אם צריך לבטל?", a: "יש אפשרות לביטול גמיש, ומדיניות מסודרת למצבי חירום כמו סגירת שמיים או ביטולי טיסות. כל הפרטים בעמודי המדיניות." },
   { q: "איך מגיעים מהשדה לדירה?", a: "שאטל ישיר משדה התעופה עד הדירה, הלוך וחזור. רק צריך לשלוח לנו את פרטי הטיסה." },
@@ -125,17 +127,19 @@ export default function Home() {
       {/* ── What's included ──────────────────────────────── */}
       <section className="max-w-[1240px] mx-auto px-5 md:px-6 pt-16 md:pt-24 pb-4 md:pb-8">
         <div className="flex flex-col gap-2 mb-7 md:mb-9">
-          <h2 className="font-display text-[28px] md:text-[40px] font-bold tracking-tight">מה כלול בחבילה</h2>
-          <p className="text-[16px] md:text-[18px] text-[#51607A]">בוחרים פעם אחת ומקבלים הכל מסודר, כולל קישורי תשלום.</p>
+          <h2 className="font-display text-[28px] md:text-[40px] font-bold tracking-tight">בונים את החופשה שלכם</h2>
+          <p className="text-[16px] md:text-[18px] text-[#51607A]">מתחילים מהדירה ומוסיפים רק מה שצריך. המחיר לאדם מתעדכן מיד, וכל אחד משלם את החלק שלו.</p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 md:gap-[18px]">
           {included.map(i => (
-            <div key={i.title} className={`rounded-[20px] p-5 md:p-6 flex flex-col gap-3 ${i.optional ? "border border-dashed border-[#CBD5E3] bg-[#FBFCFE]" : "border border-[#E3E9F2]"}`}>
-              <span className={`w-[52px] h-[52px] rounded-2xl flex items-center justify-center ${i.optional ? "bg-[#FFF1E8] text-[#C2410C]" : "bg-[#EEF3FF] text-[#1652F0]"}`}>{i.icon}</span>
+            <div key={i.title} className={`rounded-[20px] p-5 md:p-6 flex flex-col gap-3 ${
+              i.kind === "base" ? "border-2 border-[#1652F0] bg-[#F7F9FF]" : i.kind === "flight" ? "border border-dashed border-[#CBD5E3] bg-[#FBFCFE]" : "border border-[#E3E9F2]"}`}>
+              <span className={`w-[52px] h-[52px] rounded-2xl flex items-center justify-center ${i.kind === "flight" ? "bg-[#FFF1E8] text-[#C2410C]" : "bg-[#EEF3FF] text-[#1652F0]"}`}>{i.icon}</span>
               <div className="font-bold text-[17px] md:text-[19px]">{i.title}</div>
               <div className="text-[14px] md:text-[15px] leading-relaxed text-[#51607A]">{i.text}</div>
-              <span className={`self-start rounded-full px-3 py-1 text-[13px] font-bold ${i.optional ? "bg-[#FFF1E8] text-[#B33A06]" : "bg-[#E7F6EE] text-[#0F6B45]"}`}>
-                {i.optional ? "לבחירה" : "כלול"}
+              <span className={`self-start rounded-full px-3 py-1 text-[13px] font-bold mt-auto ${
+                i.kind === "base" ? "bg-[#1652F0] text-white" : i.kind === "flight" ? "bg-[#FFF1E8] text-[#B33A06]" : "bg-[#E7F6EE] text-[#0F6B45]"}`}>
+                {i.badge}
               </span>
             </div>
           ))}

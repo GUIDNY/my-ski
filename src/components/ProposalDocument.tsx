@@ -94,7 +94,9 @@ export const PROPOSAL_CSS = `
   @page { size:A4; margin:16mm 16mm 18mm 16mm;
     @bottom-center { content:"SkiShare  ·  עמוד " counter(page) " מתוך " counter(pages); font-size:8pt; color:#8a96a8; } }
   html, body, div:has(> .proposal-screen) { background:#fff !important; }
-  div:has(> .proposal-screen) { min-height:0 !important; }
+  html, body { height:auto !important; min-height:0 !important; }
+  div:has(> .proposal-screen) { min-height:0 !important; display:block !important; }
+  body > :not(:has(.proposal-screen)) { display:none !important; }
   .proposal-screen { background:#fff !important; padding:0 !important; min-height:0 !important; }
   .no-print { display:none !important; }
   .proposal { width:auto; margin:0; padding:0; box-shadow:none; border-radius:0; }

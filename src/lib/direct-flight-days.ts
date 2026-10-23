@@ -30,3 +30,9 @@ export function hasDirectFlight(date: Date): boolean {
   }
   return false;
 }
+
+/** A direct flight both ways: out on the check-in day and back on the check-out day (ISO dates). */
+export function hasDirectFlightBothWays(checkin: string, checkout: string): boolean {
+  if (!checkin || !checkout) return false;
+  return hasDirectFlight(new Date(checkin + "T12:00:00")) && hasDirectFlight(new Date(checkout + "T12:00:00"));
+}

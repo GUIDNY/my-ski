@@ -9,13 +9,15 @@ import { stayBreakdown, matchingWeek, skiDaysFromNights, equipCost } from "@/lib
 import type { PricingRule } from "@/lib/pricing";
 import {
   IconSkis, IconBus, IconShield, IconUser, IconBot, IconCheck, IconCalendar, IconChevronLeft,
-  IconWifi, IconFire, IconParking, IconSnowflake, IconWhatsApp, IconBriefcase, IconUsers, IconX,
+  IconWifi, IconFire, IconParking, IconSnowflake, IconWhatsApp, IconUsers, IconX,
 } from "@/components/Icons";
 import { buildWaHref } from "@/lib/whatsapp";
 import CardPaymentButton from "@/components/CardPaymentButton";
 import FlightDetailsModal, { EMPTY_FLIGHT, flightToString, flightFilled, type Flight } from "@/components/FlightDetailsModal";
 import FlightAddOn from "@/components/FlightAddOn";
-import { useFlightPrice } from "@/lib/useFlightPrice";
+import { useDirectFlight, useReturnLeg, time24 } from "@/lib/useFlightPrice";
+import { TRANSFER_PRICE, BAGGAGE_PRICE, LIFT_DATES, PASS_AREA_LABEL, liftsOpenForStay, packagePassArea, passTier, shortDate, type PassArea } from "@/lib/deal-pricing";
+import { encodeExtras } from "@/lib/quote-extras";
 import SaveTripButton from "@/components/SaveTripButton";
 import { wrap, card, h1, h2, btn, field, fieldLabel, chip, badgeDark, Check, CheckList, Crumbs, PerPerson, EmptyState } from "@/components/ui";
 
@@ -36,12 +38,11 @@ const addDays = (s: string, n: number) => { const d = new Date(s + "T12:00:00");
 const eur = (n: number) => `€${Math.round(n).toLocaleString("en-US")}`;
 
 const SITE_URL = "https://skisharebook.com";
-const TRANSFER_PRICE = 180;
+// transfer and checked bag prices: see deal-pricing.ts
 // ski equipment rental: €30/night under a week · €120 for a week · +€20 each extra night
 const CANCEL_FLEX    = 100; // flexible cancellation surcharge (flat)
 const CANCEL_NONE    = 100; // no-cancellation discount (flat)
 const AI_DISCOUNT    = 50;  // per person
-const BAGGAGE_PRICE  = 120; // checked-bag fee per traveler, matches the AI concierge's default
 const FALLBACK_IMAGES = ["/apt1.jpg", "/apt2.jpg", "/apt3.jpg"];
 
 // the parts of the page, in order (section tabs)
@@ -94,14 +95,16 @@ function QtyRow({ label, qty, setQty, max, total }: {
 }
 
 /* ── A selectable card (radio or checkbox), like the design ─── */
-function OptionCard({ kind, checked, onSelect, title, sub, price, icon, badge, children }: {
+function OptionCard({ kind, checked, onSelect, title, sub, price, icon, badge, children, disabled }: {
   kind: "radio" | "check"; checked: boolean; onSelect: () => void;
   title: ReactNode; sub?: ReactNode; price?: ReactNode; icon?: ReactNode; badge?: ReactNode; children?: ReactNode;
+  /** can't be picked (e.g. a ski area whose lifts are closed on these dates) */
+  disabled?: boolean;
 }) {
   return (
-    <div className={`rounded-[18px] border transition-colors ${checked ? "border-accent ring-1 ring-accent bg-accent-soft/50" : "border-line bg-white hover:border-line-strong"}`}>
-      <button type="button" role={kind === "radio" ? "radio" : "checkbox"} aria-checked={checked} onClick={onSelect}
-        className="w-full flex items-start gap-3.5 p-4 md:p-[18px] text-start rounded-[18px]">
+    <div className={`rounded-[18px] border transition-colors ${disabled ? "border-dashed border-line-strong bg-[#FBFCFE] opacity-75" : checked ? "border-accent ring-1 ring-accent bg-accent-soft/50" : "border-line bg-white hover:border-line-strong"}`}>
+      <button type="button" role={kind === "radio" ? "radio" : "checkbox"} aria-checked={checked} onClick={onSelect} disabled={disabled}
+        className="w-full flex items-start gap-3.5 p-4 md:p-[18px] text-start rounded-[18px] disabled:cursor-not-allowed">
         {kind === "radio" ? (
           <span className={`mt-0.5 w-[22px] h-[22px] shrink-0 rounded-full border-2 flex items-center justify-center ${checked ? "border-accent" : "border-line-strong bg-white"}`} aria-hidden="true">
             {checked && <span className="w-[11px] h-[11px] rounded-full bg-accent" />}
@@ -390,9 +393,13 @@ function ApartmentPage() {
   // "?deal=full" pre-checks the whole package (transfer, Trois Vallées ski
   // pass, baggage — flight follows once its live price loads, below) instead
   // of the customer having to opt into each one individually.
-  const [skiPass,  setSkiPass]  = useState(fullDeal || prePass === "trois_vallees" || prePass === "val_thorens");
+  // A package takes the pass that fits its dates: all of 3 Vallées when the
+  // whole area is open, else Val Thorens alone, else no pass at all.
+  const dealArea = packagePassArea(checkin, checkout);
+  const askedArea: PassArea | null = prePass === "val_thorens" || prePass === "trois_vallees" ? prePass : fullDeal ? dealArea : null;
+  const [skiPass,  setSkiPass]  = useState(askedArea !== null);
   const [skiPasses, setSkiPasses] = useState<SkiPass[]>([]);
-  const [skiArea,  setSkiArea]  = useState<"val_thorens" | "trois_vallees">(prePass === "val_thorens" ? "val_thorens" : (fullDeal || prePass === "trois_vallees") ? "trois_vallees" : "val_thorens");
+  const [skiArea,  setSkiArea]  = useState<PassArea>(askedArea ?? dealArea ?? "val_thorens");
   const [skiQty,   setSkiQty]   = useState(guests || 1);
   const [transfer, setTransfer] = useState(fullDeal || preTransfer);
   const [equipment, setEquipment] = useState(preEquip);
@@ -462,32 +469,29 @@ function ApartmentPage() {
   }, [apt]);
 
   /* Ski pass tier that covers the trip length, for an area (adult only) */
-  const tierFor = (area: "val_thorens" | "trois_vallees") => {
-    const options = skiPasses.filter(p => p.area === area && p.type === "adult").sort((a, b) => a.duration_days - b.duration_days);
-    if (!options.length) return null;
-    return options.find(p => p.duration_days >= skiDays) ?? options[options.length - 1];
-  };
+  const tierFor = (area: PassArea) => passTier(skiPasses, area, skiDays);
   const skiTier = tierFor(skiArea);
+  // a pass only counts when its lifts are open on the ski days of the stay
+  const passOpen = (area: PassArea) => liftsOpenForStay(area, checkin, checkout);
+  const skiOn = skiPass && passOpen(skiArea) && !!skiTier;
 
-  /* ── Live flight prices ──────────────────────────────────── */
-  const gvaFlight = useFlightPrice("TLV", "GVA", checkin, checkout);
-  const lyonFlight = useFlightPrice("TLV", "LYS", checkin, checkout);
-  // "add flight to package" always offers whichever of the two routes is
-  // actually cheaper right now, rather than making the customer compare.
-  const cheaperFlight = gvaFlight.price !== null && (lyonFlight.price === null || gvaFlight.price <= lyonFlight.price)
-    ? { ...gvaFlight, airport: "Geneva (GVA)" }
-    : { ...lyonFlight, airport: "Lyon (LYS)" };
-  // The flight price isn't known until the live scrape resolves, so it
-  // can't be a useState initial value like the other full-deal defaults —
-  // switch it on once, the moment a price actually lands, without fighting
-  // a customer who deliberately un-checks it afterwards.
+  /* ── Flight: only a real direct round trip, at its live price ── */
+  const direct = useDirectFlight(checkin, checkout);
+  const directFlight = direct.status === "found" ? direct.flight : null;
+  const flightOn = bookFlight && !!directFlight;
+  const bagOn = baggage && flightOn;
+  const returnLeg = useReturnLeg(directFlight, checkin, checkout, flightOn);
+  // The price isn't known until the live check resolves, so a package turns
+  // the flight on once, the moment a direct one is found, without fighting a
+  // customer who un-checks it afterwards.
   const autoFlightApplied = useRef(false);
+  const directFound = !!directFlight;
   useEffect(() => {
-    if (fullDeal && cheaperFlight.price && !autoFlightApplied.current) {
+    if (fullDeal && directFound && !autoFlightApplied.current) {
       autoFlightApplied.current = true;
       setBookFlight(true);
     }
-  }, [fullDeal, cheaperFlight.price]);
+  }, [fullDeal, directFound]);
 
   /* ── Price calculation ──────────────────────────────────── */
   const basePrice = apt?.price_per_night ?? 0;
@@ -511,24 +515,44 @@ function ApartmentPage() {
   const cleaningFee = stay ? stay.fee : 0;
 
   const avgNightlyPrice = breakdown.length > 0 ? Math.round((aptTotal - cleaningFee) / nights) : basePrice;
-  const skiTotal        = skiPass && skiTier ? skiTier.price * skiQty : 0;
+  const skiTotal        = skiOn && skiTier ? skiTier.price * skiQty : 0;
   // add-ons are per-person: price × number of people who need each add-on
   const trTotal         = transfer ? TRANSFER_PRICE * transferQty : 0;
   const equipTotal      = equipment ? equipCost(skiDays) * equipQty : 0;
-  const bookFlightTotal = bookFlight && cheaperFlight.price ? cheaperFlight.price * bookFlightQty : 0;
-  const baggageTotal    = baggage ? BAGGAGE_PRICE * baggageQty : 0;
+  const bookFlightTotal = flightOn && directFlight ? directFlight.price * bookFlightQty : 0;
+  const baggageTotal    = bagOn ? BAGGAGE_PRICE * baggageQty : 0;
   const flexExtra       = cancel  === "flexible" ? CANCEL_FLEX : 0;
   const noCancelDiscount = cancel === "none"     ? -CANCEL_NONE : 0;
   const aiDiscount      = service === "ai"       ? -AI_DISCOUNT : 0;
   const grandTotal      = aptTotal + skiTotal + trTotal + equipTotal + bookFlightTotal + baggageTotal + flexExtra + noCancelDiscount + aiDiscount;
   const transferDetails = transfer ? flightToString(flight) : "";
-  const bookFlightDetails = bookFlight
-    ? `${cheaperFlight.airport}${cheaperFlight.nonstop ? " · ישירה" : ""} · €${cheaperFlight.price} × ${bookFlightQty}${baggage ? ` · כבודה €${BAGGAGE_PRICE} × ${baggageQty}` : ""}`
+  // what the order says about the flight: both legs, the airline, the price
+  const legText = (label: string, date: string, d: string | null, a: string | null) =>
+    `${label} ${fmtDay(date)}${d && a ? ` ${time24(d)}–${time24(a)}` : ""}`;
+  const bookFlightDetails = flightOn && directFlight
+    ? [
+        `טיסה ישירה הלוך וחזור TLV⇄${directFlight.airport}${directFlight.airline ? ` (${directFlight.airline})` : ""}`,
+        legText("הלוך", checkin, directFlight.departTime, directFlight.arriveTime),
+        legText("חזור", checkout, returnLeg.leg?.departTime ?? null, returnLeg.leg?.arriveTime ?? null),
+        `€${directFlight.price} לאדם × ${bookFlightQty}`,
+        bagOn ? `מזוודה €${BAGGAGE_PRICE} × ${baggageQty}` : null,
+      ].filter(Boolean).join(" · ")
     : "";
+  const flightLabel = directFlight ? `טיסה ישירה הלוך וחזור ל${directFlight.city}` : "טיסה";
+  const passLabel = `סקי פס ${PASS_AREA_LABEL[skiArea]}${skiTier ? `, ${skiTier.duration_days} ימים` : ""}`;
   // split: divide the FULL total (lodging + all add-ons) equally between payers
   const shareAccommodation = Math.round(grandTotal / splitCount);
   const payNow = splitCount > 1 ? shareAccommodation : grandTotal;
   const perPerson = Math.round(grandTotal / Math.max(guests || 1, 1));
+
+  /* ── What the quote link carries: the add-ons picked here ─── */
+  const quoteExtras = encodeExtras({
+    pass: skiOn ? { area: skiArea, qty: skiQty } : undefined,
+    transfer: transfer ? { qty: transferQty } : undefined,
+    equipment: equipment ? { qty: equipQty } : undefined,
+    flight: flightOn ? { qty: bookFlightQty } : undefined,
+    bag: bagOn ? { qty: baggageQty } : undefined,
+  });
 
   /* ── Long fallback quote URL (works without DB) ─────────── */
   const buildQuoteUrl = () => {
@@ -537,14 +561,16 @@ function ApartmentPage() {
       apartment: apt?.name ?? id,
       checkin, checkout,
       guests: String(guests),
-      ski_pass: String(skiPass),
+      ski_pass: String(skiOn),
       transfer: String(transfer),
+      equipment: String(equipment),
       cancel,
       service,
       nights: String(nights),
       apt_total: String(aptTotal),
       grand_total: String(grandTotal),
     });
+    if (quoteExtras) p.set("x", quoteExtras);
     return `/quote?${p}`;
   };
 
@@ -560,10 +586,10 @@ function ApartmentPage() {
       `👥 אורחים: ${guests}`,
       transfer ? `🚐 הסעה הלוך-חזור ל-${transferQty} אנשים (€${trTotal})${transferDetails ? ` · ${transferDetails}` : ""}` : null,
       equipment ? `🎿 השכרת ציוד ל-${equipQty} אנשים (€${equipTotal})` : null,
-      bookFlight ? `✈️ טיסה ל-${cheaperFlight.airport} ל-${bookFlightQty} אנשים (€${bookFlightTotal})${cheaperFlight.nonstop ? " · ישירה" : ""}` : null,
-      baggage ? `🧳 כבודה נוספת ל-${baggageQty} אנשים (€${baggageTotal})` : null,
+      flightOn ? `✈️ ${bookFlightDetails} (€${bookFlightTotal})` : null,
+      bagOn ? `🧳 מזוודה לבטן ל-${baggageQty} אנשים (€${baggageTotal})` : null,
       cancel === "flexible" ? "✅ מדיניות ביטול גמישה" : cancel === "none" ? "🔒 ללא אפשרות ביטול" : null,
-      skiPass ? `🎿 סקי פס · ${skiArea === "val_thorens" ? "Val Thorens/Orelle" : "Trois Vallées"}${skiTier ? ` · ${skiTier.duration_days} ימים` : ""} ל-${skiQty} אנשים (€${skiTotal})` : null,
+      skiOn ? `🎿 ${passLabel} ל-${skiQty} אנשים (€${skiTotal})` : null,
       service === "ai" ? "🤖 ניהול עצמאי (AI)" : null,
     ],
     total: grandTotal,
@@ -580,13 +606,13 @@ function ApartmentPage() {
           apartment_id: id,
           apartment: apt?.name ?? id,
           checkin, checkout, guests, nights,
-          ski_pass: skiPass, transfer, equipment, cancel, service,
+          ski_pass: skiOn, transfer, equipment, cancel, service,
           apt_total: aptTotal, grand_total: grandTotal,
         }),
       });
       if (!res.ok) throw new Error("no table");
       const { id: shortId } = await res.json();
-      setQuoteUrl(`${SITE_URL}/q/${encodeURIComponent(nameSlug)}/${shortId}`);
+      setQuoteUrl(`${SITE_URL}/q/${encodeURIComponent(nameSlug)}/${shortId}${quoteExtras ? `?x=${quoteExtras}` : ""}`);
     } catch {
       // DB/table not ready → use the long URL so nothing breaks
       setQuoteUrl(SITE_URL + buildQuoteUrl());
@@ -613,10 +639,11 @@ function ApartmentPage() {
   };
 
   // the two passes work like one choice: tap one to pick it, tap it again for no pass
-  const choosePass = (area: "val_thorens" | "trois_vallees") => {
-    if (skiPass && skiArea === area) { setSkiPass(false); return; }
+  const choosePass = (area: PassArea) => {
+    if (!passOpen(area)) return;
+    if (skiOn && skiArea === area) { setSkiPass(false); return; }
     setSkiArea(area);
-    if (!skiPass) { setSkiPass(true); setSkiQty(Math.min(skiQty || 1, guests) || 1); }
+    if (!skiOn) { setSkiPass(true); setSkiQty(Math.min(skiQty || 1, guests) || 1); }
   };
 
   if (loading) return <SkiLoader label="רגע, טוענים את הדירה…" />;
@@ -649,8 +676,12 @@ function ApartmentPage() {
   ];
   const mapEmbed = apt.map_url?.match(/src="(https:\/\/www\.google\.com\/maps\/embed\?[^"]+)"/)?.[1] ?? null;
   const mapLink = apt.map_url && !apt.map_url.includes("<") && /^https?:\/\//.test(apt.map_url) ? apt.map_url : null;
-  const passPrice = (area: "val_thorens" | "trois_vallees") => { const t = tierFor(area); return t ? `${eur(t.price)} לאדם · ${t.duration_days} ימים` : undefined; };
-  const anyAddOn = skiPass || transfer || equipment || bookFlight || baggage;
+  const passPrice = (area: PassArea) => {
+    if (!passOpen(area)) return `סגור בתאריכים האלה · פתוח ${shortDate(LIFT_DATES[area][0])}–${shortDate(LIFT_DATES[area][1])}`;
+    const t = tierFor(area);
+    return t ? `${eur(t.price)} לאדם · ${t.duration_days} ימים` : undefined;
+  };
+  const anyAddOn = skiOn || transfer || equipment || flightOn;
   const canBook = hasDates && !laCimeNoMatch && !datesTaken;
   const datesLine = hasDates ? `${fmtDay(checkin)} עד ${fmtDay(checkout)} · ${nights} ${nights === 1 ? "לילה" : "לילות"}` : "";
   const facts = [
@@ -663,11 +694,11 @@ function ApartmentPage() {
   /* the lines of the price, as computed above */
   const lines: { label: string; value: string; good?: boolean }[] = [
     { label: weekMatch ? "לינה, שבת עד שבת" : `לינה, ${nights} לילות${cleaningFee > 0 ? ", כולל ניקיון" : ""}`, value: eur(aptTotal) },
-    ...(skiPass ? [{ label: `סקי פס ${skiArea === "val_thorens" ? "ואל טורנס" : "שלושת העמקים"}${skiTier ? `, ${skiTier.duration_days} ימים` : ""} × ${skiQty}`, value: eur(skiTotal) }] : []),
+    ...(skiOn ? [{ label: `${passLabel} × ${skiQty}`, value: eur(skiTotal) }] : []),
     ...(transfer ? [{ label: `הסעה הלוך וחזור × ${transferQty}`, value: eur(trTotal) }] : []),
     ...(equipment ? [{ label: `ציוד, ${skiDays} ימים × ${equipQty}`, value: eur(equipTotal) }] : []),
-    ...(bookFlight ? [{ label: `טיסה ל-${cheaperFlight.airport}${cheaperFlight.nonstop ? ", ישירה" : ""} × ${bookFlightQty}`, value: eur(bookFlightTotal) }] : []),
-    ...(baggage ? [{ label: `כבודה נוספת × ${baggageQty}`, value: eur(baggageTotal) }] : []),
+    ...(flightOn ? [{ label: `${flightLabel} × ${bookFlightQty}`, value: eur(bookFlightTotal) }] : []),
+    ...(bagOn ? [{ label: `מזוודה לבטן × ${baggageQty}`, value: eur(baggageTotal) }] : []),
     ...(cancel === "flexible" ? [{ label: "ביטול גמיש", value: eur(flexExtra) }] : []),
     ...(cancel === "none" ? [{ label: "בלי אפשרות ביטול", value: `−${eur(CANCEL_NONE)}`, good: true }] : []),
     ...(service === "ai" ? [{ label: "הנחת שירות AI", value: `−${eur(AI_DISCOUNT)}`, good: true }] : []),
@@ -768,15 +799,17 @@ function ApartmentPage() {
             </div>
           </Section>
 
-          <Section id="pass" title={skiTier ? `סקי פס, ${skiTier.duration_days} ימי גלישה` : "סקי פס"}
+          <Section id="pass" title={hasDates && skiDays > 0 ? `סקי פס ל-${skiDays} ימי גלישה` : "סקי פס"}
             sub="בוחרים אחד, או מדלגים. את הסקי פס אוספים בעצמכם מהמכונה בכפר.">
             <div role="group" aria-label="סקי פס" className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <OptionCard kind="check" checked={skiPass && skiArea === "trois_vallees"} onSelect={() => choosePass("trois_vallees")}
+              <OptionCard kind="check" checked={skiOn && skiArea === "trois_vallees"} onSelect={() => choosePass("trois_vallees")}
+                disabled={!passOpen("trois_vallees")}
                 title="שלושת העמקים" sub='600 ק"מ מסלולים, כל האזור' price={passPrice("trois_vallees")} />
-              <OptionCard kind="check" checked={skiPass && skiArea === "val_thorens"} onSelect={() => choosePass("val_thorens")}
+              <OptionCard kind="check" checked={skiOn && skiArea === "val_thorens"} onSelect={() => choosePass("val_thorens")}
+                disabled={!passOpen("val_thorens")}
                 title="ואל טורנס ואורל" sub="המסלולים של הכפר עצמו" price={passPrice("val_thorens")} />
             </div>
-            {skiPass && (
+            {skiOn && (
               <QtyRow label="כמה אנשים צריכים סקי פס?" qty={skiQty} setQty={setSkiQty} max={maxGuests} total={skiTotal} />
             )}
           </Section>
@@ -806,17 +839,15 @@ function ApartmentPage() {
             </OptionCard>
           </Section>
 
-          <Section id="flight" title="טיסה" sub={hasDates ? "מחפשים בשבילכם את הטיסה הכי זולה מתל אביב לתאריכים." : undefined}>
-            <FlightAddOn state={cheaperFlight} airport={cheaperFlight.airport}
-              checked={bookFlight}
+          <Section id="flight" title="טיסה" sub="רק טיסה ישירה הלוך וחזור מתל אביב, במחיר האמיתי לתאריכים שלכם.">
+            <FlightAddOn state={direct} ret={returnLeg} checkin={checkin} checkout={checkout}
+              checked={flightOn}
               onToggle={v => { setBookFlight(v); if (v) setBookFlightQty(guests || 1); }}
               qty={bookFlightQty} setQty={setBookFlightQty} maxQty={maxGuests} total={bookFlightTotal}
-              emptyText={hasDates ? undefined : "בחרו תאריכים ונבדוק מחיר טיסה"} />
-            <OptionCard kind="check" checked={baggage} icon={<IconBriefcase size={20} />}
-              onSelect={() => { const v = !baggage; setBaggage(v); if (v) setBaggageQty(Math.min(baggageQty || 1, guests) || 1); }}
-              title="כבודה נוספת" sub={`מזוודה לטיסה · ${eur(BAGGAGE_PRICE)} לאדם`}>
-              <QtyRow label="כמה תיקי כבודה?" qty={baggageQty} setQty={setBaggageQty} max={maxGuests} total={baggageTotal} />
-            </OptionCard>
+              bag={{
+                on: bagOn, unit: BAGGAGE_PRICE, qty: baggageQty, setQty: setBaggageQty, total: baggageTotal,
+                toggle: () => { const v = !baggage; setBaggage(v); if (v) setBaggageQty(Math.min(baggageQty || guests, guests) || 1); },
+              }} />
           </Section>
 
           <Section id="policy" title="ביטול ושירות">
@@ -957,9 +988,9 @@ function ApartmentPage() {
                 )}
 
                 <CardPaymentButton apartmentId={id} apartment={apt?.name ?? ""} checkin={checkin} checkout={checkout}
-                  guests={guests} nights={nights} skiPass={skiPass} transfer={transfer} equipment={equipment} cancel={cancel} service={service}
+                  guests={guests} nights={nights} skiPass={skiOn} transfer={transfer} equipment={equipment} cancel={cancel} service={service}
                   transferDetails={transferDetails}
-                  flight={bookFlight} flightPrice={bookFlightTotal + baggageTotal} flightDetails={bookFlightDetails}
+                  flight={flightOn} flightPrice={bookFlightTotal + baggageTotal} flightDetails={bookFlightDetails}
                   grandTotal={payNow}
                   split={splitCount > 1 ? { sharesTotal: splitCount, accommodationTotal: grandTotal, shareAmount: shareAccommodation, area: "Val Thorens, Trois Vallées" } : undefined}
                   label={splitCount > 1 ? "לשלם את החלק שלכם בכרטיס" : "להזמנה ותשלום מאובטח"}

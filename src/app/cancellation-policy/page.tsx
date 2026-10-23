@@ -1,3 +1,4 @@
+import Link from "next/link";
 import LegalShell from "@/components/LegalShell";
 
 export const metadata = { title: "מדיניות ביטול — SkiShare" };
@@ -44,6 +45,11 @@ export default function CancellationPolicy() {
           <div className="font-bold text-warn mb-1">הערה חשובה</div>
           מדיניות ביטול גמישה כוללת שירות אנושי מלא — לא ניתן לשלבה עם שירות AI בלבד. לשאלות נוספות: <a href="mailto:skishareteam@gmail.com">skishareteam@gmail.com</a>
         </div>
+
+        <Link href="/emergency-policy" className="rounded-card border border-accent/25 bg-accent-soft/60 p-5 flex flex-col gap-1 hover:border-accent/50 transition-colors">
+          <span className="font-bold text-ink text-[16px] md:text-[17px]">מצב חירום, מלחמה או סגירת שמיים?</span>
+          <span className="text-[15px] md:text-[16px] text-body">למצבים כאלה, כמו מה שהיה עם איראן, יש מדיניות ביטולים מורחבת: מה קורה עם הטיסות, הדירות והסקי פס. <b className="text-accent">למדיניות ←</b></span>
+        </Link>
       </div>
     </LegalShell>
   );

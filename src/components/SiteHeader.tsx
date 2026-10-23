@@ -24,7 +24,7 @@ const NAV = [
 ];
 
 // screens with their own frame
-const HIDDEN = ["/admin"];
+const HIDDEN = ["/admin", "/quote/print"]; // own frame / a printable page
 
 export function Brand({ white = false, small = false }: { white?: boolean; small?: boolean }) {
   return (

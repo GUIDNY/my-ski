@@ -114,7 +114,7 @@ export default function RootLayout({
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }} />
         <SiteHeader />
         <div className="flex-1 flex flex-col">{children}</div>
-        <ChromeGate hide={["/admin"]}><Footer /></ChromeGate>
+        <ChromeGate hide={["/admin", "/quote/print"]}><Footer /></ChromeGate>
         <DeepLinkHandler />
         <AiConcierge />
         <CookieConsent />

@@ -1,42 +1,29 @@
-"use client";
-import SkiLoader from "@/components/SkiLoader";
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-import QuoteView, { QuoteNotFound, type QuoteData } from "@/components/QuoteView";
-import OpenInAppBanner from "@/components/OpenInAppBanner";
+import type { Metadata } from "next";
+import ShortQuote from "./ShortQuote";
 
-export default function ShortQuotePage() {
-  const { slug } = useParams<{ slug: string[] }>();
-  const [q, setQ] = useState<QuoteData | null>(null);
-  const [notFound, setNotFound] = useState(false);
+type Props = {
+  params: Promise<{ slug: string[] }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
 
-  // last path segment is the short id (e.g. /q/נבס-93/a7k2)
-  const id = Array.isArray(slug) ? slug[slug.length - 1] : slug;
+const idOf = (slug: string[] | string) => (Array.isArray(slug) ? slug[slug.length - 1] : slug) ?? "";
+const extrasOf = (sp: Record<string, string | string[] | undefined>) => (typeof sp.x === "string" && /^[a-z0-9-]{1,60}$/i.test(sp.x) ? sp.x : null);
 
-  useEffect(() => {
-    if (!id) return;
-    fetch(`/api/quotes/${id}`)
-      .then(r => (r.ok ? r.json() : Promise.reject()))
-      .then(d => setQ({
-        apartmentId: d.apartment_id ?? "",
-        apartment:   d.apartment_name ?? "דירה",
-        checkin:     d.checkin ?? "",
-        checkout:    d.checkout ?? "",
-        guests:      d.guests ?? 2,
-        nights:      d.nights ?? 1,
-        skiPass:     !!d.ski_pass,
-        transfer:    !!d.transfer,
-        cancel:      d.cancel ?? "none",
-        service:     d.service ?? "human",
-        aptTotal:    Number(d.apt_total ?? 0),
-        grandTotal:  Number(d.grand_total ?? 0),
-      }))
-      .catch(() => setNotFound(true));
-  }, [id]);
+// A personal link: not for search results. On iPhone, Safari's own app banner
+// opens this same quote in the app (app-argument) when the app is installed.
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
+  const id = idOf((await params).slug);
+  const x = extrasOf(await searchParams);
+  return {
+    title: "הצעת מחיר — SkiShare",
+    robots: { index: false, follow: false },
+    itunes: { appId: "6782095727", appArgument: `https://skisharebook.com/q/${encodeURIComponent(id)}${x ? `?x=${x}` : ""}` },
+  };
+}
 
-  if (notFound) return <QuoteNotFound />;
-
-  if (!q) return <SkiLoader label="רגע, פותחים את ההצעה…" />;
-
-  return <><OpenInAppBanner /><QuoteView q={q} /></>;
+// last path segment is the short id (e.g. /q/נבס-93/a7k2)
+export default async function ShortQuotePage({ params, searchParams }: Props) {
+  const id = idOf((await params).slug);
+  const x = extrasOf(await searchParams);
+  return <ShortQuote id={id} x={x} />;
 }
