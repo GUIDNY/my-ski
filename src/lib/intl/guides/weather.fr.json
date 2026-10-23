@@ -1,73 +1,317 @@
 {
   "key": "weather",
   "lang": "fr",
-  "title": "PLACEHOLDER weather fr",
-  "metaTitle": "PLACEHOLDER weather | SkiShare",
-  "description": "placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder ",
+  "title": "Météo et enneigement à Val Thorens : à quoi s'attendre mois par mois",
+  "metaTitle": "Météo et enneigement à Val Thorens mois par mois | SkiShare",
+  "description": "Météo et enneigement à Val Thorens mois par mois, selon Météo-France : −10,3 °C de minimale moyenne en janvier, le plus de neige de février à avril, et où vérifier.",
   "keywords": [
-    "a",
-    "b",
-    "c"
+    "météo val thorens",
+    "enneigement val thorens",
+    "neige val thorens avril",
+    "température val thorens janvier",
+    "météo val thorens décembre",
+    "météo val thorens mars",
+    "hauteur de neige val thorens",
+    "bulletin neige val thorens",
+    "risque avalanche val thorens"
   ],
-  "emoji": "🎫",
+  "emoji": "❄️",
   "published": "2026-10-23",
   "updated": "2026-10-23",
-  "intro": "Intro with [a link](/fr/apartments) and **bold**.",
+  "intro": "Il fait froid à Val Thorens toute la saison. À la station Météo-France du village (2 277 m), janvier, le mois le plus froid, affiche en moyenne −10,3 °C de minimale et −2,1 °C de maximale (hivers 2018-2019 à 2025-2026). La neige au sol est la plus épaisse de février à avril, 140 à 152 cm en moyenne, quand novembre et décembre varient beaucoup d'une année à l'autre. En avril, le mois le plus doux (−4,9 °C de minimale et 4,4 °C de maximale en moyenne), la station a mesuré plus de 30 cm de neige chaque jour lors des sept derniers hivers.",
   "sections": [
     {
-      "heading": "Section one",
+      "heading": "Météo à Val Thorens mois par mois : températures et neige",
       "paragraphs": [
-        "Para 5–18 December."
-      ],
-      "list": [
-        "x",
-        "y"
+        "Janvier est le mois le plus froid à Val Thorens, avec −10,3 °C de minimale moyenne, et mars celui qui a le plus de neige au sol, 152 cm en moyenne. Nous avons calculé ce tableau à partir des données mensuelles de Météo-France pour sa station du village, VAL THORENS_SAPC : températures des huit hivers 2018-2019 à 2025-2026, neige des sept hivers depuis 2019-2020, le premier mesuré. Ce sont les derniers hivers, pas une prévision."
       ],
       "table": {
-        "caption": "Cap",
+        "caption": "Station du village, 2 277 m : moyennes des hivers 2018-2019 à 2025-2026 (neige depuis 2019-2020), calcul SkiShare d'après les données Météo-France",
         "head": [
-          "A",
-          "B"
+          "Mois",
+          "Mini (°C)",
+          "Maxi (°C)",
+          "Jours sans dégel",
+          "Neige au sol (cm)"
         ],
         "rows": [
           [
-            "1",
-            "2"
+            "Nov.",
+            "−4,9",
+            "2,7",
+            "8",
+            "23"
+          ],
+          [
+            "Déc.",
+            "−7,4",
+            "0,1",
+            "14",
+            "75"
+          ],
+          [
+            "Janv.",
+            "−10,3",
+            "−2,1",
+            "20",
+            "113"
+          ],
+          [
+            "Févr.",
+            "−8,0",
+            "0,7",
+            "11",
+            "140"
+          ],
+          [
+            "Mars",
+            "−8,0",
+            "2,0",
+            "9",
+            "152"
+          ],
+          [
+            "Avr.",
+            "−4,9",
+            "4,4",
+            "3",
+            "143"
+          ],
+          [
+            "Mai",
+            "−0,5",
+            "7,7",
+            "0,5",
+            "72"
           ]
         ]
-      }
+      },
+      "after": [
+        "**Ce que montre le tableau :** en janvier, la température n'a pas dépassé 0 °C de la journée 20 jours en moyenne (les jours sans dégel), et la minimale est descendue à −10 °C ou moins 16 jours. Le relevé le plus froid de ces hivers : −21,6 °C, le 11 janvier 2019.",
+        "**La hauteur de neige** est mesurée chaque matin en un seul point, la station du village ; sur les pistes et plus haut, elle peut être très différente.",
+        "**Les lacunes :** mars 2020 est incomplet (températures de mars sur sept hivers) ; une partie des hauteurs de neige n'a passé que les premiers contrôles de Météo-France. Mai figure pour mémoire."
+      ]
     },
     {
-      "heading": "Live",
+      "heading": "Quand y a-t-il le plus de neige à Val Thorens ?",
+      "paragraphs": [
+        "De février à avril : la station du village a mesuré en moyenne 140 cm de neige au sol en février, 152 cm en mars et 143 cm en avril. Le mois en tête change d'une année à l'autre, comme les quantités : en mars, 113 cm en moyenne en 2022, 223 cm en 2020. Sur les sept hivers 2019-2020 à 2025-2026, le jour le plus enneigé de chaque hiver est tombé entre le 20 février et le 17 avril, avec 151 à 249 cm.",
+        "De janvier à avril, le manteau tient : lors des sept hivers, la station a mesuré plus de 30 cm chaque jour de ces quatre mois. Les vacances d'hiver 2027, du 6 février au 8 mars selon la zone (C, puis A, puis B), tombent donc dans les mois les plus enneigés. Affluence et prix, semaine par semaine : [quand partir à Val Thorens](/fr/guide/quand-partir-a-val-thorens).",
+        "**Et la neige fraîche ?** Pour cette station, Météo-France ne donne que les précipitations, en millimètres, pas la neige tombée. Sur les six hivers aux relevés complets, de novembre à avril, 7 à 12 jours par mois ont eu au moins 1 mm, neige ou pluie : le moins en février, le plus en décembre."
+      ]
+    },
+    {
+      "heading": "Y a-t-il de la neige à Val Thorens en novembre et en décembre ?",
+      "paragraphs": [
+        "Oui, mais moins que plus tard dans la saison, et avec de gros écarts d'un hiver à l'autre : 23 cm en moyenne à la station en novembre, 75 cm en décembre. Val Thorens et Orelle ouvrent le 21 novembre 2026, les liaisons avec le reste des 3 Vallées le 5 décembre 2026 et le secteur de Saint-Martin-de-Belleville le 12 décembre. Les sept derniers hivers :"
+      ],
+      "table": {
+        "caption": "Neige au sol à la station du village, moyenne du mois (cm), et jour le plus enneigé de chaque hiver (Météo-France, calcul SkiShare)",
+        "head": [
+          "Hiver",
+          "Nov.",
+          "Déc.",
+          "Janv.",
+          "Jour le plus enneigé"
+        ],
+        "rows": [
+          [
+            "2019-20",
+            "36",
+            "115",
+            "140",
+            "249 cm, 6 mars"
+          ],
+          [
+            "2020-21",
+            "4",
+            "37",
+            "97",
+            "200 cm, 17 mars"
+          ],
+          [
+            "2021-22",
+            "17",
+            "92",
+            "113",
+            "151 cm, 8 avril"
+          ],
+          [
+            "2022-23",
+            "21",
+            "49",
+            "85",
+            "152 cm, 27 mars"
+          ],
+          [
+            "2023-24",
+            "38",
+            "92",
+            "135",
+            "180 cm, 2 avril"
+          ],
+          [
+            "2024-25",
+            "18",
+            "88",
+            "137",
+            "198 cm, 17 avril"
+          ],
+          [
+            "2025-26",
+            "25",
+            "51",
+            "84",
+            "231 cm, 20 févr."
+          ]
+        ]
+      },
+      "after": [
+        "**Noël et le Nouvel An :** lors des sept hivers, il y avait de la neige au sol à la station tous les jours de décembre, et plus de 30 cm tout le mois dans six d'entre eux. Les vacances de Noël vont du 19 décembre 2026 au 4 janvier 2027, pour toutes les zones.",
+        "**Un début maigre ne fait pas une saison maigre :** en 2025-2026, la station a mesuré 51 cm en moyenne en décembre et 84 cm en janvier, le janvier le plus faible de ces hivers, puis 231 cm le 20 février 2026."
+      ]
+    },
+    {
+      "heading": "Pourquoi l'altitude de Val Thorens compte-t-elle ?",
+      "paragraphs": [
+        "Parce qu'il fait plus froid en altitude, et que la neige y tient : le village est à 2 300 m et le domaine monte à 3 230 m côté Orelle, selon Les 3 Vallées. D'après la SETAM, qui exploite les remontées de Val Thorens, 99 % de son domaine est au-dessus de 2 000 m.",
+        "Selon Météo-France, on perd environ 0,65 °C tous les 100 m dans l'atmosphère standard : quelque 6 °C de moins à 3 230 m qu'au village. Pas tous les jours : par temps anticyclonique et ciel dégagé, l'air froid s'accumule la nuit au fond des vallées, et il peut alors faire plus doux en altitude.",
+        "Au village même, de décembre à février, la maximale moyenne reste entre −2,1 et 0,7 °C, et la neige s'accumule de 75 cm en moyenne en décembre à 152 cm en mars.",
+        "**Et la neige de culture ?** Selon le dossier de presse 2026-2027 des 3 Vallées, 2 838 enneigeurs couvrent 54 % du domaine. Ils aident, sans pouvoir promettre la neige, et Météo-France note que le changement climatique a déjà réduit l'enneigement des massifs, surtout à basse et moyenne altitude."
+      ]
+    },
+    {
+      "heading": "Comment s'habiller à Val Thorens selon le mois ?",
+      "paragraphs": [
+        "En tenue d'hiver complète, par couches, de novembre à avril : même en avril, le mois le plus doux de la saison, la minimale moyenne est de −4,9 °C. Et habillez-vous pour le sommet, pas pour le village."
+      ],
+      "list": [
+        "**Novembre :** la saison démarre dans le froid, avec −4,9 °C de minimale moyenne. Sous-vêtements techniques, polaire, veste et pantalon de ski, gants et bonnet.",
+        "**De décembre à février :** le cœur de l'hiver. La minimale moyenne est de −7,4 °C en décembre, et en janvier même la maximale moyenne reste sous zéro, à −2,1 °C. Une première couche chaude, un tour de cou, des gants chauds ou des moufles.",
+        "**Mars :** des matins aussi froids qu'en février, −8,0 °C en moyenne, mais jusqu'à 2,0 °C l'après-midi. Une couche qu'on peut retirer, crème solaire et lunettes de soleil.",
+        "**Avril :** −4,9 °C de minimale et 4,4 °C de maximale en moyenne ; le jour le plus chaud d'avril sur ces hivers a atteint 10,8 °C. Des couches plus légères, crème solaire et lunettes de soleil."
+      ]
+    },
+    {
+      "heading": "Y a-t-il de la neige à Val Thorens en mars et en avril ?",
+      "paragraphs": [
+        "Oui : lors des sept hivers 2019-2020 à 2025-2026, la station a mesuré plus de 30 cm de neige chaque jour de mars et d'avril, et 152 cm et 143 cm en moyenne. Val Thorens et Orelle restent ouverts jusqu'au 2 mai 2027, deux semaines après la fermeture des liaisons avec le reste des 3 Vallées, le 18 avril.",
+        "Au printemps, la neige change dans la journée : en général dure le matin après une nuit froide, elle ramollit vers midi et devient lourde l'après-midi, d'où l'intérêt de skier tôt. Les nuits restent froides (du gel 26 jours sur 30 en avril, en moyenne) et les journées sont longues : le 15 avril, le soleil se lève à 6 h 49 et se couche à 20 h 19 sur un horizon dégagé, selon sunrise-sunset.org, contre 8 h 06 et 16 h 51 le 15 décembre.",
+        "Les vacances de printemps 2027 vont du 3 avril au 3 mai selon la zone (C, puis A, puis B) : la zone B est encore en vacances à la fermeture, le 2 mai. Lors des sept hivers, le jour le plus enneigé de mai est tombé dans la première semaine, avec 81 à 160 cm selon l'année. Nos semaines de printemps, en direct :"
+      ],
+      "after": [
+        "Chez nous, une semaine d'avril coûte environ trois fois moins qu'une semaine de mi-février. Les prix : [prix de location d'un appartement à Val Thorens](/fr/guide/prix-location-appartement-val-thorens)."
+      ],
       "liveWeeks": {
         "notes": {
-          "2026-12-26": "New Year"
+          "2027-04-03": "Vacances de printemps, zone C",
+          "2027-04-10": "Vacances zones A et C",
+          "2027-04-17": "Vacances zones A et B",
+          "2027-04-24": "Zone B ; remontées fermées le 2 mai"
         },
+        "only": [
+          "2027-03-06",
+          "2027-03-13",
+          "2027-03-20",
+          "2027-03-27",
+          "2027-04-03",
+          "2027-04-10",
+          "2027-04-17",
+          "2027-04-24"
+        ],
         "count": true
       }
     },
     {
-      "heading": "Ordered",
-      "list": [
-        "a",
-        "b"
+      "heading": "Où consulter la météo, l'enneigement et le risque d'avalanche ?",
+      "paragraphs": [
+        "D'abord Météo-France : ses prévisions montagne pour Val Thorens portent jusqu'à 15 jours, et son bulletin d'avalanche pour le massif de la Vanoise note le risque de 1 à 5. Avant le départ et chaque matin sur place :"
       ],
-      "ordered": true,
+      "list": [
+        "Les prévisions montagne de Météo-France pour [la station](https://meteofrance.com/meteo-montagne/val-thorens/732573) et pour [Val Thorens à 3 200 m](https://meteofrance.com/meteo-montagne/val-thorens-3200m/732574).",
+        "Le bulletin d'estimation du risque d'avalanche (BERA) du massif de la Vanoise, sur [meteofrance.com](https://meteofrance.com/meteo-montagne/alpes-du-nord/risques-avalanche) : risque de 1 (faible) à 5 (très fort) sur l'échelle européenne, neige et danger jusqu'au lendemain soir, enneigement hors piste estimé à plusieurs altitudes.",
+        "La [météo des 3 Vallées pour Val Thorens](https://www.les3vallees.com/fr/live/meteo/val-thorens) : matin et après-midi, au centre station (2 300 m) et à la Cime Caron (3 200 m), sur trois jours, avec la tendance de la semaine.",
+        "Le [bulletin neige de l'office de tourisme](https://www.valthorens.com/en/infos-neige/), en anglais : neige en bas et en haut de la station, dernière chute, limite pluie-neige, isotherme 0 °C, risque d'avalanche, remontées et pistes ouvertes en temps réel.",
+        "Les [webcams des 3 Vallées à Val Thorens](https://www.les3vallees.com/fr/live/webcams/val-thorens), du centre station à la Cime Caron : dès le petit-déjeuner, on voit si le soleil brille au-dessus des nuages.",
+        "L'appli Les 3 Vallées : enneigement en temps réel, prévisions et alertes en cas d'incident technique ou de changement de météo, selon Les 3 Vallées.",
+        "Par mauvais temps, [le site de la SETAM](https://ski.valthorens.com/), qui a des alertes prêtes (visibilité réduite, fortes chutes de neige, liaison avec Orelle fermée). Son [plan des pistes](https://ski.valthorens.com/wp-content/uploads/2026/10/Plan3V-2027-675x354-ValTho_PrintOk_compressed.pdf) déconseille le circuit des 3 Vallées si le temps est trop incertain : bloqué dans une autre vallée, on rentre à ses frais."
+      ],
       "after": [
-        "after"
+        "En voiture, du 1er novembre 2026 au 31 mars 2027, quatre pneus hiver (3PMSF) ou des chaînes ou chaussettes à neige à bord sont obligatoires dans les communes de montagne désignées par les préfets, rappelle [Service Public](https://www.service-public.gouv.fr/particuliers/actualites/A14389) ; c'est le cas en Savoie, selon Les 3 Vallées. Accès : [comment aller à Val Thorens](/fr/guide/comment-aller-a-val-thorens).",
+        "Votre mois est choisi ? Voir [nos appartements à Val Thorens](/fr/apartments), et les [prix du forfait à Val Thorens](/fr/guide/prix-forfait-val-thorens) pour 2026-2027."
       ]
     }
   ],
   "faqs": [
     {
-      "q": "Question?",
-      "a": "Answer."
+      "q": "Quelle température fait-il à Val Thorens en janvier ?",
+      "a": "Janvier est le mois le plus froid : à la station Météo-France du village, −10,3 °C de minimale et −2,1 °C de maximale en moyenne (hivers 2018-2019 à 2025-2026), et 20 jours sans dégel par mois."
+    },
+    {
+      "q": "Y a-t-il de la neige à Val Thorens en avril ?",
+      "a": "Oui. Lors des sept hivers 2019-2020 à 2025-2026, la station du village a mesuré plus de 30 cm de neige tous les jours d'avril, et 143 cm en moyenne. Val Thorens et Orelle restent ouverts jusqu'au 2 mai 2027."
+    },
+    {
+      "q": "Quand l'enneigement est-il le plus important à Val Thorens ?",
+      "a": "De février à avril : 140 cm en moyenne en février, 152 cm en mars et 143 cm en avril à la station du village. Le jour le plus enneigé de chacun des sept derniers hivers est tombé entre le 20 février et le 17 avril."
+    },
+    {
+      "q": "Y a-t-il de la neige à Val Thorens à Noël ?",
+      "a": "Lors des sept derniers hivers, il y avait de la neige au sol à la station tous les jours de décembre, en quantité très variable : 37 cm en moyenne en décembre 2020, 115 cm en décembre 2019."
+    },
+    {
+      "q": "Fait-il beaucoup plus froid en haut des pistes ?",
+      "a": "Selon la règle rappelée par Météo-France, on perd environ 0,65 °C tous les 100 m : quelque 6 °C de moins à 3 230 m qu'au village (2 300 m). Par temps anticyclonique, l'air froid peut stagner plus bas et réduire l'écart, voire l'inverser."
+    },
+    {
+      "q": "Où trouver le bulletin d'avalanche pour Val Thorens ?",
+      "a": "Sur meteofrance.com : c'est le bulletin d'estimation du risque d'avalanche (BERA) du massif de la Vanoise. Il note le risque de 1 (faible) à 5 (très fort) et décrit la neige jusqu'au lendemain soir."
+    },
+    {
+      "q": "Peut-on savoir à l'avance combien de neige il y aura ?",
+      "a": "Non. Ces moyennes décrivent les derniers hivers, pas le prochain : consultez les prévisions et le bulletin neige avant de partir."
     }
   ],
   "sources": [
     {
-      "title": "Src",
-      "url": "https://www.valthorens.com/"
+      "title": "Météo-France : données climatologiques mensuelles, Savoie, 1950–2024 (station 73257005, VAL THORENS_SAPC, 2 277 m)",
+      "url": "https://object.files.data.gouv.fr/meteofrance/data/synchro_ftp/BASE/MENS/MENSQ_73_previous-1950-2024.csv.gz"
+    },
+    {
+      "title": "Météo-France : données climatologiques mensuelles, Savoie, 2025–2026 (même station)",
+      "url": "https://object.files.data.gouv.fr/meteofrance/data/synchro_ftp/BASE/MENS/MENSQ_73_latest-2025-2026.csv.gz"
+    },
+    {
+      "title": "Météo-France : avalanches, échelle de risque et bulletin d'estimation du risque d'avalanche (BERA)",
+      "url": "https://meteofrance.com/vigilance-et-securite/avalanche-quels-dangers-comment-reagir-et-sinformer"
+    },
+    {
+      "title": "Météo-France : pourquoi les températures diffèrent (environ 0,65 °C de moins tous les 100 m)",
+      "url": "https://meteofrance.com/meteo-a-z/pourquoi-les-temperatures-peuvent-etre-tres-differentes-dune-region-a-lautre"
+    },
+    {
+      "title": "Météo-France : changement climatique et enneigement des stations (ClimSnow)",
+      "url": "https://meteofrance.com/actualites/adaptation-au-changement-climatique-en-montagne-le-service-climatique-climsnow"
+    },
+    {
+      "title": "Les 3 Vallées : dossier de presse 2026-2027 (dates d'ouverture, 2 838 enneigeurs)",
+      "url": "https://press.les3vallees.com/media/download/the-place-to-ski.pdf"
+    },
+    {
+      "title": "Les 3 Vallées : Orelle (le domaine monte à 3 230 m)",
+      "url": "https://www.les3vallees.com/fr/station/orelle"
+    },
+    {
+      "title": "SETAM : domaine skiable de Val Thorens (99 % au-dessus de 2 000 m, dates d'ouverture)",
+      "url": "https://ski.valthorens.com/"
+    },
+    {
+      "title": "Service Public : les dates des vacances scolaires 2026-2027",
+      "url": "https://www.service-public.gouv.fr/particuliers/actualites/A18563"
+    },
+    {
+      "title": "sunrise-sunset.org : lever et coucher du soleil à Val Thorens",
+      "url": "https://sunrise-sunset.org/fr/val-thorens"
     }
   ]
 }

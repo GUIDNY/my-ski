@@ -1,73 +1,318 @@
 {
   "key": "weather",
   "lang": "en",
-  "title": "PLACEHOLDER weather en",
-  "metaTitle": "PLACEHOLDER weather | SkiShare",
-  "description": "placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder ",
+  "title": "Val Thorens weather and snow depth by month: what to expect",
+  "metaTitle": "Val Thorens weather and snow depth by month | SkiShare",
+  "description": "Val Thorens weather and snow by month from Météo-France's village station: −10.3 °C average January lows, deepest snow February to April, and where to check.",
   "keywords": [
-    "a",
-    "b",
-    "c"
+    "val thorens weather",
+    "val thorens snow depth",
+    "val thorens weather december",
+    "val thorens weather january",
+    "val thorens weather march",
+    "val thorens weather april",
+    "is there snow in val thorens in april",
+    "val thorens temperature",
+    "val thorens snow report"
   ],
-  "emoji": "🎫",
+  "emoji": "❄️",
   "published": "2026-10-23",
   "updated": "2026-10-23",
-  "intro": "Intro with [a link](/en/apartments) and **bold**.",
+  "intro": "Val Thorens is cold all season. At Météo-France's weather station in the village (2,277 m), January is the coldest month, with an average low of −10.3 °C and an average high of −2.1 °C over the winters 2018/19 to 2025/26. The snow on the ground is deepest from February to April, 140 to 152 cm on average, while November and December vary a lot from year to year. April is the mildest month of the season (average low −4.9 °C, high 4.4 °C), and in each of the last seven winters the station had more than 30 cm of snow on every April day.",
   "sections": [
     {
-      "heading": "Section one",
+      "heading": "Val Thorens weather by month: temperature and snow",
       "paragraphs": [
-        "Para 5–18 December."
-      ],
-      "list": [
-        "x",
-        "y"
+        "January is the coldest month in Val Thorens, with an average low of −10.3 °C, and March has the most snow on the ground, 152 cm on average. We calculated the table from the monthly data Météo-France publishes for its station in the village, VAL THORENS_SAPC, at 2,277 m: temperatures over the eight winters 2018/19 to 2025/26, snow over the seven winters since 2019/20, the first with snow data. It describes recent winters, not a forecast."
       ],
       "table": {
-        "caption": "Cap",
+        "caption": "Village station, 2,277 m: averages of the winters 2018/19 to 2025/26 (snow from 2019/20), our calculation from Météo-France data",
         "head": [
-          "A",
-          "B"
+          "Month",
+          "Avg low (°C)",
+          "Avg high (°C)",
+          "Days not above 0 °C",
+          "Snow depth (cm)"
         ],
         "rows": [
           [
-            "1",
-            "2"
+            "Nov",
+            "−4.9",
+            "2.7",
+            "8",
+            "23"
+          ],
+          [
+            "Dec",
+            "−7.4",
+            "0.1",
+            "14",
+            "75"
+          ],
+          [
+            "Jan",
+            "−10.3",
+            "−2.1",
+            "20",
+            "113"
+          ],
+          [
+            "Feb",
+            "−8.0",
+            "0.7",
+            "11",
+            "140"
+          ],
+          [
+            "Mar",
+            "−8.0",
+            "2.0",
+            "9",
+            "152"
+          ],
+          [
+            "Apr",
+            "−4.9",
+            "4.4",
+            "3",
+            "143"
+          ],
+          [
+            "May",
+            "−0.5",
+            "7.7",
+            "0.5",
+            "72"
           ]
         ]
-      }
+      },
+      "after": [
+        "**What the table shows:** in January it stayed at or below 0 °C all day on 20 days, on average, and the low fell to −10 °C or below on 16. The coldest reading of these winters was −21.6 °C, on 11 January 2019. November and April share an average low of −4.9 °C, but April afternoons are warmer.",
+        "**Snow depth** is measured every morning at one point, the station in the village; on the pistes and higher up it can be quite different.",
+        "**Gaps in the data:** days are missing in March 2020, so March temperatures come from seven winters, and some snow figures have passed only Météo-France's first checks. May is for reference: the lifts close on 2 May 2027."
+      ]
     },
     {
-      "heading": "Live",
+      "heading": "When is there the most snow in Val Thorens?",
+      "paragraphs": [
+        "From February to April: the station in the village averaged 140 cm of snow on the ground in February, 152 cm in March and 143 cm in April. Which month leads changes from year to year, and so does the amount: the March average was 113 cm in 2022 and 223 cm in 2020. In the seven winters 2019/20 to 2025/26, the deepest day of each winter fell between 20 February and 17 April, with 151 to 249 cm; the highest was 249 cm, on 6 March 2020.",
+        "The snow cover holds from January to April: in all seven winters the station had more than 30 cm on every day of those four months. February half-term falls in the deep-snow months; to pick a week by crowds and prices, see [when to go to Val Thorens](/en/guide/best-time-to-ski-in-val-thorens).",
+        "**What about fresh snow?** Météo-France's files give no new-snow figure for this station, only precipitation, measured in millimetres like rain. In the six winters with complete records, there were 7 to 12 days a month from November to April with at least 1 mm of snow or rain: the fewest in February, the most in December."
+      ]
+    },
+    {
+      "heading": "Is there snow in Val Thorens in November and December?",
+      "paragraphs": [
+        "Yes, but less than later in the season, and it varies a lot from winter to winter: the station averaged 23 cm in November and 75 cm in December. Val Thorens and Orelle open on 21 November 2026, the links to the rest of Les 3 Vallées on 5 December 2026 and the Saint-Martin-de-Belleville sector on 12 December. The last seven winters at the station:"
+      ],
+      "table": {
+        "caption": "Average snow depth at the village station (cm) and the deepest day of each winter (Météo-France data, our calculation; none for 2018/19)",
+        "head": [
+          "Winter",
+          "Nov",
+          "Dec",
+          "Jan",
+          "Deepest day"
+        ],
+        "rows": [
+          [
+            "2019/20",
+            "36",
+            "115",
+            "140",
+            "249 cm, 6 Mar"
+          ],
+          [
+            "2020/21",
+            "4",
+            "37",
+            "97",
+            "200 cm, 17 Mar"
+          ],
+          [
+            "2021/22",
+            "17",
+            "92",
+            "113",
+            "151 cm, 8 Apr"
+          ],
+          [
+            "2022/23",
+            "21",
+            "49",
+            "85",
+            "152 cm, 27 Mar"
+          ],
+          [
+            "2023/24",
+            "38",
+            "92",
+            "135",
+            "180 cm, 2 Apr"
+          ],
+          [
+            "2024/25",
+            "18",
+            "88",
+            "137",
+            "198 cm, 17 Apr"
+          ],
+          [
+            "2025/26",
+            "25",
+            "51",
+            "84",
+            "231 cm, 20 Feb"
+          ]
+        ]
+      },
+      "after": [
+        "**Christmas and New Year:** in all seven winters there was snow on the ground at the station on every day of December, and in six of them more than 30 cm all month.",
+        "**A thin start is not a thin season:** in 2025/26 the station averaged 51 cm in December and 84 cm in January, the lowest January of these winters, then reached 231 cm on 20 February 2026. Nobody can promise next winter's snow."
+      ]
+    },
+    {
+      "heading": "Why does the altitude of Val Thorens matter?",
+      "paragraphs": [
+        "Because it is colder higher up, so the snow lasts: the village is at 2,300 m and the ski area climbs to 3,230 m on the Orelle side, according to Les 3 Vallées. SETAM, the Val Thorens lift company, says 99% of its ski area lies above 2,000 m.",
+        "Météo-France's rule of thumb is that, in the standard atmosphere, the temperature drops by about 0.65 °C for every 100 m you climb: some 6 °C colder at 3,230 m than in the village. Not every day, though: in high-pressure weather with clear skies, cold air collects in the valleys overnight and it can stay milder higher up, a temperature inversion.",
+        "The station shows the effect: in the village itself, the average high from December to February is between −2.1 and 0.7 °C, and the snow builds up from 75 cm on average in December to 152 cm in March.",
+        "**And snowmaking?** The Les 3 Vallées press kit for 2026/27 counts 2,838 snow guns covering 54% of the ski area. They help, but no one can promise snow or open pistes, and Météo-France notes that climate change has already reduced the snow cover in the mountains, mainly at low and mid altitude."
+      ]
+    },
+    {
+      "heading": "What to wear in Val Thorens each month",
+      "paragraphs": [
+        "Full winter clothing from November to April: even in April, the mildest month of the season, the average low at the station is −4.9 °C."
+      ],
+      "list": [
+        "**November:** the season starts cold, with an average low of −4.9 °C. Thermal base layer, fleece, ski jacket and trousers, gloves and a hat.",
+        "**December to February:** midwinter. The average low is −7.4 °C in December, and in January even the average high is below zero, at −2.1 °C. A warm base layer, a neck warmer and warm gloves or mittens.",
+        "**March:** mornings as cold as in February, −8.0 °C on average, but afternoons reach 2.0 °C. A layer you can take off, sun cream and sunglasses.",
+        "**April:** average lows of −4.9 °C and highs of 4.4 °C; the warmest April day of these winters reached 10.8 °C. Lighter layers, sun cream and sunglasses."
+      ],
+      "after": [
+        "Whatever the month, wear layers you can add or remove during the day, and dress for the top of the mountain rather than the village."
+      ]
+    },
+    {
+      "heading": "Is there snow in Val Thorens in March and April?",
+      "paragraphs": [
+        "Yes: in all seven winters from 2019/20 to 2025/26 the station had more than 30 cm of snow on every day of March and April, and 152 cm and 143 cm on average. Val Thorens and Orelle stay open until 2 May 2027, two weeks after the links to the rest of Les 3 Vallées close on 18 April.",
+        "Spring snow changes during the day: usually firm in the morning after a cold night, it softens towards midday and turns heavy and wet in the afternoon, so ski early. Nights stay cold, with frost on 26 of April's 30 days on average, and the days are long: on 15 April the sun rises at 06:49 and sets at 20:19 over a flat horizon, according to sunrise-sunset.org, against 08:06 and 16:51 on 15 December. Behind the peaks it rises later and sets earlier.",
+        "In each of the seven winters, May's deepest day at the station came in its first week, with 81 to 160 cm depending on the year. Spring weeks in our apartments, live:"
+      ],
+      "after": [
+        "An April week costs about a third of a week in mid-February. More on prices: [Val Thorens apartment prices](/en/guide/val-thorens-apartment-prices)."
+      ],
       "liveWeeks": {
         "notes": {
-          "2026-12-26": "New Year"
+          "2027-04-10": "3 Vallées links open until 18 April",
+          "2027-04-24": "Val Thorens lifts close on 2 May"
         },
+        "only": [
+          "2027-03-06",
+          "2027-03-13",
+          "2027-03-20",
+          "2027-03-27",
+          "2027-04-03",
+          "2027-04-10",
+          "2027-04-17",
+          "2027-04-24"
+        ],
         "count": true
       }
     },
     {
-      "heading": "Ordered",
-      "list": [
-        "a",
-        "b"
+      "heading": "Where to check the forecast, the snow and the avalanche risk",
+      "paragraphs": [
+        "Start with Météo-France, the French weather service: its mountain forecast for Val Thorens runs up to 15 days ahead, and its avalanche bulletin for the Vanoise massif rates the danger from 1 to 5. Then, in the days before you leave and each morning there:"
       ],
-      "ordered": true,
+      "list": [
+        "Météo-France's mountain forecast, in French, for [the resort](https://meteofrance.com/meteo-montagne/val-thorens/732573) and for [Val Thorens at 3,200 m](https://meteofrance.com/meteo-montagne/val-thorens-3200m/732574), with the avalanche bulletin in winter.",
+        "The avalanche bulletin (BERA) for the Vanoise massif, on [meteofrance.com](https://meteofrance.com/meteo-montagne/alpes-du-nord/risques-avalanche): it rates the danger on the [European scale](https://www.avalanches.org/standards/avalanche-danger-scale/) from 1 (low) to 5 (very high), describes the snow until the following evening and estimates the off-piste snow depth at several altitudes.",
+        "The tourist office's [snow report](https://www.valthorens.com/en/infos-neige/): snow depth at the bottom and top of the resort, last snowfall, rain/snow limit, freezing level, avalanche risk, and the lifts and pistes open in real time.",
+        "The [Les 3 Vallées forecast for Val Thorens](https://www.les3vallees.com/en/live/weather/val-thorens): mornings and afternoons, the village (2,300 m) and Cime Caron (3,200 m), for three days plus a trend for the week.",
+        "Webcams, [the tourist office's](https://www.valthorens.com/en/webcams/) and [those of Les 3 Vallées](https://www.les3vallees.com/en/live/webcams/val-thorens), from the resort centre (2,300 m) to Cime Caron (3,200 m): see over breakfast whether the sun is out above the clouds.",
+        "The Les 3 Vallées app: live snow conditions and forecasts and, according to Les 3 Vallées, alerts about technical problems or changes in the weather.",
+        "On stormy days, [SETAM's website](https://ski.valthorens.com/en/home/), which has alerts ready for reduced visibility, heavy snowfall or the Orelle link closing. Its [piste map](https://ski.valthorens.com/wp-content/uploads/2026/10/Plan3V-2027-675x354-ValTho_PrintOk_compressed.pdf) advises against the 3 Vallées circuit when the weather is too uncertain: stuck in another valley, you return at your own cost."
+      ],
       "after": [
-        "after"
+        "Driving up? From 1 November 2026 to 31 March 2027, in the mountain areas listed by each prefect, cars need four winter tyres (3PMSF marking) or chains or snow socks on board, says the French government's [Service Public](https://www.service-public.gouv.fr/particuliers/actualites/A14389) site (in French); Les 3 Vallées reminds drivers this applies in Savoie. Routes: [how to get to Val Thorens](/en/guide/how-to-get-to-val-thorens).",
+        "Picked your month? See [our apartments in Val Thorens](/en/apartments), and the [Val Thorens ski pass prices](/en/guide/val-thorens-ski-pass-prices) for 2026/27."
       ]
     }
   ],
   "faqs": [
     {
-      "q": "Question?",
-      "a": "Answer."
+      "q": "How cold is Val Thorens in January?",
+      "a": "January is the coldest month: at Météo-France's station in the village, the average low was −10.3 °C and the average high −2.1 °C over the winters 2018/19 to 2025/26. On 20 days, on average, it stayed at or below 0 °C all day."
+    },
+    {
+      "q": "Is there snow in Val Thorens in April?",
+      "a": "Yes. In each of the seven winters from 2019/20 to 2025/26 the station in the village had more than 30 cm of snow on every April day, and 143 cm on average. Val Thorens and Orelle stay open until 2 May 2027."
+    },
+    {
+      "q": "When is the snow deepest in Val Thorens?",
+      "a": "From February to April: the station in the village averaged 140 cm in February, 152 cm in March and 143 cm in April. In the last seven winters, the deepest day of each winter fell between 20 February and 17 April."
+    },
+    {
+      "q": "Is there snow in Val Thorens at Christmas?",
+      "a": "In the last seven winters there was snow on the ground at the station on every day of December, but the amount varied: 37 cm on average in December 2020, 115 cm in December 2019."
+    },
+    {
+      "q": "How much colder is it at the top of Val Thorens?",
+      "a": "By Météo-France's rule of thumb the temperature drops by about 0.65 °C every 100 m: some 6 °C less at 3,230 m than in the village at 2,300 m. In high-pressure weather, cold air can settle lower down and the gap can shrink or reverse."
+    },
+    {
+      "q": "Where can I check the avalanche risk in Val Thorens?",
+      "a": "In Météo-France's avalanche bulletin (BERA) for the Vanoise massif, on meteofrance.com. It rates the danger from 1 (low) to 5 (very high) and describes the snow until the following evening."
+    },
+    {
+      "q": "Can you know in advance how much snow there will be?",
+      "a": "No. The averages here describe recent winters, not a forecast: check the forecast and the resort's snow report in the days before you go."
     }
   ],
   "sources": [
     {
-      "title": "Src",
-      "url": "https://www.valthorens.com/"
+      "title": "Météo-France: monthly climate data, Savoie, 1950–2024 (station 73257005, VAL THORENS_SAPC, 2,277 m)",
+      "url": "https://object.files.data.gouv.fr/meteofrance/data/synchro_ftp/BASE/MENS/MENSQ_73_previous-1950-2024.csv.gz"
+    },
+    {
+      "title": "Météo-France: monthly climate data, Savoie, 2025–2026 (same station)",
+      "url": "https://object.files.data.gouv.fr/meteofrance/data/synchro_ftp/BASE/MENS/MENSQ_73_latest-2025-2026.csv.gz"
+    },
+    {
+      "title": "Météo-France: avalanches, the danger scale and the avalanche bulletin (BERA)",
+      "url": "https://meteofrance.com/vigilance-et-securite/avalanche-quels-dangers-comment-reagir-et-sinformer"
+    },
+    {
+      "title": "Météo-France: why temperatures differ (about 0.65 °C less every 100 m)",
+      "url": "https://meteofrance.com/meteo-a-z/pourquoi-les-temperatures-peuvent-etre-tres-differentes-dune-region-a-lautre"
+    },
+    {
+      "title": "Météo-France: climate change and snow in ski resorts (ClimSnow)",
+      "url": "https://meteofrance.com/actualites/adaptation-au-changement-climatique-en-montagne-le-service-climatique-climsnow"
+    },
+    {
+      "title": "Les 3 Vallées: Val Thorens snow report and weather",
+      "url": "https://www.les3vallees.com/en/live/weather/val-thorens"
+    },
+    {
+      "title": "Les 3 Vallées: 2026/27 press kit (opening dates, 2,838 snow guns)",
+      "url": "https://press.les3vallees.com/media/download/the-place-to-ski.pdf"
+    },
+    {
+      "title": "Les 3 Vallées: Orelle (the ski area rises to 3,230 m)",
+      "url": "https://www.les3vallees.com/en/resort/orelle"
+    },
+    {
+      "title": "SETAM: the Val Thorens ski area (99% above 2,000 m)",
+      "url": "https://ski.valthorens.com/en/val-thorens/"
+    },
+    {
+      "title": "sunrise-sunset.org: sunrise and sunset times in Val Thorens",
+      "url": "https://sunrise-sunset.org/fr/val-thorens"
     }
   ]
 }
