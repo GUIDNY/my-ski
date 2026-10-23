@@ -16,15 +16,20 @@ function PaySuccessInner() {
   const params = useSearchParams();
   const order = params.get("order");
 
+  // PayPlus adds the transaction / payment page ids to this redirect; the server
+  // checks them with PayPlus before marking anything as paid.
+  const transactionUid = params.get("transaction_uid") || params.get("transactionUid") || "";
+  const pageRequestUid = params.get("page_request_uid") || params.get("payment_request_uid") || params.get("pageRequestUid") || "";
+
   // Backup confirmation: if the PayPlus IPN hasn't landed yet, mark the deposit
   // as taken so the order/progress updates immediately (idempotent with the callback).
   useEffect(() => {
     if (!order) return;
     fetch("/api/payplus/confirm", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ order_code: order }),
+      body: JSON.stringify({ order_code: order, transaction_uid: transactionUid, page_request_uid: pageRequestUid }),
     }).catch(() => {});
-  }, [order]);
+  }, [order, transactionUid, pageRequestUid]);
 
   return (
     <StatusCard tone="ok" title="קיבלנו את הפרטים"
