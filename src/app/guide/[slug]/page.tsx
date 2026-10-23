@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { GUIDES, getGuideBySlug, plainText, type GuideSection } from "@/lib/guides";
+import { GUIDES, getGuideBySlug, relatedGuides, plainText, type GuideSection } from "@/lib/guides";
 import { wrap, card, btn, Crumbs } from "@/components/ui";
 import GuideIcon from "../guide-icon";
 import RichText from "../rich-text";
@@ -57,7 +57,7 @@ export default async function GuideArticle({ params }: { params: Promise<{ slug:
   if (!guide) notFound();
 
   const url = siteUrl(`/guide/${guide.slug}`);
-  const related = GUIDES.filter(g => g.slug !== guide.slug).slice(0, 3);
+  const related = relatedGuides(guide.slug);
   const sources = guide.sources ?? [];
 
   const articleLd = {
