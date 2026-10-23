@@ -71,10 +71,18 @@ const faq = [
 ];
 
 /* ── Page ─────────────────────────────────────────────────── */
+// the questions below, for search engines and AI answers
+const faqLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faq.map(f => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+};
+
 export default function Home() {
   const waHref = helperWaHref();
   return (
     <div className="bg-white text-ink" dir="rtl">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
 
       {/* ── HERO ─────────────────────────────────────────── */}
       <section className="relative flex items-center min-h-[560px] md:min-h-[620px]">
