@@ -56,7 +56,8 @@ export const SITE_LD = {
       url: `${SITE}/`,
       name: "SkiShare",
       alternateName: "סקי שר",
-      inLanguage: "he-IL",
+      // the Hebrew site, and the English and French one (/en, /fr)
+      inLanguage: ["he-IL", "en", "fr"],
       publisher: { "@id": ORG_ID },
     },
     VAL_THORENS,

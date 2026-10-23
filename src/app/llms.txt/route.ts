@@ -1,4 +1,5 @@
 import { GUIDES } from "@/lib/guides";
+import { intlGuides } from "@/lib/intl/guides";
 
 const SITE = "https://skisharebook.com";
 
@@ -8,6 +9,7 @@ export const dynamic = "force-static";
 
 export function GET() {
   const guides = GUIDES.map(g => `- [${g.title}](${SITE}/guide/${encodeURIComponent(g.slug)}): ${g.description}`).join("\n");
+  const intl = (lang: "en" | "fr") => intlGuides(lang).map(g => `- [${g.title}](${SITE}/${lang}/guide/${g.slug}): ${g.description}`).join("\n");
   const body = `# SkiShare (סקי שר)
 
 > SkiShare is an Israeli company that sells ski holidays in Val Thorens, France, in Hebrew. It has its own apartments in Val Thorens and also offers agency apartments by the week (Saturday to Saturday). Each trip is built from the apartment up: a ski pass (Val Thorens or the whole 3 Vallées), an airport transfer, ski or snowboard equipment, and a direct flight from Tel Aviv when one exists on the dates. Prices are shown per person, and every member of a group can pay their own share.
@@ -30,7 +32,13 @@ SkiShare (סקי שר) מוכרת חופשות סקי בואל טורנס, צר�
 - [Seasonaires](${SITE}/seasonaires): apartments for long stays (two months or more) and a community for people spending the whole season.
 - [Emergency, war and force majeure policy](${SITE}/emergency-policy): what happens with flights, apartments and ski passes if there is an emergency such as the closing of the skies.
 - [Terms and cancellations](${SITE}/terms)
-- [English](${SITE}/en) and [French](${SITE}/fr): the apartments, with booking and card payment in euros, in English and in French.
+- [English](${SITE}/en) and [French](${SITE}/fr): the apartments, with booking and card payment in euros, in English and in French, and guides to Val Thorens ([English](${SITE}/en/guide), [French](${SITE}/fr/guide)).
+
+## Guides in English
+${intl("en")}
+
+## Guides en français
+${intl("fr")}
 
 ## Guides (Hebrew)
 ${guides}

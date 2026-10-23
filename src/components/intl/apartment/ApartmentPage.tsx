@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import { Check, chip, h1, h2, wrap } from "@/components/ui";
 import type { PricingRule } from "@/lib/pricing";
 import { aptText, amenitiesOf, isAgency, typeWorthShowing } from "@/lib/intl/apartment-text";
-import { MAX_SEARCH_GUESTS, type Lang } from "@/lib/intl/config";
+import { GUIDE_PAIRS, MAX_SEARCH_GUESTS, type Lang } from "@/lib/intl/config";
 import { getApartment, getRules, todayIso } from "@/lib/intl/data";
 import { DICT } from "@/lib/intl/dict";
 import { pageMetadata } from "@/lib/intl/metadata";
@@ -199,6 +199,21 @@ export default async function ApartmentPage({ lang, id }: { lang: Lang; id: stri
               <li className="flex items-start gap-2"><Check className="mt-[5px]" />{t.apt.gtkCard}</li>
             </ul>
           </section>
+
+          {/* the guides, for the rest of the trip */}
+          <nav aria-labelledby="plan" className="flex flex-col gap-3">
+            <h2 id="plan" className="font-display font-bold text-[21px] md:text-[23px] text-ink">{t.guides.plan}</h2>
+            <ul className="flex flex-wrap gap-2">
+              {GUIDE_PAIRS.map(p => (
+                <li key={p.key}>
+                  <Link href={`/${lang}/guide/${p[lang]}`}
+                    className="inline-flex items-center min-h-[44px] px-4 rounded-full border border-line bg-white text-[15px] font-bold text-ink hover:border-line-strong hover:text-accent transition-colors">
+                    {t.guides.short[p.key]}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
 
         {/* the static HTML has the card without dates; the browser applies the URL's */}

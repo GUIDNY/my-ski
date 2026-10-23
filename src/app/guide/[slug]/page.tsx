@@ -10,6 +10,8 @@ import LiveWeeks from "../live-weeks";
 import { pageMeta } from "@/lib/page-meta";
 import { ORG_ID, SITE, WEBSITE_ID, VAL_THORENS, breadcrumbLd, faqLd, ldJson, siteUrl } from "@/lib/site";
 import { loadWeekPrices } from "@/lib/week-prices-server";
+import { guidePair } from "@/lib/intl/config";
+import { guideAlternates } from "@/lib/intl/metadata";
 
 // Built once per deploy, never on the server afterwards: the addresses are
 // Hebrew, and rebuilding a page with a Hebrew address fails on Vercel (the
@@ -45,8 +47,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const guide = getGuideBySlug(slug);
   if (!guide) return {};
+  // the same guide in English and French, when there is one (hreflang)
+  const pair = guidePair("he", guide.slug);
   return {
-    ...pageMeta({ title: guide.metaTitle, description: guide.description, path: `/guide/${guide.slug}`, type: "article", imageAlt: guide.title }),
+    ...pageMeta({
+      title: guide.metaTitle, description: guide.description, path: `/guide/${guide.slug}`, type: "article", imageAlt: guide.title,
+      ...(pair ? { languages: guideAlternates(pair) } : {}),
+    }),
     keywords: guide.keywords,
   };
 }

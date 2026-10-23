@@ -27,6 +27,7 @@ export default function IntlHeader({ lang }: { lang: Lang }) {
         <div className="flex items-center gap-1 md:gap-2 min-w-0">
           <nav aria-label={t.nav.main} className="flex items-center gap-0.5 md:gap-1">
             {link(`/${lang}/apartments`, t.nav.apartments, pathname.startsWith(`/${lang}/apartments`))}
+            {link(`/${lang}/guide`, t.guides.nav, pathname.startsWith(`/${lang}/guide`), "hidden md:inline-flex")}
             {link(`/${lang}/terms`, t.nav.terms, pathname === `/${lang}/terms`, "hidden lg:inline-flex")}
           </nav>
           <span aria-hidden="true" className="hidden md:block w-px h-6 bg-line mx-1" />

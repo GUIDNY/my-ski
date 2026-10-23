@@ -1,0 +1,73 @@
+{
+  "key": "weather",
+  "lang": "en",
+  "title": "PLACEHOLDER weather en",
+  "metaTitle": "PLACEHOLDER weather | SkiShare",
+  "description": "placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder ",
+  "keywords": [
+    "a",
+    "b",
+    "c"
+  ],
+  "emoji": "🎫",
+  "published": "2026-10-23",
+  "updated": "2026-10-23",
+  "intro": "Intro with [a link](/en/apartments) and **bold**.",
+  "sections": [
+    {
+      "heading": "Section one",
+      "paragraphs": [
+        "Para 5–18 December."
+      ],
+      "list": [
+        "x",
+        "y"
+      ],
+      "table": {
+        "caption": "Cap",
+        "head": [
+          "A",
+          "B"
+        ],
+        "rows": [
+          [
+            "1",
+            "2"
+          ]
+        ]
+      }
+    },
+    {
+      "heading": "Live",
+      "liveWeeks": {
+        "notes": {
+          "2026-12-26": "New Year"
+        },
+        "count": true
+      }
+    },
+    {
+      "heading": "Ordered",
+      "list": [
+        "a",
+        "b"
+      ],
+      "ordered": true,
+      "after": [
+        "after"
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "q": "Question?",
+      "a": "Answer."
+    }
+  ],
+  "sources": [
+    {
+      "title": "Src",
+      "url": "https://www.valthorens.com/"
+    }
+  ]
+}

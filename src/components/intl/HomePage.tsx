@@ -7,6 +7,8 @@ import { CONTACT_EMAIL, type Lang } from "@/lib/intl/config";
 import { getApartments, getRules, todayIso } from "@/lib/intl/data";
 import { buildItems } from "@/lib/intl/items";
 import { DICT } from "@/lib/intl/dict";
+import { intlGuides } from "@/lib/intl/guides";
+import GuideIcon from "@/app/guide/guide-icon";
 
 // the other languages named in this page's language ("also in Hebrew and French")
 const LANG_IN = {
@@ -39,6 +41,7 @@ export default async function HomePage({ lang }: { lang: Lang }) {
   const all = cardsFor({ lang, items, search: parseSearch({}, today), taken: null, todayIso: today });
   const own = all.filter(c => c.kind === "own");
   const others = (["he", "en", "fr"] as const).filter(l => l !== lang);
+  const guides = intlGuides(lang);
 
   return (
     <div className="bg-white text-ink">
@@ -107,6 +110,32 @@ export default async function HomePage({ lang }: { lang: Lang }) {
           </div>
         )}
       </section>
+
+      {/* ── Plan your trip: the guides ─────────────────── */}
+      {guides.length > 0 && (
+        <section aria-labelledby="plan-title" className={`${wrap} pt-14 md:pt-20`}>
+          <div className="flex flex-col gap-2 mb-6 md:mb-8">
+            <span className="text-[15px] font-bold text-accent">{t.guides.plan}</span>
+            <h2 id="plan-title" className="font-display text-[28px] md:text-[38px] font-bold tracking-tight">{t.guides.homeTitle}</h2>
+            <p className="text-[16px] md:text-[17px] text-muted">{t.guides.homeSub}</p>
+          </div>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+            {guides.map(x => (
+              <li key={x.key} className="flex">
+                <Link href={`/${lang}/guide/${x.slug}`}
+                  className="group w-full bg-white border border-line rounded-card p-5 flex items-start gap-3.5 hover:border-line-strong transition-colors">
+                  <span className="w-11 h-11 rounded-xl bg-accent-soft text-accent flex items-center justify-center shrink-0"><GuideIcon emoji={x.emoji} size={22} /></span>
+                  <span className="flex flex-col gap-1 min-w-0">
+                    <span className="font-bold text-[16px] md:text-[17px] leading-snug text-ink">{x.title}</span>
+                    <span className="text-[14px] font-bold text-accent group-hover:text-accent-hover">{t.guides.read} →</span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <Link href={`/${lang}/guide`} className="inline-flex items-center min-h-[44px] mt-5 font-bold text-[16px] text-accent hover:text-accent-hover">{t.guides.allLink} →</Link>
+        </section>
+      )}
 
       {/* ── The resort ─────────────────────────────────── */}
       <section className="bg-soft mt-14 md:mt-20">

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SITE_URL, hebrewEquivalent, type Lang } from "./config";
+import { SITE_URL, guidePath, hebrewEquivalent, type GuidePair, type Lang } from "./config";
 import { DICT } from "./dict";
 
 /*
@@ -24,8 +24,25 @@ export function alternatesFor(rest: string) {
   };
 }
 
+/**
+ * hreflang of a guide: its own address in each language (a guide's slug is
+ * different in each), the Hebrew one only when the Hebrew site has that guide.
+ */
+export function guideAlternates(p: GuidePair) {
+  const he = guidePath(p, "he");
+  return {
+    ...(he ? { he: `${SITE_URL}${he}` } : {}),
+    en: `${SITE_URL}${guidePath(p, "en")}`,
+    fr: `${SITE_URL}${guidePath(p, "fr")}`,
+    "x-default": `${SITE_URL}${guidePath(p, "en")}`,
+  };
+}
+
 export function pageMetadata(lang: Lang, rest: string, o: {
   title: string; description: string; image?: string | null; noindex?: boolean;
+  /** hreflang when the other languages' addresses aren't the same `rest` (a guide: guideAlternates) */
+  languages?: Record<string, string>;
+  type?: "website" | "article";
 }): Metadata {
   const url = `${SITE_URL}/${lang}${rest}`;
   const t = DICT[lang].meta;
@@ -33,9 +50,9 @@ export function pageMetadata(lang: Lang, rest: string, o: {
   return {
     title: { absolute: o.title },
     description: o.description,
-    alternates: o.noindex ? { canonical: url } : { canonical: url, languages: alternatesFor(rest) },
+    alternates: o.noindex ? { canonical: url } : { canonical: url, languages: o.languages ?? alternatesFor(rest) },
     openGraph: {
-      type: "website", siteName: "SkiShare", url, title: o.title, description: o.description,
+      type: o.type ?? "website", siteName: "SkiShare", url, title: o.title, description: o.description,
       locale: OG_LOCALE[lang], alternateLocale: [OG_LOCALE[lang === "en" ? "fr" : "en"], "he_IL"], images,
     },
     twitter: { card: "summary_large_image", title: o.title, description: o.description, images: images.map(i => i.url) },

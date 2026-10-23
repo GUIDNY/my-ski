@@ -4,11 +4,14 @@ import { PageTop, wrap, card, btn } from "@/components/ui";
 import GuideIcon from "./guide-icon";
 import { pageMeta } from "@/lib/page-meta";
 import { breadcrumbLd, ldJson, siteUrl } from "@/lib/site";
+import { alternatesFor } from "@/lib/intl/metadata";
 
 export const metadata = pageMeta({
   title: "מדריך ואל טורנס 2026/27: עונה, מחירים, הגעה ולינה | SkiShare",
   description: "מדריכים בעברית לחופשת סקי בואל טורנס: מתי לנסוע, איך מגיעים מישראל, כמה עולה סקי פס, איפה לישון ומה ההבדל ממריבל וקורשבל. מעודכן לעונת 2026/27.",
   path: "/guide",
+  // the guides in English and French (hreflang)
+  languages: alternatesFor("/guide"),
 });
 
 export default function GuideIndex() {

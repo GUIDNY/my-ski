@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Brand } from "@/components/SiteHeader";
-import { CONTACT_EMAIL, type Lang } from "@/lib/intl/config";
+import { CONTACT_EMAIL, GUIDE_PAIRS, type Lang } from "@/lib/intl/config";
 import { DICT, LANG_NAMES } from "@/lib/intl/dict";
 
 const linkCls = "inline-flex items-center min-h-[44px] text-[15px] text-body hover:text-ink transition-colors";
@@ -16,7 +16,7 @@ export default function IntlFooter({ lang }: { lang: Lang }) {
   return (
     <footer className="bg-soft border-t border-line mt-auto">
       <div className="max-w-[1240px] mx-auto px-4 md:px-6 pt-12 md:pt-14 pb-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-x-6 gap-y-10">
           <div className="col-span-2 md:col-span-1 flex flex-col gap-3">
             <Link href={`/${lang}`} aria-label={t.nav.homeAria} className="w-fit min-h-[44px] flex items-center"><Brand small /></Link>
             <p className="text-[15px] leading-relaxed text-muted max-w-[300px]">{t.footer.blurb}</p>
@@ -25,6 +25,14 @@ export default function IntlFooter({ lang }: { lang: Lang }) {
           <nav aria-label={t.footer.book} className="flex flex-col">
             <span className="font-bold text-[15px] text-ink mb-1">{t.footer.book}</span>
             <Link href={`/${lang}/apartments`} className={linkCls}>{t.nav.apartments}</Link>
+          </nav>
+
+          <nav aria-label={t.guides.plan} className="flex flex-col">
+            <span className="font-bold text-[15px] text-ink mb-1">{t.guides.plan}</span>
+            {GUIDE_PAIRS.map(p => (
+              <Link key={p.key} href={`/${lang}/guide/${p[lang]}`} className={linkCls}>{t.guides.short[p.key]}</Link>
+            ))}
+            <Link href={`/${lang}/guide`} className={linkCls}>{t.guides.allLink}</Link>
           </nav>
 
           <nav aria-label={t.footer.info} className="flex flex-col">
