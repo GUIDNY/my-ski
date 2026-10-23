@@ -34,61 +34,68 @@ function withMandatoryTerms(sections: ProposalData["sections"]): ProposalData["s
 // Visual language from the approved spec. Screen rules render an A4 sheet;
 // print rules add @page margins + footer page numbers.
 export const PROPOSAL_CSS = `
-:root { --ink:#1c2126; --muted:#5a636d; --box:#f4f6f8; --line:#e4e8ec; --line2:#d8dde2; }
+:root { --ink:#0B1B33; --body:#3D4B63; --muted:#51607A; --box:#F4F7FB; --line:#E3E9F2; --line2:#CBD5E3; --accent:#1652F0; --ok:#0F7A4F; }
 
 /* screen: show a centred A4 sheet */
-.proposal-screen { background:#e9edf1; padding:24px 12px; min-height:100vh; }
+.proposal-screen { background:#EEF2F7; padding:24px 12px; min-height:100vh; }
 .proposal {
-  direction:rtl; color:var(--ink); font-size:10.5pt; line-height:1.75;
-  font-family:"Segoe UI","Arial","Helvetica Neue",sans-serif;
+  direction:rtl; color:var(--ink); font-size:10.5pt; line-height:1.7;
+  font-family:var(--font-heebo),"Heebo","Segoe UI","Arial",sans-serif;
   background:#fff; width:210mm; max-width:100%; margin:0 auto;
-  padding:18mm 16mm 20mm; box-shadow:0 6px 30px rgba(2,6,23,0.18); border-radius:2px;
+  padding:16mm 16mm 20mm; box-shadow:0 10px 34px rgba(11,27,51,0.14); border-radius:3mm;
+  -webkit-print-color-adjust:exact; print-color-adjust:exact;
 }
 .proposal * { box-sizing:border-box; }
-.proposal .cover { text-align:center; padding-top:6mm; }
-.proposal .cover img { width:46mm; max-width:60%; }
-.proposal h1 { font-size:20pt; margin:4mm 0 1mm; letter-spacing:-0.4px; font-weight:800; }
-.proposal .sub { font-size:11pt; color:var(--muted); margin-bottom:5mm; }
-.proposal .rule { height:2.5px; background:var(--ink); width:30mm; margin:0 auto 7mm; }
-.proposal .intro { background:var(--box); border-right:3px solid var(--ink); padding:4mm 5mm; margin-bottom:8mm; text-align:justify; }
-.proposal h2 { font-size:12.5pt; margin:7mm 0 3mm; padding-bottom:1.5mm; border-bottom:1px solid var(--line2); font-weight:700; }
-.proposal h2 .num { display:inline-block; background:var(--ink); color:#fff; width:7mm; height:7mm; line-height:7mm; text-align:center; border-radius:50%; font-size:9pt; margin-left:3mm; }
-.proposal p { margin:0 0 2.5mm; text-align:justify; }
-.proposal ul { margin:0 0 3mm; padding-right:5mm; }
-.proposal ul li { margin-bottom:1mm; }
-.proposal .route { background:var(--ink); color:#fff; padding:2.5mm 4mm; font-weight:bold; font-size:10.5pt; margin-bottom:2mm; }
+.proposal .cover { text-align:right; padding:0 0 6mm; margin-bottom:7mm; border-bottom:1px solid var(--line); }
+.proposal .brand { display:flex; align-items:center; gap:2.5mm; margin-bottom:9mm; }
+.proposal .brand img { height:7mm; width:auto; }
+.proposal .brand span { font-family:var(--font-rubik),"Rubik",var(--font-heebo),sans-serif; font-weight:800; font-size:15pt; letter-spacing:-0.3px; color:var(--ink); }
+.proposal .brand .tag { margin-inline-start:auto; font-family:inherit; font-weight:700; font-size:8.5pt; color:var(--accent); background:#EEF3FF; border-radius:10mm; padding:1mm 3.5mm; letter-spacing:0; }
+.proposal h1 { font-family:var(--font-rubik),"Rubik",var(--font-heebo),sans-serif; font-size:22pt; line-height:1.15; margin:0 0 2mm; letter-spacing:-0.4px; font-weight:800; }
+.proposal .sub { font-size:11.5pt; color:var(--muted); margin-bottom:0; }
+.proposal .rule { display:none; }
+.proposal .intro { background:var(--box); border:1px solid var(--line); border-radius:3mm; padding:4.5mm 5mm; margin-bottom:8mm; color:var(--body); text-align:justify; }
+.proposal h2 { font-family:var(--font-rubik),"Rubik",var(--font-heebo),sans-serif; font-size:13pt; margin:8mm 0 3.5mm; padding-bottom:2mm; border-bottom:1px solid var(--line); font-weight:700; display:flex; align-items:center; gap:3mm; }
+.proposal h2 .num { display:inline-flex; align-items:center; justify-content:center; background:var(--accent); color:#fff; width:7mm; height:7mm; border-radius:50%; font-size:9pt; font-family:var(--font-heebo),sans-serif; font-weight:700; flex:none; }
+.proposal p { margin:0 0 2.5mm; text-align:justify; color:var(--body); }
+.proposal ul { margin:0 0 3mm; padding-right:5mm; color:var(--body); }
+.proposal ul li { margin-bottom:1.2mm; }
+.proposal ul li::marker { color:var(--accent); }
+.proposal .route { background:var(--ink); color:#fff; padding:2.6mm 4mm; font-weight:700; font-size:10.5pt; margin-bottom:2mm; border-radius:2mm; }
 .proposal table.flt { width:100%; border-collapse:collapse; margin-bottom:4mm; font-size:10pt; }
-.proposal table.flt td { padding:1.8mm 3mm; border-bottom:1px solid var(--line); }
+.proposal table.flt td { padding:2mm 3mm; border-bottom:1px solid var(--line); }
 .proposal table.flt td.k { color:var(--muted); width:38%; }
-.proposal table.flt td.v { font-weight:bold; }
-.proposal .flight-link { display:inline-block; font-size:9.5pt; font-weight:bold; color:#2563eb; text-decoration:none; margin:-1mm 0 4mm; }
-.proposal .pay-btn { display:block; text-align:center; background:#2563eb; color:#fff; font-weight:bold; font-size:11.5pt; text-decoration:none; border-radius:2mm; padding:4.5mm; margin-bottom:4mm; }
-.proposal .opt { border:1px solid var(--line2); border-radius:2mm; padding:3mm 4mm; margin-bottom:3mm; }
-.proposal .opt .lbl { font-weight:bold; display:block; margin-bottom:1mm; }
-.proposal table.sum { width:100%; border-collapse:collapse; font-size:10pt; margin-bottom:4mm; }
-.proposal table.sum tr:nth-child(odd) { background:var(--box); }
-.proposal table.sum td { padding:2.2mm 4mm; }
-.proposal table.sum td.k { color:var(--muted); width:32%; }
-.proposal table.sum td.v { font-weight:bold; }
-.proposal table.grid { width:100%; border-collapse:collapse; font-size:10pt; margin-bottom:4mm; }
-.proposal table.grid th { background:var(--ink); color:#fff; padding:2.2mm 3mm; text-align:right; font-size:9.5pt; }
-.proposal table.grid td { padding:2.2mm 3mm; border-bottom:1px solid var(--line); }
-.proposal table.grid tr.total td { font-weight:bold; border-top:2px solid var(--ink); border-bottom:none; background:var(--box); }
-.proposal .sign { margin-top:8mm; border:1.5px solid var(--ink); padding:5mm; page-break-inside:avoid; }
-.proposal .sign h3 { font-size:11.5pt; margin:0 0 2mm; font-weight:700; }
+.proposal table.flt td.v { font-weight:700; }
+.proposal .flight-link { display:inline-block; font-size:9.5pt; font-weight:700; color:var(--accent); text-decoration:none; margin:-1mm 0 4mm; }
+.proposal .pay-btn { display:block; text-align:center; background:var(--accent); color:#fff; font-weight:700; font-size:12pt; text-decoration:none; border-radius:3mm; padding:4.5mm; margin-bottom:3mm; }
+.proposal .opt { border:1px solid var(--line); border-radius:3mm; padding:3.5mm 4mm; margin-bottom:3mm; color:var(--body); }
+.proposal .opt .lbl { font-weight:700; display:block; margin-bottom:1mm; color:var(--ink); }
+.proposal table.sum { width:100%; border-collapse:separate; border-spacing:0; font-size:10pt; margin-bottom:4mm; border:1px solid var(--line); border-radius:3mm; overflow:hidden; }
+.proposal table.sum tr:nth-child(odd) td { background:var(--box); }
+.proposal table.sum td { padding:2.4mm 4mm; }
+.proposal table.sum td.k { color:var(--muted); width:34%; }
+.proposal table.sum td.v { font-weight:700; }
+.proposal table.grid { width:100%; border-collapse:separate; border-spacing:0; font-size:10pt; margin-bottom:4mm; border:1px solid var(--line); border-radius:3mm; overflow:hidden; }
+.proposal table.grid th { background:var(--ink); color:#fff; padding:2.4mm 3mm; text-align:right; font-size:9.5pt; font-weight:700; }
+.proposal table.grid td { padding:2.4mm 3mm; border-bottom:1px solid var(--line); }
+.proposal table.grid tr.total td { font-weight:800; border-bottom:none; background:#EEF3FF; color:var(--ink); font-size:10.5pt; }
+.proposal .sign { margin-top:8mm; border:1px solid var(--line2); border-radius:3mm; padding:5mm; page-break-inside:avoid; }
+.proposal .sign h3 { font-family:var(--font-rubik),"Rubik",var(--font-heebo),sans-serif; font-size:12pt; margin:0 0 2mm; font-weight:700; }
 .proposal .sign-grid { display:grid; grid-template-columns:1fr 1fr; gap:6mm 10mm; margin-top:6mm; }
 .proposal .line { border-bottom:1px solid var(--ink); height:8mm; margin-bottom:1.5mm; }
 .proposal .cap { font-size:8.5pt; color:var(--muted); }
 .proposal .note { font-size:9.5pt; color:var(--muted); }
 .proposal section { page-break-inside:avoid; }
 .proposal .gallery { display:grid; grid-template-columns:repeat(3, 1fr); gap:2mm; margin-bottom:4mm; page-break-inside:avoid; }
-.proposal .gallery img { width:100%; height:32mm; object-fit:cover; border-radius:1.5mm; }
+.proposal .gallery img { width:100%; height:34mm; object-fit:cover; border-radius:2.5mm; }
+.proposal .doc-foot { margin-top:9mm; padding-top:4mm; border-top:1px solid var(--line); display:flex; justify-content:space-between; gap:4mm; font-size:8.5pt; color:var(--muted); }
 
 @media print {
-  @page { size:A4; margin:18mm 16mm 20mm 16mm;
-    @bottom-center { content:"SkiShare  |  עמוד " counter(page) " מתוך " counter(pages); font-size:8pt; color:#8a9099; } }
-  html, body { background:#fff !important; }
-  .proposal-screen { background:#fff !important; padding:0 !important; }
+  @page { size:A4; margin:16mm 16mm 18mm 16mm;
+    @bottom-center { content:"SkiShare  ·  עמוד " counter(page) " מתוך " counter(pages); font-size:8pt; color:#8a96a8; } }
+  html, body, div:has(> .proposal-screen) { background:#fff !important; }
+  div:has(> .proposal-screen) { min-height:0 !important; }
+  .proposal-screen { background:#fff !important; padding:0 !important; min-height:0 !important; }
   .no-print { display:none !important; }
   .proposal { width:auto; margin:0; padding:0; box-shadow:none; border-radius:0; }
 }
@@ -171,11 +178,14 @@ export default function ProposalDocument({ data }: { data: ProposalData }) {
   return (
     <div className="proposal" dir="rtl">
       <div className="cover">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/skishare-logo.png" alt="SkiShare" />
+        <div className="brand">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/skishare-mark.png" alt="" />
+          <span>SkiShare</span>
+          <span className="tag">הצעת מחיר אישית</span>
+        </div>
         <h1>{data.title}</h1>
         {data.subtitle && <div className="sub">{data.subtitle}</div>}
-        <div className="rule" />
       </div>
 
       {data.intro && <div className="intro">{data.intro}</div>}
@@ -201,6 +211,11 @@ export default function ProposalDocument({ data }: { data: ProposalData }) {
           </div>
         </div>
       )}
+
+      <div className="doc-foot">
+        <span>SkiShare · סקי שר בע״מ · חופשות סקי בואל טורנס</span>
+        <span>skisharebook.com</span>
+      </div>
     </div>
   );
 }

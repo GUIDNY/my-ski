@@ -6,10 +6,10 @@ export const metadata: Metadata = { title: "SkiShare — ניהול" };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="he" dir="rtl">
-      <body className="min-h-screen bg-gray-50">
-        <AdminShell>{children}</AdminShell>
-      </body>
-    </html>
+    // the root layout already renders <html>/<body>; a second pair here made
+    // React's hydration fail on every admin page
+    <div dir="rtl" className="min-h-screen bg-gray-50">
+      <AdminShell>{children}</AdminShell>
+    </div>
   );
 }
