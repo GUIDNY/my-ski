@@ -53,12 +53,15 @@ export default function WeeklyBrowser({
   apartments,
   initialDeal = "apartment",
   initialWeek = null,
+  initialGuests = 2,
   passes = [],
 }: {
   apartments: Apartment[];
   initialDeal?: "apartment" | "full";
   /** a week to open on (from a link like /weekly?week=2027-01-16) */
   initialWeek?: string | null;
+  /** how many people (from a link like /weekly?guests=4) */
+  initialGuests?: number;
   passes?: SkiPass[];
 }) {
   const allWeeks = useMemo(() => {
@@ -69,7 +72,7 @@ export default function WeeklyBrowser({
 
   const [selected, setSelected] = useState<string | null>(
     initialWeek && allWeeks.includes(initialWeek) ? initialWeek : allWeeks[0] ?? null);
-  const [guests, setGuests] = useState(2);
+  const [guests, setGuests] = useState(initialGuests);
   const [open, setOpen] = useState(false);
   const [dealMode, setDealMode] = useState<"apartment" | "full">(initialDeal);
   const ref = useRef<HTMLDivElement>(null);

@@ -15,7 +15,7 @@ import AuthModal from "./AuthModal";
  */
 
 const NAV = [
-  { href: "/search?deal=full", label: "חבילות", active: (p: string) => p.startsWith("/search") },
+  { href: "/packages", label: "חבילות", active: (p: string) => p.startsWith("/packages") || p.startsWith("/search") },
   { href: "/apartments", label: "דירות", active: (p: string) => p.startsWith("/apartments") },
   { href: "/weekly", label: "שבת עד שבת", active: (p: string) => p.startsWith("/weekly") },
   { href: "/transfers", label: "הסעות", active: (p: string) => p.startsWith("/transfers") },

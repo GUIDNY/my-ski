@@ -22,6 +22,8 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
   const params = await searchParams;
   const initialDeal = params.deal === "full" ? "full" : "apartment";
   const week = typeof params.week === "string" && /^\d{4}-\d{2}-\d{2}$/.test(params.week) ? params.week : null;
+  const g = typeof params.guests === "string" ? Number(params.guests) : NaN;
+  const guests = Number.isInteger(g) && g >= 1 && g <= 12 ? g : 2;
   const db = createServerClient();
   // only the public fields: the page sends the list to the browser
   const { data } = await db
@@ -54,6 +56,7 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
           apartments={apartments}
           initialDeal={initialDeal}
           initialWeek={week}
+          initialGuests={guests}
           passes={passes}
         />
         <WeeklyGuide apartments={apartments} />

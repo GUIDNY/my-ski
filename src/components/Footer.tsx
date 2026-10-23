@@ -5,7 +5,7 @@ import { helperWaHref } from "@/lib/helper-whatsapp";
 import FooterLangLinks from "@/components/FooterLangLinks";
 
 const VACATION = [
-  { label: "חבילות", href: "/search?deal=full" },
+  { label: "חבילות סקי לואל טורנס", href: "/packages" },
   { label: "דירות בואל טורנס", href: "/apartments" },
   { label: "דירות שבת עד שבת", href: "/weekly" },
   { label: "הסעות לואל טורנס", href: "/transfers" },

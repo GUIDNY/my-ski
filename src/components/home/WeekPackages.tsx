@@ -123,7 +123,7 @@ export default async function WeekPackages() {
           <h2 className="font-display text-[28px] md:text-[40px] font-bold tracking-tight text-[#0B1B33]">חבילות סקי לשבוע {data.label}</h2>
           <p className="text-[15px] md:text-[17px] text-[#51607A]">לדוגמה ל-4 מבוגרים: 7 לילות, סקי פס לשלושת העמקים, הסעה מהשדה וציוד. בחרו תאריכים אחרים בחיפוש למעלה.</p>
         </div>
-        <Link href="/search?deal=full" className="font-bold text-[16px] md:text-[17px] text-[#1652F0] hover:text-[#0E3FC2]">לכל החבילות ←</Link>
+        <Link href="/packages" className="font-bold text-[16px] md:text-[17px] text-[#1652F0] hover:text-[#0E3FC2]">מחיר חבילה לכל שבוע ←</Link>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
         {data.cards.map((c, i) => (

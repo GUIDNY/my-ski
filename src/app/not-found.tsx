@@ -18,7 +18,7 @@ export default function NotFound() {
           אולי הקישור ישן או שיש בו טעות. אפשר להתחיל מהחיפוש, או לכתוב לנו ונמצא את מה שחיפשתם.
         </p>
         <div className="flex flex-wrap justify-center gap-3 mt-2">
-          <Link href="/search?deal=full" className={btn.primary}>לחיפוש חבילה</Link>
+          <Link href="/packages" className={btn.primary}>לחבילות סקי</Link>
           <OpenChatButton className={btn.outline}>לכתוב לעוזר שלנו</OpenChatButton>
         </div>
         <Link href="/" className="text-[15px] font-bold text-accent hover:text-accent-hover mt-1">לדף הבית</Link>

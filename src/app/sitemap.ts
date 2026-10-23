@@ -10,6 +10,7 @@ export const revalidate = 3600;
 const STATIC_ROUTES: { path: string; priority: number; changeFrequency: "daily" | "weekly" | "monthly" }[] = [
   { path: "/", priority: 1, changeFrequency: "daily" },
   { path: "/apartments", priority: 0.9, changeFrequency: "daily" },
+  { path: "/packages", priority: 0.9, changeFrequency: "daily" },
   { path: "/weekly", priority: 0.8, changeFrequency: "daily" },
   { path: "/transfers", priority: 0.6, changeFrequency: "weekly" },
   { path: "/seasonaires", priority: 0.6, changeFrequency: "weekly" },

@@ -24,6 +24,7 @@ SkiShare (סקי שר) מוכרת חופשות סקי בואל טורנס, צר�
 ## Main pages
 - [Home](${SITE}/): search apartments and packages in Val Thorens.
 - [Apartments in Val Thorens](${SITE}/apartments): every apartment with photos, size, guests and price, and the cheapest open apartment for every Saturday of the season.
+- [Ski packages](${SITE}/packages): a week in an apartment + ski pass + airport transfer, with the price per person (for 2, 4 and 6) for every Saturday of the season.
 - [Saturday to Saturday weeks](${SITE}/weekly): agency apartments by the week, with the price per person.
 - [Airport transfers](${SITE}/transfers): shuttle between the airport (Geneva or Lyon) and Val Thorens.
 - [Seasonaires](${SITE}/seasonaires): apartments for long stays (two months or more) and a community for people spending the whole season.

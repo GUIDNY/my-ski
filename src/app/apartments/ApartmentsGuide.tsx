@@ -270,7 +270,7 @@ export default function ApartmentsGuide({ apartments, passes }: { apartments: Ap
                 <Link href={GUIDE_PATHS.arrive} className="font-bold text-accent hover:text-accent-hover">איך מגיעים לואל טורנס</Link>
               </li>
             </ul>
-            <p className={p}>רוצים לראות הכול ביחד, במחיר לאדם? <Link href="/search?deal=full" className="font-bold text-accent hover:text-accent-hover">חבילה לפי תאריכים</Link></p>
+            <p className={p}>רוצים לראות הכל ביחד, במחיר לאדם? <Link href="/packages" className="font-bold text-accent hover:text-accent-hover">מחיר חבילת סקי לכל שבוע</Link></p>
           </section>
 
           <section className={sec} aria-labelledby="check">

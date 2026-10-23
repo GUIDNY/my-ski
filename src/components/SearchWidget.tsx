@@ -111,12 +111,17 @@ const IconChevR = () => (
 );
 
 /* ── Main widget ───────────────────────────────────────────── */
-export default function SearchWidget() {
+export default function SearchWidget({ initialDeal = "apartment", flat = false }: {
+  /** which search opens selected: the full deal on the packages page */
+  initialDeal?: "apartment" | "full";
+  /** on a light page: a border and a soft shadow instead of the hero's deep one */
+  flat?: boolean;
+} = {}) {
   const [from,    setFrom]    = useState<Date | null>(null);
   const [to,      setTo]      = useState<Date | null>(null);
   const [hov,     setHov]     = useState<Date | null>(null);
   const [guests,  setGuests]  = useState(2);
-  const [dealMode, setDealMode] = useState<"apartment" | "full">("apartment");
+  const [dealMode, setDealMode] = useState<"apartment" | "full">(initialDeal);
   const [open,    setOpen]    = useState(false);
   const [picking, setPicking] = useState<"from" | "to">("from");
   const [base,    setBase]    = useState(() => new Date(2026, 10, 1));
@@ -179,8 +184,8 @@ export default function SearchWidget() {
   return (
     <div ref={ref} className="relative w-full max-w-5xl" dir="rtl">
       <form role="search" aria-label="חיפוש חופשה" onSubmit={e => { e.preventDefault(); handleSearch(); }}
-        className="bg-white rounded-[22px] p-2.5 md:p-3 grid grid-cols-1 md:grid-cols-[1.3fr_1fr_1.15fr_auto] gap-2 md:gap-2.5 text-right"
-        style={{ boxShadow: "0 24px 60px rgba(8,18,38,0.35)" }}>
+        className={`bg-white rounded-[22px] p-2.5 md:p-3 grid grid-cols-1 md:grid-cols-[1.3fr_1fr_1.15fr_auto] gap-2 md:gap-2.5 text-right ${flat ? "border border-[#E3E9F2]" : ""}`}
+        style={{ boxShadow: flat ? "0 8px 24px rgba(8,18,38,0.08)" : "0 24px 60px rgba(8,18,38,0.35)" }}>
 
         {/* When */}
         <button type="button" onClick={() => openPicker(from && !to ? "to" : "from")} aria-expanded={open}
@@ -222,7 +227,7 @@ export default function SearchWidget() {
         </button>
       </form>
       {dealMode === "full" && (
-        <p className="text-center text-white/90 text-sm font-medium mt-3">דיל שלם: הדירה, סקי פס והסעה מהשדה, ומחיר לאדם. טיסה ישירה מוסיפים כשיש.</p>
+        <p className={`text-center text-sm font-medium mt-3 ${flat ? "text-[#51607A]" : "text-white/90"}`}>דיל שלם: הדירה, סקי פס והסעה מהשדה, ומחיר לאדם. טיסה ישירה מוסיפים כשיש.</p>
       )}
 
       {/* ══ Calendar dropdown ══════════════════════════════════ */}
