@@ -24,6 +24,8 @@ export async function POST(req: NextRequest) {
   const CURRENCY = (b.currency === "EUR" || b.currency === "ILS") ? b.currency : (process.env.PAYPLUS_CURRENCY || "ILS");
 
   const origin = req.headers.get("origin") || `https://${req.headers.get("host")}`;
+  // the English/French site sends lang "en"|"fr": its customers come back to /en/pay/… or /fr/pay/…
+  const back = b.lang === "en" || b.lang === "fr" ? `${origin}/${b.lang}` : origin;
   let desc = (b.description as string) || "SkiShare";
 
   // Convert EUR → ILS at the sell (cash) rate when charging in shekels
@@ -43,9 +45,9 @@ export async function POST(req: NextRequest) {
     currency_code: CURRENCY,
     sendEmailApproval: true,
     sendEmailFailure: false,
-    refURL_success: `${origin}/pay/success${b.order_code ? `?order=${b.order_code}` : ""}`,
-    refURL_failure: `${origin}/pay/failure`,
-    refURL_cancel: `${origin}/pay/failure`,
+    refURL_success: `${back}/pay/success${b.order_code ? `?order=${b.order_code}` : ""}`,
+    refURL_failure: `${back}/pay/failure`,
+    refURL_cancel: `${back}/pay/failure`,
     refURL_callback: `${origin}/api/payplus/callback`,
     more_info: desc,
     ...(b.order_code ? { more_info_1: String(b.order_code) } : {}),

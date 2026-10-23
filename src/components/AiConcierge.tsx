@@ -17,8 +17,9 @@ type Answer = {
   reply?: string; // the old site bot (fallback) answers in one message
 };
 
-// admin/auth/checkout screens don't need the customer-facing chat launcher
-const HIDDEN = ["/admin", "/auth", "/pay", "/quote", "/q"];
+// admin/auth/checkout screens don't need the customer-facing chat launcher;
+// the English and French site (/en, /fr) has no Hebrew chat
+const HIDDEN = ["/admin", "/auth", "/pay", "/quote", "/q", "/en", "/fr"];
 
 const WELCOME: Message[] = [
   { role: "assistant", text: "היי, כאן SkiShare" },

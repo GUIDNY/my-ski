@@ -16,6 +16,8 @@ export function pageMeta(o: {
   imageAlt?: string;
   type?: "website" | "article";
   noindex?: boolean;
+  /** hreflang: the same page in other languages (src/lib/intl/metadata.ts alternatesFor) */
+  languages?: Record<string, string>;
 }): Metadata {
   const url = siteUrl(o.path);
   const images = o.image
@@ -24,7 +26,7 @@ export function pageMeta(o: {
   return {
     title: { absolute: o.title },
     description: o.description,
-    alternates: { canonical: url },
+    alternates: o.languages ? { canonical: url, languages: o.languages } : { canonical: url },
     openGraph: {
       type: o.type ?? "website",
       siteName: "SkiShare",

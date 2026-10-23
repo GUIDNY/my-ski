@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createServerClient } from "@/lib/supabase-server";
 import { pageMeta } from "@/lib/page-meta";
 import { aptDisplayName, aptMetaDescription, aptParts } from "@/lib/apartment-display";
+import { alternatesFor } from "@/lib/intl/metadata";
 import type { Apartment } from "@/types";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -10,9 +11,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const db = createServerClient();
   const { data } = await db.from("apartments")
-    .select("name, type, price_per_night, images, max_guests, sqm, source, available_weeks")
+    .select("name, type, price_per_night, images, max_guests, sqm, source, available_weeks, available")
     .eq("id", id).maybeSingle();
-  const apt = data as Pick<Apartment, "name" | "type" | "price_per_night" | "images" | "max_guests" | "sqm" | "source" | "available_weeks"> | null;
+  const apt = data as Pick<Apartment, "name" | "type" | "price_per_night" | "images" | "max_guests" | "sqm" | "source" | "available_weeks" | "available"> | null;
 
   // a wrong or removed apartment: a real 404, not an empty page with a 200
   if (!apt) notFound();
@@ -26,6 +27,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     path: `/apartments/${id}`,
     image: apt.images?.[0] ?? null,
     imageAlt: name,
+    // the English and French pages exist only for apartments on offer
+    ...(apt.available ? { languages: alternatesFor(`/apartments/${id}`) } : {}),
   });
 }
 

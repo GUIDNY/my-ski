@@ -1,10 +1,12 @@
 import LegalShell, { H2, UL } from "@/components/LegalShell";
 import { pageMeta } from "@/lib/page-meta";
+import { alternatesFor } from "@/lib/intl/metadata";
 
 export const metadata = pageMeta({
   title: "מדיניות פרטיות | SkiShare",
   description: "איך SkiShare שומרת על המידע שלכם: מה נאסף, למה, ומה הזכויות שלכם.",
   path: "/privacy",
+  languages: alternatesFor("/privacy"),
 });
 
 export default function PrivacyPage() {

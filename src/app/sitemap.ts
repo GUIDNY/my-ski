@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { createServerClient } from "@/lib/supabase-server";
 import { GUIDES } from "@/lib/guides";
 import { siteUrl } from "@/lib/site";
+import { alternatesFor } from "@/lib/intl/metadata";
 
 // the apartment list changes with the daily sync: rebuild the sitemap every hour
 export const revalidate = 3600;
@@ -21,13 +22,34 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: "daily" 
   { path: "/accessibility", priority: 0.1, changeFrequency: "monthly" },
 ];
 
+// The English and French site (/en, /fr): the Hebrew page each one translates
+// (hreflang alternates for all three languages, on the Hebrew entries too)
+const INTL_ROUTES: { rest: string; he: string; priority: number; changeFrequency: "daily" | "monthly" }[] = [
+  { rest: "", he: "/", priority: 0.9, changeFrequency: "daily" },
+  { rest: "/apartments", he: "/apartments", priority: 0.8, changeFrequency: "daily" },
+  { rest: "/terms", he: "/terms", priority: 0.2, changeFrequency: "monthly" },
+  { rest: "/privacy", he: "/privacy", priority: 0.2, changeFrequency: "monthly" },
+];
+const INTL_REST_OF_HE = new Map(INTL_ROUTES.map(r => [r.he, r.rest]));
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // no made-up "last modified" dates: only the guides have a real one
-  const staticEntries: MetadataRoute.Sitemap = STATIC_ROUTES.map(r => ({
-    url: siteUrl(r.path),
+  const staticEntries: MetadataRoute.Sitemap = STATIC_ROUTES.map(r => {
+    const rest = INTL_REST_OF_HE.get(r.path);
+    return {
+      url: siteUrl(r.path),
+      changeFrequency: r.changeFrequency,
+      priority: r.priority,
+      ...(rest !== undefined ? { alternates: { languages: alternatesFor(rest) } } : {}),
+    };
+  });
+
+  const intlEntries: MetadataRoute.Sitemap = INTL_ROUTES.flatMap(r => (["en", "fr"] as const).map(lang => ({
+    url: siteUrl(`/${lang}${r.rest}`),
     changeFrequency: r.changeFrequency,
     priority: r.priority,
-  }));
+    alternates: { languages: alternatesFor(r.rest) },
+  })));
 
   const guideEntries: MetadataRoute.Sitemap = GUIDES.map(g => ({
     // Hebrew addresses percent-encoded, as Google asks for in sitemaps
@@ -41,14 +63,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const db = createServerClient();
     const { data } = await db.from("apartments").select("id").eq("available", true);
-    apartmentEntries = (data ?? []).map(a => ({
-      url: siteUrl(`/apartments/${a.id}`),
-      changeFrequency: "daily" as const,
-      priority: 0.8,
-    }));
+    apartmentEntries = (data ?? []).flatMap(a => {
+      const alternates = { languages: alternatesFor(`/apartments/${a.id}`) };
+      return [
+        { url: siteUrl(`/apartments/${a.id}`), changeFrequency: "daily" as const, priority: 0.8, alternates },
+        { url: siteUrl(`/en/apartments/${a.id}`), changeFrequency: "daily" as const, priority: 0.7, alternates },
+        { url: siteUrl(`/fr/apartments/${a.id}`), changeFrequency: "daily" as const, priority: 0.7, alternates },
+      ];
+    });
   } catch {
     // sitemap should still render even if the DB is briefly unreachable
   }
 
-  return [...staticEntries, ...guideEntries, ...apartmentEntries];
+  return [...staticEntries, ...intlEntries, ...guideEntries, ...apartmentEntries];
 }

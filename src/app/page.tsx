@@ -5,11 +5,13 @@ import OpenChatButton from "@/components/OpenChatButton";
 import WeekPackages, { WeekPackagesSkeleton } from "@/components/home/WeekPackages";
 import { helperWaHref } from "@/lib/helper-whatsapp";
 import { pageMeta } from "@/lib/page-meta";
+import { alternatesFor } from "@/lib/intl/metadata";
 
 export const metadata = pageMeta({
   title: "חופשת סקי בואל טורנס: דירות לחבר'ה, סקי פס והסעה | SkiShare",
   description: "חופשת סקי בואל טורנס בהרכבה: דירה לחבר'ה, לקבוצה או לזוג, ומוסיפים סקי פס, הסעה מהשדה, ציוד וטיסה ישירה כשיש. כל אחד מהחבורה משלם את החלק שלו.",
   path: "/",
+  languages: alternatesFor(""),
 });
 
 // The packages section prices live inventory (which apartments are free for

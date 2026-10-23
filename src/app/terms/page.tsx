@@ -1,11 +1,13 @@
 import Link from "next/link";
 import LegalShell, { H2, UL } from "@/components/LegalShell";
 import { pageMeta } from "@/lib/page-meta";
+import { alternatesFor } from "@/lib/intl/metadata";
 
 export const metadata = pageMeta({
   title: "תקנון: הזמנות, ביטולים וכוח עליון | SkiShare",
   description: "התקנון של SkiShare: הזמנות, ביטולים והחזרים, תנאים כלליים, כוח עליון ומצב חירום, כולל הסעיף המיוחד למלחמה ולסגירת שמיים.",
   path: "/terms",
+  languages: alternatesFor("/terms"),
 });
 
 export default function TermsPage() {

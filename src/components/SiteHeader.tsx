@@ -23,8 +23,8 @@ const NAV = [
   { href: "/seasonaires", label: "סיזיונרים", active: (p: string) => p.startsWith("/seasonaires") },
 ];
 
-// screens with their own frame
-const HIDDEN = ["/admin", "/quote/print"]; // own frame / a printable page
+// screens with their own frame (/en and /fr: the English and French site) or a printable page
+const HIDDEN = ["/admin", "/quote/print", "/en", "/fr"];
 
 export function Brand({ white = false, small = false }: { white?: boolean; small?: boolean }) {
   return (
