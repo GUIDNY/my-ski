@@ -1,3 +1,4 @@
+import { faqLd, ldJson } from "@/lib/site";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { wrap } from "@/components/ui";
@@ -122,6 +123,8 @@ export default async function HomePage({ lang }: { lang: Lang }) {
 
       {/* ── FAQ ────────────────────────────────────────── */}
       <section aria-labelledby="faq-title" className="max-w-[920px] mx-auto w-full px-4 md:px-6 py-14 md:py-20">
+        {/* the same questions and answers as shown, for search engines and AI answers */}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(faqLd(h.faqItems.map(f => ({ q: f.q, a: f.a })))) }} />
         <h2 id="faq-title" className="font-display text-[28px] md:text-[38px] font-bold tracking-tight mb-6">{h.faq}</h2>
         <div className="flex flex-col border-t border-line">
           {h.faqItems.map((f, i) => (

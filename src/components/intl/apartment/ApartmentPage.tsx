@@ -1,3 +1,4 @@
+import { SITE, ORG_ID, VAL_THORENS, ldJson } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -89,8 +90,49 @@ export default async function ApartmentPage({ lang, id }: { lang: Lang; id: stri
   };
   const plain = parseSearch({}, today);
 
+  // what the page is about, for search engines and AI answers: only facts shown on the page
+  const url = `${SITE}/${lang}/apartments/${apt.id}`;
+  const prices = agency ? weeks.map(w => w.price) : [];
+  const ld = [{
+    "@context": "https://schema.org",
+    "@type": "Apartment",
+    "@id": `${url}#apartment`,
+    name: text.name,
+    url,
+    inLanguage: lang,
+    description: text.description.replace(/\s+/g, " ").trim().slice(0, 600),
+    ...(apt.images?.length ? { image: apt.images.slice(0, 10) } : {}),
+    ...(apt.baths ? { numberOfBathroomsTotal: Number(apt.baths) } : {}),
+    ...(apt.sqm ? { floorSize: { "@type": "QuantitativeValue", value: Number(apt.sqm), unitCode: "MTK" } } : {}),
+    ...(apt.max_guests ? { occupancy: { "@type": "QuantitativeValue", maxValue: Number(apt.max_guests) } } : {}),
+    address: { "@type": "PostalAddress", addressLocality: "Val Thorens", postalCode: "73440", addressRegion: "Savoie", addressCountry: "FR" },
+    containedInPlace: VAL_THORENS,
+  },
+  ...(prices.length ? [{
+    "@context": "https://schema.org",
+    "@type": "AggregateOffer",
+    url,
+    itemOffered: { "@id": `${url}#apartment` },
+    seller: { "@id": ORG_ID },
+    priceCurrency: "EUR",
+    lowPrice: Math.min(...prices),
+    highPrice: Math.max(...prices),
+    offerCount: prices.length,
+    availability: "https://schema.org/InStock",
+  }] : []),
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: t.nav.home, item: `${SITE}/${lang}` },
+      { "@type": "ListItem", position: 2, name: t.nav.apartments, item: `${SITE}/${lang}/apartments` },
+      { "@type": "ListItem", position: 3, name: text.name, item: url },
+    ],
+  }];
+
   return (
     <div className="bg-white">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(ld) }} />
       <div className={`${wrap} pt-5 md:pt-7`}>
         <Crumbs lang={lang} className="mb-3 md:mb-4" items={[
           { label: t.nav.home, href: `/${lang}` },
