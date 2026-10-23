@@ -39,3 +39,5 @@ and French. Main competitor: houski.co.il (also Global Ski, SkiDeal).
 
 ## Log (newest last, max 8 lines per day)
 - 2026-10-24: /about page live (Israeli company renting apartments in Val Thorens), home description and Organization JSON-LD updated, IndexNow 212 URLs. www.skisharebook.com has no DNS record at IONOS (Vercel side is ready): waiting on Idan.
+- 2026-10-24: www DNS added at IONOS (works, canonical to apex). Bing Webmaster connected (import from GSC); sitemap resubmitted (Bing had only 26 URLs from 8/31); home indexed in Bing. Home description shortened, hero alts added.
+- NEXT: Bing flags meta descriptions over 160 chars as an error: 105 of 212 sitemap URLs (apartment pages HE/FR/EN, /packages, /about, /fr, most EN/FR guides). Shorten the generators to 150 or less, keep the key words first. Then IndexNow.
