@@ -9,6 +9,7 @@ import { useDirectFlight } from "@/lib/useFlightPrice";
 import { aptDisplayName, aptShortName, aptParts } from "@/lib/apartment-display";
 import { card, btn, badgeLight, badgeDark, Check, EmptyState } from "@/components/ui";
 import { cardImage } from "@/lib/thumbs";
+import { HOLIDAY_WEEKS } from "@/lib/holiday-weeks";
 
 const MONTHS_FULL = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
 
@@ -176,6 +177,7 @@ export default function WeeklyBrowser({
                         {isSelected ? <Check /> : <span className="w-4" aria-hidden="true" />}
                         {fmtRange(checkin, checkout)}
                         {full && weekHasDirect(w) && <span className="text-muted" title="יש טיסה ישירה הלוך וחזור בשבוע הזה"><IcoPlane /></span>}
+                        {HOLIDAY_WEEKS[w] && <span className="text-[12px] font-bold text-accent bg-accent-soft rounded-full px-2 py-0.5">{HOLIDAY_WEEKS[w].label}</span>}
                       </span>
                       {rp !== undefined
                         ? <span className="text-[15px] text-ink">מ-<b>{eur(perPerson(rp, w))}</b> <span className="text-muted text-[14px]">לאדם</span></span>
@@ -228,6 +230,9 @@ export default function WeeklyBrowser({
                   <span className={`text-[13px] ${isSelected ? "text-white/80" : "text-muted"}`}>
                     {rp !== undefined ? `מ-${eur(perPerson(rp, w))} לאדם` : "אין מקום"}
                   </span>
+                  {HOLIDAY_WEEKS[w] && (
+                    <span className={`text-[12px] font-bold ${isSelected ? "text-white" : "text-accent"}`}>{HOLIDAY_WEEKS[w].label}</span>
+                  )}
                 </button>
               );
             })}

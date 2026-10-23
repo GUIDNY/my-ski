@@ -7,6 +7,7 @@ import SearchWidget from "@/components/SearchWidget";
 import { packageWeeks, PACKAGE_GROUPS, type PackageGroup, type PackageWeek } from "@/lib/package-prices";
 import { LIFT_DATES, PASS_AREA_LABEL, TRANSFER_PRICE } from "@/lib/deal-pricing";
 import { equipCost } from "@/lib/pricing";
+import { HOLIDAY_WEEKS } from "@/lib/holiday-weeks";
 import type { Apartment, SkiPass } from "@/types";
 
 /*
@@ -139,6 +140,11 @@ export default async function PackagesPage() {
                     <tr key={w.week}>
                       <th scope="row" className={`${td} font-bold text-ink`}>
                         <Link href={weeklyHref(w.week, 4)} className="text-accent hover:text-accent-hover">{dm(w.week)}</Link>
+                        {HOLIDAY_WEEKS[w.week] && (
+                          <Link href={encodeURI(HOLIDAY_WEEKS[w.week].href)} className="block text-[12px] md:text-[13px] font-bold text-accent hover:text-accent-hover mt-0.5">
+                            {HOLIDAY_WEEKS[w.week].label}
+                          </Link>
+                        )}
                         {w.area !== "trois_vallees" && (
                           <span className="block text-[12px] md:text-[13px] font-normal text-muted mt-0.5">פס {PASS_AREA_LABEL[w.area]} ואורל</span>
                         )}

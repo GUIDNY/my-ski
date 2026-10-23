@@ -7,15 +7,19 @@
  * build and the browser refreshes them from /api/week-prices.
  */
 
-export type WeekMin = [week: string, price: number];
+/** a Saturday, the cheapest open apartment that week, and how many are open */
+export type WeekMin = [week: string, price: number, open: number];
 export type WeekPrices = { asOf: string; weeks: WeekMin[] };
 
 type Row = { available_weeks: { week: string; price: number }[] | null };
 
 export function weekMins(rows: Row[], todayISO: string): WeekMin[] {
-  const mins = new Map<string, number>();
+  const mins = new Map<string, { price: number; open: number }>();
   for (const a of rows)
-    for (const w of a.available_weeks ?? [])
-      if (w.week >= todayISO && w.price > 0) mins.set(w.week, Math.min(mins.get(w.week) ?? Infinity, w.price));
-  return [...mins.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([w, p]) => [w, Math.round(p)]);
+    for (const w of a.available_weeks ?? []) {
+      if (!(w.week >= todayISO && w.price > 0)) continue;
+      const m = mins.get(w.week);
+      mins.set(w.week, m ? { price: Math.min(m.price, w.price), open: m.open + 1 } : { price: w.price, open: 1 });
+    }
+  return [...mins.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([w, m]) => [w, Math.round(m.price), m.open]);
 }

@@ -18,6 +18,8 @@ const PLAN = [
   { label: "סקי פס ואל טורנס: מחירים", href: "/guide/מחיר-סקי-פס-ואל-טורנס" },
   { label: "איך מגיעים לואל טורנס", href: "/guide/איך-מגיעים-לואל-טורנס-מישראל" },
   { label: "מתי לנסוע לואל טורנס", href: "/guide/מתי-לנסוע-לואל-טורנס" },
+  { label: "סקי בחנוכה", href: "/guide/חופשת-סקי-בחנוכה" },
+  { label: "סקי בפסח", href: "/guide/חופשת-סקי-בפסח" },
   { label: "חופשת סקי לקבוצות", href: "/guide/חופשת-סקי-לקבוצות-בואל-טורנס" },
   { label: "חופשת סקי ראשונה", href: "/guide/חופשת-סקי-ראשונה" },
   { label: "מה לארוז לחופשת סקי", href: "/guide/מה-לארוז-לחופשת-סקי" },
@@ -54,7 +56,8 @@ export default function Footer() {
 
           <nav aria-label="תכנון החופשה" className="flex flex-col gap-2.5">
             <span className="font-bold text-[15px] text-ink mb-1">תכנון החופשה</span>
-            {PLAN.map(i => <Link key={i.href} href={i.href} className={linkCls}>{i.label}</Link>)}
+            {/* Hebrew addresses percent-encoded, as Google recommends for links */}
+            {PLAN.map(i => <Link key={i.href} href={encodeURI(i.href)} className={linkCls}>{i.label}</Link>)}
           </nav>
 
           <nav aria-label="מידע" className="flex flex-col gap-2.5">

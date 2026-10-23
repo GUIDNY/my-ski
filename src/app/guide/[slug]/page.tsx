@@ -145,7 +145,7 @@ export default async function GuideArticle({ params }: { params: Promise<{ slug:
                   </ol>
                 )}
                 {s.table && <Table table={s.table} />}
-                {s.liveWeeks && <LiveWeeks initial={weekPrices} notes={s.liveWeeks.notes} />}
+                {s.liveWeeks && <LiveWeeks initial={weekPrices} {...s.liveWeeks} />}
                 {s.after?.map((p, pi) => (
                   <p key={pi} className={paragraph}><RichText text={p} /></p>
                 ))}
