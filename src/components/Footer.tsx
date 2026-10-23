@@ -55,7 +55,17 @@ export default function Footer() {
 
         <div className="mt-10 pt-5 border-t border-line flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-[14px] text-muted">
           <span>© 2026 SkiShare · סקי שר בע״מ</span>
-          <span>ישראל · צרפת</span>
+          <span className="flex flex-wrap items-center gap-x-4">
+            <span>ישראל · צרפת</span>
+            {/* the English and French site: plain links (a full page load), it has its own frame */}
+            <span dir="ltr" className="inline-flex items-center gap-1.5">
+              {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+              <a href="/en" hrefLang="en" lang="en" className="inline-flex items-center min-h-[44px] hover:text-ink transition-colors">English</a>
+              <span aria-hidden="true">·</span>
+              {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+              <a href="/fr" hrefLang="fr" lang="fr" className="inline-flex items-center min-h-[44px] hover:text-ink transition-colors">Français</a>
+            </span>
+          </span>
         </div>
       </div>
     </footer>
