@@ -46,6 +46,9 @@ export default async function QuotePrintPage({ searchParams }: { searchParams: P
   const extras = decodeExtras(one("x")) ?? {};
   const quoteId = /^[a-z0-9]{4,12}$/i.test(one("q")) ? one("q") : "";
   const retDepart = one("rd").slice(0, 16) || null, retArrive = one("ra").slice(0, 16) || null;
+  // the outbound times and airline the quote showed, for when the flight cache doesn't keep them
+  const outDepart = one("od").slice(0, 16) || null, outArrive = one("oa").slice(0, 16) || null;
+  const airlineShown = one("al").slice(0, 60) || null;
 
   const bad = <div dir="rtl" style={{ padding: 40, textAlign: "center", fontFamily: "Arial" }}>לא מצאנו את ההצעה.</div>;
   if (!/^[0-9a-f-]{36}$/i.test(apartmentId) || !isIso(checkin) || !isIso(checkout) || checkout <= checkin) return bad;
@@ -63,7 +66,7 @@ export default async function QuotePrintPage({ searchParams }: { searchParams: P
   // the cheapest direct flight the site found for these dates (the cache /api/flight-price fills)
   const direct: DirectFlight | null = ((flights ?? []) as { dest: FlightAirport; price_eur: number | null; nonstop: boolean; airline?: string | null; url?: string | null; depart_time?: string | null; arrive_time?: string | null }[])
     .filter(f => f.nonstop && typeof f.price_eur === "number")
-    .map(f => ({ airport: f.dest, city: AIRPORT_CITY[f.dest], price: Number(f.price_eur), airline: f.airline ?? null, url: f.url ?? null, departTime: f.depart_time ?? null, arriveTime: f.arrive_time ?? null }))
+    .map(f => ({ airport: f.dest, city: AIRPORT_CITY[f.dest], price: Number(f.price_eur), airline: f.airline ?? airlineShown, url: f.url ?? null, departTime: f.depart_time ?? outDepart, arriveTime: f.arrive_time ?? outArrive }))
     .sort((x, y) => x.price - y.price)[0] ?? null;
 
   const calc = quoteLines({

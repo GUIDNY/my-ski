@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 // Only these choices pass through to the printable page; it prices them itself.
-const KEYS = ["apartment_id", "checkin", "checkout", "guests", "cancel", "service", "x", "q", "rd", "ra"] as const;
+const KEYS = ["apartment_id", "checkin", "checkout", "guests", "cancel", "service", "x", "q", "rd", "ra", "od", "oa", "al"] as const;
 
 /**
  * The quote as a PDF file: renders /quote/print (the branded proposal design,

@@ -160,7 +160,10 @@ export async function GET(req: NextRequest) {
   const { data: cached } = await db.from("flight_price_cache")
     .select("*").eq("origin", origin).eq("dest", dest).eq("checkin", checkin).eq("checkout", checkout).maybeSingle();
 
-  if (cached && Date.now() - new Date(cached.checked_at).getTime() < CACHE_HOURS * 3600_000) {
+  // a direct flight is shown with its times: a cached row without them (the
+  // table in production has no detail columns yet) is checked again
+  const complete = cached && (!cached.nonstop || cached.depart_time);
+  if (cached && complete && Date.now() - new Date(cached.checked_at).getTime() < CACHE_HOURS * 3600_000) {
     return NextResponse.json({
       price: cached.price_eur, nonstop: cached.nonstop, url: cached.url,
       airline: cached.airline ?? null, departTime: cached.depart_time ?? null, arriveTime: cached.arrive_time ?? null,
@@ -181,7 +184,8 @@ export async function GET(req: NextRequest) {
       const { error: fullErr } = await db.from("flight_price_cache")
         .upsert({ ...row, url, airline, depart_time: departTime, arrive_time: arriveTime }, { onConflict: "origin,dest,checkin,checkout" });
       if (fullErr) {
-        console.error("flight-price cache write failed, retrying with the base columns:", fullErr.message);
+        // expected until the table gets the columns url, airline, depart_time, arrive_time
+        console.warn("flight-price cache: writing the base columns only:", fullErr.message);
         const { error: baseErr } = await db.from("flight_price_cache").upsert(row, { onConflict: "origin,dest,checkin,checkout" });
         if (baseErr) console.error("flight-price cache write failed:", baseErr.message);
       }

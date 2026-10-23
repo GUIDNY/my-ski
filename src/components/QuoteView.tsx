@@ -390,6 +390,9 @@ export default function QuoteView({ q }: { q: QuoteData }) {
     ...(pickedCode ? { x: pickedCode } : {}),
     ...(q.quoteId ? { q: q.quoteId } : {}),
     ...(flightEff && returnLeg.leg?.departTime && returnLeg.leg.arriveTime ? { rd: returnLeg.leg.departTime, ra: returnLeg.leg.arriveTime } : {}),
+    // the outbound times and airline as shown here (the flight cache may not keep them)
+    ...(flightEff && directFlight?.departTime && directFlight.arriveTime ? { od: directFlight.departTime, oa: directFlight.arriveTime } : {}),
+    ...(flightEff && directFlight?.airline ? { al: directFlight.airline } : {}),
   }).toString()}`;
   // Phones (and the app) get the share sheet with the file: save it, send it
   // on WhatsApp. Without it, the app opens the PDF in Safari from a link the
