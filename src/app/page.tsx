@@ -15,8 +15,11 @@ export const metadata = pageMeta({
 });
 
 // The packages section prices live inventory (which apartments are free for
-// the week, today's Airbnb prices) — never pre-render it at build time.
-export const dynamic = "force-dynamic";
+// the week, today's Airbnb prices), so the page is rebuilt in the background
+// every 10 minutes: visitors and search engines get it from the CDN at once
+// instead of waiting about 2 seconds for it to be priced on every view. The
+// address is ASCII, so rebuilding it on the server is safe (see guide/[slug]).
+export const revalidate = 600;
 
 /* ── Icons (stroke, follow the text color) ─────────────────── */
 const ico = (path: React.ReactNode, size = 22) => (
