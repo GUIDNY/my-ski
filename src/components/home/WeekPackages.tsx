@@ -83,7 +83,8 @@ async function loadPackages(): Promise<{ label: string; cards: Card[] } | null> 
       const meta = [`עד ${a.max_guests} אנשים`, a.sqm ? `${a.sqm} מ"ר` : ""].filter(Boolean).join(" · ");
       return {
         id: a.id, name: a.name, img: a.images?.[0] ?? "/hero-ski.jpg", ownApartment: a.source !== "la_cime", meta,
-        href: `/apartments/${a.id}?checkin=${checkin}&checkout=${checkout}&guests=${GUESTS}`,
+        // the apartment page opens with the same package (3V pass, transfer, gear) as this card's price
+        href: `/apartments/${a.id}?checkin=${checkin}&checkout=${checkout}&guests=${GUESTS}&pass=trois_vallees&transfer=1&equip=1`,
         perPerson: Math.round(total / GUESTS), total,
       };
     };
