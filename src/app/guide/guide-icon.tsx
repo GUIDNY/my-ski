@@ -14,11 +14,15 @@ const PATHS: Record<string, React.ReactNode> = {
   bag: <><path d="M10 6V4.5a2 2 0 0 1 4 0V6" /><rect x="5.5" y="6" width="13" height="15" rx="4" /><rect x="8.5" y="13" width="7" height="5" rx="1.5" /><path d="M8.5 15.5h7" /></>,
   skis: <><path d="M4 21 15.5 4.2a1.6 1.6 0 0 1 2.6 1.6" /><path d="M8.5 21.5 19.6 7.4a1.6 1.6 0 0 1 2.4 1.9" /><path d="M8.6 13.6l2.2 1.6M12 15.4l2.2 1.6" /></>,
   group: <><circle cx="12" cy="7.5" r="2.5" /><circle cx="5.5" cy="9.5" r="2" /><circle cx="18.5" cy="9.5" r="2" /><path d="M7.5 19a4.5 4.5 0 0 1 9 0" /><path d="M2 18a3.5 3.5 0 0 1 5.2-3" /><path d="M22 18a3.5 3.5 0 0 0-5.2-3" /></>,
+  // a Hanukkah menorah: the middle stem, two pairs of arms, a flame on each
+  menorah: <><path d="M12 6v13M8 21h8M12 19v2" /><path d="M5 8v3a7 7 0 0 0 14 0V8" /><path d="M8.5 8v3a3.5 3.5 0 0 0 7 0V8" /><path d="M5 4.5v1M8.5 4.5v1M12 2.5v1M15.5 4.5v1M19 4.5v1" /></>,
+  // the spring sun behind a cloud (Pesach)
+  cloudSun: <><path d="M12 2v2M4.93 4.93l1.41 1.41M20 12h2M19.07 4.93l-1.41 1.41" /><path d="M15.95 12.65a4 4 0 0 0-5.93-4.13" /><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6z" /></>,
 };
 
 const BY_EMOJI: Record<string, string> = {
   "🏔️": "mountain", "📅": "calendar", "✈️": "plane", "🎫": "ticket", "👨‍👩‍👧‍👦": "family",
-  "🍻": "glass", "🏠": "home", "☀️": "sun", "⛷️": "route", "⚖️": "compare", "👥": "group", "🎒": "bag", "🎿": "skis",
+  "🍻": "glass", "🏠": "home", "☀️": "sun", "⛷️": "route", "⚖️": "compare", "👥": "group", "🎒": "bag", "🎿": "skis", "🕎": "menorah", "🌤️": "cloudSun",
 };
 
 export default function GuideIcon({ emoji, size = 24 }: { emoji: string; size?: number }) {
