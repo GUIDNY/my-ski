@@ -1,73 +1,321 @@
 {
   "key": "apartment-prices",
   "lang": "en",
-  "title": "PLACEHOLDER apartment-prices en",
-  "metaTitle": "PLACEHOLDER apartment-prices | SkiShare",
-  "description": "placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder ",
+  "title": "Val Thorens apartment prices 2026/27: how much a week costs",
+  "metaTitle": "Val Thorens apartment prices 2026/27, week by week | SkiShare",
+  "description": "What a week in a Val Thorens apartment costs in 2026/27: live prices for every Saturday, why they change, official lift pass prices and how to pay less.",
   "keywords": [
-    "a",
-    "b",
-    "c"
+    "val thorens apartment prices",
+    "how much is a week in val thorens",
+    "cheap apartments val thorens",
+    "val thorens self catered apartment week",
+    "val thorens apartment saturday to saturday",
+    "val thorens february half term 2027"
   ],
-  "emoji": "🎫",
+  "emoji": "💰",
   "published": "2026-10-23",
   "updated": "2026-10-23",
-  "intro": "Intro with [a link](/en/apartments) and **bold**.",
+  "intro": "A week in a Val Thorens apartment costs least at the start and end of the 2026/27 season (late November to mid-December, then late March to the end of April) and most at New Year and above all at the height of the February school holidays, when the cheapest agency apartment still free on our site costs about three times as much as in April. The live table below shows, for every Saturday of the season, the cheapest agency apartment still free for the full week, Saturday to Saturday, and how many are left. Then add the lift pass: SETAM's official 6-day adult price is €330.50 or €367.50 for Val Thorens-Orelle, and €378.50 or €421 for the 3 Vallées, depending on the dates.",
   "sections": [
     {
-      "heading": "Section one",
+      "heading": "How much is a week in a Val Thorens apartment?",
       "paragraphs": [
-        "Para 5–18 December."
+        "It depends above all on the week: in our agency apartments, a week at the height of the February school holidays costs about three times a week in late November or April. For each Saturday still ahead, the table shows the cheapest agency apartment still free, for the whole apartment and the full week, and how many agency apartments are still free.",
+        "It is live: prices and counts change as apartments are booked, and each Saturday opens the apartments free that week."
       ],
-      "list": [
-        "x",
-        "y"
+      "liveWeeks": {
+        "notes": {
+          "2026-12-19": "Christmas: school holidays begin",
+          "2026-12-26": "New Year week",
+          "2027-02-06": "French holidays: zone C, Flanders",
+          "2027-02-13": "English half-term, French zones A and C",
+          "2027-02-20": "French zones A and B, Belgium, Netherlands",
+          "2027-02-27": "French zone B, French-speaking Belgium",
+          "2027-03-27": "Easter week (Easter Sunday 28 March)",
+          "2027-04-03": "Easter holidays, French zone C",
+          "2027-04-10": "French spring holidays, zones A and C",
+          "2027-04-17": "French spring holidays, zones A and B",
+          "2027-04-24": "French zone B, Dutch May holiday"
+        },
+        "count": true
+      },
+      "after": [
+        "The table shows the cheapest apartment of any size. For your group's price, open the [apartments page](/en/apartments) and add your dates and the number of guests: only apartments free on those dates and big enough are listed, with their prices."
+      ]
+    },
+    {
+      "heading": "Why does the price change from week to week?",
+      "paragraphs": [
+        "Because of school holidays: in our table the dearest weeks are holiday weeks, and in 2027 they bunch up in February. France's three zones take two weeks each between 6 February and 8 March, so the weeks of 13 and 20 February each have two French zones off at once, as well as English, Belgian or Dutch pupils."
       ],
       "table": {
-        "caption": "Cap",
+        "caption": "School holidays by week, 2026/27",
         "head": [
-          "A",
-          "B"
+          "Week (Saturday to Saturday)",
+          "England",
+          "France",
+          "Belgium and the Netherlands"
         ],
         "rows": [
           [
-            "1",
-            "2"
+            "19 December – 2 January",
+            "Christmas holidays",
+            "All zones (19 December – 4 January)",
+            "Christmas holidays (Belgium from 21 December)"
+          ],
+          [
+            "6–13 February",
+            "",
+            "Zone C (6–22 February)",
+            "Flanders (8–14 February)"
+          ],
+          [
+            "13–20 February",
+            "Half-term (15–19 February)",
+            "Zones C and A",
+            "Southern Netherlands"
+          ],
+          [
+            "20–27 February",
+            "",
+            "Zones A (to 1 March) and B",
+            "French-speaking Belgium (from 22 February); northern and central Netherlands"
+          ],
+          [
+            "27 February – 6 March",
+            "",
+            "Zone B (to 8 March)",
+            "French-speaking Belgium (to 7 March)"
+          ],
+          [
+            "27 March – 3 April (Easter Sunday 28 March)",
+            "Easter holidays (26 March – 9 April)",
+            "",
+            "Flanders (from 29 March)"
+          ],
+          [
+            "3–10 April",
+            "Easter holidays",
+            "Zone C (3–19 April)",
+            "Flanders (to 11 April)"
+          ],
+          [
+            "10–17 April",
+            "",
+            "Zones C and A (10–26 April)",
+            ""
+          ],
+          [
+            "17–24 April",
+            "",
+            "Zones A and B (17 April – 3 May)",
+            ""
+          ],
+          [
+            "24 April – 1 May",
+            "",
+            "Zone B",
+            "Netherlands (24 April – 2 May); French-speaking Belgium (from 26 April)"
           ]
         ]
-      }
+      },
+      "after": [
+        "French dates run from the Saturday classes end to the Monday they resume; zone C includes Paris, zone A Lyon and zone B Lille. English dates are those of Surrey, Bristol, Ealing, Luton and Stockport, since each council sets its own, and the Dutch February dates are the ministry's advice to schools.",
+        "Our table follows these holidays. The dearest weeks, 13 and 20 February, cost about three times a week in late November or April; the New Year week costs a little over twice as much, and Christmas week about one and a half times. The cheapest are late November and 12 December, before Christmas, and every week from 27 March to the end of April, Easter included, even though the French spring holidays fall in April; 2 and 9 January, just after the holidays, come close.",
+        "These comparisons date from 23 October 2026. Remember too that the whole 3 Vallées area is open only from 5 December 2026 to 18 April 2027; outside those dates, Val Thorens and Orelle run on their own (21 November – 2 May)."
+      ]
     },
     {
-      "heading": "Live",
-      "liveWeeks": {
-        "notes": {
-          "2026-12-26": "New Year"
-        },
-        "count": true
-      }
+      "heading": "One price for the whole apartment, Saturday to Saturday",
+      "paragraphs": [
+        "The price in the table is for the whole apartment and the full week, Saturday to Saturday, not per person. Agency apartments are only rented that way, at that week's price: choose dates inside one of an apartment's free weeks and you book that full week.",
+        "SkiShare's own apartments are priced per night for the dates you choose, plus a cleaning fee when there is one, and every line is shown before you book. Either way, paying by card adds a 1.9% card fee, shown before you pay. Prices are in euros."
+      ],
+      "table": {
+        "caption": "The two kinds of apartment on SkiShare",
+        "head": [
+          "",
+          "Agency apartments",
+          "SkiShare's own apartments"
+        ],
+        "rows": [
+          [
+            "Dates",
+            "Saturday to Saturday, full weeks only",
+            "The dates you choose"
+          ],
+          [
+            "Price",
+            "That week's price, for the whole apartment",
+            "Per night, plus a cleaning fee when there is one"
+          ],
+          [
+            "Card fee",
+            "1.9%, shown before you pay",
+            "1.9%, shown before you pay"
+          ]
+        ]
+      },
+      "after": [
+        "The week sets the price first, then the apartment: its size and how many guests it sleeps. How many of you actually stay doesn't change it, so every extra person sharing lowers the cost per head."
+      ]
     },
     {
-      "heading": "Ordered",
+      "heading": "How to book an apartment on SkiShare",
+      "paragraphs": [
+        "Booking takes five steps online, and your card is only charged once a SkiShare representative has confirmed the booking:"
+      ],
       "list": [
-        "a",
-        "b"
+        "**Search.** On the apartments page, add your dates and the number of guests, or click a Saturday in the table above.",
+        "**Choose.** On an agency apartment's page, pick one of its free weeks; on one of our own, your dates are priced night by night.",
+        "**Check every line.** You see the week or the nights, the cleaning fee where there is one, the total, the 1.9% card fee and the total by card.",
+        "**Reserve.** Enter your details, accept the booking terms and give your card on PayPlus's secure payment page.",
+        "**Wait for the confirmation.** The amount is held, a SkiShare representative confirms the booking, and only then is your card charged."
       ],
       "ordered": true,
       "after": [
-        "after"
+        "Cancellation follows the [booking terms](/en/terms), and any question before you book can go to skishareteam@gmail.com."
+      ]
+    },
+    {
+      "heading": "What else to budget for a week: lift pass and journey",
+      "paragraphs": [
+        "The other big cost of a ski week is the lift pass: SETAM, the company that runs the Val Thorens lifts, charges an adult €330.50 to €421 for 6 days in 2026/27, depending on the area and the dates:"
+      ],
+      "table": {
+        "caption": "Official 6-day lift pass prices, 2026/27 (SETAM)",
+        "head": [
+          "Pass and dates",
+          "Adult, 18–74",
+          "Junior, 5–17",
+          "75 and over"
+        ],
+        "rows": [
+          [
+            "Val Thorens-Orelle, 21 November – 18 December 2026",
+            "€330.50",
+            "€271",
+            "€82.50"
+          ],
+          [
+            "Val Thorens-Orelle, 19 December 2026 – 2 May 2027",
+            "€367.50",
+            "€301",
+            "€91.50"
+          ],
+          [
+            "3 Vallées, 5–18 December 2026 and 10–18 April 2027",
+            "€378.50",
+            "€310",
+            "€94.50"
+          ],
+          [
+            "3 Vallées, 19 December 2026 – 9 April 2027",
+            "€421",
+            "€345",
+            "€105"
+          ]
+        ]
+      },
+      "after": [
+        "Under-5s ski free, with proof of their date of birth. SETAM sells the 6-day pass as \"6 days for the price of 5\", and its days are consecutive, so a rest day midweek still counts. All the passes and periods: [Val Thorens ski pass prices](/en/guide/val-thorens-ski-pass-prices).",
+        "**Getting there.** According to Val Thorens' official site, Geneva airport is 201 km away, Lyon 199 km and Chambéry 122 km. Eurostar's Snow trains run from London St Pancras to Moûtiers on Saturdays and Sundays from 19 December to 20 February, and the fastest TGVs from Paris Gare de Lyon take about 4 hours 20 minutes. From Moûtiers, 37 km away, the S63 bus climbs to the resort.",
+        "Fares change with the date, so price them for your week: [how to get to Val Thorens](/en/guide/how-to-get-to-val-thorens). Ski hire, lessons and meals out depend on the shop, the school and your habits; ask for 2026/27 prices when you book them."
+      ]
+    },
+    {
+      "heading": "Cheap Val Thorens apartments: how to pay less for a week",
+      "paragraphs": [
+        "The biggest saving is the week itself: in our table, a week in late November or April costs about a third of a week at the height of the February holidays, and early January, just after Christmas, is close to the season's lowest too. Then share the apartment and pick the right pass:"
+      ],
+      "list": [
+        "**Fill the apartment.** Split the week's price by the number of people: in an apartment for six, six friends pay a sixth each and four pay a quarter, so with six each person pays a third less. Add the 1.9% card fee before dividing.",
+        "**Ski early or late.** SETAM's 6-day adult Val Thorens-Orelle pass is €330.50 until 18 December, €37 less than from 19 December (€367.50). The 3 Vallées pass is €378.50 from 5 to 18 December and from 10 to 18 April, €42.50 less than in between (€421).",
+        "**Stay on Val Thorens-Orelle.** From 19 December to 9 April its 6-day pass costs €53.50 less per adult than the 3 Vallées pass; from 10 to 18 April, just €11 less. You give up the rest of the 3 Vallées' 600 km of pistes.",
+        "**Families: Family Flex.** From three people, with at most two adults and at least one child aged 5 to 17, everyone pays the junior price on a 6-day pass, in one payment: for two adults and two children on Val Thorens-Orelle from 19 December, 4 × €301 = €1,204 instead of €1,337."
+      ],
+      "after": [
+        "Two weeks outside every school holiday in the table above: [12–19 December 2026](/en/apartments?checkin=2026-12-12&checkout=2026-12-19) and [9–16 January 2027](/en/apartments?checkin=2027-01-09&checkout=2027-01-16). Which weeks are quieter on the slopes too: [when to ski in Val Thorens](/en/guide/best-time-to-ski-in-val-thorens)."
+      ]
+    },
+    {
+      "heading": "Why Saturday to Saturday, and can you arrive on another day?",
+      "paragraphs": [
+        "Agency apartments are rented only by the full week, Saturday to Saturday; to arrive on another day, choose one of SkiShare's own apartments, priced per night for the dates you pick. According to Les 3 Vallées, most holidaymakers travel on Saturday: their site suggests a Sunday-to-Sunday week for quieter roads, airports and stations, and notes that Saturday is a day \"when there are fewer skiers\".",
+        "A Saturday-to-Saturday week means travelling on the busy day, but it leaves Sunday to Friday for skiing, the six days of the pass. Where to stay in the resort: [where to stay in Val Thorens](/en/guide/where-to-stay-in-val-thorens)."
       ]
     }
   ],
   "faqs": [
     {
-      "q": "Question?",
-      "a": "Answer."
+      "q": "How much does a week in Val Thorens cost?",
+      "a": "It depends on the week, the apartment and the lift pass. On our site, a week at the height of the February school holidays costs about three times a week in late November or April, and SETAM's official 6-day adult pass for 2026/27 costs €330.50 to €421."
+    },
+    {
+      "q": "When are Val Thorens apartments cheapest?",
+      "a": "In our table: late November, the week of 12 December, early January and from 27 March to the end of April. The dearest weeks are New Year and the February school holidays, above all the weeks starting 13 and 20 February 2027."
+    },
+    {
+      "q": "Is the price per person or for the whole apartment?",
+      "a": "For the whole apartment: the full week, Saturday to Saturday, for agency apartments; the nights you choose, plus a cleaning fee when there is one, for SkiShare's own. Divide it by the number of people staying."
+    },
+    {
+      "q": "Can I rent an apartment in Val Thorens from Sunday to Sunday?",
+      "a": "Not an agency apartment: those are rented by the full week, Saturday to Saturday. SkiShare's own apartments are priced per night for the dates you choose."
+    },
+    {
+      "q": "When is my card charged?",
+      "a": "Only after a SkiShare representative has confirmed the booking. When you give your card on PayPlus's secure page, the amount is held until then. The 1.9% card fee is shown before you pay."
+    },
+    {
+      "q": "How much is a 6-day lift pass in Val Thorens in 2026/27?",
+      "a": "SETAM's official adult prices: Val Thorens-Orelle €330.50 until 18 December 2026, then €367.50; 3 Vallées €378.50 from 5 to 18 December and from 10 to 18 April 2027, €421 in between. Juniors aged 5 to 17 pay €271 to €345, and under-5s ski free."
+    },
+    {
+      "q": "When is February half-term 2027?",
+      "a": "It is 15 to 19 February 2027 in many English council areas, including Surrey, Bristol, Ealing, Luton and Stockport, but each council sets its own dates. French schools take two weeks each, by zone, between 6 February and 8 March."
     }
   ],
   "sources": [
     {
-      "title": "Src",
-      "url": "https://www.valthorens.com/"
+      "title": "SETAM, the Val Thorens lift company: official winter 2026/27 lift pass prices (PDF, 6 August 2026)",
+      "url": "https://ski.valthorens.com/wp-content/uploads/2026/08/TARIFS-HIVER-20262027-2.pdf"
+    },
+    {
+      "title": "Les 3 Vallées: winter 2026/27 press kit (opening dates, 600 km of pistes, Family Flex)",
+      "url": "https://press.les3vallees.com/media/download/the-place-to-ski.pdf"
+    },
+    {
+      "title": "Les 3 Vallées: From Sunday to Sunday (Saturday travel, fewer skiers on Saturdays)",
+      "url": "https://www.les3vallees.com/en/guide/top-holiday-ideas/from-sunday-to-sunday"
+    },
+    {
+      "title": "Val Thorens: how to get there (airports, Eurostar, TGV, Moûtiers station, S63 bus)",
+      "url": "https://www.valthorens.com/en/sejour/venir-a-val-thorens/comment-venir/"
+    },
+    {
+      "title": "French Ministry of Education: school calendar 2026–2027, zones A, B and C",
+      "url": "https://www.education.gouv.fr/calendrier-scolaire-100148"
+    },
+    {
+      "title": "Surrey County Council: school term dates 2026 to 2027",
+      "url": "https://www.surreycc.gov.uk/schools-and-learning/schools/term-dates"
+    },
+    {
+      "title": "Ealing Council: term and holiday dates 2026 to 2027",
+      "url": "https://www.ealing.gov.uk/info/201123/your_child_at_school/119/term_and_holiday_dates/2/"
+    },
+    {
+      "title": "Fédération Wallonie-Bruxelles: school calendar 2026–2027 (French-speaking Belgium)",
+      "url": "https://www.enseignement.be/calendrier-scolaire"
+    },
+    {
+      "title": "Flemish government: school holidays 2026–2027 (Flanders, in Dutch)",
+      "url": "https://www.vlaanderen.be/onderwijs-en-vorming/wat-mag-en-moet-op-school/schoolvakanties-vrije-dagen-en-afwezigheden/schoolvakanties"
+    },
+    {
+      "title": "Dutch government: school holidays 2026–2027 (in Dutch)",
+      "url": "https://www.rijksoverheid.nl/themas/onderwijs/schoolvakanties/overzicht-schoolvakanties-per-schooljaar/overzicht-schoolvakanties-2026-2027"
     }
   ]
 }
