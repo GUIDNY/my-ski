@@ -6,13 +6,16 @@ import type { ReactNode } from "react";
  *   [text](/path)  a link: next/link to our own pages, a plain <a> to other sites
  *   **text**       bold
  * Numbers with a range or a sum in them ("21.11–18.12.2026", "€810–€930",
- * "2 × €421 = €842") are kept left to right: in Hebrew text the two sides of
- * the dash would otherwise swap places.
+ * "2 × €421 = €842"), and negative numbers ("−7.4"), are kept left to right:
+ * in Hebrew text the two sides of the dash, or the minus, would otherwise
+ * swap places.
  */
 
 const MARKUP = /\[([^\]]+)\]\(([^)\s]+)\)|\*\*(.+?)\*\*/g;
-const NUM = String.raw`€?\d(?:[\d.,:]*\d)?%?`;
-const NUM_RUN = new RegExp(`${NUM}(?:\\s*[–\\-×+=]\\s*${NUM})+`, "g");
+const NUM = String.raw`\u2212?€?\d(?:[\d.,:]*\d)?%?`;
+// a range or a sum, or a single negative number written with the minus sign
+// (U+2212, never the Hebrew prefix hyphen of "ב-5.12"): "−7.4" would show as "7.4−"
+const NUM_RUN = new RegExp(`${NUM}(?:\\s*[–\\-×+=]\\s*${NUM})+|\\u2212\\d(?:[\\d.,]*\\d)?`, "g");
 
 export const linkClass = "font-bold text-accent hover:text-accent-hover";
 

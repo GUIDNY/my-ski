@@ -22,11 +22,13 @@ const PATHS: Record<string, React.ReactNode> = {
   coins: <><ellipse cx="12" cy="6" rx="7" ry="3" /><path d="M5 6v4c0 1.7 3.1 3 7 3s7-1.3 7-3V6" /><path d="M5 10v4c0 1.7 3.1 3 7 3s7-1.3 7-3v-4" /><path d="M5 14v4c0 1.7 3.1 3 7 3s7-1.3 7-3v-4" /></>,
   // a folded map (the areas of the resort)
   map: <><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z" /><path d="M9 3v15M15 6v15" /></>,
+  // a snowflake (weather and snow)
+  snowflake: <><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7" /><path d="M9.5 3.5L12 6l2.5-2.5M9.5 20.5L12 18l2.5 2.5" /><path d="M3.6 10.2l3.4-.9-.9-3.4M20.4 13.8l-3.4.9.9 3.4M3.6 13.8l3.4.9-.9 3.4M20.4 10.2l-3.4-.9.9-3.4" /></>,
 };
 
 const BY_EMOJI: Record<string, string> = {
   "🏔️": "mountain", "📅": "calendar", "✈️": "plane", "🎫": "ticket", "👨‍👩‍👧‍👦": "family",
-  "🍻": "glass", "🏠": "home", "☀️": "sun", "⛷️": "route", "⚖️": "compare", "👥": "group", "🎒": "bag", "🎿": "skis", "🕎": "menorah", "🌤️": "cloudSun", "💰": "coins", "🗺️": "map",
+  "🍻": "glass", "🏠": "home", "☀️": "sun", "⛷️": "route", "⚖️": "compare", "👥": "group", "🎒": "bag", "🎿": "skis", "🕎": "menorah", "🌤️": "cloudSun", "💰": "coins", "🗺️": "map", "❄️": "snowflake",
 };
 
 export default function GuideIcon({ emoji, size = 24 }: { emoji: string; size?: number }) {
