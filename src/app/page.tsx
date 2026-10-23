@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import Navbar from "@/components/Navbar";
 import SearchWidget from "@/components/SearchWidget";
-import Footer from "@/components/Footer";
 import OpenChatButton from "@/components/OpenChatButton";
 import WeekPackages, { WeekPackagesSkeleton } from "@/components/home/WeekPackages";
 import { helperWaHref } from "@/lib/helper-whatsapp";
@@ -74,15 +72,14 @@ const faq = [
 export default function Home() {
   const waHref = helperWaHref();
   return (
-    <div className="min-h-screen bg-white text-[#0B1B33]" dir="rtl">
-      <Navbar />
+    <div className="bg-white text-ink" dir="rtl">
 
       {/* ── HERO ─────────────────────────────────────────── */}
-      <section className="relative flex items-center" style={{ minHeight: 660 }}>
+      <section className="relative flex items-center min-h-[560px] md:min-h-[620px]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/hero-ski.jpg" alt="" className="absolute inset-0 w-full h-full object-cover object-center" />
         <div className="absolute inset-0" style={{ background: "rgba(8,18,38,0.46)" }} />
-        <div className="relative z-10 w-full max-w-[1100px] mx-auto px-4 pt-24 pb-14 md:pt-32 md:pb-20 flex flex-col items-center gap-5 md:gap-6 text-center">
+        <div className="relative z-10 w-full max-w-[1100px] mx-auto px-4 pt-12 pb-14 md:pt-16 md:pb-20 flex flex-col items-center gap-5 md:gap-6 text-center">
           <span className="rounded-full px-4 py-1.5 text-[14px] md:text-[15px] font-medium text-white"
             style={{ background: "rgba(255,255,255,0.16)", border: "1px solid rgba(255,255,255,0.32)" }}>
             עונת 2026/27 פתוחה להזמנות
@@ -211,7 +208,8 @@ export default function Home() {
           </div>
           <div aria-hidden="true" className="flex-[1_1_380px] min-w-0 bg-white rounded-[26px] p-5 md:p-[22px] flex flex-col gap-2.5 text-[#0B1B33]">
             <div className="flex items-center gap-2.5 pb-3 border-b border-[#E3E9F2]">
-              <span className="w-9 h-9 rounded-full bg-[#EEF3FF] text-[#1652F0] flex items-center justify-center font-display font-extrabold">S</span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/helper.jpg" alt="" className="w-9 h-9 rounded-full object-cover" />
               <div>
                 <div className="font-bold">SkiShare</div>
                 <div className="text-[13px] text-[#51607A]">עוזר דיגיטלי · עונה בעברית</div>
@@ -269,7 +267,6 @@ export default function Home() {
         </div>
       </section>
 
-      <Footer />
     </div>
   );
 }

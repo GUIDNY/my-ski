@@ -1,59 +1,61 @@
-import Logo from "@/components/Logo";
+import Link from "next/link";
 import OpenChatButton from "@/components/OpenChatButton";
+import { Brand } from "@/components/SiteHeader";
 import { helperWaHref } from "@/lib/helper-whatsapp";
+
+const VACATION = [
+  { label: "חבילות", href: "/search?deal=full" },
+  { label: "דירות", href: "/apartments" },
+  { label: "שבת עד שבת", href: "/weekly" },
+  { label: "הסעות", href: "/transfers" },
+  { label: "סיזיונרים", href: "/seasonaires" },
+  { label: "מדריך ואל טורנס", href: "/guide" },
+];
+
+const INFO = [
+  { label: "תקנון, הזמנות וביטולים", href: "/terms" },
+  { label: "מצב חירום, מלחמה וכוח עליון", href: "/emergency-policy" },
+  { label: "מדיניות פרטיות", href: "/privacy" },
+  { label: "מדיניות עוגיות", href: "/cookies" },
+  { label: "הצהרת נגישות", href: "/accessibility" },
+  { label: "מחיקת חשבון", href: "/delete-account" },
+];
+
+const linkCls = "text-[15px] text-body hover:text-ink transition-colors";
 
 export default function Footer() {
   return (
-    <footer className="bg-white border-t border-gray-100" dir="rtl">
-      <div className="max-w-6xl mx-auto px-6 pt-16 pb-10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-14">
-          {/* Brand */}
-          <div className="md:col-span-2">
-            <Logo className="h-11 mb-4" />
-            <p className="text-sm text-gray-500 leading-relaxed max-w-xs">
-              מובילים את תרבות חופשות הסקי בישראל עם סטנדרטים בינלאומיים של שירות ואיכות.
+    <footer className="bg-soft border-t border-line mt-auto" dir="rtl">
+      <div className="max-w-[1240px] mx-auto px-4 md:px-6 pt-12 md:pt-14 pb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10">
+          <div className="col-span-2 md:col-span-1 flex flex-col gap-3">
+            <Link href="/" aria-label="SkiShare, לדף הבית" className="w-fit"><Brand small /></Link>
+            <p className="text-[15px] leading-relaxed text-muted max-w-[300px]">
+              חופשות סקי בואל טורנס: דירה, סקי פס, הסעה וציוד במקום אחד.
             </p>
           </div>
 
-          {/* Explore */}
-          <div>
-            <h5 className="text-xs font-bold tracking-widest uppercase text-gray-900 mb-6">מידע ותקנון</h5>
-            <ul className="flex flex-col gap-3.5">
-              {[
-                { label: "מדריך ואל טורנס", href: "/guide" },
-                { label: "תקנון, הזמנות וביטולים", href: "/terms" },
-                { label: "מצב חירום, מלחמה וכוח עליון", href: "/emergency-policy" },
-                { label: "מדיניות פרטיות", href: "/privacy" },
-                { label: "מדיניות עוגיות", href: "/cookies" },
-                { label: "הצהרת נגישות", href: "/accessibility" },
-                { label: "מחיקת חשבון", href: "/delete-account" },
-                { label: "צור קשר", href: "mailto:skishareteam@gmail.com" },
-              ].map((item) => (
-                <li key={item.href}>
-                  <a href={item.href} className="text-sm text-gray-500 hover:text-gray-900 transition-colors">{item.label}</a>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <nav aria-label="חופשה" className="flex flex-col gap-2.5">
+            <span className="font-bold text-[15px] text-ink mb-1">חופשה</span>
+            {VACATION.map(i => <Link key={i.href} href={i.href} className={linkCls}>{i.label}</Link>)}
+          </nav>
 
-          {/* Talk to us */}
-          <div>
-            <h5 className="text-xs font-bold tracking-widest uppercase text-gray-900 mb-6">דברו איתנו</h5>
-            <ul className="flex flex-col gap-3.5">
-              <li>
-                <a href={helperWaHref()} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">וואטסאפ</a>
-              </li>
-              <li>
-                <OpenChatButton className="text-sm text-gray-500 hover:text-gray-900 transition-colors">צ&apos;אט באתר</OpenChatButton>
-              </li>
-            </ul>
+          <nav aria-label="מידע" className="flex flex-col gap-2.5">
+            <span className="font-bold text-[15px] text-ink mb-1">מידע</span>
+            {INFO.map(i => <Link key={i.href} href={i.href} className={linkCls}>{i.label}</Link>)}
+          </nav>
+
+          <div className="col-span-2 md:col-span-1 flex flex-col gap-2.5">
+            <span className="font-bold text-[15px] text-ink mb-1">דברו איתנו</span>
+            <a href={helperWaHref()} target="_blank" rel="noopener noreferrer" className={linkCls}>וואטסאפ</a>
+            <OpenChatButton className={`${linkCls} text-start w-fit`}>צ&apos;אט באתר</OpenChatButton>
+            <a href="mailto:skishareteam@gmail.com" className={linkCls}>skishareteam@gmail.com</a>
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="pt-8 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4">
-          <span className="text-xs font-bold text-gray-400">© 2026 SkiShare. כל הזכויות שמורות.</span>
-          <span className="text-xs text-gray-400">ישראל · צרפת</span>
+        <div className="mt-10 pt-5 border-t border-line flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-[14px] text-muted">
+          <span>© 2026 SkiShare · סקי שר בע״מ</span>
+          <span>ישראל · צרפת</span>
         </div>
       </div>
     </footer>

@@ -45,7 +45,7 @@ function linkify(text: string, onBlueBg: boolean) {
   return parts.map((part, i) =>
     /^https?:\/\//.test(part) ? (
       <a key={i} href={part} target="_blank" rel="noopener noreferrer"
-        className={onBlueBg ? "underline text-white font-semibold break-all" : "underline text-blue-600 font-semibold break-all"}>
+        className={onBlueBg ? "underline text-white font-semibold break-all" : "underline text-accent font-semibold break-all"}>
         {part}
       </a>
     ) : (
@@ -195,10 +195,6 @@ export default function AiConcierge() {
   }, [open]);
 
   const hidden = HIDDEN.some(h => pathname === h || pathname.startsWith(h + "/"));
-  // On mobile the launcher floats above the tab bar on every page, which
-  // turned out to feel like clutter away from the homepage — desktop's
-  // corner bubble is less intrusive so it keeps showing everywhere.
-  const mobileHomeOnly = pathname !== "/";
 
   // Mobile bottom-sheet drag handle — swipe down to close, like a native
   // sheet. Only wired on the handle bar so it never fights the message
@@ -295,76 +291,82 @@ export default function AiConcierge() {
 
   return (
     <>
-      {/* Launcher — raised circular avatar, docked in the middle of the mobile
-          tab bar; floats bottom-corner on desktop where there's no tab bar. */}
+      {/* Launcher: desktop only, bottom corner. On phones the chat opens from
+          the header's chat button and the "write to us" buttons on the page. */}
       <button
         onClick={() => { restore(); setOpen(v => !v); }}
         aria-label="צ'אט עם SkiShare"
-        className={`fixed z-[60] rounded-full shadow-lg border-2 border-white overflow-hidden
-          bottom-[34px] left-1/2 -translate-x-1/2 w-16 h-16
-          md:bottom-6 md:left-6 md:right-auto md:translate-x-0 md:w-16 md:h-16
-          bg-blue-600 transition-transform hover:scale-105 active:scale-95
-          ${mobileHomeOnly ? "hidden md:block" : ""}`}
+        className="hidden md:block fixed z-[60] bottom-6 left-6 w-[60px] h-[60px] rounded-full border-[3px] border-white bg-soft-2 overflow-visible transition-transform hover:scale-105 active:scale-95"
+        style={{ boxShadow: "0 10px 28px rgba(11,27,51,0.28)" }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/ai-guide.png" alt="" className="w-full h-full object-cover object-top" />
-        <span className="absolute -top-1 -right-1 bg-emerald-500 text-white text-[9px] font-black rounded-full px-1.5 py-0.5 border-2 border-white">AI</span>
+        <img src="/helper.jpg" alt="" className="w-full h-full rounded-full object-cover" />
+        <span className="absolute -top-1 -right-1 bg-ok text-white text-[10px] font-extrabold rounded-full px-1.5 py-0.5 border-2 border-white leading-none">AI</span>
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-[70] flex items-end md:items-center justify-center md:justify-start bg-black/30 overscroll-none"
+        <div className="fixed inset-0 z-[70] flex items-end md:block bg-ink/35 md:bg-ink/20 overscroll-none"
           style={viewport ? { top: viewport.top, height: viewport.height, transition: "height 200ms ease-out, top 200ms ease-out" } : undefined}
           onClick={() => setOpen(false)}>
-          <div dir="rtl" onClick={e => e.stopPropagation()}
+          <div dir="rtl" onClick={e => e.stopPropagation()} role="dialog" aria-label="צ'אט עם SkiShare"
             style={{
               transform: `translateY(${dragY}px)`,
               transition: dragging ? "none" : "transform 200ms ease-out, height 200ms ease-out",
-              ...(viewport ? { height: Math.min(viewport.height * 0.85, viewport.height - 24) } : {}),
+              ...(viewport ? { height: Math.min(viewport.height * 0.88, viewport.height - 16) } : {}),
             }}
-            className="bg-white w-full md:w-[380px] md:mb-24 md:ms-6 h-[85dvh] max-h-[92dvh] md:h-[560px] rounded-t-3xl md:rounded-3xl shadow-2xl flex flex-col overflow-hidden overscroll-contain">
+            className="bg-white w-full h-[88dvh] max-h-[94dvh] rounded-t-[24px] flex flex-col overflow-hidden overscroll-contain
+              md:absolute md:left-6 md:bottom-[100px] md:w-[400px] md:h-[600px] md:max-h-[calc(100dvh-130px)] md:rounded-card md:border md:border-line"
+            >
             {/* drag handle — mobile-only swipe-down-to-close affordance */}
-            <div className="md:hidden pt-2 pb-1 flex justify-center touch-none cursor-grab active:cursor-grabbing"
+            <div className="md:hidden pt-2.5 pb-1 flex justify-center touch-none cursor-grab active:cursor-grabbing"
               onPointerDown={onHandlePointerDown} onPointerMove={onHandlePointerMove} onPointerUp={onHandlePointerUp} onPointerCancel={onHandlePointerUp}>
-              <div className="w-10 h-1.5 rounded-full bg-gray-300" />
+              <div className="w-10 h-1.5 rounded-full bg-line-strong" />
             </div>
 
             {/* header */}
-            <div className="flex items-center gap-3 px-4 pb-4 pt-1 md:pt-4 border-b border-gray-100 bg-blue-50">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/ai-guide.png" alt="" className="w-10 h-10 rounded-full object-cover object-top border-2 border-white shadow" />
+            <div className="flex items-center gap-3 px-4 pb-3.5 pt-1.5 md:pt-4 border-b border-line">
+              <span className="relative shrink-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/helper.jpg" alt="" className="w-11 h-11 rounded-full object-cover" />
+                <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-ok border-2 border-white" aria-hidden="true" />
+              </span>
               <div className="flex-1 min-w-0">
-                <div className="font-black text-gray-900 text-sm flex items-center gap-1.5">
+                <div className="font-display font-bold text-ink text-[17px] flex items-center gap-1.5">
                   SkiShare
-                  <span className="bg-emerald-500 text-white text-[9px] font-black rounded-full px-1.5 py-0.5">AI</span>
+                  <span className="bg-ok-soft text-ok-text text-[11px] font-extrabold rounded-full px-1.5 py-0.5 leading-none">AI</span>
                 </div>
-                <div className="text-xs text-gray-500">חופשות סקי בואל טורנס · דירה, סקי פס, הסעה וציוד</div>
+                <div className="text-[13px] text-muted truncate">עוזר דיגיטלי · עונה בעברית, גם בוואטסאפ</div>
               </div>
               <a href={WA_HREF} target="_blank" rel="noopener noreferrer" title="להמשיך בוואטסאפ" aria-label="להמשיך בוואטסאפ"
-                className="w-9 h-9 flex items-center justify-center rounded-full text-emerald-600 hover:bg-emerald-50 active:scale-90 transition-transform">
+                className="w-10 h-10 flex items-center justify-center rounded-full text-[#128C4B] hover:bg-ok-soft transition-colors">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
                   <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z" />
                 </svg>
               </a>
               <button onClick={restart} disabled={busy}
                 title="להתחיל שיחה חדשה" aria-label="להתחיל שיחה חדשה"
-                className="text-gray-400 hover:text-gray-600 active:scale-90 transition-transform text-lg leading-none w-9 h-9 flex items-center justify-center disabled:opacity-40">↺</button>
+                className="w-10 h-10 flex items-center justify-center rounded-full text-muted hover:text-ink hover:bg-soft transition-colors disabled:opacity-40">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7" /><path d="M3 4v5h5" /></svg>
+              </button>
               <button onClick={() => setOpen(false)} aria-label="סגירה"
-                className="text-gray-400 hover:text-gray-600 active:scale-90 transition-transform text-xl leading-none w-9 h-9 flex items-center justify-center">✕</button>
+                className="w-10 h-10 flex items-center justify-center rounded-full text-muted hover:text-ink hover:bg-soft transition-colors">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+              </button>
             </div>
 
             {/* messages */}
-            <div ref={scrollRef} aria-live="polite" className="flex-1 overflow-y-auto p-4 space-y-2">
+            <div ref={scrollRef} aria-live="polite" className="flex-1 overflow-y-auto px-4 py-4 space-y-2 bg-white">
               {messages.map((m, i) => {
                 const mine = m.role === "user";
                 const row = `flex ${mine ? "justify-start" : "justify-end"}`;
                 if (m.link) return (
                   <div key={i} className={row}>
                     <a href={m.link} target="_blank" rel="noopener noreferrer"
-                      className="max-w-[85%] flex items-center gap-3 rounded-2xl border border-blue-200 bg-white px-3.5 py-3 shadow-sm hover:bg-blue-50 transition-colors">
-                      <span className="w-9 h-9 shrink-0 rounded-xl bg-red-50 text-red-600 text-[10px] font-black flex items-center justify-center">PDF</span>
+                      className="max-w-[85%] flex items-center gap-3 rounded-2xl border border-line bg-white px-3.5 py-3 hover:border-accent transition-colors">
+                      <span className="w-10 h-10 shrink-0 rounded-xl bg-danger-soft text-danger text-[11px] font-extrabold flex items-center justify-center">PDF</span>
                       <span className="min-w-0">
-                        <span className="block text-sm font-bold text-gray-900">הצעת המחיר שלכם</span>
-                        <span className="block text-xs text-gray-500">כל הפרטים וקישורי תשלום · לחצו לפתיחה</span>
+                        <span className="block text-[15px] font-bold text-ink">הצעת המחיר שלכם</span>
+                        <span className="block text-[13px] text-muted">כל הפרטים וקישורי תשלום · לפתיחה</span>
                       </span>
                     </a>
                   </div>
@@ -373,7 +375,7 @@ export default function AiConcierge() {
                   <div key={i} className={row}>
                     <div className="max-w-[85%] grid grid-cols-2 gap-1.5">
                       {m.images.map((src, j) => (
-                        <a key={j} href={src} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-xl bg-gray-100">
+                        <a key={j} href={src} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-xl bg-soft">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={src} alt="" loading="lazy" className="w-full h-24 object-cover hover:scale-105 transition-transform" />
                         </a>
@@ -383,36 +385,36 @@ export default function AiConcierge() {
                 );
                 return (
                   <div key={i} className={row}>
-                    <div className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-[15px] leading-relaxed whitespace-pre-line ${
-                      mine ? "bg-gray-100 text-gray-800" : "bg-blue-600 text-white"
+                    <div className={`max-w-[85%] rounded-[18px] px-3.5 py-2.5 text-[15px] leading-relaxed whitespace-pre-line ${
+                      mine ? "bg-accent text-white" : "bg-soft text-ink"
                     }`}>
-                      {linkify(m.text, !mine)}
+                      {linkify(m.text, mine)}
                     </div>
                   </div>
                 );
               })}
               {typing && (
                 <div className="flex flex-col items-end gap-1">
-                  <div className="bg-blue-600 text-white rounded-2xl px-3.5 py-2.5 text-sm" aria-label="מקליד">
+                  <div className="bg-soft rounded-[18px] px-4 py-3" aria-label="מקליד">
                     <span className="inline-flex gap-1">
-                      <span className="w-1.5 h-1.5 bg-white/80 rounded-full animate-bounce [animation-delay:-.3s]" />
-                      <span className="w-1.5 h-1.5 bg-white/80 rounded-full animate-bounce [animation-delay:-.15s]" />
-                      <span className="w-1.5 h-1.5 bg-white/80 rounded-full animate-bounce" />
+                      <span className="w-1.5 h-1.5 bg-muted/70 rounded-full animate-bounce [animation-delay:-.3s]" />
+                      <span className="w-1.5 h-1.5 bg-muted/70 rounded-full animate-bounce [animation-delay:-.15s]" />
+                      <span className="w-1.5 h-1.5 bg-muted/70 rounded-full animate-bounce" />
                     </span>
                   </div>
-                  {status && <div className="text-[11px] text-gray-400">{status}</div>}
+                  {status && <div className="text-[12px] text-muted">{status}</div>}
                 </div>
               )}
             </div>
 
             {/* input — extra bottom padding clears the home-indicator area on notched phones */}
-            <div className="p-3 border-t border-gray-100" style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
+            <div className="px-3 pt-3 border-t border-line bg-white" style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
               {pendingImage && (
-                <div className="flex items-center gap-2 mb-2 bg-blue-50 rounded-xl p-2">
+                <div className="flex items-center gap-2 mb-2 bg-soft rounded-xl p-2">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={pendingImage.preview} alt="" className="w-10 h-10 rounded-lg object-cover" />
-                  <span className="text-xs text-blue-700 flex-1">התמונה מוכנה לשליחה</span>
-                  <button onClick={() => setPendingImage(null)} className="text-xs text-red-500 font-bold p-1">✕</button>
+                  <span className="text-[13px] text-ink flex-1">התמונה מוכנה לשליחה</span>
+                  <button onClick={() => setPendingImage(null)} aria-label="להסיר את התמונה" className="w-9 h-9 flex items-center justify-center text-danger font-bold">✕</button>
                 </div>
               )}
               <div className="flex items-center gap-2">
@@ -423,18 +425,21 @@ export default function AiConcierge() {
                     e.target.value = "";
                   }} />
                 <button onClick={() => fileRef.current?.click()} aria-label="לצרף תמונה"
-                  className="flex-shrink-0 w-11 h-11 rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 active:scale-90 transition-transform flex items-center justify-center text-lg">📷</button>
+                  className="shrink-0 w-11 h-11 rounded-full border border-line-strong text-muted hover:text-ink hover:border-ink transition-colors flex items-center justify-center">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" /><circle cx="12" cy="13.5" r="3.5" /></svg>
+                </button>
                 <input
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter" && !busy) send(); }}
                   placeholder="למשל: 4 אנשים, 8-15 בפברואר"
+                  aria-label="ההודעה שלכם"
                   maxLength={1500}
-                  className="flex-1 border border-gray-200 rounded-full px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 min-w-0 border border-line-strong rounded-full px-4 py-3 text-base text-ink placeholder:text-muted/70 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                 />
                 <button onClick={send} disabled={busy || (!input.trim() && !pendingImage)} aria-label="שליחה"
-                  className="flex-shrink-0 w-11 h-11 rounded-full bg-blue-600 hover:bg-blue-700 active:scale-90 disabled:active:scale-100 transition-transform disabled:opacity-40 text-white flex items-center justify-center">
-                  ←
+                  className="shrink-0 w-11 h-11 rounded-full bg-accent hover:bg-accent-hover transition-colors disabled:opacity-40 text-white flex items-center justify-center">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" /></svg>
                 </button>
               </div>
             </div>

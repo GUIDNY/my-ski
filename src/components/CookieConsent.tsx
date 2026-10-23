@@ -1,39 +1,46 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
+import Link from "next/link";
 
 const KEY = "skishare_cookie_consent";
+const CHANGED = "skishare:cookie-consent";
+
+// Read from localStorage only in the browser (the server renders nothing).
+const subscribe = (cb: () => void) => {
+  window.addEventListener("storage", cb);
+  window.addEventListener(CHANGED, cb);
+  return () => { window.removeEventListener("storage", cb); window.removeEventListener(CHANGED, cb); };
+};
+const notAnswered = () => { try { return !localStorage.getItem(KEY); } catch { return false; } };
 
 export default function CookieConsent() {
-  const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    try { if (!localStorage.getItem(KEY)) setShow(true); } catch {}
-  }, []);
+  const show = useSyncExternalStore(subscribe, notAnswered, () => false);
 
   const accept = () => {
     try { localStorage.setItem(KEY, "1"); } catch {}
-    setShow(false);
+    window.dispatchEvent(new Event(CHANGED));
   };
 
   if (!show) return null;
 
   return (
-    <div dir="rtl"
-      className="fixed inset-x-3 bottom-[80px] md:bottom-4 md:inset-x-auto md:right-4 md:max-w-sm z-[60]
-                 bg-white rounded-2xl shadow-2xl border border-gray-200 p-4">
-      <p className="text-sm text-gray-700 leading-relaxed">
-        אנחנו משתמשים בעוגיות (Cookies) כדי שהאתר יעבוד ולשיפור החוויה.
-        בהמשך השימוש אתה מסכים ל<a href="/cookies" className="text-blue-600 font-semibold">מדיניות העוגיות</a>.
+    <div dir="rtl" role="region" aria-label="עוגיות"
+      className="fixed inset-x-3 bottom-3 md:inset-x-auto md:right-6 md:bottom-6 md:max-w-[380px] z-[65]
+                 bg-white rounded-2xl border border-line p-4 md:p-5"
+      style={{ boxShadow: "0 16px 40px rgba(11,27,51,0.16)" }}>
+      <p className="text-[14px] md:text-[15px] text-body leading-relaxed">
+        אנחנו משתמשים בעוגיות (Cookies) כדי שהאתר יעבוד וכדי לשפר אותו.
+        בהמשך השימוש באתר אתם מסכימים ל<Link href="/cookies" className="text-accent font-bold">מדיניות העוגיות</Link>.
       </p>
       <div className="flex gap-2 mt-3">
         <button onClick={accept}
-          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2.5 rounded-xl transition">
-          מאשר/ת
+          className="flex-1 min-h-[44px] bg-accent hover:bg-accent-hover text-white text-[15px] font-bold rounded-xl transition-colors">
+          מאשרים
         </button>
-        <a href="/privacy"
-          className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition">
+        <Link href="/privacy"
+          className="inline-flex items-center justify-center min-h-[44px] px-4 rounded-xl border border-line-strong text-ink text-[15px] font-bold hover:border-ink transition-colors">
           פרטים
-        </a>
+        </Link>
       </div>
     </div>
   );

@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Montserrat, Inter, Heebo, Rubik } from "next/font/google";
 import "./globals.css";
-import MobileTabBar from "@/components/MobileTabBar";
+import SiteHeader from "@/components/SiteHeader";
+import Footer from "@/components/Footer";
+import ChromeGate from "@/components/ChromeGate";
 import CookieConsent from "@/components/CookieConsent";
 import DeepLinkHandler from "@/components/DeepLinkHandler";
 import AiConcierge from "@/components/AiConcierge";
@@ -22,13 +24,13 @@ const inter = Inter({
 // back to whatever the device had. Heebo for body text, Rubik for headings.
 const heebo = Heebo({
   variable: "--font-heebo",
-  subsets: ["hebrew"],
+  subsets: ["hebrew", "latin"],
   weight: ["400", "500", "700", "800"],
 });
 
 const rubik = Rubik({
   variable: "--font-rubik",
-  subsets: ["hebrew"],
+  subsets: ["hebrew", "latin"],
   weight: ["600", "700", "800"],
 });
 
@@ -105,13 +107,15 @@ export default function RootLayout({
   return (
     <html
       lang="he"
+      dir="rtl"
       className={`${montserrat.variable} ${inter.variable} ${heebo.variable} ${rubik.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }} />
-        {children}
+        <SiteHeader />
+        <div className="flex-1 flex flex-col">{children}</div>
+        <ChromeGate hide={["/admin"]}><Footer /></ChromeGate>
         <DeepLinkHandler />
-        <MobileTabBar />
         <AiConcierge />
         <CookieConsent />
       </body>

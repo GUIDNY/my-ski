@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Footer from "@/components/Footer";
 import { GUIDES } from "@/lib/guides";
 
 export const metadata: Metadata = {
@@ -50,7 +49,6 @@ export default function GuideIndex() {
           </a>
         </div>
       </div>
-      <Footer />
     </div>
   );
 }

@@ -1,5 +1,3 @@
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { createServerClient } from "@/lib/supabase-server";
 import { TRANSFER_PRICE, FLIGHT_ESTIMATE, skiPassPerPersonForWeek } from "@/lib/deal-pricing";
 import type { Apartment, SkiPass } from "@/types";
@@ -35,7 +33,6 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
     <div className="min-h-screen" style={{
       background: "radial-gradient(ellipse 80% 50% at 15% 0%, #e6f0ff 0%, transparent 60%), radial-gradient(ellipse 70% 50% at 100% 20%, #eaf7ff 0%, transparent 55%), #fbfcfe",
     }} dir="rtl">
-      <Navbar />
 
       {/* Hero */}
       <section className="relative flex flex-col items-center justify-center overflow-hidden" style={{ height: "52vh", minHeight: 420 }}>
@@ -67,7 +64,6 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
           flightEstimate={FLIGHT_ESTIMATE}
         />
       </div>
-      <Footer />
     </div>
   );
 }

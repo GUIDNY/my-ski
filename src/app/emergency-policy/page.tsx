@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Footer from "@/components/Footer";
 import Logo from "@/components/Logo";
 import { IconWhatsApp, IconShield, IconInfo, IconPlane, IconHome, IconSkis, IconUsers, IconCheck } from "@/components/Icons";
 import { buildWaHref } from "@/lib/whatsapp";
@@ -248,7 +247,6 @@ export default function EmergencyPolicyPage() {
         </p>
       </main>
 
-      <Footer />
     </div>
   );
 }

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Footer from "@/components/Footer";
 import { GUIDES, getGuideBySlug } from "@/lib/guides";
 
 const SITE_URL = "https://skisharebook.com";
@@ -155,7 +154,6 @@ export default async function GuideArticle({ params }: { params: Promise<{ slug:
           </div>
         )}
       </div>
-      <Footer />
     </div>
   );
 }
