@@ -1,73 +1,340 @@
 {
   "key": "getting-there",
   "lang": "fr",
-  "title": "PLACEHOLDER getting-there fr",
-  "metaTitle": "PLACEHOLDER getting-there | SkiShare",
-  "description": "placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder ",
+  "title": "Comment aller à Val Thorens en 2026/2027 : train, voiture ou avion",
+  "metaTitle": "Comment aller à Val Thorens : train, voiture, avion | SkiShare",
+  "description": "Gare de Moûtiers à 37 km, TGV et OUIGO depuis Paris, 630 km de route, pneus hiver obligatoires et parkings à réserver : rejoindre Val Thorens en 2026/2027.",
   "keywords": [
-    "a",
-    "b",
-    "c"
+    "comment aller à val thorens",
+    "val thorens en train",
+    "gare la plus proche de val thorens",
+    "paris val thorens en voiture",
+    "navette moûtiers val thorens",
+    "aéroport le plus proche de val thorens",
+    "eurostar snow bruxelles moûtiers",
+    "parking val thorens"
   ],
-  "emoji": "🎫",
+  "emoji": "✈️",
   "published": "2026-10-23",
   "updated": "2026-10-23",
-  "intro": "Intro with [a link](/fr/apartments) and **bold**.",
+  "intro": "Val Thorens n'a ni gare ni aéroport : la gare la plus proche est Moûtiers-Salins-Brides-les-Bains, à 37 km, à 4 h 20 environ de Paris par les TGV les plus rapides, puis 1 h 15 de car. En voiture, le site des 3 Vallées compte environ 630 km et 6 h 30 à 7 h de Paris à Moûtiers, avant 37 km de montée par la D117 ; pneus hiver ou chaînes sont obligatoires en Savoie du 1er novembre au 31 mars. Côté avion, Lyon Saint-Exupéry (199 km) et Genève (201 km) ont des cars pour la station en hiver.",
   "sections": [
     {
-      "heading": "Section one",
+      "heading": "Gare et aéroport les plus proches de Val Thorens",
       "paragraphs": [
-        "Para 5–18 December."
-      ],
-      "list": [
-        "x",
-        "y"
+        "La gare la plus proche est Moûtiers-Salins-Brides-les-Bains, à 37 km, et l'aéroport le plus proche, celui de Chambéry, à 122 km ; Lyon Saint-Exupéry et Genève, à 200 km environ, comptent le plus de compagnies de cars vers la station, d'après la [page de la gare routière](https://www.valthorens.com/en/sejour/infos-pratiques/gare-routiere-bus-taxi/) de Val Thorens."
       ],
       "table": {
-        "caption": "Cap",
+        "caption": "Distances : valthorens.com. Temps de route : Les 3 Vallées. Car S63 : Val Thorens Réservation.",
         "head": [
-          "A",
-          "B"
+          "Depuis",
+          "Distance de Val Thorens",
+          "Par la route",
+          "Car ou bus jusqu'à la station"
         ],
         "rows": [
           [
-            "1",
-            "2"
+            "Gare de Moûtiers-Salins-Brides-les-Bains",
+            "37 km",
+            "1 h 15 environ en car S63",
+            "Ligne S63, toute l'année"
+          ],
+          [
+            "Aéroport de Chambéry (CMF)",
+            "122 km",
+            "1 h 30 environ",
+            "Pas de car direct : taxi ou VTC"
+          ],
+          [
+            "Aéroport de Grenoble (GNB)",
+            "194 km",
+            "1 h 50 environ",
+            "Ben's Bus, Alpine Fleet"
+          ],
+          [
+            "Aéroport de Lyon Saint-Exupéry (LYS)",
+            "199 km",
+            "2 h 30 environ",
+            "LYS'Express (Altibus) et quatre autres compagnies"
+          ],
+          [
+            "Aéroport de Genève (GVA)",
+            "201 km",
+            "2 h environ",
+            "Altibus et quatre autres compagnies"
           ]
         ]
       }
     },
     {
-      "heading": "Live",
-      "liveWeeks": {
-        "notes": {
-          "2026-12-26": "New Year"
-        },
-        "count": true
+      "heading": "Val Thorens en train depuis Paris : TGV, OUIGO ou train de nuit",
+      "paragraphs": [
+        "Depuis Paris-Gare de Lyon, les TGV INOUI les plus rapides rejoignent Moûtiers en 4 h 20 environ, en direct ou avec une correspondance à Chambéry, selon le [site de Val Thorens](https://www.valthorens.com/en/sejour/venir-a-val-thorens/comment-venir/) ; billets sur [SNCF Connect](https://www.sncf-connect.com/). Voyager le dimanche revient souvent moins cher, avec moins de monde à bord, note le site des 3 Vallées.",
+        "[OUIGO](https://www.ouigo.com/train-paris-moutiers) dessert Moûtiers tous les jours du 17 décembre 2026 au 29 mars 2027, sans changement, en 5 h environ, au départ de Roissy-Charles-de-Gaulle 2 ou de Marne-la-Vallée-Chessy ; ses billets sont en vente depuis le 30 septembre 2026.",
+        "Le [Travelski Night Express](https://www.travelski.com/transport/travelski-night-express) quitte Paris-Austerlitz le vendredi soir pour Moûtiers, Aime ou Bourg-Saint-Maurice, où il arrive le samedi matin ; billet seul ou séjour tout compris, et avec un billet seul, le transfert depuis la gare est à réserver soi-même."
+      ],
+      "table": {
+        "caption": "Les trains les plus rapides jusqu'à Moûtiers, hiver 2026/2027",
+        "head": [
+          "Au départ de",
+          "Train",
+          "Jusqu'à Moûtiers",
+          "À savoir"
+        ],
+        "rows": [
+          [
+            "Paris-Gare de Lyon",
+            "TGV INOUI",
+            "4 h 20 environ",
+            "Direct ou correspondance à Chambéry"
+          ],
+          [
+            "Roissy-CDG 2 ou Marne-la-Vallée-Chessy",
+            "OUIGO",
+            "5 h environ",
+            "Direct, du 17 décembre au 29 mars"
+          ],
+          [
+            "Paris-Austerlitz",
+            "Travelski Night Express",
+            "Une nuit",
+            "Du vendredi soir au samedi matin"
+          ],
+          [
+            "Lyon Part-Dieu",
+            "TER ou TGV",
+            "Un peu plus de 3 h",
+            "Avec ou sans correspondance"
+          ],
+          [
+            "Chambéry",
+            "TER",
+            "1 h 15 à 1 h 20",
+            "Trains réguliers"
+          ],
+          [
+            "Genève-Cornavin",
+            "Train",
+            "Un peu moins de 4 h",
+            "Avec correspondances"
+          ]
+        ]
       }
     },
     {
-      "heading": "Ordered",
-      "list": [
-        "a",
-        "b"
-      ],
-      "ordered": true,
-      "after": [
-        "after"
+      "heading": "De la gare de Moûtiers à Val Thorens : la ligne S63",
+      "paragraphs": [
+        "Le car S63 met 1 h 15 environ de la gare de Moûtiers à la place des Arolles, la gare routière de Val Thorens, selon [Val Thorens Réservation](https://reservation.valthorens.com/altibus-moutiersar/bus-val-thorens-moutiers-aller-retour.html), la centrale de réservation de la station. Il circule toute l'année, plusieurs fois par jour et plus souvent en hiver, au départ de la gare routière installée sur le parking de la gare SNCF.",
+        "Les billets se prennent sur [Altibus](https://www.altibus.com/stations-desservies/val-thorens/), une plateforme de vente et non un transporteur, avec 10 % de remise plus de 48 h avant le départ ; les réservations de l'hiver 2026/2027 ouvrent cet automne. Un bagage à main, un bagage en soute et une paire de skis ou un snowboard sont compris, et Altibus conseille 1 h 30 entre le train et le car.",
+        "Des taxis sont aussi disponibles en gare (le site des 3 Vallées conseille de passer par leur centrale de réservation), et l'on peut appeler un VTC. En haut, la gare routière de la place des Arolles ouvre tous les jours en hiver et a une consigne à bagages."
       ]
+    },
+    {
+      "heading": "De Paris à Val Thorens en voiture : itinéraire et temps de route",
+      "paragraphs": [
+        "De Paris, le [site des 3 Vallées](https://www.les3vallees.com/fr/guide/venir-dans-les-3-vallees/en-voiture) compte environ 630 km et 6 h 30 à 7 h jusqu'à Moûtiers selon la circulation, par l'A6, l'A43, l'A430 et la RN90. Ensuite, sortie 40 et D117 sur 37 km environ jusqu'à Val Thorens, à 2 300 m d'altitude."
+      ],
+      "table": {
+        "caption": "Itinéraires et temps de route : Les 3 Vallées. Distances des aéroports : valthorens.com.",
+        "head": [
+          "Depuis",
+          "Itinéraire",
+          "Distance",
+          "Temps de route"
+        ],
+        "rows": [
+          [
+            "Paris",
+            "A6, A43, A430, RN90, puis D117",
+            "630 km environ jusqu'à Moûtiers, puis 37 km environ",
+            "6 h 30 à 7 h jusqu'à Moûtiers"
+          ],
+          [
+            "Aéroport de Lyon Saint-Exupéry",
+            "A43, A430, RN90, D117",
+            "199 km",
+            "2 h 30 environ"
+          ],
+          [
+            "Aéroport de Genève",
+            "A41 vers Annecy, Albertville, RN90, D117",
+            "201 km",
+            "2 h environ"
+          ],
+          [
+            "Aéroport de Chambéry",
+            "A430, RN90, D117",
+            "122 km",
+            "1 h 30 environ"
+          ]
+        ]
+      },
+      "after": [
+        "Le [site des 3 Vallées](https://www.les3vallees.com/fr/guide/venir-dans-les-3-vallees/etat-des-routes) recommande de rester sur la RN90 plutôt que de suivre les raccourcis des GPS par de petites routes. Si la route est blanche, deux aires de chaînage jalonnent la montée : Champ Mouton, sous Fontaine-le-Puits, et le Pont de la Combe.",
+        "Autre accès, par la Maurienne : sortie 29 de l'A43 (Saint-Michel-de-Maurienne), D1006 jusqu'à Orelle, puis les remontées mécaniques, en 45 minutes avec les bagages selon la station."
+      ]
+    },
+    {
+      "heading": "Pneus hiver ou chaînes : la loi Montagne en Savoie",
+      "paragraphs": [
+        "Du 1er novembre au 31 mars, tout conducteur doit avoir des pneus hiver ou des chaînes à bord dans toute la Savoie, rappelle la [préfecture](https://www.savoie.gouv.fr/Actions-de-l-Etat/Transports-deplacements-et-securite-routiere/Securite-routiere/Equipements-obligatoires-en-periode-hivernale-soyez-prets). Deux solutions : quatre pneus hiver marqués 3PMSF (une montagne à trois sommets et un flocon), ou au moins deux chaînes ou chaussettes à neige pour les roues motrices, rangées dans le véhicule.",
+        "Depuis le 1er novembre 2024, un pneu seulement marqué M+S ne suffit plus sans chaînes ou chaussettes, et un pneu quatre saisons ne compte que s'il porte le marquage 3PMSF. Après le 31 mars, le panneau B26 peut encore imposer les chaînes sur route enneigée, alors que les remontées tournent jusqu'au 2 mai 2027."
+      ]
+    },
+    {
+      "heading": "Parking à Val Thorens : réservez votre place avant de partir",
+      "paragraphs": [
+        "En hiver, la voiture reste au parking tout le séjour : Val Thorens est une station semi-piétonne, le stationnement dans les rues y est interdit du 15 novembre au 15 mai et les camping-cars sont interdits dans toute la station. La place se réserve en ligne auprès de [Valthoparc](https://www.valthoparc.fr/), la société d'économie mixte qui gère les parkings, au plus tard 7 jours avant l'arrivée selon le [site des 3 Vallées](https://www.les3vallees.com/fr/guide/venir-dans-les-3-vallees/stationnement-parkings).",
+        "Elle est attribuée selon la hauteur du véhicule, l'emplacement du logement, les dates du séjour et les disponibilités : mesurez donc votre voiture, coffre de toit compris."
+      ],
+      "table": {
+        "caption": "Les parkings de Val Thorens (Val Thorens Réservation)",
+        "head": [
+          "Parking",
+          "Type",
+          "Emplacement",
+          "Hauteur maximale"
+        ],
+        "rows": [
+          [
+            "P0",
+            "Couvert",
+            "Haut de la station (Balcons, Grande Rue, Slalom, Lombarde, Plein Sud)",
+            "2,20 m"
+          ],
+          [
+            "P1",
+            "Couvert",
+            "Le plus central (Grande Rue, quartier Soleil)",
+            "1,85 m"
+          ],
+          [
+            "P2",
+            "Couvert",
+            "Bas de la station (quartier Soleil), avec navettes",
+            "2,14 m"
+          ],
+          [
+            "P2D",
+            "Extérieur",
+            "Bas de la station (quartier Soleil), avec navettes",
+            "Véhicules de plus de 2,20 m"
+          ]
+        ]
+      },
+      "after": [
+        "Les parkings P0, P1 et P2 ont des bornes de recharge pour voitures électriques, et tous les parkings sont accessibles à pied ou en navette."
+      ]
+    },
+    {
+      "heading": "Depuis la Belgique ou Londres : Eurostar Snow et train de nuit",
+      "paragraphs": [
+        "De Bruxelles-Midi, l'[Eurostar Snow](https://www.b-europe.com/FR/Acheter/Promos/Eurostar/Eurostar-Snow) part chaque samedi du 19 décembre 2026 au 3 avril 2027, en direct, et s'arrête notamment à Albertville, Moûtiers et Bourg-Saint-Maurice ; il dessert aussi Anvers, Amsterdam et Rotterdam. [Eurostar](https://www.eurostar.com/us-en/deals/eurostar-snow) compte 5 h de Bruxelles à Albertville et 6 h 30 jusqu'à Bourg-Saint-Maurice, Moûtiers étant entre les deux ; retours jusqu'au 10 avril 2027, horaire sous réserve de modifications (SNCB International).",
+        "Le Travelski Night Express part aussi d'Amsterdam, d'Anvers et de Bruxelles le vendredi soir, pour une arrivée le samedi matin en Tarentaise, Moûtiers compris. Depuis Londres, l'Eurostar Snow part le samedi du 19 décembre 2026 au 20 février 2027, avec une correspondance à Lille, et revient du 27 décembre 2026 au 28 février 2027."
+      ]
+    },
+    {
+      "heading": "En avion : Lyon ou Genève, puis le car jusqu'à la station",
+      "paragraphs": [
+        "Lyon Saint-Exupéry (199 km) et Genève (201 km) sont reliés à Val Thorens par les cars Altibus. La [ligne de Genève](https://www.altibus.com/je-voyage-en-avion-pour-partir-au-ski/geneve-aeroport/) circule tous les jours du 18 décembre 2026 au 27 mars 2027, « selon les destinations », dès 47 € le billet adulte Eco ; la [LYS'Express](https://www.altibus.com/je-voyage-en-avion-pour-partir-au-ski/lyon-saint-exupery/) part de Lyon les vendredis, samedis et dimanches du 11 décembre 2026 au 3 avril 2027, dès 55 € en tarif adulte, la plupart de ses trajets vers Val Thorens étant directs, avec une pause à Moûtiers.",
+        "Sur les deux lignes, gratuit jusqu'à 2 ans, 30 % de réduction de 3 à 12 ans. À Lyon, départ de la gare routière de l'aéroport (terminal 1, niveau 0) ; au retour, prévoir au moins 3 h entre l'arrivée du car et le vol, demande Altibus. Aucune des deux lignes ne roule avant le 11 décembre ni après le 3 avril, alors que les remontées tournent du 21 novembre 2026 au 2 mai 2027 : restent alors le train et le S63, le taxi, la voiture ou une autre compagnie.",
+        "La gare routière de Val Thorens cite aussi Ben's Bus, Alpybus, Flixbus et Alpine Fleet depuis Genève et Lyon ; depuis Chambéry, seuls taxis et VTC font le trajet direct. [Go Val Thorens](https://www.govalthorens.com/en), l'outil de la station, réserve train, avion, car et taxi dans un seul panier ; SkiShare ne vend que des appartements, les transferts se réservent auprès de ces compagnies."
+      ]
+    },
+    {
+      "heading": "Le jour d'arrivée : samedi chargé et bons réflexes",
+      "paragraphs": [
+        "Le samedi, jour où la plupart des vacanciers prennent la route, prévoyez de la marge : pour Noël, [Bison Futé](https://www.bison-fute.gouv.fr/IMG/pdf/Calendrier_Bison_Fute_2026.pdf) annonce en Auvergne-Rhône-Alpes une circulation difficile le samedi 26 décembre 2026 et très difficile le samedi 2 janvier 2027, dans les deux sens. Son calendrier 2027, qui couvrira février, n'est pas encore paru ; ses prévisions détaillées sortent quelques jours avant chaque période chargée."
+      ],
+      "list": [
+        "**Partir la veille** : le site des 3 Vallées suggère une nuit près de Chambéry, d'Albertville ou de Moûtiers, ou un séjour du dimanche au dimanche.",
+        "**Garder de la marge** : 1 h 30 entre le train et le car, 3 h entre le car du retour et l'avion, conseille Altibus.",
+        "**Réserver le parking** au plus tard 7 jours avant l'arrivée.",
+        "**Acheter le forfait en ligne** pour gagner du temps à l'arrivée, comme le suggère le site des 3 Vallées : tarifs dans notre [guide du forfait](/fr/guide/prix-forfait-val-thorens)."
+      ],
+      "after": [
+        "Nos appartements d'agence se louent à la semaine, du samedi au samedi ; les appartements SkiShare sont au prix de la nuit, ce qui permet d'arriver un autre jour. Le tableau donne pour chaque samedi l'appartement d'agence le moins cher encore libre, le nombre restant et un repère de voyage. Pour choisir le quartier, voir [où loger à Val Thorens](/fr/guide/ou-loger-a-val-thorens) ; pour les dates, [quand partir à Val Thorens](/fr/guide/quand-partir-a-val-thorens) ; puis réservez sur [notre page appartements](/fr/apartments)."
+      ],
+      "liveWeeks": {
+        "notes": {
+          "2026-11-28": "Pas encore de car Altibus aéroport",
+          "2026-12-19": "1er Eurostar Snow de Londres et Bruxelles",
+          "2026-12-26": "Bison Futé : trafic difficile",
+          "2027-01-02": "Bison Futé : trafic très difficile",
+          "2027-02-20": "Dernier Eurostar Snow de Londres",
+          "2027-03-27": "Dernier jour du car Altibus de Genève",
+          "2027-04-03": "Derniers LYS'Express et Eurostar Snow"
+        },
+        "count": true
+      }
     }
   ],
   "faqs": [
     {
-      "q": "Question?",
-      "a": "Answer."
+      "q": "Quelle est la gare la plus proche de Val Thorens ?",
+      "a": "La gare de Moûtiers-Salins-Brides-les-Bains, à 37 km. Le car S63 relie la gare à la place des Arolles, à Val Thorens, en 1 h 15 environ."
+    },
+    {
+      "q": "Comment aller à Val Thorens en train depuis Paris ?",
+      "a": "En TGV INOUI depuis Paris-Gare de Lyon, en 4 h 20 environ pour les plus rapides, ou en OUIGO depuis Roissy ou Marne-la-Vallée, sans changement, du 17 décembre 2026 au 29 mars 2027, puis en car S63 depuis Moûtiers."
+    },
+    {
+      "q": "Combien de temps faut-il pour aller de Paris à Val Thorens en voiture ?",
+      "a": "Le site des 3 Vallées compte environ 630 km et 6 h 30 à 7 h de Paris à Moûtiers, selon la circulation. Il reste ensuite 37 km environ de montée par la D117."
+    },
+    {
+      "q": "Les pneus hiver sont-ils obligatoires pour aller à Val Thorens ?",
+      "a": "Oui, du 1er novembre au 31 mars dans toute la Savoie : quatre pneus hiver 3PMSF, ou des chaînes ou chaussettes à neige à bord. Depuis le 1er novembre 2024, un pneu seulement marqué M+S ne suffit plus."
+    },
+    {
+      "q": "Y a-t-il une navette entre Moûtiers et Val Thorens ?",
+      "a": "Oui, la ligne de car S63, toute l'année et plus souvent en hiver, vendue en ligne par Altibus avec 10 % de remise plus de 48 h avant le départ. Le trajet dure 1 h 15 environ."
+    },
+    {
+      "q": "Quel est l'aéroport le plus proche de Val Thorens ?",
+      "a": "Chambéry, à 122 km, mais sans car direct : seuls taxis et VTC font le trajet. Lyon Saint-Exupéry (199 km) et Genève (201 km) sont reliés à la station par les cars Altibus en hiver."
     }
   ],
   "sources": [
     {
-      "title": "Src",
-      "url": "https://www.valthorens.com/"
+      "title": "Val Thorens, site officiel : comment venir (distances, trains, routes, équipements d'hiver, parkings), page en anglais",
+      "url": "https://www.valthorens.com/en/sejour/venir-a-val-thorens/comment-venir/"
+    },
+    {
+      "title": "Les 3 Vallées : venir en voiture (itinéraires, distances, temps de route)",
+      "url": "https://www.les3vallees.com/fr/guide/venir-dans-les-3-vallees/en-voiture"
+    },
+    {
+      "title": "Les 3 Vallées : la station de Val Thorens (temps de route depuis les aéroports, parkings, aires de chaînage)",
+      "url": "https://www.les3vallees.com/fr/station/val-thorens"
+    },
+    {
+      "title": "OUIGO : ouverture des ventes d'hiver 2026-2027 (Moûtiers desservie du 17 décembre 2026 au 29 mars 2027)",
+      "url": "https://www.ouigo.com/actualites/ouverture-ventes-hiver"
+    },
+    {
+      "title": "Travelski Night Express : horaires 2026/2027 du train de nuit vers la Tarentaise",
+      "url": "https://www.travelski.com/transport/travelski-night-express"
+    },
+    {
+      "title": "Altibus : cars vers Val Thorens (ligne S63, aéroports de Genève et de Lyon)",
+      "url": "https://www.altibus.com/stations-desservies/val-thorens/"
+    },
+    {
+      "title": "Altibus : ligne LYS'Express depuis l'aéroport de Lyon, hiver 2026/2027",
+      "url": "https://www.altibus.com/je-voyage-en-avion-pour-partir-au-ski/lyon-saint-exupery/"
+    },
+    {
+      "title": "Préfecture de la Savoie : équipements obligatoires en période hivernale",
+      "url": "https://www.savoie.gouv.fr/Actions-de-l-Etat/Transports-deplacements-et-securite-routiere/Securite-routiere/Equipements-obligatoires-en-periode-hivernale-soyez-prets"
+    },
+    {
+      "title": "Val Thorens Réservation : les parkings de la station",
+      "url": "https://reservation.valthorens.com/parking.html"
+    },
+    {
+      "title": "SNCB International : Eurostar Snow, saison 2026-2027",
+      "url": "https://www.b-europe.com/FR/Acheter/Promos/Eurostar/Eurostar-Snow"
     }
   ]
 }

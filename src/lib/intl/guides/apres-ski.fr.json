@@ -1,73 +1,320 @@
 {
   "key": "apres-ski",
   "lang": "fr",
-  "title": "PLACEHOLDER apres-ski fr",
-  "metaTitle": "PLACEHOLDER ski-pass | SkiShare",
-  "description": "placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder ",
+  "title": "Après-ski à Val Thorens : La Folie Douce, bars, boîtes et restaurants",
+  "metaTitle": "Après-ski Val Thorens : Folie Douce, bars, soirées | SkiShare",
+  "description": "À Val Thorens, l'après-ski commence à La Folie Douce, sur les pistes, et finit dans les bars et boîtes du village. Adresses, restaurants, soirées calmes 2026/27.",
   "keywords": [
-    "a",
-    "b",
-    "c"
+    "après-ski val thorens",
+    "folie douce val thorens",
+    "folie douce val thorens horaires",
+    "bars val thorens",
+    "boîte de nuit val thorens",
+    "restaurant val thorens",
+    "que faire le soir à val thorens",
+    "supermarché val thorens"
   ],
   "emoji": "🍻",
   "published": "2026-10-23",
   "updated": "2026-10-23",
-  "intro": "Intro with [a link](/fr/apartments) and **bold**.",
+  "intro": "À Val Thorens, l'après-ski se vit en deux temps : l'après-midi sur les pistes, à La Folie Douce, au sommet du télésiège Plein Sud (2 600 m), avec de la musique live chaque jour jusqu'à la fermeture des pistes, puis le soir au village, où tout se rejoint à pied en vingt minutes au plus. Côté table : des restaurants d'altitude jusqu'au Caron 3200 (3 200 m), Les Explorateurs, étoilé au Michelin (30 couverts, réservation indispensable), ou une raclette à l'appartement grâce au Sherpa. Les horaires ne sont donnés ici que si une page officielle les publie pour l'hiver 2026/27 (remontées ouvertes du 21 novembre 2026 au 2 mai 2027).",
   "sections": [
     {
-      "heading": "Section one",
+      "heading": "Où et quand se passe l'après-ski à Val Thorens ?",
       "paragraphs": [
-        "Para 5–18 December."
-      ],
-      "list": [
-        "x",
-        "y"
+        "En deux temps : sur les pistes l'après-midi, puis au village à la nuit tombée. À La Folie Douce, musique live chaque jour et, selon ses mots, danse sur les tables jusqu'à la fermeture des pistes ; au village, écrivent Les 3 Vallées, les bars lancent la soirée et les boîtes s'animent quand la nuit tombe."
       ],
       "table": {
-        "caption": "Cap",
+        "caption": "L'après-ski à Val Thorens, des pistes au village",
         "head": [
-          "A",
-          "B"
+          "Quand",
+          "Où",
+          "Ce qui vous attend"
         ],
         "rows": [
           [
-            "1",
-            "2"
+            "L'après-midi, jusqu'à la fermeture des pistes",
+            "La Folie Douce, sommet du télésiège Plein Sud, 2 600 m",
+            "Musique live en terrasse, danse sur les tables"
+          ],
+          [
+            "En début de soirée",
+            "Bars, pubs et bars d'hôtel du village",
+            "Un verre, des planches, du live, des DJ sets, les matchs sur écran"
+          ],
+          [
+            "La nuit",
+            "Les boîtes : Le Malaysia, Klub Summit, Le Jackie",
+            "DJ sets, soirées à thème, concerts"
           ]
         ]
-      }
+      },
+      "after": [
+        "Tout se fait à pied : six quartiers (Soleil, Grande Rue, Balcons, Lombarde, Slalom et Plein Sud), une station semi-piétonne qui se traverse en vingt minutes et une navette gratuite entre les quartiers, selon Les 3 Vallées."
+      ]
     },
     {
-      "heading": "Live",
+      "heading": "La Folie Douce Val Thorens : où est-elle, et comment redescendre ?",
+      "paragraphs": [
+        "La Folie Douce se trouve sur les pistes, au sommet du télésiège Plein Sud, à 2 600 m selon son site, environ 300 m au-dessus du village. Elle promet « un vrai concert live proposé chaque jour », de l'électro au rock, sur une terrasse « souvent baignée de soleil », où l'on danse « sur les tables jusqu'à la fermeture des pistes » ; l'espace VIP, plus proche des artistes, se réserve.",
+        "**À table :** cuisine semi-gastronomique à La Fruitière (réservable), self à La Petite Cuisine, burgers, hot-dogs et bagels au Folie Food Ratrack.",
+        "**Horaires :** son site en affiche, mais ses menus en ligne datent encore de 2025/26 : vérifiez sur [sa page après-ski](https://www.lafoliedouce.com/fr/val-thorens-apres-ski-clubbing.html) pour cet hiver.",
+        "**Pour redescendre :** à skis, tant que les pistes sont ouvertes, et avant le dernier verre. La SETAM, qui exploite les remontées, rappelle sur son [plan débutants 2026/27](https://ski.valthorens.com/wp-content/uploads/2026/10/PlanEasyRider-2027-MockUp-Web-ValTho_compressed.pdf) que « skier en dehors des heures d'ouverture du domaine skiable constitue un danger », les dameuses entretenant les pistes ; Les 3 Vallées conseillent de vérifier les horaires de fermeture des remontées sur leur [page en direct](https://www.les3vallees.com/fr/live/ouverture-des-pistes-et-remontees/val-thorens).",
+        "**Sans skis ?** Le télésiège Plein Sud ne figure pas parmi les remontées que la SETAM ouvre aux piétons : demandez à La Folie Douce comment s'y rendre."
+      ]
+    },
+    {
+      "heading": "Bars, pubs et boîtes de nuit à Val Thorens",
+      "paragraphs": [
+        "Le [guide des sorties des 3 Vallées](https://www.les3vallees.com/fr/experiences/ou-sortir-a-val-thorens) cite trois boîtes, deux bars et deux pubs, et valthorens.com, le site de l'office de tourisme, ajoute Favela :"
+      ],
+      "table": {
+        "caption": "Bars, pubs et boîtes de Val Thorens (Les 3 Vallées, valthorens.com, octobre 2026)",
+        "head": [
+          "Nom",
+          "Type",
+          "Ce qu'en dit la source"
+        ],
+        "rows": [
+          [
+            "Le Malaysia",
+            "Boîte",
+            "Club souterrain sous la place principale ; DJ sets et concerts live réguliers"
+          ],
+          [
+            "Klub Summit",
+            "Boîte",
+            "Quartier central des bars ; DJ sets de l'électro à la techno, soirées à thème ; karaoké et after selon son site"
+          ],
+          [
+            "Le Jackie",
+            "Boîte",
+            "Club chic associé à Yuki Yama, un restaurant asiatique : dîner, puis danse"
+          ],
+          [
+            "Wild and Savage",
+            "Bar",
+            "Live et DJ sets, plus une boutique de vêtements de la marque"
+          ],
+          [
+            "Le Zinc",
+            "Bar",
+            "Hôtel Fahrenheit Seven ; fondues savoyardes, coquillettes à la truffe ; DJ sets et musiciens, selon l'hôtel"
+          ],
+          [
+            "Favela",
+            "Bar-restaurant",
+            "Galerie Péclet, quartier Grande Rue ; street food latino, cocktails signature"
+          ],
+          [
+            "Shamrock Irish Pub",
+            "Pub",
+            "Musique live et chants collectifs"
+          ],
+          [
+            "Crewzer",
+            "Pub",
+            "Pub sportif, écrans pour les matchs"
+          ]
+        ]
+      },
+      "after": [
+        "**Un verre au calme :** Le 1971, à l'hôtel Le Val Thorens, place de l'Église (quartier Lombarde), bar à l'esprit seventies avec cheminée, ou le Lounge Bar du Pashmina, « ouvert à tous » : cocktails, vins, tapas et musique live plusieurs soirs par semaine.",
+        "**Pas d'horaires ici, volontairement :** aucune page officielle consultée ne donne ceux de 2026/27. Vérifiez sur le site de chaque adresse avant de sortir."
+      ]
+    },
+    {
+      "heading": "Restaurants d'altitude : où manger sur les pistes ?",
+      "paragraphs": [
+        "Les 3 Vallées retiennent cinq restaurants de Val Thorens pour leur terrasse, de Chez Pépé Nicolas, accessible en voiture, au Caron 3200, à 3 200 m. Le Chalet de la Marine et le Chalet des 2 Lacs ouvrent aussi le soir, sur réservation, avec montée en chenillette."
+      ],
+      "table": {
+        "caption": "Restaurants d'altitude de Val Thorens (Les 3 Vallées, valthorens.com, sites des restaurants)",
+        "head": [
+          "Restaurant",
+          "Où, et comment y aller",
+          "Bon à savoir"
+        ],
+        "rows": [
+          [
+            "La Fruitière, La Folie Douce",
+            "Sommet du télésiège Plein Sud, 2 600 m",
+            "Semi-gastronomique ; réservez"
+          ],
+          [
+            "Chalet de la Marine",
+            "Piste bleue des Dalles, 2 500 m ; à pied par le chemin de la Marine",
+            "Buffet de desserts ; le soir sur réservation"
+          ],
+          [
+            "Chalet des 2 Lacs",
+            "Piste verte Traversée des 2 Lacs, 2 445 m ; à pied par le sentier des 2 Lacs ou le télésiège de Moutière",
+            "Bistrot de montagne savoyard ; le soir sur réservation"
+          ],
+          [
+            "Chez Pépé Nicolas",
+            "Piste de la Chasse, entre Val Thorens et Les Menuires ; aussi en voiture",
+            "Produits de Savoie ; terrasse à l'écart du domaine"
+          ],
+          [
+            "Caron 3200",
+            "Sommet de la Cime Caron, 3 200 m, depuis Val Thorens ou Orelle",
+            "Cuisine savoyarde et internationale, rooftop, 130 places"
+          ]
+        ]
+      },
+      "after": [
+        "**Ou un pique-nique :** la SETAM signale tables de pique-nique et toilettes publiques sur les pistes, et Les 3 Vallées retiennent quatre [spots](https://www.les3vallees.com/fr/experiences/nos-meilleurs-spots-pique-nique-3-vallees) : La Ruche (arrivée du télésiège de Moutière) et les chalets de pique-nique Goitschel (piste rouge Goitschel), Rosaël (3 000 m) et du Plateaux (près du snowpark)."
+      ]
+    },
+    {
+      "heading": "Restaurants au village : faut-il réserver ?",
+      "paragraphs": [
+        "En haute saison, oui : l'hôtel Pashmina juge la réservation « fortement recommandée, en particulier en haute saison », et indispensable aux Explorateurs, sa table étoilée, qui « n'accueille que trente couverts ». Les 3 Vallées citent aussi restaurants d'altitude, restauration rapide, salons de thé et livraison à domicile (Mountain Eats, Winter Café).",
+        "**Spécialités :** fondue savoyarde, raclette au lait cru, reblochonnade, suggèrent Les 3 Vallées. Le Zinc sert des fondues, et Le Base Camp, le restaurant bistronomique du Pashmina, une cuisine alpine généreuse à partager, avec live cooking et buffets.",
+        "**Dîner avant de sortir :** Yuki Yama, associé au Jackie, ou Favela, galerie Péclet, pour des tacos, burritos et empanadas.",
+        "**En groupe :** réservez avant de partir, surtout pour le Nouvel An et les vacances d'hiver (zones C, A puis B du 6 février au 8 mars 2027). Dans nos appartements, le Nouvel An et la mi-février sont les semaines les plus chères ; les dates des vacances sont dans [Quand partir à Val Thorens](/fr/guide/quand-partir-a-val-thorens)."
+      ]
+    },
+    {
+      "heading": "Faire ses courses pour l'appartement",
+      "paragraphs": [
+        "Val Thorens a son supermarché Sherpa, près de l'arrêt de navette Place Péclet, une épicerie taillée pour les vacances à la montagne selon l'office de tourisme : boucherie-rôtisserie, charcuterie-traiteur, fromages et spécialités locales, pain et pâtisseries cuits sur place, cave à vins, presse, chaînes à neige et puériculture.",
+        "**Raclette à l'appartement :** formules raclette, fondue et pierrade, avec prêt de l'appareil, commandes à distance sur sherpa.net et livraison à domicile.",
+        "**Le jour de l'arrivée :** sa fiche n'indique pas d'horaires : vérifiez-les avant de partir, surtout si vous arrivez tard un samedi. Sur notre [page appartements](/fr/apartments), les appartements d'agence se louent à la semaine, du samedi au samedi, et les appartements SkiShare à la nuit, pour vos dates."
+      ]
+    },
+    {
+      "heading": "Pas envie de faire la fête ? Que faire le soir à Val Thorens",
+      "paragraphs": [
+        "La SETAM a déjà publié les horaires 2026/27 de trois activités de fin de journée, toutes au départ du sommet du Funitel de Péclet :"
+      ],
+      "table": {
+        "caption": "Activités de fin de journée à Val Thorens, hiver 2026/27 (SETAM)",
+        "head": [
+          "Activité",
+          "Quand",
+          "Bon à savoir"
+        ],
+        "rows": [
+          [
+            "Péclet by Night : ski jusqu'à 18 h 30",
+            "Le mercredi, du 10 février au 21 avril 2027",
+            "Pistes Tête Ronde (bleue) et Christine (rouge) ; forfait valide obligatoire"
+          ],
+          [
+            "Cosmojet de nuit : 5 km de luge à la frontale",
+            "Du mercredi au vendredi, dès les vacances de Noël : 16 h 45–18 h jusqu'au 5 février, 17 h 15–18 h 30 dès le 6 février",
+            "40 inscrits minimum ; environ 40 minutes ; casque obligatoire ; enfant seul : plus de 9 ans et 1,25 m ; 31 € la descente"
+          ],
+          [
+            "Kart Xperience : kart sur neige sans moteur",
+            "Départ à 16 h 45 jusqu'au 5 février ; dès le 6 février, jeudi et vendredi seulement, à 17 h 15",
+            "3 km, 318 m de dénivelé ; 18 ans et 1,30 m minimum, 100 kg maximum ; 16 participants au plus, avec un employé SETAM ; réservation aux points de vente SETAM ; 31 € ; pas de chaussures de ski"
+          ]
+        ]
+      },
+      "after": [
+        "Luge et kart dépendent de la météo et de l'enneigement : la SETAM conseille de la contacter quelques jours avant l'arrivée. Elle vend les forfaits à ses caisses et sur ski.valthorens.com ; les prix sont dans [Prix du forfait à Val Thorens](/fr/guide/prix-forfait-val-thorens).",
+        "**Plus calme :** un dîner en chenillette au Chalet de la Marine ou au Chalet des 2 Lacs ; piscine, saunas, hammam et puits d'eau froide au [Board](https://www.sportwellnesslesbelleville.com/lieux/le-board/), le centre sport et bien-être au cœur de la station (vérifiez ses horaires d'hiver) ; ou une raclette à l'appartement."
+      ]
+    },
+    {
+      "heading": "Rentrer en sécurité après une soirée",
+      "paragraphs": [
+        "À pied, le plus souvent : le village se traverse en vingt minutes (Les 3 Vallées) et l'on peut tout faire à pied, rappelle Val Thorens Réservation, la centrale de réservation de la station. Avant une longue soirée, troquez si possible les chaussures de ski contre des après-ski.",
+        "**La navette gratuite** relie les quartiers, mais les horaires de la [page navettes des 3 Vallées](https://www.les3vallees.com/fr/guide/navettes-en-stations) ne sont pas datés 2026/27 : vérifiez-les en temps réel dans l'application Zenbus, que cette page recommande, avant de compter dessus tard le soir."
+      ]
+    },
+    {
+      "heading": "Où loger pour l'après-ski, et les appartements semaine par semaine",
+      "paragraphs": [
+        "Choisissez votre quartier selon vos soirées : Val Thorens Réservation décrit Grande Rue, en plein centre, comme un « quartier animé le soir », Slalom comme un « quartier très calme », Balcons et Plein Sud, en haut de la station, comme calmes. Comparatif complet : [Où loger à Val Thorens](/fr/guide/ou-loger-a-val-thorens).",
+        "Ci-dessous, pour chaque samedi à venir : l'appartement d'agence le moins cher encore libre sur SkiShare pour la semaine, du samedi au samedi, et le nombre restant. Le budget complet, forfait compris : [Prix de location d'un appartement à Val Thorens](/fr/guide/prix-location-appartement-val-thorens)."
+      ],
       "liveWeeks": {
         "notes": {
-          "2026-12-26": "New Year"
+          "2026-12-05": "Coupe du monde de skicross, 6–12 décembre",
+          "2026-12-19": "Début des vacances de Noël",
+          "2026-12-26": "Semaine du Nouvel An",
+          "2027-01-23": "Freeride World Tour, 24–30 janvier",
+          "2027-02-06": "Péclet by Night à partir du 10 février",
+          "2027-04-17": "Dernier Péclet by Night le 21 avril"
         },
         "count": true
       }
-    },
-    {
-      "heading": "Ordered",
-      "list": [
-        "a",
-        "b"
-      ],
-      "ordered": true,
-      "after": [
-        "after"
-      ]
     }
   ],
   "faqs": [
     {
-      "q": "Question?",
-      "a": "Answer."
+      "q": "Où se trouve La Folie Douce à Val Thorens ?",
+      "a": "Sur les pistes, au sommet du télésiège Plein Sud, à 2 600 m selon son site, environ 300 m au-dessus du village. On redescend à skis avant la fermeture des pistes."
+    },
+    {
+      "q": "Quels sont les horaires de La Folie Douce Val Thorens ?",
+      "a": "On y danse sur les tables jusqu'à la fermeture des pistes, selon ses mots. Son site affiche des horaires, mais en octobre 2026 il présentait encore les menus 2025/26 : vérifiez ceux de 2026/27 avant d'y aller."
+    },
+    {
+      "q": "Quelles sont les boîtes de nuit de Val Thorens ?",
+      "a": "Les 3 Vallées en citent trois : Le Malaysia, sous la place principale, le Klub Summit, dans le quartier central des bars, et Le Jackie, associé au restaurant asiatique Yuki Yama."
+    },
+    {
+      "q": "Faut-il réserver au restaurant à Val Thorens ?",
+      "a": "En haute saison, oui : l'hôtel Pashmina le recommande fortement, et c'est indispensable aux Explorateurs, sa table étoilée de 30 couverts. Le soir, le Chalet de la Marine et le Chalet des 2 Lacs reçoivent sur réservation, avec montée en chenillette."
+    },
+    {
+      "q": "Y a-t-il un supermarché à Val Thorens ?",
+      "a": "Oui, le Sherpa, près de l'arrêt de navette Place Péclet : boucherie, fromages, pain cuit sur place, formules raclette ou fondue avec prêt de l'appareil. Sa fiche officielle n'indique pas d'horaires : vérifiez-les avant d'arriver."
+    },
+    {
+      "q": "Que faire le soir à Val Thorens si l'on n'aime pas faire la fête ?",
+      "a": "Skier jusqu'à 18 h 30 le mercredi avec Péclet by Night (du 10 février au 21 avril 2027), descendre la luge Cosmojet à la frontale du mercredi au vendredi (dès les vacances de Noël, 40 inscrits minimum), tester le Kart Xperience ou dîner dans un chalet d'altitude."
+    },
+    {
+      "q": "Peut-on redescendre à skis après La Folie Douce ?",
+      "a": "Oui, tant que les pistes sont ouvertes. Après, prévient la SETAM, skier est dangereux : les dameuses entretiennent les pistes."
     }
   ],
   "sources": [
     {
-      "title": "Src",
-      "url": "https://www.valthorens.com/"
+      "title": "Les 3 Vallées : où sortir à Val Thorens (boîtes, bars et pubs)",
+      "url": "https://www.les3vallees.com/fr/experiences/ou-sortir-a-val-thorens"
+    },
+    {
+      "title": "Les 3 Vallées : restaurants avec terrasse à Val Thorens",
+      "url": "https://www.les3vallees.com/fr/experiences/restaurant-terrasses-3-vallees"
+    },
+    {
+      "title": "Les 3 Vallées : la station de Val Thorens (quartiers, navette gratuite, restauration, Péclet by Night)",
+      "url": "https://www.les3vallees.com/fr/station/val-thorens"
+    },
+    {
+      "title": "La Folie Douce Val Thorens : après-ski et clubbing",
+      "url": "https://www.lafoliedouce.com/fr/val-thorens-apres-ski-clubbing.html"
+    },
+    {
+      "title": "La Folie Douce Val Thorens : les trois restaurants",
+      "url": "https://www.lafoliedouce.com/fr/restaurant-val-thorens.html"
+    },
+    {
+      "title": "Hôtel Pashmina : restaurants et bar (Les Explorateurs, réservation)",
+      "url": "https://www.hotelpashmina.com/fr/se-restaurer-restaurant-a-val-thorens/"
+    },
+    {
+      "title": "Office de tourisme de Val Thorens : le supermarché Sherpa (page en anglais)",
+      "url": "https://www.valthorens.com/en/commerce-service/sherpa-peclet/"
+    },
+    {
+      "title": "SETAM, exploitant des remontées de Val Thorens : Péclet by Night 2026/27",
+      "url": "https://ski.valthorens.com/forfaits-ski-val-thorens-et-3-vallees/peclet-by-night-val-thorens/"
+    },
+    {
+      "title": "SETAM : luge Cosmojet, horaires et tarifs 2026/27",
+      "url": "https://ski.valthorens.com/forfaits-ski-val-thorens-et-3-vallees/luge-val-thorens-cosmojet/"
+    },
+    {
+      "title": "SETAM : Kart Xperience, horaires et tarif 2026/27",
+      "url": "https://ski.valthorens.com/forfaits-ski-val-thorens-et-3-vallees/kart-xperience-val-thorens/"
     }
   ]
 }

@@ -1,73 +1,273 @@
 {
   "key": "pistes",
   "lang": "fr",
-  "title": "PLACEHOLDER pistes fr",
-  "metaTitle": "PLACEHOLDER ski-pass | SkiShare",
-  "description": "placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder placeholder ",
+  "title": "Domaine skiable de Val Thorens : quelles pistes pour quel niveau ?",
+  "metaTitle": "Plan des pistes et domaine skiable de Val Thorens | SkiShare",
+  "description": "Val Thorens-Orelle : 150 km et 88 pistes ; Les 3 Vallées : 334 pistes. Où skier selon son niveau, la Cime Caron, les dernières remontées et le plan des pistes.",
   "keywords": [
-    "a",
-    "b",
-    "c"
+    "plan des pistes val thorens",
+    "domaine skiable val thorens",
+    "val thorens débutant",
+    "pistes noires val thorens",
+    "cime caron",
+    "forfait val thorens ou 3 vallées",
+    "pistes val thorens orelle"
   ],
   "emoji": "⛷️",
   "published": "2026-10-23",
   "updated": "2026-10-23",
-  "intro": "Intro with [a link](/fr/apartments) and **bold**.",
+  "intro": "Selon la SETAM, qui exploite les remontées de Val Thorens, le domaine Val Thorens-Orelle compte 88 pistes pour 150 km ; le forfait 3 Vallées ouvre 600 km et 334 pistes, dont 53 vertes, 136 bleues, 108 rouges et 37 noires (dossier de presse 2026/27). Côté Val Thorens, le point culminant est la Cime Caron, à 3 195 m, et une remontée du secteur d'Orelle monte à 3 230 m. Les débutants démarrent sur quatre tapis couverts gratuits ; les bons skieurs filent vers des noires comme la Combe de Caron et la Combe de Rosaël. Les remontées de Val Thorens tournent du 21 novembre 2026 au 2 mai 2027, les liaisons avec les autres vallées du 5 décembre 2026 au 18 avril 2027.",
   "sections": [
     {
-      "heading": "Section one",
+      "heading": "Quelle est la taille du domaine skiable de Val Thorens ?",
       "paragraphs": [
-        "Para 5–18 December."
-      ],
-      "list": [
-        "x",
-        "y"
+        "Val Thorens-Orelle, le domaine du forfait local, aligne 88 pistes pour 150 km selon la SETAM. L'ensemble des 3 Vallées en totalise 600 km."
       ],
       "table": {
-        "caption": "Cap",
+        "caption": "Val Thorens-Orelle et Les 3 Vallées en chiffres (SETAM ; Les 3 Vallées, 2026/27)",
         "head": [
-          "A",
-          "B"
+          "",
+          "Val Thorens-Orelle",
+          "Les 3 Vallées"
         ],
         "rows": [
           [
-            "1",
-            "2"
+            "Pistes",
+            "150 km, 88 pistes",
+            "600 km, 334 pistes"
+          ],
+          [
+            "Par couleur",
+            "Non publié par la SETAM",
+            "53 vertes, 136 bleues, 108 rouges, 37 noires"
+          ],
+          [
+            "Stations",
+            "Val Thorens (village à 2 300 m) et Orelle",
+            "7, de Courchevel à Orelle"
+          ],
+          [
+            "Altitude",
+            "99 % du domaine au-dessus de 2 000 m",
+            "85 % du domaine au-dessus de 1 800 m"
+          ],
+          [
+            "Plus haute remontée",
+            "3 230 m à Orelle ; Cime Caron à 3 195 m",
+            "3 230 m, à Orelle"
+          ],
+          [
+            "Saison 2026/27",
+            "21 novembre 2026 – 2 mai 2027",
+            "5 décembre 2026 – 18 avril 2027"
+          ],
+          [
+            "Forfait",
+            "Val Thorens-Orelle",
+            "3 Vallées"
           ]
         ]
-      }
+      },
+      "after": [
+        "Sur le plan officiel, le vert signifie facile, le bleu difficulté moyenne, le rouge difficile et le noir très difficile : une bleue française n'est donc pas une piste de premier jour. Saint-Martin-de-Belleville ouvre le 12 décembre 2026, une semaine après le reste des 3 Vallées."
+      ]
     },
     {
-      "heading": "Live",
-      "liveWeeks": {
-        "notes": {
-          "2026-12-26": "New Year"
-        },
-        "count": true
-      }
-    },
-    {
-      "heading": "Ordered",
+      "heading": "Débuter à Val Thorens : par où commencer ?",
+      "paragraphs": [
+        "Par les quatre tapis couverts gratuits, où l'on apprend sans forfait. Le plan EasyRider 2026/27 de la SETAM décrit, au cœur du domaine, trois secteurs aux pistes larges et aux pentes douces. Selon le site de la station, les tapis Castor et Pollux bordent la verte Voie Lactée, et les tapis Musaraigne et Campagnols la verte Grenouillère.",
+        "Vient ensuite le Minipass EasyRider, pour 4 heures ou une journée, à 50 % du prix public. Il ouvre de nombreuses vertes et bleues et cinq remontées : les télécabines du Cairn, des 2 Lacs et de Caron, et les télésièges des Cascades et de la Moutière. La SETAM le vend dans ses points de vente, où l'on retire aussi le plan débutants."
+      ],
       "list": [
-        "a",
-        "b"
+        "**Vertes du plan débutants :** Combe de Thorens, Voie Lactée, Grenouillère, Espace débutant, Roc, Traversée des 2 Lacs, 2 Combes et Flocon, entre autres.",
+        "**Les heures calmes :** le plan conseille de skier entre 11h et 15h.",
+        "**Le casque :** selon la SETAM, il réduit le risque de traumatisme crânien de 35 % chez l'adulte et de 61 % chez l'enfant."
+      ]
+    },
+    {
+      "heading": "Où skier avec un niveau intermédiaire ?",
+      "paragraphs": [
+        "Les intermédiaires ont des bleues dès 3 000 m. Les 3 Vallées et la SETAM mettent en avant celles-ci :"
+      ],
+      "list": [
+        "**Tête Ronde (bleue) :** depuis l'arrivée du Funitel de Péclet, à 3 000 m, face aux Aiguilles de Péclet, tout en courbes larges et virages faciles.",
+        "**La Lory (bleue), vers Orelle :** depuis le sommet du Funitel de Thorens, elle traverse le vallon glaciaire du Bouchet jusqu'au secteur d'Orelle, peu fréquenté et ensoleillé selon Les 3 Vallées. Orelle est compris dans le forfait Val Thorens-Orelle.",
+        "**Le secteur de Boismint :** ensoleillé dès le matin, avec des pistes larges, faciles et peu fréquentées comme les bleues du Blanchot et du Tétras ; le télésiège du Plan de l'Eau permet de remonter.",
+        "**Le Pluviomètre (piste bleue) :** large et fluide vers la station, il figure sur tous les itinéraires de retour officiels depuis Méribel et Les Menuires."
+      ],
+      "after": [
+        "Avec le forfait 3 Vallées, on change de vallée sans quitter les bleues : Les 3 Vallées publient une journée de Val Thorens à Courchevel et une autre de Courchevel à Orelle."
+      ]
+    },
+    {
+      "heading": "Pistes noires et pentes raides : où vont les bons skieurs ?",
+      "paragraphs": [
+        "Parmi les noires de Val Thorens figurent la Combe de Caron, au départ du téléphérique de la Cime Caron, et la Goitschel, qui part de 2 900 m ; Orelle ajoute la Combe de Rosaël. Voici comment la station et Les 3 Vallées les décrivent :"
+      ],
+      "list": [
+        "**Combe de Caron (noire) :** raide en haut, un petit goulet, puis de grands vallons. Orientée nord, elle demande endurance et maîtrise technique, selon la station.",
+        "**Goitschel (noire) :** raide et soutenue dès 2 900 m, dans le secteur Plein Sud exposé au sud. La station conseille d'y aller le matin, après le damage, avant le retour des skieurs des 3 Vallées.",
+        "**Combe de Rosaël (noire) :** l'unique noire du secteur d'Orelle, depuis la Cime Caron, avec 500 m de dénivelé sur 2 km. Exposée au sud, elle se skie en début de saison ou tôt le matin, conseillent Les 3 Vallées.",
+        "**Les Asters (rouge) :** depuis le Funitel de Thorens, vers 3 000 m, une piste orientée nord et raide au départ, avec un fort dénivelé sur peu de distance.",
+        "**La Christine (rouge) :** depuis le Funitel de Péclet, des virages techniques dans un vallon isolé sous les glaciers de Péclet, sur environ 700 m de dénivelé."
+      ],
+      "after": [
+        "Le forfait 3 Vallées ouvre aussi l'Éclipse, à Courchevel, la plus longue piste noire des 3 Vallées : 3,3 km, 970 m de dénivelé et 30 % de pente moyenne, réaménagée pour les épreuves de vitesse des Championnats du monde de ski 2023."
+      ]
+    },
+    {
+      "heading": "Cime Caron et glaciers : quel est le point culminant ?",
+      "paragraphs": [
+        "Côté Val Thorens, le point culminant est la Cime Caron, à 3 195 m selon Les 3 Vallées (la station et le plan des pistes l'arrondissent à 3 200 m). On y monte par le téléphérique de la Cime Caron ou par la télécabine Orelle-Caron. Là-haut, Les 3 Vallées dénombrent plus de 1 000 sommets des Alpes, dont le mont Blanc.",
+        "La plus haute remontée des 3 Vallées se trouve à Orelle : le plan 2026/27 place le sommet des 3 Vallées, à 3 230 m, en haut de la remontée du Bouchet (OR5).",
+        "Selon le [site de la station](https://www.valthorens.com/en/ski/domaine-skiable/) (en anglais), six glaciers dominent Val Thorens ; le plan nomme ceux de Péclet, de Thorens, du Borgne, de Gébroulaz et du Bouchet. La bleue de la Lory traverse le vallon glaciaire du Bouchet, tandis que le glacier de Gébroulaz, avec ses crevasses, relève du hors-piste : la station conseille d'y aller avec un guide de haute montagne."
+      ]
+    },
+    {
+      "heading": "Autres vallées : quel forfait, et comment rentrer avant la fermeture ?",
+      "paragraphs": [
+        "Pour skier aux Menuires, à Saint-Martin, à Méribel ou à Courchevel, il faut le forfait 3 Vallées (600 km) ; le forfait Val Thorens-Orelle couvre 150 km. Du 19 décembre 2026 au 9 avril 2027, la [grille tarifaire de la SETAM](https://ski.valthorens.com/wp-content/uploads/2026/08/TARIFS-HIVER-20262027-2.pdf) affiche le 6 jours adulte à 367,50 € pour Val Thorens-Orelle et à 421 € pour Les 3 Vallées. Ses caisses vendent aussi une extension d'une journée 3 Vallées pour un forfait Val Thorens d'au moins 2 jours. Tous les tarifs : [prix du forfait à Val Thorens](/fr/guide/prix-forfait-val-thorens).",
+        "Le plan 2026/27 demande d'anticiper le retour dans sa station au moins deux heures avant la fermeture des remontées. Les horaires de fermeture sont impératifs : bloqué dans une autre vallée, vous rentrez à vos frais, en bus inter-stations ou en taxi. Chaque remontée affiche ses horaires à son départ, avec une horloge."
+      ],
+      "table": {
+        "caption": "Derniers départs pour rentrer à Val Thorens (plan officiel 2026/27)",
+        "head": [
+          "En revenant de",
+          "Dernière remontée",
+          "Jusqu'au 5 février 2027",
+          "Dès le 6 février 2027"
+        ],
+        "rows": [
+          [
+            "Méribel, Méribel-Mottaret, Courchevel, Brides-les-Bains",
+            "Télésiège de Côte Brune",
+            "16h15",
+            "16h40"
+          ],
+          [
+            "Les Menuires, Saint-Martin-de-Belleville",
+            "Télésiège du Mont de la Chambre",
+            "16h25",
+            "16h55"
+          ],
+          [
+            "Les Menuires, par la télécabine de Roc 1",
+            "Télécabines de Bruyères 1 puis 2",
+            "16h20, puis 16h25",
+            "16h50, puis 16h55"
+          ],
+          [
+            "Orelle",
+            "Télécabine Orelle-Caron",
+            "15h45",
+            "16h15"
+          ]
+        ]
+      },
+      "after": [
+        "Ces remontées terminent les itinéraires de retour officiels des 3 Vallées. Les horaires du plan ne sont pas contractuels, et son tableau Val Thorens-Orelle porte encore les dates de la saison dernière : vérifiez au départ ou dans l'appli 3 Vallées.",
+        "Gardez de la marge pendant les vacances scolaires, quand les pistes sont chargées ([quand partir à Val Thorens](/fr/guide/quand-partir-a-val-thorens)). Par temps incertain, restez sur votre secteur : le plan déconseille alors le circuit des 3 Vallées."
+      ]
+    },
+    {
+      "heading": "Hors-piste à Val Thorens : quels risques, quelles règles ?",
+      "paragraphs": [
+        "Le hors-piste se pratique à vos risques et périls, sur un terrain ni balisé ni sécurisé, et les avalanches font en moyenne 31 morts et 26 blessés par an en France, selon [Météo-France](https://meteofrance.com/vigilance-et-securite/avalanche-quels-dangers-comment-reagir-et-sinformer). Plus de 90 % de ces accidents sont des avalanches de plaque de neige sèche, le plus souvent déclenchées par la victime ou un membre de son groupe."
       ],
       "ordered": true,
+      "list": [
+        "**Partir avec un professionnel :** guide de haute montagne ou moniteur spécialisé, comme le recommandent la station, Les 3 Vallées et la SETAM.",
+        "**Emporter le matériel et savoir s'en servir :** DVA, pelle et sonde.",
+        "**Lire le bulletin d'estimation du risque d'avalanche (BERA) le matin :** [Météo-France](https://meteofrance.com/meteo-montagne/alpes-du-nord/risques-avalanche) le publie toute la saison pour 35 massifs, avec un risque coté de 1 (faible) à 5 (très fort). La page enneigement de la station renvoie au bulletin du massif de la Vanoise.",
+        "**Ne pas s'aventurer sur une piste fermée :** c'est l'une des règles du plan officiel. Les secours sont payants sur les pistes : vérifiez votre assurance avant de partir."
+      ],
       "after": [
-        "after"
+        "Le grand classique depuis la Cime Caron est le Lac du Lou : un vallon très large, sans remontée en vue, et 1 400 m de dénivelé jusqu'au bas du télésiège du Plan de l'Eau, avec des variantes pour les experts comme pour les petits niveaux en hors-piste, selon Les 3 Vallées. Les conditions s'évaluent le jour même, rappelle la station."
+      ]
+    },
+    {
+      "heading": "Plan des pistes et ouverture des remontées : où les trouver ?",
+      "paragraphs": [
+        "Les plans officiels 2026/27 se téléchargent sur la [page Plans et horaires de la SETAM](https://ski.valthorens.com/plans-et-horaires/), et la version papier se trouve aux caisses des remontées, dans les offices de tourisme et dans de nombreux commerces."
+      ],
+      "list": [
+        "**Plan des 3 Vallées 2026/27 :** tout le domaine, avec les horaires des remontées, les numéros de la sécurité des pistes et les bons comportements. Les remontées y sont numérotées VT (Val Thorens) et OR (Orelle), par exemple VT13 Péclet.",
+        "**Plan EasyRider 2026/27 :** le plan débutants, avec les tapis gratuits, les remontées du Minipass et deux itinéraires conseillés.",
+        "**Plan Val Thorens-Orelle :** le 23 octobre 2026, la SETAM proposait encore l'édition 2025/26.",
+        "**En direct :** la [page live des 3 Vallées pour Val Thorens](https://www.les3vallees.com/fr/live/ouverture-des-pistes-et-remontees/val-thorens) indique les remontées, pistes et liaisons ouvertes ; l'appli 3 Vallées ajoute les horaires de fermeture, les numéros d'urgence et un bouton SOS qui contacte les secours les plus proches.",
+        "**Sécurité des pistes :** Val Thorens +33 4 79 00 01 80, Orelle +33 4 79 56 88 01."
+      ],
+      "after": [
+        "Pour choisir où poser vos valises : [où loger à Val Thorens](/fr/guide/ou-loger-a-val-thorens). Pour la neige et le vent en altitude : [météo et enneigement à Val Thorens](/fr/guide/meteo-enneigement-val-thorens). Nos [appartements à Val Thorens](/fr/apartments) se réservent en ligne, à la nuit ou à la semaine, du samedi au samedi."
       ]
     }
   ],
   "faqs": [
     {
-      "q": "Question?",
-      "a": "Answer."
+      "q": "Combien de pistes compte Val Thorens ?",
+      "a": "Selon la SETAM, Val Thorens-Orelle compte 88 pistes pour 150 km. Le forfait 3 Vallées ouvre 600 km et 334 pistes : 53 vertes, 136 bleues, 108 rouges et 37 noires (chiffres 2026/27)."
+    },
+    {
+      "q": "Val Thorens convient-elle aux débutants ?",
+      "a": "Oui. Quatre tapis couverts sont gratuits, et le Minipass EasyRider, pour 4 heures ou une journée à moitié prix, ouvre des vertes et des bleues. Commencez par les vertes : en France, une bleue est de difficulté moyenne."
+    },
+    {
+      "q": "Combien de pistes noires y a-t-il à Val Thorens ?",
+      "a": "Les 3 Vallées comptent 37 noires ; la SETAM ne donne pas de répartition par couleur pour Val Thorens-Orelle. On peut citer la Combe de Caron et la Goitschel à Val Thorens, et la Combe de Rosaël à Orelle."
+    },
+    {
+      "q": "Quelle est l'altitude de la Cime Caron ?",
+      "a": "3 195 m selon Les 3 Vallées, 3 200 m sur le plan des pistes. On y monte en téléphérique ou par la télécabine Orelle-Caron ; la remontée du Bouchet, à Orelle, va plus haut, jusqu'à 3 230 m."
+    },
+    {
+      "q": "Forfait Val Thorens ou forfait 3 Vallées ?",
+      "a": "Le forfait Val Thorens-Orelle couvre 150 km, le forfait 3 Vallées 600 km. Du 19 décembre 2026 au 9 avril 2027, le 6 jours adulte coûte 367,50 € ou 421 €, et la SETAM vend en caisse une extension d'une journée 3 Vallées pour un forfait Val Thorens d'au moins 2 jours."
+    },
+    {
+      "q": "À quelle heure partent les dernières remontées pour rentrer à Val Thorens ?",
+      "a": "Sur le plan 2026/27, les dernières remontées de retour depuis Méribel et Les Menuires partent entre 16h15 et 16h25 jusqu'au 5 février 2027, puis entre 16h40 et 16h55. Le plan conseille d'anticiper le retour au moins deux heures avant la fermeture."
     }
   ],
   "sources": [
     {
-      "title": "Src",
-      "url": "https://www.valthorens.com/"
+      "title": "Les 3 Vallées : dossier de presse hiver 2026/27 (334 pistes par couleur, 600 km, dates de saison, itinéraires en bleues)",
+      "url": "https://press.les3vallees.com/media/download/the-place-to-ski.pdf"
+    },
+    {
+      "title": "SETAM, société des remontées mécaniques de Val Thorens : le domaine (150 km, 88 pistes, 99 % au-dessus de 2 000 m, page en anglais)",
+      "url": "https://ski.valthorens.com/en/val-thorens/"
+    },
+    {
+      "title": "SETAM : Minipass débutants (tapis gratuits, forfait EasyRider)",
+      "url": "https://ski.valthorens.com/minipass-debutants/"
+    },
+    {
+      "title": "SETAM : plan des pistes 3 Vallées 2026/27 (légende, horaires des remontées, retour en station, altitudes, sécurité des pistes)",
+      "url": "https://ski.valthorens.com/wp-content/uploads/2026/10/Plan3V-2027-675x354-ValTho_PrintOk_compressed.pdf"
+    },
+    {
+      "title": "SETAM : plan débutants EasyRider 2026/27 (secteurs débutants, pistes, conseils)",
+      "url": "https://ski.valthorens.com/wp-content/uploads/2026/10/PlanEasyRider-2027-MockUp-Web-ValTho_compressed.pdf"
+    },
+    {
+      "title": "Val Thorens : les pistes mythiques (Combe de Caron, Goitschel, Asters, Christine, page en anglais)",
+      "url": "https://www.valthorens.com/en/les-pistes-mythiques-de-val-thorens/"
+    },
+    {
+      "title": "Val Thorens : le hors-piste, risques, matériel et glaciers (page en anglais)",
+      "url": "https://www.valthorens.com/en/activites/sorties-hors-piste-encadrees/"
+    },
+    {
+      "title": "Les 3 Vallées : 4 itinéraires faciles au départ de Val Thorens (Tête Ronde, Lory, Cime Caron, Boismint)",
+      "url": "https://www.les3vallees.com/fr/experiences/4-itineraires-faciles-et-grandioses-au-depart-de-val-thorens"
+    },
+    {
+      "title": "Les 3 Vallées : les 10 pistes mythiques (Combe de Rosaël, Éclipse)",
+      "url": "https://www.les3vallees.com/fr/experiences/10-pistes-mythiques"
+    },
+    {
+      "title": "Les 3 Vallées : destination Val Thorens (Christine, Pluviomètre, itinéraires de retour)",
+      "url": "https://www.les3vallees.com/fr/experiences/destination-val-thorens"
     }
   ]
 }
