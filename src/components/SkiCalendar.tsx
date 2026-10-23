@@ -5,7 +5,7 @@ import { hasDirectFlight } from "@/lib/direct-flight-days";
 const MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const DAYS   = ["א׳","ב׳","ג׳","ד׳","ה׳","ו׳","ש׳"];
 
-export const SEASON_START = new Date(2026, 11, 1);  // Dec 2026
+export const SEASON_START = new Date(2026, 10, 21); // Val Thorens lifts open 21.11.2026
 export const SEASON_END   = new Date(2027,  4, 31); // May 2027
 
 const same = (a: Date, b: Date) => a.toDateString() === b.toDateString();
@@ -111,7 +111,7 @@ export default function SkiCalendar({ initialFrom, initialTo, onSelect, onCancel
   // open on the month of the chosen dates (inside the season), else on the first month of the season
   const [base, setBase] = useState(() => {
     const f = initialFrom ? new Date(initialFrom + "T12:00:00") : null;
-    if (!f || f < SEASON_START || f > SEASON_END) return new Date(2026, 11, 1);
+    if (!f || f < SEASON_START || f > SEASON_END) return new Date(2026, 10, 1);
     const last = new Date(SEASON_END.getFullYear(), SEASON_END.getMonth() - 1, 1); // two months fit on desktop
     const m = new Date(f.getFullYear(), f.getMonth(), 1);
     return m > last ? last : m;

@@ -1,6 +1,7 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { PUBLIC_APARTMENT_COLUMNS } from "@/lib/apartment-fields";
 import { pageMeta } from "@/lib/page-meta";
+import { withListedSize } from "@/lib/apartment-display";
 import { breadcrumbLd, ldJson } from "@/lib/site";
 import type { Apartment, SkiPass } from "@/types";
 import WeeklyBrowser from "@/components/WeeklyBrowser";
@@ -29,7 +30,7 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
     .eq("source", "la_cime")
     .eq("available", true)
     .order("price_per_night", { ascending: true });
-  const apartments = (data ?? []) as unknown as Apartment[];
+  const apartments = ((data ?? []) as unknown as Apartment[]).map(withListedSize);
 
   // The real adult ski-pass tiers (both areas), so "דיל שלם" folds actual
   // prices into the week prices: the pass that fits each week's dates.

@@ -8,8 +8,17 @@ const DAYS   = ["א׳","ב׳","ג׳","ד׳","ה׳","ו׳","ש׳"];
 const same = (a: Date, b: Date) => a.toDateString() === b.toDateString();
 const fmt  = (d?: Date | null)  => d ? `${d.getDate()} ${MONTHS[d.getMonth()]}` : null;
 
-const SEASON_START = new Date(2026, 11, 1);
+// Val Thorens lifts open 21.11.2026 (the whole 3 Vallées on 5.12) and close 2.5.2027
+const SEASON_START = new Date(2026, 10, 21);
 const SEASON_END   = new Date(2027,  4, 31);
+const fmtLong = (d: Date) => `${d.getDate()} ב${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+
+/** small plane under a day: usually a direct flight from Tel Aviv that day */
+const PlaneDot = () => (
+  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z" />
+  </svg>
+);
 
 function gridDays(y: number, m: number): (Date | null)[] {
   const pad  = new Date(y, m, 1).getDay();
@@ -57,27 +66,30 @@ function MonthGrid({
           const hasRange = !!(eff.s && eff.e);
 
           return (
-            <div key={i}
-              className={`relative ${cell} flex items-center justify-center ${disabled ? "pointer-events-none" : "cursor-pointer"}`}
+            <button type="button" key={i} disabled={disabled}
+              aria-label={`${fmtLong(date)}${!disabled && hasDirectFlight(date) ? ", בדרך כלל יש טיסה ישירה" : ""}`}
+              aria-pressed={isStart || isEnd}
+              className={`relative ${cell} flex items-center justify-center ${disabled ? "cursor-default" : "cursor-pointer"} focus-visible:outline-2 focus-visible:outline-[#1652F0] rounded-full`}
               onMouseEnter={() => !disabled && onEnter(date)}
+              onFocus={() => !disabled && onEnter(date)}
               onMouseLeave={onLeave}
               onClick={() => !disabled && onClick(date)}
             >
-              {between   && <div className="absolute top-1.5 bottom-1.5 left-0 right-0 bg-blue-50" />}
-              {isStart && hasRange && <div className="absolute top-1.5 bottom-1.5 left-1/2 right-0 bg-blue-50" />}
-              {isEnd   && hasRange && <div className="absolute top-1.5 bottom-1.5 left-0 right-1/2 bg-blue-50" />}
-              <div className={[
+              {between   && <span className="absolute top-1.5 bottom-1.5 left-0 right-0 bg-blue-50" />}
+              {isStart && hasRange && <span className="absolute top-1.5 bottom-1.5 left-1/2 right-0 bg-blue-50" />}
+              {isEnd   && hasRange && <span className="absolute top-1.5 bottom-1.5 left-0 right-1/2 bg-blue-50" />}
+              <span className={[
                 `relative z-10 ${circle} flex items-center justify-center rounded-full select-none transition-colors font-medium`,
                 disabled ? "text-gray-300" : "",
                 !disabled && !isStart && !isEnd ? "hover:bg-blue-100 hover:text-blue-700 text-gray-800" : "",
                 isStart || isEnd ? "bg-blue-600 text-white font-bold shadow" : "",
               ].join(" ")}>
                 {date.getDate()}
-              </div>
+              </span>
               {!disabled && hasDirectFlight(date) && (
-                <span className="absolute bottom-0 z-10 text-[8px] leading-none" title="בדרך כלל יש טיסה ישירה מתל אביב ליון ביום הזה">✈️</span>
+                <span className="absolute bottom-0.5 z-10 leading-none text-[#1652F0]" title="בדרך כלל יש טיסה ישירה מתל אביב לליון ביום הזה"><PlaneDot /></span>
               )}
-            </div>
+            </button>
           );
         })}
       </div>
@@ -107,13 +119,19 @@ export default function SearchWidget() {
   const [dealMode, setDealMode] = useState<"apartment" | "full">("apartment");
   const [open,    setOpen]    = useState(false);
   const [picking, setPicking] = useState<"from" | "to">("from");
-  const [base,    setBase]    = useState(() => new Date(2026, 11, 1));
+  const [base,    setBase]    = useState(() => new Date(2026, 10, 1));
   const ref = useRef<HTMLDivElement>(null);
 
   const next    = new Date(base.getFullYear(), base.getMonth() + 1, 1);
   const nights  = from && to ? Math.round((to.getTime() - from.getTime()) / 86400000) : null;
   const canPrev = base > SEASON_START;
   const canNext = next < new Date(SEASON_END.getFullYear(), SEASON_END.getMonth(), 1);
+
+  // on a phone the calendar opens under the search box: bring it into view
+  const dropRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (open && window.innerWidth < 768) dropRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [open]);
 
   useEffect(() => {
     const h = (e: MouseEvent) => {
@@ -145,8 +163,8 @@ export default function SearchWidget() {
     window.location.href = `/search?${p.toString()}`;
   };
 
-  const navBtn = (disabled: boolean, onClick: () => void, children: React.ReactNode) => (
-    <button onClick={() => !disabled && onClick()}
+  const navBtn = (disabled: boolean, onClick: () => void, children: React.ReactNode, label: string) => (
+    <button type="button" aria-label={label} disabled={disabled} onClick={() => !disabled && onClick()}
       className={`w-9 h-9 flex items-center justify-center rounded-full border transition-colors
         ${disabled ? "border-gray-100 text-gray-300 cursor-not-allowed" : "border-gray-200 text-gray-600 hover:border-blue-400 hover:text-blue-600"}`}>
       {children}
@@ -209,16 +227,16 @@ export default function SearchWidget() {
 
       {/* ══ Calendar dropdown ══════════════════════════════════ */}
       {open && (
-        <div className="absolute top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 p-4 md:p-6" style={{ right: 0, left: 0 }}>
+        <div ref={dropRef} className="absolute top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 p-4 md:p-6 scroll-mb-4" style={{ right: 0, left: 0 }}>
 
           {/* Tabs */}
           <div className="flex gap-2 mb-4">
             {(["from","to"] as const).map(w => (
-              <button key={w} onClick={() => setPicking(w)}
+              <button type="button" key={w} onClick={() => setPicking(w)} aria-pressed={picking === w}
                 className={`flex-1 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all border-2 ${
                   picking === w ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-100 text-gray-500 hover:border-gray-200"
                 }`}>
-                {w === "from" ? "✈️ יציאה" : "🏠 חזרה"} — {fmt(w === "from" ? from : to) ?? "בחר"}
+                {w === "from" ? "כניסה" : "יציאה"}: {fmt(w === "from" ? from : to) ?? "בחרו"}
               </button>
             ))}
           </div>
@@ -226,9 +244,9 @@ export default function SearchWidget() {
           {/* Navigation + grids */}
           <div className="relative">
             <div className="flex items-center justify-between mb-1">
-              {navBtn(!canPrev, () => setBase(new Date(base.getFullYear(), base.getMonth() - 1, 1)), <IconChevR />)}
+              {navBtn(!canPrev, () => setBase(new Date(base.getFullYear(), base.getMonth() - 1, 1)), <IconChevR />, "החודש הקודם")}
               <div className="flex-1" />
-              {navBtn(!canNext, () => setBase(new Date(base.getFullYear(), base.getMonth() + 1, 1)), <IconChevL />)}
+              {navBtn(!canNext, () => setBase(new Date(base.getFullYear(), base.getMonth() + 1, 1)), <IconChevL />, "החודש הבא")}
             </div>
 
             {/* Desktop: 2 months | Mobile: 1 month */}
@@ -248,15 +266,15 @@ export default function SearchWidget() {
             </div>
           </div>
 
-          <p className="text-[11px] text-gray-400 text-center mt-2">✈️ = בדרך כלל יש טיסה ישירה מתל אביב ליון ביום הזה</p>
+          <p className="text-[12px] text-gray-500 text-center mt-2 flex items-center justify-center gap-1.5"><span className="text-[#1652F0]"><PlaneDot /></span> בדרך כלל יש טיסה ישירה מתל אביב לליון ביום הזה</p>
 
           {/* Footer */}
           <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-3">
             <button onClick={() => { setFrom(null); setTo(null); setPicking("from"); }}
-              className="text-sm text-gray-400 hover:text-gray-600 transition-colors">נקה תאריכים</button>
+              className="text-sm text-gray-500 hover:text-gray-700 transition-colors">לנקות תאריכים</button>
             {nights
-              ? <span className="text-sm font-bold text-blue-600">{nights} לילות ✓</span>
-              : <span className="text-sm text-gray-400">{picking === "from" ? "בחר תאריך יציאה" : "בחר תאריך חזרה"}</span>
+              ? <span className="text-sm font-bold text-blue-600">{nights} לילות</span>
+              : <span className="text-sm text-gray-500">{picking === "from" ? "בחרו את יום הכניסה" : "בחרו את יום היציאה"}</span>
             }
           </div>
         </div>

@@ -80,7 +80,7 @@ const group = (digits: string, sep: string) => digits.replace(/\B(?=(\d{3})+(?!\
  */
 export function fmtEur(n: number, lang: Lang): string {
   const cents = Math.round(Math.abs(n) * 100);
-  const int = group(String(Math.floor(cents / 100)), lang === "fr" ? " " : ",");
+  const int = group(String(Math.floor(cents / 100)), lang === "fr" ? "\u00a0" : ","); // no-break space: every font has it (U+202F is missing in the display font)
   const frac = cents % 100 ? (lang === "fr" ? "," : ".") + String(cents % 100).padStart(2, "0") : "";
   const sign = n < 0 ? "−" : "";
   return lang === "fr" ? `${sign}${int}${frac} €` : `${sign}€${int}${frac}`;

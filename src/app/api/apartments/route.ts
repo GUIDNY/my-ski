@@ -3,6 +3,8 @@ import { buildSeasonalRules } from "@/lib/seasonal-pricing";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/api-auth";
 import { PUBLIC_APARTMENT_COLUMNS } from "@/lib/apartment-fields";
+import { withListedSize } from "@/lib/apartment-display";
+import type { Apartment } from "@/types";
 
 export async function GET(req: NextRequest) {
   const db = createServerClient();
@@ -16,7 +18,8 @@ export async function GET(req: NextRequest) {
   if (!all) q = q.eq("available", true);
   const { data, error } = await q;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+  // the public list shows the size the listing itself states (the admin sees the raw rows)
+  return NextResponse.json(all ? data : ((data ?? []) as unknown as Apartment[]).map(withListedSize));
 }
 
 export async function POST(req: NextRequest) {

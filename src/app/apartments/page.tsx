@@ -1,5 +1,8 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { PUBLIC_APARTMENT_COLUMNS } from "@/lib/apartment-fields";
+import { withListedSize } from "@/lib/apartment-display";
+import { rulesWithAirbnb } from "@/lib/airbnb-calendar";
+import { fromNight } from "@/lib/intl/pricing-view";
 import type { Apartment, SkiPass } from "@/types";
 import ApartmentsClient from "./ApartmentsClient";
 import ApartmentsGuide, { apartmentsIntro } from "./ApartmentsGuide";
@@ -21,10 +24,20 @@ export default async function ApartmentsPage({ searchParams }: Props) {
       .eq("available", true).order("created_at", { ascending: false }),
     db.from("ski_passes").select("*").eq("available", true).eq("type", "adult"),
   ]);
-  const apartments = (data ?? []) as unknown as Apartment[];
+  const apartments = ((data ?? []) as unknown as Apartment[]).map(withListedSize);
+  // our apartments are priced per night from the Airbnb calendar: without dates
+  // the card shows the cheapest night of the season (as the English pages do)
+  const own = apartments.filter(a => a.source !== "la_cime");
+  const rules = await rulesWithAirbnb(db, own.map(a => a.id));
+  const today = new Date().toISOString().slice(0, 10);
+  const fromNights: Record<string, number> = {};
+  if (rules) for (const a of own) {
+    const p = fromNight(a, rules.get(a.id) ?? [], today);
+    if (p) fromNights[a.id] = Math.round(p);
+  }
   return (
     <>
-      <ApartmentsClient initialApartments={apartments} intro={apartmentsIntro()} />
+      <ApartmentsClient initialApartments={apartments} intro={apartmentsIntro()} fromNights={fromNights} />
       <ApartmentsGuide apartments={apartments} passes={(passes ?? []) as SkiPass[]} />
     </>
   );

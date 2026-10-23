@@ -54,6 +54,23 @@ export function aptDisplayName(a: AptLike) {
   return `${aptKind(a)}${who ? ` ${who}` : ""} בואל טורנס${size}${residence ? ` · ${residence}` : ""}`;
 }
 
+/**
+ * The size in m². Some agency rows carry a default (25 m² for a 4-room flat
+ * for 8) while the listing's own text says "כ-80 מ"ר": when the text states a
+ * size, that one counts (the largest one it mentions, so a balcony doesn't).
+ */
+export function aptSqm(a: Pick<Apartment, "sqm"> & { description?: string | null }): number | null {
+  const said = [...(a.description || "").matchAll(/(\d{2,3})\s*מ["״]ר/g)].map(m => Number(m[1])).filter(n => n >= 12 && n <= 300);
+  if (said.length) return Math.max(...said);
+  return a.sqm ? Number(a.sqm) : null;
+}
+
+/** the apartment with its listed size (see aptSqm), for everything that shows it */
+export function withListedSize<T extends Pick<Apartment, "sqm"> & { description?: string | null }>(a: T): T {
+  const sqm = aptSqm(a);
+  return sqm && sqm !== a.sqm ? { ...a, sqm } : a;
+}
+
 /** the cheapest week still ahead (agency apartments are rented by the week) */
 export function minWeekPrice(a: Pick<Apartment, "available_weeks">, todayISO = new Date().toISOString().slice(0, 10)) {
   const weeks = (a.available_weeks ?? []).filter(w => w.week >= todayISO && w.price > 0);

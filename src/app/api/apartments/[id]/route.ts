@@ -2,6 +2,8 @@ import { createServerClient } from "@/lib/supabase-server";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, sessionUser, isAdminUser } from "@/lib/api-auth";
 import { PUBLIC_APARTMENT_COLUMNS } from "@/lib/apartment-fields";
+import { withListedSize } from "@/lib/apartment-display";
+import type { Apartment } from "@/types";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const db = createServerClient();
@@ -10,7 +12,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const admin = req.headers.get("authorization") ? isAdminUser(await sessionUser(req)) : false;
   const { data, error } = await db.from("apartments").select(admin ? "*" : PUBLIC_APARTMENT_COLUMNS).eq("id", id).single();
   if (error) return NextResponse.json({ error: error.message }, { status: 404 });
-  return NextResponse.json(data);
+  return NextResponse.json(admin ? data : withListedSize(data as unknown as Apartment));
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

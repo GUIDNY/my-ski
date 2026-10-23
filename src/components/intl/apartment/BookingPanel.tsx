@@ -125,7 +125,8 @@ export default function BookingPanel({ lang, todayIso, apt, rules, rulesOk, from
     : agency ? b.chooseWeek
     : checkin && checkout ? b.changeDates : b.addDates;
 
-  const head = stay
+  // dates that are taken show the "from" price, not a total for a stay that can't be booked
+  const head = stay && state !== "taken"
     ? { amount: fmtEur(stay.total, lang), unit: stay.kind === "week" ? t.common.fullWeek : t.common.forNights(stay.nights), prefix: "" }
     : fromPrice !== null && (agency || rulesOk)
       ? { amount: fmtEur(fromPrice, lang), unit: agency ? t.common.perWeek : t.common.perNight, prefix: t.common.from }
@@ -256,9 +257,9 @@ export default function BookingPanel({ lang, todayIso, apt, rules, rulesOk, from
         </div>
       </section>
 
-      {/* ── phone: the price bar at the bottom ── */}
+      {/* ── phone: the price bar at the bottom (globals.css keeps the footer clear of it) ── */}
       <div className="h-[92px] lg:hidden" aria-hidden="true" />
-      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-line px-4 pt-3 flex items-center gap-3"
+      <div className="phone-price-bar lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-line px-4 pt-3 flex items-center gap-3"
         style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom))", boxShadow: "0 -8px 24px rgba(11,27,51,0.08)" }}>
         <div className="flex-1 min-w-0 leading-tight">
           {stay && state !== "taken" ? (

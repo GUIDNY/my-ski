@@ -1,4 +1,5 @@
 "use client";
+import { aptDisplayName, aptShortName, aptKind, aptParts, aptSqm, forWho } from "@/lib/apartment-display";
 import SkiLoader from "@/components/SkiLoader";
 import { Suspense, useEffect, useState, useRef } from "react";
 import type { ReactNode } from "react";
@@ -20,7 +21,7 @@ const day = (s: string) => new Date(s + "T12:00:00");
 const rangeLabel = (ci: string, co: string) => {
   const a = day(ci), b = day(co);
   return a.getMonth() === b.getMonth()
-    ? `${a.getDate()}\u2060–\u2060${b.getDate()} ב${HE_MONTHS[b.getMonth()]}` // word joiners: "16–23" never splits across lines
+    ? `\u2066${a.getDate()}\u2060–\u2060${b.getDate()}\u2069 ב${HE_MONTHS[b.getMonth()]}` // "16–23" on one line, left to right
     : `${a.getDate()} ב${HE_MONTHS[a.getMonth()]} – ${b.getDate()} ב${HE_MONTHS[b.getMonth()]}`;
 };
 /** "שבת 16.1" */
@@ -31,16 +32,12 @@ const eur = (n: number) => `€${n.toLocaleString("en-US", { maximumFractionDigi
 
 const capacity = (apt: Apartment) => apt.max_guests || apt.beds * 2 || 2;
 const isAgency = (apt: Apartment) => apt.source === "la_cime";
-/** a type worth showing next to the name ("סטודיו", "3 חדרים"), not "cozy"/"דירה" or what the name already says */
-const typeLabel = (apt: Apartment) => {
-  const t = (apt.type || "").trim();
-  return /[א-ת]/.test(t) && t !== "דירה" && !apt.name.includes(t) ? t : "";
-};
+/** under the name: size and bathrooms; agency apartments also their code (the name says the type and people) */
 const metaLine = (apt: Apartment) => [
-  typeLabel(apt),
-  apt.max_guests ? `עד ${apt.max_guests} אנשים` : "",
-  apt.sqm ? `${apt.sqm} מ"ר` : "",
+  !isAgency(apt) ? `${aptKind(apt)}${forWho(apt.max_guests) ? ` ${forWho(apt.max_guests)}` : ""}` : "",
+  aptSqm(apt) ? `${aptSqm(apt)} מ"ר` : "",
   apt.baths ? (apt.baths === 1 ? "חדר רחצה" : `${apt.baths} חדרי רחצה`) : "",
+  aptParts(apt).code ? `קוד ${aptParts(apt).code}` : "",
 ].filter(Boolean).join(" · ");
 
 type Kind = "all" | "own" | "agency";
@@ -140,7 +137,7 @@ function AptCard({ apt, nights, checkin, checkout, guests, deal, rules, badge, e
       {/* photo */}
       <div className="relative sm:w-[300px] lg:w-[320px] shrink-0 h-[210px] sm:h-auto sm:min-h-[230px] bg-soft-2 overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={apt.images?.[0] ?? "/hero-ski.jpg"} alt={apt.name} loading="lazy"
+        <img src={apt.images?.[0] ?? "/hero-ski.jpg"} alt={aptDisplayName(apt)} loading="lazy"
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
         <span className={`absolute top-3.5 right-3.5 ${badgeLight}`}>{isAgency(apt) ? "שבת עד שבת" : "דירה שלנו"}</span>
         {badge && <span className={`absolute bottom-3.5 right-3.5 ${badgeDark}`}>{badge}</span>}
@@ -149,7 +146,7 @@ function AptCard({ apt, nights, checkin, checkout, guests, deal, rules, badge, e
       {/* details + price */}
       <div className="flex-1 min-w-0 p-5 md:p-6 flex flex-col md:flex-row gap-5 justify-between">
         <div className="flex-1 min-w-0 flex flex-col gap-2">
-          <h2 className="font-display font-bold text-[21px] md:text-[23px] leading-snug text-ink">{apt.name}</h2>
+          <h2 className="font-display font-bold text-[21px] md:text-[23px] leading-snug text-ink">{aptShortName(apt)}</h2>
           <div className="text-[15px] text-muted">{metaLine(apt) || "ואל טורנס"}</div>
           {hasDates && (
             <div className="flex items-center gap-2 text-[15px] text-body">
@@ -229,14 +226,14 @@ function ComboCard({ a, b, total, cap, checkin, checkout, guests, nights }: {
     <Link href={`/combo?${query}`} className={`${card} group overflow-hidden flex flex-col sm:flex-row hover:border-line-strong transition-colors`}>
       <div className="relative sm:w-[300px] lg:w-[320px] shrink-0 h-[190px] sm:h-auto sm:min-h-[210px] flex bg-soft-2">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={a.images?.[0] ?? "/hero-ski.jpg"} alt={a.name} loading="lazy" className="w-1/2 h-full object-cover" />
+        <img src={a.images?.[0] ?? "/hero-ski.jpg"} alt={aptDisplayName(a)} loading="lazy" className="w-1/2 h-full object-cover" />
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={b.images?.[0] ?? "/hero-ski.jpg"} alt={b.name} loading="lazy" className="w-1/2 h-full object-cover border-r-2 border-white" />
+        <img src={b.images?.[0] ?? "/hero-ski.jpg"} alt={aptDisplayName(b)} loading="lazy" className="w-1/2 h-full object-cover border-r-2 border-white" />
         <span className={`absolute top-3.5 right-3.5 ${badgeDark}`}>שתי דירות יחד</span>
       </div>
       <div className="flex-1 min-w-0 p-5 md:p-6 flex flex-col md:flex-row gap-5 justify-between">
         <div className="flex-1 min-w-0 flex flex-col gap-2">
-          <h2 className="font-display font-bold text-[21px] md:text-[23px] leading-snug text-ink">{a.name} + {b.name}</h2>
+          <h2 className="font-display font-bold text-[21px] md:text-[23px] leading-snug text-ink">{aptShortName(a)} + {aptShortName(b)}</h2>
           <div className="text-[15px] text-muted">עד {cap} אנשים בשתי הדירות</div>
           {nights > 0 && (
             <div className="flex items-center gap-2 text-[15px] text-body">
@@ -384,19 +381,14 @@ function SearchPage() {
         .sort((x, y) => x.total - y.total)
     : [];
 
-  /* Cheapest single night across all apartments for the selected period
-     (La Cime apartments are priced per week, not per night, so they're
-     excluded from this "from €X / night" figure) */
-  const nightlyApts = apartments.filter(a => a.source !== "la_cime");
+  /* "From €X a night": the lowest average night among our own apartments
+     that are free for these dates and big enough for the group (agency
+     apartments are priced by the week, so they're not in this figure) */
+  const nightlyApts = fits.filter(a => a.source !== "la_cime");
   const minPrice = nightlyApts.length
     ? Math.min(...nightlyApts.map(a => {
-        const rules = rulesMap[a.id] ?? [];
         if (!checkin || !checkout || nights === 0) return Number(a.price_per_night);
-        const end = new Date(checkout + "T12:00:00");
-        let min = Infinity;
-        for (let d = new Date(checkin + "T12:00:00"); d < end; d.setDate(d.getDate() + 1))
-          min = Math.min(min, getEffectivePrice(new Date(d), Number(a.price_per_night), rules));
-        return min === Infinity ? Number(a.price_per_night) : min;
+        return Math.round(priceFor(a) / nights);
       }))
     : null;
 
@@ -556,7 +548,7 @@ function SearchPage() {
                 : shown.length === 0 ? (hasDates ? "לא מצאנו דירה מתאימה לתאריכים האלה." : "לא מצאנו דירה מתאימה.")
                 : <>
                     {shown.length === 1 ? "אפשרות אחת פנויה" : `${shown.length} אפשרויות פנויות`}{hasDates ? " לתאריכים האלה" : ""}.
-                    {minPrice !== null && <> החל מ-{eur(minPrice)} ללילה בדירות שלנו.</>}
+                    {minPrice !== null && <> החל מ-{eur(minPrice)} ללילה{nights > 0 ? " בממוצע" : ""} בדירות שלנו.</>}
                     {full && " המחיר לאדם כולל דירה, סקי פס והסעה."}
                     {full && hasDates && flight.status === "none" && " אין טיסה ישירה בתאריכים האלה."}
                   </>}

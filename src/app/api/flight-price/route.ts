@@ -173,13 +173,25 @@ export async function GET(req: NextRequest) {
     const checkedAt = new Date().toISOString();
     // Caching is best-effort — a schema mismatch (e.g. a new column not
     // existing yet) must never take down the live price response below.
+    // (supabase returns the error instead of throwing: a table without the
+    // newer columns used to fail silently, so nothing was ever cached; then
+    // the base columns are written, which the quote PDF reads)
     try {
-      await db.from("flight_price_cache")
-        .upsert({ origin, dest, checkin, checkout, price_eur: price, nonstop, url, airline, depart_time: departTime, arrive_time: arriveTime, checked_at: checkedAt }, { onConflict: "origin,dest,checkin,checkout" });
+      const row = { origin, dest, checkin, checkout, price_eur: price, nonstop, checked_at: checkedAt };
+      const { error: fullErr } = await db.from("flight_price_cache")
+        .upsert({ ...row, url, airline, depart_time: departTime, arrive_time: arriveTime }, { onConflict: "origin,dest,checkin,checkout" });
+      if (fullErr) {
+        console.error("flight-price cache write failed, retrying with the base columns:", fullErr.message);
+        const { error: baseErr } = await db.from("flight_price_cache").upsert(row, { onConflict: "origin,dest,checkin,checkout" });
+        if (baseErr) console.error("flight-price cache write failed:", baseErr.message);
+      }
     } catch (cacheErr) {
       console.error("flight-price cache write failed", cacheErr);
     }
-    return NextResponse.json({ price, nonstop, url, airline, departTime, arriveTime, checkedAt, cached: false });
+    // a direct flight found: the CDN keeps this answer for 6 hours (per dates and airport),
+    // so the next visitor gets it at once; a "no direct flight" isn't kept (the search can miss one)
+    return NextResponse.json({ price, nonstop, url, airline, departTime, arriveTime, checkedAt, cached: false },
+      nonstop ? { headers: { "Cache-Control": "public, s-maxage=21600, stale-while-revalidate=3600" } } : undefined);
   } catch (e) {
     console.error("flight-price scrape failed", e);
     // Serve stale cache rather than nothing, if we have any at all.

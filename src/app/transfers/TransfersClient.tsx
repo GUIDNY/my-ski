@@ -32,8 +32,8 @@ const fmtDate = (s: string) => { if (!s) return ""; const d = new Date(s + "T12:
 const PRICE_PER_DIRECTION = 90;
 
 const AIRPORTS = [
-  { code: "GVA", label: "Geneva (GVA)", note: "2.5 שעות נסיעה" },
-  { code: "LYS", label: "Lyon (LYS)",   note: "3 שעות נסיעה" },
+  { code: "GVA", label: "ז'נבה (GVA)", note: "כשעתיים וחצי נסיעה" },
+  { code: "LYS", label: "ליון (LYS)",   note: "כשלוש שעות נסיעה" },
 ];
 
 function isElAl(flightNum: string) {
@@ -318,7 +318,7 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
             <div key={a.code} className="bg-white border border-line rounded-[18px] p-4 flex items-center gap-3">
               <span className="w-11 h-11 rounded-xl bg-accent-soft text-accent flex items-center justify-center shrink-0"><IcoPlane /></span>
               <div>
-                <div className="font-display font-bold text-[18px] text-ink" dir="ltr">{a.label}</div>
+                <div className="font-display font-bold text-[18px] text-ink">{a.label}</div>
                 <div className="text-[14px] text-muted">{a.note}</div>
               </div>
             </div>
@@ -346,7 +346,7 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
                     className={`${optionCls(airport === a.code)} p-4 flex items-start gap-3 min-h-[72px]`}>
                     <span className={`hidden sm:inline ${airport === a.code ? "text-accent" : "text-muted"}`}><IcoPlane /></span>
                     <span className="flex flex-col">
-                      <span className="font-bold text-[16px] text-ink" dir="ltr">{a.label}</span>
+                      <span className="font-bold text-[16px] text-ink">{a.label}</span>
                       <span className="text-[14px] text-muted">{a.note}</span>
                     </span>
                   </button>
@@ -483,19 +483,19 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
                 <span className="w-10 h-10 rounded-xl bg-accent-soft text-accent flex items-center justify-center"><IcoVan /></span>
                 <div>
                   <div className="font-display font-bold text-[18px] text-ink">סיכום ההסעה</div>
-                  <div className="text-[14px] text-muted">שאטל ישיר · Val Thorens</div>
+                  <div className="text-[14px] text-muted">שאטל ישיר לואל טורנס</div>
                 </div>
               </div>
 
               <dl className="flex flex-col gap-2.5 text-[15px]">
-                <div className="flex justify-between gap-3"><dt className="text-body">שדה תעופה</dt><dd className="font-bold text-ink" dir="ltr">{airportLabel}</dd></div>
+                <div className="flex justify-between gap-3"><dt className="text-body">שדה תעופה</dt><dd className="font-bold text-ink">{airportLabel}</dd></div>
                 <div className="flex justify-between gap-3"><dt className="text-body">כיוון</dt><dd className="font-bold text-ink">{directionLabel}</dd></div>
                 <div className="flex justify-between gap-3"><dt className="text-body">נוסעים</dt><dd className="font-bold text-ink">{passengers}</dd></div>
               </dl>
 
               <div className="border-t border-line pt-4 flex flex-col gap-1">
                 <span className="text-[13px] text-muted">
-                  {quoting ? "בודקים מחיר עדכני…" : hasLivePrice ? `${directions} כיוון · מחיר חי מספק ההסעות` : `€${PRICE_PER_DIRECTION} × ${directions} כיוון × ${passengers} נוסעים`}
+                  {quoting ? "בודקים מחיר עדכני…" : hasLivePrice ? `${directions === 1 ? "כיוון אחד" : `${directions} כיוונים`} · מחיר חי מספק ההסעות` : `€${PRICE_PER_DIRECTION} × ${directions === 1 ? "כיוון אחד" : `${directions} כיוונים`} × ${passengers} נוסעים`}
                 </span>
                 <div className="flex items-baseline justify-between gap-3">
                   <span className="text-[15px] text-muted">סה״כ</span>

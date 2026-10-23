@@ -18,7 +18,7 @@ function fmtDate(d: Date) {
 /** "12–19 בדצמבר" / "27 בפברואר – 6 במרץ" */
 function fmtRange(a: Date, b: Date) {
   return a.getMonth() === b.getMonth()
-    ? `${a.getDate()}⁠–⁠${b.getDate()} ב${MONTHS_FULL[b.getMonth()]}`
+    ? `\u2066${a.getDate()}\u2060–\u2060${b.getDate()}\u2069 ב${MONTHS_FULL[b.getMonth()]}`
     : `${a.getDate()} ב${MONTHS_FULL[a.getMonth()]} – ${b.getDate()} ב${MONTHS_FULL[b.getMonth()]}`;
 }
 

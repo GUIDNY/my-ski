@@ -7,6 +7,31 @@ import GuideIcon from "../guide-icon";
 import RichText from "../rich-text";
 import { pageMeta } from "@/lib/page-meta";
 import { ORG_ID, SITE, WEBSITE_ID, VAL_THORENS, breadcrumbLd, faqLd, ldJson, siteUrl } from "@/lib/site";
+import { createServerClient } from "@/lib/supabase-server";
+
+// a guide with a live price table is rebuilt every hour
+export const revalidate = 3600;
+
+const dm = (iso: string) => { const [, m, d] = iso.split("-"); return `${Number(d)}.${Number(m)}`; };
+const dmy = (iso: string) => { const [y, m, d] = iso.split("-"); return `${Number(d)}.${Number(m)}.${y}`; };
+
+/** the cheapest open agency apartment of every Saturday ahead, as a guide table */
+async function liveWeekTable(notes: Record<string, string>): Promise<GuideTable | null> {
+  const { data } = await createServerClient().from("apartments").select("available_weeks")
+    .eq("source", "la_cime").eq("available", true);
+  const today = new Date().toISOString().slice(0, 10);
+  const mins = new Map<string, number>();
+  for (const a of (data ?? []) as { available_weeks: { week: string; price: number }[] | null }[])
+    for (const w of a.available_weeks ?? [])
+      if (w.week >= today && w.price > 0) mins.set(w.week, Math.min(mins.get(w.week) ?? Infinity, w.price));
+  if (!mins.size) return null;
+  return {
+    caption: `נכון ל-${dmy(today)}, מהדירות שעוד פנויות באתר`,
+    head: ["שבת כניסה", "החל מ-", "מה קורה"],
+    rows: [...mins.entries()].sort(([a], [b]) => a.localeCompare(b))
+      .map(([w, p]) => [`[${dm(w)}](/weekly?week=${w})`, `€${Math.round(p).toLocaleString("en-US")}`, notes[w] ?? ""]),
+  };
+}
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const fmtUpdated = (iso: string) => {
@@ -105,6 +130,14 @@ export default async function GuideArticle({ params }: { params: Promise<{ slug:
   const guideFaqLd = guide.faqs.length ? faqLd(guide.faqs.map(f => ({ q: plainText(f.q), a: plainText(f.a) }))) : null;
   const crumbsLd = breadcrumbLd([["דף הבית", "/"], ["מדריך ואל טורנס", "/guide"], [guide.title, `/guide/${guide.slug}`]]);
 
+  // live tables (prices from the open weeks), by section index
+  const live = new Map<number, GuideTable>();
+  await Promise.all(guide.sections.map(async (sec, i) => {
+    if (!sec.liveWeeks) return;
+    const t = await liveWeekTable(sec.liveWeeks.notes);
+    if (t) live.set(i, t);
+  }));
+
   // about 200 words a minute
   const words = [guide.intro, ...guide.sections.flatMap(sectionStrings), ...guide.faqs.flatMap(f => [f.q, f.a])]
     .map(plainText).join(" ").split(/\s+/).filter(Boolean).length;
@@ -127,7 +160,7 @@ export default async function GuideArticle({ params }: { params: Promise<{ slug:
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[14px] md:text-[15px] text-muted">
               {updated && <span>עודכן ב-{updated}</span>}
               {updated && <span aria-hidden="true">·</span>}
-              <span>קריאה של כ-{minutes} דקות</span>
+              <span>{minutes === 1 ? "קריאה של דקה" : `קריאה של כ-${minutes} דקות`}</span>
             </div>
           </div>
         </div>
@@ -167,6 +200,7 @@ export default async function GuideArticle({ params }: { params: Promise<{ slug:
                   </ol>
                 )}
                 {s.table && <Table table={s.table} />}
+                {live.get(i) && <Table table={live.get(i)!} />}
                 {s.after?.map((p, pi) => (
                   <p key={pi} className={paragraph}><RichText text={p} /></p>
                 ))}

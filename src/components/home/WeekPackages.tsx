@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { aptShortName, aptParts, withListedSize } from "@/lib/apartment-display";
 import { createServerClient } from "@/lib/supabase-server";
 import { takenApartmentIds } from "@/lib/inventory";
 import { rulesWithAirbnb } from "@/lib/airbnb-calendar";
@@ -18,7 +19,7 @@ const GUESTS = 4;
 const NIGHTS = 7;
 const FIRST_WEEK = "2026-12-05"; // the whole 3 Vallées area opens on 5.12.2026
 const LAST_WEEK = "2027-04-10";  // last full week before it closes on 18.4.2027 (the package has a 3V pass)
-const APT_FIELDS = "id,name,price_per_night,max_guests,beds,sqm,images,source,available_weeks,available";
+const APT_FIELDS = "id,name,type,price_per_night,max_guests,beds,sqm,images,source,available_weeks,available,description";
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 
 const iso = (d: Date) => d.toISOString().slice(0, 10);
@@ -28,7 +29,7 @@ const eur = (n: number) => `€${Math.round(n).toLocaleString("en-US")}`;
 function weekLabel(ci: string, co: string): string {
   const a = new Date(ci + "T12:00:00Z"), b = new Date(co + "T12:00:00Z");
   return a.getUTCMonth() === b.getUTCMonth()
-    ? `${a.getUTCDate()}\u2060–\u2060${b.getUTCDate()} ב${HE_MONTHS[b.getUTCMonth()]}` // "12–19" stays on one line
+    ? `\u2066${a.getUTCDate()}\u2060–\u2060${b.getUTCDate()}\u2069 ב${HE_MONTHS[b.getUTCMonth()]}` // "12–19" on one line, left to right
     : `${a.getUTCDate()} ב${HE_MONTHS[a.getUTCMonth()]} – ${b.getUTCDate()} ב${HE_MONTHS[b.getUTCMonth()]}`;
 }
 
@@ -77,12 +78,15 @@ async function loadPackages(): Promise<{ label: string; cards: Card[] } | null> 
     const { checkin, checkout, own, agency } = pick;
     const rules = await rulesWithAirbnb(db, own.map(a => a.id));
     if (!rules) return null;
-    const card = (a: Apartment, lodging: number): Card => {
+    const card = (row: Apartment, lodging: number): Card => {
+      const a = withListedSize(row);
       const total = Math.round(lodging) + GUESTS * addOnsPerPerson;
+      // the same name as on the other pages; the agency code in small print
       // (beds is the number of beds, not bedrooms, so it isn't shown here)
-      const meta = [`עד ${a.max_guests} אנשים`, a.sqm ? `${a.sqm} מ"ר` : ""].filter(Boolean).join(" · ");
+      const code = aptParts(a).code;
+      const meta = [`עד ${a.max_guests} אנשים`, a.sqm ? `${a.sqm} מ"ר` : "", code ? `קוד ${code}` : ""].filter(Boolean).join(" · ");
       return {
-        id: a.id, name: a.name, img: a.images?.[0] ?? "/hero-ski.jpg", ownApartment: a.source !== "la_cime", meta,
+        id: a.id, name: aptShortName(a), img: a.images?.[0] ?? "/hero-ski.jpg", ownApartment: a.source !== "la_cime", meta,
         // the apartment page opens with the same package (3V pass, transfer, gear) as this card's price
         href: `/apartments/${a.id}?checkin=${checkin}&checkout=${checkout}&guests=${GUESTS}&pass=trois_vallees&transfer=1&equip=1`,
         perPerson: Math.round(total / GUESTS), total,

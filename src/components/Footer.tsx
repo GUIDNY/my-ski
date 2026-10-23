@@ -2,6 +2,7 @@ import Link from "next/link";
 import OpenChatButton from "@/components/OpenChatButton";
 import { Brand } from "@/components/SiteHeader";
 import { helperWaHref } from "@/lib/helper-whatsapp";
+import FooterLangLinks from "@/components/FooterLangLinks";
 
 const VACATION = [
   { label: "חבילות", href: "/search?deal=full" },
@@ -72,13 +73,7 @@ export default function Footer() {
           <span className="flex flex-wrap items-center gap-x-4">
             <span>ישראל · צרפת</span>
             {/* the English and French site: plain links (a full page load), it has its own frame */}
-            <span dir="ltr" className="inline-flex items-center gap-1.5">
-              {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-              <a href="/en" hrefLang="en" lang="en" className="inline-flex items-center min-h-[44px] hover:text-ink transition-colors">English</a>
-              <span aria-hidden="true">·</span>
-              {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-              <a href="/fr" hrefLang="fr" lang="fr" className="inline-flex items-center min-h-[44px] hover:text-ink transition-colors">Français</a>
-            </span>
+            <FooterLangLinks />
           </span>
         </div>
       </div>

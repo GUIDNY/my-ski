@@ -139,7 +139,10 @@ export default function DateRangeCalendar({ lang, min, max, from, to, onChange }
         </div>
       </div>
       <p className="text-[14px] text-muted text-center" aria-live="polite">
-        {picking === "from" ? t.pickCheckin : t.pickCheckout}
+        {/* both days chosen: say so (a new click starts a new stay) */}
+        {from && to && picking === "from"
+          ? `${fmtDay(from, lang)} – ${fmtDay(to, lang)} · ${DICT[lang].common.nights(Math.round((Date.parse(to) - Date.parse(from)) / 864e5))}`
+          : picking === "from" ? t.pickCheckin : t.pickCheckout}
       </p>
     </div>
   );

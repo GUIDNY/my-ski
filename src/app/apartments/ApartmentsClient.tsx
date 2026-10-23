@@ -17,7 +17,7 @@ const day = (s: string) => new Date(s + "T12:00:00");
 const rangeLabel = (ci: string, co: string) => {
   const a = day(ci), b = day(co);
   return a.getMonth() === b.getMonth()
-    ? `${a.getDate()}–${b.getDate()} ב${HE_MONTHS[b.getMonth()]}`
+    ? `\u2066${a.getDate()}\u2060–\u2060${b.getDate()}\u2069 ב${HE_MONTHS[b.getMonth()]}`
     : `${a.getDate()} ב${HE_MONTHS[a.getMonth()]} – ${b.getDate()} ב${HE_MONTHS[b.getMonth()]}`;
 };
 const eur = (n: number) => `€${n.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
@@ -43,8 +43,8 @@ const IcoUsers = () => ico(<><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.
 const IcoArrow = () => ico(<path d="M19 12H5M11 6l-6 6 6 6" />, 18);
 const IcoClose = () => ico(<path d="M6 6l12 12M18 6L6 18" />, 20);
 
-function ApartmentCard({ apt, checkin, checkout, guests, rules }: {
-  apt: Apartment; checkin: string; checkout: string; guests: number; rules: PricingRule[];
+function ApartmentCard({ apt, checkin, checkout, guests, rules, fromNightPrice }: {
+  apt: Apartment; checkin: string; checkout: string; guests: number; rules: PricingRule[]; fromNightPrice?: number;
 }) {
   const nights = checkin && checkout
     ? Math.round((new Date(checkout).getTime() - new Date(checkin).getTime()) / 86400000) : 0;
@@ -117,6 +117,15 @@ function ApartmentCard({ apt, checkin, checkout, guests, rules }: {
                 </span>
                 <span className="text-[14px] text-muted">מ-{eur(minNightlyPrice)} ללילה</span>
               </>
+            ) : !isAgency(apt) && fromNightPrice ? (
+              <>
+                <span className="flex items-baseline gap-1.5">
+                  <span className="text-[14px] text-muted">מ-</span>
+                  <span className="font-display font-extrabold text-[26px] leading-none text-ink">{eur(fromNightPrice)}</span>
+                  <span className="text-[14px] text-muted">ללילה</span>
+                </span>
+                <span className="text-[14px] text-muted">לפי התאריכים</span>
+              </>
             ) : isAgency(apt) && fromWeek ? (
               <>
                 <span className="flex items-baseline gap-1.5">
@@ -170,7 +179,7 @@ function CalendarOverlay({ guests, onApply, onClose }: {
         <div className="sticky top-0 z-10 bg-white px-5 md:px-6 pt-5 pb-4 border-b border-line flex items-start justify-between gap-4">
           <div>
             <h2 id="dates-title" className="font-display font-bold text-[22px] text-ink">מתי אתם באים?</h2>
-            <p className="text-[14px] text-muted mt-0.5">עונת הסקי: דצמבר 2026 עד מאי 2027</p>
+            <p className="text-[14px] text-muted mt-0.5">עונת הסקי: 21 בנובמבר 2026 עד 2 במאי 2027</p>
           </div>
           <button type="button" onClick={onClose} aria-label="סגירה"
             className="w-11 h-11 shrink-0 flex items-center justify-center rounded-full text-muted hover:text-ink hover:bg-soft transition-colors">
@@ -197,7 +206,7 @@ function CalendarOverlay({ guests, onApply, onClose }: {
   );
 }
 
-function ApartmentsPage({ initialApartments, intro }: { initialApartments: Apartment[]; intro?: ReactNode }) {
+function ApartmentsPage({ initialApartments, intro, fromNights = {} }: { initialApartments: Apartment[]; intro?: ReactNode; fromNights?: Record<string, number> }) {
   const params   = useSearchParams();
   const router   = useRouter();
   const checkin  = params.get("checkin")  ?? "";
@@ -339,7 +348,7 @@ function ApartmentsPage({ initialApartments, intro }: { initialApartments: Apart
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
             {shown.map(apt => (
-              <ApartmentCard key={apt.id} apt={apt} checkin={checkin} checkout={checkout} guests={guests} rules={rulesMap[apt.id] ?? []} />
+              <ApartmentCard key={apt.id} apt={apt} checkin={checkin} checkout={checkout} guests={guests} rules={rulesMap[apt.id] ?? []} fromNightPrice={fromNights[apt.id]} />
             ))}
           </div>
         )}
@@ -348,10 +357,10 @@ function ApartmentsPage({ initialApartments, intro }: { initialApartments: Apart
   );
 }
 
-export default function ApartmentsClient({ initialApartments, intro }: { initialApartments: Apartment[]; intro?: ReactNode }) {
+export default function ApartmentsClient({ initialApartments, intro, fromNights }: { initialApartments: Apartment[]; intro?: ReactNode; fromNights?: Record<string, number> }) {
   return (
     <Suspense fallback={<SkiLoader />}>
-      <ApartmentsPage initialApartments={initialApartments} intro={intro} />
+      <ApartmentsPage initialApartments={initialApartments} intro={intro} fromNights={fromNights} />
     </Suspense>
   );
 }

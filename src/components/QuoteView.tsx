@@ -75,7 +75,7 @@ const rangeLabel = (ci: string, co: string) => {
   if (!ci || !co) return fmtDate(ci) || fmtDate(co);
   const a = new Date(ci + "T12:00:00"), b = new Date(co + "T12:00:00");
   return a.getMonth() === b.getMonth()
-    ? `${a.getDate()}–${b.getDate()} ב${HE_MONTHS[b.getMonth()]}`
+    ? `\u2066${a.getDate()}\u2060–\u2060${b.getDate()}\u2069 ב${HE_MONTHS[b.getMonth()]}`
     : `${a.getDate()} ב${HE_MONTHS[a.getMonth()]} – ${b.getDate()} ב${HE_MONTHS[b.getMonth()]}`;
 };
 const eur = (n: number) => `€${Math.round(n).toLocaleString()}`;

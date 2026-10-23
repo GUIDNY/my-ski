@@ -33,7 +33,7 @@ const fmtRange = (a: string | null, b: string | null) => {
   if (!a || !b) return "בלי תאריכים";
   const x = new Date(a + "T12:00:00"), y = new Date(b + "T12:00:00");
   return x.getMonth() === y.getMonth()
-    ? `${x.getDate()}–${y.getDate()} ב${HE[y.getMonth()]} ${y.getFullYear()}`
+    ? `\u2066${x.getDate()}\u2060–\u2060${y.getDate()}\u2069 ב${HE[y.getMonth()]} ${y.getFullYear()}`
     : `${x.getDate()} ב${HE[x.getMonth()]} עד ${y.getDate()} ב${HE[y.getMonth()]} ${y.getFullYear()}`;
 };
 const fmtShort = (s: string | null) => { if (!s) return ""; const d = new Date(s + "T12:00:00"); return `${d.getDate()} ב${HE[d.getMonth()]}`; };

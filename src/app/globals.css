@@ -154,3 +154,10 @@ body {
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: #f1f5f9; }
 ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
+
+/* A page with a fixed price bar at the bottom of the phone screen (the
+   English/French apartment page): the footer gets room so the bar never
+   covers its last line. */
+@media (max-width: 1023px) {
+  body:has(.phone-price-bar) footer { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+}

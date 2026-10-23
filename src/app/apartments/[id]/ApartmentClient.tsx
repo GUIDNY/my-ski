@@ -31,7 +31,7 @@ const fmtDay = (s: string) => { const d = new Date(s + "T12:00:00"); return `${H
 const fmtRange = (ci: string, co: string) => {
   const a = new Date(ci + "T12:00:00"), b = new Date(co + "T12:00:00");
   return a.getMonth() === b.getMonth()
-    ? `${a.getDate()}–${b.getDate()} ב${HE_MONTHS[b.getMonth()]}`
+    ? `\u2066${a.getDate()}\u2060–\u2060${b.getDate()}\u2069 ב${HE_MONTHS[b.getMonth()]}`
     : `${a.getDate()} ב${HE_MONTHS[a.getMonth()]} – ${b.getDate()} ב${HE_MONTHS[b.getMonth()]}`;
 };
 const isoDay = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -167,7 +167,7 @@ function Lightbox({ images, start, name, onClose }: { images: string[]; start: n
   return (
     <div dir="rtl" role="dialog" aria-modal="true" aria-label={`התמונות של ${name}`} className="fixed inset-0 z-[96] bg-ink flex flex-col">
       <div className="flex items-center justify-between px-4 md:px-6 h-16 text-white shrink-0">
-        <span className="text-[15px] font-bold">{name} · {i + 1} / {n}</span>
+        <span className="text-[15px] font-bold">{name} · <bdi dir="ltr">{i + 1} / {n}</bdi></span>
         <button type="button" onClick={onClose} aria-label="סגירה" className="w-11 h-11 rounded-full hover:bg-white/10 flex items-center justify-center"><IconX size={22} /></button>
       </div>
       <div className="relative flex-1 min-h-0 flex items-center justify-center px-2 md:px-20"
@@ -240,7 +240,7 @@ function Photos({ images, name, onOpen }: { images: string[]; name: string; onOp
         </div>
         {n > 1 && (
           <span className="absolute bottom-3 left-3 bg-ink/75 text-white text-[13px] font-bold rounded-full px-3 py-1 pointer-events-none" aria-hidden="true">
-            {idx + 1} / {n}
+            <bdi dir="ltr">{idx + 1} / {n}</bdi>
           </span>
         )}
       </div>
@@ -415,7 +415,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
   const [flight, setFlight] = useState<Flight>(EMPTY_FLIGHT);
   const [bookFlight, setBookFlight] = useState(false);   // "add the flight itself to the package" toggle
   const [bookFlightQty, setBookFlightQty] = useState(guests || 1);
-  const [baggage, setBaggage] = useState(fullDeal);
+  const [baggage, setBaggage] = useState(false);
   const [baggageQty, setBaggageQty] = useState(guests || 1);
 
   // Cancellation: "regular" (per terms) | "none" (-€100, signed) | "flexible" (+€100)
@@ -472,17 +472,9 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
   const flightOn = bookFlight && !!directFlight;
   const bagOn = baggage && flightOn;
   const returnLeg = useReturnLeg(directFlight, checkin, checkout, flightOn);
-  // The price isn't known until the live check resolves, so a package turns
-  // the flight on once, the moment a direct one is found, without fighting a
-  // customer who un-checks it afterwards.
-  const autoFlightApplied = useRef(false);
-  const directFound = !!directFlight;
-  useEffect(() => {
-    if (fullDeal && directFound && !autoFlightApplied.current) {
-      autoFlightApplied.current = true;
-      setBookFlight(true);
-    }
-  }, [fullDeal, directFound]);
+  // A direct flight is offered, never added by itself: the package price
+  // people saw on the search and weekly cards is apartment, pass and transfer,
+  // and "add the flight on the apartment page" means they choose it here.
 
   /* ── Price calculation ──────────────────────────────────── */
   const basePrice = apt?.price_per_night ?? 0;
@@ -826,7 +818,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
 
           <Section id="gear" title="ציוד">
             <OptionCard kind="check" checked={equipment} icon={<IconSkis size={20} />}
-              onSelect={() => { const v = !equipment; setEquipment(v); if (v) setEquipQty(Math.min(equipQty || 1, guests) || 1); }}
+              onSelect={() => { const v = !equipment; setEquipment(v); if (v) setEquipQty(guests || 1); }}
               title="סקי או סנובורד לכל ימי הגלישה" sub="€30 ליום, €120 לשבוע, ועוד €20 לכל יום נוסף. לאדם."
               price={skiDays > 0 ? `${eur(equipCost(skiDays))} לאדם${hasDates ? ` · ${skiDays} ימים` : ""}` : "מ-€30 לאדם"}>
               <QtyRow label="כמה אנשים צריכים ציוד?" qty={equipQty} setQty={setEquipQty} max={maxGuests} total={equipTotal} />
@@ -1052,11 +1044,9 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
         </aside>
       </div>
 
-      {/* spacer so the end of the page clears the phone booking bar */}
-      <div className="h-[92px] lg:hidden" aria-hidden="true" />
-
-      {/* ── Phone booking bar ──────────────────────────────────── */}
-      <div dir="rtl" className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-line px-4 pt-3 flex items-center gap-3"
+      {/* ── Phone booking bar: sticks to the bottom while the page is on screen,
+          and stops above the footer (so it never covers it) ── */}
+      <div dir="rtl" className="lg:hidden sticky bottom-0 z-40 bg-white border-t border-line px-4 pt-3 flex items-center gap-3"
         style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom))", boxShadow: "0 -8px 24px rgba(11,27,51,0.08)" }}>
         <div className="flex-1 min-w-0 leading-tight">
           {!hasDates ? (

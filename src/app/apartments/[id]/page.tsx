@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { createServerClient } from "@/lib/supabase-server";
 import { rulesWithAirbnb } from "@/lib/airbnb-calendar";
 import { PUBLIC_APARTMENT_COLUMNS } from "@/lib/apartment-fields";
-import { aptDisplayName, aptShortName } from "@/lib/apartment-display";
+import { aptDisplayName, aptShortName, withListedSize } from "@/lib/apartment-display";
 import { ORG_ID, VAL_THORENS, breadcrumbLd, ldJson } from "@/lib/site";
 import type { Apartment, SkiPass } from "@/types";
 import ApartmentClient from "./ApartmentClient";
@@ -29,7 +29,7 @@ export default async function ApartmentPage({ params, searchParams }: Props) {
     db.from("ski_passes").select("*").eq("available", true).order("price"),
   ]);
   if (!apt) notFound();
-  const a = apt as unknown as Apartment;
+  const a = withListedSize(apt as unknown as Apartment);
   const url = `https://skisharebook.com/apartments/${id}`;
   const name = aptDisplayName(a);
   // what the page is about, for search engines and AI answers (only facts from the listing)

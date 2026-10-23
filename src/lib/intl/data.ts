@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { aptSqm } from "@/lib/apartment-display";
 import { createServerClient } from "@/lib/supabase-server";
 import { rulesWithAirbnb } from "@/lib/airbnb-calendar";
 import { takenApartmentIds } from "@/lib/inventory";
@@ -16,7 +17,14 @@ import { isoOf } from "./format";
  * may end up in the page sent to the browser.
  */
 
-const FIELDS = "id,name,type,baths,sqm,max_guests,map_url,price_per_night,images,amenities,available,source,available_weeks";
+const FIELDS = "id,name,type,baths,sqm,max_guests,map_url,price_per_night,images,amenities,available,source,available_weeks,description";
+
+/** the size the listing's own (Hebrew) text states, then the text is dropped: it isn't shown here */
+function publicOf(row: PublicApartment & { description?: string | null }): PublicApartment {
+  const { description, ...rest } = row;
+  const sqm = aptSqm({ sqm: rest.sqm, description });
+  return sqm && sqm !== rest.sqm ? { ...rest, sqm } : rest;
+}
 
 export type PublicApartment = Pick<Apartment,
   "id" | "name" | "type" | "baths" | "sqm" | "max_guests" | "map_url" | "price_per_night"
@@ -32,7 +40,7 @@ export const getApartment = cache(async (id: string): Promise<PublicApartment | 
   if (!UUID.test(id)) return null;
   const { data, error } = await createServerClient().from("apartments").select(FIELDS).eq("id", id).maybeSingle();
   if (error) throw new Error(`apartment ${id}: ${error.message}`);
-  const apt = data as PublicApartment | null;
+  const apt = data ? publicOf(data as PublicApartment) : null;
   return apt && apt.available !== false ? apt : null;
 });
 
@@ -40,7 +48,7 @@ export const getApartment = cache(async (id: string): Promise<PublicApartment | 
 export const getApartments = cache(async (): Promise<PublicApartment[] | null> => {
   const { data, error } = await createServerClient().from("apartments").select(FIELDS)
     .eq("available", true).order("created_at", { ascending: false });
-  return error ? null : ((data ?? []) as PublicApartment[]);
+  return error ? null : ((data ?? []) as PublicApartment[]).map(publicOf);
 });
 
 /* Only what lib/pricing.ts reads, in the order /api/pricing-rules returns it

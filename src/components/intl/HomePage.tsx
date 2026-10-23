@@ -6,7 +6,13 @@ import { cardsFor } from "@/lib/intl/cards";
 import { CONTACT_EMAIL, type Lang } from "@/lib/intl/config";
 import { getApartments, getRules, todayIso } from "@/lib/intl/data";
 import { buildItems } from "@/lib/intl/items";
-import { DICT, LANG_NAMES } from "@/lib/intl/dict";
+import { DICT } from "@/lib/intl/dict";
+
+// the other languages named in this page's language ("also in Hebrew and French")
+const LANG_IN = {
+  en: { he: "Hebrew", fr: "French", en: "English" },
+  fr: { he: "hébreu", en: "anglais", fr: "français" },
+} as const;
 import { isAgencyApt } from "@/lib/intl/pricing-view";
 import { parseSearch } from "@/lib/intl/search";
 import ApartmentCard from "./ApartmentCard";
@@ -146,9 +152,9 @@ export default async function HomePage({ lang }: { lang: Lang }) {
         <p className="mt-3 text-[15px] text-muted">
           {h.alsoIn}{" "}
           {/* full page loads: each language has its own frame */}
-          <a href={others[0] === "he" ? "/" : `/${others[0]}`} hrefLang={others[0]} lang={others[0]} className="font-bold text-accent hover:text-accent-hover">{LANG_NAMES[others[0]]}</a>
+          <a href={others[0] === "he" ? "/" : `/${others[0]}`} hrefLang={others[0]} className="font-bold text-accent hover:text-accent-hover">{LANG_IN[lang][others[0]]}</a>
           {" "}{h.and}{" "}
-          <a href={others[1] === "he" ? "/" : `/${others[1]}`} hrefLang={others[1]} lang={others[1]} className="font-bold text-accent hover:text-accent-hover">{LANG_NAMES[others[1]]}</a>.
+          <a href={others[1] === "he" ? "/" : `/${others[1]}`} hrefLang={others[1]} className="font-bold text-accent hover:text-accent-hover">{LANG_IN[lang][others[1]]}</a>.
         </p>
       </section>
     </div>

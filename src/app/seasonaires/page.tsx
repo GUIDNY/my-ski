@@ -101,7 +101,7 @@ export default async function SeasonairesPage() {
   const rentals = (data ?? []) as SeasonRental[];
 
   const waContact = buildWaHref({
-    intro: "היי! 👋 אני מתעניין/ת בעונת סקי שלמה (סיזיונר) ב-Val Thorens.",
+    intro: "היי! 👋 אני מתעניין/ת בעונת סקי שלמה (סיזיונר) בואל טורנס.",
     lines: ["אשמח לקבל פרטים על דירות לטווח ארוך, סקי פס עונתי ואפשרויות עבודה."],
   });
 
@@ -121,7 +121,7 @@ export default async function SeasonairesPage() {
           </span>
           <h1 className="font-display font-extrabold text-[40px] leading-[1.08] md:text-[60px] md:leading-[1.05] tracking-tight">אזור הסיזיונרים</h1>
           <p className="text-[17px] md:text-[20px] leading-relaxed text-[#F1F5FB] max-w-[680px]">
-            הבית של מי שעושה עונה שלמה ב-Val Thorens — קהילה, לוח דירות לטווח ארוך, אירועים, עבודות ומידע. הכל במקום אחד.
+            הבית של מי שעושה עונה שלמה בואל טורנס — קהילה, לוח דירות לטווח ארוך, אירועים, עבודות ומידע. הכל במקום אחד.
           </p>
           <div className="flex flex-wrap gap-3 mt-2">
             <a href="#board" className="inline-flex items-center justify-center min-h-[52px] px-6 rounded-[14px] bg-white text-ink font-bold text-[16px] hover:bg-accent-soft transition-colors">ללוח הדירות</a>
@@ -167,7 +167,7 @@ export default async function SeasonairesPage() {
         <SectionHead title="אירועים קרובים" />
         <ComingSoon icon={<IcoParty />}
           title="אירועי קהילה בדרך"
-          desc="מפגשי סיזיונרים, ערבי אפטר-סקי, טריפים וחוויות משותפות. הצטרפו לקבוצת הוואטסאפ כדי להיות הראשונים לדעת." />
+          desc="מפגשי סיזיונרים, ערבי אפרה סקי, טריפים וחוויות משותפות. הצטרפו לקבוצת הוואטסאפ כדי להיות הראשונים לדעת." />
       </section>
 
       {/* Jobs — coming soon */}

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createServerClient } from "@/lib/supabase-server";
 import { pageMeta } from "@/lib/page-meta";
-import { aptDisplayName, aptMetaDescription, aptParts } from "@/lib/apartment-display";
+import { aptDisplayName, aptMetaDescription, aptParts, withListedSize } from "@/lib/apartment-display";
 import { alternatesFor } from "@/lib/intl/metadata";
 import type { Apartment } from "@/types";
 
@@ -11,9 +11,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const db = createServerClient();
   const { data } = await db.from("apartments")
-    .select("name, type, price_per_night, images, max_guests, sqm, source, available_weeks, available")
+    .select("name, type, price_per_night, images, max_guests, sqm, source, available_weeks, available, description")
     .eq("id", id).maybeSingle();
-  const apt = data as Pick<Apartment, "name" | "type" | "price_per_night" | "images" | "max_guests" | "sqm" | "source" | "available_weeks" | "available"> | null;
+  const row = data as Pick<Apartment, "name" | "type" | "price_per_night" | "images" | "max_guests" | "sqm" | "source" | "available_weeks" | "available" | "description"> | null;
+  const apt = row ? withListedSize(row) : null;
 
   // a wrong or removed apartment: a real 404, not an empty page with a 200
   if (!apt) notFound();
