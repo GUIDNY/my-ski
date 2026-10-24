@@ -5,8 +5,8 @@ import type { QuoteExtras } from "@/lib/quote-extras";
 import type { DirectFlight } from "@/lib/flight-format";
 
 // flat choices, the same numbers as the apartment page
-export const FLEXIBLE_EXTRA = 100;
-export const NO_CANCEL_DISCOUNT = 100;
+export const FLEXIBLE_EXTRA = 100; // per person
+export const NO_CANCEL_DISCOUNT = 100; // for the whole group
 export const AI_DISCOUNT = 50;
 
 export type QuoteLine = { key: string; label: string; sub?: string; amount: number };
@@ -73,8 +73,8 @@ export function quoteLines(i: QuoteInputs) {
     lines.push({ key: "flight", label: `טיסה ישירה הלוך וחזור ל${i.flight.city} × ${x.flight.qty}`, sub: `${i.flight.airline ? `${i.flight.airline} · ` : ""}${eur(i.flight.price)} לאדם`, amount: i.flight.price * x.flight.qty });
     if (x.bag) lines.push({ key: "bag", label: `מזוודה לבטן × ${x.bag.qty}`, sub: `הלוך וחזור · ${eur(BAGGAGE_PRICE)} לאדם`, amount: BAGGAGE_PRICE * x.bag.qty });
   }
-  if (i.cancel === "flexible") lines.push({ key: "flex", label: "ביטול גמיש", amount: FLEXIBLE_EXTRA });
-  if (i.cancel === "none") lines.push({ key: "nocancel", label: "בלי אפשרות ביטול", amount: -NO_CANCEL_DISCOUNT });
+  if (i.cancel === "flexible") lines.push({ key: "flex", label: `ביטול גמיש × ${Math.max(i.guests || 1, 1)}`, sub: `${eur(FLEXIBLE_EXTRA)} לאדם`, amount: FLEXIBLE_EXTRA * Math.max(i.guests || 1, 1) });
+  if (i.cancel === "none") lines.push({ key: "nocancel", label: "בלי אפשרות ביטול", sub: "הנחה לכל החבורה", amount: -NO_CANCEL_DISCOUNT });
   if (i.service === "ai") lines.push({ key: "ai", label: "הנחת שירות AI", amount: -AI_DISCOUNT });
 
   const total = lines.reduce((s, l) => s + l.amount, 0);

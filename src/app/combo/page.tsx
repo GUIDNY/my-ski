@@ -159,7 +159,7 @@ function ComboInner() {
   const cleaningFee = (stayA ? stayA.fee : 0) + (stayB ? stayB.fee : 0);
   const trTotal = transfer ? TRANSFER_PRICE : 0;
   const equipTotal = equipment ? equipCost(skiDays) : 0;
-  const flexExtra = cancel === "flexible" ? CANCEL_FLEX : 0;
+  const flexExtra = cancel === "flexible" ? CANCEL_FLEX * Math.max(guests || 1, 1) : 0;
   const noCancelDiscount = cancel === "none" ? -CANCEL_NONE : 0;
   const aiDiscount = service === "ai" ? -AI_DISCOUNT : 0;
   const total = totalA + totalB + trTotal + equipTotal + flexExtra + noCancelDiscount + aiDiscount;   // ski pass: price coming soon → not charged
@@ -248,7 +248,7 @@ function ComboInner() {
                 icon={<IconShield size={20} />} title="ללא אפשרות ביטול" badge={<Tag tone="danger">{`−€${CANCEL_NONE}`}</Tag>}
                 sub="מחיר מוזל, אי אפשר לבטל ואין החזר כספי" />
               <OptionCard selected={cancel === "flexible"} onSelect={() => setCancel("flexible")}
-                icon={<IconShield size={20} />} title="ביטול גמיש" badge={<Tag tone="ok">{`+€${CANCEL_FLEX}`}</Tag>}
+                icon={<IconShield size={20} />} title="ביטול גמיש" badge={<Tag tone="ok">{`+€${CANCEL_FLEX} לאדם`}</Tag>}
                 sub="80% החזר עד שבוע לפני, 50% עד 24 שעות לפני ההמראה, אחר כך אין החזר" />
             </div>
             <Link href="/terms" target="_blank" className={`${btn.link} mt-3 text-[15px]`}>למדיניות הביטולים בתקנון ←</Link>

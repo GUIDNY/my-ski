@@ -764,8 +764,8 @@ export default function QuoteView({ q }: { q: QuoteData }) {
               <h3 id="cancel-h" className="text-[17px] font-bold text-ink">מדיניות ביטול</h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <QRadio label="ביטול רגיל" sublabel="לפי התקנון, במחיר הרגיל" selected={cancel === "regular"} onClick={() => setCancel("regular")} />
-                <QRadio label="ביטול גמיש" sublabel="80% החזר עד שבוע לפני, 50% עד 24 שעות לפני" badge={`+${eur(FLEXIBLE_EXTRA)}`} selected={cancel === "flexible"} onClick={() => setCancel("flexible")} />
-                <QRadio label="בלי אפשרות ביטול" sublabel="מחיר מוזל, אבל אי אפשר לבטל ואין החזר" badge={`−${eur(NO_CANCEL_DISCOUNT)}`} badgeTone="good" selected={cancel === "none"} onClick={choiceNoCancel} />
+                <QRadio label="ביטול גמיש" sublabel="80% החזר עד שבוע לפני, 50% עד 24 שעות לפני" badge={`+${eur(FLEXIBLE_EXTRA)} לאדם`} selected={cancel === "flexible"} onClick={() => setCancel("flexible")} />
+                <QRadio label="בלי אפשרות ביטול" sublabel="מחיר מוזל, אבל אי אפשר לבטל ואין החזר" badge={`−${eur(NO_CANCEL_DISCOUNT)} לכל החבורה`} badgeTone="good" selected={cancel === "none"} onClick={choiceNoCancel} />
               </div>
             </div>
             <div role="radiogroup" aria-labelledby="service-h" className="flex flex-col gap-3">
@@ -812,7 +812,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             <div className={`${card} p-5 md:p-6`}>
               <h3 className="text-[17px] font-bold text-ink mb-3">חשוב לדעת</h3>
               <ul className="flex flex-col gap-3 text-[15px] leading-relaxed text-body">
-                <Info icon={<IconShield size={18} />} title="ביטול">רגיל לפי התקנון. ביטול גמיש (+€100): 80% החזר עד שבוע לפני, 50% עד 24 שעות לפני, ואחר כך אין החזר. בלי ביטול (−€100): אי אפשר לבטל.</Info>
+                <Info icon={<IconShield size={18} />} title="ביטול">רגיל לפי התקנון. ביטול גמיש (+€100 לאדם): 80% החזר עד שבוע לפני, 50% עד 24 שעות לפני, ואחר כך אין החזר. בלי ביטול (−€100 לכל החבורה): אי אפשר לבטל.</Info>
                 <Info icon={<IconUser size={18} />} title="שירות אנושי מלא">נציג ישראלי זמין לפני החופשה, במהלכה ואחריה.</Info>
                 <Info icon={<IconBot size={18} />} title="שירות AI (−€50)">ניהול עצמאי עם צ&apos;אטבוט, מפתחות בדלת 48 שעות לפני, איסוף עצמאי של הסקי פס, ופנייה לנציג במקרים חריגים.</Info>
                 <Info icon={<IconBus size={18} />} title="הסעה">המחיר לא קבוע ויכול להשתנות. אישור סופי עד 48 שעות לפני.</Info>

@@ -61,6 +61,20 @@ export default function SiteHeader() {
   const [showAuth, setShowAuth] = useState(false);
   const [menu, setMenu] = useState(false);
   const [menuPath, setMenuPath] = useState(pathname);
+  // phones: the header slides away while scrolling down (so it never sits on a title) and comes back on the way up
+  const [hidden, setHidden] = useState(false);
+  useEffect(() => {
+    let last = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (window.innerWidth >= 768 || y < 80) setHidden(false);
+      else if (y > last + 6) setHidden(true);
+      else if (y < last - 6) setHidden(false);
+      last = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user ?? null));
@@ -98,7 +112,7 @@ export default function SiteHeader() {
           onAuth={() => supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user ?? null))}
         />
       )}
-      <header dir="rtl" className="sticky top-0 z-50 bg-white border-b border-line">
+      <header dir="rtl" className={`sticky top-0 z-50 bg-white border-b border-line transition-transform duration-300 ${hidden && !menu ? "-translate-y-full" : ""}`}>
         <div className="max-w-[1240px] mx-auto px-4 md:px-6 h-[60px] md:h-[76px] flex items-center justify-between gap-4">
           <Link href="/" aria-label="SkiShare, לדף הבית" className="shrink-0"><Brand /></Link>
 

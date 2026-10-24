@@ -41,8 +41,8 @@ const eur = (n: number) => `€${Math.round(n).toLocaleString("en-US")}`;
 const SITE_URL = "https://skisharebook.com";
 // transfer and checked bag prices: see deal-pricing.ts
 // ski equipment rental: €30/night under a week · €120 for a week · +€20 each extra night
-const CANCEL_FLEX    = 100; // flexible cancellation surcharge (flat)
-const CANCEL_NONE    = 100; // no-cancellation discount (flat)
+const CANCEL_FLEX    = 100; // flexible cancellation surcharge, per person
+const CANCEL_NONE    = 100; // no-cancellation discount, for the whole group
 const AI_DISCOUNT    = 50;  // per person
 const FALLBACK_IMAGES = ["/apt1.jpg", "/apt2.jpg", "/apt3.jpg"];
 
@@ -513,7 +513,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
   const equipTotal      = equipment ? equipCost(skiDays) * equipQty : 0;
   const bookFlightTotal = flightOn && directFlight ? directFlight.price * bookFlightQty : 0;
   const baggageTotal    = bagOn ? BAGGAGE_PRICE * baggageQty : 0;
-  const flexExtra       = cancel  === "flexible" ? CANCEL_FLEX : 0;
+  const flexExtra       = cancel  === "flexible" ? CANCEL_FLEX * Math.max(guests || 1, 1) : 0;
   const noCancelDiscount = cancel === "none"     ? -CANCEL_NONE : 0;
   const aiDiscount      = service === "ai"       ? -AI_DISCOUNT : 0;
   const grandTotal      = aptTotal + skiTotal + trTotal + equipTotal + bookFlightTotal + baggageTotal + flexExtra + noCancelDiscount + aiDiscount;
@@ -852,9 +852,9 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
                 <OptionCard kind="radio" checked={cancel === "regular"} onSelect={() => setCancel("regular")} icon={<IconShield size={20} />}
                   title="ביטול רגיל" sub="לפי התקנון, במחיר הרגיל" />
                 <OptionCard kind="radio" checked={cancel === "none"} onSelect={() => setShowNoCancel(true)} icon={<IconShield size={20} />}
-                  title="בלי אפשרות ביטול" sub="מחיר מוזל. אי אפשר לבטל, ואין החזר כספי." price={`${eur(CANCEL_NONE)} הנחה`} />
+                  title="בלי אפשרות ביטול" sub="מחיר מוזל. אי אפשר לבטל, ואין החזר כספי." price={`${eur(CANCEL_NONE)} הנחה לכל החבורה`} />
                 <OptionCard kind="radio" checked={cancel === "flexible"} onSelect={() => setCancel("flexible")} icon={<IconShield size={20} />}
-                  title="ביטול גמיש" sub="80% החזר עד שבוע לפני, 50% עד 24 שעות לפני ההמראה, ואחר כך אין החזר." price={`תוספת ${eur(CANCEL_FLEX)}`} />
+                  title="ביטול גמיש" sub="80% החזר עד שבוע לפני, 50% עד 24 שעות לפני ההמראה, ואחר כך אין החזר." price={`תוספת ${eur(CANCEL_FLEX)} לאדם`} />
               </div>
               <a href="/terms" target="_blank" rel="noopener noreferrer" className={`${btn.link} text-[15px] w-fit`}>מדיניות הביטולים בתקנון</a>
             </div>
