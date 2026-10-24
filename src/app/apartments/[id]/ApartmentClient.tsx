@@ -377,6 +377,8 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
   const prePass     = params.get("pass");
   const preTransfer = params.get("transfer") === "1";
   const preEquip    = params.get("equip") === "1";
+  // ?flight=1: "with flight" was chosen on the search, so the direct flight is ticked once its live price loads
+  const preFlight   = params.get("flight") === "1";
   const hasDates   = !!(checkin && checkout);
 
   // the server already loaded the apartment, its prices and the ski passes
@@ -472,6 +474,13 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
   const flightOn = bookFlight && !!directFlight;
   const bagOn = baggage && flightOn;
   const returnLeg = useReturnLeg(directFlight, checkin, checkout, flightOn);
+  const preFlightDone = useRef(false);
+  useEffect(() => {
+    if (!preFlight || preFlightDone.current || !directFlight) return;
+    preFlightDone.current = true;
+    setBookFlight(true);
+    setBookFlightQty(guests || 1);
+  }, [preFlight, directFlight, guests]);
   // A direct flight is offered, never added by itself: the package price
   // people saw on the search and weekly cards is apartment, pass and transfer,
   // and "add the flight on the apartment page" means they choose it here.

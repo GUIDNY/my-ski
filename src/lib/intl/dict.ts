@@ -29,7 +29,7 @@ const en = {
     info: "Information",
     contact: "Contact",
     rights: "© 2026 SkiShare · Ski Share Ltd.",
-    countries: "Israel · France",
+    countries: "Val Thorens · France",
     languages: "Languages",
   },
   cookie: {
@@ -347,7 +347,7 @@ const fr: Dict = {
     info: "Informations",
     contact: "Contact",
     rights: "© 2026 SkiShare · Ski Share Ltd.",
-    countries: "Israël · France",
+    countries: "Val Thorens · France",
     languages: "Langues",
   },
   cookie: {

@@ -50,13 +50,15 @@ type Extras = ReturnType<typeof packageExtras>;
 /* What a full deal adds per person on top of the apartment, as a list: the
    pass that fits the dates and the transfer (real prices, in the price), and
    a direct flight only when one really exists (live price, not in the price). */
-function dealItems(extras: Extras | null, flight: DirectFlightState): { text: string; muted?: boolean; plane?: boolean }[] {
+function dealItems(extras: Extras | null, flight: DirectFlightState, flightIn = false): { text: string; muted?: boolean; plane?: boolean }[] {
   const items: { text: string; muted?: boolean; plane?: boolean }[] = [];
   if (extras?.area && extras.tier) items.push({ text: `סקי פס ${PASS_AREA_LABEL[extras.area]}, ${extras.tier.duration_days} ימים` });
   else if (!extras) items.push({ text: "סקי פס לפי התאריכים" });
   items.push({ text: "הסעה הלוך וחזור מהשדה" });
-  if (flight.status === "found" && flight.flight)
-    items.push({ text: `טיסה ישירה הלוך וחזור ל${flight.flight.city}: עוד ${eur(flight.flight.price)} לאדם, מוסיפים בעמוד הדירה`, plane: true });
+  if (flightIn && flight.status === "found" && flight.flight)
+    items.push({ text: `טיסה ישירה הלוך וחזור ל${flight.flight.city}, ${eur(flight.flight.price)} לאדם`, plane: true });
+  else if (flight.status === "found" && flight.flight)
+    items.push({ text: `טיסה ישירה הלוך וחזור ל${flight.flight.city}: עוד ${eur(flight.flight.price)} לאדם, אם בוחרים "עם טיסה ישירה"`, plane: true });
   else if (flight.status === "loading") items.push({ text: "בודקים טיסה ישירה…", muted: true, plane: true });
   return items;
 }
@@ -72,32 +74,45 @@ const IcoChat = () => ico(<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 
 const IcoArrow = () => ico(<path d="M19 12H5M11 6l-6 6 6 6" />, 18);
 const IcoPin = () => ico(<><path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z" /><circle cx="12" cy="10" r="2.5" /></>, 16);
 
-/* ── Full deal: how the flight works, said once at the top ─────
-   The package price never includes the flight. A flight is offered only
-   when a direct round trip really exists, at the live Google Flights price,
-   and the airline (not SkiShare) operates it (terms, section 5). */
-function FlightExplainer({ flight, hasDates }: { flight: DirectFlightState; hasDates: boolean }) {
+/* ── Full deal: with or without the flight ───────────────────
+   One switch at the top of the results. "With flight" adds the cheapest
+   direct round trip (live Google Flights price) to every card's price per
+   person and pre-ticks it on the apartment page (?flight=1). The airline
+   operates the flight, SkiShare only books it (terms, section 5). */
+function FlightToggle({ on, setOn, flight, hasDates }: { on: boolean; setOn: (v: boolean) => void; flight: DirectFlightState; hasDates: boolean }) {
   const f = flight.status === "found" ? flight.flight : null;
-  const status = !hasDates ? "בחרו תאריכים ונבדוק אם יש טיסה ישירה."
-    : flight.status === "loading" ? "בודקים עכשיו טיסות ישירות לתאריכים שלכם…"
-    : f ? `בתאריכים שלכם יש טיסה ישירה הלוך וחזור תל אביב ⇄ ${f.city}${f.airline ? ` (${f.airline})` : ""}: ${eur(f.price)} לאדם, נוסף על מחיר החבילה.`
-    : flight.status === "none" ? "בתאריכים שלכם אין טיסה ישירה הלוך וחזור, אז אין טיסה להוסיף. את הטיסה מזמינים לבד."
-    : "לא הצלחנו לבדוק טיסות כרגע. אפשר לכתוב לנו ונבדוק.";
+  const opt = (v: boolean, label: ReactNode) => (
+    <button type="button" aria-pressed={on === v} onClick={() => setOn(v)}
+      className={`flex-1 min-h-[42px] px-3 rounded-[11px] text-[15px] font-bold whitespace-nowrap inline-flex items-center justify-center gap-2 transition-colors ${on === v ? "bg-ink text-white shadow-sm" : "text-ink hover:bg-white"}`}>
+      {label}
+    </button>
+  );
+  const line = !on ? "המחיר לאדם: דירה, סקי פס והסעה. את הטיסה מזמינים לבד."
+    : !hasDates ? "בחרו תאריכים ונחפש טיסה ישירה."
+    : flight.status === "loading" ? "מחפשים טיסה ישירה לתאריכים שלכם…"
+    : f ? `נוספה לכל אחד טיסה ישירה הלוך וחזור, תל אביב ⇄ ${f.city}${f.airline ? `, ${f.airline}` : ""}: ${eur(f.price)} לאדם.`
+    : flight.status === "none" ? "אין טיסה ישירה בתאריכים האלה, אז המחיר בלי טיסה."
+    : "לא הצלחנו לבדוק טיסות כרגע, אז המחיר בלי טיסה.";
   return (
-    <div className="rounded-[18px] border border-line bg-soft p-4 md:p-5 flex flex-col gap-3">
-      <div className="flex items-center gap-2.5">
-        <span className="w-9 h-9 rounded-xl bg-white border border-line text-accent flex items-center justify-center shrink-0"><IcoPlane /></span>
-        <h2 className="font-display font-bold text-[18px] md:text-[20px] text-ink">ומה עם הטיסה?</h2>
+    <div className="rounded-[18px] border border-line bg-white p-3 md:p-3.5 flex flex-col gap-2.5">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-4">
+        <div className="flex gap-1 p-1 rounded-[14px] bg-soft border border-line sm:w-[340px] shrink-0" role="group" aria-label="טיסה">
+          {opt(false, "בלי טיסה")}
+          {opt(true, <><IcoPlane />עם טיסה ישירה</>)}
+        </div>
+        <p className="flex-1 text-[14px] md:text-[15px] leading-snug text-body" aria-live="polite">{line}</p>
       </div>
-      <ul className="flex flex-col gap-2 text-[15px] md:text-[16px] leading-relaxed text-body">
-        <li className="flex items-start gap-2"><span className="mt-1 shrink-0"><Check size={15} /></span><span><b className="text-ink">המחיר לאדם שאתם רואים הוא בלי טיסה:</b> דירה, סקי פס והסעה מהשדה.</span></li>
-        <li className="flex items-start gap-2"><span className="mt-1 shrink-0"><Check size={15} /></span><span><b className="text-ink">רק טיסה ישירה,</b> הלוך וחזור מתל אביב לז&apos;נבה או לליון, ורק כשיש כזו בתאריכים. בלי עצירות.</span></li>
-        <li className="flex items-start gap-2"><span className="mt-1 shrink-0"><Check size={15} /></span><span><b className="text-ink">המחיר של הטיסה הוא המחיר ב-Google Flights עכשיו,</b> לא מחיר שלנו. הוא יכול להשתנות עד שסוגרים את הכרטיסים.</span></li>
-        <li className="flex items-start gap-2"><span className="mt-1 shrink-0"><Check size={15} /></span><span><b className="text-ink">את הטיסה מפעילה חברת התעופה,</b> ואנחנו רק מתווכים. עיכוב, ביטול או כבודה מטופלים מול חברת התעופה, ואנחנו עוזרים לכם מולה.</span></li>
-        <li className="flex items-start gap-2"><span className="mt-1 shrink-0"><Check size={15} /></span><span><b className="text-ink">רוצים טיסה?</b> מסמנים אותה בעמוד הדירה, והיא נכנסת לאותו תשלום. לא רוצים? מזמינים טיסה לבד, והחבילה נשארת כמו שהיא.</span></li>
-      </ul>
-      <p className="text-[14px] md:text-[15px] font-bold text-ink border-t border-line pt-3" aria-live="polite">{status}</p>
-      <Link href="/terms" className="text-[14px] font-bold text-accent hover:text-accent-hover w-fit">טיסות בתקנון (סעיף 5)</Link>
+      {on && (
+        <details className="group px-1">
+          <summary className="cursor-pointer list-none text-[14px] font-bold text-accent hover:text-accent-hover w-fit">איך זה עובד? <span className="inline-block transition-transform group-open:rotate-180" aria-hidden="true">▾</span></summary>
+          <ul className="mt-2 flex flex-col gap-1.5 text-[14px] leading-relaxed text-body">
+            <li className="flex items-start gap-2"><span className="mt-1 shrink-0"><Check size={14} /></span>רק טיסה ישירה, בלי עצירות, לז&apos;נבה או לליון. הזולה ביותר לתאריכים שלכם.</li>
+            <li className="flex items-start gap-2"><span className="mt-1 shrink-0"><Check size={14} /></span>המחיר הוא המחיר החי ב-Google Flights, והוא יכול להשתנות עד שסוגרים את הכרטיסים.</li>
+            <li className="flex items-start gap-2"><span className="mt-1 shrink-0"><Check size={14} /></span>את הטיסה מפעילה חברת התעופה ואנחנו מתווכים: בעיכוב, ביטול או כבודה עוזרים לכם מולה. <Link href="/terms" className="font-bold text-accent">התקנון</Link></li>
+            <li className="flex items-start gap-2"><span className="mt-1 shrink-0"><Check size={14} /></span>בעמוד הדירה הטיסה כבר מסומנת, ונכנסת לאותו תשלום. אפשר להוריד אותה שם.</li>
+          </ul>
+        </details>
+      )}
     </div>
   );
 }
@@ -131,11 +146,13 @@ function DealToggle({ value, onChange }: { value: "full" | ""; onChange: (v: "fu
 }
 
 /* ── Result card ──────────────────────────────────────────── */
-function AptCard({ apt, nights, checkin, checkout, guests, deal, rules, badge, extras, flight }: {
+function AptCard({ apt, nights, checkin, checkout, guests, deal, rules, badge, extras, flight, withFlight = false }: {
   apt: Apartment; nights: number; checkin: string; checkout: string; guests: number; deal?: string;
   rules: PricingRule[]; badge?: string;
   /** full deal: what it adds per person for these dates (null before the dates or the pass prices are known) */
   extras: Extras | null; flight: DirectFlightState;
+  /** full deal with the direct flight in the price (when one was found) */
+  withFlight?: boolean;
 }) {
   const week = matchingWeek(apt, checkin, checkout);
   const total = week
@@ -153,14 +170,16 @@ function AptCard({ apt, nights, checkin, checkout, guests, deal, rules, badge, e
       min = Math.min(min, getEffectivePrice(new Date(d), apt.price_per_night, rules));
     return min === Infinity ? apt.price_per_night : min;
   })();
-  const query = new URLSearchParams({ checkin, checkout, guests: String(guests), ...(deal ? { deal } : {}) }).toString();
+  const fl = deal === "full" && withFlight && flight.status === "found" && flight.flight ? flight.flight : null;
+  const query = new URLSearchParams({ checkin, checkout, guests: String(guests), ...(deal ? { deal } : {}), ...(fl ? { flight: "1" } : {}) }).toString();
   const hasDates = !!(checkin && checkout && nights > 0);
   const full = deal === "full";
-  const included = full ? dealItems(hasDates ? extras : null, flight) : (apt.amenities ?? []).slice(0, 3).map(text => ({ text } as { text: string; muted?: boolean; plane?: boolean }));
+  const included = full ? dealItems(hasDates ? extras : null, flight, !!fl) : (apt.amenities ?? []).slice(0, 3).map(text => ({ text } as { text: string; muted?: boolean; plane?: boolean }));
   // the package for one person: their share of the apartment + the pass + the transfer
   const dealReady = full && (hasDates || !!week) && !!extras;
-  const pkgPerPerson = dealReady ? Math.round(total / guests + extras!.perPerson) : 0;
-  const pkgTotal = dealReady ? Math.round(total + extras!.perPerson * guests) : 0;
+  const flightPP = fl ? fl.price : 0;
+  const pkgPerPerson = dealReady ? Math.round(total / guests + extras!.perPerson + flightPP) : 0;
+  const pkgTotal = dealReady ? Math.round(total + (extras!.perPerson + flightPP) * guests) : 0;
 
   return (
     <Link href={`/apartments/${apt.id}?${query}`}
@@ -208,7 +227,7 @@ function AptCard({ apt, nights, checkin, checkout, guests, deal, rules, badge, e
                   <span className="text-[15px] text-muted">לאדם</span>
                 </div>
                 <span className="text-[14px] text-muted">{eur(pkgTotal)} לכל החבורה, {guests} {guests === 1 ? "אדם" : "אנשים"}</span>
-                <span className="text-[13px] text-muted">דירה, סקי פס והסעה</span>
+                <span className="text-[13px] text-muted">{fl ? "דירה, סקי פס, הסעה וטיסה" : "דירה, סקי פס והסעה"}</span>
               </>
             ) : week ? (
               <>
@@ -325,6 +344,7 @@ function SearchPage() {
   const [dealDraft,  setDealDraft]  = useState<"full" | "">(deal === "full" ? "full" : "");
   const [blockedFor, setBlockedFor] = useState<{ key: string; ids: string[] }>({ key: "", ids: [] });
   const [passes,     setPasses]     = useState<SkiPass[] | null>(null);
+  const [withFlight, setWithFlight] = useState(params.get("flight") === "1");
   const barRef       = useRef<HTMLDivElement>(null);
 
   const nights = checkin && checkout
@@ -556,7 +576,7 @@ function SearchPage() {
               <span className="font-bold text-[15px] text-ink">בדיל השלם, לכל אחד</span>
               <ul className="flex flex-col gap-1.5 text-[14px] text-body">
                 <li className="flex items-center gap-2"><Check size={15} />דירה</li>
-                {dealItems(extras, flight).map(f => (
+                {dealItems(extras, flight, withFlight).map(f => (
                   <li key={f.text} className={`flex items-start gap-2 ${f.muted ? "text-muted" : ""}`}>
                     {f.plane ? <span className="mt-0.5 shrink-0 text-accent"><IcoPlane /></span> : <span className="mt-0.5 shrink-0"><Check size={15} /></span>}
                     <span>{f.text}</span>
@@ -580,13 +600,13 @@ function SearchPage() {
                 : <>
                     {shown.length === 1 ? "אפשרות אחת פנויה" : `${shown.length} אפשרויות פנויות`}{hasDates ? " לתאריכים האלה" : ""}.
                     {minPrice !== null && <> החל מ-{eur(minPrice)} ללילה{nights > 0 ? " בממוצע" : ""} בדירות שלנו.</>}
-                    {full && " המחיר לאדם כולל דירה, סקי פס והסעה."}
+                    {full && (withFlight && flight.status === "found" ? " המחיר לאדם כולל דירה, סקי פס, הסעה וטיסה ישירה." : " המחיר לאדם כולל דירה, סקי פס והסעה.")}
                     {full && hasDates && flight.status === "none" && " אין טיסה ישירה בתאריכים האלה."}
                   </>}
             </p>
           </div>
 
-          {full && <FlightExplainer flight={flight} hasDates={hasDates} />}
+          {full && <FlightToggle on={withFlight} setOn={setWithFlight} flight={flight} hasDates={hasDates} />}
 
           {/* phone: filter chips + sort */}
           {!loading && combos.length === 0 && fits.length > 0 && (
@@ -646,7 +666,7 @@ function SearchPage() {
                 <AptCard key={apt.id} apt={apt} nights={nights}
                   checkin={checkin} checkout={checkout} guests={guests} deal={deal}
                   rules={rulesMap[apt.id] ?? []} badge={apt.id === cheapestId ? "הכי זול" : undefined}
-                  extras={extras} flight={flight} />
+                  extras={extras} flight={flight} withFlight={withFlight} />
               ))}
             </div>
           )}
