@@ -55,13 +55,14 @@ const T = {
 } as const;
 
 const NB = " ";
-const deg = (n: number) => (Number.isFinite(n) ? `${Math.round(n)}°` : "–");
+// LRM first: a minus sign stays on the left of the number in the Hebrew (RTL) page
+const deg = (n: number) => (Number.isFinite(n) ? `\u200E${Math.round(n) === 0 ? 0 : Math.round(n)}°` : "–");
 const ilDate = (iso: string) => { const [y, m, d] = iso.split("-"); return `${Number(d)}.${Number(m)}.${y}`; };
 
 function faqs(lang: L, snow7: number | null, d0?: Day) {
   const [vo, vc] = LIFT_DATES.val_thorens, [to, tc] = LIFT_DATES.trois_vallees;
   if (lang === "he") return [
-    { q: "מה התחזית לואל טורנס השבוע?", a: snow7 === null ? "התחזית מתעדכנת כאן כל חצי שעה." : `בשבעת הימים הקרובים צפויים בכפר כ-${snow7} ס"מ שלג${d0 ? `, והיום הטמפרטורה בכפר בין ${Math.round(d0.min)} ל-${Math.round(d0.max)} מעלות` : ""}. הטבלה למעלה מתעדכנת כל חצי שעה.` },
+    { q: "מה התחזית לואל טורנס השבוע?", a: snow7 === null ? "התחזית מתעדכנת כאן כל חצי שעה." : `בשבעת הימים הקרובים צפויים בכפר כ-${snow7} ס"מ שלג${d0 ? `, והיום הטמפרטורה בכפר בין \u2066${Math.round(d0.min)}\u2069 ל-\u2066${Math.round(d0.max)}\u2069 מעלות` : ""}. הטבלה למעלה מתעדכנת כל חצי שעה.` },
     { q: "כמה קר בואל טורנס בחורף?", a: "לפי Météo-France, בתחנה בכפר בינואר, החודש הקר ביותר, המינימום הממוצע הוא מינוס 10.3 מעלות והמקסימום הממוצע מינוס 2.1. בראש המעליות, בגובה 3,200 מ', קר יותר." },
     { q: "מתי נפתחת עונת הסקי בואל טורנס?", a: `המעליות של ואל טורנס ואורל פתוחות מ-${ilDate(vo)} עד ${ilDate(vc)}, ושלושת העמקים כולם מ-${ilDate(to)} עד ${ilDate(tc)}.` },
     { q: "מתי יש הכי הרבה שלג בואל טורנס?", a: "בתחנה בכפר השלג הכי עמוק מפברואר עד אפריל, בממוצע 140 עד 152 ס\"מ. ואל טורנס הוא כפר הסקי הגבוה באירופה, ולכן השלג בו מחזיק טוב גם בתחילת העונה ובסופה." },
