@@ -98,7 +98,7 @@ export default function RootLayout({
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(SITE_LD) }} />
         <SiteHeader />
         <div className="flex-1 flex flex-col">{children}</div>
-        <ChromeGate hide={["/admin", "/quote/print", "/en", "/fr", "/p"]}><Footer /></ChromeGate>
+        <ChromeGate hide={["/admin", "/quote/print", "/en", "/fr"]}><Footer /></ChromeGate>
         <DeepLinkHandler />
         <AiConcierge />
         <WhatsAppFloat />

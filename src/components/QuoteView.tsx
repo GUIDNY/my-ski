@@ -607,7 +607,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
                 );
               })}
             </div>
-            <span className="text-[13px] text-white/75">משנים כאן למטה מה כלול, והמחיר מתעדכן מיד. ההצעה בתוקף ל-14 ימים, וכפופה לזמינות.</span>
+            <span className="text-[13px] text-white/75">משנים כאן למטה מה כלול, והמחיר מתעדכן מיד.</span>
           </div>
           <div className="relative flex flex-wrap gap-2.5 w-full md:w-auto">
             <a href="#payment" className="inline-flex items-center justify-center min-h-[50px] px-6 rounded-[14px] bg-white text-[#0B1B33] font-bold text-[16px] hover:bg-[#EEF3FF] transition-colors flex-1 md:flex-none">להזמנה ולתשלום</a>
