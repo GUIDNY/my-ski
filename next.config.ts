@@ -36,6 +36,15 @@ const nextConfig: NextConfig = {
       { source: "/SearchResults", destination: "/apartments", permanent: true },
       { source: "/LongTermApartments", destination: "/seasonaires", permanent: true },
       { source: "/PersonalArea", destination: "/my", permanent: true },
+      { source: "/FlightBooking", destination: "/packages", permanent: true },
+      { source: "/FlightForm", destination: "/packages", permanent: true },
+      { source: "/EquipmentRental", destination: "/packages", permanent: true },
+      { source: "/CabinManagement", destination: "/apartments", permanent: true },
+      { source: "/BookingPayment", destination: "/apartments", permanent: true },
+      { source: "/DepositPayment", destination: "/apartments", permanent: true },
+      { source: "/ThankYou", destination: "/", permanent: true },
+      { source: "/MayrhofenInfo", destination: "/guide", permanent: true },
+      { source: "/PartyTicket", destination: "/guide/" + encodeURIComponent("אפרה-סקי-ומסעדות-בואל-טורנס"), permanent: true },
     ];
   },
   async headers() {
