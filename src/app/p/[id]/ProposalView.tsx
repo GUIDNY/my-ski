@@ -100,6 +100,7 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
   const [qty, setQty] = useState<Record<number, number>>({});   // how many people for each add-on
   const [equipQty, setEquipQty] = useState(0);
   const [openRow, setOpenRow] = useState<number | null>(null);
+  const [notMine, setNotMine] = useState<string[]>([]);  // add-ons the person paying their own share does not take
   const [busy, setBusy] = useState<string>("");
   const [payErr, setPayErr] = useState(false);
   const [pdfState, setPdfState] = useState<"" | "busy" | "link" | "error">("");
@@ -132,6 +133,16 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
   const equipNow = addEquip ? equipCost(skiDays) * Math.min(Math.max(equipQty, 1), guests) : 0;
   const total = baseTotal + lines.reduce((sum, l) => sum + nowOf(l) - l.amount, 0) + equipNow;
   const perPerson = total / guests;
+  // one person's share: the shared part (apartment, a private car, cancellation...) split equally,
+  // plus the add-ons this person takes (when only some of the group take one, each pays their own)
+  const mineItems = [
+    ...lines.filter(l => l.perHead && !off.includes(l.i) && qtyOf(l) > 0).map(l => ({ key: `l${l.i}`, label: KIND_LABEL[l.kind || ""] || l.label, unit: l.unit, qty: qtyOf(l) })),
+    ...(addEquip ? [{ key: "eq", label: "ציוד סקי", unit: equipCost(skiDays), qty: Math.min(Math.max(equipQty, 1), guests) }] : []),
+  ];
+  const sharedPer = (total - mineItems.reduce((sum, m) => sum + m.unit * m.qty, 0)) / guests;
+  const uneven = mineItems.some(m => m.qty < guests);
+  const myShare = sharedPer + mineItems.filter(m => !notMine.includes(m.key)).reduce((sum, m) => sum + m.unit, 0);
+  const myNote = uneven ? mineItems.filter(m => m.qty < guests).map(m => `${notMine.includes(m.key) ? "בלי" : "עם"} ${m.label}`).join(", ") : "";
   const changed = off.length > 0 || addEquip || lines.some(l => l.perHead && qtyOf(l) !== l.baseQty);
   const kinds = new Set(lines.filter(l => !off.includes(l.i)).map(l => l.kind).filter(Boolean) as string[]);
   if (addEquip) kinds.add("equipment");
@@ -173,7 +184,7 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
     try {
       const r = await fetch("/api/payplus/create-link", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: Math.round(amount * 100) / 100, currency, name: forName || undefined, description: `הצעה ${number || ""}${perHead ? " · לאדם" : ""}${what}`.trim() }),
+        body: JSON.stringify({ amount: Math.round(amount * 100) / 100, currency, name: forName || undefined, description: `הצעה ${number || ""}${perHead ? ` · החלק של אדם אחד${myNote ? ` (${myNote})` : ""}` : ""}${what}`.trim() }),
       });
       const j = await r.json();
       if (!r.ok || !j.url) throw new Error("no link");
@@ -184,8 +195,8 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
     ["eur", `לתשלום ביורו · ${eur(total)}`, total, "EUR", false],
     ["ils", "בשקלים, כל הסכום", total, "ILS", false],
     ...(guests > 1 ? [
-      ["pp-eur", `רק החלק שלי ביורו · ${eur(perPerson)}`, perPerson, "EUR", true] as [string, string, number, "EUR" | "ILS", boolean],
-      ["pp-ils", "רק החלק שלי בשקלים", perPerson, "ILS", true] as [string, string, number, "EUR" | "ILS", boolean],
+      ["pp-eur", `רק החלק שלי ביורו · ${eur(myShare)}`, myShare, "EUR", true] as [string, string, number, "EUR" | "ILS", boolean],
+      ["pp-ils", "רק החלק שלי בשקלים", myShare, "ILS", true] as [string, string, number, "EUR" | "ILS", boolean],
     ] : []),
   ];
 
@@ -268,7 +279,7 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
   const payPanel = (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
-        <span className="text-[15px] text-muted">המחיר לאדם</span>
+        <span className="text-[15px] text-muted">{uneven ? "המחיר לאדם, בממוצע" : "המחיר לאדם"}</span>
         <span className="font-display font-extrabold text-[40px] leading-none text-ink tabular-nums">{eur(perPerson)}</span>
         <span className="text-[15px] text-muted mt-1">סה״כ {eur(total)} ל-{guests} {guests === 1 ? "אדם" : "אנשים"}</span>
       </div>
@@ -280,6 +291,27 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
         ))}
       </ul>
       {changed && <p className="text-[13px] text-accent font-bold">המחיר עודכן לפי מה שבחרתם</p>}
+      {guests > 1 && uneven && (
+        <div className="rounded-2xl bg-soft p-4 flex flex-col gap-2.5">
+          <p className="text-[15px] font-bold text-ink">משלמים כל אחד לחוד? מה יש לך:</p>
+          {mineItems.filter(m => m.qty < guests).map(m => {
+            const on = !notMine.includes(m.key);
+            return (
+              <label key={m.key} className="flex items-center justify-between gap-3 text-[15px] text-ink cursor-pointer">
+                <span className="flex items-center gap-2.5">
+                  <input type="checkbox" checked={on} onChange={() => setNotMine(v => (on ? [...v, m.key] : v.filter(x => x !== m.key)))} className="w-5 h-5 accent-[#1652F0]" />
+                  {m.label} <span className="text-muted text-[13px]">({m.qty} מתוך {guests})</span>
+                </span>
+                <span className="tabular-nums text-muted">+{eur(m.unit)}</span>
+              </label>
+            );
+          })}
+          <div className="flex items-baseline justify-between gap-3 border-t border-line pt-2.5">
+            <span className="text-[15px] text-muted">החלק שלי</span>
+            <span className="font-display font-extrabold text-[22px] text-ink tabular-nums">{eur(myShare)}</span>
+          </div>
+        </div>
+      )}
       <div className="flex flex-col gap-2.5">
         {payOptions.map(([key, label, amount, currency, perHead], i) => (
           <button key={key} type="button" disabled={!!busy} onClick={() => pay(key, amount, currency, perHead)} className={`${i === 0 ? btn.primary : btn.outline} w-full`}>
