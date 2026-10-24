@@ -72,6 +72,36 @@ const IcoChat = () => ico(<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 
 const IcoArrow = () => ico(<path d="M19 12H5M11 6l-6 6 6 6" />, 18);
 const IcoPin = () => ico(<><path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z" /><circle cx="12" cy="10" r="2.5" /></>, 16);
 
+/* ── Full deal: how the flight works, said once at the top ─────
+   The package price never includes the flight. A flight is offered only
+   when a direct round trip really exists, at the live Google Flights price,
+   and the airline (not SkiShare) operates it (terms, section 5). */
+function FlightExplainer({ flight, hasDates }: { flight: DirectFlightState; hasDates: boolean }) {
+  const f = flight.status === "found" ? flight.flight : null;
+  const status = !hasDates ? "בחרו תאריכים ונבדוק אם יש טיסה ישירה."
+    : flight.status === "loading" ? "בודקים עכשיו טיסות ישירות לתאריכים שלכם…"
+    : f ? `בתאריכים שלכם יש טיסה ישירה הלוך וחזור תל אביב ⇄ ${f.city}${f.airline ? ` (${f.airline})` : ""}: ${eur(f.price)} לאדם, נוסף על מחיר החבילה.`
+    : flight.status === "none" ? "בתאריכים שלכם אין טיסה ישירה הלוך וחזור, אז אין טיסה להוסיף. את הטיסה מזמינים לבד."
+    : "לא הצלחנו לבדוק טיסות כרגע. אפשר לכתוב לנו ונבדוק.";
+  return (
+    <div className="rounded-[18px] border border-line bg-soft p-4 md:p-5 flex flex-col gap-3">
+      <div className="flex items-center gap-2.5">
+        <span className="w-9 h-9 rounded-xl bg-white border border-line text-accent flex items-center justify-center shrink-0"><IcoPlane /></span>
+        <h2 className="font-display font-bold text-[18px] md:text-[20px] text-ink">ומה עם הטיסה?</h2>
+      </div>
+      <ul className="flex flex-col gap-2 text-[15px] md:text-[16px] leading-relaxed text-body">
+        <li className="flex items-start gap-2"><span className="mt-1 shrink-0"><Check size={15} /></span><span><b className="text-ink">המחיר לאדם שאתם רואים הוא בלי טיסה:</b> דירה, סקי פס והסעה מהשדה.</span></li>
+        <li className="flex items-start gap-2"><span className="mt-1 shrink-0"><Check size={15} /></span><span><b className="text-ink">רק טיסה ישירה,</b> הלוך וחזור מתל אביב לז&apos;נבה או לליון, ורק כשיש כזו בתאריכים. בלי עצירות.</span></li>
+        <li className="flex items-start gap-2"><span className="mt-1 shrink-0"><Check size={15} /></span><span><b className="text-ink">המחיר של הטיסה הוא המחיר ב-Google Flights עכשיו,</b> לא מחיר שלנו. הוא יכול להשתנות עד שסוגרים את הכרטיסים.</span></li>
+        <li className="flex items-start gap-2"><span className="mt-1 shrink-0"><Check size={15} /></span><span><b className="text-ink">את הטיסה מפעילה חברת התעופה,</b> ואנחנו רק מתווכים. עיכוב, ביטול או כבודה מטופלים מול חברת התעופה, ואנחנו עוזרים לכם מולה.</span></li>
+        <li className="flex items-start gap-2"><span className="mt-1 shrink-0"><Check size={15} /></span><span><b className="text-ink">רוצים טיסה?</b> מסמנים אותה בעמוד הדירה, והיא נכנסת לאותו תשלום. לא רוצים? מזמינים טיסה לבד, והחבילה נשארת כמו שהיא.</span></li>
+      </ul>
+      <p className="text-[14px] md:text-[15px] font-bold text-ink border-t border-line pt-3" aria-live="polite">{status}</p>
+      <Link href="/terms" className="text-[14px] font-bold text-accent hover:text-accent-hover w-fit">טיסות בתקנון (סעיף 5)</Link>
+    </div>
+  );
+}
+
 /* ── Guests stepper ───────────────────────────────────────── */
 function Stepper({ value, onChange, min = 1, max = 12 }: { value: number; onChange: (n: number) => void; min?: number; max?: number }) {
   const b = "w-10 h-10 rounded-full border border-line-strong flex items-center justify-center text-ink text-[18px] leading-none hover:border-ink transition-colors disabled:opacity-40 disabled:hover:border-line-strong";
@@ -555,6 +585,8 @@ function SearchPage() {
                   </>}
             </p>
           </div>
+
+          {full && <FlightExplainer flight={flight} hasDates={hasDates} />}
 
           {/* phone: filter chips + sort */}
           {!loading && combos.length === 0 && fits.length > 0 && (

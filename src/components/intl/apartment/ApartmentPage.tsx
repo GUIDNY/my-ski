@@ -14,6 +14,7 @@ import { fromNight, fromWeek, upcomingWeeks } from "@/lib/intl/pricing-view";
 import { parseSearch } from "@/lib/intl/search";
 import Crumbs from "../Crumbs";
 import BookingPanel, { BookingFromUrl, type PanelProps } from "./BookingPanel";
+import BookingInfo, { bookingFaqLd } from "./BookingInfo";
 import Photos from "./Photos";
 import ReadMore from "./ReadMore";
 
@@ -128,7 +129,8 @@ export default async function ApartmentPage({ lang, id }: { lang: Lang; id: stri
       { "@type": "ListItem", position: 2, name: t.nav.apartments, item: `${SITE}/${lang}/apartments` },
       { "@type": "ListItem", position: 3, name: text.name, item: url },
     ],
-  }];
+  },
+  bookingFaqLd(lang, agency)];
 
   return (
     <div className="bg-white">
@@ -199,6 +201,9 @@ export default async function ApartmentPage({ lang, id }: { lang: Lang; id: stri
               <li className="flex items-start gap-2"><Check className="mt-[5px]" />{t.apt.gtkCard}</li>
             </ul>
           </section>
+
+          {/* who we are, how booking works, cancellation, FAQ: what a guest from abroad wants to know before paying */}
+          <BookingInfo lang={lang} agency={agency} />
 
           {/* the guides, for the rest of the trip */}
           <nav aria-labelledby="plan" className="flex flex-col gap-3">
