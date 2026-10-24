@@ -87,10 +87,10 @@ function FlightToggle({ on, setOn, flight, hasDates }: { on: boolean; setOn: (v:
       {label}
     </button>
   );
-  const line = !on ? "המחיר לאדם: דירה, סקי פס והסעה. את הטיסה מזמינים לבד."
+  const line: ReactNode = !on ? "המחיר לאדם: דירה, סקי פס והסעה. את הטיסה מזמינים לבד."
     : !hasDates ? "בחרו תאריכים ונחפש טיסה ישירה."
     : flight.status === "loading" ? "מחפשים טיסה ישירה לתאריכים שלכם…"
-    : f ? `נוספה לכל אחד טיסה ישירה הלוך וחזור, תל אביב ⇄ ${f.city}${f.airline ? `, ${f.airline}` : ""}: ${eur(f.price)} לאדם.`
+    : f ? <>נוספה לכל אחד טיסה ישירה הלוך וחזור ל{f.city}, <b className="text-ink">{eur(f.price)} לאדם</b>{f.airline && <> · <bdi>{f.airline}</bdi></>}.</>
     : flight.status === "none" ? "אין טיסה ישירה בתאריכים האלה, אז המחיר בלי טיסה."
     : "לא הצלחנו לבדוק טיסות כרגע, אז המחיר בלי טיסה.";
   return (
