@@ -17,6 +17,7 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: "daily" 
   { path: "/transfers", priority: 0.6, changeFrequency: "weekly" },
   { path: "/seasonaires", priority: 0.6, changeFrequency: "weekly" },
   { path: "/guide", priority: 0.9, changeFrequency: "weekly" },
+  { path: "/val-thorens-weather", priority: 0.8, changeFrequency: "daily" },
   { path: "/about", priority: 0.6, changeFrequency: "monthly" },
   { path: "/emergency-policy", priority: 0.3, changeFrequency: "monthly" },
   { path: "/cancellation-policy", priority: 0.3, changeFrequency: "monthly" },
@@ -32,6 +33,7 @@ const INTL_ROUTES: { rest: string; he: string; priority: number; changeFrequency
   { rest: "", he: "/", priority: 0.9, changeFrequency: "daily" },
   { rest: "/apartments", he: "/apartments", priority: 0.8, changeFrequency: "daily" },
   { rest: "/guide", he: "/guide", priority: 0.7, changeFrequency: "weekly" },
+  { rest: "/val-thorens-weather", he: "/val-thorens-weather", priority: 0.7, changeFrequency: "daily" },
   { rest: "/terms", he: "/terms", priority: 0.2, changeFrequency: "monthly" },
   { rest: "/privacy", he: "/privacy", priority: 0.2, changeFrequency: "monthly" },
 ];

@@ -98,7 +98,7 @@ function guideInLang(pathname: string, to: SiteLang): string | null {
 /** The Hebrew page with the same content, or null when there is none (then the Hebrew home). */
 export function hebrewEquivalent(rest: string): string | null {
   if (rest === "") return "/";
-  if (["/apartments", "/terms", "/privacy", "/pay/success", "/pay/failure", "/guide"].includes(rest)) return rest;
+  if (["/apartments", "/terms", "/privacy", "/pay/success", "/pay/failure", "/guide", "/val-thorens-weather"].includes(rest)) return rest;
   if (/^\/apartments\/[0-9a-f-]{36}$/i.test(rest)) return rest;
   return null;
 }

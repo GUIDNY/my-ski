@@ -33,6 +33,7 @@ export default function IntlFooter({ lang }: { lang: Lang }) {
             {GUIDE_PAIRS.map(p => (
               <Link key={p.key} href={`/${lang}/guide/${p[lang]}`} className={linkCls}>{t.guides.short[p.key]}</Link>
             ))}
+            <Link href={`/${lang}/val-thorens-weather`} className={linkCls}>{lang === "fr" ? "Météo Val Thorens" : "Val Thorens weather"}</Link>
             <Link href={`/${lang}/guide`} className={linkCls}>{t.guides.allLink}</Link>
           </nav>
 

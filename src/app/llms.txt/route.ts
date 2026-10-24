@@ -33,6 +33,7 @@ SkiShare (סקי שר) מוכרת חופשות סקי בואל טורנס, צר�
 - [Seasonaires](${SITE}/seasonaires): apartments for long stays (two months or more) and a community for people spending the whole season.
 - [Emergency, war and force majeure policy](${SITE}/emergency-policy): what happens with flights, apartments and ski passes if there is an emergency such as the closing of the skies.
 - [Terms and cancellations](${SITE}/terms)
+- Live Val Thorens weather forecast (10 days, village and top, snowfall, freezing level, updated every 30 minutes): [Hebrew](${SITE}/val-thorens-weather), [English](${SITE}/en/val-thorens-weather), [French](${SITE}/fr/val-thorens-weather).
 - [English](${SITE}/en) and [French](${SITE}/fr): the apartments, with booking and card payment in euros, in English and in French, and guides to Val Thorens ([English](${SITE}/en/guide), [French](${SITE}/fr/guide)).
 
 ## Guides in English
