@@ -115,6 +115,10 @@ export default function SiteHeader() {
           </nav>
 
           <div className="hidden md:flex items-center gap-2">
+            <a href={helperWaHref()} target="_blank" rel="noopener noreferrer" aria-label="דברו איתנו בוואטסאפ"
+              className="inline-flex items-center gap-2 min-h-[44px] px-4 rounded-full bg-[#25D366]/10 text-[#128C4B] text-[15px] font-bold hover:bg-[#25D366]/20 transition-colors">
+              <IcoWhatsApp /><span className="hidden xl:inline">וואטסאפ</span>
+            </a>
             {isAdmin && (
               <Link href="/admin" className="inline-flex items-center min-h-[40px] px-3.5 rounded-full bg-soft text-ink text-[14px] font-bold hover:bg-soft-2 transition-colors">ניהול</Link>
             )}

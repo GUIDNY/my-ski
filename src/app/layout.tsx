@@ -7,6 +7,7 @@ import ChromeGate from "@/components/ChromeGate";
 import CookieConsent from "@/components/CookieConsent";
 import DeepLinkHandler from "@/components/DeepLinkHandler";
 import AiConcierge from "@/components/AiConcierge";
+import WhatsAppFloat from "@/components/WhatsAppFloat";
 import { SITE_LD, ldJson } from "@/lib/site";
 
 const montserrat = Montserrat({
@@ -100,6 +101,7 @@ export default function RootLayout({
         <ChromeGate hide={["/admin", "/quote/print", "/en", "/fr"]}><Footer /></ChromeGate>
         <DeepLinkHandler />
         <AiConcierge />
+        <WhatsAppFloat />
         <CookieConsent />
       </body>
     </html>
