@@ -78,7 +78,7 @@ function BlockView({ b }: { b: ProposalBlock }) {
   }
 }
 
-export default function ProposalView({ id, data, number, clientName }: { id: string; data: ProposalData; number: string | null; clientName: string | null }) {
+export default function ProposalView({ id, data, number, clientName, pdfHref }: { id: string; data: ProposalData; number: string | null; clientName: string | null; pdfHref?: string }) {
   const [imgIdx, setImgIdx] = useState(0);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const [showBank, setShowBank] = useState(false);
@@ -109,10 +109,10 @@ export default function ProposalView({ id, data, number, clientName }: { id: str
   const kinds = new Set(lines.filter(l => !off.includes(l.i)).map(l => l.kind).filter(Boolean) as string[]);
   if (addEquip) kinds.add("equipment");
   const inc: [string, string, boolean][] = [["apartment", "דירה", true], ...(["skipass", "transfer", "equipment", "flight"] as const).map(k => [k, KIND_LABEL[k], kinds.has(k)] as [string, string, boolean])];
-  const pdf = `/api/proposals/${id}/pdf`;
+  const pdf = pdfHref || `/api/proposals/${id}/pdf`;
   const wa = `https://wa.me/972555174903?text=${encodeURIComponent(`היי, לגבי הצעת המחיר${number ? ` ${number}` : ""}${changed ? ` (שיניתי: ${[...lines.filter(l => off.includes(l.i)).map(l => "בלי " + (KIND_LABEL[l.kind || ""] || l.label)), ...(addEquip ? ["עם ציוד"] : [])].join(", ")})` : ""}: `)}`;
   const main = data.sections
-    .filter(s => s.heading !== "תנאים")
+    .filter(s => s.heading !== "תנאים" && s.heading !== "תשלום")
     .map(s => ({ heading: s.heading, blocks: s.blocks.filter(b => b.type !== "payment" && b.type !== "gallery") }))
     .filter(s => s.blocks.length);
   const terms = data.sections.find(s => s.heading === "תנאים");
