@@ -47,7 +47,7 @@ export default function WhatsAppFloat() {
       {bubble && (
         <div className="pointer-events-auto relative max-w-[250px] rounded-2xl bg-white border border-line shadow-[0_8px_30px_rgba(15,23,42,0.16)] p-3.5 pe-8 text-[14px] leading-snug text-ink animate-[fadeUp_.35s_ease-out]">
           <b className="block mb-0.5">שאלה? דברו איתנו בוואטסאפ</b>
-          <span className="text-body">עונים מיד, בעברית, ומכינים לכם הצעה מלאה תוך דקה.</span>
+          <span className="text-body">עונים מהר ומכינים לכם הצעה מלאה תוך דקה.</span>
           <button type="button" onClick={close} aria-label="סגירה"
             className="absolute top-1.5 left-1.5 w-7 h-7 rounded-full text-muted hover:bg-soft flex items-center justify-center text-[18px] leading-none">×</button>
         </div>

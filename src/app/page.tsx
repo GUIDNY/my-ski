@@ -234,7 +234,7 @@ export default function Home() {
               <img src="/helper.jpg" alt="" className="w-9 h-9 rounded-full object-cover" />
               <div>
                 <div className="font-bold">SkiShare</div>
-                <div className="text-[13px] text-[#51607A]">עוזר דיגיטלי · עונה בעברית</div>
+                <div className="text-[13px] text-[#51607A]">עוזר דיגיטלי · עונה תוך שניות</div>
               </div>
             </div>
             <div className="self-start bg-[#F1F3F7] rounded-[18px] px-3.5 py-2.5 text-[15px] md:text-[16px] max-w-[80%]">אנחנו 4, סוף ינואר לשבוע</div>

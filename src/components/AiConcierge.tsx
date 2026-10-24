@@ -337,7 +337,7 @@ export default function AiConcierge() {
                   SkiShare
                   <span className="bg-ok-soft text-ok-text text-[11px] font-extrabold rounded-full px-1.5 py-0.5 leading-none">AI</span>
                 </div>
-                <div className="text-[13px] text-muted truncate">עוזר דיגיטלי · עונה בעברית, גם בוואטסאפ</div>
+                <div className="text-[13px] text-muted truncate">עוזר דיגיטלי · עונה גם בוואטסאפ</div>
               </div>
               <a href={WA_HREF} target="_blank" rel="noopener noreferrer" title="להמשיך בוואטסאפ" aria-label="להמשיך בוואטסאפ"
                 className="w-10 h-10 flex items-center justify-center rounded-full text-[#128C4B] hover:bg-ok-soft transition-colors">
