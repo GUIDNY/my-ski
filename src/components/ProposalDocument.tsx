@@ -111,6 +111,11 @@ export const PROPOSAL_CSS = `
 }
 `;
 
+/* an arrow drawn as SVG: the PDF browser on the server has no font with "←" */
+const Arrow = () => (
+  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ verticalAlign: "-1px", marginInlineStart: "1.5mm" }}><path d="M19 12H5M11 6l-6 6 6 6" /></svg>
+);
+
 function Block({ block }: { block: ProposalBlock }) {
   switch (block.type) {
     case "banner":
@@ -139,7 +144,7 @@ function Block({ block }: { block: ProposalBlock }) {
       const dir = block.direction === "return" ? "טיסת חזור" : "טיסת הלוך";
       return (
         <>
-          <div className="route">{dir}{block.date ? ` — ${block.date}` : ""}{block.from || block.to ? `  ·  ${block.from} ← ${block.to}` : ""}</div>
+          <div className="route">{dir}{block.date ? ` — ${block.date}` : ""}{block.from || block.to ? `  ·  ${block.from} – ${block.to}` : ""}</div>
           <table className="flt"><tbody>
             {block.airline && <tr><td className="k">חברת תעופה</td><td className="v">{block.airline}</td></tr>}
             {block.depart && <tr><td className="k">שעת המראה</td><td className="v">{block.depart}</td></tr>}
@@ -147,7 +152,7 @@ function Block({ block }: { block: ProposalBlock }) {
             <tr><td className="k">סוג טיסה</td><td className="v">{block.nonstop ? "ישירה" : "עם עצירה"}</td></tr>
             {block.price && <tr><td className="k">מחיר</td><td className="v">{block.price}</td></tr>}
           </tbody></table>
-          {block.link && <a className="flight-link" href={block.link} target="_blank" rel="noopener noreferrer">צפייה בטיסה ←</a>}
+          {block.link && <a className="flight-link" href={block.link} target="_blank" rel="noopener noreferrer">צפייה בטיסה <Arrow /></a>}
         </>
       );
     }
@@ -175,7 +180,7 @@ function Block({ block }: { block: ProposalBlock }) {
       );
     case "payment":
       return block.url ? (
-        <a className="pay-btn" href={block.url} target="_blank" rel="noopener noreferrer">{block.label || "לתשלום מאובטח ←"}</a>
+        <a className="pay-btn" href={block.url} target="_blank" rel="noopener noreferrer">{(block.label || "לתשלום מאובטח").replace(/\s*[←→]\s*/g, " ").trim()} <Arrow /></a>
       ) : null;
     default:
       return null;
@@ -253,6 +258,7 @@ export const COVER_CSS = `
   .proposal .pc-hero { height:72vw; min-height:62mm; }
   .proposal .pc-top { top:5mm; right:5mm; left:5mm; } .proposal .pc-title { right:5mm; left:5mm; bottom:5mm; }
   .proposal .pc-title h1 { font-size:21pt; }
+  .proposal .pc-tag { display:none; }
   .proposal .pc-price { flex-direction:column; } .proposal .pc-pp .v { font-size:32pt; }
   .proposal .pc-inc { grid-template-columns:repeat(3,1fr); }
   .proposal .pc-foot { flex-wrap:wrap; } .proposal .pc-trust { width:100%; }
@@ -374,7 +380,7 @@ function Cover({ data, link }: { data: ProposalData; link?: string }) {
           <div className="pc-cta">
             <b>{url ? "סורקים או לוחצים, וההצעה פתוחה" : "רוצים לסגור?"}</b>
             <p>{url ? "שם בודקים את הכל, משלמים באתר, וכל אחד מהחבורה יכול לשלם את החלק שלו." : "כתבו לנו בוואטסאפ ונסגור את הכל."}</p>
-            {url && <a className="pc-btn" href={url}>לפתוח את ההצעה באתר ←</a>}
+            {url && <a className="pc-btn" href={url}>לפתוח את ההצעה באתר <Arrow /></a>}
             <p className="pc-valid">{h.validUntil ? `ההצעה בתוקף עד ${h.validUntil}, וכפופה לזמינות.` : "ההצעה בתוקף ל-14 ימים, וכפופה לזמינות."}</p>
           </div>
           <div className="pc-trust">
@@ -401,7 +407,7 @@ function PayCard({ data, link }: { data: ProposalData; link?: string }) {
             {url && <a className="pc-qr" href={url}><Qr text={url} /></a>}
             <p className="note" style={{ margin: 0 }}>עד 3 תשלומים בלי ריבית, וכל אחד מהחבורה משלם את החלק שלו בקישור משלו. בכרטיס נוספת עמלת סליקה של 1.9%.</p>
           </div>
-          {url && <a className="pc-btn" href={url} style={{ marginTop: "3mm" }}>להזמנה ולתשלום באתר ←</a>}
+          {url && <a className="pc-btn" href={url} style={{ marginTop: "3mm" }}>להזמנה ולתשלום באתר <Arrow /></a>}
         </div>
         <div>
           <h4>בהעברה בנקאית, בלי עמלה</h4>
