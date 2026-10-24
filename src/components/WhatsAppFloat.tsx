@@ -11,9 +11,9 @@ import { helperWaHref } from "@/lib/helper-whatsapp";
  * pages with a sticky price or pay bar at the bottom.
  */
 
-const HIDE = ["/admin", "/quote/print", "/en", "/fr", "/auth"];
+const HIDE = ["/admin", "/quote/print", "/en", "/fr", "/auth", "/p"];
 // pages with their own sticky bar at the bottom of a phone screen
-const PHONE_HIDE = [/^\/apartments\/[^/]+/, /^\/pay\//, /^\/split\//, /^\/q\//, /^\/offer\//];
+const PHONE_HIDE = [/^\/apartments\/[^/]+/, /^\/pay\//, /^\/split\//, /^\/q\//, /^\/offer\//, /^\/quote/, /^\/book/, /^\/combo/];
 const SEEN_KEY = "skishare-wa-bubble";
 
 const IcoWa = ({ size = 26 }: { size?: number }) => (

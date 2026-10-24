@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import SearchWidget from "@/components/SearchWidget";
 import OpenChatButton from "@/components/OpenChatButton";
+import AppPromo from "@/components/home/AppPromo";
 import WeekPackages, { WeekPackagesSkeleton } from "@/components/home/WeekPackages";
 import { helperWaHref } from "@/lib/helper-whatsapp";
 import { pageMeta } from "@/lib/page-meta";
@@ -250,6 +251,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ── The app (website only: hidden inside the app) ── */}
+      <AppPromo />
 
       {/* ── FAQ ──────────────────────────────────────────── */}
       <section className="max-w-[920px] mx-auto px-5 md:px-6 py-16 md:py-24">

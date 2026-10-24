@@ -1,4 +1,5 @@
 "use client";
+import { BANK } from "@/lib/bank";
 import SkiLoader from "@/components/SkiLoader";
 import { Suspense, useEffect, useState, useSyncExternalStore } from "react";
 import { useParams } from "next/navigation";
@@ -44,15 +45,10 @@ function OfferPage() {
 
   if (!apt) return <QuoteNotFound />;
 
-  const bankDetails = {
-    bank: process.env.NEXT_PUBLIC_BANK_NAME || "בנק הפועלים",
-    iban: process.env.NEXT_PUBLIC_BANK_IBAN || "IL62012673000000026026",
-    account: process.env.NEXT_PUBLIC_BANK_ACCOUNT || "SKISHARE - GUINDY IDAN AND MIZRAHI AMIT",
-    swift: process.env.NEXT_PUBLIC_BANK_SWIFT || "POALILIT",
-  };
+  const bankDetails = { bank: BANK.name, iban: BANK.iban, account: BANK.holder, swift: BANK.swift };
 
   const amenityIcon = (a: string) => AMENITY_ICONS[a] ?? <IconCheck size={18} />;
-  const imgs = apt.images?.length ? apt.images : ["/view.jpg", "/chalet-interior.jpg", "/hero-ski.jpg"];
+  const imgs = apt.images?.length ? apt.images : ["/view.jpg", "/chalet-interior.jpg"];
   const mapHref = mapLink(apt.map_url);
   const facts = [
     apt.max_guests ? { v: `עד ${apt.max_guests}`, l: "אנשים" } : null,

@@ -19,7 +19,7 @@ type Answer = {
 
 // admin/auth/checkout screens don't need the customer-facing chat launcher;
 // the English and French site (/en, /fr) has no Hebrew chat
-const HIDDEN = ["/admin", "/auth", "/pay", "/quote", "/q", "/en", "/fr"];
+const HIDDEN = ["/admin", "/auth", "/pay", "/quote", "/q", "/p", "/en", "/fr"];
 
 const WELCOME: Message[] = [
   { role: "assistant", text: "היי, כאן SkiShare" },
@@ -363,12 +363,15 @@ export default function AiConcierge() {
                 const row = `flex ${mine ? "justify-start" : "justify-end"}`;
                 if (m.link) return (
                   <div key={i} className={row}>
-                    <a href={m.link} target="_blank" rel="noopener noreferrer"
+                    {/* a bot quote opens as a page (/p/<id>), with the PDF one tap away there */}
+                    <a href={m.link.replace(/\/api\/proposals\/([0-9a-f-]{36})\/pdf$/i, "/p/$1")} target="_blank" rel="noopener noreferrer"
                       className="max-w-[85%] flex items-center gap-3 rounded-2xl border border-line bg-white px-3.5 py-3 hover:border-accent transition-colors">
-                      <span className="w-10 h-10 shrink-0 rounded-xl bg-danger-soft text-danger text-[11px] font-extrabold flex items-center justify-center">PDF</span>
+                      <span className="w-10 h-10 shrink-0 rounded-xl bg-accent text-white flex items-center justify-center" aria-hidden="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 20 9.5 9l3.5 5.5L15 11l6 9z" /><circle cx="17" cy="5" r="1.6" /></svg>
+                      </span>
                       <span className="min-w-0">
                         <span className="block text-[15px] font-bold text-ink">הצעת המחיר שלכם</span>
-                        <span className="block text-[13px] text-muted">כל הפרטים וקישורי תשלום · לפתיחה</span>
+                        <span className="block text-[13px] text-muted">מחיר, מה כלול, תשלום ו-PDF · לפתיחה</span>
                       </span>
                     </a>
                   </div>

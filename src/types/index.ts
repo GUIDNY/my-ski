@@ -107,6 +107,25 @@ export type ProposalData = {
   intro: string;
   sections: ProposalSection[];
   signature?: { heading: string; text: string; fields: string[] };
+  /** the cover page of a quote (optional; read from the sections when missing) */
+  hero?: ProposalHero;
+};
+
+export type ProposalHero = {
+  image?: string;
+  /** e.g. "€481" */
+  perPerson?: string;
+  /** e.g. "€1,922" */
+  total?: string;
+  guests?: number;
+  /** short facts: dates, nights, people */
+  chips?: string[];
+  /** what's in the price: apartment, skipass, transfer, equipment, flight */
+  included?: ("apartment" | "skipass" | "transfer" | "equipment" | "flight")[];
+  /** the link the QR code and the pay button open */
+  payUrl?: string;
+  /** e.g. "7.11.2026" */
+  validUntil?: string;
 };
 
 export type ProposalStatus = "draft" | "sent" | "accepted" | "expired";

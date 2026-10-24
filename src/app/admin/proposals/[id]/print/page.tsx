@@ -34,7 +34,7 @@ export default function ProposalPrintPage() {
             הדפסה / שמירה כ-PDF
           </button>
         </div>
-        <ProposalDocument data={data} />
+        <ProposalDocument data={data} link={isDemo ? undefined : `https://skisharebook.com/p/${id}`} />
       </div>
     </>
   );

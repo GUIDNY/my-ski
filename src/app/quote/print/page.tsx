@@ -137,14 +137,27 @@ export default async function QuotePrintPage({ searchParams }: { searchParams: P
   sections.push({
     heading: "תשלום",
     blocks: [
-      { type: "text", text: "אפשר לשלם באתר בכרטיס אשראי, עד 3 תשלומים בלי ריבית, וכל אחד מהחבורה יכול לשלם את החלק שלו. בהעברה בנקאית אין עמלה (דברו איתנו)." },
+      { type: "text", text: "אפשר לשלם באתר בכרטיס אשראי, עד 3 תשלומים בלי ריבית, וכל אחד מהחבורה יכול לשלם את החלק שלו. בהעברה בנקאית אין עמלה (הפרטים למטה)." },
       { type: "payment", label: "להזמנה ולתשלום באתר", url: payUrl },
     ],
   });
 
+  const keys = new Set(calc.lines.map(l => l.key));
+  const valid = new Date(today.getTime() + 14 * 86400000);
+  const dm = (iso: string) => { const d = new Date(iso + "T12:00:00"); return `${d.getDate()}.${d.getMonth() + 1}`; };
   const data: ProposalData = {
+    hero: {
+      image: a.images?.[0],
+      perPerson: eur(calc.perPerson),
+      total: eur(calc.total),
+      guests,
+      chips: [`${dm(checkin)} עד ${dm(checkout)}`, calc.weekly ? "שבוע שלם, שבת עד שבת" : `${calc.nights} לילות`, `${guests} ${guests === 1 ? "אדם" : "אנשים"}`, ...(a.sqm ? [`${a.sqm} מ"ר`] : [])],
+      included: (["apartment", "skipass", "transfer", "equipment", "flight"] as const).filter(k => k === "apartment" || keys.has(({ skipass: "pass", transfer: "transfer", equipment: "equipment", flight: "flight" } as Record<string, string>)[k])),
+      payUrl,
+      validUntil: `${valid.getDate()}.${valid.getMonth() + 1}.${valid.getFullYear()}`,
+    },
     title: a.name,
-    subtitle: `ואל טורנס · ${calc.weekly ? "שבוע שלם" : `${calc.nights} לילות`} · ${guests} ${guests === 1 ? "אדם" : "אנשים"}${quoteId ? ` · הצעה ${quoteId}` : ""}`,
+    subtitle: `ואל טורנס · ${calc.weekly ? "שבוע שלם" : `${calc.nights} לילות`} · ${guests} ${guests === 1 ? "אדם" : "אנשים"}${quoteId ? ` · הצעה \u2068${quoteId}\u2069` : ""}`,
     intro: `הצעת מחיר אישית לחופשה בואל טורנס, ${longDate(checkin)} עד ${longDate(checkout)}. כל המחירים באירו, לפי מה שבחרתם באתר.`,
     sections,
   };
