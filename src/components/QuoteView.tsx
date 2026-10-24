@@ -113,6 +113,66 @@ export function mapLink(mapUrl?: string | null): string | null {
 }
 
 /** "−  2  +" for how many people need an add-on. */
+const ilDate = (iso: string) => { const [y, m, d] = iso.split("-"); return `${Number(d)}.${Number(m)}.${y}`; };
+
+/** label / value rows in one white card (the look of the bots' quotes) */
+function SumRows({ rows }: { rows: [string, string][] }) {
+  return (
+    <dl className={`${card} divide-y divide-line`}>
+      {rows.map(([k, v]) => (
+        <div key={k} className="flex items-start justify-between gap-4 px-4 md:px-5 py-3">
+          <dt className="text-[15px] text-muted">{k}</dt>
+          <dd className="text-[15px] font-bold text-ink text-left">{v}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+function Switch({ on, onClick, label, disabled }: { on: boolean; onClick: () => void; label: string; disabled?: boolean }) {
+  return (
+    <button type="button" role="switch" aria-checked={on} aria-label={label} onClick={onClick} disabled={disabled}
+      className={`relative shrink-0 w-[46px] h-[28px] rounded-full transition-colors disabled:opacity-40 ${on ? "bg-accent" : "bg-line-strong"}`}>
+      <span className={`absolute top-[3px] w-[22px] h-[22px] rounded-full bg-white shadow transition-[right] ${on ? "right-[3px]" : "right-[21px]"}`} />
+    </button>
+  );
+}
+
+/** one line of the price: title, detail, amount and (for add-ons) a switch */
+function LineRow({ title, sub, amount, on, onToggle, disabled, children }: {
+  title: string; sub?: string; amount: string; on?: boolean; onToggle?: () => void; disabled?: boolean; children?: React.ReactNode;
+}) {
+  const off = onToggle && !on;
+  return (
+    <div className="px-4 md:px-5 py-3.5">
+      <div className="flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <p className={`text-[15px] md:text-[16px] font-bold ${off ? "text-muted" : "text-ink"}`}>{title}</p>
+          {sub && <p className="text-[13px] md:text-[14px] text-muted mt-0.5">{sub}</p>}
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          {amount && <span className={`text-[15px] md:text-[16px] font-bold tabular-nums ${off ? "text-muted" : "text-ink"}`}>{amount}</span>}
+          {onToggle && <Switch on={!!on} onClick={onToggle} disabled={disabled} label={`${title}: ${on ? "להוריד" : "להוסיף"}`} />}
+        </div>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function MiniQty({ label, qty, setQty, max }: { label: string; qty: number; setQty: (fn: (n: number) => number) => void; max: number }) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <span className="text-[14px] text-muted">{label}</span>
+      <button type="button" onClick={() => setQty(n => Math.max(1, n - 1))} disabled={qty <= 1} aria-label="פחות"
+        className="w-9 h-9 rounded-full border border-line-strong bg-white text-ink text-[18px] leading-none disabled:opacity-40">−</button>
+      <span className="font-bold text-[16px] text-ink w-5 text-center tabular-nums" aria-live="polite">{qty}</span>
+      <button type="button" onClick={() => setQty(n => Math.min(max, n + 1))} disabled={qty >= max} aria-label="עוד"
+        className="w-9 h-9 rounded-full border border-line-strong bg-white text-ink text-[18px] leading-none disabled:opacity-40">+</button>
+    </div>
+  );
+}
+
 function QStep({ show, label, qty, setQty, max, total }: {
   show: boolean; label: string; qty: number; setQty: (n: number) => void; max: number; total: number;
 }) {
@@ -588,136 +648,118 @@ export default function QuoteView({ q }: { q: QuoteData }) {
       <div className={`${wrap} pt-7 md:pt-9 pb-10 lg:pb-24 flex flex-col lg:flex-row gap-9 items-start`}>
         {/* ── the offer ── */}
         <div className="w-full lg:flex-1 min-w-0 flex flex-col gap-10">
-          <nav aria-label="חלקי ההצעה" className="flex gap-2 overflow-x-auto border-b border-line pb-3 -mx-4 px-4 md:mx-0 md:px-0">
-            {[["#stay", "הדירה"], ["#extras", "תוספות"], ["#choices", "ביטול ושירות"], ["#payment", "תשלום"]].map(([href, label]) => (
-              <a key={href} href={href} className="shrink-0 inline-flex items-center min-h-[44px] px-4 rounded-full border border-line text-[15px] font-medium text-ink hover:border-ink transition-colors">{label}</a>
-            ))}
-          </nav>
+          {/* the trip at a glance (the same look as the quotes the bots send) */}
+          <section className="flex flex-col gap-4">
+            <h2 className="font-display font-bold text-[22px] md:text-[26px] tracking-tight text-ink">סיכום החופשה</h2>
+            <SumRows rows={[
+              ["יעד", "ואל טורנס, צרפת"],
+              ...(checkin && checkout ? [["תאריכים", `${ilDate(checkin)} עד ${ilDate(checkout)}`] as [string, string]] : []),
+              ["משך החופשה", `${nights} לילות`],
+              ["מספר אורחים", String(guests)],
+              ["לינה", apartment],
+              ["סקי פס", passEff ? `כלול, ${passQty} ${passArea === "trois_vallees" ? "שלושת העמקים" : "ואל טורנס"}` : "לא כלול"],
+              ["הסעה מהשדה", transferOn ? `כלולה, ${transferQty} אנשים` : "לא כלולה"],
+              ["ציוד סקי/סנובורד", picked.equipment ? `כלול, ${equipQty} סטים` : "לא כלול"],
+              ["טיסות", flightEff ? `כלולות, ${flightQty} אנשים` : "לא כלולות"],
+            ]} />
+          </section>
 
           {/* the apartment */}
           <section id="stay" className="flex flex-col gap-4" aria-labelledby="stay-h">
-            <h2 id="stay-h" className={h2}>הדירה</h2>
+            <h2 id="stay-h" className="font-display font-bold text-[22px] md:text-[26px] tracking-tight text-ink">על הדירה · {apartment}</h2>
+            {apt && (
+              <SumRows rows={[
+                ...(apt.beds ? [["חדרי שינה", String(apt.beds)] as [string, string]] : []),
+                ...(apt.baths ? [["חדרי רחצה", String(apt.baths)] as [string, string]] : []),
+                ...(apt.sqm ? [["גודל", `${apt.sqm} מ"ר`] as [string, string]] : []),
+                ...(apt.max_guests ? [["תפוסה מקסימלית", `${apt.max_guests} אורחים`] as [string, string]] : []),
+              ]} />
+            )}
             {apt?.description ? (
               <div>
-                <p className={`text-[16px] md:text-[17px] leading-[1.7] text-body whitespace-pre-line ${showDesc ? "" : "line-clamp-4"}`}>{apt.description}</p>
-                {apt.description.length > 220 && (
+                <p className={`text-[16px] leading-[1.75] text-body whitespace-pre-line ${showDesc ? "" : "line-clamp-6"}`}>{apt.description}</p>
+                {apt.description.length > 300 && (
                   <button type="button" onClick={() => setShowDesc(v => !v)} className={`${btn.link} mt-2 min-h-[44px]`}>{showDesc ? "להציג פחות" : "לקרוא עוד"}</button>
                 )}
               </div>
             ) : (
-              <p className="text-[16px] md:text-[17px] leading-[1.7] text-body">דירה בואל טורנס, הכפר הגבוה באירופה: 2,300 מטר, עם גישה ל-600 ק&quot;מ מסלולים של שלושת העמקים.</p>
+              <p className="text-[16px] leading-[1.75] text-body">דירה בואל טורנס, הכפר הגבוה באירופה: 2,300 מטר, עם גישה ל-600 ק&quot;מ מסלולים של שלושת העמקים.</p>
             )}
-            {apt && (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {[
-                  apt.max_guests ? { v: `עד ${apt.max_guests}`, l: "אנשים" } : null,
-                  apt.baths ? { v: String(apt.baths), l: apt.baths === 1 ? "חדר רחצה" : "חדרי רחצה" } : null,
-                  apt.sqm ? { v: `${apt.sqm} מ"ר`, l: "גודל" } : null,
-                ].filter((x): x is { v: string; l: string } => !!x).map(f => (
-                  <div key={f.l} className="border border-line rounded-2xl p-3.5">
-                    <div className="font-display font-bold text-[18px] text-ink">{f.v}</div>
-                    <div className="text-[14px] text-muted">{f.l}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-            {mapHref ? (
-              <a href={mapHref} target="_blank" rel="noopener noreferrer"
-                className="flex items-center justify-between gap-3 rounded-2xl border border-line px-4 py-3.5 min-h-[56px] hover:border-ink transition-colors">
-                <span className="flex items-center gap-2.5 font-bold text-[15px] text-ink"><span className="text-accent"><IcoPin /></span>ואל טורנס, צרפת</span>
-                <span className="text-[14px] font-bold text-accent">לפתוח במפה ‹</span>
-              </a>
-            ) : (
-              <div className="flex items-start gap-2.5 rounded-2xl bg-soft px-4 py-3.5 text-[15px] text-body">
-                <span className="text-accent mt-0.5"><IconMountain size={18} /></span>
-                <span><b className="text-ink">ואל טורנס, צרפת.</b> הכפר הגבוה באירופה, 2,300 מטר, עם גישה ישירה ל-600 ק&quot;מ מסלולים.</span>
-              </div>
+            {mapHref && (
+              <a href={mapHref} target="_blank" rel="noopener noreferrer" className={`${btn.link} self-start min-h-[44px]`}><span className="text-accent"><IcoPin /></span>המיקום במפה ‹</a>
             )}
           </section>
 
-          {/* add-ons */}
-          <section id="extras" className="flex flex-col gap-7" aria-labelledby="extras-h">
-            <div className="flex flex-col gap-1.5">
-              <h2 id="extras-h" className={h2}>תוספות</h2>
-              <p className="text-[15px] md:text-[16px] text-muted">מוסיפים מה שצריך, והמחיר מתעדכן מיד.</p>
+          {/* the price, line by line: switches to take things out or add them */}
+          <section id="extras" className="flex flex-col gap-4" aria-labelledby="extras-h">
+            <div className="flex flex-col gap-1">
+              <h2 id="extras-h" className="font-display font-bold text-[22px] md:text-[26px] tracking-tight text-ink">פירוט מחירים</h2>
+              <p className="text-[15px] text-muted">אפשר להוסיף או להוריד סקי פס, הסעה, ציוד וטיסה, והמחיר מתעדכן מיד.</p>
             </div>
-
-            {/* ski pass: one of the two areas, or none */}
-            <div className="flex flex-col gap-3">
-              <h3 className="text-[17px] font-bold text-ink">סקי פס{skiDays > 0 ? ` ל-${skiDays} ימי גלישה` : ""}</h3>
-              <div role="group" aria-label="סקי פס" className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
-                {(["trois_vallees", "val_thorens"] as const).map(a => {
-                  const t = tierOf(a);
-                  const open = passOpen(a);
-                  const on = passEff && passArea === a;
-                  return (
-                    <AddOnToggle key={a} icon={<AdPass size={22} />} on={on} disabled={!open || (!t && passes.length > 0)}
-                      title={a === "trois_vallees" ? "שלושת העמקים" : "ואל טורנס ואורל"}
-                      sub={a === "trois_vallees" ? '600 ק"מ מסלולים, כל האזור' : "המסלולים של הכפר עצמו"}
-                      price={!open ? `סגור בתאריכים האלה (פתוח ${shortDate(LIFT_DATES[a][0])}–${shortDate(LIFT_DATES[a][1])})` : t ? `${eur(t.price)} לאדם · ${t.duration_days} ימים` : passes.length ? undefined : "בודקים מחיר…"}
-                      onToggle={() => { if (on) setPassOn(false); else { setPassArea(a); setPassOn(true); } }} />
-                  );
-                })}
-              </div>
-              <QStep show={passEff} label="כמה אנשים צריכים סקי פס?" qty={passQty} setQty={setPassQty} max={guests} total={amountOf("pass")} />
-              <p className="text-[13px] text-muted px-1 leading-relaxed">את הסקי פס אוספים בעצמכם מהמכונה בכפר.</p>
-            </div>
-
-            {/* transfer and equipment */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
-              <div className="flex flex-col gap-2">
-                <AddOnToggle icon={<AdShuttle size={22} />} on={transferOn} title="הסעה הלוך וחזור"
-                  sub={`שאטל משדה התעופה עד הדירה · ${eur(TRANSFER_PRICE)} לאדם`} price={`+${eur(TRANSFER_PRICE * transferQty)}`}
-                  onToggle={() => { const v = !transferOn; setTransferOn(v); if (v) setTransferQty(n => Math.min(n || guests, guests) || 1); }} />
+            <div className={`${card} divide-y divide-line`}>
+              <LineRow title={calc.lines[0]?.label || "לינה"} sub={calc.lines[0]?.sub} amount={eur(baseApt)} />
+              <LineRow title={`סקי פס${skiDays > 0 ? ` · ${skiDays} ימי גלישה` : ""}`}
+                sub={passEff ? `${passArea === "trois_vallees" ? "שלושת העמקים" : "ואל טורנס ואורל"} · ${passQty} אנשים` : "המסלולים של ואל טורנס, או כל שלושת העמקים"}
+                amount={passEff ? eur(amountOf("pass")) : ""} on={passEff} onToggle={() => setPassOn(v => !v)}
+                disabled={!passOpen(passArea) && !passEff}>
+                {passEff && (
+                  <div className="flex flex-col gap-2.5 mt-2.5">
+                    <div role="group" aria-label="איזה סקי פס" className="flex flex-wrap gap-2">
+                      {(["val_thorens", "trois_vallees"] as const).map(a2 => {
+                        const t = tierOf(a2);
+                        const open = passOpen(a2);
+                        return (
+                          <button key={a2} type="button" disabled={!open || (!t && passes.length > 0)} onClick={() => setPassArea(a2)} aria-pressed={passArea === a2}
+                            className={`min-h-[40px] px-3.5 rounded-full border text-[14px] font-bold transition-colors disabled:opacity-40 ${passArea === a2 ? "border-accent bg-accent-soft text-accent" : "border-line-strong text-ink"}`}>
+                            {a2 === "trois_vallees" ? "שלושת העמקים" : "ואל טורנס"}{t ? ` · ${eur(t.price)}` : ""}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <MiniQty label="לכמה אנשים" qty={passQty} setQty={setPassQty} max={guests} />
+                  </div>
+                )}
+              </LineRow>
+              <LineRow title="הסעה הלוך וחזור" sub={`שאטל משדה התעופה עד הדירה · ${eur(TRANSFER_PRICE)} לאדם`}
+                amount={transferOn ? eur(amountOf("transfer")) : `+${eur(TRANSFER_PRICE * guests)}`} on={transferOn}
+                onToggle={() => { const v = !transferOn; setTransferOn(v); if (v) setTransferQty(n => Math.min(n || guests, guests) || 1); }}>
                 {transferOn && (
-                  <>
-                    <QStep show label="כמה אנשים צריכים הסעה?" qty={transferQty} setQty={setTransferQty} max={guests} total={amountOf("transfer")} />
-                    <button type="button" onClick={() => setShowTransfer(true)}
-                      className="flex items-center justify-between gap-3 w-full min-h-[52px] px-4 rounded-2xl border border-line bg-white hover:border-ink transition-colors text-start">
-                      <span className={`flex items-center gap-2 text-[15px] font-bold ${flightFilled(flight) ? "text-ok-text" : "text-accent"}`}>
-                        {flightFilled(flight) ? <><Check size={16} /> פרטי הטיסה נשמרו, לעריכה</> : "למלא את פרטי הטיסה להסעה"}
-                      </span>
-                      <span className="text-[13px] text-muted shrink-0">הגעה וחזרה</span>
+                  <div className="flex flex-wrap items-center gap-3 mt-2.5">
+                    <MiniQty label="לכמה אנשים" qty={transferQty} setQty={setTransferQty} max={guests} />
+                    <button type="button" onClick={() => setShowTransfer(true)} className={`${btn.link} min-h-[40px] text-[14px] ${flightFilled(flight) ? "!text-ok-text" : ""}`}>
+                      {flightFilled(flight) ? <><Check size={15} /> פרטי הטיסה נשמרו</> : "למלא את פרטי הטיסה להסעה ‹"}
                     </button>
-                  </>
+                  </div>
                 )}
-              </div>
-              <div className="flex flex-col gap-2">
-                <AddOnToggle icon={<AdSkis size={22} />} on={!!picked.equipment} disabled={skiDays < 1} title="ציוד סקי או סנובורד"
-                  sub={`${eur(equipUnit)} לאדם ל-${skiDays} ימי גלישה (€30 ליום, עד €120 לשבוע)`} price={`+${eur(equipUnit * equipQty)}`}
-                  onToggle={() => { const v = !equipmentOn; setEquipmentOn(v); if (v) setEquipQty(n => Math.min(n || guests, guests) || 1); }} />
-                {picked.equipment && (
-                  <>
-                    <QStep show label="כמה אנשים צריכים ציוד?" qty={equipQty} setQty={setEquipQty} max={guests} total={amountOf("equipment")} />
-                    <p className="text-[13px] text-muted px-1 leading-relaxed">ציוד פרמיום אפשר לשדרג בתוספת תשלום בחנות ההשכרה עצמה.</p>
-                  </>
-                )}
+              </LineRow>
+              <LineRow title="ציוד סקי או סנובורד" sub={`${skiDays} ימי גלישה · ${eur(equipUnit)} לאדם`}
+                amount={picked.equipment ? eur(amountOf("equipment")) : `+${eur(equipUnit * guests)}`} on={!!picked.equipment} disabled={skiDays < 1}
+                onToggle={() => { const v = !equipmentOn; setEquipmentOn(v); if (v) setEquipQty(n => Math.min(n || guests, guests) || 1); }}>
+                {picked.equipment && <div className="mt-2.5"><MiniQty label="לכמה אנשים" qty={equipQty} setQty={setEquipQty} max={guests} /></div>}
+              </LineRow>
+              {calc.lines.filter(l => ["flex", "nocancel", "ai"].includes(l.key)).map(l => (
+                <LineRow key={l.key} title={l.label} amount={l.amount < 0 ? `−${eur(-l.amount)}` : eur(l.amount)} />
+              ))}
+              <div className="flex items-center justify-between gap-4 px-4 md:px-5 py-4 bg-soft rounded-b-card">
+                <span className="text-[16px] font-bold text-ink">סה״כ לכל החבורה</span>
+                <span className="font-display font-extrabold text-[20px] text-ink tabular-nums">{eur(liveTotal)}</span>
               </div>
             </div>
+            <p className="text-[13px] text-muted leading-relaxed">את הסקי פס אוספים בעצמכם מהמכונה בכפר. ציוד פרמיום אפשר לשדרג בחנות ההשכרה.</p>
 
             {/* the flight: only a direct round trip */}
-            <div className="flex flex-col gap-3">
-              <h3 className="text-[17px] font-bold text-ink">טיסה</h3>
+            <div className="flex flex-col gap-3 mt-2">
+              <h3 className="text-[17px] font-bold text-ink">טיסה ישירה</h3>
               <FlightAddOn state={direct} ret={returnLeg} checkin={checkin} checkout={checkout}
                 checked={flightEff} onToggle={v => { setFlightOn(v); if (v) setFlightQty(n => Math.min(n || guests, guests) || 1); }}
                 qty={flightQty} setQty={setFlightQty} maxQty={guests} total={amountOf("flight")}
                 bag={{ on: bagEff, unit: BAGGAGE_PRICE, qty: bagQty, setQty: setBagQty, total: amountOf("bag"), toggle: () => setBagOn(v => !v) }} />
             </div>
-
-            {/* lessons: not bookable on the site yet */}
-            <div className="flex items-start gap-3.5 p-4 rounded-[18px] border border-dashed border-line-strong bg-soft/60 sm:max-w-[calc(50%-6px)]">
-              <span className="w-11 h-11 rounded-xl bg-white text-muted flex items-center justify-center shrink-0"><AdLesson size={22} /></span>
-              <div className="flex-1 min-w-0">
-                <p className="text-[16px] font-bold text-ink">שיעורי סקי או סנובורד</p>
-                <p className="text-[14px] text-muted leading-snug mt-0.5">מדריך מוסמך, לכל הרמות. בינתיים מוסיפים בוואטסאפ.</p>
-              </div>
-              <span className="text-[12px] font-bold text-warn bg-warn-soft px-2.5 py-1 rounded-full shrink-0">בקרוב באתר</span>
-            </div>
           </section>
 
           {/* cancellation and service */}
           <section id="choices" className="flex flex-col gap-6" aria-labelledby="choices-h">
-            <h2 id="choices-h" className={h2}>ביטול ושירות</h2>
+            <h2 id="choices-h" className="font-display font-bold text-[22px] md:text-[26px] tracking-tight text-ink">ביטול ושירות</h2>
             <div role="radiogroup" aria-labelledby="cancel-h" className="flex flex-col gap-3">
               <h3 id="cancel-h" className="text-[17px] font-bold text-ink">מדיניות ביטול</h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -738,7 +780,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
 
           {/* payment and good to know */}
           <section id="payment" className="flex flex-col gap-4" aria-labelledby="payment-h">
-            <h2 id="payment-h" className={h2}>תשלום</h2>
+            <h2 id="payment-h" className="font-display font-bold text-[22px] md:text-[26px] tracking-tight text-ink">תשלום</h2>
             <div className={`${card} p-5 md:p-6`}>
               <h3 className="flex items-center gap-2 text-[17px] font-bold text-ink mb-3"><span className="text-accent"><IconCreditCard size={20} /></span>בכרטיס אשראי</h3>
               <CheckList className="text-body" items={[
