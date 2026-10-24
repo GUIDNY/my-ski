@@ -54,6 +54,19 @@ function Switch({ on, onClick, label }: { on: boolean; onClick: () => void; labe
   );
 }
 
+function Qty({ value, max, onChange }: { value: number; max: number; onChange: (n: number) => void }) {
+  return (
+    <div className="flex items-center gap-2.5 mt-2">
+      <span className="text-[14px] text-muted">לכמה אנשים</span>
+      <button type="button" onClick={() => onChange(Math.max(1, value - 1))} disabled={value <= 1} aria-label="פחות"
+        className="w-9 h-9 rounded-full border border-line-strong bg-white text-ink text-[18px] leading-none disabled:opacity-40">−</button>
+      <span className="font-bold text-[16px] text-ink w-5 text-center tabular-nums" aria-live="polite">{value}</span>
+      <button type="button" onClick={() => onChange(Math.min(max, value + 1))} disabled={value >= max} aria-label="עוד"
+        className="w-9 h-9 rounded-full border border-line-strong bg-white text-ink text-[18px] leading-none disabled:opacity-40">+</button>
+    </div>
+  );
+}
+
 function BlockView({ b }: { b: ProposalBlock }) {
   switch (b.type) {
     case "kv": case "summary": return <Rows rows={b.rows} />;
@@ -84,6 +97,9 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
   const [showBank, setShowBank] = useState(false);
   const [off, setOff] = useState<number[]>([]);          // rows taken out
   const [addEquip, setAddEquip] = useState(false);
+  const [qty, setQty] = useState<Record<number, number>>({});   // how many people for each add-on
+  const [equipQty, setEquipQty] = useState(0);
+  const [openRow, setOpenRow] = useState<number | null>(null);
   const [busy, setBusy] = useState<string>("");
   const [payErr, setPayErr] = useState(false);
   const [pdfState, setPdfState] = useState<"" | "busy" | "link" | "error">("");
@@ -99,18 +115,29 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
   const guests = h.guests || Number(allText.match(/(\d+)\s*(?:אנשים|אורחים)/)?.[1]) || Number(allText.match(/"מספר אורחים","(\d+)"/)?.[1]) || 1;
   const nights = Number(allText.match(/(\d+)\s*לילות/)?.[1]) || 7;
   const skiDays = Math.max(nights - 1, 0);
-  const lines = (table?.rows ?? []).map((r, i) => ({ i, label: clean(r[0]), sub: r.slice(1, -1).filter(c => c && c !== "-").join(" · "), amount: money(r[r.length - 1]), shown: r[r.length - 1], kind: kindOf(r[0]) }));
+  const four = (table?.header?.length ?? 0) >= 4; // the bots' table: item, quantity, unit price, total
+  const lines = (table?.rows ?? []).map((r, i) => {
+    const kind = kindOf(r[0]);
+    const amount = money(r[r.length - 1]);
+    const baseQty = Number(String(r[0]).match(/×\s*(\d+)/)?.[1]) || (four ? Number(String(r[1]).match(/^\d+$/)?.[0]) : 0) || 0;
+    // per person (ski pass, equipment, flight, bag, a per-seat transfer); a private car is one price for the group
+    const perHead = !!kind && baseQty > 0 && (kind !== "transfer" || baseQty > 1);
+    return { i, label: clean(r[0]).replace(/\s*×\s*\d+$/, ""), sub: r.slice(1, -1).filter(c => c && c !== "-").join(" · "), amount, shown: r[r.length - 1], kind, baseQty, perHead, unit: perHead ? amount / baseQty : amount };
+  });
   const hasEquip = lines.some(l => l.kind === "equipment");
   const equipAdd = !hasEquip && h.included.includes("skipass" as never) ? equipCost(skiDays) * guests : 0;
   const baseTotal = table?.total ? money(table.total[table.total.length - 1]) : money(h.total || "0");
-  const total = baseTotal - lines.filter(l => off.includes(l.i)).reduce((s, l) => s + l.amount, 0) + (addEquip ? equipAdd : 0);
+  const qtyOf = (l: (typeof lines)[number]) => (l.perHead ? Math.min(Math.max(qty[l.i] ?? l.baseQty, 1), guests) : l.baseQty);
+  const nowOf = (l: (typeof lines)[number]) => (off.includes(l.i) ? 0 : l.perHead ? l.unit * qtyOf(l) : l.amount);
+  const equipNow = addEquip ? equipCost(skiDays) * Math.min(Math.max(equipQty, 1), guests) : 0;
+  const total = baseTotal + lines.reduce((sum, l) => sum + nowOf(l) - l.amount, 0) + equipNow;
   const perPerson = total / guests;
-  const changed = off.length > 0 || addEquip;
+  const changed = off.length > 0 || addEquip || lines.some(l => l.perHead && qtyOf(l) !== l.baseQty);
   const kinds = new Set(lines.filter(l => !off.includes(l.i)).map(l => l.kind).filter(Boolean) as string[]);
   if (addEquip) kinds.add("equipment");
   const inc: [string, string, boolean][] = [["apartment", "דירה", true], ...(["skipass", "transfer", "equipment", "flight"] as const).map(k => [k, KIND_LABEL[k], kinds.has(k)] as [string, string, boolean])];
   const pdf = pdfHref || `/api/proposals/${id}/pdf`;
-  const wa = `https://wa.me/972555174903?text=${encodeURIComponent(`היי, לגבי הצעת המחיר${number ? ` ${number}` : ""}${changed ? ` (שיניתי: ${[...lines.filter(l => off.includes(l.i)).map(l => "בלי " + (KIND_LABEL[l.kind || ""] || l.label)), ...(addEquip ? ["עם ציוד"] : [])].join(", ")})` : ""}: `)}`;
+
   const main = data.sections
     .filter(s => s.heading !== "תנאים" && s.heading !== "תשלום")
     .map(s => ({ heading: s.heading, blocks: s.blocks.filter(b => b.type !== "payment" && b.type !== "gallery") }))
@@ -133,7 +160,13 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
   }, [data.title]);
 
   const toggle = (i: number) => setOff(v => (v.includes(i) ? v.filter(x => x !== i) : [...v, i]));
-  const what = changed ? ` (${[...lines.filter(l => off.includes(l.i)).map(l => "בלי " + (KIND_LABEL[l.kind || ""] || "")), ...(addEquip ? ["עם ציוד"] : [])].join(", ")})` : "";
+  const changes = [
+    ...lines.filter(l => off.includes(l.i)).map(l => "בלי " + (KIND_LABEL[l.kind || ""] || l.label)),
+    ...lines.filter(l => !off.includes(l.i) && l.perHead && qtyOf(l) !== l.baseQty).map(l => `${KIND_LABEL[l.kind || ""] || l.label} ל-${qtyOf(l)}`),
+    ...(addEquip ? [`עם ציוד ל-${Math.min(Math.max(equipQty, 1), guests)}`] : []),
+  ];
+  const what = changes.length ? ` (${changes.join(", ")})` : "";
+  const wa = `https://wa.me/972555174903?text=${encodeURIComponent(`היי, לגבי הצעת המחיר${number ? ` ${number}` : ""}${changes.length ? ` (שיניתי: ${changes.join(", ")})` : ""}: `)}`;
   const pay = async (key: string, amount: number, currency: "EUR" | "ILS", perHead: boolean) => {
     if (busy) return;
     setBusy(key); setPayErr(false);
@@ -187,28 +220,41 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
     <div className={`${card} divide-y divide-line`}>
       {lines.map(l => {
         const isOff = off.includes(l.i);
+        const q = qtyOf(l);
+        const open = openRow === l.i && l.perHead && !isOff;
         return (
-          <div key={l.i} className="flex items-center justify-between gap-4 px-4 md:px-5 py-3.5">
-            <div className={`min-w-0 ${isOff ? "opacity-50" : ""}`}>
-              <p className={`text-[15px] md:text-[16px] font-bold text-ink ${isOff ? "line-through" : ""}`}>{l.label}</p>
-              {l.sub && <p className="text-[13px] md:text-[14px] text-muted mt-0.5">{l.sub}</p>}
+          <div key={l.i} className="px-4 md:px-5 py-3.5">
+            <div className="flex items-center justify-between gap-4">
+              <div className={`min-w-0 ${isOff ? "opacity-50" : ""}`}>
+                <p className={`text-[15px] md:text-[16px] font-bold text-ink ${isOff ? "line-through" : ""}`}>{l.label}{l.perHead ? ` × ${q}` : ""}</p>
+                <p className="text-[13px] md:text-[14px] text-muted mt-0.5">{l.perHead ? `${eur(l.unit)} לאדם` : l.sub}</p>
+                {l.perHead && !isOff && (
+                  <button type="button" onClick={() => setOpenRow(open ? null : l.i)} aria-expanded={open}
+                    className="mt-1 inline-flex items-center gap-1 min-h-[32px] text-[13px] font-bold text-accent">
+                    {open ? "סגירה" : "לכמה אנשים?"}
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={`transition-transform ${open ? "rotate-180" : ""}`}><path d="m6 9 6 6 6-6" /></svg>
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center gap-3 shrink-0">
+                <span className={`text-[15px] md:text-[16px] font-bold tabular-nums ${isOff ? "text-muted line-through" : "text-ink"}`}>{l.perHead ? eur(l.unit * q) : l.shown}</span>
+                {l.kind && l.kind !== "flight" && l.kind !== "bag" && <Switch on={!isOff} onClick={() => toggle(l.i)} label={`${KIND_LABEL[l.kind]}: ${isOff ? "להחזיר" : "להוריד"}`} />}
+              </div>
             </div>
-            <div className="flex items-center gap-3 shrink-0">
-              <span className={`text-[15px] md:text-[16px] font-bold tabular-nums ${isOff ? "text-muted line-through" : "text-ink"}`}>{l.shown}</span>
-              {l.kind && l.kind !== "flight" && l.kind !== "bag" && <Switch on={!isOff} onClick={() => toggle(l.i)} label={`${KIND_LABEL[l.kind]}: ${isOff ? "להחזיר" : "להוריד"}`} />}
-            </div>
+            {open && <Qty value={q} max={guests} onChange={v => setQty(m => ({ ...m, [l.i]: v }))} />}
           </div>
         );
       })}
       {equipAdd > 0 && (
         <div className="flex items-center justify-between gap-4 px-4 md:px-5 py-3.5">
           <div className={`min-w-0 ${addEquip ? "" : "opacity-70"}`}>
-            <p className="text-[15px] md:text-[16px] font-bold text-ink">ציוד סקי או סנובורד × {guests}</p>
+            <p className="text-[15px] md:text-[16px] font-bold text-ink">ציוד סקי או סנובורד × {addEquip ? Math.min(Math.max(equipQty, 1), guests) : guests}</p>
             <p className="text-[13px] md:text-[14px] text-muted mt-0.5">{skiDays} ימי גלישה · {eur(equipCost(skiDays))} לאדם</p>
+            {addEquip && <Qty value={Math.min(Math.max(equipQty, 1), guests)} max={guests} onChange={setEquipQty} />}
           </div>
           <div className="flex items-center gap-3 shrink-0">
-            <span className={`text-[15px] md:text-[16px] font-bold tabular-nums ${addEquip ? "text-ink" : "text-muted"}`}>+{eur(equipAdd)}</span>
-            <Switch on={addEquip} onClick={() => setAddEquip(v => !v)} label="להוסיף ציוד" />
+            <span className={`text-[15px] md:text-[16px] font-bold tabular-nums ${addEquip ? "text-ink" : "text-muted"}`}>+{eur(addEquip ? equipNow : equipAdd)}</span>
+            <Switch on={addEquip} onClick={() => { setAddEquip(v => !v); setEquipQty(q0 => q0 || guests); }} label="להוסיף ציוד" />
           </div>
         </div>
       )}
