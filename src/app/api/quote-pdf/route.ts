@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import puppeteer from "puppeteer-core";
-import chromium from "@sparticuz/chromium";
+import { launchPdfBrowser } from "@/lib/pdf-browser";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -29,9 +29,7 @@ export async function GET(req: NextRequest) {
   let browser: Awaited<ReturnType<typeof puppeteer.launch>> | undefined;
   try {
     // CHROME_PATH: a local Chromium for running this outside Vercel
-    browser = await puppeteer.launch(process.env.CHROME_PATH
-      ? { executablePath: process.env.CHROME_PATH, headless: true, args: ["--no-sandbox"] }
-      : { args: chromium.args, executablePath: await chromium.executablePath(), headless: "shell" });
+    browser = await launchPdfBrowser();
     const page = await browser.newPage();
     await page.setViewport({ width: 1240, height: 1754 });
     const res = await page.goto(target, { waitUntil: "networkidle0", timeout: 40000 });

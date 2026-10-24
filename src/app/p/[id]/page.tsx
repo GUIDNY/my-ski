@@ -17,7 +17,7 @@ export default async function ProposalPage({ params }: Props) {
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const db = createServerClient();
-  const { data: row } = await db.from("proposals").select("id, data, proposal_number").eq("id", id).maybeSingle();
+  const { data: row } = await db.from("proposals").select("id, data, proposal_number, client_name").eq("id", id).maybeSingle();
   if (!row?.data) notFound();
-  return <ProposalView id={id} data={row.data as ProposalData} number={row.proposal_number ?? null} />;
+  return <ProposalView id={id} data={row.data as ProposalData} number={row.proposal_number ?? null} clientName={row.client_name ?? null} />;
 }

@@ -109,6 +109,8 @@ export type ProposalData = {
   signature?: { heading: string; text: string; fields: string[] };
   /** the cover page of a quote (optional; read from the sections when missing) */
   hero?: ProposalHero;
+  /** better apartments free on the same dates: the extra per person */
+  upgrades?: { name: string; extraPerPerson: number; maxGuests?: number }[];
 };
 
 export type ProposalHero = {
@@ -126,6 +128,8 @@ export type ProposalHero = {
   payUrl?: string;
   /** e.g. "7.11.2026" */
   validUntil?: string;
+  /** who the quote is for */
+  clientName?: string;
 };
 
 export type ProposalStatus = "draft" | "sent" | "accepted" | "expired";

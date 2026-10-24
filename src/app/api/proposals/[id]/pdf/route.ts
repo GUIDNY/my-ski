@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase-server";
 import puppeteer from "puppeteer-core";
-import chromium from "@sparticuz/chromium";
+import { launchPdfBrowser } from "@/lib/pdf-browser";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -21,11 +21,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const origin = new URL(req.url).origin;
   let browser: Awaited<ReturnType<typeof puppeteer.launch>> | undefined;
   try {
-    browser = await puppeteer.launch({
-      args: chromium.args,
-      executablePath: await chromium.executablePath(),
-      headless: "shell",
-    });
+    browser = await launchPdfBrowser();
     const page = await browser.newPage();
     // A headless browser never has the cookie-consent banner pre-dismissed
     // like a real visitor's would be, so it renders over the document —

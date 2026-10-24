@@ -113,8 +113,10 @@ export const PROPOSAL_CSS = `
 
 /* an arrow drawn as SVG: the PDF browser on the server has no font with "←" */
 const Arrow = () => (
-  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ verticalAlign: "-1px", marginInlineStart: "1.5mm" }}><path d="M19 12H5M11 6l-6 6 6 6" /></svg>
+  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ display: "inline-block", verticalAlign: "-1px", marginInlineStart: "1.5mm" }}><path d="M19 12H5M11 6l-6 6 6 6" /></svg>
 );
+
+const ilDates = (t: string) => String(t).replace(/(\d{4})-(\d{2})-(\d{2})/g, (_m, y, mo, d) => `${Number(d)}.${Number(mo)}.${y}`).replace(/(\d)\s+–\s+(\d)/g, "$1 עד $2");
 
 function Block({ block }: { block: ProposalBlock }) {
   switch (block.type) {
@@ -123,13 +125,13 @@ function Block({ block }: { block: ProposalBlock }) {
     case "kv":
       return (
         <table className="flt"><tbody>
-          {block.rows.map((r, i) => (<tr key={i}><td className="k">{r[0]}</td><td className="v">{r[1]}</td></tr>))}
+          {block.rows.map((r, i) => (<tr key={i}><td className="k">{r[0]}</td><td className="v">{ilDates(r[1])}</td></tr>))}
         </tbody></table>
       );
     case "summary":
       return (
         <table className="sum"><tbody>
-          {block.rows.map((r, i) => (<tr key={i}><td className="k">{r[0]}</td><td className="v">{r[1]}</td></tr>))}
+          {block.rows.map((r, i) => (<tr key={i}><td className="k">{r[0]}</td><td className="v">{ilDates(r[1])}</td></tr>))}
         </tbody></table>
       );
     case "list":
@@ -249,6 +251,51 @@ export const COVER_CSS = `
 .proposal .paycard .row b { direction:ltr; unicode-bidi:isolate; }
 .proposal .paycard .qrline { display:flex; gap:4mm; align-items:center; }
 .proposal .paycard .qrline .pc-qr { width:26mm; height:26mm; }
+
+/* the cover in the look of the website's quote page */
+.proposal .pcover { padding:0 1mm; }
+.proposal .sc-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:7mm; }
+.proposal .sc-brand { display:flex; align-items:center; gap:2.5mm; font-family:var(--font-rubik),"Rubik",sans-serif; font-weight:800; font-size:15pt; color:var(--ink); }
+.proposal .sc-brand img { height:6.5mm; width:auto; }
+.proposal .sc-tag { white-space:nowrap; font-weight:700; font-size:9pt; color:var(--accent); background:#EEF3FF; border-radius:20mm; padding:1.2mm 3.8mm; }
+.proposal .sc-h1 { font-family:var(--font-rubik),"Rubik",sans-serif; font-weight:800; font-size:28pt; line-height:1.1; letter-spacing:-.5px; color:var(--ink); margin:0 0 1.5mm; }
+.proposal .sc-sub { font-size:12pt; color:var(--muted); margin-bottom:4mm; }
+.proposal .sc-chips { display:flex; flex-wrap:wrap; gap:2mm; margin-bottom:5mm; }
+.proposal .sc-chips span { background:var(--box); border:1px solid var(--line); border-radius:20mm; padding:1.3mm 3.6mm; font-size:10pt; font-weight:600; color:var(--ink); }
+.proposal .sc-photos { display:grid; gap:2.2mm; height:92mm; border-radius:4.5mm; overflow:hidden; margin-bottom:6mm; }
+.proposal .sc-photos > div { background:#E9EEF5 center/cover no-repeat; }
+.proposal .sc-photos.n1 { grid-template-columns:1fr; }
+.proposal .sc-photos.n2 { grid-template-columns:2fr 1fr; }
+.proposal .sc-photos.n3 { grid-template-columns:2fr 1fr; grid-template-rows:1fr 1fr; }
+.proposal .sc-photos.n3 > div:first-child { grid-row:span 2; }
+.proposal .sc-price { display:flex; gap:6mm; align-items:center; border:1px solid var(--line); border-radius:6mm; padding:6mm 7mm; box-shadow:0 2mm 7mm rgba(11,27,51,.07); }
+.proposal .sc-pp { flex:1.2; display:flex; flex-direction:column; gap:1mm; }
+.proposal .sc-pp .l { font-size:10.5pt; color:var(--muted); }
+.proposal .sc-pp .v { font-family:var(--font-rubik),"Rubik",sans-serif; font-weight:800; font-size:36pt; line-height:1; color:var(--ink); letter-spacing:-.8px; }
+.proposal .sc-pp .s { font-size:9.5pt; color:var(--muted); margin-top:1.5mm; }
+.proposal .sc-inc { flex:1; list-style:none; margin:0; padding:0 6mm 0 0; border-inline-start:1px solid var(--line); display:flex; flex-direction:column; gap:1.6mm; }
+.proposal .sc-inc li { font-size:10.5pt; color:var(--ink); display:flex; align-items:center; gap:2mm; margin:0; }
+.proposal .sc-inc li.off { color:var(--muted); }
+.proposal .sc-inc .ic { width:4mm; text-align:center; display:inline-flex; justify-content:center; }
+.proposal .sc-body { margin-top:auto; }
+/* the rest of the quote, closer to the website: plain headings, white cards */
+.proposal h2 .num { display:none; }
+.proposal h2 { border-bottom:none; font-size:15pt; margin:9mm 0 3mm; padding-bottom:0; }
+.proposal table.grid th { background:var(--box); color:var(--muted); font-weight:700; }
+.proposal table.grid td { padding:3mm; }
+.proposal table.grid tr.total td { background:var(--box); font-size:12pt; }
+.proposal table.sum, .proposal table.flt { border:1px solid var(--line); border-radius:3mm; border-collapse:separate; border-spacing:0; overflow:hidden; }
+.proposal table.sum tr:nth-child(odd) td { background:#fff; }
+.proposal table.sum td, .proposal table.flt td { border-bottom:1px solid var(--line); }
+.proposal table.sum tr:last-child td, .proposal table.flt tr:last-child td { border-bottom:none; }
+.proposal .intro { background:#fff; }
+.proposal .paycard .ph { background:var(--box); color:var(--ink); }
+.proposal .pay-btn + .pay-btn { background:#fff; color:var(--accent); border:1.5px solid var(--accent); padding:3.6mm; font-size:11pt; }
+.proposal .upg { display:grid; grid-template-columns:1fr 1fr; gap:3mm; }
+.proposal .upg div { border:1px solid var(--line); border-radius:4mm; padding:4mm 5mm; break-inside:avoid; }
+.proposal .upg b { display:block; font-size:11pt; color:var(--ink); }
+.proposal .upg span { font-size:9.5pt; color:var(--muted); }
+.proposal .upg em { font-style:normal; display:block; margin-top:1.5mm; font-weight:800; color:var(--accent); font-size:11pt; }
 @media print {
   .proposal .pcover { margin:0; height:263mm; border-radius:0; }
 }
@@ -259,6 +306,7 @@ export const COVER_CSS = `
   .proposal .pc-top { top:5mm; right:5mm; left:5mm; } .proposal .pc-title { right:5mm; left:5mm; bottom:5mm; }
   .proposal .pc-title h1 { font-size:21pt; }
   .proposal .pc-tag { display:none; }
+  .proposal .sc-h1 { font-size:22pt; } .proposal .sc-photos { height:58vw; } .proposal .sc-price { flex-direction:column; align-items:stretch; } .proposal .sc-inc { border-inline-start:none; border-top:1px solid var(--line); padding:4mm 0 0; } .proposal .sc-tag { white-space:normal; }
   .proposal .pc-price { flex-direction:column; } .proposal .pc-pp .v { font-size:32pt; }
   .proposal .pc-inc { grid-template-columns:repeat(3,1fr); }
   .proposal .pc-foot { flex-wrap:wrap; } .proposal .pc-trust { width:100%; }
@@ -278,6 +326,9 @@ const ICONS: Record<string, ReactNode> = {
 };
 const INC_LABEL: Record<string, string> = { apartment: "דירה", skipass: "סקי פס", transfer: "הסעה מהשדה", equipment: "ציוד סקי", flight: "טיסה ישירה" };
 const INC_ORDER = ["apartment", "skipass", "transfer", "equipment", "flight"] as const;
+const CheckIco = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0F7A4F" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12l4 4 10-10" /></svg>
+);
 
 function Ico({ k }: { k: string }) {
   return (
@@ -327,54 +378,37 @@ export function heroOf(d: ProposalData): Required<Pick<ProposalHero, "chips" | "
 function Cover({ data, link }: { data: ProposalData; link?: string }) {
   const h = heroOf(data);
   const url = link || h.payUrl;
+  const photos = Array.from(new Set([...(h.image ? [h.image] : []), ...allBlocks(data).flatMap(b => (b.type === "gallery" ? b.urls : []))])).slice(0, 3);
+  if (!photos.length) photos.push("/view.jpg");
   return (
     <div className="pcover">
-      <div className="pc-hero" style={{ backgroundImage: `url("${h.image || "/view.jpg"}")` }}>
-        <div className="pc-top">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <span className="pc-brand"><img src="/skishare-mark-white.png" alt="" />SkiShare</span>
-          <span className="pc-tag">הצעת מחיר אישית</span>
-        </div>
-        <div className="pc-title">
-          <div className="pc-kicker">Val Thorens · 2300m · France</div>
-          <h1>{data.title}</h1>
-          {data.subtitle && <div className="pc-sub">{data.subtitle}</div>}
-        </div>
+      <div className="sc-top">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <span className="sc-brand"><img src="/skishare-mark.png" alt="" />SkiShare</span>
+        <span className="sc-tag">{h.clientName ? `הצעת מחיר עבור ${h.clientName}` : "הצעת מחיר אישית"}</span>
       </div>
-      <div className="pc-body">
-        {(h.perPerson || h.total) && (
-          <div className="pc-price">
-            {h.perPerson && (
-              <div className="pc-pp">
-                <div className="l">המחיר לאדם</div>
-                <div className="v">{h.perPerson}</div>
-                <div className="s">{h.included.length > 1 ? "כולל " + h.included.map(k => INC_LABEL[k]).join(", ") : "לפי מה שבחרתם"}</div>
-              </div>
-            )}
-            {h.total && (
-              <div className="pc-tot">
-                <div className="l">סה״כ לכל החבורה</div>
-                <div className="v">{h.total}</div>
-                <div className="s">{h.guests ? `${h.guests} ${h.guests === 1 ? "אדם" : "אנשים"} · ` : ""}כל אחד יכול לשלם את החלק שלו</div>
-              </div>
-            )}
+      <h1 className="sc-h1">{data.title}</h1>
+      <div className="sc-sub">ואל טורנס, צרפת</div>
+      {h.chips.length > 0 && <div className="sc-chips">{h.chips.map((c, i) => <span key={i}>{c}</span>)}</div>}
+      <div className={`sc-photos n${photos.length}`}>
+        {photos.map((u, i) => <div key={i} style={{ backgroundImage: `url("${u}")` }} />)}
+      </div>
+      {(h.perPerson || h.total) && (
+        <div className="sc-price">
+          <div className="sc-pp">
+            <span className="l">המחיר לאדם</span>
+            <span className="v">{h.perPerson || h.total}</span>
+            {h.total && h.perPerson && <span className="s">סה״כ {h.total}{h.guests ? ` ל-${h.guests} ${h.guests === 1 ? "אדם" : "אנשים"}` : ""} · כל אחד יכול לשלם את החלק שלו</span>}
           </div>
-        )}
-        {h.chips.length > 0 && <div className="pc-chips">{h.chips.map((c, i) => <span key={i}>{c}</span>)}</div>}
-        <div>
-          <p className="pc-h">מה כלול במחיר</p>
-          <div className="pc-inc">
+          <ul className="sc-inc">
             {INC_ORDER.map(k => {
               const on = h.included.includes(k);
-              return (
-                <div key={k} className={on ? "" : "off"}>
-                  <Ico k={k} />{INC_LABEL[k]}
-                  <span className="ck">{on ? "כלול" : "לא כלול"}</span>
-                </div>
-              );
+              return <li key={k} className={on ? "" : "off"}><span className="ic">{on ? <CheckIco /> : "–"}</span>{INC_LABEL[k]}{on ? "" : " (לא כלול)"}</li>;
             })}
-          </div>
+          </ul>
         </div>
+      )}
+      <div className="sc-body">
         <div className="pc-foot">
           {url && <a className="pc-qr" href={url}><Qr text={url} /></a>}
           <div className="pc-cta">
@@ -441,6 +475,18 @@ export default function ProposalDocument({ data, link }: { data: ProposalData; l
           {sec.blocks.map((b, bi) => <Block key={bi} block={b} />)}
         </section>
       ))}
+
+      {data.upgrades && data.upgrades.length > 0 && (
+        <section>
+          <h2>רוצים לשדרג?</h2>
+          <p className="note">דירות נוספות שפנויות בתאריכים שלכם. כתבו לנו בוואטסאפ ונעדכן את ההצעה.</p>
+          <div className="upg">
+            {data.upgrades.map((u, i) => (
+              <div key={i}><b>{u.name}</b>{u.maxGuests ? <span>עד {u.maxGuests} אנשים</span> : null}<em>+{`€${Math.round(u.extraPerPerson).toLocaleString("en-US")}`} לאדם</em></div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {data.signature && (
         <div className="sign">
