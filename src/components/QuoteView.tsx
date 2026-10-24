@@ -585,39 +585,6 @@ export default function QuoteView({ q }: { q: QuoteData }) {
         </div>
       </div>
 
-      {/* ── the offer at a glance: the price per person, what's in it, the next step ── */}
-      <div className={`${wrap} pt-6 md:pt-8`}>
-        <div className="relative overflow-hidden rounded-[26px] bg-gradient-to-l from-[#1652F0] to-[#0B1B33] text-white px-5 py-6 md:px-9 md:py-8 flex flex-wrap items-center gap-6 md:gap-10">
-          <div aria-hidden="true" className="absolute -left-20 -top-28 w-80 h-80 rounded-full bg-white/10" />
-          <div aria-hidden="true" className="absolute left-24 -bottom-24 w-56 h-56 rounded-full bg-white/[0.06]" />
-          <div className="relative flex flex-col gap-1 min-w-0">
-            <span className="text-[14px] md:text-[15px] font-bold text-white/85">המחיר לאדם</span>
-            <span className="font-display font-extrabold text-[46px] md:text-[60px] leading-none tracking-tight tabular-nums">{eur(perPerson)}</span>
-            <span className="text-[14px] md:text-[15px] text-white/85 mt-1">סה״כ {eur(liveTotal)} ל-{guests} {guests === 1 ? "אדם" : "אנשים"} · כל אחד יכול לשלם את החלק שלו</span>
-          </div>
-          <div className="relative flex-[1_1_300px] min-w-0 flex flex-col gap-3">
-            <div className="flex flex-wrap gap-2">
-              {[["stay", "דירה"], ["pass", "סקי פס"], ["transfer", "הסעה"], ["equipment", "ציוד"], ["flight", "טיסה ישירה"]].map(([k, label]) => {
-                const on = k === "stay" || calc.lines.some(l => l.key === k);
-                return (
-                  <span key={k} className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[14px] font-bold border ${on ? "bg-white text-[#0B1B33] border-white" : "border-white/30 text-white/60"}`}>
-                    {on ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10" /></svg> : <span aria-hidden="true">+</span>}
-                    {label}
-                  </span>
-                );
-              })}
-            </div>
-            <span className="text-[13px] text-white/75">משנים כאן למטה מה כלול, והמחיר מתעדכן מיד.</span>
-          </div>
-          <div className="relative flex flex-wrap gap-2.5 w-full md:w-auto">
-            <a href="#payment" className="inline-flex items-center justify-center min-h-[50px] px-6 rounded-[14px] bg-white text-[#0B1B33] font-bold text-[16px] hover:bg-[#EEF3FF] transition-colors flex-1 md:flex-none">להזמנה ולתשלום</a>
-            <button type="button" onClick={getPdf} disabled={pdfState === "busy"} className="inline-flex items-center justify-center gap-2 min-h-[50px] px-5 rounded-[14px] border border-white/45 font-bold text-[16px] hover:bg-white/10 transition-colors flex-1 md:flex-none">
-              <IcoPdf /> {pdfState === "busy" ? "מכינים…" : "PDF"}
-            </button>
-          </div>
-        </div>
-      </div>
-
       <div className={`${wrap} pt-7 md:pt-9 pb-10 lg:pb-24 flex flex-col lg:flex-row gap-9 items-start`}>
         {/* ── the offer ── */}
         <div className="w-full lg:flex-1 min-w-0 flex flex-col gap-10">
