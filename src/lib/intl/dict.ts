@@ -1,4 +1,5 @@
 import type { Lang } from "./config";
+import { fitDescription } from "../fit-description";
 
 /*
  * Every English and French string of the /en and /fr pages (the legal texts
@@ -280,7 +281,7 @@ const en = {
     listTitle: "Val Thorens apartments to rent, prices by week | SkiShare",
     listDesc: "Self-catered ski apartments in Val Thorens for 2026/27: our own by the night, agency ones Saturday to Saturday. See which are free and the price for your dates.",
     aptTitle: (name: string) => `${name}: apartment in Val Thorens | SkiShare`,
-    aptDesc: (name: string, facts: string) => `${name}, Val Thorens: ${facts}. Pick your dates to see the exact price and book online.`,
+    aptDesc: (name: string, facts: string) => fitDescription([`${name}, Val Thorens: ${facts}.`, "Exact price for your dates, book online."]),
     termsTitle: "Booking and cancellation terms | SkiShare",
     termsDesc: "SkiShare's booking and cancellation terms for apartments in Val Thorens, translated from Hebrew.",
     privacyTitle: "Privacy and cookies | SkiShare",
@@ -594,11 +595,11 @@ const fr: Dict = {
   meta: {
     siteDesc: `Des appartements à Val Thorens, en France${nb}: choisissez vos dates, voyez le prix réel, réservez et payez en ligne en toute sécurité.`,
     homeTitle: "Location ski à Val Thorens : appartements 2026/2027 | SkiShare",
-    homeDesc: "Location d'appartements de ski à Val Thorens pour 2026/2027, le plus haut village-station d'Europe (2 300 m). Le prix réel pour vos dates et le paiement en ligne.",
+    homeDesc: "Location d'appartements de ski à Val Thorens 2026/2027, le plus haut village-station d'Europe (2 300 m). Prix réel pour vos dates, paiement en ligne.",
     listTitle: "Location appartement Val Thorens : prix à la semaine | SkiShare",
     listDesc: "Location d'appartements à Val Thorens pour 2026/2027 : les nôtres à la nuit, ceux d'agence du samedi au samedi. Disponibilités et prix réel pour vos dates.",
     aptTitle: (name: string) => `${name} : appartement à Val Thorens | SkiShare`,
-    aptDesc: (name: string, facts: string) => `${name}, Val Thorens${nb}: ${facts}. Choisissez vos dates pour voir le prix exact et réserver en ligne.`,
+    aptDesc: (name: string, facts: string) => fitDescription([`${name}, Val Thorens${nb}: ${facts}.`, "Prix exact selon vos dates, réservation en ligne."]),
     termsTitle: "Conditions de réservation et d'annulation | SkiShare",
     termsDesc: "Les conditions de réservation et d'annulation de SkiShare pour les appartements à Val Thorens, traduites de l'hébreu.",
     privacyTitle: "Confidentialité et cookies | SkiShare",

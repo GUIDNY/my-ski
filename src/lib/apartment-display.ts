@@ -1,4 +1,5 @@
 import type { Apartment } from "@/types";
+import { fitDescription } from "./fit-description";
 
 /*
  * How an apartment is named to people and search engines. Agency listings
@@ -82,11 +83,20 @@ const eur = (n: number) => `€${Math.round(n).toLocaleString("en-US")}`;
 /** the meta description of an apartment page */
 export function aptMetaDescription(a: AptLike & Pick<Apartment, "price_per_night">) {
   const who = a.max_guests ? `עד ${a.max_guests} אנשים` : "";
+  const extras = "אפשר להוסיף סקי פס, הסעה וציוד, וכל אחד משלם את החלק שלו.";
   if (isAgency(a)) {
     const from = minWeekPrice(a);
     const size = a.sqm ? ` של ${a.sqm} מ״ר` : "";
-    return `${aptKind(a)}${size} בואל טורנס${who ? `, ${who}` : ""}. שבוע שלם משבת לשבת${from ? `, החל מ-${eur(from)} לדירה` : ""}. אפשר להוסיף סקי פס, הסעה משדה התעופה וציוד באותה הזמנה, וכל אחד משלם את החלק שלו.`;
+    return fitDescription([
+      `${aptKind(a)}${size} בואל טורנס${who ? `, ${who}` : ""}.`,
+      `שבוע שלם משבת לשבת${from ? `, החל מ-${eur(from)} לדירה` : ""}.`,
+      extras,
+    ]);
   }
   // our nightly prices follow the calendar, so no single "from" price here
-  return `${a.name}: ${aptKind(a)} שלנו בואל טורנס${who ? `, ${who}` : ""}. בוחרים תאריכים ורואים את המחיר לדירה כולה, כולל ניקיון. אפשר להוסיף סקי פס, הסעה משדה התעופה וציוד באותה הזמנה, וכל אחד משלם את החלק שלו.`;
+  return fitDescription([
+    `${a.name}: ${aptKind(a)} שלנו בואל טורנס${who ? `, ${who}` : ""}.`,
+    "המחיר לפי התאריכים, לדירה כולה כולל ניקיון.",
+    extras,
+  ]);
 }
