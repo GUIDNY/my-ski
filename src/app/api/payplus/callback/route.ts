@@ -46,7 +46,31 @@ export async function POST(req: NextRequest) {
     txUid,
     amountIls: Number(t.amount) || 0,
   }, payload);
-  console.info("[payplus] callback confirmed", { order: orderCode, how, changed: res.changed });
+  console.info("[payplus] callback confirmed", { order: orderCode, how, changed: res.changed, amount: t.amount, currency: t.currency_code || t.currency });
+
+  // a message to Idan on Telegram for every confirmed payment, with or without an order on the site
+  // (quote links and the links the bot makes have no order code, so nothing else tells him)
+  const alert = process.env.N8N_PAY_ALERT_URL;
+  if (alert && (!orderCode || res.changed)) {
+    const card = String(t.four_digits || t.card_suffix || "").trim();
+    try {
+      await fetch(alert, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        signal: AbortSignal.timeout(5000),
+        body: JSON.stringify({
+          amount: Number(t.amount) || 0,
+          currency: String(t.currency_code || t.currency || "ILS"),
+          description: String(t.more_info || payload.more_info || "").trim(),
+          name: String(t.customer_name || "").trim(),
+          phone: String(t.customer_phone || t.phone || "").trim(),
+          email: String(t.customer_email || t.email || "").trim(),
+          card: card ? `כרטיס שמסתיים ב-${card}` : "",
+          order: orderCode || "",
+          changed: orderCode ? res.changed : undefined,
+        }),
+      });
+    } catch { /* the payment is saved either way */ }
+  }
 
   return NextResponse.json({ ok: true });
 }
