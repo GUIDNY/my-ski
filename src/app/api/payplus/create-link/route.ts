@@ -53,7 +53,8 @@ export async function POST(req: NextRequest) {
     refURL_cancel: `${back}/pay/failure`,
     refURL_callback: `${origin}/api/payplus/callback`,
     more_info: desc,
-    ...(b.order_code ? { more_info_1: String(b.order_code) } : {}),
+    // the order on the site, or (no order yet) the quote it came from, "p:<proposal id>": the callback turns it into an order
+    ...(b.order_code ? { more_info_1: String(b.order_code) } : (typeof b.ref === "string" && /^p:[\w-]{6,60}$/.test(b.ref) ? { more_info_1: b.ref } : {})),
     customer: {
       customer_name: b.name || undefined,
       email: b.email || undefined,

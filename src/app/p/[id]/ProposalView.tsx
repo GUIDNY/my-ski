@@ -184,7 +184,7 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
     try {
       const r = await fetch("/api/payplus/create-link", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: Math.round(amount * 100) / 100, currency, name: forName || undefined, description: `הצעה ${number || ""}${perHead ? ` · החלק של אדם אחד${myNote ? ` (${myNote})` : ""}` : ""}${what}`.trim() }),
+        body: JSON.stringify({ amount: Math.round(amount * 100) / 100, currency, name: forName || undefined, ref: pdfHref ? undefined : `p:${id}`, description: `הצעה ${number || ""}${perHead ? ` · החלק של אדם אחד${myNote ? ` (${myNote})` : ""}` : ""}${what}`.trim() }),
       });
       const j = await r.json();
       if (!r.ok || !j.url) throw new Error("no link");
