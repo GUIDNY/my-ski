@@ -3,7 +3,7 @@ import type { Apartment, SkiPass } from "@/types";
 import { wrap, card, h2, btn } from "@/components/ui";
 import { aptDisplayName, aptKind } from "@/lib/apartment-display";
 import { TRANSFER_PRICE, LIFT_DATES } from "@/lib/deal-pricing";
-import { SITE, WEBSITE_ID, VAL_THORENS, breadcrumbLd, faqLd, ldJson } from "@/lib/site";
+import { SITE, ORG_ID, WEBSITE_ID, VAL_THORENS, breadcrumbLd, faqLd, ldJson } from "@/lib/site";
 
 /*
  * The text of the "דירות בואל טורנס" page, around the list: how much a week
@@ -35,6 +35,9 @@ export const GUIDE_PATHS = {
 export function apartmentsIntro() {
   return (
     <>
+      <p>
+        SkiShare היא <Link href="/about" className="font-bold text-ink underline underline-offset-2">חברה ישראלית להשכרת דירות בואל טורנס</Link>, עם שירות בעברית.
+      </p>
       <p>
         יש כאן שני סוגים של דירות: <b className="text-ink">הדירות שלנו</b>, שאנחנו מנהלים בעצמנו ובוחרים להן תאריכים,
         ו<b className="text-ink">דירות של סוכנות מקומית בואל טורנס</b>, לשבוע שלם משבת לשבת. בכל דירה רואים לכמה אנשים היא מתאימה, את הגודל ואת המחיר לדירה כולה.
@@ -105,6 +108,10 @@ export default function ApartmentsGuide({ apartments, passes }: { apartments: Ap
       a: `בעונת 2026/27 הדירה הכי זולה שעוד פנויה עולה בין ${eur(cheapestWeek)} ל-${eur(dearestWeek)} לשבוע, לפי השבוע. המחיר לדירה כולה, ומתחלק בין כולם. השבועות הכי זולים עכשיו מתחילים ב-${cheapText}. הכי יקר בחג המולד ובחופשות החורף של צרפת בפברואר. המחיר המדויק של כל דירה בכל שבוע מופיע בעמוד שבת עד שבת.`,
     }] : []),
     {
+      q: "מי משכיר את הדירות?",
+      a: "SkiShare, חברה ישראלית להשכרת דירות בואל טורנס. חלק מהדירות שלנו, ואנחנו מנהלים אותן בעצמנו. השאר של סוכנות מקומית בואל טורנס, לשבוע שלם משבת לשבת. מזמינים ומשלמים באתר, והשירות בעברית: באתר, בצ'אט ובוואטסאפ.",
+    },
+    {
       q: "למה רוב הדירות הן משבת עד שבת?",
       a: "כך עובדות רוב הסוכנויות בואל טורנס: שבת היא יום ההחלפה, ושם נמצאות רוב הדירות. בדירות שלנו אפשר לבחור תאריכים אחרים.",
     },
@@ -136,6 +143,7 @@ export default function ApartmentsGuide({ apartments, passes }: { apartments: Ap
       inLanguage: "he-IL",
       isPartOf: { "@id": WEBSITE_ID },
       about: VAL_THORENS,
+      provider: { "@id": ORG_ID },
       mainEntity: {
         "@type": "ItemList",
         numberOfItems: apartments.length,
