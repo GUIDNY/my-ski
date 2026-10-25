@@ -30,7 +30,10 @@ export async function POST(req: NextRequest) {
 
   // Convert EUR → ILS at the sell (cash) rate when charging in shekels
   let amount = amountEur;
-  if (CURRENCY === "ILS") {
+  // native: the amount is already in the chosen currency (a link Idan asks the bot for, e.g. "₪1,500")
+  const native = b.native === true;
+  if (CURRENCY === "ILS" && native) amount = Math.round(amountEur);
+  else if (CURRENCY === "ILS") {
     const sell = (await getEurToIls()) * SELL_MARKUP;
     amount = Math.round(amountEur * sell); // whole shekels
     desc = `${desc} (€${amountEur} · שער ${sell.toFixed(3)})`;
