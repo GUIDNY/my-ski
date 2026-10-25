@@ -37,7 +37,8 @@ function Switch({ lang, search }: { lang: Lang; search: string }) {
     return () => { document.removeEventListener("mousedown", onDown); document.removeEventListener("keydown", onKey); };
   }, [open]);
 
-  const items = ORDER.map(code => ({ code, name: LANG_NAMES[code], href: pathInLang(pathname, search, code), current: code === lang }));
+  // Idan, 25.10: the English and French site shows no Hebrew option at all
+  const items = ORDER.filter(code => code !== "he").map(code => ({ code, name: LANG_NAMES[code], href: pathInLang(pathname, search, code), current: code === lang }));
 
   return (
     <>

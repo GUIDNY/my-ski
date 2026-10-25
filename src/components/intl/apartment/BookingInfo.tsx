@@ -49,7 +49,7 @@ function copy(lang: Lang, agency: boolean): Copy {
   if (lang === "fr") return frSpaces<Copy>({
     trustTitle: "Réserver en toute confiance",
     trust: [
-      { t: "Une vraie entreprise", d: `SkiShare est une société spécialisée dans les séjours au ski à Val Thorens, avec un site en français, en anglais et en hébreu. ${agency ? "Cet appartement est proposé par une agence partenaire, à la semaine." : "Cet appartement fait partie de nos propres appartements."}` },
+      { t: "Une vraie entreprise", d: `SkiShare est une société spécialisée dans les séjours au ski à Val Thorens, avec un site en français et en anglais. ${agency ? "Cet appartement est proposé par une agence partenaire, à la semaine." : "Cet appartement fait partie de nos propres appartements."}` },
       { t: "Paiement sécurisé", d: `Vous payez en ligne, par carte, en euros, via PayPlus (paiement sécurisé). Des frais de carte de 1,9${N}% s'ajoutent.` },
       { t: "Le prix de tout l'appartement", d: "Le prix affiché est celui de l'appartement entier pour vos dates, pas par personne. Vous le voyez avant de payer." },
       { t: "Des conditions claires", d: "Les remboursements en cas d'annulation sont écrits à l'avance, ci-dessous et dans nos conditions de réservation." },
@@ -79,7 +79,7 @@ function copy(lang: Lang, agency: boolean): Copy {
     cancelNote: "Si vous trouvez quelqu'un pour vous remplacer, prévenez-nous et nous ferons le changement. En cas de guerre, de fermeture de l'espace aérien ou de force majeure, nous vous aidons à limiter la perte et nous vous reversons tout remboursement obtenu pour vous.",
     faqTitle: "Questions avant de réserver",
     faq: [
-      { q: "Qui est SkiShare ?", a: "SkiShare est une société qui loue des appartements à Val Thorens : ses propres appartements, et des appartements d'agence à la semaine. Le site est en français, en anglais et en hébreu, et le paiement se fait en ligne, en euros." },
+      { q: "Qui est SkiShare ?", a: "SkiShare est une société qui loue des appartements à Val Thorens : ses propres appartements, et des appartements d'agence à la semaine. Le site est en français et en anglais, et le paiement se fait en ligne, en euros." },
       { q: "Le paiement est-il sécurisé ?", a: `Oui. Le paiement se fait par carte sur la page sécurisée de PayPlus, en euros. Des frais de carte de 1,9${N}% s'ajoutent au prix.` },
       { q: "Le prix est-il par personne ?", a: "Non. Le prix est celui de l'appartement entier pour vos dates, quel que soit le nombre de personnes (jusqu'au maximum de l'appartement)." },
       { q: "Quand ma réservation est-elle confirmée ?", a: "Après le paiement complet et sa validation par SkiShare." },
@@ -93,7 +93,7 @@ function copy(lang: Lang, agency: boolean): Copy {
   return {
     trustTitle: "Book with confidence",
     trust: [
-      { t: "A real company", d: `SkiShare is a company specialising in ski holidays in Val Thorens, with a site in English, French and Hebrew. ${agency ? "This apartment is offered by a partner agency, by the week." : "This is one of our own apartments."}` },
+      { t: "A real company", d: `SkiShare is a company specialising in ski holidays in Val Thorens, with a site in English and French. ${agency ? "This apartment is offered by a partner agency, by the week." : "This is one of our own apartments."}` },
       { t: "Secure payment", d: "You pay online by card, in euros, through PayPlus (secure payment). A 1.9% card fee is added." },
       { t: "The price of the whole apartment", d: "The price shown is for the whole apartment for your dates, not per person. You see it before you pay." },
       { t: "Clear terms", d: "The cancellation refunds are written down in advance, below and in our booking terms." },
@@ -123,7 +123,7 @@ function copy(lang: Lang, agency: boolean): Copy {
     cancelNote: "If you find someone to take your place, tell us and we will hand the booking over. In case of war, closed airspace or force majeure, we help limit your loss and pass on to you any refund we receive for you.",
     faqTitle: "Questions before booking",
     faq: [
-      { q: "Who is SkiShare?", a: "SkiShare is a company renting apartments in Val Thorens: its own apartments, and agency apartments by the week. The site is in English, French and Hebrew, and you pay online, in euros." },
+      { q: "Who is SkiShare?", a: "SkiShare is a company renting apartments in Val Thorens: its own apartments, and agency apartments by the week. The site is in English and French, and you pay online, in euros." },
       { q: "Is the payment secure?", a: "Yes. You pay by card on PayPlus's secure page, in euros. A 1.9% card fee is added to the price." },
       { q: "Is the price per person?", a: "No. The price is for the whole apartment for your dates, whatever the number of guests (up to the apartment's maximum)." },
       { q: "When is my booking confirmed?", a: "Once the full payment is made and approved by SkiShare." },
