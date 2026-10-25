@@ -50,7 +50,7 @@ export default function IntlFooter({ lang }: { lang: Lang }) {
             <a href={SOCIAL.facebook} target="_blank" rel="noopener me" className={linkCls}>Facebook</a>
             <span className="font-bold text-[15px] text-ink mt-4 mb-1">{t.footer.languages}</span>
             <ul className="flex flex-wrap gap-x-4">
-              {homes.map(h => (
+              {homes.filter(h => h.code !== "he").map(h => (
                 <li key={h.code}>
                   {/* a full page load: the other language has its own frame */}
                   <a href={h.href} hrefLang={h.code} lang={h.code} aria-current={h.code === lang ? "true" : undefined}
