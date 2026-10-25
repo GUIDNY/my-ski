@@ -1,5 +1,5 @@
 import type { ProposalData, ProposalBlock, ProposalHero } from "@/types";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import QRCode from "qrcode";
 import { BANK } from "@/lib/bank";
 import { DEFAULT_TERMS_SECTION, MANDATORY_TERM_BLOCKS } from "@/lib/proposal-demo";
@@ -290,6 +290,8 @@ export const COVER_CSS = `
 .proposal table.sum tr:last-child td, .proposal table.flt tr:last-child td { border-bottom:none; }
 .proposal .intro { background:#fff; }
 .proposal .paycard .ph { background:var(--box); color:var(--ink); }
+.proposal .pay-help { font-size:9pt; margin-top:1mm; overflow-wrap:anywhere; }
+.proposal .pay-help a { color:var(--accent); }
 .proposal .pay-btn + .pay-btn { background:#fff; color:var(--accent); border:1.5px solid var(--accent); padding:3.6mm; font-size:11pt; }
 .proposal .upg { display:grid; grid-template-columns:1fr 1fr; gap:3mm; }
 .proposal .upg div { border:1px solid var(--line); border-radius:4mm; padding:4mm 5mm; break-inside:avoid; }
@@ -472,7 +474,18 @@ export default function ProposalDocument({ data, link }: { data: ProposalData; l
         <section key={si}>
           {si === termsAt && <PayCard data={data} link={link} />}
           <h2><span className="num">{si + 1}</span>{sec.heading}</h2>
-          {sec.blocks.map((b, bi) => <Block key={bi} block={b} />)}
+          {sec.blocks.map((b, bi) => (
+            <Fragment key={bi}>
+              <Block block={b} />
+              {/* after the pay buttons: some PDF viewers (WhatsApp's preview on a computer) don't open links */}
+              {b.type === "payment" && sec.blocks[bi + 1]?.type !== "payment" && (
+                <p className="note pay-help">
+                  הכפתורים נפתחים כשפותחים את הקובץ בטלפון או בתוכנת PDF רגילה. בתצוגה המהירה של וואטסאפ במחשב הם לפעמים לא נלחצים.
+                  {link ? <> אם זה לא עובד, אפשר תמיד לשלם בדף ההצעה באתר: <a href={link}>{link.replace(/^https?:\/\//, "")}</a></> : " אם זה לא עובד, אפשר תמיד לשלם דרך הלינק להצעה ששלחנו לכם."}
+                </p>
+              )}
+            </Fragment>
+          ))}
         </section>
       ))}
 
