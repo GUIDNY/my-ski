@@ -43,6 +43,13 @@ const nextConfig: NextConfig = {
       { source: "/BookingPayment", destination: "/apartments", permanent: true },
       { source: "/DepositPayment", destination: "/apartments", permanent: true },
       { source: "/ThankYou", destination: "/", permanent: true },
+      { source: "/forecast", destination: "/val-thorens-weather", permanent: true },
+      { source: "/GeneralInfo", destination: FULL_GUIDE, permanent: true },
+      { source: "/ApartmentDetails", destination: "/apartments", permanent: true },
+      { source: "/CabinBookingManagement", destination: "/apartments", permanent: true },
+      { source: "/SkiShareCRM", destination: "/", permanent: true },
+      { source: "/LeadManagement", destination: "/", permanent: true },
+      { source: "/PaymentSimulator", destination: "/", permanent: true },
       { source: "/MayrhofenInfo", destination: "/guide", permanent: true },
       { source: "/PartyTicket", destination: "/guide/" + encodeURIComponent("אפרה-סקי-ומסעדות-בואל-טורנס"), permanent: true },
     ];
