@@ -421,11 +421,17 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
       <PageTop soft
         crumbs={[{ label: "דף הבית", href: "/" }, { label: "הסעות" }]}
         title="הסעה משדה התעופה לואל טורנס"
-        sub="רכב פרטי עד הדלת או מושב בשאטל משותף, מז'נבה או מליון. בוחרים תאריך ורואים את כל האפשרויות במחיר חי."
+        sub="מז'נבה או מליון עד הדלת בואל טורנס. בוחרים תאריך ורואים את כל האפשרויות במחיר חי."
         aside={aptName && checkin && checkout ? (
           <span className={chip}><span className="text-accent"><IcoHome size={16} /></span>{aptName} · {fmtDate(checkin)} עד {fmtDate(checkout)}</span>
         ) : undefined}>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6 md:mt-8">
+        {/* phones: three small chips; bigger screens: three cards */}
+        <div className="flex flex-wrap gap-2 mt-4 sm:hidden">
+          {[[<IcoVan key="v" size={16} />, "רכב פרטי"], [<IcoUsersTop key="u" size={16} />, "שאטל משותף"], [<IcoTag key="t" size={16} />, "מחיר חי"]].map(([i, t]) => (
+            <span key={String(t)} className="inline-flex items-center gap-1.5 bg-white border border-line rounded-full px-3 py-1.5 text-[14px] font-bold text-ink"><span className="text-accent">{i}</span>{t}</span>
+          ))}
+        </div>
+        <div className="hidden sm:grid grid-cols-3 gap-3 mt-6 md:mt-8">
           {[
             { i: <IcoVan />, t: "רכב פרטי", d: "רק אתם, מהשדה עד דלת הדירה" },
             { i: <IcoUsersTop />, t: "שאטל משותף", d: "מושב לכל אחד, לפי הטיסה שלכם" },
