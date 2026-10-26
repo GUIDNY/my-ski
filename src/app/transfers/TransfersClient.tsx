@@ -161,7 +161,7 @@ function FlightLeg({ id, title, flightNum, date, time, onFlight, onDate, onTime,
   );
 }
 
-export type TransferInitial = { checkin: string; checkout: string; guests: number; aptName: string; aptId: string; airport?: string; direction?: "outbound" | "return" | "both"; outTime?: string; retTime?: string; outFlight?: string; retFlight?: string };
+export type TransferInitial = { checkin: string; checkout: string; guests: number; aptName: string; aptId: string; airport?: string; direction?: "outbound" | "return" | "both"; outTime?: string; retTime?: string; outFlight?: string; retFlight?: string; luggage?: number; ski?: number };
 
 /* ── The booking form (the page around it renders on the server) ── */
 export default function TransfersClient({ initial }: { initial: TransferInitial }) {
@@ -200,8 +200,8 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
 
   // Vehicle class + extras — chosen once, applied to every active leg.
   const [vehicleClassId, setVehicleClassId] = useState<string | null>(null);
-  const [luggage, setLuggage] = useState(passengers);
-  const [ski,     setSki]     = useState(0);
+  const [luggage, setLuggage] = useState(initial.luggage ?? passengers);
+  const [ski,     setSki]     = useState(initial.ski ?? 0);
   // a private car, or a seat on the shared shuttle (when the transfer company runs one for the flight)
   const [service, setService] = useState<"private" | "shared">("private");
   const [suppQty, setSuppQty] = useState<Record<string, number>>({});
