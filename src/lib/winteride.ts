@@ -33,7 +33,7 @@ export type WinterideQuote = {
   flight: { flight_no: string | null; found: boolean; time: string | null };
   travel: { drive_minutes: number; km: number };
   private: WinterideVehicleQuote[];
-  shared: { available: boolean; reason?: string };
+  shared: { available: boolean; reason?: string; price_cents?: number; currency?: string; seats_remaining?: number; on_request?: boolean } | null;
   supplements: { id: string; name: string; price_cents: number }[];
 };
 
@@ -44,11 +44,21 @@ export type QuoteParams = {
   pax: number;
   out_direction: "arrival" | "departure";
   flight_no?: string;
+  luggage?: number;
+  ski?: number;
 };
 
-// Pricing only — does NOT create a booking or charge anything.
+// Pricing only — does NOT create a booking or charge anything. The partner API
+// reads the leg as `direction` (arrival = airport → resort); out_direction is
+// sent too, as before. A flight number also prices a shared seat.
 export function getQuote(params: QuoteParams) {
-  return winterideFetch<WinterideQuote>("/quotes", { method: "POST", body: JSON.stringify(params) });
+  return winterideFetch<WinterideQuote>("/quotes", { method: "POST", body: JSON.stringify({ ...params, direction: params.out_direction }) });
+}
+
+/** A flight's scheduled time (Europe/Paris) for a date: lands (arrival) or takes off (departure). */
+export function lookupFlight(p: { flight_no: string; date: string; direction: "arrival" | "departure"; airport_code: string }) {
+  const q = new URLSearchParams(p).toString();
+  return winterideFetch<Record<string, unknown>>(`/flights/lookup?${q}`);
 }
 
 export type WinterideBooking = {
@@ -61,11 +71,12 @@ export type WinterideBooking = {
 };
 
 export type CreateBookingParams = QuoteParams & {
-  chosen_class: string; // vehicle_class_id from the quote the customer picked
+  chosen_class?: string; // vehicle_class_id from the quote the customer picked (not for a shared seat)
   customer: { name: string; phone?: string; email?: string };
   luggage?: number;
   ski?: number;
   supplements?: string[]; // supplement ids from the quote's `supplements` list
+  service_type?: "private" | "shared";
 };
 
 // Creates a REAL, billable, confirmed booking on the partner account. Only

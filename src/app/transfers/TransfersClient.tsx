@@ -5,20 +5,34 @@ import { PageTop, card, btn, field, fieldLabel, chip, wrap } from "@/components/
 
 type VehicleClass = { class: string; vehicle_class_id: string; max_pax: number; max_luggage: number; on_request: boolean; price_cents: number };
 type Supplement = { id: string; name: string; price_cents: number };
-type LiveQuote = { private: VehicleClass[]; supplements: Supplement[] } | null;
+type Shared = { available: boolean; price_cents?: number; seats_remaining?: number; on_request?: boolean } | null;
+type LiveQuote = { private: VehicleClass[]; supplements: Supplement[]; shared: Shared; travel: { drive_minutes?: number; km?: number } | null } | null;
 
-// Full Winteride /quotes response for one leg (vehicle classes + available supplements).
-async function fetchLiveQuote(params: { airport_code: string; resort_slug: string; date: string; pax: number; out_direction: "arrival" | "departure"; flight_no?: string }): Promise<LiveQuote> {
+// Full Winteride /quotes response for one leg (vehicle classes, shared seats, supplements, the drive).
+async function fetchLiveQuote(params: { airport_code: string; resort_slug: string; date: string; pax: number; out_direction: "arrival" | "departure"; flight_no?: string; luggage?: number; ski?: number }): Promise<LiveQuote> {
   try {
     const res = await fetch("/api/transfers/quote", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(params) });
     if (!res.ok) return null;
     const q = await res.json();
     if (!q.private?.length) return null;
-    return { private: q.private, supplements: q.supplements ?? [] };
+    return { private: q.private, supplements: q.supplements ?? [], shared: q.shared ?? null, travel: q.travel ?? null };
   } catch {
     return null;
   }
 }
+
+/** A value that settles a moment after the user stops typing (the flight number fetches prices). */
+function useSettled<T>(v: T, ms = 700): T {
+  const [s, setS] = useState(v);
+  useEffect(() => { const t = setTimeout(() => setS(v), ms); return () => clearTimeout(t); }, [v, ms]);
+  return s;
+}
+
+const CLASS_HE: Record<string, string> = {
+  sedan: "רכב פרטי (סדאן)", minivan: "מיניוואן", van: "ואן", "Premium minivan": "מיניוואן פרימיום",
+  minibus: "מיניבוס", coach: "אוטובוס",
+};
+const sharedSeat = (q: LiveQuote) => (q?.shared?.available && q.shared.price_cents ? q.shared : null);
 
 const SUPPLEMENT_LABELS: Record<string, string> = {
   "Additional stop": "עצירה נוספת",
@@ -80,11 +94,13 @@ const optionCls = (on: boolean) =>
   `rounded-2xl border text-right transition-colors ${on ? "border-accent bg-accent-soft ring-1 ring-accent" : "border-line bg-white hover:border-line-strong"}`;
 
 /* ── Flight leg form ───────────────────────────────────────── */
-function FlightLeg({ id, title, flightNum, date, time, onFlight, onDate, onTime }: {
+function FlightLeg({ id, title, flightNum, date, time, onFlight, onDate, onTime, found }: {
   id: string;
   title: string;
   flightNum: string; date: string; time: string;
   onFlight(v: string): void; onDate(v: string): void; onTime(v: string): void;
+  /** the flight's own time, from the transfer company's flight lookup */
+  found?: string | null;
 }) {
   const elal = isElAl(flightNum);
   return (
@@ -113,6 +129,11 @@ function FlightLeg({ id, title, flightNum, date, time, onFlight, onDate, onTime 
             className={`${field} text-right`} dir="ltr" />
         </Field>
       </div>
+      {found && (
+        <p className="flex items-center gap-2 text-[14px] text-ok-text mt-3 bg-ok-soft rounded-xl px-3.5 py-2.5">
+          <IcoCheck size={15} /> מצאנו את הטיסה: {id === "out" ? "נוחתת" : "ממריאה"} ב-<span dir="ltr">{found}</span>{time && time !== found ? <> (בטופס: <span dir="ltr">{time}</span>)</> : null}
+        </p>
+      )}
       {flightNum && !elal && (
         <p className="flex items-start gap-2 text-[14px] text-warn mt-3 bg-warn-soft rounded-xl px-3.5 py-2.5">
           <span className="mt-0.5 shrink-0"><IcoInfo size={16} /></span>
@@ -162,9 +183,16 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
 
   // Vehicle class + extras — chosen once, applied to every active leg.
   const [vehicleClassId, setVehicleClassId] = useState<string | null>(null);
-  const [supplementIds, setSupplementIds]   = useState<string[]>([]);
   const [luggage, setLuggage] = useState(passengers);
   const [ski,     setSki]     = useState(0);
+  // a private car, or a seat on the shared shuttle (when the transfer company runs one for the flight)
+  const [service, setService] = useState<"private" | "shared">("private");
+  const [suppQty, setSuppQty] = useState<Record<string, number>>({});
+  const [outFound, setOutFound] = useState<string | null>(null);
+  const [retFound, setRetFound] = useState<string | null>(null);
+  const outFlightQ = useSettled(outFlight.trim().toUpperCase());
+  const retFlightQ = useSettled(retFlight.trim().toUpperCase());
+  const luggageQ = useSettled(luggage), skiQ = useSettled(ski);
 
   // The live-price effects are kept as they were: they clear a leg's quote when
   // it's switched off, and pick the cheapest vehicle once classes arrive.
@@ -173,35 +201,69 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
     if (direction === "return" || !outDate) { setOutQuote(null); return; }
     let cancelled = false;
     setQuoting(true);
-    fetchLiveQuote({ airport_code: airport, resort_slug: "val-thorens", date: outDate, pax: passengers, out_direction: "arrival", flight_no: outFlight || undefined })
+    fetchLiveQuote({ airport_code: airport, resort_slug: "val-thorens", date: outDate, pax: passengers, out_direction: "arrival", flight_no: outFlightQ || undefined, luggage: luggageQ, ski: skiQ })
       .then(q => { if (!cancelled) setOutQuote(q); })
       .finally(() => { if (!cancelled) setQuoting(false); });
     return () => { cancelled = true; };
-  }, [airport, outDate, passengers, outFlight, direction]);
+  }, [airport, outDate, passengers, outFlightQ, luggageQ, skiQ, direction]);
 
   useEffect(() => {
     if (direction === "outbound" || !retDate) { setRetQuote(null); return; }
     let cancelled = false;
     setQuoting(true);
-    fetchLiveQuote({ airport_code: airport, resort_slug: "val-thorens", date: retDate, pax: passengers, out_direction: "departure", flight_no: retFlight || undefined })
+    fetchLiveQuote({ airport_code: airport, resort_slug: "val-thorens", date: retDate, pax: passengers, out_direction: "departure", flight_no: retFlightQ || undefined, luggage: luggageQ, ski: skiQ })
       .then(q => { if (!cancelled) setRetQuote(q); })
       .finally(() => { if (!cancelled) setQuoting(false); });
     return () => { cancelled = true; };
-  }, [airport, retDate, passengers, retFlight, direction]);
+  }, [airport, retDate, passengers, retFlightQ, luggageQ, skiQ, direction]);
+
+  // the flight's own time: shown under the leg, and filled in when the time is still empty
+  useEffect(() => {
+    setOutFound(null);
+    if (direction === "return" || !outDate || !/^[A-Z0-9]{2}\d{1,4}$/.test(outFlightQ)) return;
+    let cancelled = false;
+    fetch(`/api/transfers/flight?flight_no=${outFlightQ}&date=${outDate}&direction=arrival&airport_code=${airport}`)
+      .then(r => r.json()).then(f => {
+        if (cancelled || !f?.found || !f.time) return;
+        setOutFound(f.time); setOutTime(t => t || f.time);
+      }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [airport, outDate, outFlightQ, direction]);
+  useEffect(() => {
+    setRetFound(null);
+    if (direction === "outbound" || !retDate || !/^[A-Z0-9]{2}\d{1,4}$/.test(retFlightQ)) return;
+    let cancelled = false;
+    fetch(`/api/transfers/flight?flight_no=${retFlightQ}&date=${retDate}&direction=departure&airport_code=${airport}`)
+      .then(r => r.json()).then(f => {
+        if (cancelled || !f?.found || !f.time) return;
+        setRetFound(f.time); setRetTime(t => t || f.time);
+      }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [airport, retDate, retFlightQ, direction]);
 
   // Master class/supplements list — whichever leg has answered first.
   const referenceQuote = outQuote ?? retQuote;
   const availableClasses = referenceQuote?.private ?? [];
   const availableSupplements = referenceQuote?.supplements ?? [];
 
+  // a car fits when the people and the bags (suitcases and ski sets) fit in it
+  const fits = (c: VehicleClass) => c.max_pax >= passengers && c.max_luggage >= luggage + ski;
   useEffect(() => {
     if (!availableClasses.length) return;
-    if (vehicleClassId && availableClasses.some(c => c.vehicle_class_id === vehicleClassId)) return;
-    const bookable = availableClasses.filter(c => !c.on_request);
+    const cur = availableClasses.find(c => c.vehicle_class_id === vehicleClassId);
+    if (cur && fits(cur)) return;
+    const fitting = availableClasses.filter(c => !c.on_request && fits(c));
+    const bookable = fitting.length ? fitting : availableClasses.filter(c => !c.on_request);
     const cheapest = (bookable.length ? bookable : availableClasses).reduce((a, b) => (b.price_cents < a.price_cents ? b : a));
     setVehicleClassId(cheapest.vehicle_class_id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [availableClasses.map(c => c.vehicle_class_id).join(",")]);
+  }, [availableClasses.map(c => c.vehicle_class_id).join(","), passengers, luggage, ski]);
+
+  // shared seats: on each active leg, for the flight given (priced per person)
+  const outShared = direction !== "return" ? sharedSeat(outQuote) : null;
+  const retShared = direction !== "outbound" ? sharedSeat(retQuote) : null;
+  const sharedOffered = (direction === "return" || !!outShared) && (direction === "outbound" || !!retShared);
+  useEffect(() => { if (service === "shared" && !sharedOffered) setService("private"); }, [service, sharedOffered]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
   const directions = direction === "both" ? 2 : 1;
@@ -209,9 +271,14 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
   const outClassPrice = direction !== "return" ? classPriceFor(outQuote) : null;
   const retClassPrice = direction !== "outbound" ? classPriceFor(retQuote) : null;
   const hasLivePrice = (direction !== "return" ? outClassPrice != null : true) && (direction !== "outbound" ? retClassPrice != null : true);
-  const supplementsCentsPerLeg = availableSupplements.filter(s => supplementIds.includes(s.id)).reduce((sum, s) => sum + s.price_cents, 0);
-  const liveCentsTotal = (outClassPrice ?? 0) + (retClassPrice ?? 0) + supplementsCentsPerLeg * directions;
-  const totalPrice = hasLivePrice ? Math.round(liveCentsTotal / 100) : PRICE_PER_DIRECTION * directions * passengers;
+  const supplementsCentsPerLeg = availableSupplements.reduce((sum, s) => sum + s.price_cents * (suppQty[s.id] || 0), 0);
+  const isShared = service === "shared" && sharedOffered;
+  const sharedCents = ((outShared?.price_cents ?? 0) + (retShared?.price_cents ?? 0)) * passengers;
+  const liveCentsTotal = isShared ? sharedCents + supplementsCentsPerLeg * directions
+    : (outClassPrice ?? 0) + (retClassPrice ?? 0) + supplementsCentsPerLeg * directions;
+  const totalPrice = isShared || hasLivePrice ? Math.round(liveCentsTotal / 100) : PRICE_PER_DIRECTION * directions * passengers;
+  const travel = (outQuote ?? retQuote)?.travel;
+  const driveText = travel?.drive_minutes ? `כ-${Math.floor(travel.drive_minutes / 60)}:${String(travel.drive_minutes % 60).padStart(2, "0")} שעות נסיעה${travel.km ? ` · ${travel.km} ק״מ` : ""}` : "";
 
   // Is confirmed price? All selected legs must be El Al
   const outIsElal = isElAl(outFlight);
@@ -248,9 +315,9 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
         notes: [aptName ? `דירה: ${aptName}` : "", notes].filter(Boolean).join(" | ") || null,
         apartment_id: aptId || null,
         resort_slug: "val-thorens",
-        vehicle_class: availableClasses.find(c => c.vehicle_class_id === vehicleClassId)?.class ?? "sedan",
-        vehicle_class_id: vehicleClassId,
-        supplements: supplementIds,
+        vehicle_class: isShared ? "shared" : availableClasses.find(c => c.vehicle_class_id === vehicleClassId)?.class ?? "sedan",
+        vehicle_class_id: isShared ? null : vehicleClassId,
+        supplements: Object.entries(suppQty).flatMap(([id, n]) => Array.from({ length: n }, () => id)),
         luggage,
         ski,
         quote_snapshot: { outbound: outQuote, return: retQuote },
@@ -367,14 +434,14 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
                 <FlightLeg id="out"
                   title="טיסת הלוך · נחיתה בשדה התעופה"
                   flightNum={outFlight} date={outDate} time={outTime}
-                  onFlight={setOutFlight} onDate={setOutDate} onTime={setOutTime}
+                  onFlight={setOutFlight} onDate={setOutDate} onTime={setOutTime} found={outFound}
                 />
               )}
               {(direction === "return" || direction === "both") && (
                 <FlightLeg id="ret"
                   title="טיסת חזור · המראה משדה התעופה"
                   flightNum={retFlight} date={retDate} time={retTime}
-                  onFlight={setRetFlight} onDate={setRetDate} onTime={setRetTime}
+                  onFlight={setRetFlight} onDate={setRetDate} onTime={setRetTime} found={retFound}
                 />
               )}
             </Step>
@@ -406,10 +473,37 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
 
               {availableClasses.length > 0 && (
                 <div className="flex flex-col gap-2">
+                  <span className={fieldLabel}>איך נוסעים</span>
+                  <div role="radiogroup" aria-label="סוג ההסעה" className="grid grid-cols-2 gap-1 bg-soft border border-line rounded-2xl p-1">
+                    <button type="button" role="radio" aria-checked={!isShared} onClick={() => setService("private")}
+                      className={`min-h-[52px] rounded-xl text-[15px] font-bold transition-colors flex flex-col items-center justify-center ${!isShared ? "bg-ink text-white" : "text-ink hover:bg-white"}`}>
+                      רכב פרטי<span className={`text-[12px] font-medium ${!isShared ? "text-white/75" : "text-muted"}`}>רק אתם, מהשדה עד הדלת</span>
+                    </button>
+                    <button type="button" role="radio" aria-checked={isShared} onClick={() => sharedOffered && setService("shared")} disabled={!sharedOffered}
+                      className={`min-h-[52px] rounded-xl text-[15px] font-bold transition-colors flex flex-col items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed ${isShared ? "bg-ink text-white" : "text-ink hover:bg-white"}`}>
+                      שאטל משותף<span className={`text-[12px] font-medium ${isShared ? "text-white/75" : "text-muted"}`}>
+                        {sharedOffered ? `€${Math.round(((outShared?.price_cents ?? 0) + (retShared?.price_cents ?? 0)) / 100)} לאדם` : "מחיר לפי מספר הטיסה"}
+                      </span>
+                    </button>
+                  </div>
+                  {isShared ? (
+                    <p className="text-[14px] text-body bg-soft rounded-xl px-3.5 py-2.5">
+                      מושב בשאטל עם נוסעים מטיסות באותו זמן, עד הכפר. זול יותר, וייתכנו המתנה קצרה ועצירות בדרך.
+                      {[outShared?.seats_remaining, retShared?.seats_remaining].some(n => typeof n === "number" && n < 8) && <> נשארו מעט מקומות.</>}
+                    </p>
+                  ) : !sharedOffered && (
+                    <p className="text-[13px] text-muted">שאטל משותף מוצג כשיש לטיסה שלכם שאטל: כותבים את מספר הטיסה בשלב 2.</p>
+                  )}
+                </div>
+              )}
+
+              {availableClasses.length > 0 && !isShared && (
+                <div className="flex flex-col gap-2">
                   <span className={fieldLabel}>סוג רכב</span>
                   <div role="radiogroup" aria-label="סוג רכב" className="flex flex-col gap-2">
-                    {availableClasses.map(c => {
+                    {availableClasses.filter(c => c.max_pax >= passengers).map(c => {
                       const on = vehicleClassId === c.vehicle_class_id;
+                      const tight = c.max_luggage < luggage + ski;
                       return (
                         <button key={c.vehicle_class_id} type="button" role="radio" aria-checked={on}
                           onClick={() => setVehicleClassId(c.vehicle_class_id)}
@@ -418,8 +512,8 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
                           <span className="flex items-center gap-3">
                             <span className={on ? "text-accent" : "text-muted"}><IcoVan /></span>
                             <span className="flex flex-col">
-                              <span className="font-bold text-[16px] text-ink">{c.class}{c.on_request && " (לפי בקשה בלבד)"}</span>
-                              <span className="text-[14px] text-muted">עד {c.max_pax} נוסעים · עד {c.max_luggage} מזוודות</span>
+                              <span className="font-bold text-[16px] text-ink">{CLASS_HE[c.class] ?? c.class}{c.on_request && " (לפי בקשה בלבד)"}</span>
+                              <span className={`text-[14px] ${tight ? "text-warn" : "text-muted"}`}>עד {c.max_pax} נוסעים · עד {c.max_luggage} מזוודות{tight ? " · צפוף לכמות התיקים" : ""}</span>
                             </span>
                           </span>
                           <span className="font-display font-bold text-[17px] text-ink whitespace-nowrap">€{Math.round(c.price_cents / 100)}{direction === "both" ? <span className="text-[14px] font-medium text-muted"> / כיוון</span> : ""}</span>
@@ -434,18 +528,22 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
                 <div className="flex flex-col gap-2">
                   <span className={fieldLabel}>תוספות</span>
                   {availableSupplements.map(s => {
-                    const checked = supplementIds.includes(s.id);
+                    const n = suppQty[s.id] || 0;
+                    const set = (v: number) => setSuppQty(q => ({ ...q, [s.id]: Math.max(0, Math.min(6, v)) }));
                     return (
-                      <label key={s.id}
-                        className={`${optionCls(checked)} flex items-center justify-between gap-3 px-4 py-3.5 min-h-[56px] cursor-pointer`}>
-                        <span className="flex items-center gap-3">
-                          <input type="checkbox" checked={checked}
-                            onChange={() => setSupplementIds(v => checked ? v.filter(id => id !== s.id) : [...v, s.id])}
-                            className="w-5 h-5 accent-[#1652F0]" />
+                      <div key={s.id} className={`${optionCls(n > 0)} flex items-center justify-between gap-3 px-4 py-3 min-h-[56px]`}>
+                        <span className="flex flex-col">
                           <span className="text-[16px] font-bold text-ink">{SUPPLEMENT_LABELS[s.name] ?? s.name}</span>
+                          <span className="text-[14px] text-muted"><span dir="ltr">+€{(s.price_cents / 100).toFixed(0)}</span> ליחידה{directions > 1 ? " לכל כיוון" : ""}</span>
                         </span>
-                        <span className="text-[16px] font-bold text-ink whitespace-nowrap"><span dir="ltr">+€{(s.price_cents / 100).toFixed(0)}</span>{directions > 1 ? <span className="text-[14px] font-medium text-muted"> / כיוון</span> : ""}</span>
-                      </label>
+                        <span className="flex items-center gap-2" role="group" aria-label={SUPPLEMENT_LABELS[s.name] ?? s.name}>
+                          <button type="button" onClick={() => set(n - 1)} disabled={n === 0} aria-label="פחות"
+                            className="w-10 h-10 rounded-lg border border-line bg-white flex items-center justify-center text-[18px] font-bold text-ink disabled:opacity-40">−</button>
+                          <span className="w-6 text-center font-bold text-ink" aria-live="polite">{n}</span>
+                          <button type="button" onClick={() => set(n + 1)} aria-label="עוד"
+                            className="w-10 h-10 rounded-lg border border-line bg-white flex items-center justify-center text-[18px] font-bold text-ink">+</button>
+                        </span>
+                      </div>
                     );
                   })}
                 </div>
@@ -491,18 +589,20 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
                 <div className="flex justify-between gap-3"><dt className="text-body">שדה תעופה</dt><dd className="font-bold text-ink">{airportLabel}</dd></div>
                 <div className="flex justify-between gap-3"><dt className="text-body">כיוון</dt><dd className="font-bold text-ink">{directionLabel}</dd></div>
                 <div className="flex justify-between gap-3"><dt className="text-body">נוסעים</dt><dd className="font-bold text-ink">{passengers}</dd></div>
+                <div className="flex justify-between gap-3"><dt className="text-body">הסעה</dt><dd className="font-bold text-ink">{isShared ? "שאטל משותף" : CLASS_HE[availableClasses.find(c => c.vehicle_class_id === vehicleClassId)?.class ?? ""] ?? "רכב פרטי"}</dd></div>
+                {driveText && <div className="flex justify-between gap-3"><dt className="text-body">הדרך</dt><dd className="font-bold text-ink">{driveText}</dd></div>}
               </dl>
 
               <div className="border-t border-line pt-4 flex flex-col gap-1">
                 <span className="text-[13px] text-muted">
-                  {quoting ? "בודקים מחיר עדכני…" : hasLivePrice ? `${directions === 1 ? "כיוון אחד" : `${directions} כיוונים`} · מחיר חי מספק ההסעות` : `€${PRICE_PER_DIRECTION} × ${directions === 1 ? "כיוון אחד" : `${directions} כיוונים`} × ${passengers} נוסעים`}
+                  {quoting ? "בודקים מחיר עדכני…" : isShared ? `${passengers} מושבים · ${directions === 1 ? "כיוון אחד" : `${directions} כיוונים`} · מחיר חי` : hasLivePrice ? `${directions === 1 ? "כיוון אחד" : `${directions} כיוונים`} · מחיר חי מספק ההסעות` : `€${PRICE_PER_DIRECTION} × ${directions === 1 ? "כיוון אחד" : `${directions} כיוונים`} × ${passengers} נוסעים`}
                 </span>
                 <div className="flex items-baseline justify-between gap-3">
                   <span className="text-[15px] text-muted">סה״כ</span>
                   <span className="font-display font-extrabold text-[36px] leading-none text-ink">€{totalPrice}</span>
                 </div>
-                <span className={`self-end text-[13px] font-bold ${hasLivePrice ? "text-ok-text" : "text-warn"}`}>
-                  {hasLivePrice ? "מחיר חי" : "מחיר משוער, יעודכן לפני האישור"}
+                <span className={`self-end text-[13px] font-bold ${isShared || hasLivePrice ? "text-ok-text" : "text-warn"}`}>
+                  {isShared || hasLivePrice ? "מחיר חי" : "מחיר משוער, יעודכן לפני האישור"}
                 </span>
               </div>
 

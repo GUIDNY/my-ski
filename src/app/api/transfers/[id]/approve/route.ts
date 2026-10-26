@@ -25,6 +25,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   }
   if (!legs.length) return NextResponse.json({ error: "no legs to book" }, { status: 400 });
 
+  // a shared shuttle seat is booked as service_type "shared" (no vehicle class)
+  const shared = t.vehicle_class === "shared";
   const vehicleClass = t.vehicle_class_id ?? t.vehicle_class ?? "sedan";
   const bookings = [];
   try {
@@ -37,7 +39,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         pax: t.passengers,
         out_direction: leg.out_direction,
         flight_no: leg.flight_no ?? undefined,
-        chosen_class: vehicleClass,
+        ...(shared ? { service_type: "shared" as const } : { chosen_class: vehicleClass }),
         customer: { name: t.customer_name, phone: t.customer_phone ?? undefined, email: t.customer_email ?? undefined },
         luggage: t.luggage ?? undefined,
         ski: t.ski ?? undefined,
