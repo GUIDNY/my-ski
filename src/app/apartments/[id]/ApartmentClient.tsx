@@ -13,6 +13,8 @@ import {
 } from "@/components/Icons";
 import { buildWaHref } from "@/lib/whatsapp";
 import CardPaymentButton from "@/components/CardPaymentButton";
+import TransferChooser from "@/components/TransferChooser";
+import { codeOf, type TransferOption } from "@/lib/transfer-options";
 import FlightDetailsModal, { EMPTY_FLIGHT, flightToString, flightFilled, type Flight } from "@/components/FlightDetailsModal";
 import FlightAddOn from "@/components/FlightAddOn";
 import { useDirectFlight, useReturnLeg, time24 } from "@/lib/useFlightPrice";
@@ -413,6 +415,8 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
   const [transferQty, setTransferQty] = useState(guests || 1); // how many people need transfer
   const [equipQty, setEquipQty] = useState(preEquip ? (guests || 1) : 1);       // how many people need equipment
   const [showTransfer, setShowTransfer] = useState(false);
+  // the transfer picked for the flight (TransferChooser): live price for the whole group
+  const [trPick, setTrPick] = useState<TransferOption | null>(null);
   const [splitCount, setSplitCount] = useState(1);
   const [flight, setFlight] = useState<Flight>(EMPTY_FLIGHT);
   const [bookFlight, setBookFlight] = useState(false);   // "add the flight itself to the package" toggle
@@ -509,7 +513,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
   const avgNightlyPrice = breakdown.length > 0 ? Math.round((aptTotal - cleaningFee) / nights) : basePrice;
   const skiTotal        = skiOn && skiTier ? skiTier.price * skiQty : 0;
   // add-ons are per-person: price × number of people who need each add-on
-  const trTotal         = transfer ? TRANSFER_PRICE * transferQty : 0;
+  const trTotal         = transfer ? (trPick ? trPick.total : TRANSFER_PRICE * transferQty) : 0;
   const equipTotal      = equipment ? equipCost(skiDays) * equipQty : 0;
   const bookFlightTotal = flightOn && directFlight ? directFlight.price * bookFlightQty : 0;
   const baggageTotal    = bagOn ? BAGGAGE_PRICE * baggageQty : 0;
@@ -540,7 +544,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
   /* ── What the quote link carries: the add-ons picked here ─── */
   const quoteExtras = encodeExtras({
     pass: skiOn ? { area: skiArea, qty: skiQty } : undefined,
-    transfer: transfer ? { qty: transferQty } : undefined,
+    transfer: transfer ? { qty: transferQty, ...(trPick && codeOf(trPick) ? { kind: codeOf(trPick) } : {}), airport: flightOn && directFlight ? directFlight.airport : undefined } : undefined,
     equipment: equipment ? { qty: equipQty } : undefined,
     flight: flightOn ? { qty: bookFlightQty } : undefined,
     bag: bagOn ? { qty: baggageQty } : undefined,
@@ -576,7 +580,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
       `🏔️ דירה: ${apt?.name ?? ""}`,
       checkin && checkout ? `📅 תאריכים: ${fmtDate(checkin)} — ${fmtDate(checkout)} (${nights} לילות)` : `🗓️ ${nights} לילות`,
       `👥 אורחים: ${guests}`,
-      transfer ? `🚐 הסעה הלוך-חזור ל-${transferQty} אנשים (€${trTotal})${transferDetails ? ` · ${transferDetails}` : ""}` : null,
+      transfer ? `🚐 הסעה${trPick ? `: ${trPick.name}` : " הלוך-חזור"} ל-${transferQty} אנשים (€${trTotal})${transferDetails ? ` · ${transferDetails}` : ""}` : null,
       equipment ? `🎿 השכרת ציוד ל-${equipQty} אנשים (€${equipTotal})` : null,
       flightOn ? `✈️ ${bookFlightDetails} (€${bookFlightTotal})` : null,
       bagOn ? `🧳 מזוודה לבטן ל-${baggageQty} אנשים (€${baggageTotal})` : null,
@@ -690,7 +694,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
   const lines: { label: string; value: string; good?: boolean }[] = [
     { label: weekMatch ? "לינה, שבת עד שבת" : `לינה, ${nights} לילות${cleaningFee > 0 ? ", כולל ניקיון" : ""}`, value: eur(aptTotal) },
     ...(skiOn ? [{ label: `${passLabel} × ${skiQty}`, value: eur(skiTotal) }] : []),
-    ...(transfer ? [{ label: `הסעה הלוך וחזור × ${transferQty}`, value: eur(trTotal) }] : []),
+    ...(transfer ? [{ label: trPick ? `הסעה: ${trPick.name}` : `הסעה הלוך וחזור × ${transferQty}`, value: eur(trTotal) }] : []),
     ...(equipment ? [{ label: `ציוד, ${skiDays} ימים × ${equipQty}`, value: eur(equipTotal) }] : []),
     ...(flightOn ? [{ label: `${flightLabel} × ${bookFlightQty}`, value: eur(bookFlightTotal) }] : []),
     ...(bagOn ? [{ label: `מזוודה לבטן × ${baggageQty}`, value: eur(baggageTotal) }] : []),
@@ -812,8 +816,13 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
           <Section id="transfer" title="הסעה">
             <OptionCard kind="check" checked={transfer} icon={<IconBus size={20} />}
               onSelect={() => { const v = !transfer; setTransfer(v); if (v) setTransferQty(Math.min(transferQty || 1, guests) || 1); }}
-              title="שאטל ישיר משדה התעופה עד הדירה" sub={`הלוך וחזור · ${eur(TRANSFER_PRICE)} לאדם`}>
+              title="הסעה משדה התעופה עד הדירה" sub={trPick ? `${trPick.name} · ${eur(trPick.total)} לכל הקבוצה` : "רכב פרטי או שאטל משותף, לפי הטיסה"}>
               <QtyRow label="כמה אנשים צריכים הסעה?" qty={transferQty} setQty={setTransferQty} max={maxGuests} total={trTotal} />
+              <TransferChooser pax={transferQty || 1}
+                outDate={flight.arrDate || checkin} retDate={flight.retDate || checkout}
+                outFlight={flight.arrFlight} retFlight={flight.retFlight}
+                airport={flightOn && directFlight ? directFlight.airport : null}
+                value={trPick?.key ?? null} onChange={setTrPick} onFlightClick={() => setShowTransfer(true)} />
               <button type="button" onClick={() => setShowTransfer(true)}
                 className="flex items-center justify-between gap-3 min-h-[48px] px-4 rounded-2xl bg-white border border-line hover:border-line-strong text-[15px] text-start transition-colors">
                 <span className="font-bold text-ink flex items-center gap-2">

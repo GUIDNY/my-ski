@@ -24,6 +24,8 @@ export type QuoteInputs = {
   guests: number;
   /** what was picked (see quote-extras.ts) */
   extras: QuoteExtras;
+  /** the transfer option picked (TransferChooser / transferOptions), priced live */
+  transferPick?: { name: string; total: number; perPerson: number; legs: string } | null;
   cancel: string;
   service: string;
   /** the direct flight for the dates, when there is one */
@@ -64,7 +66,9 @@ export function quoteLines(i: QuoteInputs) {
       lines.push({ key: "pass", label: `סקי פס ${PASS_AREA_LABEL[x.pass.area]} × ${x.pass.qty}`, sub: `${tier.duration_days} ימים · ${eur(tier.price)} לאדם`, amount: tier.price * x.pass.qty });
     }
   }
-  if (x.transfer) lines.push({ key: "transfer", label: `הסעה הלוך וחזור × ${x.transfer.qty}`, sub: `שאטל מהשדה עד הדירה · ${eur(TRANSFER_PRICE)} לאדם`, amount: TRANSFER_PRICE * x.transfer.qty });
+  // the transfer: the option picked for the flight (live Winteride price, the whole group), or the flat price per person until it is known
+  if (x.transfer && i.transferPick) lines.push({ key: "transfer", label: `הסעה: ${i.transferPick.name}`, sub: `${i.transferPick.legs} · לכל ${x.transfer.qty} הנוסעים · ${eur(i.transferPick.perPerson)} לאדם`, amount: i.transferPick.total });
+  else if (x.transfer) lines.push({ key: "transfer", label: `הסעה הלוך וחזור × ${x.transfer.qty}`, sub: `שאטל מהשדה עד הדירה · ${eur(TRANSFER_PRICE)} לאדם`, amount: TRANSFER_PRICE * x.transfer.qty });
   if (x.equipment && skiDays > 0) {
     const unit = equipCost(skiDays);
     lines.push({ key: "equipment", label: `ציוד סקי או סנובורד × ${x.equipment.qty}`, sub: `${skiDays} ימי גלישה · ${eur(unit)} לאדם`, amount: unit * x.equipment.qty });

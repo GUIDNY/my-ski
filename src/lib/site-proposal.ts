@@ -7,6 +7,7 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { rulesWithAirbnb } from "@/lib/airbnb-calendar";
 import { decodeExtras } from "@/lib/quote-extras";
+import { byCode, transferOptions } from "@/lib/transfer-options";
 import { quoteLines } from "@/lib/quote-lines";
 import { AIRPORT_CITY, dayLabel, time24, type DirectFlight, type FlightAirport } from "@/lib/flight-format";
 import type { Apartment, ProposalBlock, ProposalData, ProposalSection, SkiPass } from "@/types";
@@ -61,9 +62,16 @@ export async function buildSiteProposal(one: (k: string) => string): Promise<{ d
     .map(f => ({ airport: f.dest, city: AIRPORT_CITY[f.dest], price: Number(f.price_eur), airline: f.airline ?? airlineShown, url: f.url ?? null, departTime: f.depart_time ?? outDepart, arriveTime: f.arrive_time ?? outArrive }))
     .sort((x, y) => x.price - y.price)[0] ?? null;
 
+  // the transfer the quote picked, priced live again (the shuttle needs flight numbers, which the link doesn't carry)
+  let transferPick: { name: string; total: number; perPerson: number; legs: string } | null = null;
+  if (extras.transfer) {
+    const t = await transferOptions({ airport: extras.transfer.airport ?? direct?.airport, outDate: checkin, retDate: checkout, pax: extras.transfer.qty }).catch(() => null);
+    const o = t?.ok ? (byCode(t, extras.transfer.kind === "sh" ? undefined : extras.transfer.kind) ?? t.options.find(x => x.key === t.best)) : undefined;
+    if (o) transferPick = { name: o.name, total: o.total, perPerson: o.perPerson, legs: "הלוך וחזור" };
+  }
   const calc = quoteLines({
     apt: a, rules: rulesMap?.get(apartmentId) ?? [], passes: (passes ?? []) as SkiPass[],
-    checkin, checkout, guests, extras, cancel, service, flight: direct,
+    checkin, checkout, guests, extras, cancel, service, flight: direct, transferPick,
   });
   const flightLine = calc.lines.find(l => l.key === "flight");
 

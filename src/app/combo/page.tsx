@@ -8,6 +8,8 @@ import { stayBreakdown, skiDaysFromNights, equipCost } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
 import CardPaymentButton from "@/components/CardPaymentButton";
 import SaveTripButton from "@/components/SaveTripButton";
+import TransferChooser from "@/components/TransferChooser";
+import type { TransferOption } from "@/lib/transfer-options";
 import FlightDetailsModal, { EMPTY_FLIGHT, flightToString, flightFilled, type Flight } from "@/components/FlightDetailsModal";
 import { buildWaHref } from "@/lib/whatsapp";
 import { IconUser, IconBed, IconWhatsApp, IconSkis, IconBus, IconPlane, IconShield, IconBot, IconCalendar, IconUsers, IconChevronLeft, IconInfo } from "@/components/Icons";
@@ -119,6 +121,7 @@ function ComboInner() {
   const [equipment, setEquipment] = useState(false);
   const [showTransfer, setShowTransfer] = useState(false);
   const [flight, setFlight] = useState<Flight>(EMPTY_FLIGHT);
+  const [trPick, setTrPick] = useState<TransferOption | null>(null);
   const [cancel, setCancel] = useState<"regular" | "none" | "flexible">("regular");
   const [showNoCancel, setShowNoCancel] = useState(false);
   const [noCancelAgreed, setNoCancelAgreed] = useState(false);
@@ -157,7 +160,7 @@ function ComboInner() {
   const totalA = stayA ? stayA.total : Number(a.price_per_night);
   const totalB = stayB ? stayB.total : Number(b.price_per_night);
   const cleaningFee = (stayA ? stayA.fee : 0) + (stayB ? stayB.fee : 0);
-  const trTotal = transfer ? TRANSFER_PRICE : 0;
+  const trTotal = transfer ? (trPick ? trPick.total : TRANSFER_PRICE) : 0;
   const equipTotal = equipment ? equipCost(skiDays) : 0;
   const flexExtra = cancel === "flexible" ? CANCEL_FLEX * Math.max(guests || 1, 1) : 0;
   const noCancelDiscount = cancel === "none" ? -CANCEL_NONE : 0;
@@ -177,7 +180,7 @@ function ComboInner() {
     intro: "היי! אשמח לפרטים על חבילה משולבת של שתי דירות 🎿",
     lines: [
       `דירות: ${comboName}`, `תאריכים: ${fmt(checkin)}–${fmt(checkout)}`, `${guests} אורחים · ${nights} לילות`,
-      skiPass ? "🎿 גם סקי פס" : "", transfer ? `🚐 כולל הסעה${transferDetails ? ` (${transferDetails})` : ""}` : "", equipment ? `🎿 כולל השכרת ציוד (€${equipTotal})` : "",
+      skiPass ? "🎿 גם סקי פס" : "", transfer ? `🚐 כולל הסעה${trPick ? `: ${trPick.name} (€${trPick.total})` : ""}${transferDetails ? ` (${transferDetails})` : ""}` : "", equipment ? `🎿 כולל השכרת ציוד (€${equipTotal})` : "",
       cancel === "flexible" ? "✅ מדיניות ביטול גמישה" : cancel === "none" ? "🔒 ללא אפשרות ביטול" : "", service === "ai" ? "🤖 ניהול עצמאי (AI)" : "",
     ].filter(Boolean),
     total,
@@ -211,8 +214,13 @@ function ComboInner() {
                 icon={<IconSkis size={20} />} title="סקי פס לשלושת העמקים" badge={<Tag tone="accent">בקרוב</Tag>}
                 sub="600 ק״מ מסלולים לכל הרמות, איסוף עצמאי מהמכונה" />
               <OptionCard type="checkbox" selected={transfer} onSelect={() => setTransfer(!transfer)}
-                icon={<IconBus size={20} />} title="הסעה הלוך וחזור" sub="שאטל ישיר משדה התעופה"
-                price={`+€${TRANSFER_PRICE}`} />
+                icon={<IconBus size={20} />} title="הסעה משדה התעופה" sub={trPick ? `${trPick.name} · לכל הקבוצה` : "רכב פרטי או שאטל משותף, לפי הטיסה"}
+                price={transfer && trPick ? `€${trPick.total}` : "להוספה"} />
+              {transfer && (
+                <TransferChooser pax={guests || 1} outDate={flight.arrDate || checkin} retDate={flight.retDate || checkout}
+                  outFlight={flight.arrFlight} retFlight={flight.retFlight}
+                  value={trPick?.key ?? null} onChange={setTrPick} onFlightClick={() => setShowTransfer(true)} />
+              )}
               {transfer && (
                 <button type="button" onClick={() => setShowTransfer(true)}
                   className="flex items-center justify-between gap-3 rounded-[18px] border border-dashed border-accent bg-accent-soft px-4 min-h-[56px] text-start">

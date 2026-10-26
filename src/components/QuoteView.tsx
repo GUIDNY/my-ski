@@ -18,6 +18,8 @@ import { useDirectFlight, useReturnLeg } from "@/lib/useFlightPrice";
 import { flightOrderText } from "@/lib/flight-format";
 import FlightAddOn from "@/components/FlightAddOn";
 import CardPaymentButton from "@/components/CardPaymentButton";
+import TransferChooser from "@/components/TransferChooser";
+import { codeOf, type TransferOption } from "@/lib/transfer-options";
 import FlightDetailsModal, { EMPTY_FLIGHT, flightToString, flightFilled, type Flight } from "@/components/FlightDetailsModal";
 import { wrap, card, h1, h2, btn, chip, Crumbs, CheckList, Check, PerPerson, EmptyState } from "@/components/ui";
 import OpenChatButton from "@/components/OpenChatButton";
@@ -366,6 +368,8 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const [passQty, setPassQty] = useState(ex?.pass?.qty ?? guests);
   const [transferOn, setTransferOn] = useState(ex ? !!ex.transfer : q.transfer);
   const [transferQty, setTransferQty] = useState(ex?.transfer?.qty ?? guests);
+  // the transfer picked for the flight (live price for the group); the link's pick comes back by its code
+  const [trPick, setTrPick] = useState<TransferOption | null>(null);
   const [equipmentOn, setEquipmentOn] = useState(ex ? !!ex.equipment : !!q.equipment);
   const [equipQty, setEquipQty] = useState(ex?.equipment?.qty ?? guests);
   const [flightOn, setFlightOn] = useState(!!ex?.flight);
@@ -412,13 +416,14 @@ export default function QuoteView({ q }: { q: QuoteData }) {
 
   const picked: QuoteExtras = {
     pass: passEff ? { area: passArea, qty: passQty } : undefined,
-    transfer: transferOn ? { qty: transferQty } : undefined,
+    transfer: transferOn ? { qty: transferQty, ...(trPick && codeOf(trPick) ? { kind: codeOf(trPick) } : {}), airport: flightEff && directFlight ? directFlight.airport : undefined } : undefined,
     equipment: equipmentOn && skiDays > 0 ? { qty: equipQty } : undefined,
     flight: flightEff ? { qty: flightQty } : undefined,
     bag: bagEff ? { qty: bagQty } : undefined,
   };
   // every line and the total, priced live, the same way the PDF prices them
-  const calc = quoteLines({ apt, rules, passes, checkin, checkout, guests, extras: picked, cancel, service, flight: directFlight, fallbackAptTotal: q.aptTotal });
+  const calc = quoteLines({ apt, rules, passes, checkin, checkout, guests, extras: picked, cancel, service, flight: directFlight, fallbackAptTotal: q.aptTotal,
+    transferPick: transferOn && trPick ? { name: trPick.name, total: trPick.total, perPerson: trPick.perPerson, legs: "הלוך וחזור" } : null });
   const amountOf = (key: string) => calc.lines.find(l => l.key === key)?.amount ?? 0;
   const liveTotal = calc.total;
   const perPerson = calc.perPerson;
@@ -720,8 +725,8 @@ export default function QuoteView({ q }: { q: QuoteData }) {
                   </div>
                 )}
               </LineRow>
-              <LineRow title="הסעה הלוך וחזור" sub={`שאטל משדה התעופה עד הדירה · ${eur(TRANSFER_PRICE)} לאדם`}
-                amount={transferOn ? eur(amountOf("transfer")) : `+${eur(TRANSFER_PRICE * guests)}`} on={transferOn}
+              <LineRow title="הסעה משדה התעופה" sub={trPick ? `${trPick.name} · ${eur(trPick.perPerson)} לאדם` : "רכב פרטי או שאטל משותף, לפי הטיסה"}
+                amount={transferOn ? eur(amountOf("transfer")) : "להוספה"} on={transferOn}
                 onToggle={() => { const v = !transferOn; setTransferOn(v); if (v) setTransferQty(n => Math.min(n || guests, guests) || 1); }}>
                 {transferOn && (
                   <div className="flex flex-wrap items-center gap-3 mt-2.5">
@@ -729,6 +734,15 @@ export default function QuoteView({ q }: { q: QuoteData }) {
                     <button type="button" onClick={() => setShowTransfer(true)} className={`${btn.link} min-h-[40px] text-[14px] ${flightFilled(flight) ? "!text-ok-text" : ""}`}>
                       {flightFilled(flight) ? <><Check size={15} /> פרטי הטיסה נשמרו</> : "למלא את פרטי הטיסה להסעה ‹"}
                     </button>
+                    <div className="w-full">
+                      <TransferChooser pax={transferQty || 1}
+                        outDate={flight.arrDate || checkin} retDate={flight.retDate || checkout}
+                        outFlight={flight.arrFlight} retFlight={flight.retFlight}
+                        airport={flightEff && directFlight ? directFlight.airport : (ex?.transfer?.airport ?? null)}
+                        value={trPick?.key ?? null}
+                        preferCode={ex?.transfer?.kind} onChange={setTrPick}
+                        onFlightClick={() => setShowTransfer(true)} />
+                    </div>
                   </div>
                 )}
               </LineRow>
