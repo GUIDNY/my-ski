@@ -27,7 +27,6 @@ export default function HostelAdmin() {
   const [exp, setExp] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    setErr("");
     const r = await authFetch("/api/managed-properties?kind=hostel");
     const list = await r.json().catch(() => null);
     if (!Array.isArray(list)) { setErr("לא הצלחתי לטעון. ודא שאתה מחובר לאזור הניהול."); return; }
@@ -41,6 +40,7 @@ export default function HostelAdmin() {
       if (!c.ok) { setErr(`לא הצלחתי ליצור את ההוסטל: ${j.error || c.status}`); return; }
       row = { ...j, payments: [] };
     }
+    setErr("");
     setH({ ...row!, payments: (row!.payments || []).filter(p => (p as { kind?: string }).kind === "booking") });
   }, []);
   useEffect(() => { load(); }, [load]);
