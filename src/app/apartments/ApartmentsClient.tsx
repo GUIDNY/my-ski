@@ -24,7 +24,7 @@ const rangeLabel = (ci: string, co: string) => {
 const eur = (n: number) => `€${n.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
 
 const isAgency = (apt: Apartment) => apt.source === "la_cime";
-/** under the name: what it is and its size; agency ones also their code */
+/** under the name: what it is and its size; weekly ones also their code */
 const metaLine = (apt: Apartment) => isAgency(apt)
   ? [apt.sqm ? `${apt.sqm} מ"ר` : "", aptParts(apt).code ? `קוד ${aptParts(apt).code}` : ""].filter(Boolean).join(" · ")
   : [`${aptKind(apt)}${forWho(apt.max_guests) ? ` ${forWho(apt.max_guests)}` : ""}`, apt.sqm ? `${apt.sqm} מ"ר` : ""].filter(Boolean).join(" · ");
@@ -74,7 +74,7 @@ function ApartmentCard({ apt, checkin, checkout, guests, rules, fromNightPrice, 
     return min === Infinity ? apt.price_per_night : min;
   })();
 
-  // agency apartments are rented by the week: without dates, their cheapest open week
+  // weekly apartments are rented by the week: without dates, their cheapest open week
   const fromWeek = isAgency(apt) ? minWeekPrice(apt) : null;
 
   // a plain address when nothing was chosen (the one search engines should index)
@@ -230,7 +230,7 @@ function ApartmentsPage({ initialApartments, intro, fromNights = {} }: { initial
   };
 
   // nightly prices for the chosen dates: only our own apartments are priced
-  // per night (agency ones by the week), and only once there are dates
+  // per night (weekly ones by the week), and only once there are dates
   const datesChosen = !!(checkin && checkout);
   useEffect(() => {
     if (!datesChosen) return;
@@ -287,7 +287,7 @@ function ApartmentsPage({ initialApartments, intro, fromNights = {} }: { initial
             <div className="flex flex-col gap-2 min-w-0">
               <h1 className="font-display font-extrabold text-[32px] leading-[1.1] md:text-[44px] tracking-tight text-ink">דירות בואל טורנס</h1>
               <p className="text-[16px] md:text-[17px] text-muted">
-                {loading ? "טוענים את הדירות…" : `${shown.length} ${shown.length === 1 ? "דירה" : "דירות"}${hasDates ? " פנויות לתאריכים שבחרתם" : ""}. הדירות שלנו, ודירות הסוכנות לשבוע שלם.`}
+                {loading ? "טוענים את הדירות…" : `${shown.length} ${shown.length === 1 ? "דירה" : "דירות"}${hasDates ? " פנויות לתאריכים שבחרתם" : ""}. הדירות שלנו, ודירות לשבוע שלם.`}
               </p>
               {intro && !hasDates && <div className="max-w-[760px] flex flex-col gap-2 text-[15px] md:text-[16px] leading-relaxed text-body">{intro}</div>}
             </div>

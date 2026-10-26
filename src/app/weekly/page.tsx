@@ -48,7 +48,7 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
         soft
         crumbs={[{ label: "דף הבית", href: "/" }, { label: "שבת עד שבת" }]}
         title="דירות שבת עד שבת בואל טורנס"
-        sub="דירות של סוכנות מקומית לשבוע שלם, מכניסה בשבת עד שבת. בוחרים שבוע, רואים מה פנוי ובכמה, ומזמינים."
+        sub="דירות לשבוע שלם בואל טורנס, מכניסה בשבת עד שבת. בוחרים שבוע, רואים מה פנוי ובכמה, ומזמינים."
       />
 
       <div className={`${wrap} pt-6 md:pt-8 pb-16 md:pb-20`}>

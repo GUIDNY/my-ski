@@ -12,9 +12,9 @@ export function GET() {
   const intl = (lang: "en" | "fr") => intlGuides(lang).map(g => `- [${g.title}](${SITE}/${lang}/guide/${g.slug}): ${g.description}`).join("\n");
   const body = `# SkiShare (סקי שר)
 
-> SkiShare is an Israeli company that sells ski holidays in Val Thorens, France, in Hebrew. It has its own apartments in Val Thorens and also offers agency apartments by the week (Saturday to Saturday). Each trip is built from the apartment up: a ski pass (Val Thorens or the whole 3 Vallées), an airport transfer, ski or snowboard equipment, and a direct flight from Tel Aviv when one exists on the dates. Prices are shown per person, and every member of a group can pay their own share.
+> SkiShare is an Israeli company that sells ski holidays in Val Thorens, France, in Hebrew. It has its own apartments in Val Thorens and also offers more apartments by the week (Saturday to Saturday). Each trip is built from the apartment up: a ski pass (Val Thorens or the whole 3 Vallées), an airport transfer, ski or snowboard equipment, and a direct flight from Tel Aviv when one exists on the dates. Prices are shown per person, and every member of a group can pay their own share.
 
-SkiShare (סקי שר) מוכרת חופשות סקי בואל טורנס, צרפת, בעברית: דירות שלה בואל טורנס, דירות סוכנות לשבוע (שבת עד שבת), ובנוסף לבחירה סקי פס, הסעה מהשדה, ציוד, וטיסה ישירה מתל אביב כשיש. המחיר מוצג לאדם, וכל אחד בחבורה יכול לשלם את החלק שלו.
+SkiShare (סקי שר) מוכרת חופשות סקי בואל טורנס, צרפת, בעברית: דירות שלה בואל טורנס, דירות לשבוע (שבת עד שבת), ובנוסף לבחירה סקי פס, הסעה מהשדה, ציוד, וטיסה ישירה מתל אביב כשיש. המחיר מוצג לאדם, וכל אחד בחבורה יכול לשלם את החלק שלו.
 
 ## Facts (season 2026/27)
 - Val Thorens lifts: 21 November 2026 to 2 May 2027. The whole 3 Vallées area: 5 December 2026 to 18 April 2027.
@@ -28,7 +28,7 @@ SkiShare (סקי שר) מוכרת חופשות סקי בואל טורנס, צר�
 - [About SkiShare](${SITE}/about): who we are: an Israeli company renting apartments in Val Thorens, booked and paid on the site, service in Hebrew.
 - [Apartments in Val Thorens](${SITE}/apartments): every apartment with photos, size, guests and price, and the cheapest open apartment for every Saturday of the season.
 - [Ski packages](${SITE}/packages): a week in an apartment + ski pass + airport transfer, with the price per person (for 2, 4 and 6) for every Saturday of the season.
-- [Saturday to Saturday weeks](${SITE}/weekly): agency apartments by the week, with the price per person.
+- [Saturday to Saturday weeks](${SITE}/weekly): more apartments by the week, with the price per person.
 - [Airport transfers](${SITE}/transfers): shuttle between the airport (Geneva or Lyon) and Val Thorens.
 - [Seasonaires](${SITE}/seasonaires): apartments for long stays (two months or more) and a community for people spending the whole season.
 - [Emergency, war and force majeure policy](${SITE}/emergency-policy): what happens with flights, apartments and ski passes if there is an emergency such as the closing of the skies.

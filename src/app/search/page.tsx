@@ -33,7 +33,7 @@ const eur = (n: number) => `€${n.toLocaleString("en-US", { maximumFractionDigi
 
 const capacity = (apt: Apartment) => apt.max_guests || apt.beds * 2 || 2;
 const isAgency = (apt: Apartment) => apt.source === "la_cime";
-/** under the name: size and bathrooms; agency apartments also their code (the name says the type and people) */
+/** under the name: size and bathrooms; weekly apartments also their code (the name says the type and people) */
 const metaLine = (apt: Apartment) => [
   !isAgency(apt) ? `${aptKind(apt)}${forWho(apt.max_guests) ? ` ${forWho(apt.max_guests)}` : ""}` : "",
   aptSqm(apt) ? `${aptSqm(apt)} מ"ר` : "",
@@ -556,7 +556,7 @@ function SearchPage() {
               <label key={k.key} className="flex items-center gap-2.5 text-[15px] text-ink min-h-[32px] cursor-pointer">
                 <input type="radio" name="kind" checked={kind === k.key} onChange={() => setKind(k.key)}
                   className="w-[18px] h-[18px] accent-accent" />
-                {k.label}{k.key === "agency" ? ", סוכנות" : ""} <span className="text-muted">({counts[k.key]})</span>
+                {k.label} <span className="text-muted">({counts[k.key]})</span>
               </label>
             ))}
           </fieldset>
@@ -675,7 +675,7 @@ function SearchPage() {
             <p className="flex items-start gap-2 text-[14px] text-muted mt-1">
               <span className="mt-0.5 shrink-0"><IcoPin /></span>
               {hasDates
-                ? "המחירים לתאריכים שבחרתם. בדירות שלנו המחיר הוא לכל הלילות, ובדירות הסוכנות מחיר השבוע המלא (שבת עד שבת)."
+                ? "המחירים לתאריכים שבחרתם. בדירות שלנו המחיר הוא לכל הלילות, ובדירות לשבוע מחיר השבוע המלא (שבת עד שבת)."
                 : "כל הדירות בואל טורנס. בחרו תאריכים כדי לראות מה פנוי ובכמה."}
             </p>
           )}

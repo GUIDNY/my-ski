@@ -268,7 +268,7 @@ function Photos({ images, name, onOpen }: { images: string[]; name: string; onOp
   );
 }
 
-/* ── Dates and guests: free dates for our apartments, the open weeks for agency ones ─ */
+/* ── Dates and guests: free dates for our apartments, the open weeks for weekly ones ─ */
 function DatesForm({ apt, checkin, checkout, guests, onApply, onCancel }: {
   apt: Apartment; checkin: string; checkout: string; guests: number;
   onApply: (ci: string, co: string, g: number) => void; onCancel?: () => void;
@@ -659,7 +659,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
   const shortName = aptShortName(apt);
   const { code } = aptParts(apt);
   const meta = [
-    agency ? "דירת סוכנות, שבת עד שבת" : "דירה שלנו",
+    agency ? "דירה לשבוע, שבת עד שבת" : "דירה שלנו",
     !agency && apt.sqm ? `${apt.sqm} מ"ר` : "",
     code ? `קוד דירה ${code}` : "",
   ].filter(Boolean).join(" · ");

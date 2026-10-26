@@ -15,12 +15,12 @@
   "emoji": "💰",
   "published": "2026-10-23",
   "updated": "2026-10-23",
-  "intro": "A week in a Val Thorens apartment costs least at the start and end of the 2026/27 season: late November, the week of 12 December, and late March to the end of April. It costs most at New Year and above all at the height of the February school holidays, when the cheapest agency apartment still free on our site costs about three times as much as in April. The live table below shows, for each Saturday, the cheapest agency apartment still free for the full week and how many are left. Then add the lift pass: SETAM's official 6-day adult price is €330.50 or €367.50 for Val Thorens-Orelle, and €378.50 or €421 for the 3 Vallées, depending on the dates.",
+  "intro": "A week in a Val Thorens apartment costs least at the start and end of the 2026/27 season: late November, the week of 12 December, and late March to the end of April. It costs most at New Year and above all at the height of the February school holidays, when the cheapest weekly apartment still free on our site costs about three times as much as in April. The live table below shows, for each Saturday, the cheapest weekly apartment still free for the full week and how many are left. Then add the lift pass: SETAM's official 6-day adult price is €330.50 or €367.50 for Val Thorens-Orelle, and €378.50 or €421 for the 3 Vallées, depending on the dates.",
   "sections": [
     {
       "heading": "How much is a week in a Val Thorens apartment?",
       "paragraphs": [
-        "It depends above all on the week: in our agency apartments, a week at the height of the February school holidays costs about three times a week in late November or April. For each Saturday still ahead, the table shows the cheapest agency apartment still free, for the whole apartment and the full week, and how many agency apartments are still free.",
+        "It depends above all on the week: in our weekly apartments, a week at the height of the February school holidays costs about three times a week in late November or April. For each Saturday still ahead, the table shows the cheapest weekly apartment still free, for the whole apartment and the full week, and how many weekly apartments are still free.",
         "The table is live: prices and counts change as apartments are booked, and clicking a Saturday shows the apartments free that week."
       ],
       "liveWeeks": {
@@ -40,7 +40,7 @@
         "count": true
       },
       "after": [
-        "The table shows the cheapest agency apartment of any size. For your group's price, open the [apartments page](/en/apartments) and add your dates and the number of guests: only apartments free on those dates and big enough are listed, with their prices."
+        "The table shows the cheapest weekly apartment of any size. For your group's price, open the [apartments page](/en/apartments) and add your dates and the number of guests: only apartments free on those dates and big enough are listed, with their prices."
       ]
     },
     {
@@ -128,14 +128,14 @@
     {
       "heading": "One price for the whole apartment, Saturday to Saturday",
       "paragraphs": [
-        "The price in the table is for the whole apartment and the full week, Saturday to Saturday, not per person. Agency apartments are only rented that way, at that week's price: choose dates inside one of an apartment's free weeks and you book that full week.",
+        "The price in the table is for the whole apartment and the full week, Saturday to Saturday, not per person. Weekly apartments are only rented that way, at that week's price: choose dates inside one of an apartment's free weeks and you book that full week.",
         "SkiShare's own apartments are priced per night for the dates you choose, plus a cleaning fee when there is one, and every line is shown before you book. Either way, paying by card adds a 1.9% card fee, shown before you pay. Prices are in euros."
       ],
       "table": {
         "caption": "The two kinds of apartment on SkiShare",
         "head": [
           "",
-          "Agency apartments",
+          "Weekly apartments",
           "SkiShare's own apartments"
         ],
         "rows": [
@@ -167,7 +167,7 @@
       ],
       "list": [
         "**Search.** On the apartments page, add your dates and the number of guests, or click a Saturday in the table above.",
-        "**Choose.** On an agency apartment's page, pick one of its free weeks; on one of our own, your dates are priced night by night.",
+        "**Choose.** On an weekly apartment's page, pick one of its free weeks; on one of our own, your dates are priced night by night.",
         "**Check every line.** You see the week or the nights, the cleaning fee where there is one, the total, the 1.9% card fee and the total by card.",
         "**Reserve.** Enter your details, accept the booking terms and give your card on PayPlus's secure payment page.",
         "**Wait for the confirmation.** The amount is held, a SkiShare representative confirms the booking, and only then is your card charged."
@@ -241,7 +241,7 @@
     {
       "heading": "Why Saturday to Saturday, and can you arrive on another day?",
       "paragraphs": [
-        "Agency apartments are rented only by the full week, Saturday to Saturday; to arrive on another day, choose one of SkiShare's own apartments, priced per night for the dates you pick. According to Les 3 Vallées, most holidaymakers travel on Saturday: their site suggests a Sunday-to-Sunday week for quieter roads, airports and stations, and notes that Saturday is a day \"when there are fewer skiers\".",
+        "Weekly apartments are rented only by the full week, Saturday to Saturday; to arrive on another day, choose one of SkiShare's own apartments, priced per night for the dates you pick. According to Les 3 Vallées, most holidaymakers travel on Saturday: their site suggests a Sunday-to-Sunday week for quieter roads, airports and stations, and notes that Saturday is a day \"when there are fewer skiers\".",
         "A Saturday-to-Saturday week means travelling on the busy day, but it leaves Sunday to Friday for skiing, the six days of the pass. Where to stay in the resort: [where to stay in Val Thorens](/en/guide/where-to-stay-in-val-thorens)."
       ]
     }
@@ -257,11 +257,11 @@
     },
     {
       "q": "Is the price per person or for the whole apartment?",
-      "a": "For the whole apartment: the full week, Saturday to Saturday, for agency apartments; the nights you choose, plus a cleaning fee when there is one, for SkiShare's own. Divide it by the number of people staying."
+      "a": "For the whole apartment: the full week, Saturday to Saturday, for weekly apartments; the nights you choose, plus a cleaning fee when there is one, for SkiShare's own. Divide it by the number of people staying."
     },
     {
       "q": "Can I rent an apartment in Val Thorens from Sunday to Sunday?",
-      "a": "Not an agency apartment: those are rented by the full week, Saturday to Saturday. SkiShare's own apartments are priced per night for the dates you choose."
+      "a": "Not an weekly apartment: those are rented by the full week, Saturday to Saturday. SkiShare's own apartments are priced per night for the dates you choose."
     },
     {
       "q": "When is February half-term 2027?",

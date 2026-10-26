@@ -5,7 +5,7 @@ import { fitDescription } from "../fit-description";
  * Every English and French string of the /en and /fr pages (the legal texts
  * live in components/intl/legal). Only facts we were given are stated here:
  * Val Thorens (2,300 m, 3 Vallées, 600 km), the 2026/27 lift dates, the
- * nearest airports, our own apartments plus agency apartments by the week,
+ * nearest airports, our own apartments plus more apartments by the week,
  * PayPlus card payment with a 1.9% fee, and the contact email.
  * French uses a no-break space before : ; ? ! and in amounts.
  */
@@ -57,7 +57,7 @@ const en = {
     valThorens: "Val Thorens",
     ourApt: "Our apartment",
     agencyBadge: "Weekly · Sat–Sat",
-    agencyApt: "Agency apartment, Saturday to Saturday",
+    agencyApt: "Weekly apartment, Saturday to Saturday",
     satToSat: "Saturday to Saturday",
     fullWeek: "full week",
     viewApt: "View apartment",
@@ -94,14 +94,14 @@ const en = {
     why: "Why book with us",
     whyItems: [
       { title: "The real price, up front", text: "Pick your dates and see the total for your stay, line by line, before you book." },
-      { title: "Our own apartments", text: "SkiShare has its own apartments in Val Thorens, plus agency apartments by the week, Saturday to Saturday." },
+      { title: "Our own apartments", text: "SkiShare has its own apartments in Val Thorens, plus more apartments by the week, Saturday to Saturday." },
       { title: "Secure card payment", text: "Pay by card with PayPlus. A 1.9% card fee is added and shown before you pay." },
       { title: "Europe's highest ski village", text: "Val Thorens is at 2,300 m, in the 3 Vallées with 600 km of pistes." },
     ],
     aptsTitle: "Our apartments in Val Thorens",
     aptsSub: "Prices per night from the season's lowest. Pick your dates to see the exact total.",
     allApts: (n: number) => `See all ${n} apartments`,
-    allAptsNote: "including agency apartments rented by the week",
+    allAptsNote: "including weekly apartments rented by the week",
     noApts: "The apartments couldn't be loaded right now. Please try again in a moment.",
     resortKicker: "The resort",
     resortTitle: "Val Thorens, the highest ski resort village in Europe",
@@ -122,7 +122,7 @@ const en = {
       },
       {
         q: "How do the weekly apartments work?",
-        a: "Agency apartments are rented by the full week, Saturday to Saturday, at the price of that week. Choose one of the free weeks on the apartment page.",
+        a: "Weekly apartments are rented by the full week, Saturday to Saturday, at the price of that week. Choose one of the free weeks on the apartment page.",
       },
       {
         q: "How do I pay?",
@@ -156,7 +156,7 @@ const en = {
     filterAria: "Type of apartment",
     filters: { all: "All", own: "Our apartments", agency: "By the week (Sat–Sat)" },
     emptyDates: "No apartments are free for these dates",
-    emptyDatesText: "Try other dates or fewer guests. Agency apartments are only rented Saturday to Saturday.",
+    emptyDatesText: "Try other dates or fewer guests. Weekly apartments are only rented Saturday to Saturday.",
     empty: "No apartments to show",
     emptyFilter: "None of this type for your search. Try all apartments.",
     showAll: "Show all apartments",
@@ -279,7 +279,7 @@ const en = {
     homeTitle: "Ski apartments in Val Thorens to book online | SkiShare",
     homeDesc: "Book a ski apartment in Val Thorens for 2026/27, the highest ski resort village in Europe (2,300 m, 3 Vallées). See the real price for your dates, pay online.",
     listTitle: "Val Thorens apartments to rent, prices by week | SkiShare",
-    listDesc: "Self-catered ski apartments in Val Thorens for 2026/27: our own by the night, agency ones Saturday to Saturday. See which are free and the price for your dates.",
+    listDesc: "Self-catered ski apartments in Val Thorens for 2026/27: our own by the night, weekly ones Saturday to Saturday. See which are free and the price for your dates.",
     aptTitle: (name: string) => `${name}: apartment in Val Thorens | SkiShare`,
     aptDesc: (name: string, facts: string) => fitDescription([`${name}, Val Thorens: ${facts}.`, "Exact price for your dates, book online."]),
     termsTitle: "Booking and cancellation terms | SkiShare",
@@ -313,7 +313,7 @@ const en = {
     homeSub: "The season's dates, prices, snow and the practical side of the trip, from official sources.",
     allLink: "All Val Thorens guides",
     aptsTitle: "Val Thorens apartment prices, week by week",
-    aptsText: "SkiShare's own apartments are priced by the night for your dates, plus a cleaning fee when there is one. Agency apartments are rented by the full week, Saturday to Saturday, at that week's price. Here is the cheapest agency apartment still free for each Saturday of the 2026/27 season: pick a week to see every apartment free that week.",
+    aptsText: "SkiShare's own apartments are priced by the night for your dates, plus a cleaning fee when there is one. Weekly apartments are rented by the full week, Saturday to Saturday, at that week's price. Here is the cheapest weekly apartment still free for each Saturday of the 2026/27 season: pick a week to see every apartment free that week.",
     aptsGuides: "Before you book",
     short: {
       "when-to-go": "When to go",
@@ -375,7 +375,7 @@ const fr: Dict = {
     valThorens: "Val Thorens",
     ourApt: "Notre appartement",
     agencyBadge: "À la semaine · sam.–sam.",
-    agencyApt: "Appartement d'agence, du samedi au samedi",
+    agencyApt: "Appartement à la semaine, du samedi au samedi",
     satToSat: "Du samedi au samedi",
     fullWeek: "semaine complète",
     viewApt: "Voir l'appartement",
@@ -412,14 +412,14 @@ const fr: Dict = {
     why: "Pourquoi réserver chez nous",
     whyItems: [
       { title: "Le prix réel, d'emblée", text: "Choisissez vos dates et voyez le total de votre séjour, ligne par ligne, avant de réserver." },
-      { title: "Nos propres appartements", text: "SkiShare dispose de ses propres appartements à Val Thorens, ainsi que d'appartements d'agence à la semaine, du samedi au samedi." },
+      { title: "Nos propres appartements", text: "SkiShare dispose de ses propres appartements à Val Thorens, ainsi que d'appartements à la semaine, du samedi au samedi." },
       { title: "Paiement sécurisé par carte", text: "Payez par carte avec PayPlus. Des frais de carte de 1,9 % s'ajoutent et sont indiqués avant le paiement." },
       { title: "Le plus haut village de ski d'Europe", text: "Val Thorens est à 2 300 m d'altitude, dans les 3 Vallées et leurs 600 km de pistes." },
     ],
     aptsTitle: "Nos appartements à Val Thorens",
     aptsSub: "Prix par nuit à partir du plus bas de la saison. Choisissez vos dates pour voir le total exact.",
     allApts: (n: number) => `Voir les ${n} appartements`,
-    allAptsNote: "y compris les appartements d'agence loués à la semaine",
+    allAptsNote: "y compris les appartements à la semaine loués à la semaine",
     noApts: "Les appartements n'ont pas pu être chargés. Veuillez réessayer dans un instant.",
     resortKicker: "La station",
     resortTitle: "Val Thorens, le plus haut village-station de ski d'Europe",
@@ -440,7 +440,7 @@ const fr: Dict = {
       },
       {
         q: `Comment fonctionnent les appartements à la semaine${nb}?`,
-        a: "Les appartements d'agence se louent à la semaine complète, du samedi au samedi, au prix de la semaine choisie. Choisissez l'une des semaines libres sur la page de l'appartement.",
+        a: "Les autres appartements se louent à la semaine complète, du samedi au samedi, au prix de la semaine choisie. Choisissez l'une des semaines libres sur la page de l'appartement.",
       },
       {
         q: `Comment payer${nb}?`,
@@ -474,7 +474,7 @@ const fr: Dict = {
     filterAria: "Type d'appartement",
     filters: { all: "Tous", own: "Nos appartements", agency: "À la semaine (sam.–sam.)" },
     emptyDates: "Aucun appartement n'est libre à ces dates",
-    emptyDatesText: "Essayez d'autres dates ou moins de voyageurs. Les appartements d'agence se louent uniquement du samedi au samedi.",
+    emptyDatesText: "Essayez d'autres dates ou moins de voyageurs. Les appartements à la semaine se louent uniquement du samedi au samedi.",
     empty: "Aucun appartement à afficher",
     emptyFilter: "Aucun appartement de ce type pour votre recherche. Essayez tous les appartements.",
     showAll: "Voir tous les appartements",
@@ -597,7 +597,7 @@ const fr: Dict = {
     homeTitle: "Location ski à Val Thorens : appartements 2026/2027 | SkiShare",
     homeDesc: "Location d'appartements de ski à Val Thorens 2026/2027, le plus haut village-station d'Europe (2 300 m). Prix réel pour vos dates, paiement en ligne.",
     listTitle: "Location appartement Val Thorens : prix à la semaine | SkiShare",
-    listDesc: "Location d'appartements à Val Thorens pour 2026/2027 : les nôtres à la nuit, ceux d'agence du samedi au samedi. Disponibilités et prix réel pour vos dates.",
+    listDesc: "Location d'appartements à Val Thorens pour 2026/2027 : les nôtres à la nuit, les autres à la semaine, du samedi au samedi. Disponibilités et prix réel pour vos dates.",
     aptTitle: (name: string) => `${name} : appartement à Val Thorens | SkiShare`,
     aptDesc: (name: string, facts: string) => fitDescription([`${name}, Val Thorens${nb}: ${facts}.`, "Prix exact selon vos dates, réservation en ligne."]),
     termsTitle: "Conditions de réservation et d'annulation | SkiShare",
@@ -631,7 +631,7 @@ const fr: Dict = {
     homeSub: "Les dates de la saison, les prix, la neige et le côté pratique du voyage, d'après les sources officielles.",
     allLink: "Tous les guides de Val Thorens",
     aptsTitle: "Prix des appartements à Val Thorens, semaine par semaine",
-    aptsText: "Nos propres appartements sont au prix de la nuit pour vos dates, avec des frais de ménage quand il y en a. Les appartements d'agence se louent à la semaine complète, du samedi au samedi, au prix de cette semaine. Voici l'appartement d'agence le moins cher encore libre pour chaque samedi de la saison 2026/2027 : choisissez une semaine pour voir tous les appartements libres cette semaine-là.",
+    aptsText: "Nos propres appartements sont au prix de la nuit pour vos dates, avec des frais de ménage quand il y en a. Les autres appartements se louent à la semaine complète, du samedi au samedi, au prix de cette semaine. Voici l'appartement à la semaine le moins cher encore libre pour chaque samedi de la saison 2026/2027 : choisissez une semaine pour voir tous les appartements libres cette semaine-là.",
     aptsGuides: "Avant de réserver",
     short: {
       "when-to-go": "Quand partir",

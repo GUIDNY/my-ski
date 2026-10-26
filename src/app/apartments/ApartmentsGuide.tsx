@@ -40,7 +40,7 @@ export function apartmentsIntro() {
       </p>
       <p>
         יש כאן שני סוגים של דירות: <b className="text-ink">הדירות שלנו</b>, שאנחנו מנהלים בעצמנו ובוחרים להן תאריכים,
-        ו<b className="text-ink">דירות של סוכנות מקומית בואל טורנס</b>, לשבוע שלם משבת לשבת. בכל דירה רואים לכמה אנשים היא מתאימה, את הגודל ואת המחיר לדירה כולה.
+        ו<b className="text-ink">דירות נוספות להשכרה בואל טורנס</b>, לשבוע שלם משבת לשבת. בכל דירה רואים לכמה אנשים היא מתאימה, את הגודל ואת המחיר לדירה כולה.
       </p>
       <p>
         אפשר להזמין רק דירה, או להוסיף לאותה הזמנה סקי פס, הסעה משדה התעופה וציוד, וטיסה ישירה מתל אביב כשיש. בחבורה, כל אחד משלם את החלק שלו בקישור נפרד.
@@ -109,7 +109,7 @@ export default function ApartmentsGuide({ apartments, passes }: { apartments: Ap
     }] : []),
     {
       q: "מי משכיר את הדירות?",
-      a: "SkiShare, חברה ישראלית להשכרת דירות בואל טורנס. חלק מהדירות שלנו, ואנחנו מנהלים אותן בעצמנו. השאר של סוכנות מקומית בואל טורנס, לשבוע שלם משבת לשבת. מזמינים ומשלמים באתר, והשירות בעברית: באתר, בצ'אט ובוואטסאפ.",
+      a: "SkiShare, חברה ישראלית להשכרת דירות בואל טורנס. חלק מהדירות שלנו, ואנחנו מנהלים אותן בעצמנו. את השאר משכירים לשבוע שלם, משבת לשבת. מזמינים ומשלמים באתר, והשירות בעברית: באתר, בצ'אט ובוואטסאפ.",
     },
     {
       q: "למה רוב הדירות הן משבת עד שבת?",
@@ -121,7 +121,7 @@ export default function ApartmentsGuide({ apartments, passes }: { apartments: Ap
     },
     {
       q: "מה כלול במחיר הדירה?",
-      a: "הלינה לכל התקופה. בדירות שלנו גם הניקיון. ברוב דירות הסוכנות מצעים, מגבות וניקיון בסוף השהות לא כלולים, ואפשר להזמין אותם מראש. זה כתוב בתיאור של כל דירה.",
+      a: "הלינה לכל התקופה. בדירות שלנו גם הניקיון. ברוב הדירות לשבוע מצעים, מגבות וניקיון בסוף השהות לא כלולים, ואפשר להזמין אותם מראש. זה כתוב בתיאור של כל דירה.",
     },
     {
       q: "אפשר להזמין רק דירה, בלי סקי פס והסעה?",
@@ -238,11 +238,11 @@ export default function ApartmentsGuide({ apartments, passes }: { apartments: Ap
           )}
 
           <section className={sec} aria-labelledby="ours">
-            <h2 id="ours" className={h2}>דירות שלנו ודירות של הסוכנות: מה ההבדל?</h2>
+            <h2 id="ours" className={h2}>דירות שלנו ודירות לשבוע: מה ההבדל?</h2>
             <div className={`${card} overflow-x-auto`}>
               <table className="w-full text-[14px] md:text-[16px]">
                 <thead>
-                  <tr><th scope="col" className={th}></th><th scope="col" className={th}>דירות שלנו</th><th scope="col" className={th}>דירות של הסוכנות</th></tr>
+                  <tr><th scope="col" className={th}></th><th scope="col" className={th}>דירות שלנו</th><th scope="col" className={th}>דירות לשבוע</th></tr>
                 </thead>
                 <tbody>
                   <tr><th scope="row" className={`${td} text-start font-bold text-ink`}>כמה</th><td className={td}>{own.length}</td><td className={td}>{agency.length}</td></tr>

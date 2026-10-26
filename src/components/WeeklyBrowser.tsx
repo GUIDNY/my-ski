@@ -129,7 +129,7 @@ export default function WeeklyBrowser({
 
   if (!allWeeks.length) {
     return (
-      <EmptyState title="אין כרגע שבועות פנויים" text="הדירות של הסוכנות מתעדכנות כל יום. אפשר לחזור לכאן בקרוב, או לחפש בדירות שלנו." />
+      <EmptyState title="אין כרגע שבועות פנויים" text="הדירות לשבוע מתעדכנות כל יום. אפשר לחזור לכאן בקרוב, או לחפש בדירות שלנו." />
     );
   }
 
