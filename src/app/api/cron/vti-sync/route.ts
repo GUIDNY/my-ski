@@ -58,14 +58,15 @@ async function week(jar: Jar, sat: Date): Promise<VtiOffer[] | null> {
 
 async function hebrew(fr: string): Promise<string> {
   if (!process.env.GEMINI_API_KEY || !fr) return "";
-  const prompt = `Translate this ski apartment description from French into natural, simple Hebrew for an apartment listing in Val Thorens. Keep every fact (rooms, beds, m², floor, lift, balcony, kitchen equipment, distance to the slopes). Short sentences, one line per room or topic. Do not add anything, do not mention an agency, prices or registration numbers. Return only the Hebrew text.\n\n${fr}`;
+  const prompt = `Translate this ski apartment description from French into natural, simple Hebrew for an apartment listing in Val Thorens. Keep every fact (rooms, beds, m², floor, lift, balcony, kitchen equipment, distance to the slopes). Short sentences, one line per room or topic. Plain text only: no markdown, no asterisks, no headings symbols. Do not add anything. Leave out the agency, prices, registration numbers and map references (like "Plan de la station F3"). Return only the Hebrew text.\n\n${fr}`;
   try {
     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
       method: "POST", headers: { "Content-Type": "application/json" }, signal: AbortSignal.timeout(25000),
       body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2 } }),
     });
     const j = await res.json();
-    return String(j?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text || "").join("") || "").trim();
+    const out = String(j?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text || "").join("") || "");
+    return out.replace(/\*\*|__|^#+\s*/gm, "").split("\n").filter(l => !/מפת (האתר|העיירה|אתר הסקי)|מיקום במפה/.test(l)).join("\n").replace(/\n{3,}/g, "\n\n").trim();
   } catch { return ""; }
 }
 
@@ -132,7 +133,7 @@ export async function GET(req: NextRequest) {
       const d = parseDetail(det.html);
       const he = d.description ? await hebrew(d.description) : "";
       if (!he) { addErrors.push(`${offer.ref}: no translation`); return; }
-      const type = kindHe(offer.kind, d.rooms);
+      const type = d.rooms ? kindHe(d.rooms === 1 ? "Studio" : String(d.rooms), d.rooms) : kindHe(offer.kind);
       const images = (d.images.length ? d.images : offer.images).slice(0, 12);
       const row = {
         name: `${type} — ${offer.ref}`, type,
