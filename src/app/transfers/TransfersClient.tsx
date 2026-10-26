@@ -62,6 +62,7 @@ const IcoPlane = ({ size = 20 }: { size?: number }) => ico(<path d="M21 16v-2l-8
 const IcoVan = ({ size = 20 }: { size?: number }) => ico(<><rect x="3" y="6" width="18" height="10" rx="2" /><path d="M3 11h18" /><circle cx="7.5" cy="18" r="1.5" /><circle cx="16.5" cy="18" r="1.5" /></>, size);
 const IcoTag = ({ size = 20 }: { size?: number }) => ico(<><path d="M3 12V4h8l10 10-8 8z" /><circle cx="7.5" cy="7.5" r="1.5" /></>, size);
 const IcoHome = ({ size = 20 }: { size?: number }) => ico(<><path d="M3 11l9-7 9 7" /><path d="M5 10v10h14V10" /></>, size);
+const IcoUsersTop = ({ size = 20 }: { size?: number }) => ico(<><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0" /><path d="M16 4.5a3.5 3.5 0 0 1 0 7" /><path d="M18 14a6 6 0 0 1 3.5 6" /></>, size);
 const IcoInfo = ({ size = 18 }: { size?: number }) => ico(<><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></>, size);
 const IcoCheck = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12l4 4 10-10" /></svg>
@@ -165,7 +166,7 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
   const [retTime,   setRetTime]   = useState(initial.retTime || "");
 
   // Other
-  const [isElAlOverride, setIsElAlOverride] = useState(false);
+  const [isElAlOverride] = useState(false);
   const [airport,   setAirport]   = useState(initial.airport === "LYS" ? "LYS" : "GVA");
   const [passengers, setPassengers] = useState(guestsParam);
   const [name,      setName]      = useState("");
@@ -339,6 +340,7 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
   }, [submitted]);
 
   const airportLabel = AIRPORTS.find(a => a.code === airport)?.label;
+  const chosenName = CLASS_HE[availableClasses.find(c => c.vehicle_class_id === vehicleClassId)?.class ?? ""] ?? "רכב פרטי";
   const directionLabel = direction === "both" ? "הלוך וחזור" : direction === "outbound" ? "הלוך" : "חזור";
   // what's still missing before the order can be sent (shown under the button)
   const missing = [
@@ -351,15 +353,42 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
       <div className={`${card} w-full max-w-[520px] p-7 md:p-9 text-center flex flex-col items-center gap-3`} role="status">
         <span className="w-16 h-16 rounded-full bg-ok-soft text-ok flex items-center justify-center mb-1"><IcoCheck size={30} /></span>
         <h1 className="font-display font-bold text-[26px] md:text-[30px] text-ink">ההזמנה התקבלה</h1>
-        <p className="text-[16px] text-body">הסעה מ-{airportLabel}</p>
+        <p className="text-[16px] text-body">{isShared ? "שאטל משותף" : chosenName} · {airportLabel}</p>
         <p className="text-[16px] text-body">{passengers} נוסעים · {directions} כיוון{directions > 1 ? "ות" : ""} · <span className="font-bold text-ink">€{totalPrice}</span></p>
-        {!priceConfirmed && (
+        {!priceConfirmed && !hasLivePrice && !isShared && (
           <p className="w-full text-[14px] text-warn bg-warn-soft rounded-xl px-4 py-3 mt-1">
             המחיר משוער, ונאשר אותו מולכם לפני התשלום
           </p>
         )}
         <p className="text-[15px] text-muted">נחזור אליכם בקרוב לאישור ולפרטי התשלום</p>
         <Link href="/" className={`${btn.primary} mt-3`}>לדף הבית</Link>
+      </div>
+    </div>
+  );
+
+  // the ride options, priced for every active leg together
+  const legsOn = (direction !== "return" ? 1 : 0) + (direction !== "outbound" ? 1 : 0);
+  const carTotal = (c: VehicleClass) => {
+    const o = direction !== "return" ? outQuote?.private.find(x => x.vehicle_class_id === c.vehicle_class_id)?.price_cents : 0;
+    const r = direction !== "outbound" ? retQuote?.private.find(x => x.vehicle_class_id === c.vehicle_class_id)?.price_cents : 0;
+    if (o == null || r == null) return null;
+    return Math.round((o + r) / 100);
+  };
+  const cars = availableClasses.filter(c => c.max_pax >= passengers)
+    .map(c => ({ c, total: carTotal(c), fit: c.max_luggage >= luggage + ski }))
+    .sort((a, b) => Number(b.fit) - Number(a.fit) || (a.total ?? 1e9) - (b.total ?? 1e9));
+  const cheapestFit = cars.find(x => x.fit && !x.c.on_request && x.total != null);
+  const datesSet = (direction === "return" || !!outDate) && (direction === "outbound" || !!retDate);
+  const sharedPP = Math.round(((outShared?.price_cents ?? 0) + (retShared?.price_cents ?? 0)) / 100);
+  const stepper = (label: string, v: number, set: (n: number) => void, min: number, max: number) => (
+    <div className="flex flex-col">
+      <span className={fieldLabel}>{label}</span>
+      <div className="flex items-center justify-between gap-2 border border-line-strong rounded-xl p-1.5" role="group" aria-label={label}>
+        <button type="button" onClick={() => set(Math.max(min, v - 1))} disabled={v <= min} aria-label={`${label}: פחות`}
+          className="w-10 h-10 rounded-lg border border-line flex items-center justify-center text-[20px] font-bold text-ink hover:border-ink transition-colors disabled:opacity-40">−</button>
+        <span className="font-display font-extrabold text-ink text-[19px] min-w-[28px] text-center" aria-live="polite">{v}</span>
+        <button type="button" onClick={() => set(Math.min(max, v + 1))} disabled={v >= max} aria-label={`${label}: עוד`}
+          className="w-10 h-10 rounded-lg border border-line flex items-center justify-center text-[20px] font-bold text-ink hover:border-ink transition-colors disabled:opacity-40">+</button>
       </div>
     </div>
   );
@@ -376,37 +405,33 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
       <PageTop soft
         crumbs={[{ label: "דף הבית", href: "/" }, { label: "הסעות" }]}
         title="הסעה משדה התעופה לואל טורנס"
-        sub="שאטל ישיר משדה התעופה בז'נבה או בליון עד הדירה בואל טורנס. ממלאים את פרטי הטיסה ורואים מחיר."
+        sub="רכב פרטי עד הדלת או מושב בשאטל משותף, מז'נבה או מליון. בוחרים תאריך ורואים את כל האפשרויות במחיר חי."
         aside={aptName && checkin && checkout ? (
           <span className={chip}><span className="text-accent"><IcoHome size={16} /></span>{aptName} · {fmtDate(checkin)} עד {fmtDate(checkout)}</span>
         ) : undefined}>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6 md:mt-8">
-          {AIRPORTS.map(a => (
-            <div key={a.code} className="bg-white border border-line rounded-[18px] p-4 flex items-center gap-3">
-              <span className="w-11 h-11 rounded-xl bg-accent-soft text-accent flex items-center justify-center shrink-0"><IcoPlane /></span>
+          {[
+            { i: <IcoVan />, t: "רכב פרטי", d: "רק אתם, מהשדה עד דלת הדירה" },
+            { i: <IcoUsersTop />, t: "שאטל משותף", d: "מושב לכל אחד, לפי הטיסה שלכם" },
+            { i: <IcoTag />, t: "מחיר חי", d: "ישר מספק ההסעות, לפני שמזמינים" },
+          ].map(x => (
+            <div key={x.t} className="bg-white border border-line rounded-[18px] p-4 flex items-center gap-3">
+              <span className="w-11 h-11 rounded-xl bg-accent-soft text-accent flex items-center justify-center shrink-0">{x.i}</span>
               <div>
-                <div className="font-display font-bold text-[18px] text-ink">{a.label}</div>
-                <div className="text-[14px] text-muted">{a.note}</div>
+                <div className="font-display font-bold text-[18px] text-ink">{x.t}</div>
+                <div className="text-[14px] text-muted">{x.d}</div>
               </div>
             </div>
           ))}
-          <div className="bg-white border border-line rounded-[18px] p-4 flex items-center gap-3">
-            <span className="w-11 h-11 rounded-xl bg-accent-soft text-accent flex items-center justify-center shrink-0"><IcoTag /></span>
-            <div>
-              <div className="font-display font-bold text-[18px] text-ink">€{PRICE_PER_DIRECTION} לאדם לכיוון</div>
-              <div className="text-[14px] text-muted">מחיר קבוע לטיסות אל על ישירות</div>
-            </div>
-          </div>
         </div>
       </PageTop>
 
       <div className={`${wrap} py-8 md:py-12`}>
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
 
-          {/* ── Form ─────────────────────────────────────────── */}
           <div className="flex-1 min-w-0 w-full flex flex-col gap-5">
 
-            <Step n={1} title="מאיזה שדה ולאיזה כיוון?">
+            <Step n={1} title="מאיפה, מתי וכמה אתם">
               <div role="radiogroup" aria-label="שדה תעופה" className="grid grid-cols-2 gap-3">
                 {AIRPORTS.map(a => (
                   <button key={a.code} type="button" role="radio" aria-checked={airport === a.code} onClick={() => setAirport(a.code)}
@@ -420,125 +445,106 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
                 ))}
               </div>
               <div role="radiogroup" aria-label="כיוון נסיעה" className="grid grid-cols-3 gap-1 bg-soft border border-line rounded-2xl p-1">
-                {([["both","הלוך וחזור"],["outbound","הלוך בלבד"],["return","חזור בלבד"]] as const).map(([k,label]) => (
+                {([["both","הלוך וחזור"],["outbound","רק לואל טורנס"],["return","רק לשדה"]] as const).map(([k,label]) => (
                   <button key={k} type="button" role="radio" aria-checked={direction === k} onClick={() => setDirection(k)}
                     className={`min-h-[44px] rounded-xl text-[15px] font-bold transition-colors ${direction === k ? "bg-ink text-white" : "text-ink hover:bg-white"}`}>
                     {label}
                   </button>
                 ))}
               </div>
+              <div className="grid grid-cols-2 gap-3">
+                {direction !== "return" && (
+                  <Field label="הגעה לואל טורנס" htmlFor="d-out">
+                    <input id="d-out" type="date" value={outDate} onChange={e => setOutDate(e.target.value)} className={`${field} text-right`} dir="ltr" />
+                  </Field>
+                )}
+                {direction !== "outbound" && (
+                  <Field label="חזרה לשדה" htmlFor="d-ret">
+                    <input id="d-ret" type="date" value={retDate} onChange={e => setRetDate(e.target.value)} className={`${field} text-right`} dir="ltr" />
+                  </Field>
+                )}
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                {stepper("נוסעים", passengers, setPassengers, 1, 20)}
+                {stepper("מזוודות", luggage, setLuggage, 0, 30)}
+                {stepper("ציוד סקי", ski, setSki, 0, 30)}
+              </div>
             </Step>
 
-            <Step n={2} title="פרטי הטיסה">
+            <Step n={2} title="בחרו הסעה">
+              {!datesSet ? (
+                <p className="text-[15px] text-muted bg-soft rounded-xl px-4 py-3.5">בוחרים תאריך למעלה, וכאן מופיעים כל הרכבים והשאטל במחיר חי.</p>
+              ) : quoting && !availableClasses.length ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" aria-hidden="true">
+                  {[1, 2, 3, 4].map(i => <div key={i} className="h-[112px] rounded-2xl bg-soft-2 animate-pulse" />)}
+                </div>
+              ) : !availableClasses.length ? (
+                <p className="text-[15px] text-warn bg-warn-soft rounded-xl px-4 py-3.5">לא הצלחנו לקבל מחירים עכשיו. אפשר לשלוח את הבקשה, ונחזור אליכם עם מחיר מדויק.</p>
+              ) : (
+                <div role="radiogroup" aria-label="סוג ההסעה" className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* shared shuttle: when the transfer company runs one for the flight */}
+                  <button type="button" role="radio" aria-checked={isShared} onClick={() => sharedOffered && setService("shared")} disabled={!sharedOffered}
+                    className={`${optionCls(isShared)} p-4 flex flex-col gap-2 min-h-[112px] text-right disabled:cursor-default ${!sharedOffered ? "border-dashed bg-soft hover:border-line" : ""}`}>
+                    <span className="flex items-center justify-between gap-2">
+                      <span className="flex items-center gap-2 font-bold text-[16px] text-ink"><span className={isShared ? "text-accent" : "text-muted"}><IcoUsersTop /></span>שאטל משותף</span>
+                      {sharedOffered && <span className="text-[12px] font-bold px-2 py-0.5 rounded-full bg-ok-soft text-ok-text">הכי זול</span>}
+                    </span>
+                    <span className="text-[14px] text-muted">מושב לכל נוסע, עם נוסעים מטיסות באותו זמן. ייתכנו המתנה קצרה ועצירות.</span>
+                    {sharedOffered ? (
+                      <span className="mt-auto flex items-baseline gap-1.5"><span className="font-display font-extrabold text-[24px] text-ink">€{sharedPP * passengers}</span><span className="text-[14px] text-muted">€{sharedPP} לאדם{legsOn > 1 ? ", הלוך וחזור" : ""}</span></span>
+                    ) : (
+                      <span className="mt-auto text-[13px] text-muted">{(direction !== "return" && !outFlight) || (direction !== "outbound" && !retFlight) ? "כותבים מספר טיסה בשלב 3, ונבדוק אם יש לה שאטל" : "אין שאטל משותף לטיסה הזו"}</span>
+                    )}
+                  </button>
+                  {cars.map(({ c, total, fit }) => {
+                    const on = !isShared && vehicleClassId === c.vehicle_class_id;
+                    const best = cheapestFit?.c.vehicle_class_id === c.vehicle_class_id;
+                    return (
+                      <button key={c.vehicle_class_id} type="button" role="radio" aria-checked={on} disabled={c.on_request}
+                        onClick={() => { setService("private"); setVehicleClassId(c.vehicle_class_id); }}
+                        className={`${optionCls(on)} p-4 flex flex-col gap-2 min-h-[112px] text-right disabled:opacity-55 disabled:cursor-not-allowed`}>
+                        <span className="flex items-center justify-between gap-2">
+                          <span className="flex items-center gap-2 font-bold text-[16px] text-ink"><span className={on ? "text-accent" : "text-muted"}><IcoVan /></span>{CLASS_HE[c.class] ?? c.class}</span>
+                          {best && <span className="text-[12px] font-bold px-2 py-0.5 rounded-full bg-accent-soft text-accent">מתאים לכם</span>}
+                          {c.on_request && <span className="text-[12px] font-bold px-2 py-0.5 rounded-full bg-soft text-muted">לפי בקשה</span>}
+                        </span>
+                        <span className={`text-[14px] ${fit ? "text-muted" : "text-warn"}`}>עד {c.max_pax} נוסעים · עד {c.max_luggage} תיקים{fit ? "" : " · קטן לכמות התיקים"}</span>
+                        {total != null && (
+                          <span className="mt-auto flex items-baseline gap-1.5 flex-wrap"><span className="font-display font-extrabold text-[24px] text-ink">€{total}</span><span className="text-[14px] text-muted">לכל הרכב{legsOn > 1 ? ", הלוך וחזור" : ""} · €{Math.round(total / passengers)} לאדם</span></span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              {driveText && <p className="text-[14px] text-muted">הדרך: {driveText}, עד דלת הדירה בואל טורנס.</p>}
+            </Step>
+
+            <Step n={3} title="פרטי הטיסה">
+              <p className="text-[14px] text-muted -mt-1">עם מספר הטיסה אנחנו ממלאים את השעה לבד, בודקים אם יש שאטל משותף, והנהג עוקב אחרי עיכובים.</p>
               {(direction === "outbound" || direction === "both") && (
-                <FlightLeg id="out"
-                  title="טיסת הלוך · נחיתה בשדה התעופה"
+                <FlightLeg id="out" title="טיסת הלוך · נחיתה בשדה"
                   flightNum={outFlight} date={outDate} time={outTime}
-                  onFlight={setOutFlight} onDate={setOutDate} onTime={setOutTime} found={outFound}
-                />
+                  onFlight={setOutFlight} onDate={setOutDate} onTime={setOutTime} found={outFound} />
               )}
               {(direction === "return" || direction === "both") && (
-                <FlightLeg id="ret"
-                  title="טיסת חזור · המראה משדה התעופה"
+                <FlightLeg id="ret" title="טיסת חזור · המראה מהשדה"
                   flightNum={retFlight} date={retDate} time={retTime}
-                  onFlight={setRetFlight} onDate={setRetDate} onTime={setRetTime} found={retFound}
-                />
+                  onFlight={setRetFlight} onDate={setRetDate} onTime={setRetTime} found={retFound} />
               )}
             </Step>
 
-            <Step n={3} title="נוסעים וציוד">
-              <div className="flex flex-col">
-                <span className={fieldLabel} id="pax-label">מספר נוסעים</span>
-                <div className="flex items-center gap-3 border border-line-strong rounded-xl p-1.5 w-fit" role="group" aria-labelledby="pax-label">
-                  <button type="button" onClick={() => setPassengers(v => Math.max(1, v - 1))} aria-label="נוסע אחד פחות"
-                    className="w-11 h-11 rounded-lg border border-line flex items-center justify-center text-[20px] font-bold text-ink hover:border-ink transition-colors">−</button>
-                  <span className="font-display font-extrabold text-ink text-[20px] w-8 text-center" aria-live="polite">{passengers}</span>
-                  <button type="button" onClick={() => setPassengers(v => Math.min(20, v + 1))} aria-label="נוסע אחד יותר"
-                    className="w-11 h-11 rounded-lg border border-line flex items-center justify-center text-[20px] font-bold text-ink hover:border-ink transition-colors">+</button>
-                  <span className="text-[15px] text-muted ms-1 me-2">{passengers === 1 ? "אדם" : "אנשים"}</span>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="מספר מזוודות" htmlFor="luggage">
-                  <input id="luggage" type="number" inputMode="numeric" min={0} max={30} value={luggage}
-                    onChange={e => setLuggage(Math.max(0, parseInt(e.target.value) || 0))}
-                    className={`${field} text-right`} dir="ltr" />
-                </Field>
-                <Field label="ציוד סקי (סטים)" htmlFor="ski">
-                  <input id="ski" type="number" inputMode="numeric" min={0} max={30} value={ski}
-                    onChange={e => setSki(Math.max(0, parseInt(e.target.value) || 0))}
-                    className={`${field} text-right`} dir="ltr" />
-                </Field>
-              </div>
-
-              {(
-                <div className="flex flex-col gap-2">
-                  <span className={fieldLabel}>איך נוסעים</span>
-                  <div role="radiogroup" aria-label="סוג ההסעה" className="grid grid-cols-2 gap-1 bg-soft border border-line rounded-2xl p-1">
-                    <button type="button" role="radio" aria-checked={!isShared} onClick={() => setService("private")}
-                      className={`min-h-[52px] rounded-xl text-[15px] font-bold transition-colors flex flex-col items-center justify-center ${!isShared ? "bg-ink text-white" : "text-ink hover:bg-white"}`}>
-                      רכב פרטי<span className={`text-[12px] font-medium ${!isShared ? "text-white/75" : "text-muted"}`}>רק אתם, מהשדה עד הדלת</span>
-                    </button>
-                    <button type="button" role="radio" aria-checked={isShared} onClick={() => sharedOffered && setService("shared")} disabled={!sharedOffered}
-                      className={`min-h-[52px] rounded-xl text-[15px] font-bold transition-colors flex flex-col items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed ${isShared ? "bg-ink text-white" : "text-ink hover:bg-white"}`}>
-                      שאטל משותף<span className={`text-[12px] font-medium ${isShared ? "text-white/75" : "text-muted"}`}>
-                        {sharedOffered ? `€${Math.round(((outShared?.price_cents ?? 0) + (retShared?.price_cents ?? 0)) / 100)} לאדם` : "מחיר לפי מספר הטיסה"}
-                      </span>
-                    </button>
-                  </div>
-                  {isShared ? (
-                    <p className="text-[14px] text-body bg-soft rounded-xl px-3.5 py-2.5">
-                      מושב בשאטל עם נוסעים מטיסות באותו זמן, עד הכפר. זול יותר, וייתכנו המתנה קצרה ועצירות בדרך.
-                      {[outShared?.seats_remaining, retShared?.seats_remaining].some(n => typeof n === "number" && n < 8) && <> נשארו מעט מקומות.</>}
-                    </p>
-                  ) : !sharedOffered && (
-                    <p className="text-[13px] text-muted">
-                      {quoting ? "בודקים מחירים ואפשרויות…"
-                        : !availableClasses.length ? "המחירים והרכבים מופיעים אחרי שבוחרים תאריך. שאטל משותף מופיע כשיש לטיסה שלכם שאטל, לפי מספר הטיסה."
-                        : "שאטל משותף מופיע כשיש לטיסה שלכם שאטל: כותבים את מספר הטיסה בשלב 2."}
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {availableClasses.length > 0 && !isShared && (
-                <div className="flex flex-col gap-2">
-                  <span className={fieldLabel}>סוג רכב</span>
-                  <div role="radiogroup" aria-label="סוג רכב" className="flex flex-col gap-2">
-                    {availableClasses.filter(c => c.max_pax >= passengers).map(c => {
-                      const on = vehicleClassId === c.vehicle_class_id;
-                      const tight = c.max_luggage < luggage + ski;
-                      return (
-                        <button key={c.vehicle_class_id} type="button" role="radio" aria-checked={on}
-                          onClick={() => setVehicleClassId(c.vehicle_class_id)}
-                          disabled={c.on_request}
-                          className={`${optionCls(on)} flex items-center justify-between gap-3 px-4 py-3.5 min-h-[60px] disabled:opacity-45 disabled:cursor-not-allowed`}>
-                          <span className="flex items-center gap-3">
-                            <span className={on ? "text-accent" : "text-muted"}><IcoVan /></span>
-                            <span className="flex flex-col">
-                              <span className="font-bold text-[16px] text-ink">{CLASS_HE[c.class] ?? c.class}{c.on_request && " (לפי בקשה בלבד)"}</span>
-                              <span className={`text-[14px] ${tight ? "text-warn" : "text-muted"}`}>עד {c.max_pax} נוסעים · עד {c.max_luggage} מזוודות{tight ? " · צפוף לכמות התיקים" : ""}</span>
-                            </span>
-                          </span>
-                          <span className="font-display font-bold text-[17px] text-ink whitespace-nowrap">€{Math.round(c.price_cents / 100)}{direction === "both" ? <span className="text-[14px] font-medium text-muted"> / כיוון</span> : ""}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {availableSupplements.length > 0 && (
-                <div className="flex flex-col gap-2">
-                  <span className={fieldLabel}>תוספות</span>
+            {availableSupplements.length > 0 && (
+              <Step n={4} title="תוספות">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {availableSupplements.map(s => {
                     const n = suppQty[s.id] || 0;
                     const set = (v: number) => setSuppQty(q => ({ ...q, [s.id]: Math.max(0, Math.min(6, v)) }));
                     return (
-                      <div key={s.id} className={`${optionCls(n > 0)} flex items-center justify-between gap-3 px-4 py-3 min-h-[56px]`}>
+                      <div key={s.id} className={`${optionCls(n > 0)} flex items-center justify-between gap-3 px-4 py-3 min-h-[64px]`}>
                         <span className="flex flex-col">
                           <span className="text-[16px] font-bold text-ink">{SUPPLEMENT_LABELS[s.name] ?? s.name}</span>
-                          <span className="text-[14px] text-muted"><span dir="ltr">+€{(s.price_cents / 100).toFixed(0)}</span> ליחידה{directions > 1 ? " לכל כיוון" : ""}</span>
+                          <span className="text-[14px] text-muted"><span dir="ltr">+€{(s.price_cents / 100).toFixed(0)}</span>{legsOn > 1 ? " לכל כיוון" : ""}</span>
                         </span>
                         <span className="flex items-center gap-2" role="group" aria-label={SUPPLEMENT_LABELS[s.name] ?? s.name}>
                           <button type="button" onClick={() => set(n - 1)} disabled={n === 0} aria-label="פחות"
@@ -551,10 +557,10 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
                     );
                   })}
                 </div>
-              )}
-            </Step>
+              </Step>
+            )}
 
-            <Step n={4} title="פרטים ליצירת קשר">
+            <Step n={availableSupplements.length > 0 ? 5 : 4} title="פרטים ליצירת קשר">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="שם מלא *" htmlFor="name">
                   <input id="name" value={name} onChange={e => setName(e.target.value)} autoComplete="name" required
@@ -570,7 +576,7 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
                 </Field>
                 <Field label="הערות" htmlFor="notes">
                   <input id="notes" value={notes} onChange={e => setNotes(e.target.value)}
-                    placeholder="כמות מזוודות, בעלי חיים..." className={field} />
+                    placeholder="כתובת הדירה, ציוד מיוחד…" className={field} />
                 </Field>
               </div>
             </Step>
@@ -578,72 +584,49 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
             {error && <p role="alert" className="text-[15px] text-danger bg-danger-soft border border-danger/20 px-4 py-3 rounded-xl">{error}</p>}
           </div>
 
-          {/* ── Summary ───────────────────────────────────────── */}
           <aside aria-label="סיכום ההסעה" className="w-full lg:w-[380px] shrink-0 lg:sticky lg:top-[96px]">
             <div className={`${card} p-5 md:p-6 flex flex-col gap-4 shadow-card`}>
               <div className="flex items-center gap-2.5">
-                <span className="w-10 h-10 rounded-xl bg-accent-soft text-accent flex items-center justify-center"><IcoVan /></span>
+                <span className="w-10 h-10 rounded-xl bg-accent-soft text-accent flex items-center justify-center">{isShared ? <IcoUsersTop /> : <IcoVan />}</span>
                 <div>
                   <div className="font-display font-bold text-[18px] text-ink">סיכום ההסעה</div>
-                  <div className="text-[14px] text-muted">שאטל ישיר לואל טורנס</div>
+                  <div className="text-[14px] text-muted">{isShared ? "שאטל משותף" : chosenName} · עד הדלת בואל טורנס</div>
                 </div>
               </div>
 
               <dl className="flex flex-col gap-2.5 text-[15px]">
                 <div className="flex justify-between gap-3"><dt className="text-body">שדה תעופה</dt><dd className="font-bold text-ink">{airportLabel}</dd></div>
                 <div className="flex justify-between gap-3"><dt className="text-body">כיוון</dt><dd className="font-bold text-ink">{directionLabel}</dd></div>
-                <div className="flex justify-between gap-3"><dt className="text-body">נוסעים</dt><dd className="font-bold text-ink">{passengers}</dd></div>
-                <div className="flex justify-between gap-3"><dt className="text-body">הסעה</dt><dd className="font-bold text-ink">{isShared ? "שאטל משותף" : CLASS_HE[availableClasses.find(c => c.vehicle_class_id === vehicleClassId)?.class ?? ""] ?? "רכב פרטי"}</dd></div>
-                {driveText && <div className="flex justify-between gap-3"><dt className="text-body">הדרך</dt><dd className="font-bold text-ink">{driveText}</dd></div>}
+                {direction !== "return" && outDate && <div className="flex justify-between gap-3"><dt className="text-body">הלוך</dt><dd className="font-bold text-ink">{fmtDate(outDate)}{outTime ? <> · <span dir="ltr">{outTime}</span></> : ""}</dd></div>}
+                {direction !== "outbound" && retDate && <div className="flex justify-between gap-3"><dt className="text-body">חזור</dt><dd className="font-bold text-ink">{fmtDate(retDate)}{retTime ? <> · <span dir="ltr">{retTime}</span></> : ""}</dd></div>}
+                <div className="flex justify-between gap-3"><dt className="text-body">נוסעים ותיקים</dt><dd className="font-bold text-ink">{passengers} · {luggage + ski} תיקים</dd></div>
+                {Object.values(suppQty).some(Boolean) && <div className="flex justify-between gap-3"><dt className="text-body">תוספות</dt><dd className="font-bold text-ink">{availableSupplements.filter(x => suppQty[x.id]).map(x => `${suppQty[x.id]} × ${SUPPLEMENT_LABELS[x.name] ?? x.name}`).join(", ")}</dd></div>}
               </dl>
 
               <div className="border-t border-line pt-4 flex flex-col gap-1">
-                <span className="text-[13px] text-muted">
-                  {quoting ? "בודקים מחיר עדכני…" : isShared ? `${passengers} מושבים · ${directions === 1 ? "כיוון אחד" : `${directions} כיוונים`} · מחיר חי` : hasLivePrice ? `${directions === 1 ? "כיוון אחד" : `${directions} כיוונים`} · מחיר חי מספק ההסעות` : `€${PRICE_PER_DIRECTION} × ${directions === 1 ? "כיוון אחד" : `${directions} כיוונים`} × ${passengers} נוסעים`}
-                </span>
                 <div className="flex items-baseline justify-between gap-3">
                   <span className="text-[15px] text-muted">סה״כ</span>
                   <span className="font-display font-extrabold text-[36px] leading-none text-ink">€{totalPrice}</span>
                 </div>
-                <span className={`self-end text-[13px] font-bold ${isShared || hasLivePrice ? "text-ok-text" : "text-warn"}`}>
-                  {isShared || hasLivePrice ? "מחיר חי" : "מחיר משוער, יעודכן לפני האישור"}
-                </span>
+                <span className="self-end text-[13px] text-muted">{passengers > 1 ? `€${Math.round(totalPrice / passengers)} לאדם · ` : ""}<span className={`font-bold ${isShared || hasLivePrice ? "text-ok-text" : "text-warn"}`}>{quoting ? "בודקים מחיר…" : isShared || hasLivePrice ? "מחיר חי" : "מחיר משוער"}</span></span>
               </div>
-
-              {/* El Al: a fixed price per person and direction */}
-              <button type="button" role="checkbox" aria-checked={isElAlOverride || priceConfirmed} onClick={() => setIsElAlOverride(v => !v)}
-                className={`w-full flex items-center gap-3 p-3.5 rounded-2xl border text-right transition-colors
-                  ${isElAlOverride || priceConfirmed ? "border-ok bg-ok-soft" : "border-line bg-white hover:border-line-strong"}`}>
-                <span className={`w-6 h-6 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors
-                  ${isElAlOverride || priceConfirmed ? "bg-ok border-ok text-white" : "border-line-strong"}`}>
-                  {(isElAlOverride || priceConfirmed) && <IcoCheck size={14} />}
-                </span>
-                <span className="flex-1 flex flex-col">
-                  <span className="text-[15px] font-bold text-ink">טיסת אל על ישירה</span>
-                  <span className="text-[13px] text-muted">מחיר קבוע: €{PRICE_PER_DIRECTION}/אדם/כיוון</span>
-                </span>
-                <span className={`text-[13px] font-bold px-2.5 py-0.5 rounded-full whitespace-nowrap ${isElAlOverride || priceConfirmed ? "bg-white text-ok-text" : "bg-soft text-muted"}`}>
-                  {isElAlOverride || priceConfirmed ? "מאושר" : "משוער"}
-                </span>
-              </button>
 
               <div className="hidden lg:flex flex-col gap-2">
                 {submitButton}
                 {!canSubmit && missing.length > 0 && <p className="text-[13px] text-muted text-center">כדי להזמין חסרים: {missing.join(", ")}</p>}
               </div>
-              <p className="text-center text-[14px] text-muted">נחזור אליכם לאישור ולתשלום</p>
+              <p className="text-center text-[14px] text-muted">משלמים רק אחרי שאנחנו מאשרים את ההסעה</p>
+              {priceConfirmed && <p className="text-[13px] text-ok-text bg-ok-soft rounded-xl px-3 py-2 text-center">טיסת אל על ישירה: מחיר קבוע €{PRICE_PER_DIRECTION} לאדם לכיוון</p>}
             </div>
           </aside>
         </div>
       </div>
 
-      {/* Phone: the total and the button always at hand (sticks to the bottom
-          while the form is on screen, and stays above the footer) */}
       <div className="lg:hidden sticky bottom-0 z-40 bg-white border-t border-line px-4 pt-3"
         style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))", boxShadow: "0 -8px 24px rgba(11,27,51,0.08)" }}>
         <div className="flex items-center gap-3">
           <div className="shrink-0 flex flex-col">
-            <span className="text-[12px] text-muted leading-tight">{hasLivePrice ? "סה״כ" : "סה״כ משוער"}</span>
+            <span className="text-[12px] text-muted leading-tight">{isShared || hasLivePrice ? "סה״כ" : "סה״כ משוער"}</span>
             <span className="font-display font-extrabold text-[24px] leading-none text-ink">€{totalPrice}</span>
           </div>
           <div className="flex-1">{submitButton}</div>
