@@ -86,9 +86,12 @@ function Chip({ on, label, count, onClick }: { on: boolean; label: string; count
   const off = !on && count === 0;
   return (
     <button type="button" onClick={onClick} aria-pressed={on} disabled={off}
-      className={`min-h-[38px] px-3 rounded-full border text-[14px] font-bold transition-colors disabled:opacity-40 ${
+      className={`inline-flex items-center min-h-[38px] ps-3.5 pe-2 rounded-full border text-[14px] font-bold transition-colors disabled:opacity-40 ${
         on ? "bg-ink border-ink text-white" : "bg-white border-line text-ink hover:border-ink"}`}>
-      <bdi>{label}</bdi>{count !== undefined && <bdi className={`ms-1.5 font-normal ${on ? "text-white/70" : "text-muted"}`}>{count}</bdi>}
+      <bdi>{label}</bdi>{count !== undefined && (
+        <bdi className={`ms-2 inline-flex items-center justify-center min-w-[24px] h-[22px] px-1.5 rounded-full text-[12px] font-bold tabular-nums ${
+          on ? "bg-white/20 text-white" : "bg-soft text-muted"}`}>{count}</bdi>
+      )}
     </button>
   );
 }
