@@ -88,7 +88,7 @@ function Chip({ on, label, count, onClick }: { on: boolean; label: string; count
     <button type="button" onClick={onClick} aria-pressed={on} disabled={off}
       className={`min-h-[38px] px-3 rounded-full border text-[14px] font-bold transition-colors disabled:opacity-40 ${
         on ? "bg-ink border-ink text-white" : "bg-white border-line text-ink hover:border-ink"}`}>
-      {label}{count !== undefined && <span className={`ms-1 font-normal ${on ? "text-white/70" : "text-muted"}`}>{count}</span>}
+      <bdi>{label}</bdi>{count !== undefined && <bdi className={`ms-1.5 font-normal ${on ? "text-white/70" : "text-muted"}`}>{count}</bdi>}
     </button>
   );
 }
@@ -99,7 +99,7 @@ function CheckRow({ on, label, count, onClick, dir }: { on: boolean; label: stri
       <input type="checkbox" checked={on} onChange={onClick} disabled={!on && count === 0}
         className="w-[18px] h-[18px] shrink-0 rounded-[5px] accent-[var(--color-accent,#1f5eff)] cursor-pointer" />
       <span className="flex-1 text-[15px] text-ink group-hover:text-accent transition-colors" dir={dir}>{label}</span>
-      <span className="text-[13px] text-muted tabular-nums">{count}</span>
+      <bdi className="text-[13px] text-muted tabular-nums">{count}</bdi>
     </label>
   );
 }
