@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
-import { vtiFetch, vtiLogin, type Jar } from "@/lib/vti-session";
+import { Jar, vtiFetch, vtiLogin } from "@/lib/vti-session";
 import { parseDetail, parseResults, kindHe, PICTO_HE, type VtiOffer } from "@/lib/vti-parse";
 
 /*
@@ -83,6 +83,8 @@ export async function GET(req: NextRequest) {
   }
   if (!login.ok) { await log(false, { error: "login failed" }); return NextResponse.json({ error: "login failed" }, { status: 502 }); }
   const jar: Jar = login.jar;
+  // a lot page errors (500) inside the TO session, but the public one has everything: details are read without it
+  const pub = new Jar();
 
   // 1) every week of the season: who is free and at what price
   const weeks = seasonSaturdays();
@@ -116,18 +118,19 @@ export async function GET(req: NextRequest) {
     updated++;
   });
 
-  // 3) new lots: details, photos, a Hebrew description, then into the site
-  const fresh = [...byRef.values()].filter(e => !have.has(e.offer.ref)).sort((a, b) => b.weeks.length - a.weeks.length);
+  // 3) new lots (and lots asked to be read again: ?refresh=REF,REF): details, photos, a Hebrew description
+  const refresh = new Set((req.nextUrl.searchParams.get("refresh") || "").split(",").map(x => x.trim()).filter(Boolean));
+  const fresh = [...byRef.values()].filter(e => !have.has(e.offer.ref) || refresh.has(e.offer.ref)).sort((a, b) => Number(refresh.has(b.offer.ref)) - Number(refresh.has(a.offer.ref)) || b.weeks.length - a.weeks.length);
   let added = 0; const addErrors: string[] = [];
   await pool(fresh.slice(0, maxNew), 4, async ({ offer, weeks: w }) => {
     if (Date.now() - started > 45000) return;
     try {
-      const det = await vtiFetch(jar, "/fr-FR/Lot/Detail", {
+      const det = await vtiFetch(pub, "/fr-FR/Lot/Detail", {
         method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({ lot_no: offer.lotNo, comm_no: "101", comm_type: "DEFAUT", startDate: frIso(w[0].week, 0), endDate: frIso(w[0].week, 7) }).toString(),
       });
       const d = parseDetail(det.html);
-      const he = await hebrew(d.description || offer.catcher);
+      const he = d.description ? await hebrew(d.description) : "";
       if (!he) { addErrors.push(`${offer.ref}: no translation`); return; }
       const type = kindHe(offer.kind, d.rooms);
       const images = (d.images.length ? d.images : offer.images).slice(0, 12);
@@ -140,7 +143,11 @@ export async function GET(req: NextRequest) {
         description: he, available: w.length > 0,
         source: "la_cime", source_ref: `vti:${offer.ref}`, available_weeks: w,
       };
-      const { error } = await db.from("apartments").insert(row);
+      if (!d.description) { addErrors.push(`${offer.ref}: no description on its page`); return; }
+      const existing = have.get(offer.ref);
+      const { error } = existing
+        ? await db.from("apartments").update(row).eq("id", existing)
+        : await db.from("apartments").insert(row);
       if (error) addErrors.push(`${offer.ref}: ${error.message}`); else added++;
     } catch (e) { addErrors.push(`${offer.ref}: ${e instanceof Error ? e.message : "error"}`); }
   });
