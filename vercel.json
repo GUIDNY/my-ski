@@ -8,6 +8,10 @@
     {
       "path": "/api/cron/la-cime-sync",
       "schedule": "10 5 * * *"
+    },
+    {
+      "path": "/api/cron/vti-sync",
+      "schedule": "20 5 * * *"
     }
   ]
 }

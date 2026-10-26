@@ -78,7 +78,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  const { data: ours } = await supabase.from("apartments").select("id,source_ref").eq("source", "la_cime");
+  // the Val Thorens Immobilier apartments ("vti:<ref>") have their own sync (cron/vti-sync)
+  const { data: ours } = await supabase.from("apartments").select("id,source_ref").eq("source", "la_cime").not("source_ref", "like", "vti:%");
   if (!ours?.length) {
     await logRun(true, { checked: 0, weeksScanned: 0, note: "no la_cime apartments in DB" });
     return NextResponse.json({ checked: 0, weeksScanned: 0 });
