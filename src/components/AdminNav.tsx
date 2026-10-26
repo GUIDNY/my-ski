@@ -1,6 +1,6 @@
 "use client";
 import { usePathname } from "next/navigation";
-import { IconBed, IconSkis, IconCalendar, IconBus } from "@/components/Icons";
+import { IconBed, IconSkis, IconCalendar, IconBus, IconHome } from "@/components/Icons";
 
 const IconGrid = ({ size = 18 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -31,6 +31,7 @@ const links = [
   { href: "/admin/season-rentals", label: "דירות סיזיונרים", icon: <IconSkis size={18} /> },
   { href: "/admin/seasonal-properties", label: "ניהול דירות עונתיות", icon: <IconKey size={18} /> },
   { href: "/admin/agency-properties", label: "ניהול דירות סוכנות", icon: <IconBriefcase size={18} /> },
+  { href: "/admin/hostel", label: "הוסטל מאיירהופן", icon: <IconHome size={18} /> },
   { href: "/admin/proposals", label: "הצעות מחיר (PDF)", icon: <IconDoc size={18} /> },
   { href: "/admin/orders", label: "הזמנות ותשלומים", icon: <IconCalendar size={18} /> },
   { href: "/admin/transfers", label: "הסעות", icon: <IconBus size={18} /> },
