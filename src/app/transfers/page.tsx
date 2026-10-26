@@ -82,7 +82,9 @@ export default async function TransfersPage({ searchParams }: Props) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(ld) }} />
-      <TransfersClient initial={{ checkin, checkout, guests, aptName: one(params.apartment), aptId: one(params.apartment_id) }} />
+      <TransfersClient initial={{ checkin, checkout, guests, aptName: one(params.apartment), aptId: one(params.apartment_id),
+        airport: one(params.airport).toUpperCase() === "LYS" ? "LYS" : "GVA",
+        direction: one(params.direction) === "outbound" || one(params.direction) === "return" ? (one(params.direction) as "outbound" | "return") : "both" }} />
 
       <div className="bg-white border-t border-line" dir="rtl">
         <div className={`${wrap} py-12 md:py-16 flex flex-col gap-12 md:gap-14 max-w-[880px]`}>

@@ -123,7 +123,7 @@ function FlightLeg({ id, title, flightNum, date, time, onFlight, onDate, onTime 
   );
 }
 
-export type TransferInitial = { checkin: string; checkout: string; guests: number; aptName: string; aptId: string };
+export type TransferInitial = { checkin: string; checkout: string; guests: number; aptName: string; aptId: string; airport?: string; direction?: "outbound" | "return" | "both" };
 
 /* ── The booking form (the page around it renders on the server) ── */
 export default function TransfersClient({ initial }: { initial: TransferInitial }) {
@@ -131,7 +131,7 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
   const guestsParam = initial.guests;
 
   // Direction
-  const [direction, setDirection] = useState<"outbound" | "return" | "both">("both");
+  const [direction, setDirection] = useState<"outbound" | "return" | "both">(initial.direction || "both");
 
   // Outbound flight
   const [outFlight, setOutFlight] = useState("");
@@ -145,7 +145,7 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
 
   // Other
   const [isElAlOverride, setIsElAlOverride] = useState(false);
-  const [airport,   setAirport]   = useState("GVA");
+  const [airport,   setAirport]   = useState(initial.airport === "LYS" ? "LYS" : "GVA");
   const [passengers, setPassengers] = useState(guestsParam);
   const [name,      setName]      = useState("");
   const [email,     setEmail]     = useState("");
