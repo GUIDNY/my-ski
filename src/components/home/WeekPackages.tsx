@@ -133,7 +133,7 @@ export default async function WeekPackages() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img {...cardImage(c.img, "/hero-ski.jpg")} alt={c.name} loading="lazy" className="w-full h-full object-cover" />
               <span className="absolute top-3.5 right-3.5 bg-white text-[#0B1B33] rounded-full px-3 py-1 text-[13px] font-bold">
-                {c.ownApartment ? "דירה שלנו" : "שבת עד שבת"}
+                {c.ownApartment ? "כניסה בכל יום" : "שבת עד שבת"}
               </span>
               {i === 0 && (
                 <span className="absolute top-3.5 left-3.5 bg-[#0B1B33] text-white rounded-full px-3 py-1 text-[13px] font-bold">הכי משתלם השבוע</span>

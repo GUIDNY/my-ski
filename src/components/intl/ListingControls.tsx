@@ -2,9 +2,9 @@
 import { useState, type ReactNode } from "react";
 import { IconCalendar, IconUsers } from "@/components/Icons";
 import { EmptyState, btn } from "@/components/ui";
-import { MAX_SEARCH_GUESTS, SEASON_END, type Lang } from "@/lib/intl/config";
+import { MAX_SEARCH_GUESTS, SEASON_END, SEASON_START, type Lang } from "@/lib/intl/config";
 import { DICT } from "@/lib/intl/dict";
-import { fmtRange, nightsBetween } from "@/lib/intl/format";
+import { addDays, fmtRange, nightsBetween } from "@/lib/intl/format";
 import { firstBookable, searchQuery } from "@/lib/intl/search";
 import DatesDialog from "./DatesDialog";
 
@@ -13,6 +13,17 @@ const chipCls = "inline-flex items-center gap-2 min-h-[44px] px-4 rounded-full b
 /** A new search changes the URL only (the list is re-filtered here, no page load). */
 export const goToSearch = (lang: Lang, s: { checkin?: string; checkout?: string; guests?: number }) =>
   window.history.pushState(null, "", `/${lang}/apartments${searchQuery(s)}`);
+
+/** every Saturday-to-Saturday week of the season from today */
+function seasonWeeks(todayIso: string): { ci: string; co: string }[] {
+  const out: { ci: string; co: string }[] = [];
+  for (let d = SEASON_START; addDays(d, 7) <= SEASON_END; d = addDays(d, 7)) if (d >= todayIso) out.push({ ci: d, co: addDays(d, 7) });
+  return out;
+}
+const WEEK_L = {
+  en: { pick: "Saturday to Saturday week", week: "Week", choose: "Choose a week", sat: "Sat." },
+  fr: { pick: "Semaine samedi–samedi", week: "Semaine", choose: "Choisir une semaine", sat: "Sam." },
+};
 
 /** The dates and guests of the listing. */
 export function DatesChips({ lang, todayIso, checkin, checkout, guests, hasDates, guestsSet }: {
@@ -26,6 +37,22 @@ export function DatesChips({ lang, todayIso, checkin, checkout, guests, hasDates
         <span className="text-accent" aria-hidden="true"><IconCalendar size={16} /></span>
         {hasDates ? <>{fmtRange(checkin, checkout, lang)} · {t.common.nights(nightsBetween(checkin, checkout))}</> : t.dates.addDates}
       </button>
+      {(() => {
+        const wl = WEEK_L[lang], weeks = seasonWeeks(todayIso);
+        const sel = weeks.find(w => w.ci === checkin && w.co === checkout);
+        return (
+          <label className={`relative ${chipCls} pe-9 cursor-pointer`}>
+            <span className="text-accent" aria-hidden="true"><IconCalendar size={16} /></span>
+            {sel ? `${wl.week} ${fmtRange(sel.ci, sel.co, lang)}` : wl.pick}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="absolute end-3.5 text-muted"><path d="M6 9l6 6 6-6" /></svg>
+            <select aria-label={wl.pick} value={sel ? sel.ci : ""} className="absolute inset-0 opacity-0 cursor-pointer"
+              onChange={e => { const w = weeks.find(x => x.ci === e.target.value); if (w) goToSearch(lang, { checkin: w.ci, checkout: w.co, guests }); }}>
+              <option value="" disabled>{wl.choose}</option>
+              {weeks.map(w => <option key={w.ci} value={w.ci}>{wl.sat} {fmtRange(w.ci, w.co, lang)}</option>)}
+            </select>
+          </label>
+        );
+      })()}
       <button type="button" onClick={() => setOpen(true)} aria-haspopup="dialog" className={chipCls}>
         <span className="text-accent" aria-hidden="true"><IconUsers size={16} /></span>
         {t.common.guests(guests)}

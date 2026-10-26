@@ -7,9 +7,9 @@ import type { Lang } from "@/lib/intl/config";
 import { DICT } from "@/lib/intl/dict";
 import { fmtRange } from "@/lib/intl/format";
 import { parseSearch, type SearchState } from "@/lib/intl/search";
-import ApartmentCard from "./ApartmentCard";
 import Crumbs from "./Crumbs";
-import { DatesChips, FilterGrid } from "./ListingControls";
+import { DatesChips } from "./ListingControls";
+import ListingBrowser from "./ListingBrowser";
 
 type Props = { lang: Lang; items: ListItem[]; todayIso: string };
 
@@ -23,11 +23,6 @@ export function ListingView({ lang, items, todayIso, search, taken, checking }: 
 }) {
   const t = DICT[lang];
   const cards = checking ? [] : cardsFor({ lang, items, search, taken, todayIso });
-  const counts = {
-    all: cards.length,
-    own: cards.filter(c => c.kind === "own").length,
-    agency: cards.filter(c => c.kind === "agency").length,
-  };
   const summary = checking ? t.book.checking
     : search.hasDates ? t.list.countFor(cards.length, fmtRange(search.checkin, search.checkout, lang), t.common.guests(search.guests))
     : search.guestsSet ? t.list.countGuests(cards.length, t.common.guests(search.guests))
@@ -74,9 +69,7 @@ export function ListingView({ lang, items, todayIso, search, taken, checking }: 
           <EmptyState title={search.hasDates ? t.list.emptyDates : t.list.empty} text={search.hasDates ? t.list.emptyDatesText : undefined} />
         ) : (
           // a new search starts on "all" again
-          <FilterGrid key={`${search.checkin}|${search.checkout}|${search.guests}`} lang={lang} counts={counts}>
-            {cards.map((c, i) => <ApartmentCard key={c.id} c={c} cta={t.common.viewApt} eager={i < 3} heading="h3" />)}
-          </FilterGrid>
+          <ListingBrowser key={`${search.checkin}|${search.checkout}|${search.guests}`} lang={lang} cards={cards} />
         )}
       </div>
     </div>

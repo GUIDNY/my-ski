@@ -17,7 +17,7 @@ import { isoOf } from "./format";
  * may end up in the page sent to the browser.
  */
 
-const FIELDS = "id,name,type,baths,sqm,max_guests,map_url,price_per_night,images,amenities,available,source,available_weeks,description";
+const FIELDS = "id,name,type,beds,baths,sqm,max_guests,map_url,price_per_night,images,amenities,available,source,available_weeks,description";
 
 /** the size the listing's own (Hebrew) text states, then the text is dropped: it isn't shown here */
 function publicOf(row: PublicApartment & { description?: string | null }): PublicApartment {
@@ -27,7 +27,7 @@ function publicOf(row: PublicApartment & { description?: string | null }): Publi
 }
 
 export type PublicApartment = Pick<Apartment,
-  "id" | "name" | "type" | "baths" | "sqm" | "max_guests" | "map_url" | "price_per_night"
+  "id" | "name" | "type" | "beds" | "baths" | "sqm" | "max_guests" | "map_url" | "price_per_night"
   | "images" | "amenities" | "available" | "source" | "available_weeks">;
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

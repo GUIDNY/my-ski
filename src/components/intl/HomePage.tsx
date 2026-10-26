@@ -97,7 +97,7 @@ export default async function HomePage({ lang }: { lang: Lang }) {
           <p className="rounded-2xl bg-soft border border-line px-5 py-6 text-[16px] text-body">{h.noApts}</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-            {own.map(c => <ApartmentCard key={c.id} c={c} cta={t.common.viewApt} heading="h3" />)}
+            {own.map(c => <ApartmentCard key={c.id} c={c} cta={t.common.viewApt} heading="h3" lang={lang} />)}
           </div>
         )}
         {all.length > 0 && (

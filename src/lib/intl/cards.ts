@@ -25,6 +25,18 @@ export type ListItem = {
   price_per_night: number;
   weeks: Week[];                  // agency: the free weeks ahead
   rules: PricingRule[] | null;    // own: pricing rules with the Airbnb calendar (null: couldn't be read)
+  facts: CardFacts;
+};
+
+/** what the listing's filters and the card's facts row read */
+export type CardFacts = {
+  bed: string;                    // "studio" | "1" | "2" | "3" | "4" (4+) | "" unknown
+  beds: number;                   // bedrooms (0: studio or unknown)
+  residence: string | null;       // the building
+  quarter: string | null;         // the village quarter (lib/residences Q)
+  sqm: number | null;
+  code: string | null;            // weekly apartments: their reference
+  amen: string[];                 // translated amenities only
 };
 
 export type CardPrice =
@@ -40,6 +52,10 @@ export type CardData = {
   badge: string;
   meta: string;
   price: CardPrice;
+  guests: number | null;
+  facts: CardFacts;
+  /** the card's price as a week (nightly × 7), for sorting and the price filter; Infinity: unknown */
+  week: number;
 };
 
 export function cardsFor(o: {
@@ -63,6 +79,7 @@ export function cardsFor(o: {
     let href = search.guestsSet ? `${base}${searchQuery({ guests: search.guests })}` : base;
     let price: CardPrice = { text: t.priceOnPage };
     let sort = Number.MAX_SAFE_INTEGER;
+    let week = Infinity;
 
     if (it.kind === "agency") {
       if (!it.weeks.length) continue; // nothing left to book
@@ -71,24 +88,24 @@ export function cardsFor(o: {
         if (!q || q.kind !== "week") continue;
         price = { amount: fmtEur(q.total, lang), unit: t.fullWeek, sub: fmtDayRange(q.checkin, q.checkout, lang) };
         href = `${base}${searchQuery({ checkin: q.checkin, checkout: q.checkout, guests: search.guests })}`;
-        sort = q.total;
+        sort = q.total; week = q.total;
       } else {
         const min = fromWeek(priceApt, todayIso);
-        if (min !== null) { price = { prefix: t.from, amount: fmtEur(min, lang), unit: t.perWeek, sub: t.satToSat }; sort = min; }
+        if (min !== null) { price = { prefix: t.from, amount: fmtEur(min, lang), unit: t.perWeek, sub: t.satToSat }; sort = min; week = min; }
       }
     } else if (search.hasDates) {
       href = `${base}${searchQuery(search)}`;
       const q = it.rules ? quoteFor(priceApt, it.rules, search.checkin, search.checkout, todayIso) : null;
       if (q && q.kind === "nights") {
         price = { amount: fmtEur(q.total, lang), unit: t.forNights(q.nights), sub: t.avgNight(fmtEur(q.avg, lang)) };
-        sort = q.total;
+        sort = q.total; week = q.avg * 7;
       }
     } else if (it.rules) {
       const min = fromNight(priceApt, it.rules, todayIso);
-      if (min !== null) { price = { prefix: t.from, amount: fmtEur(min, lang), unit: t.perNight }; sort = min; }
+      if (min !== null) { price = { prefix: t.from, amount: fmtEur(min, lang), unit: t.perNight }; sort = min; week = min * 7; }
     }
 
-    rows.push({ sort, card: { id: it.id, kind: it.kind, href, img: it.img, name: it.name, badge: it.badge, meta: it.meta, price } });
+    rows.push({ sort, card: { id: it.id, kind: it.kind, href, img: it.img, name: it.name, badge: it.badge, meta: it.meta, price, guests: it.maxGuests, facts: it.facts, week } });
   }
 
   // our own apartments first, then the agency ones; cheapest first in each

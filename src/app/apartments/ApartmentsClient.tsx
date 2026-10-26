@@ -28,7 +28,7 @@ const isAgency = (apt: Apartment) => apt.source === "la_cime";
 type Filter = "all" | "own" | "agency";
 const FILTERS: { key: Filter; label: string }[] = [
   { key: "all",    label: "הכל" },
-  { key: "own",    label: "הדירות שלנו" },
+  { key: "own", label: "תאריכים גמישים" },
   { key: "agency", label: "שבת עד שבת" },
 ];
 
@@ -255,7 +255,7 @@ function ApartmentCard({ apt, checkin, checkout, guests, rules, fromNightPrice, 
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img {...cardImage(apt.images?.[0], "/apt1.jpg")} alt={aptDisplayName(apt)} loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : "auto"}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
-        <span className={`absolute top-3.5 right-3.5 ${badgeLight}`}>{isAgency(apt) ? "שבת עד שבת" : "דירה שלנו"}</span>
+        <span className={`absolute top-3.5 right-3.5 ${badgeLight}`}>{isAgency(apt) ? "שבת עד שבת" : "כניסה בכל יום"}</span>
       </div>
 
       <div className="p-5 flex flex-col gap-2 flex-1">
@@ -539,7 +539,7 @@ function ApartmentsPage({ initialApartments, intro, fromNights = {} }: { initial
             <div className="flex flex-col gap-2 min-w-0">
               <h1 className="font-display font-extrabold text-[32px] leading-[1.1] md:text-[44px] tracking-tight text-ink">דירות בואל טורנס</h1>
               <p className="text-[16px] md:text-[17px] text-muted">
-                {loading ? "טוענים את הדירות…" : `${filtered.length} ${filtered.length === 1 ? "דירה" : "דירות"}${hasDates ? " פנויות לתאריכים שבחרתם" : ""}. הדירות שלנו, ודירות לשבוע שלם.`}
+                {loading ? "טוענים את הדירות…" : `${filtered.length} ${filtered.length === 1 ? "דירה" : "דירות"}${hasDates ? " פנויות לתאריכים שבחרתם" : ""}. דירות עם כניסה בכל יום, ודירות לשבוע שלם משבת לשבת.`}
               </p>
               {intro && !hasDates && <div className="max-w-[760px] flex flex-col gap-2 text-[15px] md:text-[16px] leading-relaxed text-body">{intro}</div>}
             </div>

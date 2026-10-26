@@ -71,8 +71,9 @@ export function placeOf(a: Pick<Apartment, "name" | "source">): Place {
   return known ? { residence: known[0], quarter: known[1] } : { residence: named, quarter: null };
 }
 
-/** "סטודיו" for studios, otherwise the number of bedrooms (0 when unknown) */
-export function bedroomsOf(a: Pick<Apartment, "type" | "beds">): "studio" | number {
-  if ((a.type || "").trim() === "סטודיו") return "studio";
-  return Number(a.beds) || 0;
+/** "סטודיו" for studios, otherwise the number of bedrooms (0 when unknown).
+ *  `beds` is bedrooms only for weekly apartments; for our own it counts beds. */
+export function bedroomsOf(a: Pick<Apartment, "type" | "beds" | "source">): "studio" | number {
+  if (/^(סטודיו|studio)$/i.test((a.type || "").trim())) return "studio";
+  return a.source === "la_cime" ? Number(a.beds) || 0 : 0;
 }

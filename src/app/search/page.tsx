@@ -189,7 +189,7 @@ function AptCard({ apt, nights, checkin, checkout, guests, deal, rules, badge, e
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img {...cardImage(apt.images?.[0], "/hero-ski.jpg")} alt={aptDisplayName(apt)} loading="lazy"
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
-        <span className={`absolute top-3.5 right-3.5 ${badgeLight}`}>{isAgency(apt) ? "שבת עד שבת" : "דירה שלנו"}</span>
+        <span className={`absolute top-3.5 right-3.5 ${badgeLight}`}>{isAgency(apt) ? "שבת עד שבת" : "כניסה בכל יום"}</span>
         {badge && <span className={`absolute bottom-3.5 right-3.5 ${badgeDark}`}>{badge}</span>}
       </div>
 
@@ -475,7 +475,7 @@ function SearchPage() {
 
   const kinds: { key: Kind; label: string }[] = [
     { key: "all", label: "הכל" },
-    { key: "own", label: "הדירות שלנו" },
+    { key: "own", label: "תאריכים גמישים" },
     { key: "agency", label: "שבת עד שבת" },
   ];
 
