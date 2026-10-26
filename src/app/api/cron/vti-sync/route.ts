@@ -70,6 +70,25 @@ async function hebrew(fr: string): Promise<string> {
   } catch { return ""; }
 }
 
+/** a short Hebrew title from the apartment's own description: "סטודיו עם מרפסת דרומית ליד המסלולים" */
+async function titleFor(kind: string, description: string): Promise<string> {
+  if (!process.env.GEMINI_API_KEY || !description) return "";
+  const prompt = `כתוב כותרת קצרה בעברית (4 עד 8 מילים) לדירת סקי בואל טורנס, מתוך התיאור שלה. מתחילים בסוג הדירה (${kind}), ואחר כך היתרון הבולט שכתוב בתיאור: מרפסת, נוף, דופלקס, אח, קרוב למסלולים או לחנויות, משופצת, מרווחת. בלי מספר אנשים, בלי מ"ר, בלי מחיר, בלי שם הסוכנות, בלי מירכאות ובלי נקודה בסוף. רק עובדות מהתיאור. החזר רק את הכותרת.\n\nהתיאור:\n${description.slice(0, 1500)}`;
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, signal: AbortSignal.timeout(20000),
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.3 } }),
+    });
+    const j = await res.json();
+    const t = String(j?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text || "").join("") || "")
+      .split("\n")[0].replace(/["״“”*]/g, "").replace(/[.:]+$/, "").replace(/\s+[—–-]\s+/g, ", ").trim();
+    return t.split(/\s+/).length >= 3 && t.length <= 70 && /[א-ת]/.test(t) ? t : "";
+  } catch { return ""; }
+}
+
+/** the name the site stores: "<type> — <Hebrew title> — <code>" (the display helpers read the parts) */
+const nameWith = (type: string, title: string, ref: string) => title ? `${type} — ${title} — ${ref}` : `${type} — ${ref}`;
+
 export async function GET(req: NextRequest) {
   const auth = req.headers.get("authorization");
   if (process.env.CRON_SECRET && auth !== `Bearer ${process.env.CRON_SECRET}`) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
@@ -134,8 +153,9 @@ export async function GET(req: NextRequest) {
       if (!he) { addErrors.push(`${offer.ref}: no translation`); return; }
       const type = d.rooms ? kindHe(d.rooms === 1 ? "Studio" : String(d.rooms), d.rooms) : kindHe(offer.kind);
       const images = (d.images.length ? d.images : offer.images).slice(0, 12);
+      const title = await titleFor(type, he);
       const row = {
-        name: `${type} — ${offer.ref}`, type,
+        name: nameWith(type, title, offer.ref), type,
         beds: d.bedrooms || (type === "סטודיו" ? 1 : Math.max(1, (parseInt(offer.kind, 10) || 2) - 1)),
         baths: d.baths || 1, sqm: d.sqm || 0, max_guests: d.pax || offer.pax || 2,
         price_per_night: Math.round(Math.min(...w.map(x => x.price)) / 7 * 100) / 100,
@@ -152,7 +172,25 @@ export async function GET(req: NextRequest) {
     } catch (e) { addErrors.push(`${offer.ref}: ${e instanceof Error ? e.message : "error"}`); }
   });
 
+  // 4) weekly apartments still without a title (also La Cime's): up to 80 per run, until all have one
+  let titled = 0;
+  const wantTitles = Math.min(Number(req.nextUrl.searchParams.get("titles") ?? 80) || 0, 80);
+  if (wantTitles && Date.now() - started < 40000) {
+    const { data: plain } = await db.from("apartments").select("id,name,type,description").eq("source", "la_cime").limit(400);
+    const todo = (plain ?? []).filter(a => String(a.name).split(/\s+[—–-]\s+/).length < 3 && a.description).slice(0, wantTitles);
+    await pool(todo, 8, async a => {
+      if (Date.now() - started > 52000) return;
+      const parts = String(a.name).split(/\s+[—–-]\s+/);
+      const code = parts[parts.length - 1];
+      const t = await titleFor(a.type || parts[0], String(a.description));
+      if (!t) return;
+      const { error } = await db.from("apartments").update({ name: nameWith(parts[0], t, code) }).eq("id", a.id);
+      if (!error) titled++;
+    });
+  }
+
   const summary = {
+    titled,
     weeks: weeks.length, failed, lotsSeen: byRef.size, updated, added,
     waiting: Math.max(0, fresh.length - added), errors: addErrors.slice(0, 8), ms: Date.now() - started,
   };

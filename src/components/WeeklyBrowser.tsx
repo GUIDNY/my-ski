@@ -6,7 +6,7 @@ import type { Apartment, SkiPass } from "@/types";
 import { hasDirectFlightBothWays } from "@/lib/direct-flight-days";
 import { weekPackageExtras, PASS_AREA_LABEL } from "@/lib/deal-pricing";
 import { useDirectFlight } from "@/lib/useFlightPrice";
-import { aptDisplayName, aptShortName, aptParts } from "@/lib/apartment-display";
+import { aptDisplayName, aptShortName, aptParts, forWho } from "@/lib/apartment-display";
 import { card, btn, badgeLight, badgeDark, Check, EmptyState } from "@/components/ui";
 import { cardImage } from "@/lib/thumbs";
 import { HOLIDAY_WEEKS } from "@/lib/holiday-weeks";
@@ -274,7 +274,7 @@ export default function WeeklyBrowser({
               guests: String(guests),
               ...(full ? { deal: "full" } : {}),
             }).toString()}`;
-            const meta = [apt.sqm ? `${apt.sqm} מ"ר` : "", aptParts(apt).code ? `קוד ${aptParts(apt).code}` : ""].filter(Boolean).join(" · ");
+            const meta = [aptParts(apt).title ? forWho(apt.max_guests) : "", apt.sqm ? `${apt.sqm} מ"ר` : "", aptParts(apt).code ? `קוד ${aptParts(apt).code}` : ""].filter(Boolean).join(" · ");
             return (
               <Link key={apt.id} href={href}
                 className={`${card} group overflow-hidden flex flex-col hover:border-line-strong transition-colors`}>

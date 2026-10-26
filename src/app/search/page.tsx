@@ -35,7 +35,7 @@ const capacity = (apt: Apartment) => apt.max_guests || apt.beds * 2 || 2;
 const isAgency = (apt: Apartment) => apt.source === "la_cime";
 /** under the name: size and bathrooms; weekly apartments also their code (the name says the type and people) */
 const metaLine = (apt: Apartment) => [
-  !isAgency(apt) ? `${aptKind(apt)}${forWho(apt.max_guests) ? ` ${forWho(apt.max_guests)}` : ""}` : "",
+  !isAgency(apt) ? `${aptKind(apt)}${forWho(apt.max_guests) ? ` ${forWho(apt.max_guests)}` : ""}` : (aptParts(apt).title ? forWho(apt.max_guests) : ""),
   aptSqm(apt) ? `${aptSqm(apt)} מ"ר` : "",
   apt.baths ? (apt.baths === 1 ? "חדר רחצה" : `${apt.baths} חדרי רחצה`) : "",
   aptParts(apt).code ? `קוד ${aptParts(apt).code}` : "",

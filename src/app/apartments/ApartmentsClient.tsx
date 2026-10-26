@@ -26,7 +26,7 @@ const eur = (n: number) => `€${n.toLocaleString("en-US", { maximumFractionDigi
 const isAgency = (apt: Apartment) => apt.source === "la_cime";
 /** under the name: what it is and its size; weekly ones also their code */
 const metaLine = (apt: Apartment) => isAgency(apt)
-  ? [apt.sqm ? `${apt.sqm} מ"ר` : "", aptParts(apt).code ? `קוד ${aptParts(apt).code}` : ""].filter(Boolean).join(" · ")
+  ? [aptParts(apt).title ? forWho(apt.max_guests) : "", apt.sqm ? `${apt.sqm} מ"ר` : "", aptParts(apt).code ? `קוד ${aptParts(apt).code}` : ""].filter(Boolean).join(" · ")
   : [`${aptKind(apt)}${forWho(apt.max_guests) ? ` ${forWho(apt.max_guests)}` : ""}`, apt.sqm ? `${apt.sqm} מ"ר` : ""].filter(Boolean).join(" · ");
 
 type Filter = "all" | "own" | "agency";
@@ -35,6 +35,27 @@ const FILTERS: { key: Filter; label: string }[] = [
   { key: "own",    label: "הדירות שלנו" },
   { key: "agency", label: "שבת עד שבת" },
 ];
+
+/** how many people the apartment is for: a range of its maximum */
+type Size = "any" | "2" | "4" | "6" | "8" | "9";
+const SIZES: { key: Size; label: string; fits: (n: number) => boolean }[] = [
+  { key: "any", label: "כל הגדלים", fits: () => true },
+  { key: "2", label: "עד 2", fits: n => n <= 2 },
+  { key: "4", label: "3–4", fits: n => n >= 3 && n <= 4 },
+  { key: "6", label: "5–6", fits: n => n >= 5 && n <= 6 },
+  { key: "8", label: "7–8", fits: n => n >= 7 && n <= 8 },
+  { key: "9", label: "9 ומעלה", fits: n => n >= 9 },
+];
+type Sort = "rec" | "low" | "high" | "big" | "small";
+const SORTS: { key: Sort; label: string }[] = [
+  { key: "rec", label: "מומלצות" },
+  { key: "low", label: "מחיר: מהזול ליקר" },
+  { key: "high", label: "מחיר: מהיקר לזול" },
+  { key: "big", label: "הכי גדולות" },
+  { key: "small", label: "הכי קטנות" },
+];
+const PER_PAGE = [12, 24, 48] as const;
+const selectCls = "min-h-[44px] rounded-full bg-white border border-line-strong px-4 text-[15px] font-bold text-ink hover:border-ink focus:outline-none focus:border-ink cursor-pointer";
 
 const ico = (path: ReactNode, size = 18) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{path}</svg>
@@ -220,6 +241,11 @@ function ApartmentsPage({ initialApartments, intro, fromNights = {} }: { initial
   const apartments = initialApartments;
   const loading = false;
   const [filter,     setFilter]     = useState<Filter>("all");
+  const [size,       setSize]       = useState<Size>("any");
+  const [sort,       setSort]       = useState<Sort>("rec");
+  const [perPage,    setPerPage]    = useState<number>(12);
+  const [page,       setPage]       = useState(1);
+  const gridTop = useRef<HTMLDivElement>(null);
   const [showCal,    setShowCal]    = useState(false); // opens from the dates chip; the list shows without dates too
   const [rulesMap,   setRulesMap]   = useState<Record<string, PricingRule[]>>({});
   const [blockedFor, setBlockedFor] = useState<{ key: string; ids: string[] }>({ key: "", ids: [] });
@@ -260,8 +286,39 @@ function ApartmentsPage({ initialApartments, intro, fromNights = {} }: { initial
   const available = apartments.filter(a =>
     !blocked.includes(a.id) && (a.source !== "la_cime" || !checkin || !checkout || matchingWeek(a, checkin, checkout))
   );
-  const shown = filter === "all" ? available : available.filter(a => (filter === "agency") === isAgency(a));
-  const counts = { all: available.length, own: available.filter(a => !isAgency(a)).length, agency: available.filter(isAgency).length };
+  // people: an apartment too small for the group is left out (the group size comes from the address)
+  const fitsGroup = available.filter(a => !params.get("guests") || (a.max_guests ?? 0) >= guests);
+  const sizeOk = (a: Apartment) => (SIZES.find(x => x.key === size) ?? SIZES[0]).fits(a.max_guests ?? 0);
+  const byKind = filter === "all" ? fitsGroup : fitsGroup.filter(a => (filter === "agency") === isAgency(a));
+  const filtered = byKind.filter(sizeOk);
+  const counts = {
+    all: fitsGroup.filter(sizeOk).length,
+    own: fitsGroup.filter(a => !isAgency(a) && sizeOk(a)).length,
+    agency: fitsGroup.filter(a => isAgency(a) && sizeOk(a)).length,
+  };
+  const sizeCount = (k: Size) => byKind.filter(a => (SIZES.find(x => x.key === k) ?? SIZES[0]).fits(a.max_guests ?? 0)).length;
+  // the price a card shows, as a week, so nightly and weekly apartments sort together
+  const priceOf = (a: Apartment) => {
+    const w = matchingWeek(a, checkin, checkout);
+    if (w) return w.price;
+    if (isAgency(a)) return minWeekPrice(a) ?? Infinity;
+    const night = fromNights[a.id] ?? a.price_per_night;
+    return night ? night * 7 : Infinity;
+  };
+  const sorted = sort === "rec" ? filtered : [...filtered].sort((a, b) =>
+    sort === "low" ? priceOf(a) - priceOf(b)
+    : sort === "high" ? (priceOf(b) === Infinity ? -1 : priceOf(a) === Infinity ? 1 : priceOf(b) - priceOf(a))
+    : sort === "big" ? (b.max_guests ?? 0) - (a.max_guests ?? 0) || (b.sqm ?? 0) - (a.sqm ?? 0)
+    : (a.max_guests ?? 0) - (b.max_guests ?? 0) || (a.sqm ?? 0) - (b.sqm ?? 0));
+  const pages = Math.max(1, Math.ceil(sorted.length / perPage));
+  const current = Math.min(page, pages);
+  const shown = sorted.slice((current - 1) * perPage, current * perPage);
+  const goTo = (n: number) => {
+    setPage(n);
+    gridTop.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+  // a new filter, sort or page size starts again at page 1
+  const pick = <T,>(set: (v: T) => void) => (v: T) => { set(v); setPage(1); };
 
   const nights = checkin && checkout
     ? Math.round((new Date(checkout).getTime() - new Date(checkin).getTime()) / 86400000) : 0;
@@ -287,7 +344,7 @@ function ApartmentsPage({ initialApartments, intro, fromNights = {} }: { initial
             <div className="flex flex-col gap-2 min-w-0">
               <h1 className="font-display font-extrabold text-[32px] leading-[1.1] md:text-[44px] tracking-tight text-ink">דירות בואל טורנס</h1>
               <p className="text-[16px] md:text-[17px] text-muted">
-                {loading ? "טוענים את הדירות…" : `${shown.length} ${shown.length === 1 ? "דירה" : "דירות"}${hasDates ? " פנויות לתאריכים שבחרתם" : ""}. הדירות שלנו, ודירות לשבוע שלם.`}
+                {loading ? "טוענים את הדירות…" : `${filtered.length} ${filtered.length === 1 ? "דירה" : "דירות"}${hasDates ? " פנויות לתאריכים שבחרתם" : ""}. הדירות שלנו, ודירות לשבוע שלם.`}
               </p>
               {intro && !hasDates && <div className="max-w-[760px] flex flex-col gap-2 text-[15px] md:text-[16px] leading-relaxed text-body">{intro}</div>}
             </div>
@@ -311,10 +368,10 @@ function ApartmentsPage({ initialApartments, intro, fromNights = {} }: { initial
 
       <div className={`${wrap} pt-6 md:pt-8 pb-16 md:pb-20`}>
         {/* ── Filters ───────────────────────────────────────── */}
-        {!loading && apartments.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-6" role="group" aria-label="סוג הדירה">
+        {!loading && apartments.length > 0 && (<>
+          <div ref={gridTop} className="scroll-mt-24 flex flex-wrap gap-2 mb-3" role="group" aria-label="סוג הדירה">
             {FILTERS.map(f => (
-              <button key={f.key} type="button" aria-pressed={filter === f.key} onClick={() => setFilter(f.key)}
+              <button key={f.key} type="button" aria-pressed={filter === f.key} onClick={() => pick(setFilter)(f.key)}
                 className={`min-h-[44px] px-4 rounded-full border text-[15px] font-bold transition-colors ${
                   filter === f.key ? "bg-ink border-ink text-white" : "bg-white border-line-strong text-ink hover:border-ink"
                 }`}>
@@ -322,7 +379,35 @@ function ApartmentsPage({ initialApartments, intro, fromNights = {} }: { initial
               </button>
             ))}
           </div>
-        )}
+          <div className="flex flex-wrap items-center gap-2 mb-3" role="group" aria-label="לכמה אנשים הדירה">
+            <span className="text-[15px] font-bold text-ink me-1">לכמה אנשים:</span>
+            {SIZES.map(z => {
+              const n = z.key === "any" ? byKind.length : sizeCount(z.key);
+              if (z.key !== "any" && n === 0) return null;
+              return (
+                <button key={z.key} type="button" aria-pressed={size === z.key} onClick={() => pick(setSize)(z.key)}
+                  className={`min-h-[40px] px-3.5 rounded-full border text-[14px] font-bold transition-colors ${
+                    size === z.key ? "bg-accent border-accent text-white" : "bg-white border-line text-ink hover:border-ink"}`}>
+                  {z.label} <span className={size === z.key ? "text-white/75" : "text-muted"}>{n}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+            <label className="flex items-center gap-2 text-[15px] text-muted">
+              מיון
+              <select value={sort} onChange={e => pick(setSort)(e.target.value as Sort)} className={selectCls}>
+                {SORTS.map(o => <option key={o.key} value={o.key}>{o.label}</option>)}
+              </select>
+            </label>
+            <label className="flex items-center gap-2 text-[15px] text-muted">
+              בכל עמוד
+              <select value={perPage} onChange={e => pick(setPerPage)(Number(e.target.value))} className={selectCls}>
+                {PER_PAGE.map(n => <option key={n} value={n}>{n} דירות</option>)}
+              </select>
+            </label>
+          </div>
+        </>)}
 
         {/* ── Grid ──────────────────────────────────────────── */}
         <h2 className="sr-only">{hasDates ? "הדירות הפנויות לתאריכים שבחרתם" : "כל הדירות בואל טורנס"}</h2>
@@ -344,17 +429,39 @@ function ApartmentsPage({ initialApartments, intro, fromNights = {} }: { initial
             title={hasDates ? "אין דירות פנויות לתאריכים האלה" : "לא מצאנו דירות"}
             text={hasDates ? "נסו תאריכים אחרים, או את כל סוגי הדירות." : undefined}
             action={<>
-              {filter !== "all" && <button type="button" onClick={() => setFilter("all")} className={btn.outline}>לכל הדירות</button>}
+              {(filter !== "all" || size !== "any") && <button type="button" onClick={() => { setFilter("all"); setSize("any"); setPage(1); }} className={btn.outline}>לכל הדירות</button>}
               <button type="button" onClick={() => setShowCal(true)} className={btn.primary}>לבחור תאריכים</button>
             </>}
           />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
             {shown.map((apt, i) => (
-              <ApartmentCard key={apt.id} apt={apt} checkin={checkin} checkout={checkout} guests={guests} rules={rulesMap[apt.id] ?? []} fromNightPrice={fromNights[apt.id]} priority={i < 3} />
+              <ApartmentCard key={apt.id} apt={apt} checkin={checkin} checkout={checkout} guests={guests} rules={rulesMap[apt.id] ?? []} fromNightPrice={fromNights[apt.id]} priority={current === 1 && i < 3} />
             ))}
           </div>
         )}
+        {pages > 1 && (
+          <nav aria-label="עמודים" className="mt-8 flex flex-col items-center gap-3">
+            <div className="flex flex-wrap items-center justify-center gap-1.5">
+              <button type="button" onClick={() => goTo(current - 1)} disabled={current <= 1}
+                className="min-h-[44px] px-4 rounded-full border border-line-strong text-[15px] font-bold text-ink hover:border-ink disabled:opacity-40 disabled:hover:border-line-strong">הקודם</button>
+              {Array.from({ length: pages }, (_, i) => i + 1)
+                .filter(n => n === 1 || n === pages || Math.abs(n - current) <= 1)
+                .map((n, i, arr) => (
+                  <span key={n} className="flex items-center gap-1.5">
+                    {i > 0 && n - arr[i - 1] > 1 && <span className="px-1 text-muted">…</span>}
+                    <button type="button" onClick={() => goTo(n)} aria-current={n === current ? "page" : undefined}
+                      className={`min-w-[44px] min-h-[44px] rounded-full border text-[15px] font-bold transition-colors ${
+                        n === current ? "bg-ink border-ink text-white" : "bg-white border-line-strong text-ink hover:border-ink"}`}>{n}</button>
+                  </span>
+                ))}
+              <button type="button" onClick={() => goTo(current + 1)} disabled={current >= pages}
+                className="min-h-[44px] px-4 rounded-full border border-line-strong text-[15px] font-bold text-ink hover:border-ink disabled:opacity-40 disabled:hover:border-line-strong">הבא</button>
+            </div>
+            <p className="text-[14px] text-muted">{(current - 1) * perPage + 1}–{Math.min(current * perPage, sorted.length)} מתוך {sorted.length} דירות</p>
+          </nav>
+        )}
+
       </div>
     </div>
   );

@@ -16,7 +16,9 @@ export function aptParts(a: Pick<Apartment, "name">) {
   const parts = a.name.split(/\s+[—–-]\s+/).map(p => p.trim()).filter(Boolean);
   const code = parts.find(p => /^[A-Z0-9]{4,8}$/.test(p) && /\d/.test(p)) ?? null;
   const residence = parts.find(p => /[A-Za-zÀ-ÿ]/.test(p) && /\s/.test(p) && !/[א-ת]/.test(p)) ?? null;
-  return { code, residence };
+  // a Hebrew title written for the listing ("סטודיו עם מרפסת דרומית ליד המסלולים"), between the type and the code
+  const title = parts.length >= 3 ? (parts.slice(1).find(p => /[א-ת]/.test(p) && p.split(/\s+/).length >= 3) ?? null) : null;
+  return { code, residence, title };
 }
 
 /** "סטודיו", "דירת 2 חדרים", or "דירה" */
@@ -36,7 +38,8 @@ export const forWho = (n?: number | null) => (!n ? "" : n === 2 ? "לזוג" : `
  */
 export function aptShortName(a: AptLike) {
   if (!isAgency(a)) return a.name;
-  const { residence } = aptParts(a);
+  const { residence, title } = aptParts(a);
+  if (title) return title;
   const who = forWho(a.max_guests);
   return `${aptKind(a)}${who ? ` ${who}` : ""}${residence ? ` · ${residence}` : ""}`;
 }
@@ -50,8 +53,9 @@ export function aptShortName(a: AptLike) {
 export function aptDisplayName(a: AptLike) {
   const who = forWho(a.max_guests);
   if (!isAgency(a)) return `${a.name} · ${aptKind(a)}${who ? ` ${who}` : ""} בואל טורנס`;
-  const { residence } = aptParts(a);
+  const { residence, title } = aptParts(a);
   const size = a.sqm ? ` · ${a.sqm} מ״ר` : "";
+  if (title) return `${title} בואל טורנס${who ? ` · ${who}` : ""}${size}`;
   return `${aptKind(a)}${who ? ` ${who}` : ""} בואל טורנס${size}${residence ? ` · ${residence}` : ""}`;
 }
 
