@@ -37,7 +37,9 @@ export default async function ApartmentsPage({ searchParams }: Props) {
   }
   return (
     <>
-      <ApartmentsClient initialApartments={apartments} intro={apartmentsIntro()} fromNights={fromNights} />
+      {/* the cards show one photo and three amenities: the rest (descriptions, all the photos) stays on the apartment pages,
+          so the list of 250+ apartments doesn't weigh megabytes */}
+      <ApartmentsClient initialApartments={apartments.map(a => ({ ...a, description: "", images: (a.images ?? []).slice(0, 1), amenities: (a.amenities ?? []).slice(0, 3) }))} intro={apartmentsIntro()} fromNights={fromNights} />
       <ApartmentsGuide apartments={apartments} passes={(passes ?? []) as SkiPass[]} />
     </>
   );

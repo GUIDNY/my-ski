@@ -53,7 +53,7 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
 
       <div className={`${wrap} pt-6 md:pt-8 pb-16 md:pb-20`}>
         <WeeklyBrowser
-          apartments={apartments}
+          apartments={apartments.map(a => ({ ...a, description: "", images: (a.images ?? []).slice(0, 1) }))}
           initialDeal={initialDeal}
           initialWeek={week}
           initialGuests={guests}
