@@ -19,6 +19,7 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: "daily" 
   { path: "/guide", priority: 0.9, changeFrequency: "weekly" },
   { path: "/val-thorens-weather", priority: 0.8, changeFrequency: "daily" },
   { path: "/about", priority: 0.6, changeFrequency: "monthly" },
+  { path: "/contact", priority: 0.4, changeFrequency: "monthly" },
   { path: "/emergency-policy", priority: 0.3, changeFrequency: "monthly" },
   { path: "/cancellation-policy", priority: 0.3, changeFrequency: "monthly" },
   { path: "/terms", priority: 0.2, changeFrequency: "monthly" },

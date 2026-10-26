@@ -102,6 +102,8 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
   const [openRow, setOpenRow] = useState<number | null>(null);
   const [notMine, setNotMine] = useState<string[]>([]);  // add-ons the person paying their own share does not take
   const [busy, setBusy] = useState<string>("");
+  const [agreed, setAgreed] = useState(false);
+  const [needAgree, setNeedAgree] = useState(false);
   const [payErr, setPayErr] = useState(false);
   const [pdfState, setPdfState] = useState<"" | "busy" | "link" | "error">("");
   const [mapHref, setMapHref] = useState<string | null>(null);
@@ -180,6 +182,7 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
   const wa = `https://wa.me/972555174903?text=${encodeURIComponent(`היי, לגבי הצעת המחיר${number ? ` ${number}` : ""}${changes.length ? ` (שיניתי: ${changes.join(", ")})` : ""}: `)}`;
   const pay = async (key: string, amount: number, currency: "EUR" | "ILS", perHead: boolean) => {
     if (busy) return;
+    if (!agreed) { setNeedAgree(true); return; }
     setBusy(key); setPayErr(false);
     try {
       const r = await fetch("/api/payplus/create-link", {
@@ -188,7 +191,7 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
       });
       const j = await r.json();
       if (!r.ok || !j.url) throw new Error("no link");
-      window.location.href = j.url;
+      window.location.assign(j.url);
     } catch { setPayErr(true); setBusy(""); }
   };
   const payOptions: [string, string, number, "EUR" | "ILS", boolean][] = [
@@ -313,6 +316,13 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
         </div>
       )}
       <div className="flex flex-col gap-2.5">
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" checked={agreed} onChange={e => { setAgreed(e.target.checked); setNeedAgree(false); }} className="mt-1 w-5 h-5 shrink-0 accent-[#1652F0]" />
+          <span className="text-[14px] text-body leading-relaxed">
+            קראתי את <Link href="/terms" target="_blank" className="text-accent underline font-bold">התקנון, מדיניות הביטולים</Link> ו<Link href="/privacy" target="_blank" className="text-accent underline font-bold">מדיניות הפרטיות</Link>, והם מקובלים עליי.
+          </span>
+        </label>
+        {needAgree && <p role="alert" className="text-[13px] text-danger">כדי להמשיך לתשלום יש לסמן שהתקנון מקובל עליכם.</p>}
         {payOptions.map(([key, label, amount, currency, perHead], i) => (
           <button key={key} type="button" disabled={!!busy} onClick={() => pay(key, amount, currency, perHead)} className={`${i === 0 ? btn.primary : btn.outline} w-full`}>
             {busy === key ? "פותחים תשלום מאובטח…" : label}

@@ -118,7 +118,8 @@ const Arrow = () => (
 
 const ilDates = (t: string) => String(t).replace(/(\d{4})-(\d{2})-(\d{2})/g, (_m, y, mo, d) => `${Number(d)}.${Number(mo)}.${y}`).replace(/(\d)\s+–\s+(\d)/g, "$1 עד $2");
 
-function Block({ block }: { block: ProposalBlock }) {
+/** link: the proposal on the site; payment then goes through it (the terms are approved there before paying) */
+function Block({ block, link }: { block: ProposalBlock; link?: string }) {
   switch (block.type) {
     case "banner":
       return <div className="route">{block.text}</div>;
@@ -182,7 +183,7 @@ function Block({ block }: { block: ProposalBlock }) {
       );
     case "payment":
       return block.url ? (
-        <a className="pay-btn" href={block.url} target="_blank" rel="noopener noreferrer">{(block.label || "לתשלום מאובטח").replace(/\s*[←→]\s*/g, " ").trim()} <Arrow /></a>
+        <a className="pay-btn" href={link ? `${link}#pay` : block.url} target="_blank" rel="noopener noreferrer">{(block.label || "לתשלום מאובטח").replace(/\s*[←→]\s*/g, " ").trim()} <Arrow /></a>
       ) : null;
     default:
       return null;
@@ -476,7 +477,7 @@ export default function ProposalDocument({ data, link }: { data: ProposalData; l
           <h2><span className="num">{si + 1}</span>{sec.heading}</h2>
           {sec.blocks.map((b, bi) => (
             <Fragment key={bi}>
-              <Block block={b} />
+              <Block block={b} link={link} />
               {/* after the pay buttons: some PDF viewers (WhatsApp's preview on a computer) don't open links */}
               {b.type === "payment" && sec.blocks[bi + 1]?.type !== "payment" && (
                 <p className="note pay-help">
