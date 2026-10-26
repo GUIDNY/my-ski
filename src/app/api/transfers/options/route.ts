@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     const o = a.options.find(x => x.key === a.best);
     const SHORT: Record<string, string> = { shared: "שאטל משותף", sedan: "סדאן", minivan: "מיניוואן", van: "ואן", "Premium minivan": "מיניוואן פרימיום", minibus: "מיניבוס", coach: "אוטובוס" };
     return NextResponse.json(o ? {
-      private: [{ class: SHORT[o.className] ?? o.className, max_pax: 99, price_cents: o.total * 100 }],
+      private: [{ class: SHORT[o.className] ?? o.name, max_pax: 99, price_cents: o.total * 100 }],
       best: o, options: a.options,
     } : { private: [] });
   }

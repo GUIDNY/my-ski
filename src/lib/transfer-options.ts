@@ -46,6 +46,9 @@ export const CLASS_CODE: Record<string, string> = {
 export const codeOf = (o: Pick<TransferOption, "className">) => CLASS_CODE[o.className] ?? "";
 export const byCode = (a: TransferAnswer, code?: string) => (code ? a.options.find(o => codeOf(o) === code) : undefined);
 
+/** "minivan" → "מיניוואן", "2× van" → "2 × ואן" */
+export const classHe = (c: string) => { const m = c.match(/^(\d+)\s*[×x]\s*(.+)$/); return m ? `${m[1]} × ${CLASS_HE[m[2]] ?? m[2]}` : CLASS_HE[c] ?? c; };
+
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 const flightNo = (v?: string | null) => { const s = String(v || "").toUpperCase().replace(/\s+/g, ""); return /^[A-Z0-9]{2}\d{1,4}$/.test(s) ? s : undefined; };
 
@@ -93,7 +96,7 @@ export async function transferOptions(p: {
     if (per.some(x => !x) || c.max_pax < pax) continue;
     const cents = per.reduce((s, x) => s + x!.price_cents, 0);
     options.push({
-      key: c.vehicle_class_id, kind: "private", name: CLASS_HE[c.class] ?? c.class, className: c.class,
+      key: c.vehicle_class_id, kind: "private", name: classHe(c.class), className: c.class,
       total: Math.round(cents / 100), perPerson: Math.round(cents / 100 / pax),
       maxPax: c.max_pax, maxBags: c.max_luggage, fits: c.max_luggage >= luggage + ski,
       onRequest: per.some(x => x!.on_request), seatsLeft: null,

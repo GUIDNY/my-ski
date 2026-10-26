@@ -32,6 +32,7 @@ const CLASS_HE: Record<string, string> = {
   sedan: "רכב פרטי (סדאן)", minivan: "מיניוואן", van: "ואן", "Premium minivan": "מיניוואן פרימיום",
   minibus: "מיניבוס", coach: "אוטובוס",
 };
+const classLabel = (c: string) => { const m = c.match(/^(\d+)\s*[×x]\s*(.+)$/); return m ? `${m[1]} × ${CLASS_HE[m[2]] ?? m[2]}` : CLASS_HE[c] ?? c; };
 const sharedSeat = (q: LiveQuote) => (q?.shared?.available && q.shared.price_cents ? q.shared : null);
 
 const SUPPLEMENT_LABELS: Record<string, string> = {
@@ -504,7 +505,7 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
                         onClick={() => { setService("private"); setVehicleClassId(c.vehicle_class_id); }}
                         className={`${optionCls(on)} p-4 flex flex-col gap-2 min-h-[112px] text-right disabled:opacity-55 disabled:cursor-not-allowed`}>
                         <span className="flex items-center justify-between gap-2">
-                          <span className="flex items-center gap-2 font-bold text-[16px] text-ink"><span className={on ? "text-accent" : "text-muted"}><IcoVan /></span>{CLASS_HE[c.class] ?? c.class}</span>
+                          <span className="flex items-center gap-2 font-bold text-[16px] text-ink"><span className={on ? "text-accent" : "text-muted"}><IcoVan /></span>{classLabel(c.class)}</span>
                           {best && <span className="text-[12px] font-bold px-2 py-0.5 rounded-full bg-accent-soft text-accent">מתאים לכם</span>}
                           {c.on_request && <span className="text-[12px] font-bold px-2 py-0.5 rounded-full bg-soft text-muted">לפי בקשה</span>}
                         </span>
