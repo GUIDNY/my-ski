@@ -70,6 +70,24 @@ const IcoCheck = ({ size = 16 }: { size?: number }) => (
 );
 
 /* ── Pieces ────────────────────────────────────────────────── */
+/** A date field that behaves on phones: iOS gives date inputs a fixed width (they ran off the screen)
+    and shows nothing useful when empty, so the native input sits invisible on top of our own label. */
+function DateField({ id, label, value, onChange, min }: { id: string; label: string; value: string; onChange(v: string): void; min?: string }) {
+  return (
+    <div className="flex flex-col min-w-0">
+      <label htmlFor={id} className={fieldLabel}>{label}</label>
+      <div className="relative min-w-0">
+        <div className={`${field} flex items-center justify-between gap-2 pointer-events-none ${value ? "text-ink" : "text-muted"}`} aria-hidden="true">
+          <span className="truncate">{value ? fmtDate(value) + " " + value.slice(0, 4) : "בחרו תאריך"}</span>
+          <span className="text-accent shrink-0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg></span>
+        </div>
+        <input id={id} type="date" value={value} min={min} onChange={e => onChange(e.target.value)}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer appearance-none min-w-0" />
+      </div>
+    </div>
+  );
+}
+
 function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col">
@@ -116,19 +134,16 @@ function FlightLeg({ id, title, flightNum, date, time, onFlight, onDate, onTime,
           </span>
         )}
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 [&>*]:min-w-0">
         <Field label="מספר טיסה" htmlFor={`${id}-flight`}>
           <input id={`${id}-flight`} value={flightNum} onChange={e => onFlight(e.target.value)}
             placeholder="LY311 / FR1234..."
             className={`${field} text-right`} dir="ltr" autoComplete="off" />
         </Field>
-        <Field label="תאריך" htmlFor={`${id}-date`}>
-          <input id={`${id}-date`} type="date" value={date} onChange={e => onDate(e.target.value)}
-            className={`${field} text-right`} dir="ltr" />
-        </Field>
+        <div className="hidden sm:block"><DateField id={`${id}-date`} label="תאריך" value={date} onChange={onDate} /></div>
         <Field label="שעה" htmlFor={`${id}-time`}>
           <input id={`${id}-time`} type="time" value={time} onChange={e => onTime(e.target.value)}
-            className={`${field} text-right`} dir="ltr" />
+            className={`${field} text-right min-w-0 w-full appearance-none`} dir="ltr" />
         </Field>
       </div>
       {found && (
@@ -384,12 +399,12 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
   const stepper = (label: string, v: number, set: (n: number) => void, min: number, max: number) => (
     <div className="flex flex-col">
       <span className={fieldLabel}>{label}</span>
-      <div className="flex items-center justify-between gap-2 border border-line-strong rounded-xl p-1.5" role="group" aria-label={label}>
+      <div className="flex items-center justify-between gap-1 border border-line-strong rounded-xl p-1" role="group" aria-label={label}>
         <button type="button" onClick={() => set(Math.max(min, v - 1))} disabled={v <= min} aria-label={`${label}: פחות`}
-          className="w-10 h-10 rounded-lg border border-line flex items-center justify-center text-[20px] font-bold text-ink hover:border-ink transition-colors disabled:opacity-40">−</button>
-        <span className="font-display font-extrabold text-ink text-[19px] min-w-[28px] text-center" aria-live="polite">{v}</span>
+          className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-soft flex items-center justify-center text-[20px] font-bold text-ink hover:bg-soft-2 transition-colors disabled:opacity-35">−</button>
+        <span className="font-display font-extrabold text-ink text-[18px] min-w-[22px] text-center" aria-live="polite">{v}</span>
         <button type="button" onClick={() => set(Math.min(max, v + 1))} disabled={v >= max} aria-label={`${label}: עוד`}
-          className="w-10 h-10 rounded-lg border border-line flex items-center justify-center text-[20px] font-bold text-ink hover:border-ink transition-colors disabled:opacity-40">+</button>
+          className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-soft flex items-center justify-center text-[20px] font-bold text-ink hover:bg-soft-2 transition-colors disabled:opacity-35">+</button>
       </div>
     </div>
   );
@@ -446,7 +461,7 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
                 ))}
               </div>
               <div role="radiogroup" aria-label="כיוון נסיעה" className="grid grid-cols-3 gap-1 bg-soft border border-line rounded-2xl p-1">
-                {([["both","הלוך וחזור"],["outbound","רק לואל טורנס"],["return","רק לשדה"]] as const).map(([k,label]) => (
+                {([["both","הלוך וחזור"],["outbound","רק הלוך"],["return","רק חזור"]] as const).map(([k,label]) => (
                   <button key={k} type="button" role="radio" aria-checked={direction === k} onClick={() => setDirection(k)}
                     className={`min-h-[44px] rounded-xl text-[15px] font-bold transition-colors ${direction === k ? "bg-ink text-white" : "text-ink hover:bg-white"}`}>
                     {label}
@@ -454,18 +469,10 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
                 ))}
               </div>
               <div className="grid grid-cols-2 gap-3">
-                {direction !== "return" && (
-                  <Field label="הגעה לואל טורנס" htmlFor="d-out">
-                    <input id="d-out" type="date" value={outDate} onChange={e => setOutDate(e.target.value)} className={`${field} text-right`} dir="ltr" />
-                  </Field>
-                )}
-                {direction !== "outbound" && (
-                  <Field label="חזרה לשדה" htmlFor="d-ret">
-                    <input id="d-ret" type="date" value={retDate} onChange={e => setRetDate(e.target.value)} className={`${field} text-right`} dir="ltr" />
-                  </Field>
-                )}
+                {direction !== "return" && <DateField id="d-out" label="הגעה לואל טורנס" value={outDate} onChange={setOutDate} min={new Date().toISOString().slice(0, 10)} />}
+                {direction !== "outbound" && <DateField id="d-ret" label="חזרה לשדה" value={retDate} onChange={setRetDate} min={outDate || new Date().toISOString().slice(0, 10)} />}
               </div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 {stepper("נוסעים", passengers, setPassengers, 1, 20)}
                 {stepper("מזוודות", luggage, setLuggage, 0, 30)}
                 {stepper("ציוד סקי", ski, setSki, 0, 30)}
@@ -607,7 +614,7 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
               <div className="border-t border-line pt-4 flex flex-col gap-1">
                 <div className="flex items-baseline justify-between gap-3">
                   <span className="text-[15px] text-muted">סה״כ</span>
-                  <span className="font-display font-extrabold text-[36px] leading-none text-ink">€{totalPrice}</span>
+                  <span className="font-display font-extrabold text-[36px] leading-none text-ink">{datesSet && (isShared || hasLivePrice) ? `€${totalPrice}` : "—"}</span>
                 </div>
                 <span className="self-end text-[13px] text-muted">{passengers > 1 ? `€${Math.round(totalPrice / passengers)} לאדם · ` : ""}<span className={`font-bold ${isShared || hasLivePrice ? "text-ok-text" : "text-warn"}`}>{quoting ? "בודקים מחיר…" : isShared || hasLivePrice ? "מחיר חי" : "מחיר משוער"}</span></span>
               </div>
@@ -627,8 +634,8 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
         style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))", boxShadow: "0 -8px 24px rgba(11,27,51,0.08)" }}>
         <div className="flex items-center gap-3">
           <div className="shrink-0 flex flex-col">
-            <span className="text-[12px] text-muted leading-tight">{isShared || hasLivePrice ? "סה״כ" : "סה״כ משוער"}</span>
-            <span className="font-display font-extrabold text-[24px] leading-none text-ink">€{totalPrice}</span>
+            <span className="text-[12px] text-muted leading-tight">{datesSet && (isShared || hasLivePrice) ? "סה״כ" : "סה״כ"}</span>
+            <span className="font-display font-extrabold text-[24px] leading-none text-ink">{datesSet && (isShared || hasLivePrice) ? `€${totalPrice}` : "—"}</span>
           </div>
           <div className="flex-1">{submitButton}</div>
         </div>
