@@ -123,7 +123,7 @@ function FlightLeg({ id, title, flightNum, date, time, onFlight, onDate, onTime 
   );
 }
 
-export type TransferInitial = { checkin: string; checkout: string; guests: number; aptName: string; aptId: string; airport?: string; direction?: "outbound" | "return" | "both" };
+export type TransferInitial = { checkin: string; checkout: string; guests: number; aptName: string; aptId: string; airport?: string; direction?: "outbound" | "return" | "both"; outTime?: string; retTime?: string; outFlight?: string; retFlight?: string };
 
 /* ── The booking form (the page around it renders on the server) ── */
 export default function TransfersClient({ initial }: { initial: TransferInitial }) {
@@ -134,14 +134,14 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
   const [direction, setDirection] = useState<"outbound" | "return" | "both">(initial.direction || "both");
 
   // Outbound flight
-  const [outFlight, setOutFlight] = useState("");
+  const [outFlight, setOutFlight] = useState(initial.outFlight || "");
   const [outDate,   setOutDate]   = useState(checkin);
-  const [outTime,   setOutTime]   = useState("");
+  const [outTime,   setOutTime]   = useState(initial.outTime || "");
 
   // Return flight
-  const [retFlight, setRetFlight] = useState("");
+  const [retFlight, setRetFlight] = useState(initial.retFlight || "");
   const [retDate,   setRetDate]   = useState(checkout);
-  const [retTime,   setRetTime]   = useState("");
+  const [retTime,   setRetTime]   = useState(initial.retTime || "");
 
   // Other
   const [isElAlOverride, setIsElAlOverride] = useState(false);

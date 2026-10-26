@@ -8,6 +8,9 @@ type Props = { searchParams: Promise<Record<string, string | string[] | undefine
 
 const one = (v: string | string[] | undefined) => (typeof v === "string" ? v : "");
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
+/** "9:00" → "09:00"; anything else → "" */
+const hhmm = (v: string) => { const m = v.match(/^(\d{1,2}):(\d{2})$/); return m && +m[1] < 24 && +m[2] < 60 ? `${m[1].padStart(2, "0")}:${m[2]}` : ""; };
+const flightNo = (v: string) => (/^[A-Za-z0-9]{2}\s?\d{1,4}$/.test(v.trim()) ? v.trim().toUpperCase().replace(/\s/, "") : "");
 
 /*
  * Airport transfers. The page renders on the server (it used to reach search
@@ -84,6 +87,8 @@ export default async function TransfersPage({ searchParams }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(ld) }} />
       <TransfersClient initial={{ checkin, checkout, guests, aptName: one(params.apartment), aptId: one(params.apartment_id),
         airport: one(params.airport).toUpperCase() === "LYS" ? "LYS" : "GVA",
+        outTime: hhmm(one(params.outTime)), retTime: hhmm(one(params.retTime)),
+        outFlight: flightNo(one(params.outFlight)), retFlight: flightNo(one(params.retFlight)),
         direction: one(params.direction) === "outbound" || one(params.direction) === "return" ? (one(params.direction) as "outbound" | "return") : "both" }} />
 
       <div className="bg-white border-t border-line" dir="rtl">
