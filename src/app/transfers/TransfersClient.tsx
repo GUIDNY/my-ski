@@ -471,7 +471,7 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
                 </Field>
               </div>
 
-              {availableClasses.length > 0 && (
+              {(
                 <div className="flex flex-col gap-2">
                   <span className={fieldLabel}>איך נוסעים</span>
                   <div role="radiogroup" aria-label="סוג ההסעה" className="grid grid-cols-2 gap-1 bg-soft border border-line rounded-2xl p-1">
@@ -492,7 +492,11 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
                       {[outShared?.seats_remaining, retShared?.seats_remaining].some(n => typeof n === "number" && n < 8) && <> נשארו מעט מקומות.</>}
                     </p>
                   ) : !sharedOffered && (
-                    <p className="text-[13px] text-muted">שאטל משותף מוצג כשיש לטיסה שלכם שאטל: כותבים את מספר הטיסה בשלב 2.</p>
+                    <p className="text-[13px] text-muted">
+                      {quoting ? "בודקים מחירים ואפשרויות…"
+                        : !availableClasses.length ? "המחירים והרכבים מופיעים אחרי שבוחרים תאריך. שאטל משותף מופיע כשיש לטיסה שלכם שאטל, לפי מספר הטיסה."
+                        : "שאטל משותף מופיע כשיש לטיסה שלכם שאטל: כותבים את מספר הטיסה בשלב 2."}
+                    </p>
                   )}
                 </div>
               )}
