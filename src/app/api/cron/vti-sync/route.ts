@@ -72,8 +72,7 @@ async function hebrew(fr: string): Promise<string> {
 
 export async function GET(req: NextRequest) {
   const auth = req.headers.get("authorization");
-  const probe = process.env.VTI_PROBE_TOKEN && req.nextUrl.searchParams.get("t") === process.env.VTI_PROBE_TOKEN;
-  if (!probe && process.env.CRON_SECRET && auth !== `Bearer ${process.env.CRON_SECRET}`) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  if (process.env.CRON_SECRET && auth !== `Bearer ${process.env.CRON_SECRET}`) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const started = Date.now();
   const maxNew = Math.min(Number(req.nextUrl.searchParams.get("import") ?? 12) || 0, 40);
 
