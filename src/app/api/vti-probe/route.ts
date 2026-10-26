@@ -19,7 +19,10 @@ export async function GET(req: NextRequest) {
   const raw = req.nextUrl.searchParams.get("raw") === "1";
   try {
     const { jar, ok, landing } = await vtiLogin();
-    const page = path && path.startsWith("/") ? await vtiFetch(jar, path) : landing;
+    const post = req.nextUrl.searchParams.get("post");
+    const page = path && path.startsWith("/")
+      ? await vtiFetch(jar, path, post ? { method: "POST", body: post, headers: { "Content-Type": "application/x-www-form-urlencoded" } } : {})
+      : landing;
     const user = process.env.VTI_TO_USER || "\u0000";
     const redact = (s: string) => s.split(user).join("[TO]");
     const links = [...page.html.matchAll(/<a\b[^>]*href="([^"#][^"]*)"[^>]*>([\s\S]*?)<\/a>/gi)]
