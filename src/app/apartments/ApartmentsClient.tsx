@@ -51,6 +51,18 @@ const SORTS: { key: Sort; label: string }[] = [
   { key: "small", label: "הכי קטנות" },
 ];
 const PER_PAGE = [12, 24, 48] as const;
+/** every Saturday-to-Saturday week of the 2026/27 season still ahead (the lifts open 21.11.2026, the last week ends 1.5.2027) */
+function seasonWeeks(): { ci: string; co: string; label: string }[] {
+  const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const out: { ci: string; co: string; label: string }[] = [];
+  for (let d = new Date(2026, 10, 21); d <= new Date(2027, 3, 24); d.setDate(d.getDate() + 7)) {
+    if (d < today) continue;
+    const e = new Date(d); e.setDate(e.getDate() + 7);
+    out.push({ ci: iso(d), co: iso(e), label: rangeLabel(iso(d), iso(e)) });
+  }
+  return out;
+}
 /** the price of a week (nightly apartments × 7) */
 const PRICES: { key: string; label: string; fits: (p: number) => boolean }[] = [
   { key: "p1", label: "עד €1,000 לשבוע", fits: p => p < 1000 },
@@ -102,7 +114,7 @@ function CheckRow({ on, label, count, onClick, dir }: { on: boolean; label: stri
       <input type="checkbox" checked={on} onChange={onClick} disabled={!on && count === 0}
         className="w-[18px] h-[18px] shrink-0 rounded-[5px] accent-[var(--color-accent,#1f5eff)] cursor-pointer" />
       <span className="flex-1 text-[15px] text-ink group-hover:text-accent transition-colors" dir={dir}>{label}</span>
-      <bdi className="text-[13px] text-muted tabular-nums">{count}</bdi>
+      <bdi className="inline-flex items-center justify-center min-w-[26px] h-[22px] px-1.5 rounded-full bg-soft text-[12px] font-bold text-muted tabular-nums">{count}</bdi>
     </label>
   );
 }
@@ -540,6 +552,18 @@ function ApartmentsPage({ initialApartments, intro, fromNights = {} }: { initial
               <span className="text-accent"><IcoCal /></span>
               {hasDates ? <>{rangeLabel(checkin, checkout)}{nights > 0 ? ` · ${nights} לילות` : ""}</> : "בחרו תאריכים"}
             </button>
+            {/* or straight to a Saturday-to-Saturday week, the way most apartments here are rented */}
+            <label className="relative inline-flex items-center gap-2 min-h-[44px] ps-4 pe-9 rounded-full bg-white border border-line-strong text-[15px] font-bold text-ink hover:border-ink transition-colors cursor-pointer">
+              <span className="text-accent"><IcoCal /></span>
+              {(() => { const w = seasonWeeks().find(x => x.ci === checkin && x.co === checkout); return w ? `שבוע ${w.label}` : "שבוע משבת לשבת"; })()}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="absolute end-3.5 text-muted"><path d="M6 9l6 6 6-6" /></svg>
+              <select aria-label="שבוע משבת לשבת" value={seasonWeeks().some(x => x.ci === checkin && x.co === checkout) ? checkin : ""}
+                onChange={e => { const w = seasonWeeks().find(x => x.ci === e.target.value); if (w) applyDates(w.ci, w.co, guests); }}
+                className="absolute inset-0 opacity-0 cursor-pointer">
+                <option value="" disabled>בחרו שבוע</option>
+                {seasonWeeks().map(w => <option key={w.ci} value={w.ci}>שבת {w.label}</option>)}
+              </select>
+            </label>
             <button type="button" onClick={() => setShowCal(true)}
               className="inline-flex items-center gap-2 min-h-[44px] px-4 rounded-full bg-white border border-line-strong text-[15px] font-bold text-ink hover:border-ink transition-colors">
               <span className="text-accent"><IcoUsers /></span>
