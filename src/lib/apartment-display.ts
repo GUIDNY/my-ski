@@ -14,7 +14,7 @@ const isAgency = (a: Pick<Apartment, "source">) => a.source === "la_cime";
 /** the agency's code ("NV0153") and building name ("Résidence Sérac") inside the stored name */
 export function aptParts(a: Pick<Apartment, "name">) {
   const parts = a.name.split(/\s+[—–-]\s+/).map(p => p.trim()).filter(Boolean);
-  const code = parts.find(p => /^[A-Z0-9]{4,8}$/.test(p) && /\d/.test(p)) ?? null;
+  const code = parts.find(p => /^[A-Z0-9][A-Z0-9-]{2,9}$/.test(p) && /\d/.test(p) && /[A-Z]/.test(p)) ?? null;
   const residence = parts.find(p => /[A-Za-zÀ-ÿ]/.test(p) && /\s/.test(p) && !/[א-ת]/.test(p)) ?? null;
   // a Hebrew title written for the listing ("סטודיו עם מרפסת דרומית ליד המסלולים"), between the type and the code
   const title = parts.length >= 3 ? (parts.slice(1).find(p => /[א-ת]/.test(p) && p.split(/\s+/).length >= 3) ?? null) : null;
