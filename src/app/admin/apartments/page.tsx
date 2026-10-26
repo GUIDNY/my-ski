@@ -204,8 +204,9 @@ export default function ApartmentsAdmin() {
   const load = async () => {
     setLoading(true);
     const res = await authFetch("/api/apartments?all=1");
-    const data = await res.json();
-    setApartments(data);
+    const data = await res.json().catch(() => null);
+    // not signed in (or a server error): an empty list, not a crashed page
+    setApartments(Array.isArray(data) ? data : []);
     setLoading(false);
   };
 
