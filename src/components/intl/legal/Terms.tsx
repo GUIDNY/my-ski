@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Lang } from "@/lib/intl/config";
 import LegalPage, { H2, H3, UL } from "./LegalPage";
 
@@ -8,7 +9,8 @@ import LegalPage, { H2, H3, UL } from "./LegalPage";
  * (this site charges in euros) and 5 flights) and the apartment part of
  * src/app/emergency-policy/page.tsx (left out: the flight, ski pass and
  * on-holiday cards and the cancellation-insurance options, which this site
- * doesn't sell). Nothing is added.
+ * doesn't sell). Nothing is added. Clauses 9–13 (supply, refunds, the site,
+ * privacy, contact) were added to the Hebrew terms in October 2026 (9.5 flights left out).
  */
 
 const box = "my-2 rounded-2xl border border-accent/25 bg-accent-soft/60 p-4 md:p-5 flex flex-col gap-2";
@@ -21,9 +23,12 @@ function TermsEn() {
       <H2>1. Introduction</H2>
       <p>1.1. We are sorry to hear that you wish to cancel your holiday, and we promise to be by your side at every stage of the process.</p>
       <p>1.2. You can contact us to cancel by WhatsApp or by email, and we will be happy to help you cancel and to arrange a future holiday.</p>
+      <p>1.3. The website skisharebook.com is operated by Ski Share Ltd. (SkiShare), company no. 517332060, 12 HaZohar St., Caesarea, Israel (&quot;the company&quot;). The company rents holiday apartments and offers ski packages in Val Thorens, France: apartments, ski passes, airport transfers, ski equipment and flights.</p>
+      <p>1.4. Booking and paying on the website require agreeing to these terms, by ticking the box for it before payment. These terms apply to every booking made on the website, through a quote sent to the customer, on WhatsApp or by phone.</p>
 
       <H2>2. Cancellation terms</H2>
-      <p>2.1. Cancellation of the booking is subject to the Consumer Protection Law (Israel).</p>
+      <p>2.1. Cancellation of the booking is subject to the Consumer Protection Law, 5741-1981 (Israel), and the Consumer Protection (Cancellation of Transaction) Regulations, 5771-2010.</p>
+      <p>2.1.1. A booking made on the website, by phone or on WhatsApp may be cancelled within 14 days of being made, provided the cancellation is made more than 7 days (not counting rest days) before the service begins. In that case the payment is refunded less a cancellation fee of 5% of the transaction price or ILS 100, whichever is lower.</p>
       <p>2.2. Refund terms:</p>
       <UL>
         <li>From 14 days after the booking date until 15 days before the arrival date: a refund of 50% of the total transaction.</li>
@@ -81,9 +86,34 @@ function TermsEn() {
       <p>8.4. Minor changes (such as in colour, design, type of bed or location in the building) are not grounds for cancelling the transaction.</p>
       <p>8.5. In the event of a material change, the company will inform the customer in advance and offer a suitable alternative.</p>
 
-      <H2>9. Customer declaration</H2>
-      <p>9.1. By approving this document, I confirm that I have read and understood the terms, and that all the clauses of the agreement have been brought to my attention.</p>
-      <p>9.2. I approve the terms of my own free will and in accordance with the provisions of the Consumer Protection Law, 5741-1981 (Israel).</p>
+      <H2>9. Supply of the service and delivery times</H2>
+      <p>9.1. The company sells accommodation and holiday services, not physical goods. Nothing is shipped by post or courier; the service is provided in Val Thorens on the dates set in the booking.</p>
+      <p>9.2. Once payment is received, the customer receives a booking confirmation by email, with the booking details, the dates and the amount paid.</p>
+      <p>9.3. Before the arrival date (usually about a week before), the customer receives the arrival details for the apartment: the address, check-in and check-out times, and how to collect the key. Vouchers and pick-up details for any extra services booked (ski pass, transfer, equipment) are also sent before arrival.</p>
+      <p>9.4. The apartment is at the customer&apos;s disposal from the arrival day to the departure day of the booking, according to the apartment&apos;s check-in and check-out times. Weekly apartments are rented Saturday to Saturday.</p>
+
+      <H2>10. Service not provided and refunds</H2>
+      <p>10.1. The customer will receive the service they booked and paid for. If the service was not provided for a reason within the company&apos;s control, and the customer did not accept an equivalent alternative, the customer will be refunded the full amount paid for that service.</p>
+      <p>10.2. The refund is made to the means of payment used (for a credit card: a credit to the same card), within 14 days of the notice of cancellation or of the day it became clear the service would not be provided.</p>
+      <p>10.3. In cases of force majeure, clause 6 applies, and in an emergency the emergency policy applies.</p>
+
+      <H2>11. The company&apos;s responsibility for the website and its content</H2>
+      <p>11.1. The company is responsible for the content it publishes on the website (the description of the apartments and services, the prices and the booking conditions) and for carrying out the bookings made on it in accordance with these terms.</p>
+      <p>11.2. The binding price is the price shown to the customer when booking and paid by them. If there is an obvious error in a price or in the details of a service on the website, the company will inform the customer, who may choose to continue at the correct price or to cancel and receive a full refund.</p>
+      <p>11.3. The company is not responsible for the content of external websites linked from the website, or for browsing disruptions caused by communication or hosting providers outside its control. The company will fix any fault on the website as soon as possible.</p>
+      <p>11.4. Card payments are processed on a secure payment page of the payment company PayPlus. Card details are entered on that page only and are not stored by the company.</p>
+
+      <H2>12. Privacy</H2>
+      <p>12.1. The company protects its customers&apos; privacy. The details given when booking (name, phone, email and the travellers&apos; details) are used to carry out the booking, to communicate with the customer, and are passed only to the suppliers needed to provide the service (for example the apartment and the transfer company). They will not be passed to anyone else except as required by law.</p>
+      <p>12.2. Marketing messages are sent only to those who agreed to receive them, and every message lets you unsubscribe.</p>
+      <p>12.3. The full details: <Link href="/en/privacy">privacy policy</Link>.</p>
+
+      <H2>13. Contact</H2>
+      <p>13.1. For any question: phone <a href="tel:+972547701899" dir="ltr">+972 54-770-1899</a>, WhatsApp <a href="https://wa.me/972555174903" dir="ltr">+972 55-517-4903</a>, or email <a href="mailto:skishareteam@gmail.com">skishareteam@gmail.com</a>. Address: 12 HaZohar St., Caesarea, Israel.</p>
+
+      <H2>14. Customer declaration</H2>
+      <p>14.1. By approving this document, I confirm that I have read and understood the terms, and that all the clauses of the agreement have been brought to my attention.</p>
+      <p>14.2. I approve the terms of my own free will and in accordance with the provisions of the Consumer Protection Law, 5741-1981 (Israel).</p>
 
       <H2 id="emergency">Emergencies, war and force majeure: apartments</H2>
       <H3>An important clarification about the nature of the service and the suppliers&apos; policies</H3>
@@ -109,9 +139,12 @@ function TermsFr() {
       <H2>1. Introduction</H2>
       <p>1.1. Nous sommes désolés d&apos;apprendre que vous souhaitez annuler vos vacances, et nous nous engageons à être à vos côtés à chaque étape de la procédure.</p>
       <p>1.2. Vous pouvez nous contacter pour annuler par WhatsApp ou par e-mail, et nous serons heureux de vous aider à effectuer l&apos;annulation et à organiser de futures vacances.</p>
+      <p>1.3. Le site skisharebook.com est exploité par Ski Share Ltd. (SkiShare), société n°&nbsp;517332060, 12 rue HaZohar, Césarée, Israël (la «&nbsp;société&nbsp;»). La société loue des appartements de vacances et propose des séjours de ski à Val Thorens, en France&nbsp;: appartements, forfaits de ski, transferts depuis l&apos;aéroport, matériel de ski et vols.</p>
+      <p>1.4. La réservation et le paiement sur le site supposent l&apos;acceptation des présentes conditions, en cochant la case prévue avant le paiement. Elles s&apos;appliquent à toute réservation faite sur le site, par un devis envoyé au client, sur WhatsApp ou par téléphone.</p>
 
       <H2>2. Conditions d&apos;annulation</H2>
-      <p>2.1. L&apos;annulation de la réservation est soumise à la loi sur la protection du consommateur (Israël).</p>
+      <p>2.1. L&apos;annulation de la réservation est soumise à la loi sur la protection du consommateur, 5741-1981 (Israël), et au règlement sur la protection du consommateur (annulation de transaction), 5771-2010.</p>
+      <p>2.1.1. Une réservation faite sur le site, par téléphone ou sur WhatsApp peut être annulée dans les 14 jours suivant sa conclusion, à condition que l&apos;annulation intervienne plus de 7 jours (hors jours de repos) avant le début du service. Le paiement est alors remboursé, déduction faite de frais d&apos;annulation de 5&nbsp;% du prix de la transaction ou de 100&nbsp;ILS, le montant le plus bas étant retenu.</p>
       <p>2.2. Conditions de remboursement&nbsp;:</p>
       <UL>
         <li>À partir de 14 jours après la date de réservation et jusqu&apos;à 15 jours avant la date d&apos;arrivée&nbsp;: remboursement de 50&nbsp;% du montant total de la transaction.</li>
@@ -169,9 +202,34 @@ function TermsFr() {
       <p>8.4. Les changements mineurs (par exemple de couleur, de décoration, de type de lit ou d&apos;emplacement dans l&apos;immeuble) ne constituent pas un motif d&apos;annulation de la transaction.</p>
       <p>8.5. En cas de changement substantiel, la société en informera le client à l&apos;avance et lui proposera une alternative adaptée.</p>
 
-      <H2>9. Déclaration du client</H2>
-      <p>9.1. En acceptant ce document, je confirme avoir lu et compris les conditions, et que toutes les clauses du contrat ont été portées à ma connaissance.</p>
-      <p>9.2. J&apos;accepte les conditions de mon plein gré et conformément aux dispositions de la loi sur la protection du consommateur, 5741-1981 (Israël).</p>
+      <H2>9. Fourniture du service et délais</H2>
+      <p>9.1. La société vend des services d&apos;hébergement et de vacances, et non des biens physiques. Rien n&apos;est expédié par la poste ou par coursier&nbsp;; le service est fourni à Val Thorens aux dates fixées dans la réservation.</p>
+      <p>9.2. Dès réception du paiement, le client reçoit par e-mail une confirmation de réservation indiquant les détails de la réservation, les dates et le montant payé.</p>
+      <p>9.3. Avant la date d&apos;arrivée (en général environ une semaine avant), le client reçoit les informations d&apos;arrivée&nbsp;: l&apos;adresse, les heures d&apos;arrivée et de départ et la façon de récupérer la clé. Les bons et informations de prise en charge des services supplémentaires réservés (forfait, transfert, matériel) sont également envoyés avant l&apos;arrivée.</p>
+      <p>9.4. L&apos;appartement est à la disposition du client du jour d&apos;arrivée au jour de départ de la réservation, selon les heures d&apos;arrivée et de départ de l&apos;appartement. Les appartements à la semaine se louent du samedi au samedi.</p>
+
+      <H2>10. Service non fourni et remboursement</H2>
+      <p>10.1. Le client recevra le service qu&apos;il a réservé et payé. Si le service n&apos;a pas été fourni pour une raison qui dépend de la société, et que le client n&apos;a pas accepté une alternative équivalente, le montant intégral payé pour ce service lui sera remboursé.</p>
+      <p>10.2. Le remboursement est effectué sur le moyen de paiement utilisé (pour une carte bancaire&nbsp;: un crédit sur la même carte), dans les 14 jours suivant l&apos;avis d&apos;annulation ou le jour où il est apparu que le service ne serait pas fourni.</p>
+      <p>10.3. En cas de force majeure, la clause 6 s&apos;applique, et en situation d&apos;urgence, la politique d&apos;urgence s&apos;applique.</p>
+
+      <H2>11. Responsabilité de la société pour le site et son contenu</H2>
+      <p>11.1. La société est responsable du contenu qu&apos;elle publie sur le site (la description des appartements et des services, les prix et les conditions de réservation) et de l&apos;exécution des réservations qui y sont faites conformément aux présentes conditions.</p>
+      <p>11.2. Le prix contractuel est celui affiché au client lors de la réservation et payé par lui. En cas d&apos;erreur manifeste de prix ou de description d&apos;un service sur le site, la société en informera le client, qui pourra choisir de poursuivre au prix correct ou d&apos;annuler et d&apos;être intégralement remboursé.</p>
+      <p>11.3. La société n&apos;est pas responsable du contenu des sites externes vers lesquels renvoient des liens du site, ni des perturbations de navigation causées par des fournisseurs de communication ou d&apos;hébergement indépendants de sa volonté. La société corrigera au plus vite tout dysfonctionnement du site.</p>
+      <p>11.4. Les paiements par carte sont traités sur une page de paiement sécurisée de la société de paiement PayPlus. Les données de carte sont saisies uniquement sur cette page et ne sont pas conservées par la société.</p>
+
+      <H2>12. Confidentialité</H2>
+      <p>12.1. La société protège la vie privée de ses clients. Les informations fournies lors de la réservation (nom, téléphone, e-mail et informations des voyageurs) servent à exécuter la réservation et à communiquer avec le client, et ne sont transmises qu&apos;aux prestataires nécessaires à la fourniture du service (par exemple l&apos;appartement et la société de transfert). Elles ne sont transmises à personne d&apos;autre, sauf obligation légale.</p>
+      <p>12.2. Les messages commerciaux ne sont envoyés qu&apos;aux personnes qui y ont consenti, et chaque message permet de se désinscrire.</p>
+      <p>12.3. Tous les détails&nbsp;: <Link href="/fr/privacy">politique de confidentialité</Link>.</p>
+
+      <H2>13. Contact</H2>
+      <p>13.1. Pour toute question&nbsp;: téléphone <a href="tel:+972547701899" dir="ltr">+972 54-770-1899</a>, WhatsApp <a href="https://wa.me/972555174903" dir="ltr">+972 55-517-4903</a>, ou e-mail <a href="mailto:skishareteam@gmail.com">skishareteam@gmail.com</a>. Adresse&nbsp;: 12 rue HaZohar, Césarée, Israël.</p>
+
+      <H2>14. Déclaration du client</H2>
+      <p>14.1. En acceptant ce document, je confirme avoir lu et compris les conditions, et que toutes les clauses du contrat ont été portées à ma connaissance.</p>
+      <p>14.2. J&apos;accepte les conditions de mon plein gré et conformément aux dispositions de la loi sur la protection du consommateur, 5741-1981 (Israël).</p>
 
       <H2 id="emergency">Urgences, guerre et force majeure&nbsp;: appartements</H2>
       <H3>Précision importante sur la nature du service et les politiques des prestataires</H3>

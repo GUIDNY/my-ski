@@ -1,5 +1,6 @@
 import { getEurToIls, SELL_MARKUP } from "@/lib/fx";
 import { NextRequest, NextResponse } from "next/server";
+import { landingUrl } from "@/lib/pay-landing";
 
 /**
  * Creates a PayPlus hosted payment-page link and returns its URL.
@@ -78,6 +79,11 @@ export async function POST(req: NextRequest) {
       // Return the actual charged amount/currency too — when converting
       // EUR→ILS, `amount` here is the real shekel figure, not the caller's
       // original euro number, so callers can label the link correctly.
+      // landing: a link to send as is (the bot): the site's page with the terms checkbox, then PayPlus
+      if (b.landing === true) {
+        const page = landingUrl(origin, { u: link, a: amount, c: CURRENCY, t: String(b.description || "SkiShare").slice(0, 140) });
+        return NextResponse.json({ url: page, payplus: link, amount, currency: CURRENCY });
+      }
       return NextResponse.json({ url: link, amount, currency: CURRENCY });
     }
     return NextResponse.json({ error: json?.results?.message || "PayPlus error", raw: json }, { status: 400 });
