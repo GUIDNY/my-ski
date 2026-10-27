@@ -81,7 +81,8 @@ export async function transferOptions(p: {
     const left = seats.map(x => x!.seats_remaining).filter((n): n is number => typeof n === "number");
     options.push({
       key: "shared", kind: "shared", name: "שאטל משותף", className: "shared",
-      total: Math.round((cents * pax) / 100), perPerson: Math.round(cents / 100),
+      // Winteride price the shuttle for the whole group (all seats together), not per seat
+      total: Math.round(cents / 100), perPerson: Math.round(cents / 100 / pax),
       maxPax: null, maxBags: null, fits: !left.length || Math.min(...left) >= pax,
       onRequest: seats.some(x => x!.on_request), seatsLeft: left.length ? Math.min(...left) : null,
     });

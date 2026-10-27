@@ -114,13 +114,15 @@ const optionCls = (on: boolean) =>
   `rounded-2xl border text-right transition-colors ${on ? "border-accent bg-accent-soft ring-1 ring-accent" : "border-line bg-white hover:border-line-strong"}`;
 
 /* ── Flight leg form ───────────────────────────────────────── */
-function FlightLeg({ id, title, flightNum, date, time, onFlight, onDate, onTime, found }: {
+function FlightLeg({ id, title, flightNum, date, time, onFlight, onDate, onTime, found, noFlight }: {
   id: string;
   title: string;
   flightNum: string; date: string; time: string;
   onFlight(v: string): void; onDate(v: string): void; onTime(v: string): void;
   /** the flight's own time, from the transfer company's flight lookup */
   found?: string | null;
+  /** no flight (a hotel, a train…): only the date and the pickup time */
+  noFlight?: boolean;
 }) {
   const elal = isElAl(flightNum);
   return (
@@ -128,30 +130,30 @@ function FlightLeg({ id, title, flightNum, date, time, onFlight, onDate, onTime,
       <div className="flex flex-wrap items-center gap-2 mb-3.5">
         <span className="text-accent"><IcoPlane size={18} /></span>
         <span className="font-bold text-ink text-[16px]">{title}</span>
-        {flightNum && (
+        {flightNum && !noFlight && (
           <span className={`text-[13px] font-bold px-2.5 py-0.5 rounded-full ${elal ? "bg-ok-soft text-ok-text" : "bg-warn-soft text-warn"}`}>
             {elal ? "אל על ישיר · מחיר קבוע" : "מחיר משוער"}
           </span>
         )}
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 [&>*]:min-w-0">
-        <Field label="מספר טיסה" htmlFor={`${id}-flight`}>
+        {!noFlight && <Field label="מספר טיסה" htmlFor={`${id}-flight`}>
           <input id={`${id}-flight`} value={flightNum} onChange={e => onFlight(e.target.value)}
             placeholder="LY311 / FR1234..."
             className={`${field} text-right`} dir="ltr" autoComplete="off" />
-        </Field>
+        </Field>}
         <div className="hidden sm:block"><DateField id={`${id}-date`} label="תאריך" value={date} onChange={onDate} /></div>
-        <Field label="שעה" htmlFor={`${id}-time`}>
+        <Field label={noFlight ? "שעת איסוף" : "שעה"} htmlFor={`${id}-time`}>
           <input id={`${id}-time`} type="time" value={time} onChange={e => onTime(e.target.value)}
             className={`${field} text-right min-w-0 w-full appearance-none`} dir="ltr" />
         </Field>
       </div>
-      {found && (
+      {found && !noFlight && (
         <p className="flex items-center gap-2 text-[14px] text-ok-text mt-3 bg-ok-soft rounded-xl px-3.5 py-2.5">
           <IcoCheck size={15} /> מצאנו את הטיסה: {id === "out" ? "נוחתת" : "ממריאה"} ב-<span dir="ltr">{found}</span>{time && time !== found ? <> (בטופס: <span dir="ltr">{time}</span>)</> : null}
         </p>
       )}
-      {flightNum && !elal && (
+      {flightNum && !elal && !noFlight && (
         <p className="flex items-start gap-2 text-[14px] text-warn mt-3 bg-warn-soft rounded-xl px-3.5 py-2.5">
           <span className="mt-0.5 shrink-0"><IcoInfo size={16} /></span>
           טיסות שאינן אל על ישיר: המחיר משוער ועשוי להשתנות בהתאם לשעות הנחיתה
@@ -204,6 +206,9 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
   const [ski,     setSki]     = useState(initial.ski ?? 0);
   // a private car, or a seat on the shared shuttle (when the transfer company runs one for the flight)
   const [service, setService] = useState<"private" | "shared">("private");
+  // no flight: a transfer to or from a hotel, a train station… (date and pickup time only)
+  const [noFlight, setNoFlight] = useState(false);
+  const [pickup, setPickup] = useState("");
   const [suppQty, setSuppQty] = useState<Record<string, number>>({});
   const [outFound, setOutFound] = useState<string | null>(null);
   const [retFound, setRetFound] = useState<string | null>(null);
@@ -279,7 +284,7 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
   // shared seats: on each active leg, for the flight given (priced per person)
   const outShared = direction !== "return" ? sharedSeat(outQuote) : null;
   const retShared = direction !== "outbound" ? sharedSeat(retQuote) : null;
-  const sharedOffered = (direction === "return" || !!outShared) && (direction === "outbound" || !!retShared);
+  const sharedOffered = !noFlight && (direction === "return" || !!outShared) && (direction === "outbound" || !!retShared);
   useEffect(() => { if (service === "shared" && !sharedOffered) setService("private"); }, [service, sharedOffered]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
@@ -290,7 +295,8 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
   const hasLivePrice = (direction !== "return" ? outClassPrice != null : true) && (direction !== "outbound" ? retClassPrice != null : true);
   const supplementsCentsPerLeg = availableSupplements.reduce((sum, s) => sum + s.price_cents * (suppQty[s.id] || 0), 0);
   const isShared = service === "shared" && sharedOffered;
-  const sharedCents = ((outShared?.price_cents ?? 0) + (retShared?.price_cents ?? 0)) * passengers;
+  // the shuttle's price is for the whole group (all the seats), as Winteride answers it
+  const sharedCents = (outShared?.price_cents ?? 0) + (retShared?.price_cents ?? 0);
   const liveCentsTotal = isShared ? sharedCents + supplementsCentsPerLeg * directions
     : (outClassPrice ?? 0) + (retClassPrice ?? 0) + supplementsCentsPerLeg * directions;
   const totalPrice = isShared || hasLivePrice ? Math.round(liveCentsTotal / 100) : PRICE_PER_DIRECTION * directions * passengers;
@@ -305,10 +311,10 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
     if (direction === "return")   return retFlight ? retIsElal : false;
     return (outFlight || retFlight) ? (outIsElal && retIsElal) : false;
   })();
+  const legOk = (f: string, d: string, t: string) => !!(d && t && (noFlight || f));
   const canSubmit = name.trim() &&
-    (direction !== "outbound" || (outFlight && outDate && outTime)) &&
-    (direction !== "return"   || (retFlight && retDate && retTime)) &&
-    (direction !== "both"     || (outFlight && outDate && outTime && retFlight && retDate && retTime));
+    (direction === "return" || legOk(outFlight, outDate, outTime)) &&
+    (direction === "outbound" || legOk(retFlight, retDate, retTime));
 
   const handleSubmit = async () => {
     setSubmitting(true);
@@ -329,7 +335,7 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
         customer_name:  name,
         customer_email: email || null,
         customer_phone: phone || null,
-        notes: [aptName ? `דירה: ${aptName}` : "", notes].filter(Boolean).join(" | ") || null,
+        notes: [aptName ? `דירה: ${aptName}` : "", noFlight ? `בלי טיסה${pickup.trim() ? ` · איסוף/יעד: ${pickup.trim()}` : ""}` : "", notes].filter(Boolean).join(" | ") || null,
         apartment_id: aptId || null,
         resort_slug: "val-thorens",
         vehicle_class: isShared ? "shared" : availableClasses.find(c => c.vehicle_class_id === vehicleClassId)?.class ?? "sedan",
@@ -361,7 +367,7 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
   // what's still missing before the order can be sent (shown under the button)
   const missing = [
     !name.trim() && "שם מלא",
-    ((direction !== "return" && !(outFlight && outDate && outTime)) || (direction !== "outbound" && !(retFlight && retDate && retTime))) && "פרטי הטיסה (מספר, תאריך ושעה)",
+    ((direction !== "return" && !legOk(outFlight, outDate, outTime)) || (direction !== "outbound" && !legOk(retFlight, retDate, retTime))) && (noFlight ? "תאריך ושעת איסוף" : "פרטי הטיסה (מספר, תאריך ושעה)"),
   ].filter(Boolean) as string[];
 
   if (submitted) return (
@@ -395,7 +401,7 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
     .sort((a, b) => Number(b.fit) - Number(a.fit) || (a.total ?? 1e9) - (b.total ?? 1e9));
   const cheapestFit = cars.find(x => x.fit && !x.c.on_request && x.total != null);
   const datesSet = (direction === "return" || !!outDate) && (direction === "outbound" || !!retDate);
-  const sharedPP = Math.round(((outShared?.price_cents ?? 0) + (retShared?.price_cents ?? 0)) / 100);
+  const sharedPP = Math.round(sharedCents / 100 / passengers);
   const stepper = (label: string, v: number, set: (n: number) => void, min: number, max: number) => (
     <div className="flex flex-col">
       <span className={fieldLabel}>{label}</span>
@@ -505,7 +511,7 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
                     </span>
                     <span className="text-[14px] text-muted">מושב לכל נוסע, עם נוסעים מטיסות באותו זמן. ייתכנו המתנה קצרה ועצירות.</span>
                     {sharedOffered ? (
-                      <span className="mt-auto flex items-baseline gap-1.5"><span className="font-display font-extrabold text-[24px] text-ink">€{sharedPP * passengers}</span><span className="text-[14px] text-muted">€{sharedPP} לאדם{legsOn > 1 ? ", הלוך וחזור" : ""}</span></span>
+                      <span className="mt-auto flex items-baseline gap-1.5"><span className="font-display font-extrabold text-[24px] text-ink">€{Math.round(sharedCents / 100)}</span><span className="text-[14px] text-muted">€{sharedPP} לאדם{legsOn > 1 ? ", הלוך וחזור" : ""}</span></span>
                     ) : (
                       <span className="mt-auto text-[13px] text-muted">{(direction !== "return" && !outFlight) || (direction !== "outbound" && !retFlight) ? "כותבים מספר טיסה בשלב 3, ונבדוק אם יש לה שאטל" : "אין שאטל משותף לטיסה הזו"}</span>
                     )}
@@ -534,17 +540,27 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
               {driveText && <p className="text-[14px] text-muted">הדרך: {driveText}, עד דלת הדירה בואל טורנס.</p>}
             </Step>
 
-            <Step n={3} title="פרטי הטיסה">
-              <p className="text-[14px] text-muted -mt-1">עם מספר הטיסה אנחנו ממלאים את השעה לבד, בודקים אם יש שאטל משותף, והנהג עוקב אחרי עיכובים.</p>
+            <Step n={3} title={noFlight ? "מתי לאסוף" : "פרטי הטיסה"}>
+              <label className="flex items-center gap-3 cursor-pointer -mt-1">
+                <input type="checkbox" checked={noFlight} onChange={e => setNoFlight(e.target.checked)} className="w-5 h-5 shrink-0 accent-[#1652F0]" />
+                <span className="text-[15px] text-ink font-bold">אין טיסה <span className="font-normal text-muted">(למשל איסוף ממלון או מתחנת רכבת)</span></span>
+              </label>
+              {noFlight ? (
+                <Field label="מאיפה לאסוף או לאן להגיע" htmlFor="pickup">
+                  <input id="pickup" value={pickup} onChange={e => setPickup(e.target.value)} placeholder="שם המלון או הכתובת" className={field} />
+                </Field>
+              ) : (
+                <p className="text-[14px] text-muted">עם מספר הטיסה אנחנו ממלאים את השעה לבד, בודקים אם יש שאטל משותף, והנהג עוקב אחרי עיכובים.</p>
+              )}
               {(direction === "outbound" || direction === "both") && (
-                <FlightLeg id="out" title="טיסת הלוך · נחיתה בשדה"
+                <FlightLeg id="out" title={noFlight ? "הלוך · לואל טורנס" : "טיסת הלוך · נחיתה בשדה"}
                   flightNum={outFlight} date={outDate} time={outTime}
-                  onFlight={setOutFlight} onDate={setOutDate} onTime={setOutTime} found={outFound} />
+                  onFlight={setOutFlight} onDate={setOutDate} onTime={setOutTime} found={outFound} noFlight={noFlight} />
               )}
               {(direction === "return" || direction === "both") && (
-                <FlightLeg id="ret" title="טיסת חזור · המראה מהשדה"
+                <FlightLeg id="ret" title={noFlight ? "חזור · מואל טורנס" : "טיסת חזור · המראה מהשדה"}
                   flightNum={retFlight} date={retDate} time={retTime}
-                  onFlight={setRetFlight} onDate={setRetDate} onTime={setRetTime} found={retFound} />
+                  onFlight={setRetFlight} onDate={setRetDate} onTime={setRetTime} found={retFound} noFlight={noFlight} />
               )}
             </Step>
 
