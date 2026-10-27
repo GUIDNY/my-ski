@@ -567,7 +567,7 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
             </Step>
 
             <Step n={3} title={noFlight ? "מתי לאסוף" : "פרטי הטיסה והאיסוף"}>
-              <p className="text-[14px] text-muted -mt-1">עם מספר הטיסה אנחנו ממלאים את השעה לבד, בודקים אם יש שאטל משותף, והנהג עוקב אחרי עיכובים. אין טיסה בכיוון מסוים? מסמנים "בלי טיסה" ומוסיפים מאיפה לאסוף.</p>
+              <p className="text-[14px] text-muted -mt-1">עם מספר הטיסה אנחנו ממלאים את השעה לבד, בודקים אם יש שאטל משותף, והנהג עוקב אחרי עיכובים. אין טיסה בכיוון מסוים? מסמנים &quot;בלי טיסה&quot; ומוסיפים מאיפה לאסוף.</p>
               {(direction === "outbound" || direction === "both") && (
                 <FlightLeg id="out" title={outNoFlight ? "הלוך · לואל טורנס" : "טיסת הלוך · נחיתה בשדה"}
                   flightNum={outFlight} date={outDate} time={outTime}
