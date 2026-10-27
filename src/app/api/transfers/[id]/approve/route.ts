@@ -27,6 +27,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   // a shared shuttle seat is booked as service_type "shared" (no vehicle class)
   const shared = t.vehicle_class === "shared";
+  // "mixed:out" / "mixed:ret": the shuttle on that leg, the chosen car (vehicle_class_id) on the other
+  const mixedLeg = typeof t.vehicle_class === "string" && t.vehicle_class.startsWith("mixed:") ? t.vehicle_class.slice(6) : null;
   const vehicleClass = t.vehicle_class_id ?? t.vehicle_class ?? "sedan";
   const bookings = [];
   try {
@@ -39,7 +41,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         pax: t.passengers,
         out_direction: leg.out_direction,
         flight_no: leg.flight_no ?? undefined,
-        ...(shared ? { service_type: "shared" as const } : { chosen_class: vehicleClass }),
+        ...(shared || (mixedLeg === "out" && leg.direction === "outbound") || (mixedLeg === "ret" && leg.direction === "return")
+          ? { service_type: "shared" as const } : { chosen_class: mixedLeg ? (t.vehicle_class_id ?? "sedan") : vehicleClass }),
         customer: { name: t.customer_name, phone: t.customer_phone ?? undefined, email: t.customer_email ?? undefined },
         luggage: t.luggage ?? undefined,
         ski: t.ski ?? undefined,

@@ -227,7 +227,7 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
   const [luggage, setLuggage] = useState(initial.luggage ?? passengers);
   const [ski,     setSki]     = useState(initial.ski ?? 0);
   // a private car, or a seat on the shared shuttle (when the transfer company runs one for the flight)
-  const [service, setService] = useState<"private" | "shared">("private");
+  const [service, setService] = useState<"private" | "shared" | "mixed">("private");
   // no flight: a transfer to or from a hotel, a train station… (date and pickup time only)
   const [outNoFlight, setOutNoFlight] = useState(false);
   const [retNoFlight, setRetNoFlight] = useState(false);
@@ -310,7 +310,13 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
   const outShared = direction !== "return" ? sharedSeat(outQuote) : null;
   const retShared = direction !== "outbound" ? sharedSeat(retQuote) : null;
   const sharedOffered = (direction === "return" || (!outNoFlight && !!outShared)) && (direction === "outbound" || (!retNoFlight && !!retShared));
-  useEffect(() => { if (service === "shared" && !sharedOffered) setService("private"); }, [service, sharedOffered]);
+  // the shuttle on one leg only (the other has none, or no flight): shuttle that way, a private car the other way
+  const outSh = direction !== "return" && !outNoFlight && !!outShared, retSh = direction !== "outbound" && !retNoFlight && !!retShared;
+  const mixedLeg: "out" | "ret" | null = direction === "both" && !sharedOffered ? (outSh && !retSh ? "out" : retSh && !outSh ? "ret" : null) : null;
+  useEffect(() => {
+    if (service === "shared" && !sharedOffered) setService("private");
+    if (service === "mixed" && !mixedLeg) setService("private");
+  }, [service, sharedOffered, mixedLeg]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
   const directions = direction === "both" ? 2 : 1;
@@ -320,11 +326,16 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
   const hasLivePrice = (direction !== "return" ? outClassPrice != null : true) && (direction !== "outbound" ? retClassPrice != null : true);
   const supplementsCentsPerLeg = availableSupplements.reduce((sum, s) => sum + s.price_cents * (suppQty[s.id] || 0), 0);
   const isShared = service === "shared" && sharedOffered;
+  const isMixed = service === "mixed" && !!mixedLeg;
   // the shuttle's price is for the whole group (all the seats), as Winteride answers it
   const sharedCents = (outShared?.price_cents ?? 0) + (retShared?.price_cents ?? 0);
+  // mixed: the shuttle leg's seats + the chosen car on the other leg
+  const mixedCents = mixedLeg === "out" ? (outShared?.price_cents ?? 0) + (retClassPrice ?? 0)
+    : mixedLeg === "ret" ? (retShared?.price_cents ?? 0) + (outClassPrice ?? 0) : 0;
   const liveCentsTotal = isShared ? sharedCents + supplementsCentsPerLeg * directions
+    : isMixed ? mixedCents + supplementsCentsPerLeg * directions
     : (outClassPrice ?? 0) + (retClassPrice ?? 0) + supplementsCentsPerLeg * directions;
-  const totalPrice = isShared || hasLivePrice ? Math.round(liveCentsTotal / 100) : PRICE_PER_DIRECTION * directions * passengers;
+  const totalPrice = isShared || isMixed || hasLivePrice ? Math.round(liveCentsTotal / 100) : PRICE_PER_DIRECTION * directions * passengers;
   const travel = (outQuote ?? retQuote)?.travel;
   const driveText = travel?.drive_minutes ? `כ-${Math.floor(travel.drive_minutes / 60)}:${String(travel.drive_minutes % 60).padStart(2, "0")} שעות נסיעה${travel.km ? ` · ${travel.km} ק״מ` : ""}` : "";
 
@@ -364,7 +375,7 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
           direction !== "outbound" && retNoFlight ? `חזור בלי טיסה${retPlace.trim() ? `, יעד: ${retPlace.trim()}` : ""}` : "", notes].filter(Boolean).join(" | ") || null,
         apartment_id: aptId || null,
         resort_slug: "val-thorens",
-        vehicle_class: isShared ? "shared" : availableClasses.find(c => c.vehicle_class_id === vehicleClassId)?.class ?? "sedan",
+        vehicle_class: isShared ? "shared" : isMixed ? `mixed:${mixedLeg}` : availableClasses.find(c => c.vehicle_class_id === vehicleClassId)?.class ?? "sedan",
         vehicle_class_id: isShared ? null : vehicleClassId,
         supplements: Object.entries(suppQty).flatMap(([id, n]) => Array.from({ length: n }, () => id)),
         luggage,
@@ -388,7 +399,8 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
   }, [submitted]);
 
   const airportLabel = AIRPORTS.find(a => a.code === airport)?.label;
-  const chosenName = CLASS_HE[availableClasses.find(c => c.vehicle_class_id === vehicleClassId)?.class ?? ""] ?? "רכב פרטי";
+  const carName = classLabel(availableClasses.find(c => c.vehicle_class_id === vehicleClassId)?.class ?? "sedan");
+  const chosenName = isMixed ? (mixedLeg === "out" ? `שאטל בהלוך + ${carName} בחזור` : `${carName} בהלוך + שאטל בחזור`) : carName;
   const directionLabel = direction === "both" ? "הלוך וחזור" : direction === "outbound" ? "הלוך" : "חזור";
   // what's still missing before the order can be sent (shown under the button)
   const missing = [
@@ -539,11 +551,22 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
                     {sharedOffered ? (
                       <span className="mt-auto flex items-baseline gap-1.5"><span className="font-display font-extrabold text-[24px] text-ink">€{Math.round(sharedCents / 100)}</span><span className="text-[14px] text-muted">€{sharedPP} לאדם{legsOn > 1 ? ", הלוך וחזור" : ""}</span></span>
                     ) : (
-                      <span className="mt-auto text-[13px] text-muted">{(direction !== "return" && !outFlight) || (direction !== "outbound" && !retFlight) ? "כותבים מספר טיסה בשלב 3, ונבדוק אם יש לה שאטל" : "אין שאטל משותף לטיסה הזו"}</span>
+                      <span className="mt-auto text-[13px] text-muted">{mixedLeg ? `יש שאטל רק ${mixedLeg === "out" ? "בהלוך" : "בחזור"}: האפשרות המשולבת כאן למטה` : (direction !== "return" && !outFlight && !outNoFlight) || (direction !== "outbound" && !retFlight && !retNoFlight) ? "כותבים מספר טיסה בשלב 3, ונבדוק אם יש לה שאטל" : (outNoFlight || retNoFlight) && !(outFlight || retFlight) ? "שאטל משותף יוצא רק לפי טיסה" : "אין שאטל משותף לטיסה הזו"}</span>
                     )}
                   </button>
+                  {mixedLeg && (mixedLeg === "out" ? retClassPrice : outClassPrice) != null && (
+                    <button type="button" role="radio" aria-checked={isMixed} onClick={() => setService("mixed")}
+                      className={`${optionCls(isMixed)} p-4 flex flex-col gap-2 min-h-[112px] text-right`}>
+                      <span className="flex items-center justify-between gap-2">
+                        <span className="flex items-center gap-2 font-bold text-[16px] text-ink"><span className={isMixed ? "text-accent" : "text-muted"}><IcoUsersTop /></span>{mixedLeg === "out" ? "שאטל בהלוך + רכב פרטי בחזור" : "רכב פרטי בהלוך + שאטל בחזור"}</span>
+                        <span className="text-[12px] font-bold px-2 py-0.5 rounded-full bg-ok-soft text-ok-text">משולב</span>
+                      </span>
+                      <span className="text-[14px] text-muted">שאטל משותף בכיוון שיש לו שאטל, ו{carName} בכיוון השני.</span>
+                      <span className="mt-auto flex items-baseline gap-1.5 flex-wrap"><span className="font-display font-extrabold text-[24px] text-ink">€{Math.round(mixedCents / 100)}</span><span className="text-[14px] text-muted">הלוך וחזור · €{Math.round(mixedCents / 100 / passengers)} לאדם</span></span>
+                    </button>
+                  )}
                   {cars.map(({ c, total, fit }) => {
-                    const on = !isShared && vehicleClassId === c.vehicle_class_id;
+                    const on = !isShared && !isMixed && vehicleClassId === c.vehicle_class_id;
                     const best = cheapestFit?.c.vehicle_class_id === c.vehicle_class_id;
                     return (
                       <button key={c.vehicle_class_id} type="button" role="radio" aria-checked={on} disabled={c.on_request}
@@ -656,7 +679,7 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
                   <span className="text-[15px] text-muted">סה״כ</span>
                   <span className="font-display font-extrabold text-[36px] leading-none text-ink">{datesSet && (isShared || hasLivePrice) ? `€${totalPrice}` : "—"}</span>
                 </div>
-                <span className="self-end text-[13px] text-muted">{passengers > 1 ? `€${Math.round(totalPrice / passengers)} לאדם · ` : ""}<span className={`font-bold ${isShared || hasLivePrice ? "text-ok-text" : "text-warn"}`}>{quoting ? "בודקים מחיר…" : isShared || hasLivePrice ? "מחיר חי" : "מחיר משוער"}</span></span>
+                <span className="self-end text-[13px] text-muted">{passengers > 1 ? `€${Math.round(totalPrice / passengers)} לאדם · ` : ""}<span className={`font-bold ${isShared || isMixed || hasLivePrice ? "text-ok-text" : "text-warn"}`}>{quoting ? "בודקים מחיר…" : isShared || isMixed || hasLivePrice ? "מחיר חי" : "מחיר משוער"}</span></span>
               </div>
 
               <div className="hidden lg:flex flex-col gap-2">

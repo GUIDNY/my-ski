@@ -15,7 +15,11 @@ export async function GET(req: NextRequest) {
     // the schema isn't documented: take the first HH:MM-looking time it gives
     const f = (r.flight ?? r) as Record<string, unknown>;
     const raw = [f.time, f.scheduled_time, f.arrival_time, f.departure_time, f.scheduled].find(v => typeof v === "string") as string | undefined;
-    const time = raw?.match(/(\d{2}):(\d{2})/)?.[0] ?? null;
+    // a full timestamp ("2027-01-15T07:45:00.000Z") is UTC: shown in the airport's own time (Geneva and Lyon: Europe/Paris)
+    const iso = raw && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(raw) && /(Z|[+-]\d{2}:?\d{2})$/.test(raw) ? new Date(raw) : null;
+    const time = iso && !isNaN(iso.getTime())
+      ? new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Paris", hour: "2-digit", minute: "2-digit", hour12: false }).format(iso)
+      : raw?.match(/(\d{2}):(\d{2})/)?.[0] ?? null;
     const found = f.found !== false && !!time;
     return NextResponse.json({ found, time: found ? time : null }, { headers: { "Cache-Control": "public, s-maxage=3600" } });
   } catch {
