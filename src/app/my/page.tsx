@@ -25,7 +25,7 @@ type OrderView = {
   share_amount?: number | null; shares_total?: number | null;
   group?: { code: string; shares_total: number; shares_paid: number } | null;
 };
-type FLeg = { date: string; time: string; no: string };
+type FLeg = { date: string; time: string; no: string; arr?: string; airport?: string };
 type Apt = { id: string; name: string; type: string; images: string[]; price_per_night: number; beds: number; baths: number; sqm: number };
 type Saved = {
   id: string; checkin: string | null; checkout: string | null; guests: number;
@@ -177,7 +177,7 @@ function GroupProgress({ group }: { group: { code: string; shares_total: number;
 function FlightCheckinBox({ f }: { f: NonNullable<OrderView["flightCheckin"]> }) {
   const [copied, setCopied] = useState(false);
   const legLine = (label: string, l: FLeg) => l.date
-    ? <p className="text-[14px] text-body"><span className="font-bold text-ink">{label}:</span> {fmtShort(l.date)}{l.time ? `, ${l.time}` : ""}{l.no ? <> · <span dir="ltr">{l.no}</span></> : null}</p>
+    ? <p className="text-[14px] text-body"><span className="font-bold text-ink">{label}:</span> {fmtShort(l.date)}{l.time ? `, ${l.time}` : ""}{l.no ? <> · <span dir="ltr">{l.no}</span></> : null}{l.arr ? ` · נחיתה ב${l.airport === "LYS" ? "ליון" : "ז׳נבה"} ${l.arr}` : ""}</p>
     : null;
   return (
     <div className="rounded-2xl border border-line p-4 flex flex-col gap-3">
@@ -239,7 +239,7 @@ function CheckinBox({ o, onDone }: { o: OrderView; onDone: (v: Partial<OrderView
   if (done) {
     return (
       <div className="rounded-2xl border border-ok/30 bg-ok-soft p-4 flex flex-col gap-2.5">
-        <p className="flex items-center gap-2 font-bold text-[15px] text-ok-text"><Check size={16} />הצ׳ק-אין בוצע</p>
+        <p className="flex items-center gap-2 font-bold text-[15px] text-ok-text"><Check size={16} />הצ׳ק-אין לדירה בוצע</p>
         {o.stay ? (
           <div className="flex flex-col gap-2 text-[15px] text-ink">
             {o.stay.address && <p><span className="text-muted">כתובת: </span><span className="font-bold">{o.stay.address}</span>{" "}
@@ -258,17 +258,17 @@ function CheckinBox({ o, onDone }: { o: OrderView; onDone: (v: Partial<OrderView
     return (
       <div className="rounded-2xl border border-line p-4 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
         <div>
-          <p className="font-bold text-[15px] text-ink">צ׳ק-אין אונליין</p>
+          <p className="font-bold text-[15px] text-ink">צ׳ק-אין לדירה</p>
           <p className="text-[14px] text-body">2 דקות, ואחרי זה תראו כאן את הכתובת ואת פרטי הכניסה לדירה.</p>
         </div>
-        <button type="button" onClick={() => setOpen(true)} className={`${btn.primary} shrink-0 min-h-[44px] px-5`}>לביצוע צ׳ק-אין</button>
+        <button type="button" onClick={() => setOpen(true)} className={`${btn.primary} shrink-0 min-h-[44px] px-5`}>לצ׳ק-אין לדירה</button>
       </div>
     );
   }
 
   return (
     <div className="rounded-2xl border border-line p-4 flex flex-col gap-3">
-      <p className="font-bold text-[16px] text-ink">צ׳ק-אין אונליין</p>
+      <p className="font-bold text-[16px] text-ink">צ׳ק-אין לדירה</p>
       <div className="flex flex-col gap-2">
         <span className={fieldLabel}>שמות האורחים (כמו בדרכון)</span>
         {names.map((n, i) => (
@@ -290,7 +290,7 @@ function CheckinBox({ o, onDone }: { o: OrderView; onDone: (v: Partial<OrderView
       </label>
       {err && <p role="alert" className="text-[14px] text-danger">{err}</p>}
       <div className="flex gap-2">
-        <button type="button" onClick={submit} disabled={busy} className={`${btn.primary} flex-1 min-h-[44px]`}>{busy ? "שולח…" : "סיום צ׳ק-אין"}</button>
+        <button type="button" onClick={submit} disabled={busy} className={`${btn.primary} flex-1 min-h-[44px]`}>{busy ? "שולח…" : "סיום הצ׳ק-אין לדירה"}</button>
         <button type="button" onClick={() => setOpen(false)} className={`${btn.outline} min-h-[44px] px-4`}>ביטול</button>
       </div>
     </div>

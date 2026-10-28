@@ -4,7 +4,8 @@
  * the guest gets a button to the airline's check-in page with the code to copy,
  * and an email 24 hours before each flight (cron /api/cron/flight-checkin).
  */
-export type FlightLeg = { date: string; time: string; no: string };
+/** time = takeoff (out: Israel time, return: Geneva/Lyon time); arr = landing in Geneva/Lyon on the way out */
+export type FlightLeg = { date: string; time: string; no: string; arr?: string; airport?: string };
 export type FlightInfo = { airline: string; pnr: string; url: string; out: FlightLeg; ret: FlightLeg; remOut?: string; remRet?: string };
 
 /** the airline's check-in page (Transavia checked 28.10.2026; the others open the airline's site,
@@ -27,7 +28,9 @@ const leg = (v: unknown): FlightLeg => {
   const o = (v && typeof v === "object" ? v : {}) as Record<string, unknown>;
   const date = /^\d{4}-\d{2}-\d{2}$/.test(String(o.date ?? "")) ? String(o.date) : "";
   const time = /^\d{1,2}:\d{2}$/.test(String(o.time ?? "")) ? String(o.time).padStart(5, "0") : "";
-  return { date, time, no: s(o.no, 12).toUpperCase().replace(/\s+/g, "") };
+  const arr = /^\d{1,2}:\d{2}$/.test(String(o.arr ?? "")) ? String(o.arr).padStart(5, "0") : "";
+  const airport = o.airport === "GVA" || o.airport === "LYS" ? String(o.airport) : "";
+  return { date, time, no: s(o.no, 12).toUpperCase().replace(/\s+/g, ""), ...(arr ? { arr } : {}), ...(airport ? { airport } : {}) };
 };
 
 export function cleanFlight(v: unknown): FlightInfo | null {
@@ -60,3 +63,14 @@ export function zonedMs(date: string, time: string, tz: string): number {
   const asTz = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute);
   return guess - (asTz - guess);
 }
+
+/** the airline from the flight number's code (LY345 → El Al) */
+const BY_CODE: Record<string, string> = {
+  LY: "elal", "6H": "israir", IZ: "arkia", TO: "transavia", HV: "transavia",
+  U2: "easyjet", DS: "easyjet", EC: "easyjet", W6: "wizz", W4: "wizz", W9: "wizz", "5W": "wizz",
+  LX: "swiss", LH: "lufthansa", AF: "airfrance",
+};
+export const airlineByFlightNo = (no: string) => BY_CODE[no.toUpperCase().replace(/\s+/g, "").slice(0, 2)] ?? "";
+
+/** minutes in the air Tel Aviv → Geneva / Lyon, to know the takeoff from the landing time */
+export const BLOCK_MIN: Record<string, number> = { GVA: 285, LYS: 290 };

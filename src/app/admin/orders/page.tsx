@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import type { Order, Apartment } from "@/types";
 import { authFetch } from "@/lib/auth-fetch";
-import { AIRLINES, cleanFlight } from "@/lib/flight-checkin";
+import { AIRLINES, cleanFlight, airlineByFlightNo, BLOCK_MIN } from "@/lib/flight-checkin";
 
 const STATUS: Record<string, { label: string; cls: string }> = {
   awaiting:  { label: "🔥 ליד חם — הגיע לתשלום, לא שילם", cls: "bg-orange-100 text-orange-700" },
@@ -22,7 +22,26 @@ const EMPTY_NEW_ORDER = {
   pass3v: false, flight: false, flight_details: "", flight_price: 0,
   stay_address: "", stay_ref: "", stay_notes: "",
   fl_airline: "", fl_pnr: "", fl_url: "", fl_out_date: "", fl_out_time: "", fl_out_no: "", fl_ret_date: "", fl_ret_time: "", fl_ret_no: "",
+  fl_out_arr: "", fl_out_airport: "", fl_ret_airport: "",
 };
+
+const hhmm = (ms: number, tz: string) => new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(ms));
+const ymdIn = (ms: number, tz: string) => new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(ms));
+
+/** a flight number + date → the real times (the transfer company's flight data, direct flights Tel Aviv ⇄ Geneva/Lyon) */
+async function lookupLeg(no: string, date: string, leg: "out" | "ret") {
+  for (const ap of ["GVA", "LYS"]) {
+    const q = new URLSearchParams({ flight_no: no, date, airport_code: ap, direction: leg === "out" ? "arrival" : "departure", full: "1" });
+    const j = await fetch(`/api/transfers/flight?${q}`).then(r => r.json()).catch(() => null);
+    const t = j?.found && typeof j.flight?.time === "string" ? Date.parse(j.flight.time) : NaN;
+    if (!isNaN(t)) {
+      if (leg === "ret") return { airport: ap, date: ymdIn(t, "Europe/Paris"), time: hhmm(t, "Europe/Paris") };
+      const dep = t - (BLOCK_MIN[ap] ?? 285) * 60_000;
+      return { airport: ap, arr: hhmm(t, "Europe/Paris"), date: ymdIn(dep, "Asia/Jerusalem"), time: hhmm(dep, "Asia/Jerusalem") };
+    }
+  }
+  return null;
+}
 
 // Searchable apartment picker with a regular/agency (La Cime) toggle — the
 // full list is ~90 apartments (6 regular + ~83 synced from La Cime), too
@@ -87,6 +106,25 @@ export default function OrdersAdmin() {
     setShowExtraApt(false);
   };
 
+  const [flMsg, setFlMsg] = useState("");
+  // Idan types only the flight numbers: the airline, the airport and the times come from the flight data
+  const fillFlights = async () => {
+    setFlMsg("בודק…");
+    const outNo = newOrder.fl_out_no.trim(), retNo = newOrder.fl_ret_no.trim();
+    const [o, r] = await Promise.all([
+      outNo && (newOrder.fl_out_date || newOrder.checkin) ? lookupLeg(outNo, newOrder.fl_out_date || newOrder.checkin, "out") : Promise.resolve(null),
+      retNo && (newOrder.fl_ret_date || newOrder.checkout) ? lookupLeg(retNo, newOrder.fl_ret_date || newOrder.checkout, "ret") : Promise.resolve(null),
+    ]);
+    setNewOrder(v => ({
+      ...v,
+      fl_airline: v.fl_airline || airlineByFlightNo(outNo || retNo),
+      ...(o ? { fl_out_date: o.date, fl_out_time: o.time, fl_out_arr: o.arr ?? "", fl_out_airport: o.airport } : {}),
+      ...(r ? { fl_ret_date: r.date, fl_ret_time: r.time, fl_ret_airport: r.airport } : {}),
+    }));
+    const miss = [outNo && !o && `הלוך ${outNo}`, retNo && !r && `חזור ${retNo}`].filter(Boolean);
+    setFlMsg(miss.length ? `לא מצאתי את ${miss.join(" ו-")} בתאריך הזה: אפשר למלא שעה ידנית` : "✓ מולא לפי מספרי הטיסה");
+  };
+
   const startEdit = (o: Order) => {
     setEditingOrder(o);
     setNewOrder({
@@ -101,7 +139,8 @@ export default function OrdersAdmin() {
       ...(() => { const fl = cleanFlight(o.ops && o.ops.x_flight);
         return { fl_airline: fl?.airline || "", fl_pnr: fl?.pnr || "", fl_url: fl?.url || "",
           fl_out_date: fl?.out.date || o.checkin || "", fl_out_time: fl?.out.time || "", fl_out_no: fl?.out.no || "",
-          fl_ret_date: fl?.ret.date || o.checkout || "", fl_ret_time: fl?.ret.time || "", fl_ret_no: fl?.ret.no || "" }; })(),
+          fl_ret_date: fl?.ret.date || o.checkout || "", fl_ret_time: fl?.ret.time || "", fl_ret_no: fl?.ret.no || "",
+          fl_out_arr: fl?.out.arr || "", fl_out_airport: fl?.out.airport || "", fl_ret_airport: fl?.ret.airport || "" }; })(),
     });
     setShowExtraApt(!!o.extra_apartment_id);
     setShowAdd(true);
@@ -146,8 +185,8 @@ export default function OrdersAdmin() {
         x_flight: newOrder.flight ? {
           ...(cleanFlight(editingOrder && editingOrder.ops && editingOrder.ops.x_flight) || {}),
           airline: newOrder.fl_airline, pnr: newOrder.fl_pnr.trim().toUpperCase(), url: newOrder.fl_url.trim(),
-          out: { date: newOrder.fl_out_date, time: newOrder.fl_out_time, no: newOrder.fl_out_no.trim() },
-          ret: { date: newOrder.fl_ret_date, time: newOrder.fl_ret_time, no: newOrder.fl_ret_no.trim() },
+          out: { date: newOrder.fl_out_date, time: newOrder.fl_out_time, no: newOrder.fl_out_no.trim(), arr: newOrder.fl_out_arr, airport: newOrder.fl_out_airport },
+          ret: { date: newOrder.fl_ret_date, time: newOrder.fl_ret_time, no: newOrder.fl_ret_no.trim(), airport: newOrder.fl_ret_airport },
         } : null },
       customer_name: newOrder.customer_name, customer_email: newOrder.customer_email, customer_phone: newOrder.customer_phone,
     };
@@ -347,8 +386,14 @@ export default function OrdersAdmin() {
                       <input type="time" value={newOrder.fl_ret_time} onChange={e => setNewOrder(v => ({ ...v, fl_ret_time: e.target.value }))} className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                       <input placeholder="מס׳ טיסה" dir="ltr" value={newOrder.fl_ret_no} onChange={e => setNewOrder(v => ({ ...v, fl_ret_no: e.target.value }))} className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <button type="button" onClick={fillFlights} disabled={!newOrder.fl_out_no.trim() && !newOrder.fl_ret_no.trim()}
+                        className="px-3 py-2 rounded-xl bg-sky-600 text-white text-sm font-bold disabled:opacity-40">✈️ מלא הכל לפי מספרי הטיסה</button>
+                      {flMsg && <span className="text-xs text-gray-600">{flMsg}</span>}
+                      {newOrder.fl_out_arr && <span className="text-xs text-gray-500">נחיתה הלוך: {newOrder.fl_out_arr} ({newOrder.fl_out_airport === "LYS" ? "ליון" : "ז׳נבה"})</span>}
+                    </div>
                     <input placeholder="קישור מדויק לצ׳ק-אין (לא חובה, אחרת האתר של החברה)" dir="ltr" value={newOrder.fl_url} onChange={e => setNewOrder(v => ({ ...v, fl_url: e.target.value }))} className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-right" />
-                    <p className="text-[11px] text-gray-500">שעות לפי השעון המקומי בשדה: הלוך שעון ישראל, חזור שעון צרפת/שווייץ.</p>
+                    <p className="text-[11px] text-gray-500">מספיק לכתוב מספרי טיסה וללחוץ ״מלא הכל״. שעות לפי השעון המקומי בשדה: הלוך שעון ישראל (המראה, לפי שעת הנחיתה), חזור שעון צרפת/שווייץ.</p>
                   </div>
                 )}
                 {newOrder.transfer && (
@@ -358,7 +403,7 @@ export default function OrdersAdmin() {
               </div>
 
               <div className="rounded-xl border border-gray-200 p-3 space-y-2">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block">פרטי הגעה לצ׳ק-אין (הלקוח רואה אחרי שעשה צ׳ק-אין אונליין)</label>
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block">פרטי הגעה לצ׳ק-אין (הלקוח רואה אחרי שעשה צ׳ק-אין לדירה)</label>
                 <input placeholder="כתובת הדירה" value={newOrder.stay_address} onChange={e => setNewOrder(v => ({ ...v, stay_address: e.target.value }))}
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 <input placeholder="קוד / מספר הזמנה לקבלה" dir="ltr" value={newOrder.stay_ref} onChange={e => setNewOrder(v => ({ ...v, stay_ref: e.target.value }))}
@@ -461,10 +506,10 @@ export default function OrdersAdmin() {
                   return (
                     <div className={`mt-3 rounded-xl px-3 py-2.5 text-xs ${ci ? "bg-emerald-50 text-emerald-800" : "bg-gray-50 text-gray-600"}`}>
                       {ci ? <>
-                        <p className="font-bold">✅ צ׳ק-אין אונליין בוצע{ci.at ? ` · ${new Date(ci.at).toLocaleDateString("he-IL")}` : ""}</p>
+                        <p className="font-bold">✅ צ׳ק-אין לדירה בוצע{ci.at ? ` · ${new Date(ci.at).toLocaleDateString("he-IL")}` : ""}</p>
                         <p>אורחים: {(ci.guests || []).join(", ")}{ci.arrival ? ` · מגיעים: ${ci.arrival}` : ""}{ci.phone ? ` · טלפון: ${ci.phone}` : ""}</p>
                         {ci.notes && <p>הערה: {ci.notes}</p>}
-                      </> : <p>עוד לא עשו צ׳ק-אין אונליין</p>}
+                      </> : <p>עוד לא עשו צ׳ק-אין לדירה</p>}
                       {st && (st.address || st.ref)
                         ? <p className="mt-0.5 opacity-80">פרטי הגעה שהזנת: {[st.address, st.ref].filter(Boolean).join(" · ")}</p>
                         : <p className="mt-0.5 font-bold text-amber-700">חסרים פרטי הגעה (כתובת וקוד הזמנה): עריכה ← פרטי הגעה</p>}
