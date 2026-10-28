@@ -143,9 +143,9 @@ export default function OrdersAdmin() {
         // NEW apartment/dates in the same request wouldn't clear the old
         // ones), then update the fields and re-block under the new values.
         if (editingOrder.status === "approved" || editingOrder.status === "hold") {
-          await authFetch(`/api/orders/${editingOrder.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "cancelled" }) });
+          await authFetch(`/api/orders/${editingOrder.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "cancelled", silent: true }) });
         }
-        await authFetch(`/api/orders/${editingOrder.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...fields, status: newOrder.status }) });
+        await authFetch(`/api/orders/${editingOrder.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...fields, status: newOrder.status, silent: true }) });
       } else {
         const post = (force: boolean) => authFetch("/api/orders", {
           method: "POST",

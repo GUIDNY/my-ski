@@ -8,7 +8,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (denied) return denied;
   const db = createServerClient();
   const { id } = await params;
-  const body = await req.json();
+  // silent: an admin edit (the dates move: cancel + approve again) only changes the details the
+  // customer sees in the personal area, no confirmation email
+  const { silent, ...body } = await req.json();
 
   // read the current status first so we only act on real transitions
   const { data: prev } = await db.from("orders").select("status").eq("id", id).single();
@@ -22,7 +24,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
 
   // when an order TRANSITIONS to approved → fire the "confirmed" email once
-  const newlyApproved = body.status === "approved" && prev?.status !== "approved";
+  const newlyApproved = body.status === "approved" && prev?.status !== "approved" && silent !== true;
   if (newlyApproved && data) {
     const hook = process.env.N8N_WEBHOOK_URL;
     if (hook) {
