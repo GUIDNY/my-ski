@@ -1,3 +1,5 @@
+import { flightView } from "./flight-checkin";
+
 /*
  * Online check-in, kept in orders.ops (jsonb; x_ keys are not checklist items):
  *   ops.x_checkin : what the guest filled in the personal area
@@ -29,5 +31,5 @@ export function guestView(ops: unknown) {
   const checkin = (o.x_checkin && typeof o.x_checkin === "object" ? o.x_checkin : null) as CheckinData | null;
   const stay = cleanStay(o.x_stay);
   // (not "checkin": that is the arrival date on the order)
-  return { pass3v: !!o.x_pass3v, onlineCheckin: checkin, stay: checkin ? stay : null, stayReady: !!stay };
+  return { pass3v: !!o.x_pass3v, onlineCheckin: checkin, stay: checkin ? stay : null, stayReady: !!stay, flightCheckin: flightView(o.x_flight) };
 }

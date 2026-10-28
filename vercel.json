@@ -16,6 +16,10 @@
     {
       "path": "/api/cron/indexnow",
       "schedule": "40 5 * * *"
+    },
+    {
+      "path": "/api/cron/flight-checkin",
+      "schedule": "0 7 * * *"
     }
   ]
 }

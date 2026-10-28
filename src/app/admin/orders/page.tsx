@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import type { Order, Apartment } from "@/types";
 import { authFetch } from "@/lib/auth-fetch";
+import { AIRLINES, cleanFlight } from "@/lib/flight-checkin";
 
 const STATUS: Record<string, { label: string; cls: string }> = {
   awaiting:  { label: "🔥 ליד חם — הגיע לתשלום, לא שילם", cls: "bg-orange-100 text-orange-700" },
@@ -20,6 +21,7 @@ const EMPTY_NEW_ORDER = {
   ski_pass: false, transfer: false, equipment: false, transfer_details: "",
   pass3v: false, flight: false, flight_details: "", flight_price: 0,
   stay_address: "", stay_ref: "", stay_notes: "",
+  fl_airline: "", fl_pnr: "", fl_url: "", fl_out_date: "", fl_out_time: "", fl_out_no: "", fl_ret_date: "", fl_ret_time: "", fl_ret_no: "",
 };
 
 // Searchable apartment picker with a regular/agency (La Cime) toggle — the
@@ -96,6 +98,10 @@ export default function OrdersAdmin() {
       pass3v: !!(o.ops && o.ops.x_pass3v), flight: !!o.flight, flight_details: o.flight_details || "", flight_price: Number(o.flight_price) || 0,
       ...(() => { const st = (o.ops && typeof o.ops.x_stay === "object" && o.ops.x_stay ? o.ops.x_stay : {}) as Record<string, string>;
         return { stay_address: st.address || "", stay_ref: st.ref || "", stay_notes: st.notes || "" }; })(),
+      ...(() => { const fl = cleanFlight(o.ops && o.ops.x_flight);
+        return { fl_airline: fl?.airline || "", fl_pnr: fl?.pnr || "", fl_url: fl?.url || "",
+          fl_out_date: fl?.out.date || o.checkin || "", fl_out_time: fl?.out.time || "", fl_out_no: fl?.out.no || "",
+          fl_ret_date: fl?.ret.date || o.checkout || "", fl_ret_time: fl?.ret.time || "", fl_ret_no: fl?.ret.no || "" }; })(),
     });
     setShowExtraApt(!!o.extra_apartment_id);
     setShowAdd(true);
@@ -135,7 +141,14 @@ export default function OrdersAdmin() {
       // the ski pass area is kept in ops (x_ keys are not checklist items): the personal area shows it
       ops: { ...((editingOrder && editingOrder.ops) || {}), x_pass3v: newOrder.ski_pass && newOrder.pass3v,
         // arrival details for the guest: shown in the personal area after the online check-in
-        x_stay: { address: newOrder.stay_address.trim(), ref: newOrder.stay_ref.trim(), notes: newOrder.stay_notes.trim() } },
+        x_stay: { address: newOrder.stay_address.trim(), ref: newOrder.stay_ref.trim(), notes: newOrder.stay_notes.trim() },
+        // flight check-in in the personal area + the email 24 hours before (reminders already sent are kept)
+        x_flight: newOrder.flight ? {
+          ...(cleanFlight(editingOrder && editingOrder.ops && editingOrder.ops.x_flight) || {}),
+          airline: newOrder.fl_airline, pnr: newOrder.fl_pnr.trim().toUpperCase(), url: newOrder.fl_url.trim(),
+          out: { date: newOrder.fl_out_date, time: newOrder.fl_out_time, no: newOrder.fl_out_no.trim() },
+          ret: { date: newOrder.fl_ret_date, time: newOrder.fl_ret_time, no: newOrder.fl_ret_no.trim() },
+        } : null },
       customer_name: newOrder.customer_name, customer_email: newOrder.customer_email, customer_phone: newOrder.customer_phone,
     };
 
@@ -312,6 +325,30 @@ export default function OrdersAdmin() {
                       className="col-span-2 w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     <input type="number" min={0} placeholder="מחיר (€, לא חובה)" value={newOrder.flight_price || ""} onChange={e => setNewOrder(v => ({ ...v, flight_price: +e.target.value }))}
                       className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  </div>
+                )}
+                {newOrder.flight && (
+                  <div className="rounded-xl border border-sky-200 bg-sky-50/40 p-3 mt-2 space-y-2">
+                    <label className="text-xs font-bold text-sky-800 block">צ׳ק-אין לטיסה באזור האישי (+ מייל ללקוח 24 שעות לפני כל טיסה)</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <select value={newOrder.fl_airline} onChange={e => setNewOrder(v => ({ ...v, fl_airline: e.target.value }))} className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                        <option value="">חברת תעופה…</option>
+                        {AIRLINES.map(a => <option key={a.key} value={a.key}>{a.name}</option>)}
+                      </select>
+                      <input placeholder="קוד הזמנה בחברה (PNR)" dir="ltr" value={newOrder.fl_pnr} onChange={e => setNewOrder(v => ({ ...v, fl_pnr: e.target.value }))} className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-right font-mono" />
+                    </div>
+                    <div className="grid grid-cols-[auto_1fr_90px_100px] gap-2 items-center">
+                      <span className="text-xs font-bold text-gray-500">הלוך</span>
+                      <input type="date" value={newOrder.fl_out_date} onChange={e => setNewOrder(v => ({ ...v, fl_out_date: e.target.value }))} className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      <input type="time" value={newOrder.fl_out_time} onChange={e => setNewOrder(v => ({ ...v, fl_out_time: e.target.value }))} className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      <input placeholder="מס׳ טיסה" dir="ltr" value={newOrder.fl_out_no} onChange={e => setNewOrder(v => ({ ...v, fl_out_no: e.target.value }))} className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      <span className="text-xs font-bold text-gray-500">חזור</span>
+                      <input type="date" value={newOrder.fl_ret_date} onChange={e => setNewOrder(v => ({ ...v, fl_ret_date: e.target.value }))} className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      <input type="time" value={newOrder.fl_ret_time} onChange={e => setNewOrder(v => ({ ...v, fl_ret_time: e.target.value }))} className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      <input placeholder="מס׳ טיסה" dir="ltr" value={newOrder.fl_ret_no} onChange={e => setNewOrder(v => ({ ...v, fl_ret_no: e.target.value }))} className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+                    <input placeholder="קישור מדויק לצ׳ק-אין (לא חובה, אחרת האתר של החברה)" dir="ltr" value={newOrder.fl_url} onChange={e => setNewOrder(v => ({ ...v, fl_url: e.target.value }))} className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-right" />
+                    <p className="text-[11px] text-gray-500">שעות לפי השעון המקומי בשדה: הלוך שעון ישראל, חזור שעון צרפת/שווייץ.</p>
                   </div>
                 )}
                 {newOrder.transfer && (

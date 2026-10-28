@@ -20,10 +20,12 @@ type OrderView = {
   pass3v?: boolean; extra_apartment_name?: string | null;
   onlineCheckin?: { guests: string[]; arrival: string; phone: string; notes: string; at: string } | null;
   stay?: { address: string; ref: string; notes: string } | null; stayReady?: boolean;
+  flightCheckin?: { airline: string; pnr: string; url: string; out: FLeg; ret: FLeg } | null;
   apartment?: { images?: string[] } | null;
   share_amount?: number | null; shares_total?: number | null;
   group?: { code: string; shares_total: number; shares_paid: number } | null;
 };
+type FLeg = { date: string; time: string; no: string };
 type Apt = { id: string; name: string; type: string; images: string[]; price_per_night: number; beds: number; baths: number; sqm: number };
 type Saved = {
   id: string; checkin: string | null; checkout: string | null; guests: number;
@@ -127,6 +129,7 @@ function OrderCard({ o: initial, onMore }: { o: OrderView; onMore?: (o: OrderVie
         )}
         {o.status === "hold" && <p className="text-[14px] text-body">הפיקדון התקבל. ההזמנה ממתינה לאישור שלנו.</p>}
         {o.group && <GroupProgress group={o.group} />}
+        {o.flightCheckin && (o.status === "approved" || o.status === "hold") && <FlightCheckinBox f={o.flightCheckin} />}
         <CheckinBox o={o} onDone={v => setO(x => ({ ...x, ...v }))} />
         <div className="mt-auto pt-3.5 border-t border-line flex flex-wrap items-center gap-2">
           <button type="button" onClick={() => onMore?.(o)} className={`${btn.outline} w-full sm:w-auto min-h-[44px] px-4 text-[15px]`}>פרטי ההזמנה</button>
@@ -168,6 +171,42 @@ function GroupProgress({ group }: { group: { code: string; shares_total: number;
     </div>
   );
 }
+
+/* Flight check-in: the airline's check-in page and the booking code to copy
+   (an email reminds the guest 24 hours before each flight). */
+function FlightCheckinBox({ f }: { f: NonNullable<OrderView["flightCheckin"]> }) {
+  const [copied, setCopied] = useState(false);
+  const legLine = (label: string, l: FLeg) => l.date
+    ? <p className="text-[14px] text-body"><span className="font-bold text-ink">{label}:</span> {fmtShort(l.date)}{l.time ? `, ${l.time}` : ""}{l.no ? <> · <span dir="ltr">{l.no}</span></> : null}</p>
+    : null;
+  return (
+    <div className="rounded-2xl border border-line p-4 flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <p className="font-bold text-[15px] text-ink">צ׳ק-אין לטיסה · {f.airline}</p>
+        <span className="text-accent shrink-0"><IcoPlaneSm /></span>
+      </div>
+      <div className="flex flex-col gap-0.5">{legLine("הלוך", f.out)}{legLine("חזור", f.ret)}</div>
+      {f.pnr && (
+        <div className="flex items-center justify-between gap-3 rounded-xl bg-soft px-4 py-2.5">
+          <span className="text-[14px] text-muted">קוד ההזמנה בחברת התעופה</span>
+          <button type="button" onClick={() => { navigator.clipboard?.writeText(f.pnr); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+            className="flex items-center gap-2 font-mono font-bold text-[17px] text-ink" dir="ltr" aria-label="העתקת קוד ההזמנה">
+            {f.pnr}<span className="text-[12px] font-sans font-bold text-accent">{copied ? "הועתק" : "העתקה"}</span>
+          </button>
+        </div>
+      )}
+      {f.url && (
+        <a href={f.url} target="_blank" rel="noopener noreferrer" className={`${btn.primary} w-full min-h-[44px]`}>לצ׳ק-אין באתר {f.airline}</a>
+      )}
+      <p className="text-[13px] text-muted">הצ׳ק-אין נפתח בדרך כלל 24 עד 30 שעות לפני הטיסה. נשלח לכם מייל תזכורת יום לפני כל טיסה.</p>
+    </div>
+  );
+}
+const IcoPlaneSm = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" />
+  </svg>
+);
 
 /* Online check-in: the guests' names, arrival time and a phone for the day; after it,
    the arrival details Idan entered in the admin (address, booking code, how to get in). */
