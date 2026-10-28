@@ -15,6 +15,7 @@ type Answer = {
   images?: string[];
   contact?: string | null;
   reply?: string; // the old site bot (fallback) answers in one message
+  held?: boolean; // Idan is answering this chat himself: no bot answer
 };
 
 // admin/auth/checkout screens don't need the customer-facing chat launcher;
@@ -116,18 +117,25 @@ export default function AiConcierge() {
   const fileRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const restored = useRef(false);
+  // Idan can answer a site chat himself from /admin/chats: while the visitor
+  // was active in the last 30 minutes, the chat asks every few seconds for
+  // his messages (newer than idanAfter) and shows them like any other answer.
+  const idanAfter = useRef(0);
+  const activeAt = useRef(0);
 
   // Keep the conversation across page changes and reloads in this tab:
   // picked up again the first time the chat is opened.
   const restore = () => {
     if (restored.current) return;
     restored.current = true;
-    let saved: { sessionId?: string; messages?: Message[]; contact?: string } | null = null;
+    let saved: { sessionId?: string; messages?: Message[]; contact?: string; idanAfter?: number; activeAt?: number } | null = null;
     try { saved = JSON.parse(sessionStorage.getItem(STORE) || "null"); } catch { saved = null; }
     if (saved?.sessionId && Array.isArray(saved.messages) && saved.messages.length) {
       setSessionId(saved.sessionId);
       setMessages(saved.messages.slice(-60));
       setContact(saved.contact || "");
+      idanAfter.current = Number(saved.idanAfter) || 0;
+      activeAt.current = Number(saved.activeAt) || 0;
     } else {
       setSessionId(newSessionId());
     }
@@ -140,7 +148,7 @@ export default function AiConcierge() {
   }, []);
   useEffect(() => {
     if (!restored.current || !sessionId) return;
-    try { sessionStorage.setItem(STORE, JSON.stringify({ sessionId, messages: messages.slice(-60), contact })); } catch { /* private mode */ }
+    try { sessionStorage.setItem(STORE, JSON.stringify({ sessionId, messages: messages.slice(-60), contact, idanAfter: idanAfter.current, activeAt: activeAt.current })); } catch { /* private mode */ }
   }, [sessionId, messages, contact]);
 
   useEffect(() => {
@@ -228,6 +236,7 @@ export default function AiConcierge() {
   const send = async () => {
     const text = input.trim();
     if ((!text && !pendingImage) || busy) return;
+    activeAt.current = Date.now();
     const userMsg: Message = { role: "user", text: text || "(שלחתי תמונה)" };
     const transcript = [...messages, userMsg];
     setMessages(transcript);
@@ -263,7 +272,9 @@ export default function AiConcierge() {
     setWaiting(false);
 
     const items: Message[] = [];
-    if (answer?.bubbles?.length) {
+    if (answer?.held) {
+      // Idan is in this chat: his answer comes through the check below
+    } else if (answer?.bubbles?.length) {
       for (const b of answer.bubbles) items.push({ role: "assistant", text: b });
       if (answer.link) items.push({ role: "assistant", text: "", link: answer.link });
       if (answer.images?.length) items.push({ role: "assistant", text: "", images: answer.images });
@@ -285,6 +296,27 @@ export default function AiConcierge() {
     setTyping(false);
     setBusy(false);
   };
+
+  // Idan's messages from the admin chat screen
+  useEffect(() => {
+    if (!sessionId) return;
+    let stop = false;
+    const tick = async () => {
+      if (stop || document.visibilityState !== "visible") return;
+      if (!activeAt.current || Date.now() - activeAt.current > 30 * 60_000) return;
+      try {
+        const r = await fetch(`/api/ai-concierge/poll?sessionId=${encodeURIComponent(sessionId)}&after=${idanAfter.current}`, { cache: "no-store" });
+        const j = await r.json() as { messages?: { id: number; text: string }[] };
+        const fresh = (j.messages ?? []).filter(m => m.id > idanAfter.current);
+        if (stop || !fresh.length) return;
+        idanAfter.current = Math.max(...fresh.map(m => m.id));
+        setMessages(m => [...m, ...fresh.map(f => ({ role: "assistant" as const, text: f.text }))]);
+        setOpen(true);
+      } catch { /* next time */ }
+    };
+    const t = setInterval(tick, 6000);
+    return () => { stop = true; clearInterval(t); };
+  }, [sessionId]);
 
   if (hidden) return null;
 

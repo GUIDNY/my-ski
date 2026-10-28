@@ -14,6 +14,7 @@ export type HelperAnswer = {
   link: string | null;     // the quote (PDF) when get_quote made one
   images: string[];        // apartment photos to show under the messages
   contact: string | null;  // phone number the visitor left, kept for the next messages
+  held?: boolean;          // Idan took over this chat from the admin: the bot stays quiet
 };
 
 const SESSION = /^[A-Za-z0-9_-]{16,64}$/;
@@ -64,6 +65,8 @@ export async function askHelper(input: { sessionId: string; text: string; name?:
     }
     const j = await res.json() as Record<string, unknown>;
     const bubbles = Array.isArray(j.bubbles) ? j.bubbles.map(b => String(b ?? "").trim()).filter(Boolean).slice(0, 6) : [];
+    // Idan is answering this chat himself (admin chat screen): no bot answer, nothing to fall back to
+    if (j.ok === true && j.held === true) return { ok: true, bubbles: [], link: null, images: [], contact: null, held: true };
     if (j.ok !== true || !bubbles.length) return null;
     const link = typeof j.link === "string" && SITE_LINK.test(j.link) ? j.link : null;
     const images = Array.isArray(j.images)
@@ -98,5 +101,28 @@ export async function describeImage(base64: string, mimeType: string): Promise<s
     return parts.map((p: { text?: string }) => p.text ?? "").join(" ").replace(/\s+/g, " ").trim().slice(0, 400);
   } catch {
     return "";
+  }
+}
+
+/**
+ * The admin chat screen and the widget's "did Idan write?" check, through the
+ * same n8n workflow: POST `${N8N_SITE_URL}/admin` with
+ * { action: list | thread | send | release | poll, sessionId, text, after }.
+ */
+export async function chatAdmin(body: Record<string, unknown>): Promise<Record<string, unknown> | null> {
+  if (!process.env.N8N_SITE_URL) return null;
+  try {
+    const res = await fetch(`${process.env.N8N_SITE_URL}/admin`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "User-Agent": N8N_UA },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(25_000),
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    return await res.json() as Record<string, unknown>;
+  } catch (e) {
+    console.error("chat admin:", e instanceof Error ? e.message : e);
+    return null;
   }
 }

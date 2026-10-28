@@ -25,6 +25,12 @@ const IconBriefcase = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
+const IconChat = ({ size = 18 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z" />
+  </svg>
+);
+
 const links = [
   { href: "/admin", label: "דשבורד", icon: <IconGrid size={18} /> },
   { href: "/admin/apartments", label: "דירות", icon: <IconBed size={18} /> },
@@ -32,6 +38,7 @@ const links = [
   { href: "/admin/seasonal-properties", label: "ניהול דירות עונתיות", icon: <IconKey size={18} /> },
   { href: "/admin/agency-properties", label: "ניהול דירות סוכנות", icon: <IconBriefcase size={18} /> },
   { href: "/admin/hostel", label: "הוסטל מאיירהופן", icon: <IconHome size={18} /> },
+  { href: "/admin/chats", label: "צ׳אט האתר", icon: <IconChat size={18} /> },
   { href: "/admin/proposals", label: "הצעות מחיר (PDF)", icon: <IconDoc size={18} /> },
   { href: "/admin/orders", label: "הזמנות ותשלומים", icon: <IconCalendar size={18} /> },
   { href: "/admin/transfers", label: "הסעות", icon: <IconBus size={18} /> },
