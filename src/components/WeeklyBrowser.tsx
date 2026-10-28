@@ -10,6 +10,8 @@ import { aptDisplayName, aptShortName, aptParts, forWho } from "@/lib/apartment-
 import { card, btn, badgeLight, badgeDark, Check, EmptyState } from "@/components/ui";
 import { cardImage } from "@/lib/thumbs";
 import { HOLIDAY_WEEKS } from "@/lib/holiday-weeks";
+import { placeOf, bedroomsOf } from "@/lib/residences";
+import WeeklyFilters, { NO_WFILTERS, W_SIZES, W_PRICES, W_SQM, type WFilters, type WKey, type WCounts } from "@/components/WeeklyFilters";
 
 const MONTHS_FULL = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
 
@@ -77,6 +79,9 @@ export default function WeeklyBrowser({
   const [guests, setGuests] = useState(initialGuests);
   const [open, setOpen] = useState(false);
   const [dealMode, setDealMode] = useState<"apartment" | "full">(initialDeal);
+  const [f, setF] = useState<WFilters>(NO_WFILTERS);
+  const [sort, setSort] = useState<"low" | "high" | "big" | "people">("low");
+  const [showFilters, setShowFilters] = useState(false); // the filters drawer on phones
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -120,6 +125,50 @@ export default function WeeklyBrowser({
     Math.round(aptPrice / guests + (full ? extras(weekIso).perPerson : 0));
   const groupTotal = (aptPrice: number, weekIso: string) =>
     Math.round(aptPrice + (full ? extras(weekIso).perPerson * guests : 0));
+
+  // ── filters (the column on the right) ──
+  const factsOf = (apt: Apartment, price: number) => {
+    const b = bedroomsOf(apt), pl = placeOf(apt);
+    return { bed: b === "studio" ? "studio" : b >= 4 ? "4" : b ? String(b) : "", pl, pp: selected ? perPerson(price, selected) : 0, sqm: Number(apt.sqm) || 0, cap: apt.max_guests ?? 0 };
+  };
+  const passesF = (x: { apt: Apartment; price: number }, skip?: WKey) => {
+    const k = factsOf(x.apt, x.price);
+    if (skip !== "beds" && f.beds.length && !f.beds.includes(k.bed)) return false;
+    if (skip !== "sizes" && f.sizes.length && !f.sizes.some(v => W_SIZES.find(z => z.key === v)?.fits(k.cap))) return false;
+    if (skip !== "prices" && f.prices.length && !f.prices.some(v => W_PRICES.find(z => z.key === v)?.fits(k.pp))) return false;
+    if (skip !== "sqm" && f.sqm.length && !f.sqm.some(v => W_SQM.find(z => z.key === v)?.fits(k.sqm))) return false;
+    if (skip !== "quarters" && f.quarters.length && !(k.pl.quarter && f.quarters.includes(k.pl.quarter))) return false;
+    if (skip !== "residences" && f.residences.length && !(k.pl.residence && f.residences.includes(k.pl.residence))) return false;
+    if (skip !== "amen" && f.amen.length && !f.amen.every(m => (x.apt.amenities ?? []).includes(m))) return false;
+    return true;
+  };
+  const countBy = (key: WKey, val: (x: { apt: Apartment; price: number }) => string[] | string | null) => {
+    const m = new Map<string, number>();
+    for (const x of visible) if (passesF(x, key)) {
+      const v = val(x); for (const k of (Array.isArray(v) ? v : v ? [v] : [])) m.set(k, (m.get(k) ?? 0) + 1);
+    }
+    return m;
+  };
+  const counts: WCounts = {
+    beds: countBy("beds", x => factsOf(x.apt, x.price).bed || null),
+    sizes: countBy("sizes", x => W_SIZES.filter(z => z.fits(x.apt.max_guests ?? 0)).map(z => z.key)),
+    prices: countBy("prices", x => W_PRICES.filter(z => z.fits(factsOf(x.apt, x.price).pp)).map(z => z.key)),
+    sqm: countBy("sqm", x => W_SQM.filter(z => z.fits(Number(x.apt.sqm) || 0)).map(z => z.key)),
+    quarters: countBy("quarters", x => placeOf(x.apt).quarter),
+    residences: countBy("residences", x => placeOf(x.apt).residence),
+    amen: countBy("amen", x => x.apt.amenities ?? []),
+  };
+  const amenOptions = [...counts.amen.keys()].filter(m => (counts.amen.get(m) ?? 0) >= 2 || f.amen.includes(m))
+    .sort((a, b) => (counts.amen.get(b) ?? 0) - (counts.amen.get(a) ?? 0)).slice(0, 12);
+  const activeCount = Object.values(f).reduce((n, v) => n + v.length, 0);
+  const toggleF = (k: WKey, v: string) => setF(o => ({ ...o, [k]: o[k].includes(v) ? o[k].filter(x => x !== v) : [...o[k], v] }));
+  const clearF = () => setF(NO_WFILTERS);
+  const shownList = visible.filter(x => passesF(x)).sort((a, b) =>
+    sort === "high" ? b.price - a.price
+    : sort === "big" ? (Number(b.apt.sqm) || 0) - (Number(a.apt.sqm) || 0) || a.price - b.price
+    : sort === "people" ? (b.apt.max_guests ?? 0) - (a.apt.max_guests ?? 0) || a.price - b.price
+    : a.price - b.price);
+  const filterPanel = <WeeklyFilters f={f} counts={counts} toggle={toggleF} clearAll={clearF} active={activeCount} amenOptions={amenOptions} />;
 
   // the live direct flight, only for the chosen week of a package
   const live = useDirectFlight(full && range ? selected! : "", full && range ? range.checkoutIso : "");
@@ -250,22 +299,42 @@ export default function WeeklyBrowser({
         )}
       </div>
 
-      {/* ── Results ─────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-end justify-between gap-2">
+      {/* ── Results, with the filters on the right ──────────── */}
+      <div className="flex gap-6 items-start">
+      {visible.length > 0 && <aside aria-label="סינון" className="hidden lg:block w-[290px] shrink-0 sticky top-[96px] max-h-[calc(100dvh-110px)] overflow-y-auto">{filterPanel}</aside>}
+      <div className="flex-1 min-w-0 flex flex-col gap-5">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <h2 className="font-display font-bold text-[22px] md:text-[26px] text-ink">
-          {visible.length === 1 ? "דירה אחת פנויה" : `${visible.length} דירות פנויות`}{range ? ` ל-${fmtRange(range.checkin, range.checkout)}` : ""}
+          {shownList.length === 1 ? "דירה אחת פנויה" : `${shownList.length} דירות פנויות`}{range ? ` ל-${fmtRange(range.checkin, range.checkout)}` : ""}
+          {activeCount > 0 && <span className="text-[15px] font-normal text-muted"> (מתוך {visible.length})</span>}
         </h2>
-        {visible.length > 1 && <span className="text-[14px] text-muted">מהזולה ליקרה</span>}
+        {visible.length > 1 && (
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={() => setShowFilters(true)}
+              className="lg:hidden min-h-[44px] px-4 rounded-full border border-line-strong bg-white text-[15px] font-bold text-ink">
+              סינון{activeCount > 0 ? ` (${activeCount})` : ""}
+            </button>
+            <select value={sort} onChange={e => setSort(e.target.value as typeof sort)} aria-label="סידור"
+              className="min-h-[44px] rounded-full bg-white border border-line-strong px-4 text-[15px] font-bold text-ink hover:border-ink focus:outline-none focus:border-ink cursor-pointer">
+              <option value="low">מהזולה ליקרה</option>
+              <option value="high">מהיקרה לזולה</option>
+              <option value="big">הכי גדולה (מ&quot;ר)</option>
+              <option value="people">הכי הרבה מקום</option>
+            </select>
+          </div>
+        )}
       </div>
 
-      {visible.length === 0 ? (
+      {visible.length > 0 && shownList.length === 0 ? (
+        <EmptyState title="אין דירה שמתאימה לסינון" text="נסו להוריד חלק מהסינונים." action={<button type="button" onClick={clearF} className={btn.primary}>ניקוי הסינון</button>} />
+      ) : visible.length === 0 ? (
         <EmptyState
           title="אין דירה פנויה בשבוע הזה"
           text={guests > 1 ? `לא מצאנו דירה פנויה ל-${guests} אנשים בשבוע הזה. נסו שבוע אחר או פחות אנשים בדירה.` : "נסו שבוע אחר."}
         />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-          {visible.map(({ apt, price }, i) => {
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 md:gap-6">
+          {shownList.map(({ apt, price }, i) => {
             const pp = perPerson(price, selected!);
             const total = groupTotal(price, selected!);
             const href = `/apartments/${apt.id}?${new URLSearchParams({
@@ -285,7 +354,7 @@ export default function WeeklyBrowser({
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
                   )}
                   <span className={`absolute top-3.5 right-3.5 ${badgeLight}`}>שבת עד שבת</span>
-                  {i === 0 && visible.length > 1 && <span className={`absolute top-3.5 left-3.5 ${badgeDark}`}>הכי משתלם</span>}
+                  {i === 0 && sort === "low" && shownList.length > 1 && <span className={`absolute top-3.5 left-3.5 ${badgeDark}`}>הכי משתלם</span>}
                 </div>
                 <div className="p-5 flex flex-col gap-2.5 flex-1">
                   <h3 className="font-display font-bold text-[20px] md:text-[21px] leading-snug text-ink">{aptShortName(apt)}</h3>
@@ -329,6 +398,26 @@ export default function WeeklyBrowser({
               </Link>
             );
           })}
+        </div>
+      )}
+      </div>
+      </div>
+
+      {/* filters drawer on phones */}
+      {showFilters && (
+        <div className="lg:hidden fixed inset-0 z-[85] bg-ink/45 flex items-end" role="dialog" aria-modal="true" aria-label="סינון הדירות" onClick={() => setShowFilters(false)}>
+          <div className="bg-white w-full max-h-[88dvh] rounded-t-[24px] flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 pt-4 pb-2 border-b border-line">
+              <span className="font-display font-bold text-[20px] text-ink">סינון</span>
+              {activeCount > 0 && <button type="button" onClick={clearF} className="text-[14px] font-bold text-accent">ניקוי הכל</button>}
+            </div>
+            <div className="flex-1 overflow-y-auto px-5 py-4">
+              <WeeklyFilters bare f={f} counts={counts} toggle={toggleF} clearAll={clearF} active={activeCount} amenOptions={amenOptions} />
+            </div>
+            <div className="p-4 border-t border-line" style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}>
+              <button type="button" onClick={() => setShowFilters(false)} className={`${btn.primary} w-full`}>הצגת {shownList.length} דירות</button>
+            </div>
+          </div>
         </div>
       )}
     </div>
