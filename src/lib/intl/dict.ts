@@ -324,6 +324,7 @@ const en = {
       weather: "Weather and snow",
       pistes: "Pistes and ski area",
       "apres-ski": "Après-ski and restaurants",
+      families: "Val Thorens with kids",
     } as Record<string, string>,
   },
 };
@@ -642,6 +643,7 @@ const fr: Dict = {
       weather: "Météo et neige",
       pistes: "Pistes et domaine skiable",
       "apres-ski": "Après-ski et restaurants",
+      families: "Val Thorens en famille",
     },
   },
 };

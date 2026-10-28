@@ -65,6 +65,7 @@ export const GUIDE_PAIRS: readonly GuidePair[] = [
   { key: "weather", en: "val-thorens-weather-and-snow", fr: "meteo-enneigement-val-thorens", he: "מזג-אוויר-ושלג-בואל-טורנס" },
   { key: "pistes", en: "val-thorens-pistes-and-ski-area", fr: "pistes-domaine-skiable-val-thorens", he: "מסלולי-סקי-בואל-טורנס" },
   { key: "apres-ski", en: "val-thorens-apres-ski", fr: "apres-ski-val-thorens", he: "אפרה-סקי-ומסעדות-בואל-טורנס" },
+  { key: "families", en: "val-thorens-with-kids", fr: "val-thorens-en-famille", he: "ואל-טורנס-למשפחות" },
 ];
 
 /** The pair of the guide with this address in this language (a Hebrew slug may still be percent-encoded). */
