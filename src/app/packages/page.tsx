@@ -90,15 +90,80 @@ export default async function PackagesPage() {
     },
   ];
 
+  // the cheapest per-person price of any week and group size: the "from €X per person" AI answers quote
+  const all = weeks.flatMap(w => PACKAGE_GROUPS.map(n => ({ w, n, v: w.perPerson[n] })))
+    .filter((x): x is { w: PackageWeek; n: PackageGroup; v: number } => x.v !== null);
+  const from = all.length ? all.reduce((a, b) => (b.v < a.v ? b : a)) : null;
+  const to = all.length ? all.reduce((a, b) => (b.v > a.v ? b : a)) : null;
+  const SITE = "https://skisharebook.com";
+  const addDays = (iso: string, d: number) => new Date(Date.parse(iso) + d * 864e5).toISOString().slice(0, 10);
+  const productLd = from && to ? {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: "חבילת סקי לואל טורנס לשבוע: דירה, סקי פס והסעה",
+    alternateName: "Val Thorens ski package: apartment, lift pass and airport transfer",
+    description: `שבוע בדירה בואל טורנס (שבת עד שבת), סקי פס ל-${passDays} ימים והסעה מז'נבה או מליון, הלוך וחזור. החל מ-${eur(from.v)} לאדם. עונת 2026/27.`,
+    image: [`${SITE}/hero-ski.jpg`, `${SITE}/apt1.jpg`, `${SITE}/apt2.jpg`, `${SITE}/chalet-interior.jpg`],
+    brand: { "@type": "Brand", name: "SkiShare" },
+    category: "Ski holiday package",
+    url: `${SITE}/packages`,
+    offers: {
+      "@type": "AggregateOffer",
+      priceCurrency: "EUR",
+      lowPrice: from.v,
+      highPrice: to.v,
+      offerCount: all.length,
+      availability: "https://schema.org/InStock",
+      seller: { "@type": "TravelAgency", name: "SkiShare", url: SITE },
+      offers: weeks.slice(0, 20).flatMap(w => PACKAGE_GROUPS.filter(n => w.perPerson[n] !== null).map(n => ({
+        "@type": "Offer",
+        name: `${dmy(w.week)} – ${dmy(addDays(w.week, 7))}, ${n} אנשים, לאדם`,
+        price: w.perPerson[n],
+        priceCurrency: "EUR",
+        availability: "https://schema.org/InStock",
+        validThrough: w.week,
+        url: `${SITE}${weeklyHref(w.week, n)}`,
+        priceSpecification: { "@type": "UnitPriceSpecification", price: w.perPerson[n], priceCurrency: "EUR", referenceQuantity: { "@type": "QuantitativeValue", value: 1, unitText: "person" } },
+      }))),
+    },
+  } : null;
+  const tripLd = from ? {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "חבילות סקי לואל טורנס לפי שבוע, עונת 2026/27",
+    itemListElement: weeks.slice(0, 20).filter(w => PACKAGE_GROUPS.some(n => w.perPerson[n] !== null)).map((w, i) => {
+      const v = Math.min(...PACKAGE_GROUPS.map(n => w.perPerson[n]).filter((x): x is number => x !== null));
+      return {
+        "@type": "ListItem",
+        position: i + 1,
+        item: {
+          "@type": "TouristTrip",
+          name: `חבילת סקי לואל טורנס ${dmy(w.week)} – ${dmy(addDays(w.week, 7))}`,
+          description: `7 לילות בדירה, סקי פס ${PASS_AREA_LABEL[w.area]} ל-${w.passDays} ימים והסעה מהשדה. החל מ-${eur(v)} לאדם.`,
+          image: `${SITE}/apt${(i % 3) + 1}.jpg`,
+          url: `${SITE}${weeklyHref(w.week, 4)}`,
+          touristType: "Skiers",
+          itinerary: { "@type": "Place", name: "Val Thorens, France" },
+          provider: { "@type": "TravelAgency", name: "SkiShare", url: SITE },
+          offers: { "@type": "Offer", price: v, priceCurrency: "EUR", availability: "https://schema.org/InStock", validFrom: new Date().toISOString().slice(0, 10), url: `${SITE}${weeklyHref(w.week, 4)}` },
+        },
+      };
+    }),
+  } : null;
+
   return (
     <div className="flex-1 bg-white" dir="rtl">
+      {productLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(productLd) }} />}
+      {tripLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(tripLd) }} />}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(breadcrumbLd([["דף הבית", "/"], ["חבילות סקי לואל טורנס", "/packages"]])) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(faqLd(faq)) }} />
       <PageTop
         soft
         crumbs={[{ label: "דף הבית", href: "/" }, { label: "חבילות סקי" }]}
         title="חבילת סקי לואל טורנס"
-        sub="דירה לשבוע, סקי פס והסעה מהשדה, במחיר לאדם. כל אחד מהחבורה משלם את החלק שלו."
+        sub={from
+          ? `החל מ-${eur(from.v)} לאדם לשבוע: דירה בואל טורנס, סקי פס והסעה מהשדה. כל אחד מהחבורה משלם את החלק שלו.`
+          : "דירה לשבוע, סקי פס והסעה מהשדה, במחיר לאדם. כל אחד מהחבורה משלם את החלק שלו."}
       >
         <div className="mt-6 md:mt-8">
           <SearchWidget initialDeal="full" flat />
