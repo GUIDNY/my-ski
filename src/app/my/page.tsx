@@ -16,6 +16,8 @@ type OrderView = {
   code: string; apartment_name: string; area: string;
   checkin: string | null; checkout: string | null; guests: number; nights: number;
   ski_pass: boolean; transfer: boolean; total_eur: number; status: string; customer_name: string;
+  equipment?: boolean; flight?: boolean; flight_details?: string | null; transfer_details?: string | null;
+  pass3v?: boolean; extra_apartment_name?: string | null;
   apartment?: { images?: string[] } | null;
   share_amount?: number | null; shares_total?: number | null;
   group?: { code: string; shares_total: number; shares_paid: number } | null;
@@ -91,7 +93,7 @@ function OrderCard({ o, onMore }: { o: OrderView; onMore?: (o: OrderView) => voi
   const img = o.apartment?.images?.[0] ?? "/view.jpg";
   const approved = o.status === "approved";
   const wa = buildWaHref({ intro: "היי, יש לי שאלה על ההזמנה שלי", lines: [`קוד הזמנה: ${o.code}`, `${o.apartment_name}, ${fmtRange(o.checkin, o.checkout)}`] });
-  const included = [o.ski_pass && "סקי פס", o.transfer && "הסעה מהשדה"].filter(Boolean) as string[];
+  const included = [o.flight && "טיסה", o.ski_pass && (o.pass3v ? "סקי פס שלושת העמקים" : "סקי פס"), o.transfer && "הסעה מהשדה", o.equipment && "ציוד סקי"].filter(Boolean) as string[];
   return (
     <article className={`${card} overflow-hidden flex flex-col sm:flex-row`}>
       <div className="relative shrink-0 h-[190px] sm:h-auto sm:min-h-[230px] sm:w-[280px] lg:w-[300px] bg-soft-2">
@@ -165,10 +167,16 @@ function GroupProgress({ group }: { group: { code: string; shares_total: number;
 
 function OrderModal({ o, onClose }: { o: OrderView; onClose: () => void }) {
   const approved = o.status === "approved";
-  const img = o.apartment?.images?.[0] ?? "/view.jpg";
-  const addons = [
-    { label: "סקי פס", on: o.ski_pass },
-    { label: "הסעה מהשדה", on: o.transfer },
+  const imgs = o.apartment?.images?.length ? o.apartment.images : ["/view.jpg"];
+  const [pic, setPic] = useState(0);
+  const skiDays = Math.max((o.nights || 0) - 1, 0);
+  const addons: { label: string; on: boolean; detail?: string }[] = [
+    { label: "טיסה", on: !!o.flight, detail: o.flight_details || "טיסה ישירה, הלוך וחזור" },
+    { label: o.pass3v ? "סקי פס מורחב: שלושת העמקים" : "סקי פס ואל טורנס",
+      on: o.ski_pass,
+      detail: o.pass3v ? `${skiDays ? `${skiDays} ימי סקי, ` : ""}כל 3 העמקים: ואל טורנס, מריבל, קורשבל ועוד` : `${skiDays ? `${skiDays} ימי סקי, ` : ""}ואל טורנס ואורל` },
+    { label: "הסעה מהשדה", on: o.transfer, detail: o.transfer_details || "הלוך וחזור, מהשדה עד הדירה" },
+    { label: "ציוד סקי או סנובורד", on: !!o.equipment, detail: `${skiDays ? `${skiDays} ימים, ` : ""}סקי או סנובורד, מגפיים וקסדה` },
   ];
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -180,18 +188,38 @@ function OrderModal({ o, onClose }: { o: OrderView; onClose: () => void }) {
       <div role="dialog" aria-modal="true" aria-label={`פרטי ההזמנה, ${o.apartment_name}`}
         className="bg-white w-full md:max-w-[520px] max-h-[92dvh] overflow-y-auto overscroll-contain rounded-t-[24px] md:rounded-card shadow-pop"
         onClick={e => e.stopPropagation()}>
-        <div className="relative h-48 md:h-52 bg-soft-2">
+        <div className="relative h-56 md:h-64 bg-soft-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={img} alt={o.apartment_name} className="w-full h-full object-cover md:rounded-t-card" />
+          <img src={imgs[pic] ?? imgs[0]} alt={o.apartment_name} className="w-full h-full object-cover md:rounded-t-card" />
+          {imgs.length > 1 && (
+            <>
+              <button type="button" aria-label="התמונה הקודמת" onClick={() => setPic(p => (p - 1 + imgs.length) % imgs.length)}
+                className="absolute top-1/2 -translate-y-1/2 right-3 w-10 h-10 rounded-full bg-white/90 text-ink text-[20px] leading-none shadow-card">›</button>
+              <button type="button" aria-label="התמונה הבאה" onClick={() => setPic(p => (p + 1) % imgs.length)}
+                className="absolute top-1/2 -translate-y-1/2 left-3 w-10 h-10 rounded-full bg-white/90 text-ink text-[20px] leading-none shadow-card">‹</button>
+              <span className="absolute bottom-3.5 left-3.5 rounded-full bg-ink/70 text-white text-[12px] font-bold px-2.5 py-1">{pic + 1}/{imgs.length}</span>
+            </>
+          )}
           <button type="button" onClick={onClose} aria-label="סגירה"
             className="absolute top-3 left-3 w-11 h-11 rounded-full bg-white text-ink flex items-center justify-center shadow-card"><IcoClose /></button>
           <span className="absolute bottom-3.5 right-3.5"><StatusBadge status={o.status} /></span>
         </div>
         <div className="p-5 md:p-6 flex flex-col gap-5" style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}>
           <div>
-            <h2 className="font-display font-bold text-[24px] text-ink">{o.apartment_name}</h2>
+            <h2 className="font-display font-bold text-[24px] text-ink">{o.apartment_name}{o.extra_apartment_name ? ` + ${o.extra_apartment_name}` : ""}</h2>
             {o.area && <p className="text-[15px] text-muted">{o.area}</p>}
           </div>
+          {imgs.length > 1 && (
+            <div className="flex gap-2 overflow-x-auto -mx-1 px-1 pb-1">
+              {imgs.map((u, i) => (
+                <button key={u + i} type="button" onClick={() => setPic(i)} aria-label={`תמונה ${i + 1}`}
+                  className={`shrink-0 w-[72px] h-[54px] rounded-lg overflow-hidden border-2 ${i === pic ? "border-ink" : "border-transparent"}`}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={u} alt="" loading="lazy" className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-2.5">
             <Info label="כניסה" value={fmt(o.checkin)} />
             <Info label="יציאה" value={fmt(o.checkout)} />
@@ -202,11 +230,14 @@ function OrderModal({ o, onClose }: { o: OrderView; onClose: () => void }) {
             <p className="font-bold text-[15px] text-ink mb-2">מה כלול</p>
             <div className="flex flex-col gap-2">
               {addons.map(a => (
-                <div key={a.label} className="flex items-center justify-between rounded-xl border border-line px-4 min-h-[48px]">
-                  <span className="text-[15px] text-ink">{a.label}</span>
+                <div key={a.label} className="flex items-center justify-between gap-3 rounded-xl border border-line px-4 py-2.5 min-h-[48px]">
+                  <span className="min-w-0">
+                    <span className={`block text-[15px] ${a.on ? "text-ink font-bold" : "text-muted"}`}>{a.label}</span>
+                    {a.on && a.detail && <span className="block text-[13px] text-body mt-0.5">{a.detail}</span>}
+                  </span>
                   {a.on
-                    ? <span className="flex items-center gap-1.5 text-[14px] font-bold text-ok-text"><Check size={15} />כלול</span>
-                    : <span className="text-[14px] text-muted">לא כלול</span>}
+                    ? <span className="shrink-0 flex items-center gap-1.5 text-[14px] font-bold text-ok-text"><Check size={15} />כלול</span>
+                    : <span className="shrink-0 text-[14px] text-muted">לא כלול</span>}
                 </div>
               ))}
             </div>

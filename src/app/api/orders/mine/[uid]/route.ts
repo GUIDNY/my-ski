@@ -21,13 +21,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ uid:
 
   const { data, error } = await db
     .from("orders")
-    .select("code, apartment_id, apartment_name, area, checkin, checkout, guests, nights, ski_pass, transfer, total_eur, status, customer_name, group_id, share_amount, shares_total")
+    .select("code, apartment_id, apartment_name, extra_apartment_id, extra_apartment_name, area, checkin, checkout, guests, nights, ski_pass, transfer, equipment, flight, flight_details, transfer_details, ops, total_eur, status, customer_name, group_id, share_amount, shares_total")
     .eq("user_id", uid)
     .order("created_at", { ascending: false });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   // attach apartment images via a separate query (no FK relationship to join on)
-  const ids = Array.from(new Set((data ?? []).map(o => o.apartment_id).filter(Boolean)));
+  const ids = Array.from(new Set((data ?? []).flatMap(o => [o.apartment_id, o.extra_apartment_id]).filter(Boolean)));
   let imgMap: Record<string, string[]> = {};
   if (ids.length) {
     const { data: apts } = await db.from("apartments").select("id, images").in("id", ids);
@@ -48,9 +48,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ uid:
     });
   }
 
-  const enriched = (data ?? []).map(o => ({
+  const enriched = (data ?? []).map(({ ops, ...o }) => ({
     ...o,
-    apartment: { images: imgMap[o.apartment_id] || [] },
+    // the ski pass area the admin set (orders.ops.x_pass3v); the rest of ops is our internal checklist
+    pass3v: !!(ops && (ops as Record<string, boolean>).x_pass3v),
+    apartment: { images: [...(imgMap[o.apartment_id] || []), ...(o.extra_apartment_id ? imgMap[o.extra_apartment_id] || [] : [])].slice(0, 12) },
     group: o.group_id ? groupMap[o.group_id] ?? null : null,
   }));
   return NextResponse.json(enriched);

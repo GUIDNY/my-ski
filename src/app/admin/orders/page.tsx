@@ -18,6 +18,7 @@ const EMPTY_NEW_ORDER = {
   apartment_id: "", extra_apartment_id: "", checkin: "", checkout: "", guests: 2, total_eur: 0,
   customer_name: "", customer_email: "", customer_phone: "", status: "approved" as "approved" | "hold",
   ski_pass: false, transfer: false, equipment: false, transfer_details: "",
+  pass3v: false, flight: false, flight_details: "", flight_price: 0,
 };
 
 // Searchable apartment picker with a regular/agency (La Cime) toggle — the
@@ -91,6 +92,7 @@ export default function OrdersAdmin() {
       customer_name: o.customer_name || "", customer_email: o.customer_email || "", customer_phone: o.customer_phone || "",
       status: (o.status === "hold" ? "hold" : "approved"),
       ski_pass: !!o.ski_pass, transfer: !!o.transfer, equipment: !!o.equipment, transfer_details: o.transfer_details || "",
+      pass3v: !!(o.ops && o.ops.x_pass3v), flight: !!o.flight, flight_details: o.flight_details || "", flight_price: Number(o.flight_price) || 0,
     });
     setShowExtraApt(!!o.extra_apartment_id);
     setShowAdd(true);
@@ -125,6 +127,10 @@ export default function OrdersAdmin() {
       total_eur: newOrder.total_eur,
       ski_pass: newOrder.ski_pass, transfer: newOrder.transfer, equipment: newOrder.equipment,
       transfer_details: newOrder.transfer ? newOrder.transfer_details : "",
+      flight: newOrder.flight, flight_details: newOrder.flight ? newOrder.flight_details : null,
+      flight_price: newOrder.flight && newOrder.flight_price > 0 ? newOrder.flight_price : null,
+      // the ski pass area is kept in ops (x_ keys are not checklist items): the personal area shows it
+      ops: { ...((editingOrder && editingOrder.ops) || {}), x_pass3v: newOrder.ski_pass && newOrder.pass3v },
       customer_name: newOrder.customer_name, customer_email: newOrder.customer_email, customer_phone: newOrder.customer_phone,
     };
 
@@ -158,7 +164,7 @@ export default function OrdersAdmin() {
         // POST only returns {code} — fetch the full list to find this row's id for the status PATCH.
         const list: Order[] = await authFetch("/api/orders").then(r => r.json());
         const created = list.find(o => o.code === j.code);
-        if (created) await authFetch(`/api/orders/${created.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: newOrder.status }) });
+        if (created) await authFetch(`/api/orders/${created.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: newOrder.status, ops: fields.ops }) });
       }
 
       closeForm();
@@ -283,8 +289,28 @@ export default function OrdersAdmin() {
                     🎿 השכרת ציוד
                   </label>
                 </div>
+                <label className="flex items-center gap-1.5 text-sm text-gray-700 cursor-pointer mt-3">
+                  <input type="checkbox" checked={newOrder.flight} onChange={e => setNewOrder(v => ({ ...v, flight: e.target.checked }))} className="w-4 h-4 rounded accent-sky-600" />
+                  ✈️ טיסה
+                </label>
+                {newOrder.ski_pass && (
+                  <div className="flex gap-2 mt-2">
+                    {[{ v: false, l: "סקי פס ואל טורנס" }, { v: true, l: "סקי פס מורחב: שלושת העמקים" }].map(x => (
+                      <button key={String(x.v)} type="button" onClick={() => setNewOrder(o => ({ ...o, pass3v: x.v }))}
+                        className={`flex-1 rounded-xl border px-3 py-2 text-sm font-bold ${newOrder.pass3v === x.v ? "border-blue-500 bg-blue-50 text-blue-700" : "border-gray-200 text-gray-600"}`}>{x.l}</button>
+                    ))}
+                  </div>
+                )}
+                {newOrder.flight && (
+                  <div className="grid grid-cols-3 gap-2 mt-2">
+                    <input placeholder="פרטי הטיסה, למשל: טרנסאוויה, הלוך 12.12 19:25 TLV→LYS, חזור 19.12 13:05" value={newOrder.flight_details} onChange={e => setNewOrder(v => ({ ...v, flight_details: e.target.value }))}
+                      className="col-span-2 w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input type="number" min={0} placeholder="מחיר (€, לא חובה)" value={newOrder.flight_price || ""} onChange={e => setNewOrder(v => ({ ...v, flight_price: +e.target.value }))}
+                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  </div>
+                )}
                 {newOrder.transfer && (
-                  <input placeholder="פרטי טיסה (אופציונלי)" value={newOrder.transfer_details} onChange={e => setNewOrder(v => ({ ...v, transfer_details: e.target.value }))}
+                  <input placeholder="פרטי ההסעה / טיסה לאיסוף (אופציונלי)" value={newOrder.transfer_details} onChange={e => setNewOrder(v => ({ ...v, transfer_details: e.target.value }))}
                     className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 )}
               </div>
