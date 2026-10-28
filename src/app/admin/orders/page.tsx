@@ -19,6 +19,7 @@ const EMPTY_NEW_ORDER = {
   customer_name: "", customer_email: "", customer_phone: "", status: "approved" as "approved" | "hold",
   ski_pass: false, transfer: false, equipment: false, transfer_details: "",
   pass3v: false, flight: false, flight_details: "", flight_price: 0,
+  stay_address: "", stay_ref: "", stay_notes: "",
 };
 
 // Searchable apartment picker with a regular/agency (La Cime) toggle — the
@@ -93,6 +94,8 @@ export default function OrdersAdmin() {
       status: (o.status === "hold" ? "hold" : "approved"),
       ski_pass: !!o.ski_pass, transfer: !!o.transfer, equipment: !!o.equipment, transfer_details: o.transfer_details || "",
       pass3v: !!(o.ops && o.ops.x_pass3v), flight: !!o.flight, flight_details: o.flight_details || "", flight_price: Number(o.flight_price) || 0,
+      ...(() => { const st = (o.ops && typeof o.ops.x_stay === "object" && o.ops.x_stay ? o.ops.x_stay : {}) as Record<string, string>;
+        return { stay_address: st.address || "", stay_ref: st.ref || "", stay_notes: st.notes || "" }; })(),
     });
     setShowExtraApt(!!o.extra_apartment_id);
     setShowAdd(true);
@@ -130,7 +133,9 @@ export default function OrdersAdmin() {
       flight: newOrder.flight, flight_details: newOrder.flight ? newOrder.flight_details : null,
       flight_price: newOrder.flight && newOrder.flight_price > 0 ? newOrder.flight_price : null,
       // the ski pass area is kept in ops (x_ keys are not checklist items): the personal area shows it
-      ops: { ...((editingOrder && editingOrder.ops) || {}), x_pass3v: newOrder.ski_pass && newOrder.pass3v },
+      ops: { ...((editingOrder && editingOrder.ops) || {}), x_pass3v: newOrder.ski_pass && newOrder.pass3v,
+        // arrival details for the guest: shown in the personal area after the online check-in
+        x_stay: { address: newOrder.stay_address.trim(), ref: newOrder.stay_ref.trim(), notes: newOrder.stay_notes.trim() } },
       customer_name: newOrder.customer_name, customer_email: newOrder.customer_email, customer_phone: newOrder.customer_phone,
     };
 
@@ -315,6 +320,16 @@ export default function OrdersAdmin() {
                 )}
               </div>
 
+              <div className="rounded-xl border border-gray-200 p-3 space-y-2">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block">פרטי הגעה לצ׳ק-אין (הלקוח רואה אחרי שעשה צ׳ק-אין אונליין)</label>
+                <input placeholder="כתובת הדירה" value={newOrder.stay_address} onChange={e => setNewOrder(v => ({ ...v, stay_address: e.target.value }))}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <input placeholder="קוד / מספר הזמנה לקבלה" dir="ltr" value={newOrder.stay_ref} onChange={e => setNewOrder(v => ({ ...v, stay_ref: e.target.value }))}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-right focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <textarea placeholder="הוראות כניסה (קוד לכספת, איפה הקבלה, חניה…)" rows={2} value={newOrder.stay_notes} onChange={e => setNewOrder(v => ({ ...v, stay_notes: e.target.value }))}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+
               <input placeholder="שם הלקוח" value={newOrder.customer_name} onChange={e => setNewOrder(v => ({ ...v, customer_name: e.target.value }))}
                 className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               <div className="grid grid-cols-2 gap-3">
@@ -401,6 +416,24 @@ export default function OrdersAdmin() {
                   {o.group_id && <span className="text-xs font-semibold bg-violet-50 text-violet-700 px-2.5 py-1 rounded-full">👥 תשלום מפוצל ({o.shares_total})</span>}
                   {o.extra_apartment_name && <span className="text-xs font-semibold bg-violet-50 text-violet-700 px-2.5 py-1 rounded-full">+ {o.extra_apartment_name}</span>}
                 </div>
+
+                {(() => {
+                  const ci = o.ops && typeof o.ops.x_checkin === "object" ? o.ops.x_checkin as { guests?: string[]; arrival?: string; phone?: string; notes?: string; at?: string } : null;
+                  const st = o.ops && typeof o.ops.x_stay === "object" ? o.ops.x_stay as { address?: string; ref?: string } : null;
+                  if (!ci && !(st && (st.address || st.ref))) return null;
+                  return (
+                    <div className={`mt-3 rounded-xl px-3 py-2.5 text-xs ${ci ? "bg-emerald-50 text-emerald-800" : "bg-gray-50 text-gray-600"}`}>
+                      {ci ? <>
+                        <p className="font-bold">✅ צ׳ק-אין אונליין בוצע{ci.at ? ` · ${new Date(ci.at).toLocaleDateString("he-IL")}` : ""}</p>
+                        <p>אורחים: {(ci.guests || []).join(", ")}{ci.arrival ? ` · מגיעים: ${ci.arrival}` : ""}{ci.phone ? ` · טלפון: ${ci.phone}` : ""}</p>
+                        {ci.notes && <p>הערה: {ci.notes}</p>}
+                      </> : <p>עוד לא עשו צ׳ק-אין אונליין</p>}
+                      {st && (st.address || st.ref)
+                        ? <p className="mt-0.5 opacity-80">פרטי הגעה שהזנת: {[st.address, st.ref].filter(Boolean).join(" · ")}</p>
+                        : <p className="mt-0.5 font-bold text-amber-700">חסרים פרטי הגעה (כתובת וקוד הזמנה): עריכה ← פרטי הגעה</p>}
+                    </div>
+                  );
+                })()}
 
                 {/* checklist toggle */}
                 {(o.status === "hold" || o.status === "approved") && (

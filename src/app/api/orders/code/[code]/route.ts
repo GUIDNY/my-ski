@@ -1,5 +1,6 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { NextRequest, NextResponse } from "next/server";
+import { guestView } from "@/lib/checkin";
 
 // Public lookup of an order by its personal-area code.
 export async function GET(_: NextRequest, { params }: { params: Promise<{ code: string }> }) {
@@ -16,5 +17,5 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ code: 
   const images = ids.flatMap(id => (apts ?? []).find(a => a.id === id)?.images ?? []).slice(0, 12);
   const { ops, apartment_id: _a, extra_apartment_id: _b, ...rest } = data;
   void _a; void _b;
-  return NextResponse.json({ ...rest, pass3v: !!(ops && (ops as Record<string, boolean>).x_pass3v), apartment: { images } });
+  return NextResponse.json({ ...rest, ...guestView(ops), apartment: { images } });
 }

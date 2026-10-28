@@ -13,7 +13,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { silent, ...body } = await req.json();
 
   // read the current status first so we only act on real transitions
-  const { data: prev } = await db.from("orders").select("status").eq("id", id).single();
+  const { data: prev } = await db.from("orders").select("status, ops").eq("id", id).single();
+  // ops from the admin screen can be older than the row (the guest did the online check-in
+  // meanwhile): keys missing from the admin's copy are kept, never dropped
+  if (body.ops && typeof body.ops === "object") body.ops = { ...((prev?.ops as Record<string, unknown>) || {}), ...body.ops };
   const { data, error } = await db.from("orders").update(body).eq("id", id).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 

@@ -81,7 +81,7 @@ export type Order = {
   shares_total?: number | null;
   extra_apartment_id?: string | null;
   extra_apartment_name?: string | null;
-  ops?: Record<string, boolean> | null;
+  ops?: Record<string, unknown> | null;
   created_at: string;
 };
 

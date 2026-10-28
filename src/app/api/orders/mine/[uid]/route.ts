@@ -1,6 +1,7 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { sessionUser } from "@/lib/api-auth";
 import { NextRequest, NextResponse } from "next/server";
+import { guestView } from "@/lib/checkin";
 
 // Returns the signed-in user's orders. Also auto-links any orders whose
 // customer_email matches the user's verified login email. The user and the
@@ -51,7 +52,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ uid:
   const enriched = (data ?? []).map(({ ops, ...o }) => ({
     ...o,
     // the ski pass area the admin set (orders.ops.x_pass3v); the rest of ops is our internal checklist
-    pass3v: !!(ops && (ops as Record<string, boolean>).x_pass3v),
+    ...guestView(ops),
     apartment: { images: [...(imgMap[o.apartment_id] || []), ...(o.extra_apartment_id ? imgMap[o.extra_apartment_id] || [] : [])].slice(0, 12) },
     group: o.group_id ? groupMap[o.group_id] ?? null : null,
   }));

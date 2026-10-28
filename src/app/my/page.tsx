@@ -18,6 +18,8 @@ type OrderView = {
   ski_pass: boolean; transfer: boolean; total_eur: number; status: string; customer_name: string;
   equipment?: boolean; flight?: boolean; flight_details?: string | null; transfer_details?: string | null;
   pass3v?: boolean; extra_apartment_name?: string | null;
+  onlineCheckin?: { guests: string[]; arrival: string; phone: string; notes: string; at: string } | null;
+  stay?: { address: string; ref: string; notes: string } | null; stayReady?: boolean;
   apartment?: { images?: string[] } | null;
   share_amount?: number | null; shares_total?: number | null;
   group?: { code: string; shares_total: number; shares_paid: number } | null;
@@ -89,7 +91,8 @@ function Countdown({ checkin }: { checkin: string | null }) {
   return <span className={badgeDark}>{d === 0 ? "היום!" : d === 1 ? "מחר" : `בעוד ${d} ימים`}</span>;
 }
 
-function OrderCard({ o, onMore }: { o: OrderView; onMore?: (o: OrderView) => void }) {
+function OrderCard({ o: initial, onMore }: { o: OrderView; onMore?: (o: OrderView) => void }) {
+  const [o, setO] = useState(initial);
   const img = o.apartment?.images?.[0] ?? "/view.jpg";
   const approved = o.status === "approved";
   const wa = buildWaHref({ intro: "היי, יש לי שאלה על ההזמנה שלי", lines: [`קוד הזמנה: ${o.code}`, `${o.apartment_name}, ${fmtRange(o.checkin, o.checkout)}`] });
@@ -124,6 +127,7 @@ function OrderCard({ o, onMore }: { o: OrderView; onMore?: (o: OrderView) => voi
         )}
         {o.status === "hold" && <p className="text-[14px] text-body">הפיקדון התקבל. ההזמנה ממתינה לאישור שלנו.</p>}
         {o.group && <GroupProgress group={o.group} />}
+        <CheckinBox o={o} onDone={v => setO(x => ({ ...x, ...v }))} />
         <div className="mt-auto pt-3.5 border-t border-line flex flex-wrap items-center gap-2">
           <button type="button" onClick={() => onMore?.(o)} className={`${btn.outline} w-full sm:w-auto min-h-[44px] px-4 text-[15px]`}>פרטי ההזמנה</button>
           <a href={wa} target="_blank" rel="noopener noreferrer" className={`${btn.pill} w-full sm:w-auto gap-2`}>
@@ -161,6 +165,95 @@ function GroupProgress({ group }: { group: { code: string; shares_total: number;
           {copied ? <><Check size={16} className="[&>path]:stroke-white" />הקישור הועתק, אפשר לשלוח לחברים</> : <><IcoLink />להעתיק את קישור התשלום לחברים</>}
         </button>
       )}
+    </div>
+  );
+}
+
+/* Online check-in: the guests' names, arrival time and a phone for the day; after it,
+   the arrival details Idan entered in the admin (address, booking code, how to get in). */
+function CheckinBox({ o, onDone }: { o: OrderView; onDone: (v: Partial<OrderView>) => void }) {
+  const [open, setOpen] = useState(false);
+  const [names, setNames] = useState<string[]>(() => Array.from({ length: Math.max(1, o.guests || 1) }, (_, i) => i === 0 ? (o.customer_name || "") : ""));
+  const [arrival, setArrival] = useState("");
+  const [phone, setPhone] = useState("");
+  const [notes, setNotes] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  if (o.status !== "approved" && o.status !== "hold") return null;
+  const done = o.onlineCheckin;
+
+  const submit = async () => {
+    setErr("");
+    if (!names.some(n => n.trim()) || !phone.trim()) { setErr("צריך לפחות שם אחד ומספר טלפון"); return; }
+    setBusy(true);
+    const r = await fetch(`/api/orders/code/${encodeURIComponent(o.code)}/checkin`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ guests: names, arrival, phone, notes }),
+    }).catch(() => null);
+    setBusy(false);
+    const j = r ? await r.json().catch(() => null) : null;
+    if (!r?.ok || !j?.ok) { setErr("משהו השתבש, נסו שוב עוד רגע"); return; }
+    onDone({ onlineCheckin: j.onlineCheckin, stay: j.stay, stayReady: j.stayReady });
+    setOpen(false);
+  };
+
+  if (done) {
+    return (
+      <div className="rounded-2xl border border-ok/30 bg-ok-soft p-4 flex flex-col gap-2.5">
+        <p className="flex items-center gap-2 font-bold text-[15px] text-ok-text"><Check size={16} />הצ׳ק-אין בוצע</p>
+        {o.stay ? (
+          <div className="flex flex-col gap-2 text-[15px] text-ink">
+            {o.stay.address && <p><span className="text-muted">כתובת: </span><span className="font-bold">{o.stay.address}</span>{" "}
+              <a className="text-accent font-bold underline" target="_blank" rel="noopener noreferrer" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.stay.address)}`}>במפה</a></p>}
+            {o.stay.ref && <p><span className="text-muted">קוד הזמנה לקבלה: </span><span dir="ltr" className="font-mono font-bold">{o.stay.ref}</span></p>}
+            {o.stay.notes && <p className="whitespace-pre-line text-body">{o.stay.notes}</p>}
+          </div>
+        ) : (
+          <p className="text-[14px] text-body">כתובת הדירה ופרטי הכניסה יופיעו כאן לפני ההגעה.</p>
+        )}
+      </div>
+    );
+  }
+
+  if (!open) {
+    return (
+      <div className="rounded-2xl border border-line p-4 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+        <div>
+          <p className="font-bold text-[15px] text-ink">צ׳ק-אין אונליין</p>
+          <p className="text-[14px] text-body">2 דקות, ואחרי זה תראו כאן את הכתובת ואת פרטי הכניסה לדירה.</p>
+        </div>
+        <button type="button" onClick={() => setOpen(true)} className={`${btn.primary} shrink-0 min-h-[44px] px-5`}>לביצוע צ׳ק-אין</button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-2xl border border-line p-4 flex flex-col gap-3">
+      <p className="font-bold text-[16px] text-ink">צ׳ק-אין אונליין</p>
+      <div className="flex flex-col gap-2">
+        <span className={fieldLabel}>שמות האורחים (כמו בדרכון)</span>
+        {names.map((n, i) => (
+          <input key={i} value={n} onChange={e => setNames(v => v.map((x, j) => j === i ? e.target.value : x))}
+            placeholder={`אורח ${i + 1}`} className={field} autoComplete={i === 0 ? "name" : "off"} />
+        ))}
+      </div>
+      <label className="flex flex-col gap-1.5">
+        <span className={fieldLabel}>מתי תגיעו לדירה בערך?</span>
+        <input value={arrival} onChange={e => setArrival(e.target.value)} placeholder="למשל 17:30, או אחרי הנחיתה בליון" className={field} />
+      </label>
+      <label className="flex flex-col gap-1.5">
+        <span className={fieldLabel}>טלפון ליום ההגעה</span>
+        <input value={phone} onChange={e => setPhone(e.target.value)} type="tel" dir="ltr" autoComplete="tel" placeholder="050-0000000" className={`${field} text-right`} />
+      </label>
+      <label className="flex flex-col gap-1.5">
+        <span className={fieldLabel}>משהו שחשוב שנדע? (לא חובה)</span>
+        <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} className={`${field} py-2.5`} />
+      </label>
+      {err && <p role="alert" className="text-[14px] text-danger">{err}</p>}
+      <div className="flex gap-2">
+        <button type="button" onClick={submit} disabled={busy} className={`${btn.primary} flex-1 min-h-[44px]`}>{busy ? "שולח…" : "סיום צ׳ק-אין"}</button>
+        <button type="button" onClick={() => setOpen(false)} className={`${btn.outline} min-h-[44px] px-4`}>ביטול</button>
+      </div>
     </div>
   );
 }
