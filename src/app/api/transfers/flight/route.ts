@@ -21,6 +21,8 @@ export async function GET(req: NextRequest) {
       ? new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Paris", hour: "2-digit", minute: "2-digit", hour12: false }).format(iso)
       : raw?.match(/(\d{2}):(\d{2})/)?.[0] ?? null;
     const found = f.found !== false && !!time;
+    // full=1: the whole public flight record (airline, both airports and times), for the admin's flight form
+    if (sp.get("full") === "1") return NextResponse.json({ found, time: found ? time : null, flight: f });
     return NextResponse.json({ found, time: found ? time : null }, { headers: { "Cache-Control": "public, s-maxage=3600" } });
   } catch {
     return NextResponse.json({ found: false });
