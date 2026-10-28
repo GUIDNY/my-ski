@@ -89,6 +89,11 @@ export async function GET(req: NextRequest) {
   try {
     browser = await puppeteer.launch({ args: chromium.args, executablePath: await chromium.executablePath(), headless: "shell" });
     const page = await browser.newPage();
+    // skip Google's cookie-consent page (the server runs in Europe), as in /api/flight-price
+    await page.setCookie(
+      { name: "SOCS", value: "CAESEwgDEgk0ODE3Nzk3MjQaAmVuIAEaBgiA_LyaBg", domain: ".google.com", path: "/" },
+      { name: "CONSENT", value: "YES+cb", domain: ".google.com", path: "/" },
+    );
 
     // 1. Outbound: the cheapest nonstop round trip, as /api/flight-price reads it.
     const url = buildGoogleFlightsUrl(checkin, checkout, origin, dest, true);

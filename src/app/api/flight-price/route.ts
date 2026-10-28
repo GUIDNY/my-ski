@@ -98,11 +98,16 @@ type ScrapeResult = { price: number | null; nonstop: boolean; url: string; airli
 // marker Google Flights renders once search finishes, and reload once if a
 // transient "Oops, something went wrong" interstitial shows up (also seen
 // live, unrelated to this date actually having no nonstop option).
+// (Oct 2026: Google no longer always renders the "N results returned"
+// marker, so a priced "round trip" row seen on two polls in a row counts as
+// loaded too.)
 async function waitForResults(page: Page): Promise<string> {
   let reloaded = false;
-  for (let i = 0; i < 7; i++) {
+  let sawRow = false;
+  for (let i = 0; i < 10; i++) {
     const bodyText = await page.evaluate(() => document.body.innerText);
     if (/\d+\s+results?\s+returned|No results returned/i.test(bodyText)) return bodyText;
+    if (/\nround trip\n/.test(bodyText)) { if (sawRow) return bodyText; sawRow = true; }
     if (!reloaded && /Oops, something went wrong/i.test(bodyText)) {
       reloaded = true;
       await page.reload({ waitUntil: "domcontentloaded", timeout: 45000 });
@@ -110,6 +115,17 @@ async function waitForResults(page: Page): Promise<string> {
     await new Promise(r => setTimeout(r, 1500));
   }
   return await page.evaluate(() => document.body.innerText);
+}
+
+/** if Google still shows its consent page, press "Reject all" (or "Accept all") and go back to the search */
+async function passConsent(page: Page, url: string) {
+  if (!/consent\.google/.test(page.url())) return;
+  await page.evaluate(() => {
+    const b = [...document.querySelectorAll("button")].find(x => /reject all|accept all/i.test(x.textContent ?? ""));
+    b?.click();
+  });
+  await new Promise(r => setTimeout(r, 2000));
+  if (!page.url().includes("/travel/flights")) await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45000 });
 }
 
 async function scrapePrice(outDate: string, retDate: string, origin: string, dest: string): Promise<ScrapeResult> {
@@ -121,9 +137,18 @@ async function scrapePrice(outDate: string, retDate: string, origin: string, des
       headless: "shell",
     });
     const page = await browser.newPage();
+    // The server runs in Europe, where Google first shows a cookie-consent
+    // page instead of the flights: caught live (TLV-LYS 27.2.2027, a direct
+    // Transavia flight read as "no flight"). The consent cookie skips it.
+    await page.setCookie(
+      { name: "SOCS", value: "CAESEwgDEgk0ODE3Nzk3MjQaAmVuIAEaBgiA_LyaBg", domain: ".google.com", path: "/" },
+      { name: "CONSENT", value: "YES+cb", domain: ".google.com", path: "/" },
+    );
+    await page.setExtraHTTPHeaders({ "Accept-Language": "en-US,en;q=0.9" });
 
     const nonstopUrl = buildGoogleFlightsUrl(outDate, retDate, origin, dest, true);
     await page.goto(nonstopUrl, { waitUntil: "domcontentloaded", timeout: 45000 });
+    await passConsent(page, nonstopUrl);
     let bodyText = await waitForResults(page);
 
     if (!/No results returned/i.test(bodyText)) {
@@ -135,7 +160,9 @@ async function scrapePrice(outDate: string, retDate: string, origin: string, des
     // No nonstop option this date — fall back to the plain (any-stops) search.
     const anyUrl = buildGoogleFlightsUrl(outDate, retDate, origin, dest, false);
     await page.goto(anyUrl, { waitUntil: "domcontentloaded", timeout: 45000 });
+    await passConsent(page, anyUrl);
     bodyText = await waitForResults(page);
+    if (!/\nround trip\n/.test(bodyText)) console.warn("flight-price: no results read", page.url().slice(0, 80), bodyText.slice(0, 200).replace(/\n/g, " | "));
     const lines = bodyText.split("\n").map(l => l.trim());
     const result = cheapestRoundTripResult(lines);
     const details = result ? flightDetailsForResult(lines, result.idx) : { airline: null, departTime: null, arriveTime: null };
@@ -162,7 +189,8 @@ export async function GET(req: NextRequest) {
 
   // a direct flight is shown with its times: a cached row without them (the
   // table in production has no detail columns yet) is checked again
-  const complete = cached && (!cached.nonstop || cached.depart_time);
+  // and an empty answer (no price at all) means the read failed, not "no flights"
+  const complete = cached && cached.price_eur !== null && (!cached.nonstop || cached.depart_time);
   if (cached && complete && Date.now() - new Date(cached.checked_at).getTime() < CACHE_HOURS * 3600_000) {
     return NextResponse.json({
       price: cached.price_eur, nonstop: cached.nonstop, url: cached.url,
@@ -179,7 +207,7 @@ export async function GET(req: NextRequest) {
     // (supabase returns the error instead of throwing: a table without the
     // newer columns used to fail silently, so nothing was ever cached; then
     // the base columns are written, which the quote PDF reads)
-    try {
+    if (price !== null) try {
       const row = { origin, dest, checkin, checkout, price_eur: price, nonstop, checked_at: checkedAt };
       const { error: fullErr } = await db.from("flight_price_cache")
         .upsert({ ...row, url, airline, depart_time: departTime, arrive_time: arriveTime }, { onConflict: "origin,dest,checkin,checkout" });
