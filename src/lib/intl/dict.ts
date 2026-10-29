@@ -325,6 +325,7 @@ const en = {
       pistes: "Pistes and ski area",
       "apres-ski": "Après-ski and restaurants",
       families: "Val Thorens with kids",
+      beginners: "First ski holiday",
     } as Record<string, string>,
   },
 };
@@ -644,6 +645,7 @@ const fr: Dict = {
       pistes: "Pistes et domaine skiable",
       "apres-ski": "Après-ski et restaurants",
       families: "Val Thorens en famille",
+      beginners: "Ski débutant",
     },
   },
 };
