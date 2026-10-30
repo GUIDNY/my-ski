@@ -13,18 +13,20 @@ const BASE = () => process.env.MORNING_BASE_URL || "https://api.greeninvoice.co.
 
 export const morningConfigured = () => !!process.env.MORNING_API_KEY && !!process.env.MORNING_API_SECRET;
 
+const AUTH = () => process.env.MORNING_AUTH_URL || "https://api.morning.co/idp/v1/oauth/token";
+
 let cached: { token: string; until: number } | null = null;
 async function token(): Promise<string> {
   if (cached && Date.now() < cached.until - 60_000) return cached.token;
-  const r = await fetch(`${BASE()}/account/token`, {
+  const r = await fetch(AUTH(), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id: process.env.MORNING_API_KEY, secret: process.env.MORNING_API_SECRET }),
+    body: JSON.stringify({ grant_type: "client_credentials", client_id: process.env.MORNING_API_KEY, client_secret: process.env.MORNING_API_SECRET }),
   });
-  const j = await r.json().catch(() => ({})) as { token?: string; expires?: number; errorMessage?: string };
-  if (!r.ok || !j.token) throw new Error(`morning login failed: ${j.errorMessage || r.status}`);
-  cached = { token: j.token, until: j.expires ? j.expires * 1000 : Date.now() + 50 * 60_000 };
-  return j.token;
+  const j = await r.json().catch(() => ({})) as { accessToken?: string; expiresAt?: number; error?: string; error_description?: string };
+  if (!r.ok || !j.accessToken) throw new Error(`morning login failed: ${j.error_description || j.error || r.status}`);
+  cached = { token: j.accessToken, until: j.expiresAt ? j.expiresAt * 1000 : Date.now() + 50 * 60_000 };
+  return j.accessToken;
 }
 
 /** how the customer paid → morning's payment type */
