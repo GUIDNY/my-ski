@@ -23,13 +23,25 @@ export async function POST(req: NextRequest) {
   const ops = (o.ops as Record<string, unknown>) || {};
   const payMethod = String(b.payMethod || ops.x_paymethod || (o.payplus_transaction_uid ? "card_link" : "card_link"));
   const dm = (d: string | null) => d ? `${Number(d.slice(8, 10))}.${Number(d.slice(5, 7))}.${d.slice(0, 4)}` : "";
+  // what the deal included — goes into תיאור תכולת המסמך
+  const parts: string[] = ["חופשת סקי בוואל טורנס"];
+  if (o.apartment_name) parts.push(`לינה: ${String(o.apartment_name).slice(0, 60)}${o.extra_apartment_name ? ` + ${String(o.extra_apartment_name).slice(0, 40)}` : ""}`);
+  if (o.checkin) parts.push(`${dm(o.checkin)}–${dm(o.checkout)} (${o.nights} לילות, ${o.guests} אורחים)`);
+  const incl: string[] = [];
+  if (o.ski_pass) incl.push("סקי פס");
+  if (o.transfer) incl.push("הסעות משדה התעופה");
+  if (o.equipment) incl.push("השכרת ציוד סקי");
+  if (o.flight) incl.push("טיסות");
+  if (incl.length) parts.push(`כולל: ${incl.join(", ")}`);
+  const description = parts.join(" · ").slice(0, 250);
   const draft = {
     clientName: String(b.clientName || "").trim() || String(o.customer_name || "").trim() || "לקוח/ה",
     clientPhone: String(o.customer_phone || "").trim() || undefined,
     amount: Number(b.amount) > 0 ? Number(b.amount) : ils ? Number(o.amount_ils) : Number(o.total_eur) || 0,
     currency: (b.currency === "EUR" || b.currency === "ILS" ? b.currency : ils ? "ILS" : "EUR") as "ILS" | "EUR",
     payMethod,
-    remarks: `חופשת סקי בואל טורנס · הזמנה ${o.code}` + (o.checkin ? ` · ${dm(o.checkin)}–${dm(o.checkout)}` : "") + (o.apartment_name ? ` · ${String(o.apartment_name).slice(0, 60)}` : ""),
+    description,
+    remarks: `הזמנה ${o.code} · skisharebook.com`,
   };
   try {
     if (b.mode === "pdf") {

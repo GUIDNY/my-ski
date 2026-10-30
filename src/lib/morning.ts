@@ -42,6 +42,7 @@ export const PAY_METHODS: { key: string; label: string; type: number }[] = [
 
 export type ReceiptDraft = {
   clientName: string;
+  description?: string; // תיאור תכולת המסמך — what the deal included
   clientPhone?: string;
   amount: number;
   currency: "ILS" | "EUR";
@@ -57,6 +58,7 @@ function docBody(d: ReceiptDraft) {
     currency: d.currency,
     vatType: 0,
     rounding: false,
+    ...(d.description ? { description: d.description.slice(0, 250) } : {}),
     // emails stays [] — morning never emails the customer (Idan's standing rule)
     client: { name: d.clientName || "לקוח/ה", ...(d.clientPhone ? { phone: d.clientPhone } : {}), emails: [] as string[], add: false },
     payment: [{ date: new Date().toISOString().slice(0, 10), type: method.type, price: Math.round(d.amount * 100) / 100, currency: d.currency }],
