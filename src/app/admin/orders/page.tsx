@@ -279,17 +279,14 @@ export default function OrdersAdmin() {
     await authFetch(`/api/orders/${o.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ops: { x_paymethod: key } }) });
   };
 
-  // a DRAFT receipt from morning, to look at: nothing is created or saved there
+  // a DRAFT receipt saved inside morning (טיוטה) — unissued, no email, editable there
   const receiptDraft = async (o: Order) => {
     setBusy(o.id);
     const r = await authFetch("/api/admin/receipts/preview", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ order_id: o.id }) });
     const j = await r.json().catch(() => ({}));
     setBusy(null);
-    if (!r.ok || !j.pdf) { alert(`לא הצלחתי להכין טיוטה: ${j.error || "שגיאה"}`); return; }
-    try {
-      const bytes = Uint8Array.from(atob(j.pdf), c => c.charCodeAt(0));
-      window.open(URL.createObjectURL(new Blob([bytes], { type: "application/pdf" })), "_blank");
-    } catch { alert("מורנינג החזיר תשובה לא צפויה"); }
+    if (!r.ok || !j.draftUrl) { alert(`לא הצלחתי לשמור טיוטה במורנינג: ${j.error || "שגיאה"}`); return; }
+    window.open(j.draftUrl, "_blank");
   };
 
   const setStatus = async (o: Order, status: string) => {
@@ -630,9 +627,9 @@ export default function OrdersAdmin() {
                     <>
                       <button onClick={() => receiptDraft(o)} disabled={busy === o.id}
                         className="rounded-lg border border-teal-200 bg-teal-50 text-teal-800 px-2.5 py-1.5 text-xs font-bold hover:bg-teal-100 transition disabled:opacity-50">
-                        🧾 {busy === o.id ? "מכין…" : "קבלה — טיוטה לבדיקה"}
+                        🧾 {busy === o.id ? "שומר…" : "טיוטת קבלה במורנינג"}
                       </button>
-                      <span className="text-[11px] text-gray-400">טיוטה בלבד, שום דבר לא נשמר במורנינג</span>
+                      <span className="text-[11px] text-gray-400">נשמר כטיוטה בלבד — לא מופק ולא נשלח</span>
                     </>
                   )}
                 </div>

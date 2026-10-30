@@ -1,8 +1,10 @@
 /*
  * morning (חשבונית ירוקה / Green Invoice) — the business's receipts.
- * DRAFT STAGE ONLY: this module logs in and asks morning for a PREVIEW of a
- * receipt (a PDF to look at). It never creates, saves or sends any document:
- * the only document endpoint it calls is /documents/preview.
+ * DRAFT STAGE ONLY: this module logs in and either asks morning for a PREVIEW
+ * (a PDF, creates nothing) or saves a native morning DRAFT (טיוטה) — editable,
+ * unissued, numberless, and never emailed. It NEVER issues a document:
+ * the only document endpoints it calls are /documents/preview and
+ * /documents/drafts (morning's own app endpoint for saved drafts).
  * Env (set by Idan in Vercel): MORNING_API_KEY, MORNING_API_SECRET,
  * optional MORNING_BASE_URL, MORNING_DOC_TYPE (default 400 = קבלה).
  */
@@ -53,8 +55,8 @@ function docBody(d: ReceiptDraft) {
     currency: d.currency,
     vatType: 0,
     rounding: false,
-    client: { name: d.clientName || "לקוח/ה", ...(d.clientPhone ? { phone: d.clientPhone } : {}), add: false },
-    // no emails anywhere: morning never emails the customer (Idan's standing rule)
+    // emails stays [] — morning never emails the customer (Idan's standing rule)
+    client: { name: d.clientName || "לקוח/ה", ...(d.clientPhone ? { phone: d.clientPhone } : {}), emails: [] as string[], add: false },
     payment: [{ date: new Date().toISOString().slice(0, 10), type: method.type, price: Math.round(d.amount * 100) / 100, currency: d.currency }],
     remarks: d.remarks.slice(0, 250),
   };
@@ -72,4 +74,22 @@ export async function previewReceipt(d: ReceiptDraft): Promise<{ pdf: string }> 
   const pdf = j.file || j.data;
   if (!r.ok || !pdf) throw new Error(`morning preview failed: ${j.errorMessage || r.status}`);
   return { pdf };
+}
+
+/**
+ * Save a DRAFT (טיוטה) inside morning itself — shows up in his morning account,
+ * editable there, UNISSUED (no number, no email). Not an issued document.
+ */
+export async function saveDraftInMorning(d: ReceiptDraft): Promise<{ id: string; url: string }> {
+  const t = await token();
+  const body = docBody(d);
+  const r = await fetch(`${BASE()}/documents/drafts`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` },
+    body: JSON.stringify(body),
+  });
+  const j = await r.json().catch(() => ({})) as { id?: string; errorMessage?: string };
+  if (!r.ok || !j.id) throw new Error(`morning draft failed: ${j.errorMessage || r.status}`);
+  const section = [305, 320, 330, 400, 405, 410].includes(body.type) ? "incomes" : "business";
+  return { id: j.id, url: `https://app.greeninvoice.co.il/${section}/documents/new/${body.type}?draftId=${encodeURIComponent(j.id)}` };
 }
