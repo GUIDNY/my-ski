@@ -274,14 +274,14 @@ export default function OrdersAdmin() {
 
   // ===== קבלות ותשלומים: per-guest payments + a morning DRAFT receipt per payer =====
   type Receipt = { id?: string; number?: string; url?: string; at?: string; auto?: boolean; manual?: boolean };
-  type PayRow = { name: string; amount: string; currency: "ILS" | "EUR"; method: string; receipt?: Receipt };
+  type PayRow = { name: string; amount: string; currency: "ILS" | "EUR"; method: string; receipt?: Receipt; tripDoc?: Receipt };
   const [payOrder, setPayOrder] = useState<Order | null>(null);
   const [payRows, setPayRows] = useState<PayRow[]>([]);
   const [payBusy, setPayBusy] = useState<number | null>(null);
 
   const openPayments = (o: Order) => {
     const saved = Array.isArray(o.ops?.x_payments) ? (o.ops!.x_payments as PayRow[]) : null;
-    if (saved && saved.length) { setPayRows(saved.map(r => ({ name: String(r.name || ""), amount: String(r.amount || ""), currency: r.currency === "EUR" ? "EUR" : "ILS", method: String(r.method || ""), receipt: r.receipt }))); setPayOrder(o); return; }
+    if (saved && saved.length) { setPayRows(saved.map(r => ({ name: String(r.name || ""), amount: String(r.amount || ""), currency: r.currency === "EUR" ? "EUR" : "ILS", method: String(r.method || ""), receipt: r.receipt, tripDoc: r.tripDoc }))); setPayOrder(o); return; }
     const names = String(o.customer_name || "").split(/\s*[,+]\s*|\s+ו-\s*/).map(n => n.trim()).filter(Boolean);
     const ils = Number(o.amount_ils) > 0;
     const rows: PayRow[] = (names.length ? names : ["לקוח/ה"]).map((name, i) => ({
@@ -784,6 +784,15 @@ export default function OrdersAdmin() {
                         {r.receipt.url && <a href={r.receipt.url} target="_blank" className="underline">צפייה</a>}
                         {r.receipt.manual && <button onClick={() => rowReceiptMark(i)} className="text-emerald-400 hover:text-red-500" title="ביטול הסימון">✕</button>}
                       </span>
+                    ) : null}
+                    {r.tripDoc ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-xl bg-sky-50 border border-sky-200 text-sky-800 px-3 py-2 text-xs font-bold">
+                        ✓ חשבונית {r.tripDoc.number || ""}
+                        {r.tripDoc.url && <a href={r.tripDoc.url} target="_blank" className="underline">צפייה</a>}
+                      </span>
+                    ) : null}
+                    {r.receipt ? (
+                      <></>
                     ) : (
                       <>
                         <button onClick={() => rowReceiptDraft(i)} disabled={payBusy === i}

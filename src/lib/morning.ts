@@ -43,6 +43,7 @@ export const PAY_METHODS: { key: string; label: string; type: number }[] = [
 export type ReceiptDraft = {
   clientName: string;
   description?: string; // תיאור תכולת המסמך — what the deal included
+  docType?: number; // override: 400 קבלה (default) / 320 חשבונית מס-קבלה / 305 חשבונית מס
   clientPhone?: string;
   amount: number;
   currency: "ILS" | "EUR";
@@ -53,7 +54,7 @@ export type ReceiptDraft = {
 function docBody(d: ReceiptDraft) {
   const method = PAY_METHODS.find(m => m.key === d.payMethod) ?? PAY_METHODS[0];
   return {
-    type: Number(process.env.MORNING_DOC_TYPE || 400), // 400 = קבלה
+    type: d.docType || Number(process.env.MORNING_DOC_TYPE || 400), // 400 = קבלה
     lang: "he",
     currency: d.currency,
     vatType: 0,
