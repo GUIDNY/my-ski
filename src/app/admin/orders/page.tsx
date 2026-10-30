@@ -279,6 +279,17 @@ export default function OrdersAdmin() {
   const [payRows, setPayRows] = useState<PayRow[]>([]);
   const [payBusy, setPayBusy] = useState<number | null>(null);
 
+  // ── בדיקת אובר-בוקינג: all site-order nights must be closed on Airbnb ──
+  type ObReport = { calendar: boolean; checked: number; covered: number; issues: { code: string; name: string; apartment: string; checkin: string; checkout: string; openDates: string[] }[] };
+  const [obBusy, setObBusy] = useState(false);
+  const [obReport, setObReport] = useState<ObReport | null>(null);
+  const checkAirbnb = async () => {
+    setObBusy(true);
+    const j = await authFetch("/api/admin/overbooking").then(r => r.json()).catch(() => null);
+    setObBusy(false);
+    setObReport(j && typeof j === "object" ? j as ObReport : { calendar: false, checked: 0, covered: 0, issues: [] });
+  };
+
   const openPayments = (o: Order) => {
     const saved = Array.isArray(o.ops?.x_payments) ? (o.ops!.x_payments as PayRow[]) : null;
     if (saved && saved.length) { setPayRows(saved.map(r => ({ name: String(r.name || ""), amount: String(r.amount || ""), currency: r.currency === "EUR" ? "EUR" : "ILS", method: String(r.method || ""), receipt: r.receipt, tripDoc: r.tripDoc }))); setPayOrder(o); return; }
@@ -409,11 +420,34 @@ export default function OrdersAdmin() {
           <h1 className="text-3xl font-black text-gray-900">הזמנות</h1>
           <p className="text-gray-500 text-sm mt-1">חיפוש, אישור פיקדונות ומעקב לפי חודשי ההגעה</p>
         </div>
-        <button onClick={() => setShowAdd(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-colors">
-          + הוסף הזמנה חדשה
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button onClick={checkAirbnb} disabled={obBusy}
+            className="border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 font-bold px-4 py-2.5 rounded-xl text-sm transition-colors disabled:opacity-60">
+            🛡️ {obBusy ? "בודק מול איירבנב…" : "בדיקת אובר-בוקינג"}
+          </button>
+          <button onClick={() => setShowAdd(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-colors">
+            + הוסף הזמנה חדשה
+          </button>
+        </div>
       </div>
+
+      {obReport && (
+        <div className={`mb-4 rounded-2xl border p-4 text-sm ${obReport.issues.length ? "bg-red-50 border-red-200" : "bg-emerald-50 border-emerald-200"}`}>
+          {!obReport.calendar ? <p className="font-bold text-amber-700">לא הצלחתי למשוך את לוח האיירבנב מ-n8n — לנסות שוב עוד רגע.</p>
+          : obReport.issues.length === 0 ? (
+            <p className="font-bold text-emerald-800">✅ אין סיכון אובר-בוקינג: כל התאריכים של {obReport.covered} ההזמנות בדירות שלנו סגורים באיירבנב.</p>
+          ) : (
+            <div>
+              <p className="font-black text-red-700 mb-2">⚠️ תאריכים של הזמנות מהאתר שעדיין פתוחים באיירבנב — לסגור בהוסטקס:</p>
+              {obReport.issues.map((i, k) => (
+                <p key={k} className="text-red-800">• <b>{i.name}</b> ({i.code}) · {i.apartment} · פתוח: {i.openDates.join(", ")}</p>
+              ))}
+            </div>
+          )}
+          <button onClick={() => setObReport(null)} className="text-xs text-gray-400 hover:text-gray-600 mt-2">סגירה</button>
+        </div>
+      )}
 
       {/* ── search and filters, sticky so they stay at hand on the phone too ── */}
       <div className="sticky top-0 z-20 bg-gray-50 pt-1 pb-3 mb-4 border-b border-gray-200">

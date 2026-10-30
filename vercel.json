@@ -24,6 +24,10 @@
     {
       "path": "/api/cron/trip-invoices",
       "schedule": "30 7 * * *"
+    },
+    {
+      "path": "/api/cron/overbooking",
+      "schedule": "0 8 * * *"
     }
   ]
 }

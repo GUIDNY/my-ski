@@ -44,6 +44,7 @@ export type ReceiptDraft = {
   clientName: string;
   description?: string; // תיאור תכולת המסמך — what the deal included
   docType?: number; // override: 400 קבלה (default) / 320 חשבונית מס-קבלה / 305 חשבונית מס
+  linkedIds?: string[]; // link this document to earlier ones (e.g. the receipt a tax invoice closes)
   clientPhone?: string;
   amount: number;
   currency: "ILS" | "EUR";
@@ -60,6 +61,7 @@ function docBody(d: ReceiptDraft) {
     vatType: 0,
     rounding: false,
     ...(d.description ? { description: d.description.slice(0, 250) } : {}),
+    ...(d.linkedIds?.length ? { linkedDocumentIds: d.linkedIds, linkType: "link" } : {}),
     // emails stays [] — morning never emails the customer (Idan's standing rule)
     client: { name: d.clientName || "לקוח/ה", ...(d.clientPhone ? { phone: d.clientPhone } : {}), emails: [] as string[], add: false },
     payment: [{ date: new Date().toISOString().slice(0, 10), type: method.type, price: Math.round(d.amount * 100) / 100, currency: d.currency }],

@@ -6,9 +6,9 @@ import { dealDescription } from "@/lib/receipt-build";
 /*
  * Daily (Vercel cron): on the day a vacation starts (checkin = today, IL time),
  * auto-issue the trip tax document in morning for every payer that already has
- * a receipt and no trip document yet. Type via MORNING_TRIP_DOC_TYPE
- * (default 320 = חשבונית מס-קבלה; the accountant may prefer 305 = חשבונית מס —
- * one env change). Idempotent: each payment row gets tripDoc once.
+ * a receipt and no trip document yet: חשבונית מס (305) LINKED to that receipt,
+ * so morning closes the receipt — exactly the UI's "הפקת מסמך מתוך מסמך"
+ * (override type with MORNING_TRIP_DOC_TYPE). Idempotent: each row once.
  * morning never emails the customer.
  */
 export const dynamic = "force-dynamic";
@@ -45,8 +45,9 @@ export async function GET(req: NextRequest) {
           currency: r.currency === "EUR" ? "EUR" : "ILS",
           payMethod: String(r.method || "card_link"),
           description: dealDescription(o),
-          remarks: `הזמנה ${o.code} · skisharebook.com` + (r.receipt.number ? ` · כנגד קבלה ${r.receipt.number}` : ""),
-          docType: Number(process.env.MORNING_TRIP_DOC_TYPE || 320),
+          remarks: `הזמנה ${o.code} · skisharebook.com` + (r.receipt.number ? ` · חשבונית מס עבור קבלה ${r.receipt.number}` : ""),
+          docType: Number(process.env.MORNING_TRIP_DOC_TYPE || 305),
+          linkedIds: r.receipt.id ? [r.receipt.id] : undefined,
         });
         rows[i] = { ...r, tripDoc: { ...doc, at: new Date().toISOString(), auto: true } };
         changed = true; issued++;
