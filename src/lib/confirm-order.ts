@@ -48,6 +48,7 @@ export async function confirmDepositPaid(code: string, origin: string, info: Inf
               code: order.code, customer_email: order.customer_email, customer_name: order.customer_name,
               apartment: order.apartment_name, area: order.area, checkin: order.checkin, checkout: order.checkout,
               guests: order.guests, nights: order.nights, ski_pass: order.ski_pass, transfer: order.transfer,
+              equipment: order.equipment, flight: order.flight,
               total_eur: order.total_eur, portal_url: `${origin}/my?code=${order.code}`,
               share_amount: order.share_amount, shares_total: order.shares_total, split_url: splitUrl,
             },
