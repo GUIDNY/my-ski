@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import type { Order, Apartment } from "@/types";
 import { authFetch } from "@/lib/auth-fetch";
 import { AIRLINES, cleanFlight, airlineByFlightNo, BLOCK_MIN } from "@/lib/flight-checkin";
+import { PAY_METHODS } from "@/lib/morning";
 
 const STATUS: Record<string, { label: string; cls: string }> = {
   awaiting:  { label: "🔥 ליד חם — הגיע לתשלום, לא שילם", cls: "bg-orange-100 text-orange-700" },
@@ -269,6 +270,26 @@ export default function OrdersAdmin() {
     if (r.ok && j.ok) alert(`✓ הושלם מההצעה ${j.proposal}: ${[...(j.filled.apartments || []), j.filled.ski_pass && "סקי פס", j.filled.transfer && "הסעה", j.filled.equipment && "ציוד", j.filled.flight && "טיסות"].filter(Boolean).join(", ")}`);
     else if (r.status !== 404) alert(`שגיאה: ${j.error || "לא הצלחתי"}`);
     load();
+  };
+
+  // how the customer paid (for the receipt): kept on the order (ops.x_paymethod)
+  const setPayMethod = async (o: Order, key: string) => {
+    const ops = { ...(o.ops || {}), x_paymethod: key };
+    setOrders(prev => prev.map(x => x.id === o.id ? { ...x, ops } : x));
+    await authFetch(`/api/orders/${o.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ops: { x_paymethod: key } }) });
+  };
+
+  // a DRAFT receipt from morning, to look at: nothing is created or saved there
+  const receiptDraft = async (o: Order) => {
+    setBusy(o.id);
+    const r = await authFetch("/api/admin/receipts/preview", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ order_id: o.id }) });
+    const j = await r.json().catch(() => ({}));
+    setBusy(null);
+    if (!r.ok || !j.pdf) { alert(`לא הצלחתי להכין טיוטה: ${j.error || "שגיאה"}`); return; }
+    try {
+      const bytes = Uint8Array.from(atob(j.pdf), c => c.charCodeAt(0));
+      window.open(URL.createObjectURL(new Blob([bytes], { type: "application/pdf" })), "_blank");
+    } catch { alert("מורנינג החזיר תשובה לא צפויה"); }
   };
 
   const setStatus = async (o: Order, status: string) => {
@@ -595,6 +616,25 @@ export default function OrdersAdmin() {
                   <span className="text-xs font-semibold bg-gray-50 text-gray-600 px-2.5 py-1 rounded-full">{o.service === "ai" ? "🤖 AI" : "👤 שירות אנושי"}</span>
                   {o.group_id && <span className="text-xs font-semibold bg-violet-50 text-violet-700 px-2.5 py-1 rounded-full">👥 תשלום מפוצל ({o.shares_total})</span>}
                   {o.extra_apartment_name && <span className="text-xs font-semibold bg-violet-50 text-violet-700 px-2.5 py-1 rounded-full">+ {o.extra_apartment_name}</span>}
+                </div>
+
+                {/* how they paid + a draft receipt to look at (nothing is saved in morning) */}
+                <div className="flex flex-wrap items-center gap-2 mt-3">
+                  <select value={String((o.ops && o.ops.x_paymethod) || (o.payplus_transaction_uid ? "card_link" : ""))}
+                    onChange={e => setPayMethod(o, e.target.value)} aria-label="איך שילמו"
+                    className="rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-bold text-gray-700 focus:outline-none cursor-pointer">
+                    <option value="">💳 איך שילמו?</option>
+                    {PAY_METHODS.map(m => <option key={m.key} value={m.key}>{m.label}</option>)}
+                  </select>
+                  {(o.status === "approved" || o.status === "hold") && (
+                    <>
+                      <button onClick={() => receiptDraft(o)} disabled={busy === o.id}
+                        className="rounded-lg border border-teal-200 bg-teal-50 text-teal-800 px-2.5 py-1.5 text-xs font-bold hover:bg-teal-100 transition disabled:opacity-50">
+                        🧾 {busy === o.id ? "מכין…" : "קבלה — טיוטה לבדיקה"}
+                      </button>
+                      <span className="text-[11px] text-gray-400">טיוטה בלבד, שום דבר לא נשמר במורנינג</span>
+                    </>
+                  )}
                 </div>
 
                 {(() => {

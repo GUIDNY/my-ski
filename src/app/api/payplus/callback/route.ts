@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     name: String(t.customer_name || "").trim(),
     phone: String(t.customer_phone || t.phone || "").trim(),
     txUid,
-    amountIls: Number(t.amount) || 0,
+    amountIls: /^ils$/i.test(String(t.currency_code || t.currency || "ILS")) ? Number(t.amount) || 0 : 0,
   }, payload);
   console.info("[payplus] callback confirmed", { order: orderCode, how, changed: res.changed, amount: t.amount, currency: t.currency_code || t.currency });
 
