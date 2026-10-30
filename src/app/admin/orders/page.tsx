@@ -146,10 +146,18 @@ export default function OrdersAdmin() {
     setShowAdd(true);
   };
 
+  // ── the toolbar: search, status, upcoming/past, sort ──
+  const [q, setQ] = useState("");
+  const [statusF, setStatusF] = useState("all");
+  const [range, setRange] = useState<"upcoming" | "past" | "all">("upcoming");
+  const [sort, setSort] = useState<"checkin" | "new">("checkin");
+  const [today, setToday] = useState("");
+
   const load = async () => {
     setLoading(true);
     const r = await authFetch("/api/orders");
     setOrders(await r.json());
+    setToday(new Date().toISOString().slice(0, 10));
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
@@ -289,17 +297,71 @@ export default function OrdersAdmin() {
     return items;
   };
 
+  // which orders the toolbar shows, grouped by the month of arrival
+  const isPast = (o: Order) => !!today && !!(o.checkout || o.checkin) && String(o.checkout || o.checkin) < today;
+  const inRange = orders.filter(o => range === "all" ? true : range === "past" ? isPast(o) : !isPast(o));
+  const needle = q.trim().toLowerCase();
+  const visible = inRange.filter(o =>
+    (statusF === "all" || o.status === statusF) &&
+    (!needle || [o.customer_name, o.code, o.apartment_name, o.extra_apartment_name, o.customer_phone, o.customer_email]
+      .some(v => String(v ?? "").toLowerCase().includes(needle))));
+  const countOf = (k: string) => k === "all" ? inRange.length : inRange.filter(o => o.status === k).length;
+  const HE_M = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
+  const sumOf = (list: Order[]) => Math.round(list.filter(o => o.status !== "cancelled").reduce((t, o) => t + (Number(o.total_eur) || 0), 0));
+  let groups: { label: string; list: Order[]; sum: number }[];
+  if (sort === "new") {
+    const list = [...visible].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+    groups = [{ label: "", list, sum: sumOf(list) }];
+  } else {
+    const by = new Map<string, Order[]>();
+    for (const o of visible) { const k = o.checkin ? o.checkin.slice(0, 7) : "~none"; if (!by.has(k)) by.set(k, []); by.get(k)!.push(o); }
+    const keys = [...by.keys()].sort((a, b) => range === "past" ? b.localeCompare(a) : a.localeCompare(b));
+    groups = keys.map(k => ({
+      label: k === "~none" ? "בלי תאריך הגעה" : `${HE_M[Number(k.slice(5, 7)) - 1]} ${k.slice(0, 4)}`,
+      list: by.get(k)!.sort((a, b) => String(a.checkin || "").localeCompare(String(b.checkin || ""))),
+      sum: sumOf(by.get(k)!),
+    }));
+  }
+  const daysTo = (d: string | null) => d && today ? Math.round((Date.parse(d) - Date.parse(today)) / 864e5) : null;
+
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-3xl font-black text-gray-900">הזמנות</h1>
-          <p className="text-gray-500 text-sm mt-1">אישור פיקדונות ושליחת אישור הזמנה ללקוח</p>
+          <p className="text-gray-500 text-sm mt-1">חיפוש, אישור פיקדונות ומעקב לפי חודשי ההגעה</p>
         </div>
         <button onClick={() => setShowAdd(true)}
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-colors">
           + הוסף הזמנה חדשה
         </button>
+      </div>
+
+      {/* ── search and filters, sticky so they stay at hand on the phone too ── */}
+      <div className="sticky top-0 z-20 bg-gray-50 pt-1 pb-3 mb-4 border-b border-gray-200">
+        <div className="flex flex-wrap items-center gap-2">
+          <input type="search" value={q} onChange={e => setQ(e.target.value)} placeholder="חיפוש: שם, קוד, דירה, טלפון, מייל…"
+            className="w-full md:w-[280px] rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500" />
+          <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none] max-w-full">
+            {([["all", "הכל"], ["hold", "פיקדון לאישור"], ["approved", "אושרו"], ["awaiting", "ליד חם"], ["cancelled", "בוטלו"]] as const).map(([k, l]) => (
+              <button key={k} onClick={() => setStatusF(k)}
+                className={`shrink-0 px-3 py-1.5 rounded-full text-[13px] font-bold border transition ${statusF === k ? "bg-gray-900 text-white border-gray-900" : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"}`}>
+                {l} · {countOf(k)}
+              </button>
+            ))}
+          </div>
+          <span className="hidden lg:block flex-1" />
+          <div className="flex gap-1 rounded-full border border-gray-200 bg-white p-0.5" role="group" aria-label="קרובות או עבר">
+            {([["upcoming", "קרובות"], ["past", "עבר"], ["all", "הכל"]] as const).map(([k, l]) => (
+              <button key={k} onClick={() => setRange(k)} className={`px-3 py-1.5 rounded-full text-[13px] font-bold transition ${range === k ? "bg-blue-600 text-white" : "text-gray-600"}`}>{l}</button>
+            ))}
+          </div>
+          <select value={sort} onChange={e => setSort(e.target.value as "checkin" | "new")} aria-label="סידור"
+            className="rounded-full border border-gray-200 bg-white px-3 py-2 text-[13px] font-bold text-gray-700 focus:outline-none cursor-pointer">
+            <option value="checkin">לפי תאריך הגעה</option>
+            <option value="new">אחרונות שנוספו</option>
+          </select>
+        </div>
       </div>
 
       {showAdd && (
@@ -468,9 +530,23 @@ export default function OrdersAdmin() {
         <div className="text-center py-20 text-gray-400">טוען...</div>
       ) : !orders.length ? (
         <div className="text-center py-20 bg-white rounded-2xl border border-gray-100 text-gray-500">אין הזמנות עדיין</div>
+      ) : visible.length === 0 ? (
+        <div className="text-center py-16 bg-white rounded-2xl border border-gray-100 text-gray-500">
+          לא נמצאו הזמנות לחיפוש או לסינון הזה.
+          <button onClick={() => { setQ(""); setStatusF("all"); setRange("all"); }} className="block mx-auto mt-3 text-sm font-bold text-blue-600 hover:underline">ניקוי הסינון</button>
+        </div>
       ) : (
-        <div className="space-y-3">
-          {orders.map(o => {
+        <div>
+          {groups.map(g => (
+            <section key={g.label || "list"} className="mb-8">
+              {g.label && (
+                <div className="flex items-baseline justify-between gap-3 mb-2.5 px-1">
+                  <h2 className="text-lg font-black text-gray-900">{g.label}</h2>
+                  <span className="text-sm text-gray-500">{g.list.length === 1 ? "הזמנה אחת" : `${g.list.length} הזמנות`} · €{g.sum.toLocaleString()}</span>
+                </div>
+              )}
+              <div className="space-y-3">
+          {g.list.map(o => {
             const st = STATUS[o.status] || STATUS.awaiting;
             return (
               <div key={o.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
@@ -480,15 +556,18 @@ export default function OrdersAdmin() {
                     <span className="font-black text-gray-900">{o.customer_name || "לקוח/ה"}</span>
                     <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${st.cls}`}>{st.label}</span>
                     <span className="text-xs font-mono bg-gray-100 text-gray-500 px-2 py-0.5 rounded">קוד: {o.code}</span>
+                    {(() => { const d = daysTo(o.checkin); return d != null && d >= 0 && o.status !== "cancelled"
+                      ? <span className="text-xs font-bold bg-gray-900 text-white px-2.5 py-1 rounded-full">{d === 0 ? "מגיעים היום" : d === 1 ? "מגיעים מחר" : `בעוד ${d} ימים`}</span>
+                      : null; })()}
                   </div>
                   <p className="text-sm text-gray-600">{o.apartment_name} · {fmt(o.checkin)}–{fmt(o.checkout)} · {o.guests} אורחים · {o.nights} לילות</p>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    €{Number(o.total_eur).toLocaleString()}
+                    <b className="text-sm text-gray-800">€{Number(o.total_eur).toLocaleString()}</b>
                     {o.customer_email && <> · {o.customer_email}</>}
                     {o.customer_phone && <> · {o.customer_phone}</>}
                   </p>
                 </div>
-                <div className="flex gap-2 flex-shrink-0">
+                <div className="flex flex-wrap gap-2 md:flex-shrink-0">
                   {o.status !== "approved" && (
                     <button onClick={() => approve(o)} disabled={busy === o.id}
                       className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-bold text-sm px-4 py-2 rounded-xl transition">
@@ -567,6 +646,9 @@ export default function OrdersAdmin() {
               </div>
             );
           })}
+              </div>
+            </section>
+          ))}
         </div>
       )}
     </div>
