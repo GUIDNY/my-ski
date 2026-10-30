@@ -114,10 +114,6 @@ function OrderCard({ o: initial, onMore }: { o: OrderView; onMore?: (o: OrderVie
             <h3 className={h3}>{o.apartment_name}</h3>
             {o.area && <div className="text-[15px] text-muted mt-0.5">{o.area}</div>}
           </div>
-          <div className="flex flex-col items-start sm:items-end">
-            <span className="font-display font-extrabold text-[26px] leading-none text-ink">{eur(o.total_eur)}</span>
-            <span className="text-[13px] text-muted mt-1">{o.group ? "החלק שלכם" : "סה״כ ההזמנה"}</span>
-          </div>
         </div>
         <div className="flex flex-wrap gap-x-5 gap-y-2 text-[15px] text-body">
           <span className="flex items-center gap-2"><IcoCal />{fmtRange(o.checkin, o.checkout)}</span>
@@ -444,6 +440,46 @@ function SavedCard({ s, onRemove }: { s: Saved; onRemove: (id: string) => void }
   );
 }
 
+/* A taste of Val Thorens for the personal area: the facts guests ask about, and the site's own guides. */
+function ValThorensInfo() {
+  const facts = [
+    { k: "גובה הכפר", v: "2,300 מ׳, הגבוה באירופה" },
+    { k: "אזור הסקי", v: "שלושת העמקים, 600 ק״מ מסלולים" },
+    { k: "שלג", v: "מובטח כל העונה, נובמבר עד מאי" },
+    { k: "מהשדה לכפר", v: "כ-3 שעות נסיעה מז׳נבה או מליון" },
+  ];
+  const links = [
+    { label: "מזג האוויר והשלג עכשיו", href: "/val-thorens-weather" },
+    { label: "מה לארוז", href: "/guide/מה-לארוז-לחופשת-סקי" },
+    { label: "מסלולי הסקי", href: "/guide/מסלולי-סקי-בואל-טורנס" },
+    { label: "אפרה-סקי ומסעדות", href: "/guide/אפרה-סקי-ומסעדות-בואל-טורנס" },
+    { label: "המדריך המלא", href: "/guide/המדריך-המלא-לואל-טורנס" },
+  ];
+  return (
+    <section aria-label="לקראת ואל טורנס" className={`${card} p-5 md:p-6 flex flex-col gap-4`}>
+      <div>
+        <h2 className="font-display font-bold text-[21px] text-ink">לקראת ואל טורנס 🏔️</h2>
+        <p className="text-[15px] text-body mt-1">כמה דברים ששווה להכיר לפני שמגיעים.</p>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        {facts.map(f => (
+          <div key={f.k} className="rounded-xl bg-soft px-4 py-3">
+            <p className="text-[13px] text-muted mb-0.5">{f.k}</p>
+            <p className="font-bold text-[14px] text-ink">{f.v}</p>
+          </div>
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {links.map(l => (
+          <Link key={l.href} href={l.href} className="inline-flex items-center min-h-[40px] px-3.5 rounded-full border border-line text-[14px] font-bold text-ink hover:border-ink transition-colors">
+            {l.label}
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function FAQBlock() {
   return (
     <section aria-labelledby="my-faq" className={`${card} p-5 md:p-6`}>
@@ -603,6 +639,7 @@ function MyOrder() {
           title="ההזמנה שלכם" sub={single.apartment_name} />
         <div className={`${wrap} py-8 md:py-10 flex flex-col gap-6`}>
           <OrderCard o={single} onMore={setModalOrder} />
+          <ValThorensInfo />
           <div className={`${card} p-5 md:p-6 flex flex-col md:flex-row md:items-center gap-4 justify-between`}>
             <p className="text-[16px] text-ink">רוצים שההזמנה תחכה לכם תמיד כאן? התחברו עם המייל שהזמנתם איתו.</p>
             <Link href="/auth" className={`${btn.dark} shrink-0`}>כניסה / הרשמה</Link>
@@ -649,9 +686,12 @@ function MyOrder() {
         {tab === "orders" && (
           <div role="tabpanel" id="panel-orders" aria-labelledby="tab-orders" className="flex flex-col gap-6">
             {orders.length > 0 ? (
-              <div className="grid grid-cols-1 gap-5">
-                {orders.map(o => <OrderCard key={o.code} o={o} onMore={setModalOrder} />)}
-              </div>
+              <>
+                <div className="grid grid-cols-1 gap-5">
+                  {orders.map(o => <OrderCard key={o.code} o={o} onMore={setModalOrder} />)}
+                </div>
+                <ValThorensInfo />
+              </>
             ) : (
               <>
                 <EmptyState title="עוד אין כאן הזמנות"
