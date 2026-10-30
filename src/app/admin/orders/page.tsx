@@ -273,14 +273,15 @@ export default function OrdersAdmin() {
   };
 
   // ===== קבלות ותשלומים: per-guest payments + a morning DRAFT receipt per payer =====
-  type PayRow = { name: string; amount: string; currency: "ILS" | "EUR"; method: string };
+  type Receipt = { id?: string; number?: string; url?: string; at?: string; auto?: boolean; manual?: boolean };
+  type PayRow = { name: string; amount: string; currency: "ILS" | "EUR"; method: string; receipt?: Receipt };
   const [payOrder, setPayOrder] = useState<Order | null>(null);
   const [payRows, setPayRows] = useState<PayRow[]>([]);
   const [payBusy, setPayBusy] = useState<number | null>(null);
 
   const openPayments = (o: Order) => {
     const saved = Array.isArray(o.ops?.x_payments) ? (o.ops!.x_payments as PayRow[]) : null;
-    if (saved && saved.length) { setPayRows(saved.map(r => ({ name: String(r.name || ""), amount: String(r.amount || ""), currency: r.currency === "EUR" ? "EUR" : "ILS", method: String(r.method || "") }))); setPayOrder(o); return; }
+    if (saved && saved.length) { setPayRows(saved.map(r => ({ name: String(r.name || ""), amount: String(r.amount || ""), currency: r.currency === "EUR" ? "EUR" : "ILS", method: String(r.method || ""), receipt: r.receipt }))); setPayOrder(o); return; }
     const names = String(o.customer_name || "").split(/\s*[,+]\s*|\s+ו-\s*/).map(n => n.trim()).filter(Boolean);
     const ils = Number(o.amount_ils) > 0;
     const rows: PayRow[] = (names.length ? names : ["לקוח/ה"]).map((name, i) => ({
@@ -316,6 +317,36 @@ export default function OrdersAdmin() {
     setPayBusy(null);
     if (!r.ok || !j.draftUrl) { alert(`לא הצלחתי לשמור טיוטה במורנינג: ${j.error || "שגיאה"}`); return; }
     window.open(j.draftUrl, "_blank");
+  };
+
+  // ISSUE a real receipt in morning for one payer (explicit confirm first)
+  const rowReceiptIssue = async (i: number) => {
+    if (!payOrder) return;
+    const r0 = payRows[i];
+    if (!r0.method) { alert("קודם לבחור איך שילם/ה"); return; }
+    if (!(Number(r0.amount) > 0)) { alert("קודם למלא סכום"); return; }
+    const sign = r0.currency === "EUR" ? "€" : "₪";
+    if (!confirm(`להפיק קבלה אמיתית במורנינג?\n\nעל שם: ${r0.name}\nסכום: ${sign}${Number(r0.amount).toLocaleString()}\n\nזה מסמך רשמי עם מספר (לא טיוטה). לא נשלח ללקוח שום מייל.`)) return;
+    setPayBusy(i);
+    await savePayments(payRows);
+    const r = await authFetch("/api/admin/receipts/issue", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ order_id: payOrder.id, rowIndex: i, clientName: r0.name, amount: Number(r0.amount), currency: r0.currency, payMethod: r0.method }),
+    });
+    const j = await r.json().catch(() => ({}));
+    setPayBusy(null);
+    if (!r.ok || !j.receipt) { alert(`ההפקה נכשלה: ${j.error || "שגיאה"}`); return; }
+    const rows = j.rows as PayRow[];
+    setPayRows(rows);
+    const ops = { ...(payOrder.ops || {}), x_payments: rows };
+    setOrders(prev => prev.map(x => x.id === payOrder.id ? { ...x, ops } : x));
+    setPayOrder(prev => prev ? { ...prev, ops } : prev);
+  };
+
+  // just MARK that a receipt exists (issued outside the site)
+  const rowReceiptMark = (i: number) => {
+    const rows = payRows.map((x, j) => j === i ? { ...x, receipt: x.receipt ? undefined : { manual: true, at: new Date().toISOString() } } : x);
+    setPayRows(rows); savePayments(rows);
   };
 
   const setStatus = async (o: Order, status: string) => {
@@ -643,11 +674,16 @@ export default function OrdersAdmin() {
                   <span className="text-xs font-semibold bg-gray-50 text-gray-600 px-2.5 py-1 rounded-full">{o.service === "ai" ? "🤖 AI" : "👤 שירות אנושי"}</span>
                   {o.group_id && <span className="text-xs font-semibold bg-violet-50 text-violet-700 px-2.5 py-1 rounded-full">👥 תשלום מפוצל ({o.shares_total})</span>}
                   {o.extra_apartment_name && <span className="text-xs font-semibold bg-violet-50 text-violet-700 px-2.5 py-1 rounded-full">+ {o.extra_apartment_name}</span>}
-                  {Array.isArray(o.ops?.x_payments) && (o.ops!.x_payments as { method?: string }[]).some(r => r.method) && (
-                    <span className="text-xs font-semibold bg-teal-50 text-teal-700 px-2.5 py-1 rounded-full">
-                      💳 {(o.ops!.x_payments as { method?: string }[]).filter(r => r.method).length} תשלומים מסומנים
-                    </span>
-                  )}
+                  {(() => {
+                    const rows = Array.isArray(o.ops?.x_payments) ? (o.ops!.x_payments as { method?: string; receipt?: unknown }[]) : [];
+                    if (!rows.length) return null;
+                    const got = rows.filter(r => r.receipt).length;
+                    return (
+                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${got === rows.length ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>
+                        🧾 קבלות {got}/{rows.length}
+                      </span>
+                    );
+                  })()}
                 </div>
 
                 {(() => {
@@ -716,7 +752,7 @@ export default function OrdersAdmin() {
               </div>
               <button onClick={() => setPayOrder(null)} className="text-gray-400 hover:text-gray-600 text-xl leading-none px-2">✕</button>
             </div>
-            <p className="text-xs text-gray-400 mb-4">כפתור הקבלה שומר טיוטה בלבד במורנינג — כלום לא מופק ולא נשלח. ההפקה עצמה נעשית אצלם, אחרי שבדקת.</p>
+            <p className="text-xs text-gray-400 mb-4">״טיוטה״ שומרת טיוטה בלבד במורנינג · ״הפק קבלה״ מפיק מסמך אמיתי עם מספר (אחרי אישור שלך) · מורנינג אף פעם לא שולח מייל ללקוח. חיוב פיקדון דרך ״אשר וחייב״ מפיק קבלה אוטומטית.</p>
 
             <div className="space-y-3">
               {payRows.map((r, i) => (
@@ -742,10 +778,28 @@ export default function OrdersAdmin() {
                         <option value="EUR">€</option>
                       </select>
                     </div>
-                    <button onClick={() => rowReceiptDraft(i)} disabled={payBusy === i}
-                      className="rounded-xl border border-teal-200 bg-teal-50 text-teal-800 px-3 py-2 text-xs font-bold hover:bg-teal-100 transition disabled:opacity-50">
-                      🧾 {payBusy === i ? "שומר…" : "טיוטת קבלה במורנינג"}
-                    </button>
+                    {r.receipt ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-2 text-xs font-bold">
+                        ✓ {r.receipt.manual ? "קיבל/ה קבלה (סומן ידנית)" : `קבלה ${r.receipt.number || ""}${r.receipt.auto ? " · אוטומטית" : ""}`}
+                        {r.receipt.url && <a href={r.receipt.url} target="_blank" className="underline">צפייה</a>}
+                        {r.receipt.manual && <button onClick={() => rowReceiptMark(i)} className="text-emerald-400 hover:text-red-500" title="ביטול הסימון">✕</button>}
+                      </span>
+                    ) : (
+                      <>
+                        <button onClick={() => rowReceiptDraft(i)} disabled={payBusy === i}
+                          className="rounded-xl border border-teal-200 bg-teal-50 text-teal-800 px-3 py-2 text-xs font-bold hover:bg-teal-100 transition disabled:opacity-50">
+                          🧾 {payBusy === i ? "רגע…" : "טיוטה"}
+                        </button>
+                        <button onClick={() => rowReceiptIssue(i)} disabled={payBusy === i}
+                          className="rounded-xl bg-emerald-600 text-white px-3 py-2 text-xs font-bold hover:bg-emerald-700 transition disabled:opacity-50">
+                          ✅ {payBusy === i ? "מפיק…" : "הפק קבלה"}
+                        </button>
+                        <button onClick={() => rowReceiptMark(i)}
+                          className="text-xs font-bold text-gray-400 hover:text-emerald-700 px-1" title="סימון בלבד — אם הקבלה הופקה מחוץ לאתר">
+                          סמן שקיבל/ה
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}

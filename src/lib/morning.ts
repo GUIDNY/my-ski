@@ -97,3 +97,23 @@ export async function saveDraftInMorning(d: ReceiptDraft): Promise<{ id: string;
   const section = [305, 320, 330, 400, 405, 410].includes(body.type) ? "incomes" : "business";
   return { id: j.id, url: `https://app.greeninvoice.co.il/${section}/documents/new/${body.type}?draftId=${encodeURIComponent(j.id)}` };
 }
+
+export type IssuedReceipt = { id: string; number?: string; url?: string };
+
+/**
+ * ISSUE a real receipt (מסמך אמיתי, עם מספר) in morning.
+ * Still NO email ever — the client has no email on the document (emails: []).
+ * Called only from flows Idan explicitly approved: the הפק-קבלה button and
+ * the auto-receipt on a captured deposit.
+ */
+export async function issueReceipt(d: ReceiptDraft): Promise<IssuedReceipt> {
+  const t = await token();
+  const r = await fetch(`${BASE()}/documents`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` },
+    body: JSON.stringify(docBody(d)),
+  });
+  const j = await r.json().catch(() => ({})) as { id?: string; number?: string | number; url?: { he?: string; origin?: string }; errorMessage?: string };
+  if (!r.ok || !j.id) throw new Error(`morning issue failed: ${j.errorMessage || r.status}`);
+  return { id: j.id, number: j.number != null ? String(j.number) : undefined, url: j.url?.he || j.url?.origin };
+}

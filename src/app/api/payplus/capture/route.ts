@@ -2,6 +2,8 @@ import { createServerClient } from "@/lib/supabase-server";
 import { blockDatesForOrder } from "@/lib/inventory";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/api-auth";
+import { morningConfigured, issueReceipt } from "@/lib/morning";
+import { receiptDraftFromOrder } from "@/lib/receipt-build";
 
 // Captures (charges) a held J5 deposit via PayPlus, then marks the order
 // approved and fires the confirmation email via n8n.
@@ -43,6 +45,28 @@ export async function POST(req: NextRequest) {
   const { data: updated } = await db.from("orders").update({ status: "approved" }).eq("id", order_id).select().single();
   if (updated) await blockDatesForOrder(db, updated);
 
+  // 2.5) auto receipt in morning for the charged deposit (never emails anyone;
+  // never blocks the approval — on any failure the admin just sees no receipt chip)
+  let autoReceipt: string | undefined;
+  if (updated && order.payplus_transaction_uid && morningConfigured()) {
+    try {
+      const ops = (updated.ops as Record<string, unknown>) || {};
+      type Row = { name?: string; amount?: string; currency?: string; method?: string; receipt?: { auto?: boolean } };
+      const rows: Row[] = Array.isArray(ops.x_payments) ? [...(ops.x_payments as Row[])] : [];
+      if (!rows.some(r => r.receipt && r.method === "card_link")) {
+        const firstName = String(updated.customer_name || "").split(/\s*[,+]\s*|\s+ו-\s*/)[0]?.trim() || undefined;
+        const draft = receiptDraftFromOrder(updated, { clientName: firstName, payMethod: "card_link" });
+        const receipt = await issueReceipt(draft);
+        const rec = { ...receipt, at: new Date().toISOString(), auto: true };
+        const idx = rows.findIndex(r => !r.receipt && (String(r.name || "") === draft.clientName || r.method === "card_link"));
+        if (idx >= 0) rows[idx] = { ...rows[idx], name: draft.clientName, amount: String(draft.amount), currency: draft.currency, method: "card_link", receipt: rec };
+        else rows.push({ name: draft.clientName, amount: String(draft.amount), currency: draft.currency, method: "card_link", receipt: rec });
+        await db.from("orders").update({ ops: { ...ops, x_payments: rows } }).eq("id", order_id);
+        autoReceipt = receipt.number || receipt.id;
+      }
+    } catch { /* receipt failure must never block an approval */ }
+  }
+
   const hook = process.env.N8N_WEBHOOK_URL;
   if (hook && updated && updated.customer_email) {
     const origin = req.headers.get("origin") || `https://${req.headers.get("host")}`;
@@ -62,5 +86,5 @@ export async function POST(req: NextRequest) {
     } catch { /* ignore */ }
   }
 
-  return NextResponse.json({ ok: true, charged: !!order.payplus_transaction_uid });
+  return NextResponse.json({ ok: true, charged: !!order.payplus_transaction_uid, receipt: autoReceipt });
 }
