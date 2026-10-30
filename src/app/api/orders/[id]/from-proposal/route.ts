@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/api-auth";
 import { createServerClient } from "@/lib/supabase-server";
 import { findProposal, orderFieldsFromProposal } from "@/lib/proposal-order";
+import { blockDatesForOrder } from "@/lib/inventory";
 
 /*
  * Admin: fill an order from the quote it was paid from (apartments, dates, people,
@@ -37,7 +38,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // a flight already entered by hand (with the booking code) stays
     ops: { ...q.ops, ...ops, x_proposal: p.id, ...(ops.x_flight ? {} : q.ops.x_flight ? { x_flight: q.ops.x_flight } : {}), x_pass3v: ops.x_pass3v ?? q.ops.x_pass3v },
   };
-  const { error } = await db.from("orders").update(patch).eq("id", id);
+  const { data: updated, error } = await db.from("orders").update(patch).eq("id", id).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  // the order now knows its apartment(s) and dates: a paid order blocks them in the calendar
+  if (updated && (updated.status === "approved" || updated.status === "hold")) await blockDatesForOrder(db, updated);
   return NextResponse.json({ ok: true, proposal: p.proposal_number, filled: { apartments: [q.apartment_name, q.extra_apartment_name].filter(Boolean), ski_pass: q.ski_pass, transfer: q.transfer, equipment: q.equipment, flight: q.flight } });
 }
