@@ -122,6 +122,7 @@ function OrderCard({ o: initial, onMore }: { o: OrderView; onMore?: (o: OrderVie
         <div className="flex flex-wrap gap-x-5 gap-y-2 text-[15px] text-body">
           <span className="flex items-center gap-2"><IcoCal />{fmtRange(o.checkin, o.checkout)}</span>
           <span className="flex items-center gap-2"><IcoPeople />{o.guests} אורחים · {o.nights} לילות</span>
+          {o.customer_name && <span className="flex items-center gap-2 min-w-0"><IcoUserSm /><span className="truncate">על שם {o.customer_name}</span></span>}
         </div>
         {included.length > 0 && (
           <ul className="flex flex-wrap gap-x-5 gap-y-1.5 text-[15px] text-ink">
@@ -203,6 +204,11 @@ function FlightCheckinBox({ f }: { f: NonNullable<OrderView["flightCheckin"]> })
     </div>
   );
 }
+const IcoUserSm = () => (
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="8" r="3.6" /><path d="M5 20a7 7 0 0 1 14 0" />
+  </svg>
+);
 const IcoPlaneSm = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" />
@@ -213,7 +219,11 @@ const IcoPlaneSm = () => (
    the arrival details Idan entered in the admin (address, booking code, how to get in). */
 function CheckinBox({ o, onDone }: { o: OrderView; onDone: (v: Partial<OrderView>) => void }) {
   const [open, setOpen] = useState(false);
-  const [names, setNames] = useState<string[]>(() => Array.from({ length: Math.max(1, o.guests || 1) }, (_, i) => i === 0 ? (o.customer_name || "") : ""));
+  const [names, setNames] = useState<string[]>(() => {
+    // the order often carries all the guests' names ("ליהוא ידלין, שחר דול, יותם סופר"): one per field
+    const given = String(o.customer_name || "").split(/\s*[,+]\s*| ו-\s*/).map(x => x.trim()).filter(Boolean);
+    return Array.from({ length: Math.max(1, o.guests || 1, given.length) }, (_, i) => given[i] || "");
+  });
   const [arrival, setArrival] = useState("");
   const [phone, setPhone] = useState("");
   const [notes, setNotes] = useState("");
@@ -359,6 +369,7 @@ function OrderModal({ o, onClose }: { o: OrderView; onClose: () => void }) {
             <Info label="אורחים" value={`${o.guests}`} />
             <Info label="לילות" value={`${o.nights}`} />
           </div>
+          {o.customer_name && <div className="rounded-xl bg-soft px-4 py-3"><p className="text-[13px] text-muted mb-0.5">ההזמנה על שם</p><p className="font-bold text-[15px] text-ink">{o.customer_name}</p></div>}
           <div>
             <p className="font-bold text-[15px] text-ink mb-2">מה כלול</p>
             <div className="flex flex-col gap-2">
