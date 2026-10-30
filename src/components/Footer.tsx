@@ -33,6 +33,7 @@ const PLAN = [
 
 const INFO = [
   { label: "אודות SkiShare", href: "/about" },
+  { label: "ההזמנה שלי (כניסה עם קוד)", href: "/my" },
   { label: "צור קשר", href: "/contact" },
   { label: "תקנון, הזמנות וביטולים", href: "/terms" },
   { label: "מצב חירום, מלחמה וכוח עליון", href: "/emergency-policy" },
