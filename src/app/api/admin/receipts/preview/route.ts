@@ -24,10 +24,10 @@ export async function POST(req: NextRequest) {
   const payMethod = String(b.payMethod || ops.x_paymethod || (o.payplus_transaction_uid ? "card_link" : "card_link"));
   const dm = (d: string | null) => d ? `${Number(d.slice(8, 10))}.${Number(d.slice(5, 7))}.${d.slice(0, 4)}` : "";
   const draft = {
-    clientName: String(o.customer_name || "").trim() || "לקוח/ה",
+    clientName: String(b.clientName || "").trim() || String(o.customer_name || "").trim() || "לקוח/ה",
     clientPhone: String(o.customer_phone || "").trim() || undefined,
     amount: Number(b.amount) > 0 ? Number(b.amount) : ils ? Number(o.amount_ils) : Number(o.total_eur) || 0,
-    currency: (ils ? "ILS" : "EUR") as "ILS" | "EUR",
+    currency: (b.currency === "EUR" || b.currency === "ILS" ? b.currency : ils ? "ILS" : "EUR") as "ILS" | "EUR",
     payMethod,
     remarks: `חופשת סקי בואל טורנס · הזמנה ${o.code}` + (o.checkin ? ` · ${dm(o.checkin)}–${dm(o.checkout)}` : "") + (o.apartment_name ? ` · ${String(o.apartment_name).slice(0, 60)}` : ""),
   };

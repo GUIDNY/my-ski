@@ -272,19 +272,48 @@ export default function OrdersAdmin() {
     load();
   };
 
-  // how the customer paid (for the receipt): kept on the order (ops.x_paymethod)
-  const setPayMethod = async (o: Order, key: string) => {
-    const ops = { ...(o.ops || {}), x_paymethod: key };
-    setOrders(prev => prev.map(x => x.id === o.id ? { ...x, ops } : x));
-    await authFetch(`/api/orders/${o.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ops: { x_paymethod: key } }) });
+  // ===== קבלות ותשלומים: per-guest payments + a morning DRAFT receipt per payer =====
+  type PayRow = { name: string; amount: string; currency: "ILS" | "EUR"; method: string };
+  const [payOrder, setPayOrder] = useState<Order | null>(null);
+  const [payRows, setPayRows] = useState<PayRow[]>([]);
+  const [payBusy, setPayBusy] = useState<number | null>(null);
+
+  const openPayments = (o: Order) => {
+    const saved = Array.isArray(o.ops?.x_payments) ? (o.ops!.x_payments as PayRow[]) : null;
+    if (saved && saved.length) { setPayRows(saved.map(r => ({ name: String(r.name || ""), amount: String(r.amount || ""), currency: r.currency === "EUR" ? "EUR" : "ILS", method: String(r.method || "") }))); setPayOrder(o); return; }
+    const names = String(o.customer_name || "").split(/\s*[,+]\s*|\s+ו-\s*/).map(n => n.trim()).filter(Boolean);
+    const ils = Number(o.amount_ils) > 0;
+    const rows: PayRow[] = (names.length ? names : ["לקוח/ה"]).map((name, i) => ({
+      name,
+      amount: i === 0 && o.payplus_transaction_uid ? String(ils ? o.amount_ils : o.total_eur) : "",
+      currency: (ils || !o.payplus_transaction_uid ? "ILS" : "EUR") as "ILS" | "EUR",
+      method: i === 0 && o.payplus_transaction_uid ? "card_link" : "",
+    }));
+    setPayRows(rows); setPayOrder(o);
   };
 
-  // a DRAFT receipt saved inside morning (טיוטה) — unissued, no email, editable there
-  const receiptDraft = async (o: Order) => {
-    setBusy(o.id);
-    const r = await authFetch("/api/admin/receipts/preview", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ order_id: o.id }) });
+  const savePayments = async (rows: PayRow[]) => {
+    if (!payOrder) return;
+    const ops = { ...(payOrder.ops || {}), x_payments: rows };
+    setOrders(prev => prev.map(x => x.id === payOrder.id ? { ...x, ops } : x));
+    setPayOrder(prev => prev ? { ...prev, ops } : prev);
+    await authFetch(`/api/orders/${payOrder.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ops: { x_payments: rows } }) });
+  };
+
+  // morning DRAFT (טיוטה) for one payer — unissued, no number, no email
+  const rowReceiptDraft = async (i: number) => {
+    if (!payOrder) return;
+    const r0 = payRows[i];
+    if (!r0.method) { alert("קודם לבחור איך שילם/ה"); return; }
+    if (!(Number(r0.amount) > 0)) { alert("קודם למלא סכום"); return; }
+    setPayBusy(i);
+    await savePayments(payRows);
+    const r = await authFetch("/api/admin/receipts/preview", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ order_id: payOrder.id, clientName: r0.name, amount: Number(r0.amount), currency: r0.currency, payMethod: r0.method }),
+    });
     const j = await r.json().catch(() => ({}));
-    setBusy(null);
+    setPayBusy(null);
     if (!r.ok || !j.draftUrl) { alert(`לא הצלחתי לשמור טיוטה במורנינג: ${j.error || "שגיאה"}`); return; }
     window.open(j.draftUrl, "_blank");
   };
@@ -598,6 +627,7 @@ export default function OrdersAdmin() {
                   {(!o.apartment_id || /SK-\d{4}-/.test(o.apartment_name || "")) && !(o.ops && o.ops.x_proposal) && (
                     <button onClick={() => fillFromProposal(o)} disabled={busy === o.id} className="border border-violet-200 text-violet-700 hover:bg-violet-50 font-medium text-sm px-3 py-2 rounded-xl transition">השלם מההצעה</button>
                   )}
+                  <button onClick={() => openPayments(o)} className="border border-teal-200 text-teal-700 hover:bg-teal-50 font-medium text-sm px-3 py-2 rounded-xl transition">💳 קבלות ותשלומים</button>
                   <button onClick={() => startEdit(o)} className="border border-gray-200 text-blue-600 hover:bg-blue-50 font-medium text-sm px-3 py-2 rounded-xl transition">עריכה</button>
                   <button onClick={() => remove(o)} className="text-red-500 hover:text-red-700 text-sm px-2">🗑</button>
                 </div>
@@ -613,24 +643,10 @@ export default function OrdersAdmin() {
                   <span className="text-xs font-semibold bg-gray-50 text-gray-600 px-2.5 py-1 rounded-full">{o.service === "ai" ? "🤖 AI" : "👤 שירות אנושי"}</span>
                   {o.group_id && <span className="text-xs font-semibold bg-violet-50 text-violet-700 px-2.5 py-1 rounded-full">👥 תשלום מפוצל ({o.shares_total})</span>}
                   {o.extra_apartment_name && <span className="text-xs font-semibold bg-violet-50 text-violet-700 px-2.5 py-1 rounded-full">+ {o.extra_apartment_name}</span>}
-                </div>
-
-                {/* how they paid + a draft receipt to look at (nothing is saved in morning) */}
-                <div className="flex flex-wrap items-center gap-2 mt-3">
-                  <select value={String((o.ops && o.ops.x_paymethod) || (o.payplus_transaction_uid ? "card_link" : ""))}
-                    onChange={e => setPayMethod(o, e.target.value)} aria-label="איך שילמו"
-                    className="rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-bold text-gray-700 focus:outline-none cursor-pointer">
-                    <option value="">💳 איך שילמו?</option>
-                    {PAY_METHODS.map(m => <option key={m.key} value={m.key}>{m.label}</option>)}
-                  </select>
-                  {(o.status === "approved" || o.status === "hold") && (
-                    <>
-                      <button onClick={() => receiptDraft(o)} disabled={busy === o.id}
-                        className="rounded-lg border border-teal-200 bg-teal-50 text-teal-800 px-2.5 py-1.5 text-xs font-bold hover:bg-teal-100 transition disabled:opacity-50">
-                        🧾 {busy === o.id ? "שומר…" : "טיוטת קבלה במורנינג"}
-                      </button>
-                      <span className="text-[11px] text-gray-400">נשמר כטיוטה בלבד — לא מופק ולא נשלח</span>
-                    </>
+                  {Array.isArray(o.ops?.x_payments) && (o.ops!.x_payments as { method?: string }[]).some(r => r.method) && (
+                    <span className="text-xs font-semibold bg-teal-50 text-teal-700 px-2.5 py-1 rounded-full">
+                      💳 {(o.ops!.x_payments as { method?: string }[]).filter(r => r.method).length} תשלומים מסומנים
+                    </span>
                   )}
                 </div>
 
@@ -686,6 +702,58 @@ export default function OrdersAdmin() {
               </div>
             </section>
           ))}
+        </div>
+      )}
+
+      {/* קבלות ותשלומים — מי שילם, איך, וטיוטת קבלה במורנינג לכל אחד */}
+      {payOrder && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-end md:items-center justify-center p-0 md:p-6" onClick={() => setPayOrder(null)}>
+          <div className="bg-white w-full md:max-w-2xl rounded-t-3xl md:rounded-3xl p-5 md:p-7 max-h-[92vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-start justify-between gap-3 mb-1">
+              <div>
+                <h3 className="text-lg font-black text-gray-900">💳 קבלות ותשלומים</h3>
+                <p className="text-sm text-gray-500">{payOrder.customer_name} · קוד {payOrder.code} · €{Number(payOrder.total_eur).toLocaleString()}{Number(payOrder.amount_ils) > 0 ? ` · שולם ₪${Number(payOrder.amount_ils).toLocaleString()} בלינק` : ""}</p>
+              </div>
+              <button onClick={() => setPayOrder(null)} className="text-gray-400 hover:text-gray-600 text-xl leading-none px-2">✕</button>
+            </div>
+            <p className="text-xs text-gray-400 mb-4">כפתור הקבלה שומר טיוטה בלבד במורנינג — כלום לא מופק ולא נשלח. ההפקה עצמה נעשית אצלם, אחרי שבדקת.</p>
+
+            <div className="space-y-3">
+              {payRows.map((r, i) => (
+                <div key={i} className="border border-gray-100 rounded-2xl p-3.5 bg-gray-50/60">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <input value={r.name} onChange={e => setPayRows(rows => rows.map((x, j) => j === i ? { ...x, name: e.target.value } : x))}
+                      placeholder="שם" className="flex-1 min-w-[130px] rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                    <button onClick={() => { const rows = payRows.filter((_, j) => j !== i); setPayRows(rows); savePayments(rows); }}
+                      className="text-gray-300 hover:text-red-500 text-sm px-1" title="הסרת שורה">✕</button>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 mt-2">
+                    <select value={r.method} onChange={e => { const rows = payRows.map((x, j) => j === i ? { ...x, method: e.target.value } : x); setPayRows(rows); savePayments(rows); }}
+                      className="rounded-xl border border-gray-200 bg-white px-2.5 py-2 text-xs font-bold text-gray-700 cursor-pointer focus:outline-none">
+                      <option value="">💳 איך שילם/ה?</option>
+                      {PAY_METHODS.map(m => <option key={m.key} value={m.key}>{m.label}</option>)}
+                    </select>
+                    <div className="flex items-center rounded-xl border border-gray-200 bg-white overflow-hidden">
+                      <input value={r.amount} inputMode="decimal" onChange={e => setPayRows(rows => rows.map((x, j) => j === i ? { ...x, amount: e.target.value } : x))}
+                        onBlur={() => savePayments(payRows)} placeholder="סכום" className="w-24 px-3 py-2 text-sm font-bold focus:outline-none" />
+                      <select value={r.currency} onChange={e => { const rows = payRows.map((x, j) => j === i ? { ...x, currency: (e.target.value === "EUR" ? "EUR" : "ILS") as "ILS" | "EUR" } : x); setPayRows(rows); savePayments(rows); }}
+                        className="px-1.5 py-2 text-xs font-bold text-gray-500 bg-gray-50 border-r border-gray-200 cursor-pointer focus:outline-none">
+                        <option value="ILS">₪</option>
+                        <option value="EUR">€</option>
+                      </select>
+                    </div>
+                    <button onClick={() => rowReceiptDraft(i)} disabled={payBusy === i}
+                      className="rounded-xl border border-teal-200 bg-teal-50 text-teal-800 px-3 py-2 text-xs font-bold hover:bg-teal-100 transition disabled:opacity-50">
+                      🧾 {payBusy === i ? "שומר…" : "טיוטת קבלה במורנינג"}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button onClick={() => setPayRows(rows => [...rows, { name: "", amount: "", currency: "ILS", method: "" }])}
+              className="mt-3 text-sm font-bold text-teal-700 hover:text-teal-900">+ הוספת תשלום</button>
+          </div>
         </div>
       )}
     </div>
