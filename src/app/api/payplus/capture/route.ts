@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
   if (updated) await blockDatesForOrder(db, updated);
 
   const hook = process.env.N8N_WEBHOOK_URL;
-  if (hook && updated) {
+  if (hook && updated && updated.customer_email) {
     const origin = req.headers.get("origin") || `https://${req.headers.get("host")}`;
     try {
       await fetch(hook, {

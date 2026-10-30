@@ -232,17 +232,18 @@ export default function OrdersAdmin() {
   };
 
   const approve = async (o: Order) => {
-    if (!o.customer_email) { alert("⚠️ אין מייל ללקוח בהזמנה — לא יישלח אישור."); return; }
+    // no email on the order (a pay link from a quote or the bot): it can still be charged and approved, just no email goes out
     const charges = !!o.payplus_transaction_uid;
+    const mailLine = o.customer_email ? `יישלח מייל אישור אל: ${o.customer_email}` : "⚠️ אין מייל בהזמנה, אז לא יישלח מייל אישור (אפשר להוסיף מייל בעריכה לפני כן)";
     const msg = charges
-      ? `לחייב את הפיקדון ולאשר את ההזמנה של ${o.customer_name || o.code}?\nהכרטיס יחויב בפועל ויישלח מייל אישור אל: ${o.customer_email}`
-      : `לאשר את ההזמנה של ${o.customer_name || o.code}? (אין פיקדון מקושר — רק אישור + מייל)\nמייל יישלח אל: ${o.customer_email}`;
+      ? `לחייב את הפיקדון ולאשר את ההזמנה של ${o.customer_name || o.code}?\nהכרטיס יחויב בפועל.\n${mailLine}`
+      : `לאשר את ההזמנה של ${o.customer_name || o.code}? (אין פיקדון מקושר, רק אישור)\n${mailLine}`;
     if (!confirm(msg)) return;
     setBusy(o.id);
     const res = await authFetch("/api/payplus/capture", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ order_id: o.id }) });
     const j = await res.json().catch(() => ({}));
     setBusy(null);
-    if (res.ok) alert(`✓ ${charges ? "הפיקדון חויב ו" : ""}ההזמנה אושרה. מייל אישור נשלח אל ${o.customer_email}`);
+    if (res.ok) alert(`✓ ${charges ? "הפיקדון חויב ו" : ""}ההזמנה אושרה.${o.customer_email ? ` מייל אישור נשלח אל ${o.customer_email}` : " (בלי מייל: אין מייל בהזמנה)"}`);
     else alert(`שגיאה: ${j.error || "לא הצלחנו לאשר"}`);
     load();
   };
