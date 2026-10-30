@@ -248,6 +248,21 @@ export default function OrdersAdmin() {
     load();
   };
 
+  // an order paid from a quote's link: everything the quote says goes into the order (and the personal area)
+  const fillFromProposal = async (o: Order) => {
+    setBusy(o.id);
+    let r = await authFetch(`/api/orders/${o.id}/from-proposal`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+    if (r.status === 404) {
+      const n = prompt("לא מצאתי את ההצעה של ההזמנה הזו. מה מספר ההצעה? (למשל SK-2026-0062)");
+      if (n) r = await authFetch(`/api/orders/${o.id}/from-proposal`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ number: n }) });
+    }
+    const j = await r.json().catch(() => ({}));
+    setBusy(null);
+    if (r.ok && j.ok) alert(`✓ הושלם מההצעה ${j.proposal}: ${[...(j.filled.apartments || []), j.filled.ski_pass && "סקי פס", j.filled.transfer && "הסעה", j.filled.equipment && "ציוד", j.filled.flight && "טיסות"].filter(Boolean).join(", ")}`);
+    else if (r.status !== 404) alert(`שגיאה: ${j.error || "לא הצלחתי"}`);
+    load();
+  };
+
   const setStatus = async (o: Order, status: string) => {
     setBusy(o.id);
     await authFetch(`/api/orders/${o.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
@@ -482,6 +497,9 @@ export default function OrdersAdmin() {
                   )}
                   {o.status !== "cancelled" && (
                     <button onClick={() => setStatus(o, "cancelled")} className="border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium text-sm px-3 py-2 rounded-xl transition">בטל</button>
+                  )}
+                  {(!o.apartment_id || /SK-\d{4}-/.test(o.apartment_name || "")) && !(o.ops && o.ops.x_proposal) && (
+                    <button onClick={() => fillFromProposal(o)} disabled={busy === o.id} className="border border-violet-200 text-violet-700 hover:bg-violet-50 font-medium text-sm px-3 py-2 rounded-xl transition">השלם מההצעה</button>
                   )}
                   <button onClick={() => startEdit(o)} className="border border-gray-200 text-blue-600 hover:bg-blue-50 font-medium text-sm px-3 py-2 rounded-xl transition">עריכה</button>
                   <button onClick={() => remove(o)} className="text-red-500 hover:text-red-700 text-sm px-2">🗑</button>

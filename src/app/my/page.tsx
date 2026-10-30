@@ -21,6 +21,7 @@ type OrderView = {
   onlineCheckin?: { guests: string[]; arrival: string; phone: string; notes: string; at: string } | null;
   stay?: { address: string; ref: string; notes: string } | null; stayReady?: boolean;
   flightCheckin?: { airline: string; pnr: string; url: string; out: FLeg; ret: FLeg } | null;
+  proposalId?: string | null;
   apartment?: { images?: string[] } | null;
   share_amount?: number | null; shares_total?: number | null;
   group?: { code: string; shares_total: number; shares_paid: number } | null;
@@ -378,6 +379,9 @@ function OrderModal({ o, onClose }: { o: OrderView; onClose: () => void }) {
             <span className="text-[15px] font-bold text-ink">{o.group ? "החלק שלכם" : approved ? "סה״כ ששולם" : "סה״כ ההזמנה"}</span>
             <span className="font-display font-extrabold text-[26px] text-ink">{eur(o.total_eur)}</span>
           </div>
+          {o.proposalId && (
+            <a href={`/p/${o.proposalId}`} target="_blank" rel="noopener noreferrer" className={`${btn.outline} w-full min-h-[44px]`}>ההצעה המלאה, עם כל הפרטים</a>
+          )}
           <p className="text-center text-[13px] text-muted">קוד הזמנה: <span dir="ltr" className="font-mono">{o.code}</span></p>
         </div>
       </div>

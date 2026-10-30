@@ -53,6 +53,7 @@ export async function POST(req: NextRequest) {
       name: String(t.customer_name || "").trim(),
       email: String(t.customer_email || t.email || "").trim(),
       phone: String(t.customer_phone || t.phone || "").trim(),
+      pageUid,
     });
     if (made) { orderCode = made.code; fromLink = made.created; }
     else console.warn("[payplus] payment with no order: could not open an order", { ref: ref || null });
