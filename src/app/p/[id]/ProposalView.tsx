@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import CouponCorner from "@/components/CouponCorner";
 import { wrap, card, btn, h1, chip, Crumbs, Check } from "@/components/ui";
 import { PhotoGallery, Lightbox, mapLink } from "@/components/QuoteView";
 import { heroOf } from "@/components/ProposalDocument";
@@ -446,6 +447,9 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
         </div>
         <a href="#pay" className={`${btn.primary} flex-1`}>לתשלום</a>
       </div>
+
+      {/* a very quiet coupon entry, at the very bottom on purpose */}
+      <CouponCorner total={total} description={data.title || "חופשת סקי בוואל טורנס"} />
 
       <Lightbox imgs={imgs} index={lightbox} setIndex={setLightbox} name={data.title} />
     </div>
