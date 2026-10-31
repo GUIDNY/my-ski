@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/api-auth";
 import { createServerClient } from "@/lib/supabase-server";
+import { apartmentProfit } from "@/lib/profit";
 
 /*
  * Admin-only: the estimated PROFIT behind one proposal, for the floating
@@ -11,12 +12,6 @@ import { createServerClient } from "@/lib/supabase-server";
  */
 export const dynamic = "force-dynamic";
 
-// €/night from the signed season contracts (rent ÷ usable nights)
-const OWN_COST_NIGHT: [RegExp, number][] = [
-  [/נבס 93|neves 93/i, 123], [/נבס 163|neves 163/i, 123], [/נבס 154|neves 154/i, 114],
-  [/נבס 148|neves 148/i, 85], [/311/, 135], [/302/, 177],
-  [/פולסה|polset/i, 99], [/גלסייר|glacier/i, 119], [/i3/i, 148], [/135/, 102],
-];
 
 const eur = (s: string) => { const m = String(s).replace(/,/g, "").match(/€\s*(\d+(?:\.\d+)?)/); return m ? Number(m[1]) : 0; };
 
@@ -42,15 +37,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const [label, qty, , totalS] = r;
     const sellTotal = eur(totalS || "");
     if (/^לינה/.test(label) && sellTotal > 0) {
-      const source = srcOf(label);
-      if (source === "la_cime") {
-        const cost = Math.round(sellTotal / 1.32);
-        lines.push({ label: label.slice(0, 60), sell: sellTotal, cost, profit: sellTotal - cost });
-      } else {
-        const own = OWN_COST_NIGHT.find(([re]) => re.test(label));
-        if (own) { const cost = Math.round(own[1] * nights); lines.push({ label: label.slice(0, 60), sell: sellTotal, cost, profit: sellTotal - cost }); }
-        else lines.push({ label: label.slice(0, 60), sell: sellTotal, cost: null, profit: null });
-      }
+      const { cost, profit } = apartmentProfit(label, srcOf(label), sellTotal, nights);
+      lines.push({ label: label.slice(0, 60), sell: sellTotal, cost, profit });
     } else if (/^טיסות/.test(label) && sellTotal > 0) {
       const pax = Number(qty) || 0;
       lines.push({ label: "טיסות (המרווח שלנו €25 לאדם)", sell: sellTotal, cost: sellTotal - 25 * pax, profit: 25 * pax });

@@ -21,6 +21,7 @@ import CardPaymentButton from "@/components/CardPaymentButton";
 import TransferChooser from "@/components/TransferChooser";
 import { codeOf, type TransferOption } from "@/lib/transfer-options";
 import FlightDetailsModal, { EMPTY_FLIGHT, flightToString, flightFilled, type Flight } from "@/components/FlightDetailsModal";
+import AdminProfitBadge from "@/components/AdminProfitBadge";
 import { wrap, card, h1, h2, btn, chip, Crumbs, CheckList, Check, PerPerson, EmptyState } from "@/components/ui";
 import OpenChatButton from "@/components/OpenChatButton";
 import { helperWaHref } from "@/lib/helper-whatsapp";
@@ -626,6 +627,8 @@ export default function QuoteView({ q }: { q: QuoteData }) {
 
   return (
     <div className="bg-white text-ink" dir="rtl">
+      {/* admin-only: the profit behind this quote (renders nothing for customers) */}
+      <AdminProfitBadge body={{ apartment_id: apartmentId, apartment, nights, aptTotal: baseApt, flightQty: flightEff ? flightQty : 0 }} />
       {/* ── top: where we are, the title, dates and guests, photos ── */}
       <div className={`${wrap} pt-5 md:pt-7`}>
         <Crumbs items={[{ label: "דף הבית", href: "/" }, { label: "הצעת מחיר" }, { label: apartment }]} />
