@@ -31,7 +31,7 @@ export default async function ApartmentsPage({ lang }: { lang: Lang }) {
       <Suspense fallback={<ListingView {...props} search={parseSearch({}, today)} taken={null} checking={false} />}>
         <ListingSearch {...props} />
       </Suspense>
-      <ApartmentsInfo lang={lang} weekPrices={weekPrices} />
+      <ApartmentsInfo lang={lang} weekPrices={weekPrices} apartments={items.map(x => ({ id: x.id, name: x.name }))} />
     </>
   );
 }

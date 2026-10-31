@@ -147,7 +147,8 @@ const en = {
     and: "and",
   },
   list: {
-    title: "Apartments in Val Thorens",
+    title: "Val Thorens apartments to rent",
+    intro: "SkiShare is an Israeli company renting apartments in Val Thorens, France: our own apartments, booked by the night for the dates you choose, and more apartments rented by the full week, Saturday to Saturday. Every apartment shows how many people it sleeps, its size and the price for the whole apartment.",
     countAll: (n: number) => `${n === 1 ? "1 apartment" : `${n} apartments`}. Pick your dates to see the exact price.`,
     countFor: (n: number, range: string, guests: string) =>
       `${n === 1 ? "1 apartment" : `${n} apartments`} free for ${range} · ${guests}`,
@@ -315,6 +316,15 @@ const en = {
     aptsTitle: "Val Thorens apartment prices, week by week",
     aptsText: "SkiShare's own apartments are priced by the night for your dates, plus a cleaning fee when there is one. Weekly apartments are rented by the full week, Saturday to Saturday, at that week's price. Here is the cheapest weekly apartment still free for each Saturday of the 2026/27 season: pick a week to see every apartment free that week.",
     aptsGuides: "Before you book",
+    aptsFaqTitle: "Questions about renting an apartment in Val Thorens",
+    aptsFaq: [
+      { q: "Who rents these apartments?", a: "SkiShare, an Israeli company renting apartments in Val Thorens. Some apartments are our own and we manage them ourselves, so you choose your dates. The others are rented by the full week, Saturday to Saturday. You book and pay on this site." },
+      { q: "Why are most apartments Saturday to Saturday?", a: "That is how most agencies in Val Thorens work: Saturday is changeover day, and that is where most of the apartments are. In our own apartments you can choose other dates." },
+      { q: "How many people fit in an apartment?", a: "Each apartment says \"up to X guests\", and that is the maximum. Read the description to see how the beds are arranged, and in a big group check how many bathrooms there are." },
+      { q: "What is included in the price?", a: "The apartment for your whole stay. Every line is shown before you pay: the nights and, where it applies, the cleaning fee. In most weekly apartments, bed linen, towels and the final cleaning are not included: the description of each apartment says what is." },
+      { q: "How do I see the price for my dates?", a: "Add your dates and the number of guests at the top of this page. The list then keeps only the apartments free for those dates and big enough for your group, with the total for your stay." },
+      { q: "How do I pay?", a: "By card, with PayPlus. A 1.9% card fee is added to the total and shown before you pay." },
+    ] as { q: string; a: string }[],
     short: {
       "when-to-go": "When to go",
       "apartment-prices": "Apartment prices",
@@ -468,6 +478,7 @@ const fr: Dict = {
   },
   list: {
     title: "Location d'appartements à Val Thorens",
+    intro: "SkiShare est une entreprise israélienne qui loue des appartements à Val Thorens, en Savoie : nos propres appartements, réservables à la nuit pour les dates de votre choix, et d'autres appartements loués à la semaine complète, du samedi au samedi. Chaque appartement indique pour combien de personnes il est prévu, sa surface et le prix pour l'appartement entier.",
     countAll: (n: number) => `${n === 1 ? "1 appartement" : `${n} appartements`}. Choisissez vos dates pour voir le prix exact.`,
     countFor: (n: number, range: string, guests: string) =>
       `${n === 1 ? "1 appartement libre" : `${n} appartements libres`} · ${range} · ${guests}`,
@@ -635,6 +646,15 @@ const fr: Dict = {
     aptsTitle: "Prix des appartements à Val Thorens, semaine par semaine",
     aptsText: "Nos propres appartements sont au prix de la nuit pour vos dates, avec des frais de ménage quand il y en a. Les autres appartements se louent à la semaine complète, du samedi au samedi, au prix de cette semaine. Voici l'appartement à la semaine le moins cher encore libre pour chaque samedi de la saison 2026/2027 : choisissez une semaine pour voir tous les appartements libres cette semaine-là.",
     aptsGuides: "Avant de réserver",
+    aptsFaqTitle: "Questions sur la location d'un appartement à Val Thorens",
+    aptsFaq: [
+      { q: `Qui loue ces appartements${nb}?`, a: "SkiShare, une entreprise israélienne qui loue des appartements à Val Thorens. Certains appartements sont les nôtres et nous les gérons nous-mêmes : vous choisissez vos dates. Les autres se louent à la semaine complète, du samedi au samedi. Vous réservez et payez sur ce site." },
+      { q: `Pourquoi la plupart des appartements se louent-ils du samedi au samedi${nb}?`, a: "C'est ainsi que fonctionnent la plupart des agences de Val Thorens : le samedi est le jour des arrivées et des départs, et c'est là que se trouvent la plupart des appartements. Dans nos propres appartements, vous pouvez choisir d'autres dates." },
+      { q: `Combien de personnes peut accueillir un appartement${nb}?`, a: "Chaque appartement indique « jusqu'à X personnes », et c'est le maximum. Lisez la description pour voir comment sont disposés les lits et, en groupe, vérifiez le nombre de salles de bains." },
+      { q: `Que comprend le prix${nb}?`, a: "L'appartement pour tout votre séjour. Chaque ligne est indiquée avant le paiement : les nuits et, le cas échéant, les frais de ménage. Dans la plupart des appartements à la semaine, le linge de lit, les serviettes et le ménage de fin de séjour ne sont pas compris : la description de chaque appartement indique ce qui l'est." },
+      { q: `Comment voir le prix pour mes dates${nb}?`, a: "Indiquez vos dates et le nombre de personnes en haut de cette page. La liste ne garde alors que les appartements libres à ces dates et assez grands pour votre groupe, avec le total de votre séjour." },
+      { q: `Comment payer${nb}?`, a: "Par carte, avec PayPlus. Les frais de carte de 1,9 % s'ajoutent au total et sont indiqués avant le paiement." },
+    ] as { q: string; a: string }[],
     short: {
       "when-to-go": "Quand partir",
       "apartment-prices": "Prix des locations",

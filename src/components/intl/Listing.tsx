@@ -35,6 +35,7 @@ export function ListingView({ lang, items, todayIso, search, taken, checking }: 
           <Crumbs lang={lang} items={[{ label: t.nav.home, href: `/${lang}` }, { label: t.nav.apartments }]} className="mb-3 md:mb-4" />
           <div className="flex flex-col gap-2 min-w-0">
             <h1 className="font-display font-extrabold text-[32px] leading-[1.1] md:text-[44px] tracking-tight text-ink">{t.list.title}</h1>
+            <p className="text-[16px] md:text-[17px] leading-relaxed text-body max-w-[760px]">{t.list.intro}</p>
             <p className="text-[16px] md:text-[17px] text-muted" aria-live="polite">{summary}</p>
           </div>
           <DatesChips lang={lang} todayIso={todayIso} checkin={search.checkin} checkout={search.checkout}
