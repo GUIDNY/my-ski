@@ -82,6 +82,8 @@ function DateField({ id, label, value, onChange, min }: { id: string; label: str
           <span className="text-accent shrink-0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg></span>
         </div>
         <input id={id} type="date" value={value} min={min} onChange={e => onChange(e.target.value)}
+          onClick={e => { try { (e.currentTarget as HTMLInputElement & { showPicker?: () => void }).showPicker?.(); } catch { /* native fallback */ } }}
+          onFocus={e => { try { (e.currentTarget as HTMLInputElement & { showPicker?: () => void }).showPicker?.(); } catch { /* native fallback */ } }}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer appearance-none min-w-0" />
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase-server";
 import { buildGoogleFlightsUrl } from "@/lib/google-flights";
+import { flightSell as sell } from "@/lib/flight-margin";
 import puppeteer, { type Page } from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
 
@@ -8,11 +9,9 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const CACHE_HOURS = 6;
-// What the customer sees = the real scraped price + our handling margin.
-// The cache keeps the RAW price; the margin is added on every answer, so
-// every surface (site booking, bots, quote engine) shows the same number.
-const FLIGHT_MARGIN_EUR = 25;
-const sell = (p: number | null) => (p === null || p === undefined ? null : Number(p) + FLIGHT_MARGIN_EUR);
+// What the customer sees = the real scraped price + our handling margin
+// (lib/flight-margin). The cache keeps the RAW price; the margin is added on
+// every answer, so every surface shows the same number, exactly once.
 
 function isValidAirport(code: string) {
   return /^[A-Z]{3}$/.test(code);

@@ -10,6 +10,7 @@ import { decodeExtras } from "@/lib/quote-extras";
 import { byCode, transferOptions } from "@/lib/transfer-options";
 import { quoteLines } from "@/lib/quote-lines";
 import { AIRPORT_CITY, dayLabel, time24, type DirectFlight, type FlightAirport } from "@/lib/flight-format";
+import { flightSell } from "@/lib/flight-margin";
 import type { Apartment, ProposalBlock, ProposalData, ProposalSection, SkiPass } from "@/types";
 
 const SITE = "https://skisharebook.com";
@@ -59,7 +60,7 @@ export async function buildSiteProposal(one: (k: string) => string): Promise<{ d
   // the cheapest direct flight the site found for these dates (the cache /api/flight-price fills)
   const direct: DirectFlight | null = ((flights ?? []) as { dest: FlightAirport; price_eur: number | null; nonstop: boolean; airline?: string | null; url?: string | null; depart_time?: string | null; arrive_time?: string | null }[])
     .filter(f => f.nonstop && typeof f.price_eur === "number")
-    .map(f => ({ airport: f.dest, city: AIRPORT_CITY[f.dest], price: Number(f.price_eur), airline: f.airline ?? airlineShown, url: f.url ?? null, departTime: f.depart_time ?? outDepart, arriveTime: f.arrive_time ?? outArrive }))
+    .map(f => ({ airport: f.dest, city: AIRPORT_CITY[f.dest], price: Number(flightSell(f.price_eur)), airline: f.airline ?? airlineShown, url: f.url ?? null, departTime: f.depart_time ?? outDepart, arriveTime: f.arrive_time ?? outArrive }))
     .sort((x, y) => x.price - y.price)[0] ?? null;
 
   // the transfer the quote picked, priced live again (the shuttle needs flight numbers, which the link doesn't carry)

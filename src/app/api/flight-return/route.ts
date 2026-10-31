@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { flightSell } from "@/lib/flight-margin";
 import { buildGoogleFlightsUrl, buildGoogleFlightsOneWayUrl } from "@/lib/google-flights";
 import { resultRows, cheapest, pickReturn, type ResultRow } from "@/lib/google-flights-parse";
 import puppeteer, { type ElementHandle, type Page } from "puppeteer-core";
@@ -136,7 +137,7 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({
-      ok: true, nonstop: true, price: out.price, url,
+      ok: true, nonstop: true, price: flightSell(out.price), url,
       outbound: leg(out),
       return: ret ? leg(ret) : null,
       source,
