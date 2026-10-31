@@ -8,6 +8,11 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const CACHE_HOURS = 6;
+// What the customer sees = the real scraped price + our handling margin.
+// The cache keeps the RAW price; the margin is added on every answer, so
+// every surface (site booking, bots, quote engine) shows the same number.
+const FLIGHT_MARGIN_EUR = 25;
+const sell = (p: number | null) => (p === null || p === undefined ? null : Number(p) + FLIGHT_MARGIN_EUR);
 
 function isValidAirport(code: string) {
   return /^[A-Z]{3}$/.test(code);
@@ -193,7 +198,7 @@ export async function GET(req: NextRequest) {
   const complete = cached && cached.price_eur !== null && (!cached.nonstop || cached.depart_time);
   if (cached && complete && Date.now() - new Date(cached.checked_at).getTime() < CACHE_HOURS * 3600_000) {
     return NextResponse.json({
-      price: cached.price_eur, nonstop: cached.nonstop, url: cached.url,
+      price: sell(cached.price_eur), nonstop: cached.nonstop, url: cached.url,
       airline: cached.airline ?? null, departTime: cached.depart_time ?? null, arriveTime: cached.arrive_time ?? null,
       checkedAt: cached.checked_at, cached: true,
     });
@@ -222,14 +227,14 @@ export async function GET(req: NextRequest) {
     }
     // a direct flight found: the CDN keeps this answer for 6 hours (per dates and airport),
     // so the next visitor gets it at once; a "no direct flight" isn't kept (the search can miss one)
-    return NextResponse.json({ price, nonstop, url, airline, departTime, arriveTime, checkedAt, cached: false },
+    return NextResponse.json({ price: sell(price), nonstop, url, airline, departTime, arriveTime, checkedAt, cached: false },
       nonstop ? { headers: { "Cache-Control": "public, s-maxage=21600, stale-while-revalidate=3600" } } : undefined);
   } catch (e) {
     console.error("flight-price scrape failed", e);
     // Serve stale cache rather than nothing, if we have any at all.
     if (cached) {
       return NextResponse.json({
-        price: cached.price_eur, nonstop: cached.nonstop, url: cached.url,
+        price: sell(cached.price_eur), nonstop: cached.nonstop, url: cached.url,
         airline: cached.airline ?? null, departTime: cached.depart_time ?? null, arriveTime: cached.arrive_time ?? null,
         checkedAt: cached.checked_at, cached: true, stale: true,
       });

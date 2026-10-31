@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ProposalView from "./ProposalView";
+import AdminProfit from "./AdminProfit";
 import { createServerClient } from "@/lib/supabase-server";
 import type { ProposalData } from "@/types";
 
@@ -19,5 +20,10 @@ export default async function ProposalPage({ params }: Props) {
   const db = createServerClient();
   const { data: row } = await db.from("proposals").select("id, data, proposal_number, client_name").eq("id", id).maybeSingle();
   if (!row?.data) notFound();
-  return <ProposalView id={id} data={row.data as ProposalData} number={row.proposal_number ?? null} clientName={row.client_name ?? null} />;
+  return (
+    <>
+      <ProposalView id={id} data={row.data as ProposalData} number={row.proposal_number ?? null} clientName={row.client_name ?? null} />
+      <AdminProfit id={id} />
+    </>
+  );
 }
