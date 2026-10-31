@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ProposalView from "@/app/p/[id]/ProposalView";
+import AdminProfitBadge from "@/components/AdminProfitBadge";
 import { createServerClient } from "@/lib/supabase-server";
 import { buildSiteProposal } from "@/lib/site-proposal";
 import { encodeExtras } from "@/lib/quote-extras";
@@ -49,5 +50,11 @@ export default async function ShortQuotePage({ params, searchParams }: Props) {
   const r = await buildSiteProposal(k => choices[k] || "");
   if (!r) notFound();
   const pdfHref = `/api/quote-pdf?${new URLSearchParams({ ...Object.fromEntries(Object.entries(choices).filter(([, v]) => v)), name: String(q.apartment_name || "") }).toString()}`;
-  return <ProposalView id={id} data={r.data} number={id} clientName={null} pdfHref={pdfHref} />;
+  return (
+    <>
+      <ProposalView id={id} data={r.data} number={id} clientName={null} pdfHref={pdfHref} />
+      {/* admin-only: the profit behind this quote (nothing renders for customers) */}
+      <AdminProfitBadge body={{ apartment_id: String(q.apartment_id || ""), apartment: String(q.apartment_name || ""), nights: r.profitHints.nights, aptTotal: r.profitHints.aptTotal, flightQty: r.profitHints.flightQty }} />
+    </>
+  );
 }

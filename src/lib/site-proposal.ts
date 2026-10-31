@@ -163,5 +163,7 @@ export async function buildSiteProposal(one: (k: string) => string): Promise<{ d
     sections,
   };
 
-  return { data, payUrl, guests };
+  // for the admin-only profit badge on /q pages
+  const profitHints = { aptTotal: calc.aptTotal, nights: calc.nights, flightQty: flightLine ? (extras.flight?.qty ?? guests) : 0 };
+  return { data, payUrl, guests, profitHints };
 }
