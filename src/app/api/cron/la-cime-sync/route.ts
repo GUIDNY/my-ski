@@ -8,7 +8,7 @@ const supabase = createClient(
 
 export const maxDuration = 60;
 
-const MARKUP = 1.25;
+const MARKUP = 1.32;
 
 // Every Saturday of the current/upcoming Val Thorens ski season (roughly
 // Nov 28 -> May 3), starting from today if we're already mid-season.

@@ -17,7 +17,7 @@ export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
 const TO_DISCOUNT = 0.85;
-const MARKUP = 1.20;
+const MARKUP = 1.32;
 const sell = (toPrice: number) => Math.round(toPrice * TO_DISCOUNT * MARKUP);
 
 function seasonSaturdays(): Date[] {
