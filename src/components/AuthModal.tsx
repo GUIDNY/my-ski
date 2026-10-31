@@ -141,6 +141,21 @@ export function AuthForm({ onDone, autoFocus = false, titleAs = "h2" }: { onDone
         </button>
       </form>
 
+      {/* quick entry with just the order code — no account needed */}
+      <div className="rounded-2xl bg-soft px-4 py-3.5">
+        <p className="text-[14px] font-bold text-ink mb-2">יש לכם קוד הזמנה? אפשר בלי חשבון</p>
+        <form className="flex gap-2" onSubmit={e => {
+          e.preventDefault();
+          const v = (e.currentTarget.elements.namedItem("quickcode") as HTMLInputElement)?.value.trim();
+          if (v) window.location.href = `/my?code=${encodeURIComponent(v)}`;
+        }}>
+          <input name="quickcode" dir="ltr" placeholder="למשל 25g4pp" autoComplete="off"
+            className="flex-1 min-w-0 rounded-xl border border-line bg-white px-3.5 py-2.5 text-[15px] text-left focus:outline-none focus:ring-2 focus:ring-accent" />
+          <button type="submit" className="rounded-xl bg-ink text-white text-[14px] font-bold px-4 hover:opacity-90 transition">כניסה עם קוד</button>
+        </form>
+        <p className="text-[12px] text-muted mt-1.5">הקוד מופיע במייל האישור של ההזמנה.</p>
+      </div>
+
       <p className="text-[13px] leading-relaxed text-muted text-center">
         בכניסה אתם מסכימים ל<Link href="/terms" className="font-bold text-accent hover:text-accent-hover">תנאי השירות</Link>.
         {" "}<Link href="/delete-account" className="underline hover:text-ink">אפשר למחוק את החשבון בכל עת</Link>.
