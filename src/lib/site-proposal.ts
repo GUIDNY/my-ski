@@ -32,7 +32,7 @@ function describe(desc: string): ProposalBlock[] {
 
 
 
-export async function buildSiteProposal(one: (k: string) => string): Promise<{ data: ProposalData; payUrl: string; guests: number } | null> {
+export async function buildSiteProposal(one: (k: string) => string): Promise<{ data: ProposalData; payUrl: string; guests: number; profitHints: { aptTotal: number; nights: number; flightQty: number } } | null> {
   const apartmentId = one("apartment_id");
   const checkin = one("checkin"), checkout = one("checkout");
   const guests = Math.min(Math.max(parseInt(one("guests")) || 2, 1), 40);
