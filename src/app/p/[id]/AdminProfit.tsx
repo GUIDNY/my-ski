@@ -16,7 +16,7 @@ export default function AdminProfit({ id }: { id: string }) {
   if (!d) return null;
   const f = (n: number) => `€${Math.round(n).toLocaleString("en-US")}`;
   return (
-    <div dir="rtl" className="fixed bottom-4 right-4 z-50 max-w-[300px]">
+    <div dir="rtl" className="fixed bottom-24 right-4 z-[80] max-w-[300px]">
       {open ? (
         <div className="bg-gray-900 text-white rounded-2xl shadow-2xl p-4 text-sm">
           <div className="flex items-center justify-between gap-3 mb-2">

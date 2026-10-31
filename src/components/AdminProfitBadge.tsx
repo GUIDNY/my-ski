@@ -21,7 +21,7 @@ export default function AdminProfitBadge({ body }: { body: Record<string, unknow
   if (!d || !d.lines.length) return null;
   const f = (n: number) => `€${Math.round(n).toLocaleString("en-US")}`;
   return (
-    <div dir="rtl" className="fixed bottom-4 left-4 z-50 max-w-[290px]">
+    <div dir="rtl" className="fixed bottom-24 left-4 z-[80] max-w-[290px]">
       {open ? (
         <div className="bg-gray-900 text-white rounded-2xl shadow-2xl p-4 text-sm">
           <div className="flex items-center justify-between gap-3 mb-2">
