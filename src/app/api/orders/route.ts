@@ -1,4 +1,5 @@
 import { createServerClient } from "@/lib/supabase-server";
+import { couponDiscount, normCode, readCoupons, saveCoupons } from "@/lib/coupons";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/api-auth";
 
@@ -44,6 +45,16 @@ export async function POST(req: NextRequest) {
     customer_email: (b.customer_email || "").toLowerCase(),
     customer_phone: b.customer_phone || "",
   };
+  // a coupon is validated and priced on the server, never trusted from the browser
+  let couponUsed: { code: string; discount: number } | null = null;
+  if (b.coupon && row.total_eur > 0) {
+    const hit = await couponDiscount(db, String(b.coupon), row.total_eur);
+    if (hit) {
+      couponUsed = { code: hit.coupon.code, discount: hit.discount };
+      row.total_eur = Math.max(0, row.total_eur - hit.discount);
+      if (row.share_amount != null && Number(b.shares_total) > 0) row.share_amount = Math.max(0, Math.round(row.total_eur / Number(b.shares_total)));
+    }
+  }
   // Refuse orders for nights that are already taken (Airbnb/Hostex iCal,
   // other site orders, manual owner blocks). Without this, a direct link to
   // an apartment page let customers pay for dates booked elsewhere — only
@@ -70,8 +81,13 @@ export async function POST(req: NextRequest) {
 
   for (let i = 0; i < 5; i++) {
     const c = code();
-    const { data, error } = await db.from("orders").insert({ code: c, ...row }).select("code").single();
-    if (!error && data) return NextResponse.json({ code: data.code }, { status: 201 });
+    const { data, error } = await db.from("orders").insert({ code: c, ...row, ...(couponUsed ? { ops: { x_coupon: couponUsed } } : {}) }).select("code").single();
+    if (!error && data) {
+      if (couponUsed) { // best-effort usage counter
+        try { const all = await readCoupons(db); const i = all.findIndex(x => normCode(x.code) === couponUsed!.code); if (i >= 0) { all[i].uses = (Number(all[i].uses) || 0) + 1; await saveCoupons(db, all); } } catch { /* counter only */ }
+      }
+      return NextResponse.json({ code: data.code, ...(couponUsed ? { coupon_discount: couponUsed.discount, total_eur: row.total_eur } : {}) }, { status: 201 });
+    }
     if (error && !/duplicate|unique/i.test(error.message)) return NextResponse.json({ error: error.message }, { status: 500 });
   }
   return NextResponse.json({ error: "could not allocate code" }, { status: 500 });

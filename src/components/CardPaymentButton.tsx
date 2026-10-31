@@ -34,8 +34,26 @@ const fieldCls = "w-full min-h-[48px] rounded-xl border border-line-strong bg-wh
 const labelCls = "block text-[14px] font-bold text-ink mb-1.5";
 
 export default function CardPaymentButton(p: Props) {
-  const cardFee = Math.round(p.grandTotal * CARD_FEE_PCT);
-  const totalWithFee = p.grandTotal + cardFee;
+  // a quiet coupon line: only who has a code will look for it
+  const [couponOpen, setCouponOpen] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponBusy, setCouponBusy] = useState(false);
+  const [couponErr, setCouponErr] = useState("");
+  const [applied, setApplied] = useState<{ code: string; discount: number; label: string } | null>(null);
+  const applyCoupon = async () => {
+    const code = couponCode.trim();
+    if (!code) return;
+    setCouponBusy(true); setCouponErr("");
+    try {
+      const j = await fetch("/api/coupons/check", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code, total: p.grandTotal }) }).then(r => r.json());
+      if (j.valid) setApplied({ code, discount: j.discount, label: j.label });
+      else { setApplied(null); setCouponErr("הקוד לא מוכר או שפג תוקפו"); }
+    } catch { setCouponErr("לא הצלחנו לבדוק את הקוד כרגע"); }
+    setCouponBusy(false);
+  };
+  const effTotal = Math.max(0, p.grandTotal - (applied?.discount || 0));
+  const cardFee = Math.round(effTotal * CARD_FEE_PCT);
+  const totalWithFee = effTotal + cardFee;
   const [currency, setCurrency] = useState<"EUR" | "ILS">("EUR");
   const [sellRate, setSellRate] = useState<number | null>(null);
   useEffect(() => { fetch("/api/fx").then(r => r.json()).then(d => setSellRate(Number(d.sell) || null)).catch(() => {}); }, []);
@@ -88,6 +106,7 @@ export default function CardPaymentButton(p: Props) {
           transfer_details: p.transferDetails,
           flight: p.flight, flight_price: p.flightPrice, flight_details: p.flightDetails,
           cancel: p.cancel, service: p.service, grand_total: p.grandTotal,
+          coupon: applied?.code || undefined,
           group_id: groupId, share_amount: p.split?.shareAmount, shares_total: p.split?.sharesTotal,
           customer_name: name, customer_email: email, customer_phone: phone,
         }),
@@ -172,6 +191,12 @@ export default function CardPaymentButton(p: Props) {
               {/* fee breakdown */}
               <div className="bg-soft rounded-2xl p-4 text-[15px] flex flex-col gap-2">
                 <div className="flex justify-between text-body"><span>סכום ההזמנה</span><span>€{p.grandTotal.toLocaleString("en-US")}</span></div>
+                {applied && (
+                  <div className="flex justify-between text-ok-text font-bold">
+                    <span>קופון {applied.code} ({applied.label}) <button type="button" onClick={() => { setApplied(null); setCouponCode(""); }} className="text-muted font-normal underline">הסרה</button></span>
+                    <span>−€{applied.discount.toLocaleString("en-US")}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-body"><span>עמלת סליקת אשראי (1.9%)</span><span>€{cardFee.toLocaleString("en-US")}</span></div>
                 <div className="flex justify-between font-bold text-ink border-t border-line pt-2">
                   <span>לתשלום בכרטיס</span>
@@ -181,6 +206,25 @@ export default function CardPaymentButton(p: Props) {
                   <p className="text-[13px] text-muted">החיוב בשקלים לפי שער מזומן{sellRate ? ` (${sellRate.toFixed(3)})` : ""}, בערך €{totalWithFee.toLocaleString("en-US")}</p>
                 )}
               </div>
+
+              {/* the quiet coupon entry */}
+              {!applied && (
+                couponOpen ? (
+                  <div className="flex items-center gap-2">
+                    <input value={couponCode} onChange={e => setCouponCode(e.target.value)} placeholder="קוד קופון" dir="ltr"
+                      onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); applyCoupon(); } }}
+                      className="flex-1 min-h-[42px] rounded-xl border border-line-strong bg-white px-3 text-[15px] text-left focus:outline-none focus:border-accent" />
+                    <button type="button" onClick={applyCoupon} disabled={couponBusy}
+                      className="min-h-[42px] rounded-xl border border-line-strong px-4 text-[14px] font-bold text-body hover:border-ink disabled:opacity-50">
+                      {couponBusy ? "בודק…" : "החלה"}
+                    </button>
+                  </div>
+                ) : (
+                  <button type="button" onClick={() => setCouponOpen(true)}
+                    className="self-start text-[13px] text-muted hover:text-ink underline-offset-2 hover:underline">יש לכם קוד?</button>
+                )
+              )}
+              {couponErr && <p className="text-[13px] text-danger -mt-1">{couponErr}</p>}
 
               {err && <p role="alert" className="text-[15px] text-danger bg-danger-soft rounded-xl px-3.5 py-2.5">{err}</p>}
 

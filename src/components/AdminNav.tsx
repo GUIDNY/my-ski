@@ -41,6 +41,7 @@ const links = [
   { href: "/admin/chats", label: "לידים וצ׳אטים", icon: <IconChat size={18} /> },
   { href: "/admin/proposals", label: "הצעות מחיר (PDF)", icon: <IconDoc size={18} /> },
   { href: "/admin/orders", label: "הזמנות ותשלומים", icon: <IconCalendar size={18} /> },
+  { href: "/admin/coupons", label: "קופונים", icon: <IconDoc size={18} /> },
   { href: "/admin/transfers", label: "הסעות", icon: <IconBus size={18} /> },
 ];
 
