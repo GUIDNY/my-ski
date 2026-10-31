@@ -6,7 +6,7 @@ import { useState } from "react";
  * very bottom. Only someone who got a code from Idan will notice it; a valid
  * code answers with a fresh discounted payment link.
  */
-export default function CouponCorner({ total, description }: { total: number; description: string }) {
+export default function CouponCorner({ total, description, inline }: { total: number; description: string; inline?: boolean }) {
   const [open, setOpen] = useState(false);
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
@@ -23,7 +23,7 @@ export default function CouponCorner({ total, description }: { total: number; de
     setBusy(false);
   };
   return (
-    <div dir="rtl" className="max-w-5xl mx-auto px-4 pb-6 pt-10 text-center">
+    <div dir="rtl" className={inline ? "pt-1" : "max-w-5xl mx-auto px-4 pb-6 pt-10 text-center"}>
       {ok ? (
         <div className="inline-flex flex-col items-center gap-2 rounded-2xl border border-line bg-soft px-5 py-4">
           <p className="text-[14px] font-bold text-ok-text">קופון הוחל: {ok.label} (−€{ok.discount.toLocaleString("en-US")})</p>
@@ -45,7 +45,7 @@ export default function CouponCorner({ total, description }: { total: number; de
         </div>
       ) : (
         <button type="button" onClick={() => setOpen(true)}
-          className="text-[11px] text-muted/50 hover:text-muted transition-colors">קוד</button>
+          className="text-[11px] text-muted/50 hover:text-muted transition-colors">{inline ? "יש קוד?" : "קוד"}</button>
       )}
     </div>
   );

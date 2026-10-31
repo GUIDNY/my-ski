@@ -351,6 +351,7 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
         )}
       </div>
       <p className="text-[13px] text-muted leading-relaxed">תשלום מאובטח ב-PayPlus, עד 3 תשלומים בלי ריבית. בכרטיס נוספת עמלת סליקה של 1.9%.{h.validUntil ? ` ההצעה בתוקף עד ${h.validUntil}, וכפופה לזמינות.` : ""}</p>
+      <CouponCorner total={total} description={data.title || "חופשת סקי בוואל טורנס"} inline />
     </div>
   );
 
