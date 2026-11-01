@@ -15,7 +15,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { data: q } = await db.from("quotes").select("*").eq("id", id).maybeSingle();
   if (!q) return NextResponse.json({ error: "not found" }, { status: 404 });
   const guests = Number(q.guests) || 2;
-  const x = encodeExtras({
+  const b = await req.json().catch(() => ({}));
+  // the flight (and exact extras) live only in the /q link's ?x= — the badge passes it along
+  const xFromLink = typeof b.x === "string" && /^[a-z0-9-]{1,60}$/i.test(b.x) ? b.x : null;
+  const x = xFromLink ?? encodeExtras({
     ...(q.ski_pass ? { pass: { area: "val_thorens" as const, qty: guests } } : {}),
     ...(q.transfer ? { transfer: { qty: guests } } : {}),
     ...(q.equipment ? { equipment: { qty: guests } } : {}),

@@ -16,7 +16,7 @@ export function stripForReplacement(src: ProposalData): ProposalData {
     .map(sec => ({
       ...sec,
       // the price table keeps its ITEMS (לינה, סקי פס, הסעות, ציוד, טיסות) — just without prices
-      heading: /פירוט מחירים/.test(String(sec.heading || "")) ? "מה כלול בחופשה" : sec.heading,
+      heading: /פירוט מחירים|^המחיר$/.test(String(sec.heading || "").trim()) ? "מה כלול בחופשה" : sec.heading,
       blocks: (sec.blocks || []).flatMap(b => {
         if (b.type === "payment") return [];
         if (b.type === "table") {

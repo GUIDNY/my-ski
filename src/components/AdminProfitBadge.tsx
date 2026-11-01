@@ -41,7 +41,8 @@ export default function AdminProfitBadge({ body, quoteId }: { body: Record<strin
           {quoteId && (
             <button onClick={async () => {
               if (!confirm("ליצור גרסת חופשת החזר של ההצעה? (עותק חדש בלי מחירים, המקור לא משתנה)")) return;
-              const r = await authFetch(`/api/admin/quotes/${quoteId}/replacement`, { method: "POST" }).then(x => x.json()).catch(() => null);
+              const xParam = new URLSearchParams(window.location.search).get("x") || undefined;
+              const r = await authFetch(`/api/admin/quotes/${quoteId}/replacement`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ x: xParam }) }).then(x => x.json()).catch(() => null);
               if (r?.url) { try { await navigator.clipboard.writeText(r.url); } catch { /* copy is a bonus */ } window.open(r.url, "_blank"); }
               else alert(r?.error || "לא הצליח");
             }} className="mt-2 w-full rounded-xl border border-gray-700 text-gray-300 hover:text-white hover:border-gray-500 text-[12px] font-bold py-1.5 transition">
