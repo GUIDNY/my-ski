@@ -20,6 +20,8 @@ import familiesEn from "./guides/families.en.json";
 import familiesFr from "./guides/families.fr.json";
 import beginnersEn from "./guides/beginners.en.json";
 import beginnersFr from "./guides/beginners.fr.json";
+import packingEn from "./guides/packing.en.json";
+import packingFr from "./guides/packing.fr.json";
 
 /*
  * The guides of /en/guide and /fr/guide: one JSON file per guide and
@@ -50,7 +52,7 @@ export type IntlGuidePage = IntlGuide & { slug: string; pair: GuidePair };
 const ALL: IntlGuide[] = [
   whenToGoEn, whenToGoFr, apartmentPricesEn, apartmentPricesFr, skiPassEn, skiPassFr,
   whereToStayEn, whereToStayFr, gettingThereEn, gettingThereFr, weatherEn, weatherFr,
-  pistesEn, pistesFr, apresSkiEn, apresSkiFr, familiesEn, familiesFr, beginnersEn, beginnersFr,
+  pistesEn, pistesFr, apresSkiEn, apresSkiFr, familiesEn, familiesFr, beginnersEn, beginnersFr, packingEn, packingFr,
 ] as IntlGuide[];
 
 /** The guides in this language, in the order of GUIDE_PAIRS. */
@@ -78,6 +80,7 @@ const RELATED: Record<string, string[]> = {
   "apres-ski": ["where-to-stay", "apartment-prices", "pistes"],
   families: ["where-to-stay", "ski-pass", "when-to-go"],
   beginners: ["ski-pass", "pistes", "when-to-go"],
+  packing: ["weather", "beginners", "families"],
 };
 
 export function relatedIntlGuides(lang: Lang, key: string, n = 3): IntlGuidePage[] {

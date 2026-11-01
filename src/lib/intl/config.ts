@@ -67,6 +67,7 @@ export const GUIDE_PAIRS: readonly GuidePair[] = [
   { key: "apres-ski", en: "val-thorens-apres-ski", fr: "apres-ski-val-thorens", he: "אפרה-סקי-ומסעדות-בואל-טורנס" },
   { key: "families", en: "val-thorens-with-kids", fr: "val-thorens-en-famille", he: "ואל-טורנס-למשפחות" },
   { key: "beginners", en: "val-thorens-for-beginners", fr: "ski-debutant-val-thorens", he: "חופשת-סקי-ראשונה" },
+  { key: "packing", en: "what-to-pack-for-a-ski-holiday", fr: "que-mettre-dans-sa-valise-ski", he: "מה-לארוז-לחופשת-סקי" },
 ];
 
 /** The pair of the guide with this address in this language (a Hebrew slug may still be percent-encoded). */

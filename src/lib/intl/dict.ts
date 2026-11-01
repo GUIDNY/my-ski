@@ -336,6 +336,7 @@ const en = {
       "apres-ski": "Après-ski and restaurants",
       families: "Val Thorens with kids",
       beginners: "First ski holiday",
+      packing: "What to pack",
     } as Record<string, string>,
   },
 };
@@ -666,6 +667,7 @@ const fr: Dict = {
       "apres-ski": "Après-ski et restaurants",
       families: "Val Thorens en famille",
       beginners: "Ski débutant",
+      packing: "La valise ski",
     },
   },
 };
