@@ -33,6 +33,14 @@ export default function AdminProfit({ id }: { id: string }) {
             <span>סה״כ רווח</span><span className="text-emerald-400">{f(d.totalProfit)}</span>
           </div>
           <div className="text-[11px] text-gray-500 mt-1">מתוך הצעה של {f(d.grandTotal)} · {d.note}</div>
+          <button onClick={async () => {
+            if (!confirm("ליצור גרסת חופשת החזר של ההצעה? (עותק חדש בלי מחירים, המקור לא משתנה)")) return;
+            const r = await authFetch(`/api/admin/proposals/${id}/replacement`, { method: "POST" }).then(x => x.json()).catch(() => null);
+            if (r?.url) { try { await navigator.clipboard.writeText(r.url); } catch { /* copy is a bonus */ } window.open(r.url, "_blank"); }
+            else alert(r?.error || "לא הצליח");
+          }} className="mt-2 w-full rounded-xl border border-gray-700 text-gray-300 hover:text-white hover:border-gray-500 text-[12px] font-bold py-1.5 transition">
+            🔁 גרסת חופשת החזר (בלי מחירים)
+          </button>
         </div>
       ) : (
         <button onClick={() => setOpen(true)} className="bg-gray-900 text-emerald-400 font-black rounded-full shadow-xl px-4 py-2 text-sm">💰 {f(d.totalProfit)}</button>

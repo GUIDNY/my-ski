@@ -136,6 +136,9 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
   const equipNow = addEquip ? equipCost(skiDays) * Math.min(Math.max(equipQty, 1), guests) : 0;
   const total = baseTotal + lines.reduce((sum, l) => sum + nowOf(l) - l.amount, 0) + equipNow;
   const perPerson = total / guests;
+  // replacement vacation (חופשת החזר): a quote with no prices and no payment —
+  // it stands in for a vacation that was cancelled in 2026
+  const repl = (data as { replacement2026?: boolean }).replacement2026 === true;
   // one person's share: the shared part (apartment, a private car, cancellation...) split equally,
   // plus the add-ons this person takes (when only some of the group take one, each pays their own)
   const mineItems = [
@@ -355,6 +358,19 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
     </div>
   );
 
+  const replPanel = (
+    <div className="flex flex-col gap-4">
+      <div className="rounded-2xl bg-accent-soft border border-accent/20 p-4">
+        <p className="text-[17px] font-bold text-ink mb-1">🔁 חופשה חלופית</p>
+        <p className="text-[15px] text-body leading-relaxed">חופשה זו היא חלופה לחופשה שבוטלה ב-2026.</p>
+      </div>
+      <ul className="flex flex-col gap-2 text-[14px] text-muted">
+        <li>הפרטים המלאים של החופשה מופיעים בעמוד זה.</li>
+        <li>לכל שאלה או התאמה אפשר לכתוב לנו בוואטסאפ.</li>
+      </ul>
+    </div>
+  );
+
   return (
     <div className="bg-white text-ink" dir="rtl">
       <div className={`${wrap} pt-5 md:pt-7`}>
@@ -362,7 +378,7 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
         <div className="flex flex-wrap items-end justify-between gap-4 mt-3 md:mt-4">
           <div className="flex flex-col gap-2 min-w-0">
             <span className="self-start inline-flex items-center rounded-full bg-accent-soft text-accent text-[13px] font-bold px-3 py-1">
-              {forName ? `הצעת מחיר עבור ${forName}` : "הצעת מחיר אישית"}{number ? ` · ${number}` : ""}
+              {repl ? (forName ? `חופשת החזר עבור ${forName}` : "חופשת החזר") : (forName ? `הצעת מחיר עבור ${forName}` : "הצעת מחיר אישית")}{number ? ` · ${number}` : ""}
             </span>
             <h1 className={h1}>{data.title}</h1>
             <span className="text-[16px] md:text-[17px] text-muted">ואל טורנס, צרפת</span>
@@ -431,26 +447,26 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
               <Link href="/terms" target="_blank" className={`${btn.link} mt-3`}>התקנון המלא ומדיניות הביטולים ‹</Link>
             </details>
           )}
-          <section id="pay" className={`lg:hidden ${card} p-5 scroll-mt-24`}>{payPanel}</section>
+          <section id="pay" className={`lg:hidden ${card} p-5 scroll-mt-24`}>{repl ? replPanel : payPanel}</section>
         </div>
 
         <aside aria-label="סיכום ההצעה" className="hidden lg:block w-[380px] shrink-0 sticky top-[96px] bg-white border border-line rounded-[24px] shadow-card p-6">
-          <p className="text-[18px] font-bold text-ink mb-4">ההצעה שלכם</p>
-          {payPanel}
+          <p className="text-[18px] font-bold text-ink mb-4">{repl ? "חופשת החזר" : "ההצעה שלכם"}</p>
+          {repl ? replPanel : payPanel}
         </aside>
       </div>
 
-      <div className="lg:hidden sticky bottom-0 z-40 bg-white border-t border-line px-4 pt-3 flex items-center gap-3"
+      {!repl && <div className="lg:hidden sticky bottom-0 z-40 bg-white border-t border-line px-4 pt-3 flex items-center gap-3"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 12px)", boxShadow: "0 -8px 24px rgba(11,27,51,0.08)" }}>
         <div className="flex flex-col leading-tight min-w-0">
           <span className="flex items-baseline gap-1"><span className="font-display font-extrabold text-[22px] text-ink tabular-nums">{eur(perPerson)}</span><span className="text-[13px] text-muted">לאדם</span></span>
           <span className="text-[12px] text-muted tabular-nums">{eur(total)} לכל החבורה</span>
         </div>
         <a href="#pay" className={`${btn.primary} flex-1`}>לתשלום</a>
-      </div>
+      </div>}
 
       {/* a very quiet coupon entry, at the very bottom on purpose */}
-      <CouponCorner total={total} description={data.title || "חופשת סקי בוואל טורנס"} />
+      {!repl && <CouponCorner total={total} description={data.title || "חופשת סקי בוואל טורנס"} />}
 
       <Lightbox imgs={imgs} index={lightbox} setIndex={setLightbox} name={data.title} />
     </div>

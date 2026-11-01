@@ -54,7 +54,7 @@ export default async function ShortQuotePage({ params, searchParams }: Props) {
     <>
       <ProposalView id={id} data={r.data} number={id} clientName={null} pdfHref={pdfHref} />
       {/* admin-only: the profit behind this quote (nothing renders for customers) */}
-      <AdminProfitBadge body={{ apartment_id: String(q.apartment_id || ""), apartment: String(q.apartment_name || ""), nights: r.profitHints.nights, aptTotal: r.profitHints.aptTotal, flightQty: r.profitHints.flightQty }} />
+      <AdminProfitBadge quoteId={id} body={{ apartment_id: String(q.apartment_id || ""), apartment: String(q.apartment_name || ""), nights: r.profitHints.nights, aptTotal: r.profitHints.aptTotal, flightQty: r.profitHints.flightQty }} />
     </>
   );
 }
