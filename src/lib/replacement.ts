@@ -11,22 +11,24 @@ export function stripForReplacement(src: ProposalData): ProposalData {
   if (data.hero) { delete data.hero.perPerson; delete data.hero.total; }
   delete (data as { upgrades?: unknown }).upgrades;
   const PRICEY = /€|יורו|₪|מחיר|לתשלום|תשלום|עלות/;
+  const noPrice = (t: string) => String(t || "").replace(/[-–·,]?\s*(?:€|EUR)\s*[\d,.]+|[\d,.]+\s*(?:€|יורו|₪|ש"ח)/g, "").replace(/\s{2,}/g, " ").trim();
   data.sections = ((data.sections || [])
-    // the whole price-breakdown section goes
-    .filter(sec => !/פירוט מחירים|מחיר|תשלום/.test(String(sec.heading || "")))
     .map(sec => ({
       ...sec,
-      blocks: (sec.blocks || []).filter(b => {
-        if (b.type === "payment") return false;
-        if (b.type === "table" && PRICEY.test(JSON.stringify(b))) return false;
-        if (b.type === "note" && PRICEY.test(String((b as { text?: string }).text || ""))) return false;
-        return true;
-      }).map(b => {
-        if (b.type === "summary" || b.type === "kv") {
-          const rows = ((b as { rows?: string[][] }).rows || []).filter(r => !PRICEY.test(r.join(" ")));
-          return { ...b, rows };
+      // the price table keeps its ITEMS (לינה, סקי פס, הסעות, ציוד, טיסות) — just without prices
+      heading: /פירוט מחירים/.test(String(sec.heading || "")) ? "מה כלול בחופשה" : sec.heading,
+      blocks: (sec.blocks || []).flatMap(b => {
+        if (b.type === "payment") return [];
+        if (b.type === "table") {
+          const items = ((b as { rows?: string[][] }).rows || []).map(r => noPrice(r[0])).filter(Boolean);
+          return items.length ? [{ type: "list", items } as never] : [];
         }
-        return b;
+        if (b.type === "note" && PRICEY.test(String((b as { text?: string }).text || ""))) return [];
+        if (b.type === "summary" || b.type === "kv") {
+          const rows = ((b as { rows?: string[][] }).rows || []).map(r => r.map(noPrice)).filter(r => r[1] !== "" && !PRICEY.test(r.join(" ")));
+          return [{ ...b, rows } as never];
+        }
+        return [b];
       }),
     }))
     .filter(sec => (sec.blocks || []).length > 0)) as ProposalData["sections"];
