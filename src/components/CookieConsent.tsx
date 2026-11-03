@@ -35,7 +35,7 @@ export default function CookieConsent() {
   }, [pathname]);
 
   // /en and /fr show their own notice (components/intl/IntlCookieNotice.tsx)
-  if (!show || ["/admin", "/quote/print", "/en", "/fr"].some(h => pathname === h || pathname?.startsWith(h + "/"))) return null;
+  if (!show || ["/admin", "/seller", "/quote/print", "/en", "/fr"].some(h => pathname === h || pathname?.startsWith(h + "/"))) return null;
 
   return (
     <div dir="rtl" role="region" aria-label="עוגיות"

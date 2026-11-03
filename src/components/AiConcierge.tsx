@@ -20,7 +20,7 @@ type Answer = {
 
 // admin/auth/checkout screens don't need the customer-facing chat launcher;
 // the English and French site (/en, /fr) has no Hebrew chat
-const HIDDEN = ["/admin", "/auth", "/pay", "/quote", "/q", "/p", "/en", "/fr"];
+const HIDDEN = ["/admin", "/seller", "/auth", "/pay", "/quote", "/q", "/p", "/en", "/fr"];
 
 const WELCOME: Message[] = [
   { role: "assistant", text: "היי, כאן SkiShare" },

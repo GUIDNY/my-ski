@@ -10,7 +10,11 @@ export default function AuthPage() {
     <div className="flex-1 bg-soft flex items-start md:items-center justify-center px-4 py-8 md:py-16" dir="rtl">
       <div className="w-full max-w-[460px] flex flex-col gap-4">
         <div className="bg-white rounded-card border border-line px-5 py-8 md:px-8 md:py-10">
-          <AuthForm titleAs="h1" onDone={() => router.push("/my")} />
+          <AuthForm titleAs="h1" onDone={() => {
+            // back to the team area the visitor came from (/auth?next=/seller); anything else goes to /my
+            const next = new URLSearchParams(window.location.search).get("next") || "";
+            router.push(/^\/(seller|admin)(\/[a-z-]*)?$/.test(next) ? next : "/my");
+          }} />
         </div>
 
         {/* a guest with an order code sees the order without an account (/my?code=…) */}

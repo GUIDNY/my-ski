@@ -1,0 +1,17 @@
+name: Seller alerts (Telegram)
+
+# Every 5 minutes: asks the site to tell the sellers on Telegram about new leads
+# and quotes that were just sent (src/app/api/cron/seller-alerts). Vercel's Hobby
+# crons run only once a day, so the schedule lives here.
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Check for new leads and quotes
+        run: curl -sS --max-time 90 https://skisharebook.com/api/cron/seller-alerts

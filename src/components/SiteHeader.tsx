@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase-client";
 import { isAdminEmail } from "@/lib/admins";
+import { isSellerEmail } from "@/lib/sellers";
 import { helperWaHref, OPEN_CHAT_EVENT } from "@/lib/helper-whatsapp";
 import AuthModal from "./AuthModal";
 
@@ -24,7 +25,7 @@ const NAV = [
 ];
 
 // screens with their own frame (/en and /fr: the English and French site) or a printable page
-const HIDDEN = ["/admin", "/quote/print", "/en", "/fr"];
+const HIDDEN = ["/admin", "/seller", "/quote/print", "/en", "/fr"];
 
 export function Brand({ white = false, small = false }: { white?: boolean; small?: boolean }) {
   return (
@@ -101,6 +102,7 @@ export default function SiteHeader() {
   if (HIDDEN.some(h => pathname === h || pathname.startsWith(h + "/"))) return null;
 
   const isAdmin = isAdminEmail(user?.email) || user?.app_metadata?.role === "admin";
+  const isSeller = !isAdmin && isSellerEmail(user?.email);
   const openChat = () => { setMenu(false); window.dispatchEvent(new Event(OPEN_CHAT_EVENT)); };
   const login = () => { setMenu(false); setShowAuth(true); };
 
@@ -135,6 +137,9 @@ export default function SiteHeader() {
             </a>
             {isAdmin && (
               <Link href="/admin" className="inline-flex items-center min-h-[40px] px-3.5 rounded-full bg-soft text-ink text-[14px] font-bold hover:bg-soft-2 transition-colors">ניהול</Link>
+            )}
+            {isSeller && (
+              <Link href="/seller" className="inline-flex items-center min-h-[40px] px-3.5 rounded-full bg-soft text-ink text-[14px] font-bold hover:bg-soft-2 transition-colors">אזור מכירות</Link>
             )}
             {user ? (
               <Link href="/my" className="inline-flex items-center gap-2 min-h-[44px] px-4 rounded-full border border-line-strong text-ink text-[15px] font-bold hover:border-ink transition-colors">
@@ -193,6 +198,9 @@ export default function SiteHeader() {
                   )}
                   {isAdmin && (
                     <Link href="/admin" onClick={() => setMenu(false)} className="col-span-2 flex items-center justify-center min-h-[48px] rounded-[14px] bg-soft text-ink font-bold">ניהול</Link>
+                  )}
+                  {isSeller && (
+                    <Link href="/seller" onClick={() => setMenu(false)} className="col-span-2 flex items-center justify-center min-h-[48px] rounded-[14px] bg-soft text-ink font-bold">אזור מכירות</Link>
                   )}
                   <button type="button" onClick={openChat} className="flex items-center justify-center gap-2 min-h-[48px] rounded-[14px] bg-accent text-white font-bold">
                     <IcoChat />צ&apos;אט

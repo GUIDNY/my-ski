@@ -7,7 +7,7 @@ import { authFetch } from "@/lib/auth-fetch";
  * body = what to POST to /api/admin/quote-profit; renders nothing for non-admins.
  */
 export default function AdminProfitBadge({ body, quoteId }: { body: Record<string, unknown>; quoteId?: string }) {
-  const [d, setD] = useState<{ lines: { label: string; profit: number | null }[]; totalProfit: number; note: string } | null>(null);
+  const [d, setD] = useState<{ lines: { label: string; profit: number | null }[]; totalProfit: number; note: string; share?: { rate: number; amount: number } | null; admin?: boolean } | null>(null);
   const [open, setOpen] = useState(false);
   const key = JSON.stringify(body);
   useEffect(() => {
@@ -25,7 +25,7 @@ export default function AdminProfitBadge({ body, quoteId }: { body: Record<strin
       {open ? (
         <div className="bg-gray-900 text-white rounded-2xl shadow-2xl p-4 text-sm">
           <div className="flex items-center justify-between gap-3 mb-2">
-            <b>💰 רווח משוער (רק אתה רואה)</b>
+            <b>{d.share ? "💰 רווח משוער (רק הצוות רואה)" : "💰 רווח משוער (רק אתה רואה)"}</b>
             <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-white">—</button>
           </div>
           {d.lines.map((l, i) => (
@@ -37,8 +37,13 @@ export default function AdminProfitBadge({ body, quoteId }: { body: Record<strin
           <div className="flex justify-between gap-3 border-t border-gray-700 mt-2 pt-2 font-black">
             <span>סה״כ רווח</span><span className="text-emerald-400">{f(d.totalProfit)}</span>
           </div>
+          {d.share && (
+            <div className="flex justify-between gap-3 mt-1 font-black text-amber-300">
+              <span>החלק שלך ({Math.round(d.share.rate * 100)}%)</span><span>{f(d.share.amount)}</span>
+            </div>
+          )}
           <div className="text-[11px] text-gray-500 mt-1">{d.note}</div>
-          {quoteId && (
+          {quoteId && d.admin !== false && (
             <button onClick={async () => {
               if (!confirm("ליצור גרסת חופשת החזר של ההצעה? (עותק חדש בלי מחירים, המקור לא משתנה)")) return;
               const xParam = new URLSearchParams(window.location.search).get("x") || undefined;
@@ -51,7 +56,7 @@ export default function AdminProfitBadge({ body, quoteId }: { body: Record<strin
           )}
         </div>
       ) : (
-        <button onClick={() => setOpen(true)} className="bg-gray-900 text-emerald-400 font-black rounded-full shadow-xl px-4 py-2 text-sm">💰 {f(d.totalProfit)}</button>
+        <button onClick={() => setOpen(true)} className="bg-gray-900 text-emerald-400 font-black rounded-full shadow-xl px-4 py-2 text-sm">💰 {f(d.totalProfit)}{d.share ? ` · שלך ${f(d.share.amount)}` : ""}</button>
       )}
     </div>
   );
