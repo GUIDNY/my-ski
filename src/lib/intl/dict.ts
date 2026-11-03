@@ -338,6 +338,7 @@ const en = {
       beginners: "First ski holiday",
       packing: "What to pack",
       compare: "Val Thorens, Méribel or Courchevel",
+      groups: "Ski trip with friends",
     } as Record<string, string>,
   },
 };
@@ -670,6 +671,7 @@ const fr: Dict = {
       beginners: "Ski débutant",
       packing: "La valise ski",
       compare: "Val Thorens, Méribel ou Courchevel",
+      groups: "Ski entre amis",
     },
   },
 };

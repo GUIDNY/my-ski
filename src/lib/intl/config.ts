@@ -69,6 +69,7 @@ export const GUIDE_PAIRS: readonly GuidePair[] = [
   { key: "beginners", en: "val-thorens-for-beginners", fr: "ski-debutant-val-thorens", he: "חופשת-סקי-ראשונה" },
   { key: "packing", en: "what-to-pack-for-a-ski-holiday", fr: "que-mettre-dans-sa-valise-ski", he: "מה-לארוז-לחופשת-סקי" },
   { key: "compare", en: "val-thorens-vs-meribel-vs-courchevel", fr: "val-thorens-meribel-ou-courchevel", he: "ואל-טורנס-מול-קורשבל-ומריבל" },
+  { key: "groups", en: "val-thorens-ski-trip-with-friends", fr: "ski-entre-amis-val-thorens", he: "חופשת-סקי-לקבוצות-בואל-טורנס" },
 ];
 
 /** The pair of the guide with this address in this language (a Hebrew slug may still be percent-encoded). */
