@@ -94,6 +94,17 @@ export async function GET(req: NextRequest) {
   if (process.env.CRON_SECRET && auth !== `Bearer ${process.env.CRON_SECRET}`) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const started = Date.now();
   const maxNew = Math.min(Number(req.nextUrl.searchParams.get("import") ?? 12) || 0, 40);
+  // Vercel kills the function at maxDuration (60s) with no chance to write the sync_log row.
+  // The per-task time checks below only stop NEW tasks from starting; a task that started at 44s
+  // can still spend ~70s on the lot page + two Gemini calls. So the optional steps (3 and 4) are
+  // raced against a hard deadline: whatever is still running is left behind and the run is logged.
+  const DEADLINE_MS = 50000;
+  let cutShort = false;
+  const beforeDeadline = async <T,>(p: Promise<T>): Promise<void> => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const late = new Promise<void>(r => { timer = setTimeout(() => { cutShort = true; r(); }, Math.max(0, DEADLINE_MS - (Date.now() - started))); });
+    try { await Promise.race([p.then(() => undefined, () => undefined), late]); } finally { clearTimeout(timer); }
+  };
 
   let login: Awaited<ReturnType<typeof vtiLogin>>;
   try { login = await vtiLogin(); } catch (e) {
@@ -141,7 +152,7 @@ export async function GET(req: NextRequest) {
   const refresh = new Set((req.nextUrl.searchParams.get("refresh") || "").split(",").map(x => x.trim()).filter(Boolean));
   const fresh = [...byRef.values()].filter(e => !have.has(e.offer.ref) || refresh.has(e.offer.ref)).sort((a, b) => Number(refresh.has(b.offer.ref)) - Number(refresh.has(a.offer.ref)) || b.weeks.length - a.weeks.length);
   let added = 0; const addErrors: string[] = [];
-  await pool(fresh.slice(0, maxNew), 4, async ({ offer, weeks: w }) => {
+  await beforeDeadline(pool(fresh.slice(0, maxNew), 4, async ({ offer, weeks: w }) => {
     if (Date.now() - started > 45000) return;
     try {
       const det = await vtiFetch(pub, "/fr-FR/Lot/Detail", {
@@ -170,15 +181,15 @@ export async function GET(req: NextRequest) {
         : await db.from("apartments").insert(row);
       if (error) addErrors.push(`${offer.ref}: ${error.message}`); else added++;
     } catch (e) { addErrors.push(`${offer.ref}: ${e instanceof Error ? e.message : "error"}`); }
-  });
+  }));
 
   // 4) weekly apartments still without a title (also La Cime's): up to 80 per run, until all have one
   let titled = 0;
   const wantTitles = Math.min(Number(req.nextUrl.searchParams.get("titles") ?? 80) || 0, 80);
-  if (wantTitles && Date.now() - started < 40000) {
+  if (wantTitles && !cutShort && Date.now() - started < 40000) {
     const { data: plain } = await db.from("apartments").select("id,name,type,description").eq("source", "la_cime").limit(400);
     const todo = (plain ?? []).filter(a => String(a.name).split(/\s+[—–-]\s+/).length < 3 && a.description).slice(0, wantTitles);
-    await pool(todo, 8, async a => {
+    await beforeDeadline(pool(todo, 8, async a => {
       if (Date.now() - started > 52000) return;
       const parts = String(a.name).split(/\s+[—–-]\s+/);
       const code = parts[parts.length - 1];
@@ -186,11 +197,11 @@ export async function GET(req: NextRequest) {
       if (!t) return;
       const { error } = await db.from("apartments").update({ name: nameWith(parts[0], t, code) }).eq("id", a.id);
       if (!error) titled++;
-    });
+    }));
   }
 
   const summary = {
-    titled,
+    titled, cutShort,
     weeks: weeks.length, failed, lotsSeen: byRef.size, updated, added,
     waiting: Math.max(0, fresh.length - added), errors: addErrors.slice(0, 8), ms: Date.now() - started,
   };
