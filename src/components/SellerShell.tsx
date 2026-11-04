@@ -46,7 +46,7 @@ export default function SellerShell({ children }: { children: React.ReactNode })
 
   const nav = (
     <nav className="flex-1 py-4 px-3 space-y-1">
-      {LINKS.map(l => {
+      {[...LINKS, ...(who.admin ? [{ href: "/seller/assign", label: "חלוקת לידים", icon: "🔀" }] : [])].map(l => {
         const active = l.href === "/seller" ? pathname === "/seller" : pathname.startsWith(l.href);
         return (
           <a key={l.href} href={l.href} onClick={() => setOpen(false)}

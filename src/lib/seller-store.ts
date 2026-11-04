@@ -11,12 +11,19 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  *   sellers[email].customers  his saved customers: star, note (by phone)
  *   orders[code].seller       Idan's override: an email = his, "" = nobody's, missing = automatic
  *   orders[code].profit       Idan's override of the order's profit (€), when the estimate is off
+ *   leads[lead]               Idan's assignment of a lead: seller email ("" = nobody), its phone, when
+ *   autoAssign                new leads from `since` on go to this seller by themselves (lib/seller-leads)
  */
 export type Touch = { phone: string; at: string };
 export type SavedCustomer = { name?: string; note?: string; saved?: boolean; at: string };
 export type SellerData = { telegram?: number; touched: Record<string, Touch>; customers: Record<string, SavedCustomer> };
 export type OrderOverride = { seller?: string; profit?: number };
-export type SellerConfig = { sellers: Record<string, SellerData>; orders: Record<string, OrderOverride> };
+export type LeadAssign = { seller: string; phone: string; at: string };
+export type AutoAssign = { seller: string; since: string };
+export type SellerConfig = {
+  sellers: Record<string, SellerData>; orders: Record<string, OrderOverride>;
+  leads: Record<string, LeadAssign>; autoAssign?: AutoAssign;
+};
 
 const JOB = "seller_config";
 const KEEP = 30;
@@ -25,7 +32,11 @@ export async function readSellerConfig(db: SupabaseClient): Promise<SellerConfig
   const { data } = await db.from("sync_log").select("detail").eq("job", JOB)
     .order("id", { ascending: false }).limit(1).maybeSingle();
   const d = (data?.detail ?? {}) as Partial<SellerConfig>;
-  return { sellers: d.sellers && typeof d.sellers === "object" ? d.sellers : {}, orders: d.orders && typeof d.orders === "object" ? d.orders : {} };
+  const obj = <T,>(x: unknown): Record<string, T> => (x && typeof x === "object" ? x as Record<string, T> : {});
+  return {
+    sellers: obj<SellerData>(d.sellers), orders: obj<OrderOverride>(d.orders), leads: obj<LeadAssign>(d.leads),
+    ...(d.autoAssign?.seller ? { autoAssign: d.autoAssign } : {}),
+  };
 }
 
 export function sellerData(cfg: SellerConfig, email: string): SellerData {

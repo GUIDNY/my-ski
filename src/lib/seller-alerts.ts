@@ -2,21 +2,23 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { chatAdmin } from "@/lib/helper-chat";
 import { SELLERS, phoneDigits } from "@/lib/sellers";
 import { readSellerConfig, sellerData } from "@/lib/seller-store";
+import { leadOwner } from "@/lib/seller-leads";
 import { apartmentsForProfit, profitFromData } from "@/lib/proposal-profit";
 import { telegramSend } from "@/lib/telegram";
 import { SITE } from "@/lib/site";
 
 /*
  * The seller alerts, run every few minutes by /api/cron/seller-alerts: compares the
- * leads in n8n with the last check, and tells the sellers on Telegram about a new
- * conversation (WhatsApp or the site chat) and about a quote that was just sent,
- * with its profit and his share. The last check is the latest sync_log row with
+ * leads in n8n with the last check, and tells the lead's seller (lib/seller-leads:
+ * assigned, written to, or auto-assigned) on Telegram about a new conversation
+ * (WhatsApp or the site chat) and about a quote that was just sent, with its profit
+ * and his share. A lead nobody owns yet goes to every seller (first one to answer takes it). The last check is the latest sync_log row with
  * job='seller_alerts'; the first run only learns what exists.
  */
 const JOB = "seller_alerts";
 const MAX_ALERTS = 12;
 
-type Lead = { lead: string; channel: string; phone: string; name: string; lastMessage: string; quotes: number; lastQuote: string; lastTotal: number };
+type Lead = { lead: string; channel: string; phone: string; name: string; firstAt?: string; lastMessage: string; quotes: number; lastQuote: string; lastTotal: number };
 
 const eur = (n: number) => `€${Math.round(n).toLocaleString("en-US")}`;
 const showPhone = (p: string) => p.startsWith("972") ? "0" + p.slice(3).replace(/^(\d{2})(\d{3})(\d+)$/, "$1-$2-$3") : p ? "+" + p : "";
@@ -66,14 +68,14 @@ export async function checkSellerAlerts(db: SupabaseClient): Promise<Record<stri
   }
 
   // each alert: its lines, the profit behind it when it's a quote (the share is per seller), and a link
-  type Alert = { lines: string[]; profit: number | null; link: string };
+  type Alert = { lines: string[]; profit: number | null; link: string; owner: string | null };
   const alerts: Alert[] = [];
   const whoOf = (l: Lead) => [l.name?.trim(), showPhone(l.phone)].filter(Boolean).join(" · ") || "גולש באתר";
   const chatLink = (l: Lead) => `${SITE}/seller/chats?lead=${encodeURIComponent(l.lead)}`;
   for (const l of fresh.filter(x => !quotedAll.includes(x))) {
     alerts.push({
       lines: [`💬 ליד חדש ${l.channel === "web" ? "בצ׳אט באתר" : "בוואטסאפ"}`, whoOf(l), ...(l.lastMessage ? [`"${l.lastMessage.slice(0, 200)}"`] : [])],
-      profit: null, link: chatLink(l),
+      profit: null, link: chatLink(l), owner: leadOwner(cfg, l).seller,
     });
   }
   for (const l of quotedAll) {
@@ -82,17 +84,19 @@ export async function checkSellerAlerts(db: SupabaseClient): Promise<Record<stri
     alerts.push({
       lines: [`📄 נשלחה הצעת מחיר${prev[l.lead] === undefined ? " (ליד חדש)" : ""}`, whoOf(l), quoteSummary(l.lastQuote || "", Number(l.lastTotal) || 0)].filter(Boolean),
       profit: pr && pr.lines.length ? pr.totalProfit : null,
-      link: p ? `${SITE}/p/${p.id}` : chatLink(l),
+      link: p ? `${SITE}/p/${p.id}` : chatLink(l), owner: leadOwner(cfg, l).seller,
     });
   }
 
   let sent = 0;
   for (const { seller, chat } of to) {
-    for (const a of alerts.slice(0, MAX_ALERTS)) {
+    const mine = alerts.filter(a => a.owner === seller.email || !a.owner);
+    for (const a of mine.slice(0, MAX_ALERTS)) {
       const money = a.profit != null ? [`רווח משוער ${eur(a.profit)} · החלק שלך ${eur(a.profit * seller.share)}`] : [];
-      if (await telegramSend(chat, [...a.lines, ...money, a.link].join("\n"))) sent++;
+      const free = !a.owner ? ["🟢 פנוי: מי שעונה ראשון מקבל אותו"] : [];
+      if (await telegramSend(chat, [...a.lines, ...free, ...money, a.link].join("\n"))) sent++;
     }
-    if (alerts.length > MAX_ALERTS) await telegramSend(chat, `ועוד ${alerts.length - MAX_ALERTS} עדכונים: ${SITE}/seller/chats`);
+    if (mine.length > MAX_ALERTS) await telegramSend(chat, `ועוד ${mine.length - MAX_ALERTS} עדכונים: ${SITE}/seller/chats`);
   }
 
   if (fresh.length || quoted.length) {

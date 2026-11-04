@@ -1,13 +1,14 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { SELLERS, phoneDigits } from "@/lib/sellers";
-import { readSellerConfig, sellerData, type SellerConfig } from "@/lib/seller-store";
+import { leadList, phoneOwners, type LeadRow } from "@/lib/seller-leads";
+import { readSellerConfig, type SellerConfig } from "@/lib/seller-store";
 import { apartmentsForProfit, profitFromData } from "@/lib/proposal-profit";
 
 /*
  * Whose order is it, and how much did we make on it.
  * - owner: Idan's choice when he set one (orders[code].seller: an email, or "" for nobody);
- *   otherwise automatic: the seller who wrote to that phone (from the seller area)
- *   BEFORE the order was made.
+ *   otherwise automatic: the seller whose lead that phone is (lib/seller-leads: assigned,
+ *   written to, or auto-assigned), when the order came after the conversation started.
  * - profit: Idan's number when he set one; otherwise the estimate from the order's
  *   proposal (lib/proposal-profit); site orders without a proposal wait for his number.
  * - share: the seller's part of the profit (lib/sellers.ts), only for paid orders
@@ -23,8 +24,9 @@ export type SellerOrder = {
 
 const PAID = new Set(["approved", "hold"]);
 
-export async function sellerOrders(db: SupabaseClient, cfg?: SellerConfig): Promise<{ orders: SellerOrder[]; cfg: SellerConfig }> {
+export async function sellerOrders(db: SupabaseClient, cfg?: SellerConfig, leads?: LeadRow[]): Promise<{ orders: SellerOrder[]; cfg: SellerConfig }> {
   const conf = cfg ?? await readSellerConfig(db);
+  const owners = phoneOwners(conf, leads ?? await leadList() ?? []);
   const { data: rows } = await db.from("orders")
     .select("code, customer_name, customer_phone, apartment_name, checkin, checkout, guests, total_eur, status, created_at, ops")
     .order("created_at", { ascending: false }).limit(400);
@@ -39,15 +41,6 @@ export async function sellerOrders(db: SupabaseClient, cfg?: SellerConfig): Prom
   }
   const apts = pids.length ? await apartmentsForProfit(db) : [];
 
-  // phone → [seller, first time he wrote]
-  const touchedBy = new Map<string, { email: string; at: string }>();
-  for (const s of SELLERS) for (const t of Object.values(sellerData(conf, s.email).touched)) {
-    const d = phoneDigits(t.phone);
-    if (d.length < 9) continue;
-    const cur = touchedBy.get(d);
-    if (!cur || t.at < cur.at) touchedBy.set(d, { email: s.email, at: t.at });
-  }
-
   const orders = list.map(o => {
     const ops = (o.ops ?? {}) as Record<string, unknown>;
     const pid = typeof ops.x_proposal === "string" ? ops.x_proposal : null;
@@ -58,8 +51,8 @@ export async function sellerOrders(db: SupabaseClient, cfg?: SellerConfig): Prom
     let owner: string | null = null, ownerBy: SellerOrder["ownerBy"] = null;
     if (typeof ov.seller === "string") { owner = ov.seller || null; ownerBy = "manual"; }
     else {
-      const t = phone ? touchedBy.get(phone) : undefined;
-      if (t && t.at < String(o.created_at)) { owner = t.email; ownerBy = "auto"; }
+      const t = phone ? owners.get(phone) : undefined;
+      if (t && (!t.since || Date.parse(t.since) <= Date.parse(String(o.created_at)))) { owner = t.seller; ownerBy = "auto"; }
     }
 
     let profit: number | null = null, profitBy: SellerOrder["profitBy"] = null;

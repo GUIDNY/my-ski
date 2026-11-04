@@ -3,10 +3,13 @@ import { sellerAccess } from "@/lib/api-auth";
 import { createServerClient } from "@/lib/supabase-server";
 import { apartmentsForProfit, profitFromData } from "@/lib/proposal-profit";
 import { phoneDigits } from "@/lib/sellers";
+import { readSellerConfig } from "@/lib/seller-store";
+import { leadList, phoneOwners } from "@/lib/seller-leads";
 
 /*
  * /seller/quotes: the quotes sent lately (the bot's and Idan's proposals, /p/<id>),
  * each with its estimated profit and the seller's share of it if it closes.
+ * A seller gets only the quotes of his leads (same phone); an admin gets all, with the owner.
  */
 export const dynamic = "force-dynamic";
 
@@ -16,13 +19,14 @@ export async function GET(req: NextRequest) {
   const db = createServerClient();
   const days = Math.min(Math.max(Number(req.nextUrl.searchParams.get("days")) || 60, 1), 365);
   const since = new Date(Date.now() - days * 86400_000).toISOString();
-  const [{ data }, apts] = await Promise.all([
+  const [{ data }, apts, cfg, leads] = await Promise.all([
     db.from("proposals").select("id, proposal_number, client_name, client_phone, status, created_at, data")
       .gte("created_at", since).order("created_at", { ascending: false }).limit(200),
-    apartmentsForProfit(db),
+    apartmentsForProfit(db), readSellerConfig(db), leadList(),
   ]);
+  const owners = phoneOwners(cfg, leads ?? []);
   const rate = access.seller?.share ?? 0;
-  const quotes = (data ?? []).map(p => {
+  const quotes = (data ?? []).filter(p => access.isAdmin || owners.get(phoneDigits(p.client_phone))?.seller === access.seller?.email).map(p => {
     const pr = profitFromData(p.data, apts);
     const d = p.data as { title?: string; subtitle?: string } | null;
     return {
@@ -30,6 +34,7 @@ export async function GET(req: NextRequest) {
       status: p.status, createdAt: p.created_at, title: d?.subtitle || d?.title || "",
       total: pr?.grandTotal ?? 0, profit: pr && pr.lines.length ? pr.totalProfit : null,
       share: pr && pr.lines.length && rate ? Math.round(pr.totalProfit * rate) : null,
+      owner: owners.get(phoneDigits(p.client_phone))?.seller ?? null,
     };
   });
   return NextResponse.json({ ok: true, rate, quotes });

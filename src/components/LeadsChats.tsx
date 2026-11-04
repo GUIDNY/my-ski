@@ -17,6 +17,8 @@ type Lead = {
   lead: string; sessionId: string; channel: "web" | "whatsapp"; phone: string; name: string; lastAt: string; firstAt: string;
   lastMessage: string; messages: number; quotes: number; lastTotal: number; lastQuote: string; status: string; live: boolean;
   note: string; fuStage: number; optOut: boolean; lastIdanAt: string; order: Order;
+  /** seller area: whose lead (null = free, anyone can take it by answering) */
+  owner?: string | null;
 };
 type Msg = { id: number; role: "user" | "bot" | "idan"; text: string; link: string; at: string };
 type Thread = { live: boolean; status: string; lastQuote: string; note: string; messages: Msg[] };
@@ -68,12 +70,13 @@ function parseQuote(q: string) {
  * api: /api/admin/chats (Idan) or /api/seller/chats (a seller: the same leads and
  * actions; what he writes makes the lead his). A link like ?lead=<id> opens that lead.
  */
-export default function LeadsChats({ api, ordersHref, team = false }: { api: string; ordersHref: string; team?: boolean }) {
+export default function LeadsChats({ api, ordersHref, team = false, assign = false }: { api: string; ordersHref: string; team?: boolean; assign?: boolean }) {
   const [leads, setLeads] = useState<Lead[] | null>(null);
   const [sel, setSel] = useState<string | null>(null);
   const [thread, setThread] = useState<Thread | null>(null);
   const [stage, setStage] = useState<string>("all");
   const [channel, setChannel] = useState<"all" | "web" | "whatsapp">("all");
+  const [whose, setWhose] = useState<"all" | "mine" | "free">("all");
   const [q, setQ] = useState("");
   const [text, setText] = useState("");
   const [note, setNote] = useState("");
@@ -82,6 +85,22 @@ export default function LeadsChats({ api, ordersHref, team = false }: { api: str
   const [info, setInfo] = useState("");
   const [loadedAt, setLoadedAt] = useState(0);
   const endRef = useRef<HTMLDivElement>(null);
+  // assign: Idan picks the seller of each lead here too (lib/seller-leads)
+  const [owners, setOwners] = useState<{ sellers: { email: string; name: string }[]; byLead: Record<string, string | null> } | null>(null);
+  const loadOwners = useCallback(async () => {
+    if (!assign) return;
+    const j = await authFetch("/api/seller/assign").then(r => r.json()).catch(() => null);
+    if (j?.ok) setOwners({ sellers: j.sellers, byLead: Object.fromEntries((j.leads as { lead: string; owner: string | null }[]).map(l => [l.lead, l.owner])) });
+  }, [assign]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadOwners();
+  }, [loadOwners]);
+  const setOwner = async (lead: string, seller: string) => {
+    await authFetch("/api/seller/assign", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lead, seller }) }).catch(() => null);
+    setInfo(seller ? "הליד שויך" : "הליד לא משויך לאף אחד");
+    loadOwners();
+  };
 
   const loadList = useCallback(async () => {
     const r = await authFetch(api);
@@ -146,6 +165,7 @@ export default function LeadsChats({ api, ordersHref, team = false }: { api: str
   const shown = (leads ?? []).filter(l =>
     (stage === "all" || stageOf(l) === stage) &&
     (channel === "all" || l.channel === channel) &&
+    (!team || whose === "all" || (whose === "mine" ? !!l.owner : !l.owner)) &&
     (!q || [l.name, l.phone, l.lastMessage, l.note, l.lastQuote].some(v => (v || "").toLowerCase().includes(q.toLowerCase()))));
 
   const post = async (body: Record<string, unknown>) => {
@@ -180,8 +200,8 @@ export default function LeadsChats({ api, ordersHref, team = false }: { api: str
     <div className="p-4 md:p-8 max-w-[1400px]" dir="rtl">
       <div className="flex flex-wrap items-end justify-between gap-3 mb-5">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">לידים וצ׳אטים</h1>
-          <p className="text-sm text-gray-500 mt-1">כל השיחות עם הבוט, בצ׳אט באתר ובוואטסאפ, מהפנייה הראשונה ועד הסגירה.</p>
+          <h1 className="text-2xl font-bold text-gray-900">{team ? "הלידים שלי" : "לידים וצ׳אטים"}</h1>
+          <p className="text-sm text-gray-500 mt-1">{team ? "הלידים שלך וכל הלידים הפנויים. ליד פנוי עובר אליך ברגע שאתה עונה לו." : "כל השיחות עם הבוט, בצ׳אט באתר ובוואטסאפ, מהפנייה הראשונה ועד הסגירה."}</p>
         </div>
         <button type="button" onClick={loadList} className="text-sm font-bold text-blue-600 hover:underline">רענון</button>
       </div>
@@ -215,6 +235,13 @@ export default function LeadsChats({ api, ordersHref, team = false }: { api: str
           </button>
         ))}
         <span className="flex-1" />
+        {team && (
+          <div className="flex gap-1 rounded-full border border-gray-200 bg-white p-0.5">
+            {([["all", "הכל"], ["mine", `שלי ${(leads ?? []).filter(l => l.owner).length}`], ["free", `פנויים ${(leads ?? []).filter(l => !l.owner).length}`]] as const).map(([k, label]) => (
+              <button key={k} type="button" onClick={() => setWhose(k)} className={`px-3 py-1 rounded-full text-sm font-bold ${whose === k ? "bg-emerald-600 text-white" : "text-gray-600"}`}>{label}</button>
+            ))}
+          </div>
+        )}
         <div className="flex gap-1 rounded-full border border-gray-200 bg-white p-0.5">
           {([["all", "הכל"], ["whatsapp", `וואטסאפ ${stats.wa}`], ["web", `אתר ${stats.web}`]] as const).map(([k, l]) => (
             <button key={k} type="button" onClick={() => setChannel(k)} className={`px-3 py-1 rounded-full text-sm font-bold ${channel === k ? "bg-blue-600 text-white" : "text-gray-600"}`}>{l}</button>
@@ -227,7 +254,7 @@ export default function LeadsChats({ api, ordersHref, team = false }: { api: str
       <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-4 lg:h-[calc(100dvh-330px)] lg:min-h-[560px]">
         {/* ── list ── */}
         <div className={`rounded-2xl border border-gray-200 bg-white overflow-y-auto ${sel ? "hidden lg:block" : ""}`}>
-          {leads === null ? <p className="p-4 text-sm text-gray-500">טוען…</p> : shown.length === 0 ? <p className="p-4 text-sm text-gray-500">אין לידים כאן.</p> : shown.map(l => {
+          {leads === null ? <p className="p-4 text-sm text-gray-500">טוען…</p> : shown.length === 0 ? <p className="p-4 text-sm text-gray-500">{team && !(leads ?? []).length ? "אין כרגע לידים שלך או לידים פנויים. כשייכנס ליד חדש הוא יופיע כאן ותקבל הודעה בטלגרם." : "אין לידים כאן."}</p> : shown.map(l => {
             const st = stageInfo(stageOf(l));
             const qq = parseQuote(l.lastQuote);
             return (
@@ -247,6 +274,8 @@ export default function LeadsChats({ api, ordersHref, team = false }: { api: str
                   {qq?.people && <span className="text-[11px] text-gray-500">{qq.people} אנשים · {qq.checkin ? `${dm(qq.checkin)}–${dm(qq.checkout!)}` : ""}</span>}
                   {(l.order?.total || l.lastTotal) > 0 && <span className="text-[11px] font-bold text-gray-700">{eur(l.order?.total || l.lastTotal)}</span>}
                   {l.note && <span className="text-[11px] text-amber-700">📝</span>}
+                  {team && !owners && <span className={`text-[11px] font-bold ${l.owner ? "text-indigo-700" : "text-emerald-700"}`}>{l.owner ? "👤 שלך" : "🟢 פנוי"}</span>}
+                  {owners && <span className={`text-[11px] font-bold ${owners.byLead[l.lead] ? "text-indigo-700" : "text-orange-600"}`}>{owners.byLead[l.lead] ? `👤 ${owners.sellers.find(x => x.email === owners.byLead[l.lead])?.name ?? ""}` : "לא משויך"}</span>}
                 </div>
               </button>
             );
@@ -265,6 +294,7 @@ export default function LeadsChats({ api, ordersHref, team = false }: { api: str
                     <div className="font-bold text-gray-900 truncate">{cur.name?.trim() || (cur.channel === "web" ? "גולש באתר" : showPhone(cur.phone))}</div>
                     <div className="text-xs text-gray-500">{thread?.live ? "אתה עונה בשיחה הזו, הבוט שותק" : "הבוט עונה בשיחה הזו"} · {cur.channel === "web" ? "צ׳אט באתר" : "WhatsApp"}</div>
                   </div>
+                  {team && !owners && !cur.owner && <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">פנוי: מי שעונה ראשון מקבל</span>}
                   {thread?.live && <button type="button" onClick={release} disabled={busy} className="px-3 py-2 rounded-xl border border-gray-300 text-sm font-bold text-gray-700 disabled:opacity-50">להחזיר לבוט</button>}
                 </div>
                 <div className="flex-1 overflow-y-auto p-4 space-y-2.5 bg-gray-50 min-h-[300px]">
@@ -302,6 +332,16 @@ export default function LeadsChats({ api, ordersHref, team = false }: { api: str
                 </div>
                 {cur.phone && <p className="text-sm text-gray-600" dir="ltr">{showPhone(cur.phone)}</p>}
 
+                {owners && (
+                  <div>
+                    <div className="text-xs font-bold text-gray-400 mb-1.5">איש מכירות</div>
+                    <select value={owners.byLead[cur.lead] ?? ""} onChange={e => setOwner(cur.lead, e.target.value)}
+                      className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm font-bold bg-white">
+                      <option value="">לא משויך</option>
+                      {owners.sellers.map(x => <option key={x.email} value={x.email}>{x.name}</option>)}
+                    </select>
+                  </div>
+                )}
                 <div>
                   <div className="text-xs font-bold text-gray-400 mb-1.5">סטטוס</div>
                   <div className="flex flex-wrap gap-1.5">

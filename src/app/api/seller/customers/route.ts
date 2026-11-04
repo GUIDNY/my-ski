@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sellerAccess } from "@/lib/api-auth";
 import { createServerClient } from "@/lib/supabase-server";
-import { chatAdmin } from "@/lib/helper-chat";
 import { phoneDigits, SELLERS } from "@/lib/sellers";
 import { sellerData, updateSellerConfig } from "@/lib/seller-store";
 import { sellerOrders } from "@/lib/seller-orders";
+import { leadList, phoneOwners } from "@/lib/seller-leads";
 
 /*
- * /seller/customers: everyone the seller talked to (leads he wrote to), everyone
+ * /seller/customers: his leads (assigned, written to, or automatic), everyone
  * who ordered through him, and customers he added himself — with a star and a
  * private note. An admin sees the customers of every seller.
  */
@@ -23,8 +23,8 @@ export async function GET(req: NextRequest) {
   const access = await sellerAccess(req);
   if (access instanceof NextResponse) return access;
   const db = createServerClient();
-  const [{ orders, cfg }, list] = await Promise.all([sellerOrders(db), chatAdmin({ action: "list" })]);
-  const leads = ((list?.chats as Record<string, unknown>[]) || []);
+  const leads = await leadList() ?? [];
+  const { orders, cfg } = await sellerOrders(db, undefined, leads);
   const leadByPhone = new Map<string, Record<string, unknown>>();
   for (const l of leads) { const d = phoneDigits(String(l.phone || "")); if (d && !leadByPhone.has(d)) leadByPhone.set(d, l); }
 
@@ -40,13 +40,13 @@ export async function GET(req: NextRequest) {
   };
   for (const email of emails) {
     const s = sellerData(cfg, email);
-    for (const t of Object.values(s.touched)) if (t.phone) touch(phoneDigits(t.phone), email, t.at);
     for (const [phone, c] of Object.entries(s.customers)) {
       const row = touch(phone, email, c.at, c.name || "");
       row.saved = !!c.saved; row.note = c.note || "";
       if (c.name) row.name = c.name;
     }
   }
+  for (const [phone, o] of phoneOwners(cfg, leads)) if (emails.includes(o.seller)) touch(phone, o.seller, o.since);
   for (const o of orders) {
     if (!o.owner || !emails.includes(o.owner)) continue;
     const c = touch(o.phone, o.owner, o.createdAt, o.customer);
