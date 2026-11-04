@@ -6,6 +6,7 @@ export type Seller = { email: string; name: string; share: number };
 export const SELLERS: Seller[] = [
   // share = his part of OUR profit on each of his orders (Idan, 4.11.2026: 20% of the profit)
   { email: "raklaplay@gmail.com", name: "איש מכירות", share: 0.2 },
+  { email: "mayabs2025@gmail.com", name: "מאיה", share: 0.2 }, // added by Idan 4.11.2026, same 20%
 ];
 
 export function sellerByEmail(email?: string | null): Seller | null {
