@@ -62,11 +62,29 @@ export async function POST(req: NextRequest) {
   const access = await sellerAccess(req);
   if (access instanceof NextResponse) return access;
   const b = await req.json().catch(() => ({}));
-  const action = ["send", "release", "status"].includes(b.action) ? b.action : "";
+  const action = ["send", "release", "status", "claim", "unclaim"].includes(b.action) ? b.action : "";
   const lead = String(b.lead || "");
   if (!action || !LEAD.test(lead)) return NextResponse.json({ ok: false }, { status: 400 });
   const whose = await access2lead(access, lead);
   if (whose === "other") return NextResponse.json({ ok: false, error: "not your lead" }, { status: 403 });
+
+  // "קח את הליד" / "שחרר": a seller takes a free lead without writing to it, or gives his back
+  if (action === "claim" || action === "unclaim") {
+    if (!access.seller) return NextResponse.json({ ok: false, error: "sellers only" }, { status: 403 });
+    if (action === "claim" && whose === "mine") return NextResponse.json({ ok: true });
+    if (action === "unclaim" && whose !== "mine") return NextResponse.json({ ok: true });
+    const db = createServerClient();
+    const cfg0 = await readSellerConfig(db);
+    const phone = /^\d+$/.test(lead) ? lead : MANUAL_LEAD.test(lead) ? (cfg0.manualLeads[lead]?.phone ?? "")
+      : phoneDigits(String((await leadList())?.find(c => c.lead === lead)?.phone || ""));
+    const me = access.seller.email;
+    await updateSellerConfig(db, cfg => {
+      // giving it back: nobody's ("" stays free even when auto-assign is on); his "touched" mark goes too
+      cfg.leads[lead] = { seller: action === "claim" ? me : "", phone, at: new Date().toISOString() };
+      if (action === "unclaim" && cfg.sellers[me]?.touched) delete cfg.sellers[me].touched[lead];
+    });
+    return NextResponse.json({ ok: true });
+  }
   // on a free lead a seller may only write (that takes it); status and handing back stay with the owner
   if (whose === "free" && action !== "send" && !MANUAL_LEAD.test(lead)) return NextResponse.json({ ok: false, error: "answer first to take this lead" }, { status: 403 });
   const text = String(b.text ?? "").trim().slice(0, 2000);
