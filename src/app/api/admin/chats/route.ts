@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/api-auth";
 import { chatAdmin } from "@/lib/helper-chat";
 import { createServerClient } from "@/lib/supabase-server";
 import { readSellerConfig } from "@/lib/seller-store";
-import { MANUAL_LEAD, manualPost, manualRows, manualThread, type LeadRow } from "@/lib/seller-leads";
+import { isTrashed, MANUAL_LEAD, manualPost, manualRows, manualThread, trashPost, type LeadRow } from "@/lib/seller-leads";
 
 /*
  * Admin leads & chats (/admin/chats): every lead from the site chat and WhatsApp
@@ -45,24 +45,31 @@ export async function GET(req: NextRequest) {
     if (d.length >= 9 && !byPhone.has(d)) byPhone.set(d, { code: o.code, total: Number(o.total_eur) || 0, status: o.status, checkin: o.checkin, apartment: o.apartment_name });
   }
   const n8nLeads = (r.chats as LeadRow[]) || [];
-  const withManual = [...n8nLeads, ...manualRows(await readSellerConfig(createServerClient()), n8nLeads)]
+  const cfg = await readSellerConfig(createServerClient());
+  const inTrash = req.nextUrl.searchParams.get("trash") === "1";
+  const all = [...n8nLeads, ...manualRows(cfg, n8nLeads)];
+  const withManual = all.filter(c => isTrashed(cfg, c) === inTrash)
     .sort((a, b) => String(b.lastAt || "").localeCompare(String(a.lastAt || "")));
   const chats = withManual.map(c => {
     const order = c.phone ? byPhone.get(digits(String(c.phone))) ?? null : null;
-    return { ...c, order };
+    return { ...c, order, trashedAt: cfg.trash[c.lead]?.at ?? null };
   });
-  return NextResponse.json({ ok: true, chats });
+  return NextResponse.json({ ok: true, chats, trashCount: inTrash ? chats.length : all.length - chats.length });
 }
 
 export async function POST(req: NextRequest) {
   const denied = await requireAdmin(req);
   if (denied) return denied;
   const b = await req.json().catch(() => ({}));
-  const action = ["send", "release", "status"].includes(b.action) ? b.action : "";
+  const action = ["send", "release", "status", "trash", "restore", "purge"].includes(b.action) ? b.action : "";
   const lead = String(b.lead || (b.sessionId ? `web_${b.sessionId}` : ""));
   if (!action || !LEAD.test(lead)) return NextResponse.json({ ok: false }, { status: 400 });
   const text = String(b.text ?? "").trim().slice(0, 2000);
   if (action === "send" && !text) return NextResponse.json({ ok: false }, { status: 400 });
+  if (action === "trash" || action === "restore" || action === "purge") {
+    const r = await trashPost(createServerClient(), lead, action, { isAdmin: true, email: "", whose: "mine" });
+    return NextResponse.json(r, { status: r.ok ? 200 : 400 });
+  }
   if (MANUAL_LEAD.test(lead)) return NextResponse.json(await manualPost(createServerClient(), lead, action, b));
   const r = await chatAdmin({ action, lead, text, status: b.status, note: b.note });
   if (!r) return NextResponse.json({ ok: false, error: "n8n did not answer" }, { status: 502 });

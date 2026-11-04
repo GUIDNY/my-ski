@@ -19,6 +19,8 @@ type Lead = {
   note: string; fuStage: number; optOut: boolean; lastIdanAt: string; order: Order;
   /** seller area: whose lead (null = free, anyone can take it by answering) */
   owner?: string | null;
+  /** when it was moved to the trash (only in the trash view) */
+  trashedAt?: string | null;
 };
 type Msg = { id: number; role: "user" | "bot" | "idan"; text: string; link: string; at: string };
 type Thread = { live: boolean; status: string; lastQuote: string; note: string; messages: Msg[] };
@@ -81,6 +83,9 @@ export default function LeadsChats({ api, ordersHref, team = false, assign = fal
   const [adding, setAdding] = useState(false);
   const [nl, setNl] = useState({ name: "", phone: "", note: "", seller: "" });
   const [addErr, setAddErr] = useState("");
+  // the trash: leads moved there are out of the list (a customer who writes again comes back by himself)
+  const [trashView, setTrashView] = useState(false);
+  const [trashCount, setTrashCount] = useState(0);
   // phones: an open lead takes the whole screen (like WhatsApp); its details open as a sheet
   const [info2, setInfo2] = useState(false);
   useEffect(() => {
@@ -115,13 +120,14 @@ export default function LeadsChats({ api, ordersHref, team = false, assign = fal
   };
 
   const loadList = useCallback(async () => {
-    const r = await authFetch(api);
+    const r = await authFetch(api + (trashView ? "?trash=1" : ""));
     const j = await r.json().catch(() => null);
     if (!r.ok || !j?.ok) { setErr("לא הצלחתי לטעון את הלידים"); return; }
     setErr("");
     setLeads(j.chats as Lead[]);
+    setTrashCount(Number(j.trashCount) || 0);
     setLoadedAt(Date.now());
-  }, [api]);
+  }, [api, trashView]);
   const loadThread = useCallback(async (lead: string) => {
     const r = await authFetch(`${api}?lead=${encodeURIComponent(lead)}`);
     const j = await r.json().catch(() => null);
@@ -220,6 +226,15 @@ export default function LeadsChats({ api, ordersHref, team = false, assign = fal
     setInfo(ok ? (take ? "הליד עכשיו שלך" : "הליד שוחרר, הוא פנוי לכולם") : "לא הצליח, נסה שוב");
     loadList();
   };
+  const toTrash = async (action: "trash" | "restore" | "purge") => {
+    if (!cur) return;
+    if (action === "trash" && !confirm("להעביר את הליד לפח? הוא ייעלם מהרשימה. אם הלקוח יכתוב שוב, הוא יחזור לבד.")) return;
+    if (action === "purge" && !confirm("למחוק את הליד לצמיתות? אי אפשר לשחזר.")) return;
+    const { ok } = await post({ action, lead: cur.lead });
+    if (!ok) { setInfo("לא הצליח, נסה שוב"); return; }
+    setSel(null); setThread(null);
+    loadList();
+  };
   const release = async () => { if (!cur) return; await post({ action: "release", lead: cur.lead }); loadThread(cur.lead); loadList(); };
   const setStatus = async (status: string) => { if (!cur) return; await post({ action: "status", lead: cur.lead, status }); loadList(); };
   const saveNote = async () => { if (!cur || note === (cur.note || "")) return; await post({ action: "status", lead: cur.lead, note }); setInfo("ההערה נשמרה"); loadList(); };
@@ -236,6 +251,11 @@ export default function LeadsChats({ api, ordersHref, team = false, assign = fal
         </div>
         <div className="flex items-center gap-3">
           <button type="button" onClick={loadList} aria-label="רענון" className="w-10 h-10 md:w-auto md:h-auto flex items-center justify-center rounded-xl border border-gray-200 md:border-0 bg-white md:bg-transparent text-blue-600 text-sm font-bold hover:underline"><span className="md:hidden text-lg leading-none">↻</span><span className="hidden md:inline">רענון</span></button>
+          <button type="button" onClick={() => { setTrashView(v => !v); setSel(null); setThread(null); setLeads(null); setStage("all"); }}
+            aria-label="פח" className={`h-10 px-3 flex items-center gap-1.5 rounded-xl border text-sm font-bold whitespace-nowrap ${trashView ? "bg-gray-900 text-white border-gray-900" : "bg-white text-gray-600 border-gray-200"}`}>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0-1 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 6" /></svg>
+            <span className="hidden md:inline">פח</span>{trashCount > 0 && <span className="tabular-nums">{trashCount}</span>}
+          </button>
           <button type="button" onClick={() => { setAdding(v => !v); setAddErr(""); }} className="h-10 px-4 rounded-xl bg-blue-600 text-white text-sm font-bold shadow-sm shadow-blue-600/20 whitespace-nowrap">+ ליד חדש</button>
         </div>
       </div>
@@ -257,6 +277,12 @@ export default function LeadsChats({ api, ordersHref, team = false, assign = fal
       )}
       {err && <p className="mb-3 text-sm font-bold text-red-600">{err}</p>}
 
+      {trashView && (
+        <div className="rounded-2xl border border-gray-300 bg-gray-100 p-3 mb-4 flex items-center justify-between gap-3 text-sm">
+          <span className="text-gray-700"><b>הפח</b> · לידים שהועברו לפח. לקוח שכותב שוב חוזר לרשימה לבד.</span>
+          <button type="button" onClick={() => { setTrashView(false); setSel(null); setThread(null); setLeads(null); }} className="shrink-0 font-bold text-blue-600">חזרה לרשימה</button>
+        </div>
+      )}
       {/* ── numbers ── */}
       <div className="flex md:grid md:grid-cols-3 xl:grid-cols-6 gap-2 md:gap-3 mb-4 md:mb-5 overflow-x-auto snap-x -mx-4 px-4 md:mx-0 md:px-0 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {[
@@ -307,7 +333,7 @@ export default function LeadsChats({ api, ordersHref, team = false, assign = fal
       <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-4 lg:h-[calc(100dvh-330px)] lg:min-h-[560px]">
         {/* ── list ── */}
         <div className={`rounded-2xl border border-gray-200 bg-white overflow-y-auto ${sel ? "hidden lg:block" : ""}`}>
-          {leads === null ? <p className="p-4 text-sm text-gray-500">טוען…</p> : shown.length === 0 ? <p className="p-4 text-sm text-gray-500">{team && !(leads ?? []).length ? "אין כרגע לידים שלך או לידים פנויים. כשייכנס ליד חדש הוא יופיע כאן ותקבל הודעה בטלגרם." : "אין לידים כאן."}</p> : shown.map(l => {
+          {leads === null ? <p className="p-4 text-sm text-gray-500">טוען…</p> : shown.length === 0 ? <p className="p-4 text-sm text-gray-500">{trashView ? "הפח ריק." : team && !(leads ?? []).length ? "אין כרגע לידים שלך או לידים פנויים. כשייכנס ליד חדש הוא יופיע כאן ותקבל הודעה בטלגרם." : "אין לידים כאן."}</p> : shown.map(l => {
             const st = stageInfo(stageOf(l));
             const qq = parseQuote(l.lastQuote);
             return (
@@ -479,6 +505,20 @@ export default function LeadsChats({ api, ordersHref, team = false, assign = fal
                   <div className="text-xs font-bold text-gray-400 mb-1.5">הערה שלך</div>
                   <textarea value={note} onChange={e => setNote(e.target.value)} onBlur={saveNote} rows={4} placeholder="למשל: מחכה לתשובה מהחברים, להתקשר ביום ראשון…"
                     className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+
+                <div className="pt-2 border-t border-gray-100 flex flex-wrap gap-2">
+                  {trashView ? (
+                    <>
+                      <button type="button" onClick={() => toTrash("restore")} disabled={busy} className="flex-1 px-3 py-2 rounded-xl bg-gray-900 text-white text-sm font-bold disabled:opacity-50">♻️ שחזור מהפח</button>
+                      {(owners || !team) && cur.channel === "manual" && <button type="button" onClick={() => toTrash("purge")} disabled={busy} className="px-3 py-2 rounded-xl border border-red-200 text-red-600 text-sm font-bold disabled:opacity-50">מחיקה לצמיתות</button>}
+                    </>
+                  ) : (
+                    <button type="button" onClick={() => toTrash("trash")} disabled={busy} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold text-gray-500 hover:text-red-600 hover:bg-red-50 disabled:opacity-50">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0-1 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 6" /></svg>
+                      העברה לפח
+                    </button>
+                  )}
                 </div>
               </aside>
             </div>

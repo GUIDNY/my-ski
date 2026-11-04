@@ -16,6 +16,7 @@ import { DEFAULT_SELLERS, type Seller } from "@/lib/sellers";
  *   autoAssign                new leads from `since` on go to this seller by themselves (lib/seller-leads)
  *   manualLeads[id]           leads added by hand ("+ ליד חדש": a phone call, a referral): id "m_…"
  *   sellerList                the sellers table (email, name, share), edited by Idan; missing = DEFAULT_SELLERS
+ *   trash[lead]               leads moved to the trash (who, when): hidden until restored, or until the customer writes again
  */
 export type Touch = { phone: string; at: string };
 export type SavedCustomer = { name?: string; note?: string; saved?: boolean; at: string };
@@ -30,6 +31,7 @@ export type SellerConfig = {
   leads: Record<string, LeadAssign>; autoAssign?: AutoAssign;
   manualLeads: Record<string, ManualLead>;
   sellerList?: Seller[];
+  trash: Record<string, { by: string; at: string }>;
 };
 
 const JOB = "seller_config";
@@ -43,6 +45,7 @@ export async function readSellerConfig(db: SupabaseClient): Promise<SellerConfig
   return {
     sellers: obj<SellerData>(d.sellers), orders: obj<OrderOverride>(d.orders), leads: obj<LeadAssign>(d.leads),
     manualLeads: obj<ManualLead>(d.manualLeads),
+    trash: obj<{ by: string; at: string }>(d.trash),
     ...(Array.isArray(d.sellerList) ? { sellerList: d.sellerList } : {}),
     ...(d.autoAssign?.seller ? { autoAssign: d.autoAssign } : {}),
   };

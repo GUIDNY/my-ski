@@ -3,7 +3,7 @@ import { sellerAccess } from "@/lib/api-auth";
 import { createServerClient } from "@/lib/supabase-server";
 import { phoneDigits } from "@/lib/sellers";
 import { readSellerConfig, sellerData, sellersOf, updateSellerConfig } from "@/lib/seller-store";
-import { allLeads, leadList, leadOwner } from "@/lib/seller-leads";
+import { allLeads, isTrashed, leadList, leadOwner } from "@/lib/seller-leads";
 import { telegramSend } from "@/lib/telegram";
 import { SITE } from "@/lib/site";
 
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   const cfg = await readSellerConfig(createServerClient());
   const leads = await allLeads(cfg, true);
   if (!leads) return NextResponse.json({ ok: false, error: "n8n did not answer" }, { status: 502 });
-  const rows = leads.map(l => {
+  const rows = leads.filter(l => !isTrashed(cfg, l)).map(l => {
     const o = leadOwner(cfg, l);
     return {
       lead: l.lead, name: String(l.name || ""), phone: String(l.phone || ""), channel: String(l.channel || ""),

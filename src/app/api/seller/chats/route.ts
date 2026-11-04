@@ -4,7 +4,7 @@ import { chatAdmin } from "@/lib/helper-chat";
 import { createServerClient } from "@/lib/supabase-server";
 import { phoneDigits } from "@/lib/sellers";
 import { readSellerConfig, recordTouch, updateSellerConfig } from "@/lib/seller-store";
-import { allLeads, leadList, leadOwner, MANUAL_LEAD, manualPost, manualThread } from "@/lib/seller-leads";
+import { allLeads, isTrashed, leadList, leadOwner, MANUAL_LEAD, manualPost, manualThread, trashPost } from "@/lib/seller-leads";
 
 /*
  * The seller's leads & chats (/seller/chats): the same screen and actions as
@@ -52,21 +52,29 @@ export async function GET(req: NextRequest) {
     const d = phoneDigits(o.customer_phone);
     if (d.length >= 9 && !byPhone.has(d)) byPhone.set(d, { code: o.code, total: Number(o.total_eur) || 0, status: o.status, checkin: o.checkin, apartment: o.apartment_name });
   }
-  const chats = leads
-    .map(c => ({ ...c, owner: leadOwner(cfg, c).seller, order: c.phone ? byPhone.get(phoneDigits(String(c.phone))) ?? null : null }))
+  // ?trash=1: the trash instead of the list (each side counts the other)
+  const inTrash = req.nextUrl.searchParams.get("trash") === "1";
+  const visible = leads
+    .map(c => ({ ...c, owner: leadOwner(cfg, c).seller, order: c.phone ? byPhone.get(phoneDigits(String(c.phone))) ?? null : null, trashedAt: cfg.trash[c.lead]?.at ?? null }))
     .filter(c => access.isAdmin || !c.owner || c.owner === access.seller?.email);
-  return NextResponse.json({ ok: true, chats });
+  const chats = visible.filter(c => isTrashed(cfg, c) === inTrash);
+  return NextResponse.json({ ok: true, chats, trashCount: inTrash ? chats.length : visible.length - chats.length });
 }
 
 export async function POST(req: NextRequest) {
   const access = await sellerAccess(req);
   if (access instanceof NextResponse) return access;
   const b = await req.json().catch(() => ({}));
-  const action = ["send", "release", "status", "claim", "unclaim"].includes(b.action) ? b.action : "";
+  const action = ["send", "release", "status", "claim", "unclaim", "trash", "restore", "purge"].includes(b.action) ? b.action : "";
   const lead = String(b.lead || "");
   if (!action || !LEAD.test(lead)) return NextResponse.json({ ok: false }, { status: 400 });
   const whose = await access2lead(access, lead);
   if (whose === "other") return NextResponse.json({ ok: false, error: "not your lead" }, { status: 403 });
+
+  if (action === "trash" || action === "restore" || action === "purge") {
+    const r = await trashPost(createServerClient(), lead, action, { isAdmin: access.isAdmin, email: access.seller?.email ?? "", whose });
+    return NextResponse.json(r, { status: r.ok ? 200 : 403 });
+  }
 
   // "קח את הליד" / "שחרר": a seller takes a free lead without writing to it, or gives his back
   if (action === "claim" || action === "unclaim") {

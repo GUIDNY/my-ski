@@ -127,3 +127,29 @@ export async function manualPost(db: import("@supabase/supabase-js").SupabaseCli
   });
   return found ? { ok: true } : { ok: false, error: "not found" };
 }
+
+/* ── the trash ── */
+/** in the trash, and the customer hasn't written since (a new message brings the lead back by itself) */
+export function isTrashed(cfg: SellerConfig, l: LeadRow): boolean {
+  const t = cfg.trash[l.lead];
+  if (!t) return false;
+  const last = leadTime(l.lastAt);
+  return !last || last <= t.at;
+}
+
+/**
+ * trash / restore / purge one lead. Who may: Idan any lead; a seller his own or a free one.
+ * purge = delete for good, Idan only, and only a hand-added lead (the bot's leads live in n8n).
+ */
+export async function trashPost(db: import("@supabase/supabase-js").SupabaseClient, lead: string, action: string, who: { isAdmin: boolean; email: string; whose: "mine" | "free" | "other" }): Promise<{ ok: boolean; error?: string }> {
+  if (!who.isAdmin && who.whose === "other") return { ok: false, error: "not your lead" };
+  if (action === "purge" && (!who.isAdmin || !MANUAL_LEAD.test(lead))) return { ok: false, error: "admins only, hand-added leads only" };
+  const { updateSellerConfig } = await import("@/lib/seller-store");
+  await updateSellerConfig(db, cfg => {
+    if (action === "trash") cfg.trash[lead] = { by: who.email || "admin", at: new Date().toISOString() };
+    else if (action === "restore") { if (!cfg.trash[lead]) return false; delete cfg.trash[lead]; }
+    else if (action === "purge") { delete cfg.trash[lead]; delete cfg.manualLeads[lead]; delete cfg.leads[lead]; }
+    else return false;
+  });
+  return { ok: true };
+}

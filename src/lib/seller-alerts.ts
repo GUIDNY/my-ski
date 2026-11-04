@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { chatAdmin } from "@/lib/helper-chat";
 import { phoneDigits, type Seller } from "@/lib/sellers";
 import { readSellerConfig, sellerData, sellersOf } from "@/lib/seller-store";
-import { leadOwner } from "@/lib/seller-leads";
+import { isTrashed, leadOwner } from "@/lib/seller-leads";
 import { apartmentsForProfit, profitFromData } from "@/lib/proposal-profit";
 import { telegramSend } from "@/lib/telegram";
 import { SITE } from "@/lib/site";
@@ -18,7 +18,7 @@ import { SITE } from "@/lib/site";
 const JOB = "seller_alerts";
 const MAX_ALERTS = 12;
 
-type Lead = { lead: string; channel: string; phone: string; name: string; firstAt?: string; lastMessage: string; quotes: number; lastQuote: string; lastTotal: number };
+type Lead = { lead: string; channel: string; phone: string; name: string; firstAt?: string; lastAt?: string; lastMessage: string; quotes: number; lastQuote: string; lastTotal: number };
 
 const eur = (n: number) => `€${Math.round(n).toLocaleString("en-US")}`;
 const showPhone = (p: string) => p.startsWith("972") ? "0" + p.slice(3).replace(/^(\d{2})(\d{3})(\d+)$/, "$1-$2-$3") : p ? "+" + p : "";
@@ -52,6 +52,7 @@ export async function checkSellerAlerts(db: SupabaseClient): Promise<Record<stri
   const quotedAll = [...quoted, ...fresh.filter(l => (Number(l.quotes) || 0) > 0)];
 
   const cfg = await readSellerConfig(db);
+  const live = (l: Lead) => !isTrashed(cfg, l);
   const to = sellersOf(cfg).map(s => ({ seller: s, chat: sellerData(cfg, s.email).telegram })).filter((x): x is { seller: Seller; chat: number } => !!x.chat);
 
   // the proposals made in the last hours, to show the profit behind a quote that was just sent
@@ -72,13 +73,13 @@ export async function checkSellerAlerts(db: SupabaseClient): Promise<Record<stri
   const alerts: Alert[] = [];
   const whoOf = (l: Lead) => [l.name?.trim(), showPhone(l.phone)].filter(Boolean).join(" · ") || "גולש באתר";
   const chatLink = (l: Lead) => `${SITE}/seller/chats?lead=${encodeURIComponent(l.lead)}`;
-  for (const l of fresh.filter(x => !quotedAll.includes(x))) {
+  for (const l of fresh.filter(x => !quotedAll.includes(x) && live(x))) {
     alerts.push({
       lines: [`💬 ליד חדש ${l.channel === "web" ? "בצ׳אט באתר" : "בוואטסאפ"}`, whoOf(l), ...(l.lastMessage ? [`"${l.lastMessage.slice(0, 200)}"`] : [])],
       profit: null, link: chatLink(l), owner: leadOwner(cfg, l).seller,
     });
   }
-  for (const l of quotedAll) {
+  for (const l of quotedAll.filter(live)) {
     const p = l.phone ? recent.find(r => r.phone && r.phone === phoneDigits(l.phone)) : undefined;
     const pr = p ? profitFromData(p.data, apts) : null;
     alerts.push({
