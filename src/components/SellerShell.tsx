@@ -2,9 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { supabase } from "@/lib/supabase-client";
-import { isAdminEmail } from "@/lib/admins";
-import { sellerByEmail } from "@/lib/sellers";
+import { authFetch } from "@/lib/auth-fetch";
 
 /*
  * The seller area (/seller): a salesperson from lib/sellers.ts, or Idan (who sees
@@ -24,12 +22,10 @@ export default function SellerShell({ children }: { children: React.ReactNode })
   const [who, setWho] = useState<{ state: "loading" | "ok" | "no"; name: string; admin: boolean }>({ state: "loading", name: "", admin: false });
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const email = session?.user?.email;
-      const admin = isAdminEmail(email) || session?.user?.app_metadata?.role === "admin";
-      const seller = sellerByEmail(email);
-      setWho({ state: admin || seller ? "ok" : "no", name: seller?.name || (admin ? "מנהל" : ""), admin });
-    });
+    // the sellers table lives on the server (Idan edits it), so ask it who this is
+    authFetch("/api/seller/me").then(r => r.json()).then(j => {
+      setWho({ state: j?.admin || j?.seller ? "ok" : "no", name: j?.seller?.name || (j?.admin ? "מנהל" : ""), admin: !!j?.admin });
+    }).catch(() => setWho({ state: "no", name: "", admin: false }));
   }, []);
 
   if (who.state === "loading") return <div className="p-10 text-center text-gray-400" dir="rtl">בודק הרשאה…</div>;

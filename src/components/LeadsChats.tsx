@@ -14,7 +14,7 @@ import { authFetch } from "@/lib/auth-fetch";
 
 type Order = { code: string; total: number; status: string; checkin: string | null; apartment: string } | null;
 type Lead = {
-  lead: string; sessionId: string; channel: "web" | "whatsapp"; phone: string; name: string; lastAt: string; firstAt: string;
+  lead: string; sessionId: string; channel: "web" | "whatsapp" | "manual"; phone: string; name: string; lastAt: string; firstAt: string;
   lastMessage: string; messages: number; quotes: number; lastTotal: number; lastQuote: string; status: string; live: boolean;
   note: string; fuStage: number; optOut: boolean; lastIdanAt: string; order: Order;
   /** seller area: whose lead (null = free, anyone can take it by answering) */
@@ -77,6 +77,10 @@ export default function LeadsChats({ api, ordersHref, team = false, assign = fal
   const [stage, setStage] = useState<string>("all");
   const [channel, setChannel] = useState<"all" | "web" | "whatsapp">("all");
   const [whose, setWhose] = useState<"all" | "mine" | "free">("all");
+  // "+ ליד חדש": a lead added by hand (a phone call, a referral)
+  const [adding, setAdding] = useState(false);
+  const [nl, setNl] = useState({ name: "", phone: "", note: "", seller: "" });
+  const [addErr, setAddErr] = useState("");
   const [q, setQ] = useState("");
   const [text, setText] = useState("");
   const [note, setNote] = useState("");
@@ -175,6 +179,18 @@ export default function LeadsChats({ api, ordersHref, team = false, assign = fal
     setBusy(false);
     return { ok: r.ok && j?.ok, j };
   };
+  const addLead = async () => {
+    setAddErr("");
+    const r = await authFetch("/api/seller/leads", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(nl) });
+    const j = await r.json().catch(() => null);
+    if (!r.ok || !j?.ok) {
+      setAddErr(j?.error === "phone" ? "צריך מספר טלפון תקין" : j?.error === "taken" ? "הלקוח הזה כבר משויך לאיש מכירות אחר" : "לא נשמר, נסה שוב");
+      return;
+    }
+    setAdding(false); setNl({ name: "", phone: "", note: "", seller: "" });
+    await loadList(); loadOwners();
+    setThread(null); setSel(j.lead); setNote(nl.note); setInfo(j.existing ? "הלקוח הזה כבר קיים, פתחתי את הליד שלו" : "הליד נוסף");
+  };
   const send = async () => {
     const t = text.trim();
     if (!cur || !t || busy) return;
@@ -203,8 +219,27 @@ export default function LeadsChats({ api, ordersHref, team = false, assign = fal
           <h1 className="text-2xl font-bold text-gray-900">{team ? "הלידים שלי" : "לידים וצ׳אטים"}</h1>
           <p className="text-sm text-gray-500 mt-1">{team ? "הלידים שלך וכל הלידים הפנויים. ליד פנוי עובר אליך ברגע שאתה עונה לו." : "כל השיחות עם הבוט, בצ׳אט באתר ובוואטסאפ, מהפנייה הראשונה ועד הסגירה."}</p>
         </div>
-        <button type="button" onClick={loadList} className="text-sm font-bold text-blue-600 hover:underline">רענון</button>
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={loadList} className="text-sm font-bold text-blue-600 hover:underline">רענון</button>
+          <button type="button" onClick={() => { setAdding(v => !v); setAddErr(""); }} className="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-bold">+ ליד חדש</button>
+        </div>
       </div>
+      {adding && (
+        <form onSubmit={e => { e.preventDefault(); addLead(); }} className="rounded-2xl border border-blue-200 bg-blue-50 p-3 mb-4 flex flex-wrap gap-2 items-center">
+          <input autoFocus value={nl.name} onChange={e => setNl(v => ({ ...v, name: e.target.value }))} placeholder="שם" className="flex-1 min-w-[130px] rounded-xl border border-gray-200 px-3 py-2 text-sm bg-white" />
+          <input value={nl.phone} onChange={e => setNl(v => ({ ...v, phone: e.target.value }))} placeholder="טלפון" dir="ltr" inputMode="tel" required className="w-[150px] rounded-xl border border-gray-200 px-3 py-2 text-sm bg-white" />
+          <input value={nl.note} onChange={e => setNl(v => ({ ...v, note: e.target.value }))} placeholder="מה הוא מחפש? (תאריכים, כמה אנשים…)" className="flex-[2] min-w-[200px] rounded-xl border border-gray-200 px-3 py-2 text-sm bg-white" />
+          {owners && (
+            <select value={nl.seller} onChange={e => setNl(v => ({ ...v, seller: e.target.value }))} className="rounded-xl border border-gray-200 px-3 py-2 text-sm bg-white font-bold">
+              <option value="">לא משויך</option>
+              {owners.sellers.map(x => <option key={x.email} value={x.email}>{x.name}</option>)}
+            </select>
+          )}
+          <button className="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-bold">הוספה</button>
+          <button type="button" onClick={() => setAdding(false)} className="px-3 py-2 text-sm text-gray-600">ביטול</button>
+          {addErr && <span className="text-sm font-bold text-red-600 w-full">{addErr}</span>}
+        </form>
+      )}
       {err && <p className="mb-3 text-sm font-bold text-red-600">{err}</p>}
 
       {/* ── numbers ── */}
@@ -264,7 +299,7 @@ export default function LeadsChats({ api, ordersHref, team = false, assign = fal
                   <span className="flex items-center gap-2 min-w-0">
                     <span className={`shrink-0 w-2 h-2 rounded-full ${st.dot}`} />
                     <span className="font-bold text-gray-900 truncate">{l.name?.trim() || (l.channel === "web" ? "גולש באתר" : showPhone(l.phone))}</span>
-                    <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded ${l.channel === "web" ? "bg-sky-50 text-sky-700" : "bg-green-50 text-green-700"}`}>{l.channel === "web" ? "אתר" : "WhatsApp"}</span>
+                    <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded ${l.channel === "web" ? "bg-sky-50 text-sky-700" : l.channel === "manual" ? "bg-amber-50 text-amber-700" : "bg-green-50 text-green-700"}`}>{l.channel === "web" ? "אתר" : l.channel === "manual" ? "ידני" : "WhatsApp"}</span>
                   </span>
                   <span className="text-[11px] text-gray-400 shrink-0">{ago(l.lastAt)}</span>
                 </div>
@@ -292,14 +327,16 @@ export default function LeadsChats({ api, ordersHref, team = false, assign = fal
                   <button type="button" onClick={() => setSel(null)} className="lg:hidden text-sm font-bold text-blue-600">→</button>
                   <div className="flex-1 min-w-0">
                     <div className="font-bold text-gray-900 truncate">{cur.name?.trim() || (cur.channel === "web" ? "גולש באתר" : showPhone(cur.phone))}</div>
-                    <div className="text-xs text-gray-500">{thread?.live ? "אתה עונה בשיחה הזו, הבוט שותק" : "הבוט עונה בשיחה הזו"} · {cur.channel === "web" ? "צ׳אט באתר" : "WhatsApp"}</div>
+                    <div className="text-xs text-gray-500">{cur.channel === "manual" ? "ליד שנוסף ידנית" : <>{thread?.live ? "אתה עונה בשיחה הזו, הבוט שותק" : "הבוט עונה בשיחה הזו"} · {cur.channel === "web" ? "צ׳אט באתר" : "WhatsApp"}</>}</div>
                   </div>
                   {team && !owners && !cur.owner && <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">פנוי: מי שעונה ראשון מקבל</span>}
                   {thread?.live && <button type="button" onClick={release} disabled={busy} className="px-3 py-2 rounded-xl border border-gray-300 text-sm font-bold text-gray-700 disabled:opacity-50">להחזיר לבוט</button>}
                 </div>
                 <div className="flex-1 overflow-y-auto p-4 space-y-2.5 bg-gray-50 min-h-[300px]">
                   {thread === null ? <p className="text-sm text-gray-500">טוען…</p> : thread.messages.length === 0 ? (
-                    <p className="text-sm text-gray-500">השיחה התחילה לפני שהתחלנו לשמור שיחות (28.10). ההודעה האחרונה: {cur.lastMessage}</p>
+                    cur.channel === "manual"
+                    ? <div className="text-sm text-gray-600 space-y-1"><p>הליד נוסף ידנית ב-{cur.firstAt}. אין איתו צ׳אט במערכת: כותבים לו בוואטסאפ מהטלפון או מתקשרים (הכפתורים בצד).</p>{cur.note && <p className="text-gray-800">📝 {cur.note}</p>}<p className="text-xs text-gray-400">אם הוא יכתוב לבוט מהמספר הזה, השיחה תופיע כאן במקום הליד הידני.</p></div>
+                    : <p className="text-sm text-gray-500">השיחה התחילה לפני שהתחלנו לשמור שיחות (28.10). ההודעה האחרונה: {cur.lastMessage}</p>
                   ) : thread.messages.map(m => (
                     <div key={m.id} className={`flex ${m.role === "user" ? "justify-start" : "justify-end"}`}>
                       <div className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-[14px] leading-relaxed whitespace-pre-wrap break-words
@@ -312,6 +349,9 @@ export default function LeadsChats({ api, ordersHref, team = false, assign = fal
                   ))}
                   <div ref={endRef} />
                 </div>
+                {cur.channel === "manual" ? (
+                  <div className="p-3 border-t border-gray-100 text-sm text-gray-600">{info && <p className="text-xs text-gray-600 mb-1">{info}</p>}ליד ידני: עדכן סטטוס והערה בצד, וכתוב לו מהוואטסאפ שלך.</div>
+                ) : (
                 <div className="p-3 border-t border-gray-100">
                   {info && <p className="text-xs text-gray-600 mb-2">{info}</p>}
                   <div className="flex gap-2">
@@ -322,6 +362,7 @@ export default function LeadsChats({ api, ordersHref, team = false, assign = fal
                   </div>
                   <p className="text-[11px] text-gray-400 mt-1.5">כשאתה כותב, הבוט שותק בשיחה עד ״להחזיר לבוט״.</p>
                 </div>
+                )}
               </div>
 
               {/* lead card */}

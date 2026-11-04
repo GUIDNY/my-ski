@@ -7,6 +7,7 @@ import { dmy, eur, showPhone, PageHead } from "@/components/seller-ui";
  * Idan's lead assignment: who handles which lead. A seller sees only the leads
  * assigned to him (and their quotes and orders). New leads can go to one seller by
  * themselves (auto-assign); every lead can be moved by hand, one by one or many at once.
+ * On top: the sellers table (email, name, share): adding an email gives it the seller area.
  */
 type Seller = { email: string; name: string; share: number };
 type Lead = {
@@ -25,6 +26,8 @@ export default function AssignLeads() {
   const [sel, setSel] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
+  const [ns, setNs] = useState({ email: "", name: "", share: "20" });
+  const [teamMsg, setTeamMsg] = useState("");
 
   const load = useCallback(async () => {
     const r = await authFetch("/api/seller/assign");
@@ -43,6 +46,13 @@ export default function AssignLeads() {
     setMsg(r?.ok ? done : "לא נשמר, נסה שוב");
     setSel(new Set());
     await load();
+  };
+  const team = async (body: Record<string, unknown>, done: string) => {
+    setTeamMsg("");
+    const r = await authFetch("/api/seller/team", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).then(x => x.json()).catch(() => null);
+    setTeamMsg(r?.ok ? done : r?.error === "email" ? "מייל לא תקין" : r?.error === "share" ? "אחוז בין 0 ל-100" : "לא נשמר");
+    await load();
+    return !!r?.ok;
   };
   const nameOf = (email: string | null) => d?.sellers.find(s => s.email === email)?.name ?? "";
 
@@ -64,6 +74,37 @@ export default function AssignLeads() {
 
       {d && (
         <>
+          {/* ── the sellers table ── */}
+          <div className="rounded-2xl border border-gray-200 bg-white mb-4">
+            <div className="p-4 border-b border-gray-100">
+              <div className="font-bold text-gray-900">אנשי מכירות</div>
+              <div className="text-sm text-gray-500">מי שברשימה נכנס לאזור המכירות עם המייל שלו (צריך להירשם באתר עם אותו מייל). האחוז הוא החלק שלו מהרווח.</div>
+            </div>
+            {d.sellers.map(x => (
+              <div key={x.email} className="flex flex-wrap items-center gap-2 px-4 py-2.5 border-b border-gray-50">
+                <input key={`n-${x.email}-${x.name}`} defaultValue={x.name} onBlur={e => { if (e.target.value.trim() && e.target.value !== x.name) team({ email: x.email, name: e.target.value }, "השם עודכן"); }}
+                  className="w-[150px] rounded-lg border border-gray-200 px-2 py-1.5 text-sm font-bold" />
+                <span className="flex-1 min-w-[180px] text-sm text-gray-600" dir="ltr">{x.email}</span>
+                <span className="text-[11px] text-gray-400">{counts[x.email] ?? 0} לידים</span>
+                <label className="flex items-center gap-1 text-sm">
+                  <input key={`s-${x.email}-${x.share}`} type="number" min={0} max={100} defaultValue={Math.round(x.share * 1000) / 10}
+                    onBlur={e => { const v = Number(e.target.value); if (v !== Math.round(x.share * 1000) / 10) team({ email: x.email, share: v }, "האחוז עודכן"); }}
+                    className="w-16 rounded-lg border border-gray-200 px-2 py-1.5 text-sm tabular-nums" />%
+                </label>
+                <button onClick={() => { if (confirm(`להוציא את ${x.name} מאנשי המכירות? הלידים שלו יהפכו לפנויים.`)) team({ email: x.email, remove: true }, "הוסר"); }}
+                  className="px-2 py-1 text-sm text-red-600 hover:underline">הסרה</button>
+              </div>
+            ))}
+            <form onSubmit={async e => { e.preventDefault(); if (await team({ email: ns.email, name: ns.name, share: ns.share }, "נוסף ✓")) setNs({ email: "", name: "", share: "20" }); }}
+              className="flex flex-wrap items-center gap-2 px-4 py-3 bg-gray-50 rounded-b-2xl">
+              <input value={ns.name} onChange={e => setNs(v => ({ ...v, name: e.target.value }))} placeholder="שם" className="w-[150px] rounded-lg border border-gray-200 px-2 py-1.5 text-sm bg-white" />
+              <input value={ns.email} onChange={e => setNs(v => ({ ...v, email: e.target.value }))} placeholder="מייל" dir="ltr" type="email" required className="flex-1 min-w-[180px] rounded-lg border border-gray-200 px-2 py-1.5 text-sm bg-white" />
+              <label className="flex items-center gap-1 text-sm"><input value={ns.share} onChange={e => setNs(v => ({ ...v, share: e.target.value }))} type="number" min={0} max={100} className="w-16 rounded-lg border border-gray-200 px-2 py-1.5 text-sm bg-white tabular-nums" />%</label>
+              <button className="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-sm font-bold">+ הוספת איש מכירות</button>
+              {teamMsg && <span className="text-sm text-gray-700">{teamMsg}</span>}
+            </form>
+          </div>
+
           {/* ── automatic ── */}
           <div className="rounded-2xl border border-gray-200 bg-white p-4 mb-4 flex flex-wrap items-center gap-3">
             <div className="flex-1 min-w-[220px]">
@@ -118,7 +159,7 @@ export default function AssignLeads() {
                   <span className="min-w-0">
                     <span className="flex items-center gap-2">
                       <span className="font-bold text-gray-900 truncate">{l.name?.trim() || (l.channel === "web" ? "גולש באתר" : showPhone(l.phone))}</span>
-                      <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded ${l.channel === "web" ? "bg-sky-50 text-sky-700" : "bg-green-50 text-green-700"}`}>{l.channel === "web" ? "אתר" : "WhatsApp"}</span>
+                      <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded ${l.channel === "web" ? "bg-sky-50 text-sky-700" : l.channel === "manual" ? "bg-amber-50 text-amber-700" : "bg-green-50 text-green-700"}`}>{l.channel === "web" ? "אתר" : l.channel === "manual" ? "ידני" : "WhatsApp"}</span>
                     </span>
                     <span className="block text-[13px] text-gray-600 truncate mt-0.5">{l.lastMessage}</span>
                     <span className="block text-[11px] text-gray-400 mt-0.5">

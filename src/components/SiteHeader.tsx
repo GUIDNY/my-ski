@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase-client";
 import { isAdminEmail } from "@/lib/admins";
-import { isSellerEmail } from "@/lib/sellers";
+import { authFetch } from "@/lib/auth-fetch";
 import { helperWaHref, OPEN_CHAT_EVENT } from "@/lib/helper-whatsapp";
 import AuthModal from "./AuthModal";
 
@@ -59,6 +59,14 @@ const IcoWhatsApp = () => (
 export default function SiteHeader() {
   const pathname = usePathname() || "/";
   const [user, setUser] = useState<User | null>(null);
+  // the email the server says is a seller (the sellers table lives on the server)
+  const [sellerOf, setSellerOf] = useState<string | null>(null);
+  useEffect(() => {
+    if (!user?.email || isAdminEmail(user.email)) return;
+    let on = true;
+    authFetch("/api/seller/me").then(r => r.json()).then(j => { if (on && j?.seller) setSellerOf(user.email ?? null); }).catch(() => {});
+    return () => { on = false; };
+  }, [user]);
   const [showAuth, setShowAuth] = useState(false);
   const [menu, setMenu] = useState(false);
   const [menuPath, setMenuPath] = useState(pathname);
@@ -102,7 +110,7 @@ export default function SiteHeader() {
   if (HIDDEN.some(h => pathname === h || pathname.startsWith(h + "/"))) return null;
 
   const isAdmin = isAdminEmail(user?.email) || user?.app_metadata?.role === "admin";
-  const isSeller = !isAdmin && isSellerEmail(user?.email);
+  const isSeller = !isAdmin && sellerOf === user?.email;
   const openChat = () => { setMenu(false); window.dispatchEvent(new Event(OPEN_CHAT_EVENT)); };
   const login = () => { setMenu(false); setShowAuth(true); };
 

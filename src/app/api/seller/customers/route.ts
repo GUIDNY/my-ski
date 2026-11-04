@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sellerAccess } from "@/lib/api-auth";
 import { createServerClient } from "@/lib/supabase-server";
-import { phoneDigits, SELLERS } from "@/lib/sellers";
-import { sellerData, updateSellerConfig } from "@/lib/seller-store";
+import { phoneDigits } from "@/lib/sellers";
+import { readSellerConfig, sellerData, sellersOf, updateSellerConfig } from "@/lib/seller-store";
 import { sellerOrders } from "@/lib/seller-orders";
 import { leadList, phoneOwners } from "@/lib/seller-leads";
 
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
   const leadByPhone = new Map<string, Record<string, unknown>>();
   for (const l of leads) { const d = phoneDigits(String(l.phone || "")); if (d && !leadByPhone.has(d)) leadByPhone.set(d, l); }
 
-  const emails = access.isAdmin ? SELLERS.map(s => s.email) : [access.seller!.email];
+  const emails = access.isAdmin ? sellersOf(cfg).map(s => s.email) : [access.seller!.email];
   const out = new Map<string, Customer>();
   const touch = (phone: string, seller: string, at: string, name = "") => {
     const key = phone || `?${name}`;
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
   const access = await sellerAccess(req);
   if (access instanceof NextResponse) return access;
   const b = await req.json().catch(() => ({}));
-  const email = access.seller?.email ?? (access.isAdmin && SELLERS.some(s => s.email === b.seller) ? String(b.seller) : "");
+  const email = access.seller?.email ?? (access.isAdmin && sellersOf(await readSellerConfig(createServerClient())).some(s => s.email === b.seller) ? String(b.seller) : "");
   const phone = phoneDigits(b.phone);
   if (!email || phone.length < 9 || phone.length > 15) return NextResponse.json({ ok: false, error: "phone" }, { status: 400 });
   await updateSellerConfig(createServerClient(), cfg => {

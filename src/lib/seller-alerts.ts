@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { chatAdmin } from "@/lib/helper-chat";
-import { SELLERS, phoneDigits } from "@/lib/sellers";
-import { readSellerConfig, sellerData } from "@/lib/seller-store";
+import { phoneDigits, type Seller } from "@/lib/sellers";
+import { readSellerConfig, sellerData, sellersOf } from "@/lib/seller-store";
 import { leadOwner } from "@/lib/seller-leads";
 import { apartmentsForProfit, profitFromData } from "@/lib/proposal-profit";
 import { telegramSend } from "@/lib/telegram";
@@ -52,7 +52,7 @@ export async function checkSellerAlerts(db: SupabaseClient): Promise<Record<stri
   const quotedAll = [...quoted, ...fresh.filter(l => (Number(l.quotes) || 0) > 0)];
 
   const cfg = await readSellerConfig(db);
-  const to = SELLERS.map(s => ({ seller: s, chat: sellerData(cfg, s.email).telegram })).filter((x): x is { seller: typeof SELLERS[number]; chat: number } => !!x.chat);
+  const to = sellersOf(cfg).map(s => ({ seller: s, chat: sellerData(cfg, s.email).telegram })).filter((x): x is { seller: Seller; chat: number } => !!x.chat);
 
   // the proposals made in the last hours, to show the profit behind a quote that was just sent
   let recent: { phone: string; id: string; data: unknown }[] = [];

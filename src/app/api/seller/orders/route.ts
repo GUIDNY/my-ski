@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sellerAccess } from "@/lib/api-auth";
 import { createServerClient } from "@/lib/supabase-server";
-import { SELLERS } from "@/lib/sellers";
-import { updateSellerConfig } from "@/lib/seller-store";
+import { sellersOf, updateSellerConfig } from "@/lib/seller-store";
 import { sellerOrders, totals } from "@/lib/seller-orders";
 
 /*
@@ -14,7 +13,8 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   const access = await sellerAccess(req);
   if (access instanceof NextResponse) return access;
-  const { orders } = await sellerOrders(createServerClient());
+  const { orders, cfg } = await sellerOrders(createServerClient());
+  const SELLERS = sellersOf(cfg);
   if (access.isAdmin) {
     const bySeller = Object.fromEntries(SELLERS.map(s => [s.email, totals(orders.filter(o => o.owner === s.email))]));
     return NextResponse.json({ ok: true, admin: true, sellers: SELLERS, orders: orders.slice(0, 200), bySeller });
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     if ("seller" in b) {
       const s = String(b.seller ?? "");
       if (s === "auto") delete ov.seller;
-      else if (s === "" || SELLERS.some(x => x.email === s)) ov.seller = s;
+      else if (s === "" || sellersOf(cfg).some(x => x.email === s)) ov.seller = s;
     }
     if ("profit" in b) {
       const p = b.profit === null || b.profit === "" ? null : Number(b.profit);

@@ -4,7 +4,7 @@ import { chatAdmin } from "@/lib/helper-chat";
 import { createServerClient } from "@/lib/supabase-server";
 import { phoneDigits } from "@/lib/sellers";
 import { readSellerConfig, recordTouch, updateSellerConfig } from "@/lib/seller-store";
-import { leadList, leadOwner } from "@/lib/seller-leads";
+import { allLeads, leadList, leadOwner, MANUAL_LEAD, manualPost, manualThread } from "@/lib/seller-leads";
 
 /*
  * The seller's leads & chats (/seller/chats): the same screen and actions as
@@ -15,13 +15,14 @@ import { leadList, leadOwner } from "@/lib/seller-leads";
  */
 export const dynamic = "force-dynamic";
 
-const LEAD = /^(web_[A-Za-z0-9_-]{16,64}|\d{8,15})$/;
+const LEAD = /^(web_[A-Za-z0-9_-]{16,64}|\d{8,15}|m_[a-z0-9]{10})$/;
 
 /** whose lead is it now: "mine", "free" (nobody's), or "other" (another seller's). Admins: always "mine". */
 async function access2lead(access: { isAdmin: boolean; seller: { email: string } | null }, lead: string): Promise<"mine" | "free" | "other"> {
   if (access.isAdmin) return "mine";
   if (!access.seller) return "other";
-  const [cfg, leads] = await Promise.all([readSellerConfig(createServerClient()), leadList()]);
+  const cfg = await readSellerConfig(createServerClient());
+  const leads = await allLeads(cfg);
   const owner = leadOwner(cfg, leads?.find(l => l.lead === lead) ?? { lead }).seller;
   return owner === access.seller.email ? "mine" : owner ? "other" : "free";
 }
@@ -33,13 +34,15 @@ export async function GET(req: NextRequest) {
   if (lead) {
     if (!LEAD.test(lead)) return NextResponse.json({ ok: false }, { status: 400 });
     if (await access2lead(access, lead) === "other") return NextResponse.json({ ok: false, error: "not your lead" }, { status: 403 });
+    if (MANUAL_LEAD.test(lead)) return NextResponse.json(manualThread(await readSellerConfig(createServerClient()), lead));
     const r = await chatAdmin({ action: "thread", lead });
     if (!r) return NextResponse.json({ ok: false, error: "n8n did not answer" }, { status: 502 });
     return NextResponse.json(r);
   }
   const db = createServerClient();
-  const [leads, cfg, { data: orders }] = await Promise.all([
-    leadList(true), readSellerConfig(db),
+  const cfg = await readSellerConfig(db);
+  const [leads, { data: orders }] = await Promise.all([
+    allLeads(cfg, true),
     db.from("orders").select("code, customer_phone, total_eur, status, checkin, apartment_name, created_at")
       .in("status", ["approved", "hold"]).order("created_at", { ascending: false }).limit(500),
   ]);
@@ -65,9 +68,18 @@ export async function POST(req: NextRequest) {
   const whose = await access2lead(access, lead);
   if (whose === "other") return NextResponse.json({ ok: false, error: "not your lead" }, { status: 403 });
   // on a free lead a seller may only write (that takes it); status and handing back stay with the owner
-  if (whose === "free" && action !== "send") return NextResponse.json({ ok: false, error: "answer first to take this lead" }, { status: 403 });
+  if (whose === "free" && action !== "send" && !MANUAL_LEAD.test(lead)) return NextResponse.json({ ok: false, error: "answer first to take this lead" }, { status: 403 });
   const text = String(b.text ?? "").trim().slice(0, 2000);
   if (action === "send" && !text) return NextResponse.json({ ok: false }, { status: 400 });
+  if (MANUAL_LEAD.test(lead)) {
+    // a free hand-added lead: saving a note or a status takes it (there's no chat to answer)
+    if (whose === "free" && access.seller) {
+      const me = access.seller.email;
+      const phone = (await readSellerConfig(createServerClient())).manualLeads[lead]?.phone ?? "";
+      await updateSellerConfig(createServerClient(), cfg => { cfg.leads[lead] = { seller: me, phone, at: new Date().toISOString() }; });
+    }
+    return NextResponse.json(await manualPost(createServerClient(), lead, action, b));
+  }
   const r = await chatAdmin({ action, lead, text, status: b.status, note: b.note });
   if (!r) return NextResponse.json({ ok: false, error: "n8n did not answer" }, { status: 502 });
 

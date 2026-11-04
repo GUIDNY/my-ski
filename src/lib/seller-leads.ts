@@ -1,6 +1,7 @@
 import { chatAdmin } from "@/lib/helper-chat";
-import { SELLERS, phoneDigits } from "@/lib/sellers";
-import { sellerData, type SellerConfig } from "@/lib/seller-store";
+import { phoneDigits } from "@/lib/sellers";
+import { sellerData, sellersOf, type SellerConfig } from "@/lib/seller-store";
+import { randomBytes } from "node:crypto";
 
 /*
  * Whose lead is it. In order:
@@ -22,6 +23,7 @@ export function leadTime(s: unknown): string {
 }
 
 export function leadOwner(cfg: SellerConfig, l: LeadRow): LeadOwner {
+  const SELLERS = sellersOf(cfg);
   const m = cfg.leads[l.lead];
   if (m) return { seller: SELLERS.some(s => s.email === m.seller) ? m.seller : null, by: "manual" };
   let best: { email: string; at: string } | null = null;
@@ -41,6 +43,7 @@ export function leadOwner(cfg: SellerConfig, l: LeadRow): LeadOwner {
  * conversation started (or when he first wrote, for a lead the list doesn't have).
  */
 export function phoneOwners(cfg: SellerConfig, leads: LeadRow[]): Map<string, { seller: string; since: string }> {
+  const SELLERS = sellersOf(cfg);
   const out = new Map<string, { seller: string; since: string }>();
   const put = (phone: string, seller: string, since: string) => {
     const d = phoneDigits(phone);
@@ -70,4 +73,57 @@ export async function leadList(fresh = false): Promise<LeadRow[] | null> {
   const leads = ((r.chats as LeadRow[]) || []).filter(l => l && typeof l.lead === "string");
   cache = { at: Date.now(), leads };
   return leads;
+}
+
+/* ── leads added by hand (seller-store manualLeads, id "m_…") ── */
+export const MANUAL_LEAD = /^m_[a-z0-9]{10}$/;
+export const newManualId = () => "m_" + randomBytes(8).toString("hex").slice(0, 10);
+
+/** now, the way n8n writes lead times: "2026-11-04 21:47" in Israel */
+export function israelStamp(d = new Date()): string {
+  const p = Object.fromEntries(new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Jerusalem", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false })
+    .formatToParts(d).map(x => [x.type, x.value]));
+  return `${p.year}-${p.month}-${p.day} ${p.hour === "24" ? "00" : p.hour}:${p.minute}`;
+}
+
+/** the hand-added leads as lead rows; one whose phone already talks to the bot is shown as that lead instead */
+export function manualRows(cfg: SellerConfig, n8nLeads: LeadRow[]): LeadRow[] {
+  const phones = new Set(n8nLeads.map(l => phoneDigits(String(l.phone || ""))).filter(Boolean));
+  return Object.entries(cfg.manualLeads)
+    .filter(([, m]) => !phones.has(m.phone))
+    .map(([id, m]) => ({
+      lead: id, sessionId: "", channel: "manual", phone: m.phone, name: m.name, firstAt: m.firstAt, lastAt: m.lastAt,
+      lastMessage: m.note || "ליד שנוסף ידנית", messages: 0, quotes: 0, lastTotal: 0, lastQuote: "", status: m.status || "talking",
+      live: false, note: m.note, fuStage: 0, optOut: false, lastIdanAt: "",
+    }));
+}
+
+/** n8n's leads and the hand-added ones, newest first */
+export async function allLeads(cfg: SellerConfig, fresh = false): Promise<LeadRow[] | null> {
+  const n8n = await leadList(fresh);
+  if (!n8n) return null;
+  return [...n8n, ...manualRows(cfg, n8n)].sort((a, b) => String(b.lastAt || "").localeCompare(String(a.lastAt || "")));
+}
+
+/** a hand-added lead opened in the chat screen: no conversation, its note and status */
+export function manualThread(cfg: SellerConfig, id: string) {
+  const m = cfg.manualLeads[id];
+  return m ? { ok: true, live: false, status: m.status || "talking", lastQuote: "", note: m.note, messages: [], manual: true } : { ok: false, error: "not found" };
+}
+
+/** status / note on a hand-added lead (there is no chat to send to: he calls or writes from his own phone) */
+export async function manualPost(db: import("@supabase/supabase-js").SupabaseClient, id: string, action: string, b: { status?: unknown; note?: unknown }): Promise<Record<string, unknown>> {
+  if (action === "send") return { ok: false, error: "manual" };
+  if (action === "release") return { ok: true };
+  const { updateSellerConfig } = await import("@/lib/seller-store");
+  let found = false;
+  await updateSellerConfig(db, cfg => {
+    const m = cfg.manualLeads[id];
+    if (!m) return false;
+    found = true;
+    if (typeof b.status === "string" && b.status) m.status = b.status.slice(0, 20);
+    if (typeof b.note === "string") m.note = b.note.slice(0, 1000);
+    m.lastAt = israelStamp();
+  });
+  return found ? { ok: true } : { ok: false, error: "not found" };
 }

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sellerAccess } from "@/lib/api-auth";
 import { createServerClient } from "@/lib/supabase-server";
-import { SELLERS, phoneDigits } from "@/lib/sellers";
-import { readSellerConfig, sellerData, updateSellerConfig } from "@/lib/seller-store";
-import { leadList, leadOwner } from "@/lib/seller-leads";
+import { phoneDigits } from "@/lib/sellers";
+import { readSellerConfig, sellerData, sellersOf, updateSellerConfig } from "@/lib/seller-store";
+import { allLeads, leadList, leadOwner } from "@/lib/seller-leads";
 import { telegramSend } from "@/lib/telegram";
 import { SITE } from "@/lib/site";
 
@@ -16,13 +16,14 @@ import { SITE } from "@/lib/site";
  */
 export const dynamic = "force-dynamic";
 
-const LEAD = /^(web_[A-Za-z0-9_-]{16,64}|\d{8,15})$/;
+const LEAD = /^(web_[A-Za-z0-9_-]{16,64}|\d{8,15}|m_[a-z0-9]{10})$/;
 
 export async function GET(req: NextRequest) {
   const access = await sellerAccess(req);
   if (access instanceof NextResponse) return access;
   if (!access.isAdmin) return NextResponse.json({ error: "admins only" }, { status: 403 });
-  const [cfg, leads] = await Promise.all([readSellerConfig(createServerClient()), leadList(true)]);
+  const cfg = await readSellerConfig(createServerClient());
+  const leads = await allLeads(cfg, true);
   if (!leads) return NextResponse.json({ ok: false, error: "n8n did not answer" }, { status: 502 });
   const rows = leads.map(l => {
     const o = leadOwner(cfg, l);
@@ -33,7 +34,7 @@ export async function GET(req: NextRequest) {
       owner: o.seller, by: o.by,
     };
   });
-  return NextResponse.json({ ok: true, sellers: SELLERS, autoAssign: cfg.autoAssign ?? null, leads: rows });
+  return NextResponse.json({ ok: true, sellers: sellersOf(cfg), autoAssign: cfg.autoAssign ?? null, leads: rows });
 }
 
 export async function POST(req: NextRequest) {
@@ -42,6 +43,7 @@ export async function POST(req: NextRequest) {
   if (!access.isAdmin) return NextResponse.json({ error: "admins only" }, { status: 403 });
   const b = await req.json().catch(() => ({}));
   const db = createServerClient();
+  const SELLERS = sellersOf(await readSellerConfig(db));
 
   if ("autoAssign" in b) {
     const email = String(b.autoAssign || "");
@@ -56,7 +58,7 @@ export async function POST(req: NextRequest) {
   const seller = String(b.seller ?? "");
   if (!ids.length || !(seller === "" || seller === "auto" || SELLERS.some(s => s.email === seller))) return NextResponse.json({ ok: false }, { status: 400 });
 
-  const leads = await leadList() ?? [];
+  const leads = await allLeads(await readSellerConfig(db)) ?? await leadList() ?? [];
   const byId = new Map(leads.map(l => [l.lead, l]));
   const now = new Date().toISOString();
   const cfg = await updateSellerConfig(db, c => {

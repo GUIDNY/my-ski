@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { DEFAULT_SELLERS, type Seller } from "@/lib/sellers";
 
 /*
  * Everything the seller area keeps, as the latest sync_log row with job='seller_config'
@@ -13,6 +14,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  *   orders[code].profit       Idan's override of the order's profit (€), when the estimate is off
  *   leads[lead]               Idan's assignment of a lead: seller email ("" = nobody), its phone, when
  *   autoAssign                new leads from `since` on go to this seller by themselves (lib/seller-leads)
+ *   manualLeads[id]           leads added by hand ("+ ליד חדש": a phone call, a referral): id "m_…"
+ *   sellerList                the sellers table (email, name, share), edited by Idan; missing = DEFAULT_SELLERS
  */
 export type Touch = { phone: string; at: string };
 export type SavedCustomer = { name?: string; note?: string; saved?: boolean; at: string };
@@ -20,9 +23,13 @@ export type SellerData = { telegram?: number; touched: Record<string, Touch>; cu
 export type OrderOverride = { seller?: string; profit?: number };
 export type LeadAssign = { seller: string; phone: string; at: string };
 export type AutoAssign = { seller: string; since: string };
+/** firstAt/lastAt like n8n's leads: "YYYY-MM-DD HH:mm", Israel time */
+export type ManualLead = { name: string; phone: string; note: string; status: string; by: string; firstAt: string; lastAt: string };
 export type SellerConfig = {
   sellers: Record<string, SellerData>; orders: Record<string, OrderOverride>;
   leads: Record<string, LeadAssign>; autoAssign?: AutoAssign;
+  manualLeads: Record<string, ManualLead>;
+  sellerList?: Seller[];
 };
 
 const JOB = "seller_config";
@@ -35,9 +42,14 @@ export async function readSellerConfig(db: SupabaseClient): Promise<SellerConfig
   const obj = <T,>(x: unknown): Record<string, T> => (x && typeof x === "object" ? x as Record<string, T> : {});
   return {
     sellers: obj<SellerData>(d.sellers), orders: obj<OrderOverride>(d.orders), leads: obj<LeadAssign>(d.leads),
+    manualLeads: obj<ManualLead>(d.manualLeads),
+    ...(Array.isArray(d.sellerList) ? { sellerList: d.sellerList } : {}),
     ...(d.autoAssign?.seller ? { autoAssign: d.autoAssign } : {}),
   };
 }
+
+/** the sellers right now: Idan's table, or the starting list */
+export const sellersOf = (cfg: SellerConfig): Seller[] => cfg.sellerList ?? DEFAULT_SELLERS;
 
 export function sellerData(cfg: SellerConfig, email: string): SellerData {
   const s = cfg.sellers[email] ?? {};

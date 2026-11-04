@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { SELLERS, phoneDigits } from "@/lib/sellers";
+import { phoneDigits } from "@/lib/sellers";
 import { leadList, phoneOwners, type LeadRow } from "@/lib/seller-leads";
-import { readSellerConfig, type SellerConfig } from "@/lib/seller-store";
+import { readSellerConfig, sellersOf, type SellerConfig } from "@/lib/seller-store";
 import { apartmentsForProfit, profitFromData } from "@/lib/proposal-profit";
 
 /*
@@ -62,7 +62,7 @@ export async function sellerOrders(db: SupabaseClient, cfg?: SellerConfig, leads
       if (p && p.lines.length) { profit = p.totalProfit; profitBy = "proposal"; }
     }
 
-    const seller = SELLERS.find(s => s.email === owner);
+    const seller = sellersOf(conf).find(s => s.email === owner);
     const counts = PAID.has(String(o.status));
     return {
       code: o.code, customer: String(o.customer_name || ""), phone, apartment: String(o.apartment_name || ""),

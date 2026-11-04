@@ -2,7 +2,8 @@ import type { User } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase-server";
 import { ADMIN_EMAILS } from "@/lib/admins";
-import { sellerByEmail, type Seller } from "@/lib/sellers";
+import { sellerIn, type Seller } from "@/lib/sellers";
+import { readSellerConfig, sellersOf } from "@/lib/seller-store";
 
 /**
  * Server-side checks for the API routes. The browser sends the visitor's
@@ -50,7 +51,7 @@ export async function sellerAccess(req: NextRequest): Promise<SellerAccess | Nex
   const user = await sessionUser(req);
   if (!user) return NextResponse.json({ error: "login required" }, { status: 401 });
   const isAdmin = isAdminUser(user);
-  const seller = sellerByEmail(user.email);
+  const seller = sellerIn(sellersOf(await readSellerConfig(createServerClient())), user.email);
   if (!isAdmin && !seller) return NextResponse.json({ error: "sellers only" }, { status: 403 });
   return { user, isAdmin, seller };
 }
