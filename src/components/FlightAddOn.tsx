@@ -117,7 +117,7 @@ export default function FlightAddOn({ state, ret, checkin, checkout, checked, on
             <span className={`shrink-0 ${bag.on ? "text-accent" : "text-muted"}`} aria-hidden="true"><IconBriefcase size={18} /></span>
             <span className="flex-1 min-w-0 flex flex-col gap-0.5">
               <span className="font-bold text-[15px] text-ink">מזוודה לבטן</span>
-              <span className="text-[14px] text-muted">הלוך וחזור · {eur(bag.unit)} לאדם</span>
+              <span className="text-[14px] text-muted">הלוך וחזור · {eur(bag.unit)} לאדם{bag.on ? " · כלולה עם הטיסה, אפשר להוריד" : ""}</span>
             </span>
           </button>
           {bag.on && <Stepper label="כמה מזוודות?" qty={bag.qty} setQty={bag.setQty} max={maxQty} total={bag.total} />}

@@ -484,6 +484,9 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
     preFlightDone.current = true;
     setBookFlight(true);
     setBookFlightQty(guests || 1);
+    // a flight comes with a checked bag per ticket (Idan, 5.11.2026)
+    setBaggage(true);
+    setBaggageQty(guests || 1);
   }, [preFlight, directFlight, guests]);
   // A direct flight is offered, never added by itself: the package price
   // people saw on the search and weekly cards is apartment, pass and transfer,
@@ -846,8 +849,9 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
           <Section id="flight" title="טיסה" sub="רק טיסה ישירה הלוך וחזור מתל אביב, במחיר האמיתי לתאריכים שלכם.">
             <FlightAddOn state={direct} ret={returnLeg} checkin={checkin} checkout={checkout}
               checked={flightOn}
-              onToggle={v => { setBookFlight(v); if (v) setBookFlightQty(guests || 1); }}
-              qty={bookFlightQty} setQty={setBookFlightQty} maxQty={maxGuests} total={bookFlightTotal}
+              // a flight comes with a checked bag per ticket (Idan, 5.11.2026); unticking "מזוודה לבטן" removes it
+              onToggle={v => { setBookFlight(v); if (v) { setBookFlightQty(guests || 1); setBaggage(true); setBaggageQty(guests || 1); } }}
+              qty={bookFlightQty} setQty={n => { setBaggageQty(b => (b === bookFlightQty || b > n ? n : b)); setBookFlightQty(n); }} maxQty={maxGuests} total={bookFlightTotal}
               bag={{
                 on: bagOn, unit: BAGGAGE_PRICE, qty: baggageQty, setQty: setBaggageQty, total: baggageTotal,
                 toggle: () => { const v = !baggage; setBaggage(v); if (v) setBaggageQty(Math.min(baggageQty || guests, guests) || 1); },

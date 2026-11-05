@@ -768,8 +768,10 @@ export default function QuoteView({ q }: { q: QuoteData }) {
             <div className="flex flex-col gap-3 mt-2">
               <h3 className="text-[17px] font-bold text-ink">טיסה ישירה</h3>
               <FlightAddOn state={direct} ret={returnLeg} checkin={checkin} checkout={checkout}
-                checked={flightEff} onToggle={v => { setFlightOn(v); if (v) setFlightQty(n => Math.min(n || guests, guests) || 1); }}
-                qty={flightQty} setQty={setFlightQty} maxQty={guests} total={amountOf("flight")}
+                checked={flightEff}
+                // a flight comes with a checked bag per ticket (Idan, 5.11.2026); unticking "מזוודה לבטן" removes it
+                onToggle={v => { setFlightOn(v); if (v) { const n = Math.min(flightQty || guests, guests) || 1; setFlightQty(n); setBagOn(true); setBagQty(n); } }}
+                qty={flightQty} setQty={n => { setBagQty(b => (b === flightQty || b > n ? n : b)); setFlightQty(n); }} maxQty={guests} total={amountOf("flight")}
                 bag={{ on: bagEff, unit: BAGGAGE_PRICE, qty: bagQty, setQty: setBagQty, total: amountOf("bag"), toggle: () => setBagOn(v => !v) }} />
             </div>
           </section>

@@ -11,7 +11,7 @@ import OpenChatButton from "@/components/OpenChatButton";
 import { wrap, card, btn, badgeLight, badgeDark, Check, EmptyState, Skeleton } from "@/components/ui";
 import { getEffectivePrice, calcTotalForRange, matchingWeek } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
-import { packageExtras, PASS_AREA_LABEL } from "@/lib/deal-pricing";
+import { packageExtras, PASS_AREA_LABEL, BAGGAGE_PRICE } from "@/lib/deal-pricing";
 import { useDirectFlight, type DirectFlightState } from "@/lib/useFlightPrice";
 import { cardImage } from "@/lib/thumbs";
 
@@ -56,9 +56,9 @@ function dealItems(extras: Extras | null, flight: DirectFlightState, flightIn = 
   else if (!extras) items.push({ text: "סקי פס לפי התאריכים" });
   items.push({ text: "הסעה הלוך וחזור מהשדה" });
   if (flightIn && flight.status === "found" && flight.flight)
-    items.push({ text: `טיסה ישירה הלוך וחזור ל${flight.flight.city}, ${eur(flight.flight.price)} לאדם`, plane: true });
+    items.push({ text: `טיסה ישירה הלוך וחזור ל${flight.flight.city} עם מזוודה, ${eur(flight.flight.price + BAGGAGE_PRICE)} לאדם`, plane: true });
   else if (flight.status === "found" && flight.flight)
-    items.push({ text: `טיסה ישירה הלוך וחזור ל${flight.flight.city}: עוד ${eur(flight.flight.price)} לאדם, אם בוחרים "עם טיסה ישירה"`, plane: true });
+    items.push({ text: `טיסה ישירה הלוך וחזור ל${flight.flight.city} עם מזוודה: עוד ${eur(flight.flight.price + BAGGAGE_PRICE)} לאדם, אם בוחרים "עם טיסה ישירה"`, plane: true });
   else if (flight.status === "loading") items.push({ text: "בודקים טיסה ישירה…", muted: true, plane: true });
   return items;
 }
@@ -177,7 +177,8 @@ function AptCard({ apt, nights, checkin, checkout, guests, deal, rules, badge, e
   const included = full ? dealItems(hasDates ? extras : null, flight, !!fl) : (apt.amenities ?? []).slice(0, 3).map(text => ({ text } as { text: string; muted?: boolean; plane?: boolean }));
   // the package for one person: their share of the apartment + the pass + the transfer
   const dealReady = full && (hasDates || !!week) && !!extras;
-  const flightPP = fl ? fl.price : 0;
+  // a flight comes with a checked bag per ticket (Idan, 5.11.2026), the same as on the apartment page
+  const flightPP = fl ? fl.price + BAGGAGE_PRICE : 0;
   const pkgPerPerson = dealReady ? Math.round(total / guests + extras!.perPerson + flightPP) : 0;
   const pkgTotal = dealReady ? Math.round(total + (extras!.perPerson + flightPP) * guests) : 0;
 
@@ -227,7 +228,7 @@ function AptCard({ apt, nights, checkin, checkout, guests, deal, rules, badge, e
                   <span className="text-[15px] text-muted">לאדם</span>
                 </div>
                 <span className="text-[14px] text-muted">{eur(pkgTotal)} לכל החבורה, {guests} {guests === 1 ? "אדם" : "אנשים"}</span>
-                <span className="text-[13px] text-muted">{fl ? "דירה, סקי פס, הסעה וטיסה" : "דירה, סקי פס והסעה"}</span>
+                <span className="text-[13px] text-muted">{fl ? "דירה, סקי פס, הסעה, טיסה ומזוודה" : "דירה, סקי פס והסעה"}</span>
               </>
             ) : week ? (
               <>
