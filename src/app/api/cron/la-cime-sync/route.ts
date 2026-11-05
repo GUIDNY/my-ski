@@ -61,9 +61,15 @@ function parseWeekOffers(html: string): Map<string, number> {
     // separator) as whole units FIRST — the "160" in "&#160;" is part of
     // the entity's own code point, not a price digit, and blindly keeping
     // every remaining digit turns "2 142" into "2160142".
-    const digits = priceMatch[1].replace(/&#\d+;/g, "").replace(/[^0-9]/g, "");
-    if (!digits) continue;
-    offers.set(refMatch[1], parseInt(digits, 10));
+    // French format: "1&#160;540,80 €" (space between thousands, comma before the cents).
+    // The cents used to be read as more digits: 1 540,80 became 154 080 (5.11.2026, a -20% week).
+    const clean = priceMatch[1].replace(/&#\d+;/g, "").replace(/&nbsp;/g, "").replace(/[\s\u00a0\u202f]/g, "");
+    const num = clean.match(/(\d+)(?:,(\d{1,2}))?/);
+    if (!num) continue;
+    const price = Math.round(Number(num[1] + (num[2] ? "." + num[2] : "")));
+    // a week here never costs more than this: anything above is a parsing mistake, not a price
+    if (!(price > 0 && price < 30000)) continue;
+    offers.set(refMatch[1], price);
   }
   return offers;
 }
