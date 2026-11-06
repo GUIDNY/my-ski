@@ -9,7 +9,8 @@ import DeepLinkHandler from "@/components/DeepLinkHandler";
 import AiConcierge from "@/components/AiConcierge";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
 import OpenAIPixel from "@/components/OpenAIPixel";
-import SiteAnalytics from "@/components/SiteAnalytics";
+import { Analytics } from "@vercel/analytics/next";
+import AnalyticsConsent from "@/components/AnalyticsConsent";
 import { SITE_LD, ldJson } from "@/lib/site";
 
 const montserrat = Montserrat({
@@ -105,8 +106,9 @@ export default function RootLayout({
         <AiConcierge />
         <WhatsAppFloat />
         <CookieConsent />
+        <AnalyticsConsent />
         <OpenAIPixel />
-        <SiteAnalytics />
+        <Analytics />
       </body>
     </html>
   );

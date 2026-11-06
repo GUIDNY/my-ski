@@ -40,7 +40,7 @@ function PrivacyEn() {
 
       <H2 id="cookies">5. Cookies</H2>
       <p>The site uses cookies that are essential for running it and for improving the experience (for example, saving preferences). You can block cookies in your browser settings, but this may affect some of the functions.</p>
-      <p>Our cookie policy explains how the <b>SkiShare</b> site and app (skisharebook.com) use cookies. We protect your privacy: besides the cookies the site needs to work, we use <b>only two third-party measurement tools: the OpenAI measurement pixel</b>, to know whether our ads on ChatGPT brought enquiries and bookings, <b>and Vercel Web Analytics</b>, for overall visit counts. On the English and French pages they only load after you accept cookies.</p>
+      <p>Our cookie policy explains how the <b>SkiShare</b> site and app (skisharebook.com) use cookies. We protect your privacy: besides the cookies the site needs to work, we use <b>only two third-party measurement tools: the OpenAI measurement pixel</b>, to know whether our ads on ChatGPT brought enquiries and bookings, <b>and Vercel Web Analytics</b>, for overall visit counts. On the English and French pages they measure nothing until you accept cookies.</p>
       <H3>What cookies are</H3>
       <p>Cookies are small text files saved on your device when you use the site, which allow basic services such as signing in to an account to work properly.</p>
       <H3>Which cookies we use</H3>
@@ -106,7 +106,7 @@ function PrivacyFr() {
 
       <H2 id="cookies">5. Cookies</H2>
       <p>Le site utilise des cookies essentiels à son fonctionnement et à l&apos;amélioration de l&apos;expérience (par exemple, la mémorisation des préférences). Vous pouvez bloquer les cookies dans les paramètres de votre navigateur, mais cela peut nuire à certaines fonctionnalités.</p>
-      <p>Notre politique relative aux cookies explique comment le site et l&apos;application <b>SkiShare</b> (skisharebook.com) utilisent les cookies. Nous protégeons votre vie privée&nbsp;: en plus des cookies nécessaires au fonctionnement du site, nous utilisons <b>seulement deux outils de mesure tiers&nbsp;: le pixel de mesure d&apos;OpenAI</b>, pour savoir si nos annonces sur ChatGPT ont apporté des demandes et des réservations, <b>et Vercel Web Analytics</b>, pour compter les visites de manière globale. Sur les pages en anglais et en français, ils ne se chargent qu&apos;après votre accord aux cookies.</p>
+      <p>Notre politique relative aux cookies explique comment le site et l&apos;application <b>SkiShare</b> (skisharebook.com) utilisent les cookies. Nous protégeons votre vie privée&nbsp;: en plus des cookies nécessaires au fonctionnement du site, nous utilisons <b>seulement deux outils de mesure tiers&nbsp;: le pixel de mesure d&apos;OpenAI</b>, pour savoir si nos annonces sur ChatGPT ont apporté des demandes et des réservations, <b>et Vercel Web Analytics</b>, pour compter les visites de manière globale. Sur les pages en anglais et en français, ils ne mesurent rien avant votre accord aux cookies.</p>
       <H3>Que sont les cookies</H3>
       <p>Les cookies sont de petits fichiers texte enregistrés sur votre appareil lorsque vous utilisez le site&nbsp;; ils permettent le bon fonctionnement de services de base comme la connexion à un compte.</p>
       <H3>Les cookies que nous utilisons</H3>
