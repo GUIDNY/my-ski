@@ -44,7 +44,7 @@ export default function CookieConsent() {
       <div className="max-w-[1240px] mx-auto px-4 md:px-6 py-2.5 flex items-center gap-3">
         <p className="flex-1 min-w-0 text-[13px] md:text-[14px] text-body leading-snug">
           <span className="md:hidden">האתר משתמש בעוגיות. <Link href="/cookies" className="text-accent font-bold">פרטים</Link></span>
-          <span className="hidden md:inline">אנחנו משתמשים בעוגיות כדי שהאתר יעבוד. בהמשך השימוש אתם מסכימים ל<Link href="/cookies" className="text-accent font-bold">מדיניות העוגיות</Link>.</span>
+          <span className="hidden md:inline">אנחנו משתמשים בעוגיות כדי שהאתר יעבוד ולמדידת המודעות שלנו. בהמשך השימוש אתם מסכימים ל<Link href="/cookies" className="text-accent font-bold">מדיניות העוגיות</Link>.</span>
         </p>
         <button onClick={remember}
           className="shrink-0 min-h-[40px] px-4 bg-accent hover:bg-accent-hover text-white text-[14px] font-bold rounded-xl transition-colors">

@@ -6,6 +6,7 @@ import { CONTACT_EMAIL, LAST_APARTMENT_KEY, cardFeeFor, type Lang } from "@/lib/
 import { DICT } from "@/lib/intl/dict";
 import { fmtDayRange, fmtEur } from "@/lib/intl/format";
 import Dialog from "../Dialog";
+import { oaiCheckoutStarted } from "@/lib/oai-pixel";
 
 export type Booking = {
   apartmentId: string;
@@ -83,6 +84,7 @@ export default function CheckoutDialog({ lang, booking: b, onClose, onTaken }: {
       }).then(r => r.json()).catch(() => ({}));
 
       if (link?.url) {
+        oaiCheckoutStarted(code, toPay, "EUR", b.name);
         try { sessionStorage.setItem(LAST_APARTMENT_KEY, window.location.pathname + window.location.search); } catch { /* private mode */ }
         window.location.href = link.url;
         return;

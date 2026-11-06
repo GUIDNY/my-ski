@@ -6,6 +6,7 @@ import { btn, chip } from "@/components/ui";
 import { StatusCard } from "@/components/checkout/Checkout";
 import { CONTACT_EMAIL, LAST_APARTMENT_KEY, type Lang } from "@/lib/intl/config";
 import { DICT } from "@/lib/intl/dict";
+import { oaiOrderCreated } from "@/lib/oai-pixel";
 
 /*
  * Where PayPlus sends the customer back (create-link with lang "en"/"fr").
@@ -23,6 +24,7 @@ export function PaySuccess({ lang }: { lang: Lang }) {
 
   useEffect(() => {
     if (!order) return;
+    oaiOrderCreated(order);
     fetch("/api/payplus/confirm", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ order_code: order, transaction_uid: transactionUid, page_request_uid: pageRequestUid }),

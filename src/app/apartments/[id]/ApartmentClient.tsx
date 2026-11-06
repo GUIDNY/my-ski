@@ -23,6 +23,7 @@ import { encodeExtras } from "@/lib/quote-extras";
 import SaveTripButton from "@/components/SaveTripButton";
 import { wrap, card, h1, h2, btn, field, fieldLabel, chip, badgeDark, Check, CheckList, Crumbs, PerPerson, EmptyState } from "@/components/ui";
 import { aptDisplayName, aptShortName, aptParts } from "@/lib/apartment-display";
+import { oaiLead } from "@/lib/oai-pixel";
 
 const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const HE_DAYS = ["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"];
@@ -597,6 +598,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
   /* ── Create a short shareable quote link, fall back to long URL ── */
   const handleSendQuote = async () => {
     setCreatingQuote(true);
+    oaiLead("quote");
     try {
       const res = await fetch("/api/quotes", {
         method: "POST",

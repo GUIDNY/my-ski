@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import { usePathname } from "next/navigation";
 import { helperWaHref, OPEN_CHAT_EVENT } from "@/lib/helper-whatsapp";
+import { oaiLead } from "@/lib/oai-pixel";
 
 // One chat message. The helper answers in a few short messages, then the quote
 // link and apartment photos (when it made a quote or showed an apartment).
@@ -252,6 +253,7 @@ export default function AiConcierge() {
       setPendingImage(null);
     }
 
+    oaiLead("chat");
     let answer: Answer | null = null;
     try {
       const res = await fetch("/api/ai-concierge", {

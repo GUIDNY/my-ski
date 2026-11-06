@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { IconCreditCard, IconX } from "@/components/Icons";
+import { oaiCheckoutStarted } from "@/lib/oai-pixel";
 
 type Props = {
   apartmentId?: string;
@@ -126,7 +127,10 @@ export default function CardPaymentButton(p: Props) {
         }),
       }).then(r => r.json());
 
-      if (res.url) { window.location.href = res.url; return; }
+      if (res.url) {
+        oaiCheckoutStarted(String(order.code), currency === "ILS" && ilsTotal ? ilsTotal : totalWithFee, currency === "ILS" && ilsTotal ? "ILS" : "EUR", p.apartment);
+        window.location.href = res.url; return;
+      }
       setErr("התשלום בכרטיס לא זמין כרגע. אפשר לסגור את ההזמנה בוואטסאפ."); setBusy(false);
     } catch {
       setErr("משהו השתבש ביצירת התשלום. אפשר לנסות שוב, או לכתוב לנו בוואטסאפ."); setBusy(false);

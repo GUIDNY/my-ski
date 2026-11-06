@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { btn, chip } from "@/components/ui";
 import { StatusCard } from "@/components/checkout/Checkout";
 import { helperWaHref } from "@/lib/helper-whatsapp";
+import { oaiOrderCreated } from "@/lib/oai-pixel";
 
 const NEXT_STEPS = [
   "אנחנו בודקים שהכל פנוי ומאשרים את ההזמנה.",
@@ -25,6 +26,7 @@ function PaySuccessInner() {
   // as taken so the order/progress updates immediately (idempotent with the callback).
   useEffect(() => {
     if (!order) return;
+    oaiOrderCreated(order);
     fetch("/api/payplus/confirm", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ order_code: order, transaction_uid: transactionUid, page_request_uid: pageRequestUid }),

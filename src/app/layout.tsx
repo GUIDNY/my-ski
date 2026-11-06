@@ -8,6 +8,7 @@ import CookieConsent from "@/components/CookieConsent";
 import DeepLinkHandler from "@/components/DeepLinkHandler";
 import AiConcierge from "@/components/AiConcierge";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
+import OpenAIPixel from "@/components/OpenAIPixel";
 import { SITE_LD, ldJson } from "@/lib/site";
 
 const montserrat = Montserrat({
@@ -103,6 +104,7 @@ export default function RootLayout({
         <AiConcierge />
         <WhatsAppFloat />
         <CookieConsent />
+        <OpenAIPixel />
       </body>
     </html>
   );
