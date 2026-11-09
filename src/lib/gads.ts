@@ -3,15 +3,16 @@
  * OpenAI pixel (lib/oai-pixel.ts calls these): not on the admin/seller pages,
  * and on /en and /fr only after the cookie consent.
  *
- * Switched on by Vercel env vars (all public, set in Google Ads > Goals > Conversions):
+ * The account (462-339-2837) and its "רכישה" conversion are built in; Vercel env vars override them
+ * (all public, from Google Ads > Goals > Conversions):
  *   NEXT_PUBLIC_GADS_ID              "AW-123456789"           the account's tag; without it nothing loads
  *   NEXT_PUBLIC_GADS_PURCHASE_LABEL  the "Purchase" conversion's label  (order paid, with amount and order code)
  *   NEXT_PUBLIC_GADS_CHECKOUT_LABEL  optional, "Begin checkout"        (sent to PayPlus)
  *   NEXT_PUBLIC_GADS_LEAD_LABEL      optional, "Contact / lead"        (WhatsApp, site chat, quote link)
  */
-export const GADS_ID = (process.env.NEXT_PUBLIC_GADS_ID || "").trim();
+export const GADS_ID = (process.env.NEXT_PUBLIC_GADS_ID || "AW-11403117194").trim();
 const LABEL = {
-  purchase: (process.env.NEXT_PUBLIC_GADS_PURCHASE_LABEL || "").trim(),
+  purchase: (process.env.NEXT_PUBLIC_GADS_PURCHASE_LABEL || "RjpNCPqqpbUdEIqFt70q").trim(),
   checkout: (process.env.NEXT_PUBLIC_GADS_CHECKOUT_LABEL || "").trim(),
   lead: (process.env.NEXT_PUBLIC_GADS_LEAD_LABEL || "").trim(),
 };
