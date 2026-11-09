@@ -40,7 +40,7 @@ function PrivacyEn() {
 
       <H2 id="cookies">5. Cookies</H2>
       <p>The site uses cookies that are essential for running it and for improving the experience (for example, saving preferences). You can block cookies in your browser settings, but this may affect some of the functions.</p>
-      <p>Our cookie policy explains how the <b>SkiShare</b> site and app (skisharebook.com) use cookies. We protect your privacy: besides the cookies the site needs to work, we use <b>only two third-party measurement tools: the OpenAI measurement pixel</b>, to know whether our ads on ChatGPT brought enquiries and bookings, <b>and Vercel Web Analytics</b>, for overall visit counts. On the English and French pages they measure nothing until you accept cookies.</p>
+      <p>Our cookie policy explains how the <b>SkiShare</b> site and app (skisharebook.com) use cookies. We protect your privacy: besides the cookies the site needs to work, we use <b>only three third-party measurement tools: the OpenAI measurement pixel and the Google Ads conversion tag</b>, to know whether our ads on ChatGPT and Google brought enquiries and bookings, <b>and Vercel Web Analytics</b>, for overall visit counts. On the English and French pages they measure nothing until you accept cookies.</p>
       <H3>What cookies are</H3>
       <p>Cookies are small text files saved on your device when you use the site, which allow basic services such as signing in to an account to work properly.</p>
       <H3>Which cookies we use</H3>
@@ -48,12 +48,13 @@ function PrivacyEn() {
         <li><b>Essential cookies (first party only):</b> needed for the site to work: keeping the session and secure sign-in to an account. Without them you cannot sign in or manage a booking.</li>
         <li><b>Preferences:</b> saving your agreement to the cookie policy, so that you are not asked again.</li>
         <li><b>Ad measurement (third party, OpenAI):</b> the OpenAI Ads measurement pixel records page views, an enquiry (a WhatsApp click, a message in the site chat or a quote link), going to payment and a completed booking (the booking code and amount). We do not send it your name, phone, email or payment details. OpenAI uses this to attribute actions on the site to our ads, under its own privacy policy. It does not run in the staff areas.</li>
+        <li><b>Conversion measurement (third party, Google Ads):</b> the Google Ads tag records an enquiry, going to payment and a completed booking (the booking code and amount), to know which Google ad brought it. We do not send it your name, phone, email or payment details. Google uses this under its own privacy policy. It does not run in the staff areas.</li>
         <li><b>Visit statistics (third party, Vercel):</b> Vercel Web Analytics counts page visits, the referring site, country and device type, in aggregate. It sets no cookies in your browser and does not identify you personally.</li>
       </UL>
       <H3>What we do <u>not</u> use</H3>
       <UL>
         <li><b>No remarketing:</b> we do not use cookies to follow you with ads on other sites, and there are no ads on our site.</li>
-        <li><b>No other tools:</b> no Google Analytics, no Facebook Pixel and no external analytics tools other than the OpenAI measurement pixel and Vercel Web Analytics described above.</li>
+        <li><b>No other tools:</b> no Google Analytics, no Facebook Pixel and no external analytics tools other than the three tools described above.</li>
         <li><b>No sharing with data brokers:</b> we do not share your data or link it with third-party data for marketing or advertising purposes.</li>
       </UL>
       <H3>Payments</H3>
@@ -106,7 +107,7 @@ function PrivacyFr() {
 
       <H2 id="cookies">5. Cookies</H2>
       <p>Le site utilise des cookies essentiels à son fonctionnement et à l&apos;amélioration de l&apos;expérience (par exemple, la mémorisation des préférences). Vous pouvez bloquer les cookies dans les paramètres de votre navigateur, mais cela peut nuire à certaines fonctionnalités.</p>
-      <p>Notre politique relative aux cookies explique comment le site et l&apos;application <b>SkiShare</b> (skisharebook.com) utilisent les cookies. Nous protégeons votre vie privée&nbsp;: en plus des cookies nécessaires au fonctionnement du site, nous utilisons <b>seulement deux outils de mesure tiers&nbsp;: le pixel de mesure d&apos;OpenAI</b>, pour savoir si nos annonces sur ChatGPT ont apporté des demandes et des réservations, <b>et Vercel Web Analytics</b>, pour compter les visites de manière globale. Sur les pages en anglais et en français, ils ne mesurent rien avant votre accord aux cookies.</p>
+      <p>Notre politique relative aux cookies explique comment le site et l&apos;application <b>SkiShare</b> (skisharebook.com) utilisent les cookies. Nous protégeons votre vie privée&nbsp;: en plus des cookies nécessaires au fonctionnement du site, nous utilisons <b>seulement trois outils de mesure tiers&nbsp;: le pixel de mesure d&apos;OpenAI et la balise de conversion Google Ads</b>, pour savoir si nos annonces sur ChatGPT et Google ont apporté des demandes et des réservations, <b>et Vercel Web Analytics</b>, pour compter les visites de manière globale. Sur les pages en anglais et en français, ils ne mesurent rien avant votre accord aux cookies.</p>
       <H3>Que sont les cookies</H3>
       <p>Les cookies sont de petits fichiers texte enregistrés sur votre appareil lorsque vous utilisez le site&nbsp;; ils permettent le bon fonctionnement de services de base comme la connexion à un compte.</p>
       <H3>Les cookies que nous utilisons</H3>
@@ -114,12 +115,13 @@ function PrivacyFr() {
         <li><b>Cookies essentiels (internes uniquement)&nbsp;:</b> nécessaires au fonctionnement du site&nbsp;: maintien de la session et connexion sécurisée au compte. Sans eux, il n&apos;est pas possible de se connecter ni de gérer une réservation.</li>
         <li><b>Préférences&nbsp;:</b> la mémorisation de votre accord à la politique relative aux cookies, afin que la question ne vous soit plus posée.</li>
         <li><b>Mesure publicitaire (tiers, OpenAI)&nbsp;:</b> le pixel de mesure OpenAI Ads enregistre les pages vues, une demande (un clic WhatsApp, un message dans le chat du site ou un lien de devis), le passage au paiement et une réservation terminée (le code de réservation et le montant). Nous ne lui transmettons ni nom, ni téléphone, ni e-mail, ni données de paiement. OpenAI utilise ces informations pour attribuer les actions sur le site à nos annonces, selon sa propre politique de confidentialité. Il ne fonctionne pas dans les espaces réservés à l&apos;équipe.</li>
+        <li><b>Mesure des conversions (tiers, Google Ads)&nbsp;:</b> la balise Google Ads enregistre une demande, le passage au paiement et une réservation terminée (le code de réservation et le montant), pour savoir quelle annonce Google l&apos;a apportée. Nous ne lui transmettons ni nom, ni téléphone, ni e-mail, ni données de paiement. Google utilise ces informations selon sa propre politique de confidentialité. Elle ne fonctionne pas dans les espaces réservés à l&apos;équipe.</li>
         <li><b>Statistiques de visite (tiers, Vercel)&nbsp;:</b> Vercel Web Analytics compte les pages visitées, le site d&apos;origine, le pays et le type d&apos;appareil, de manière agrégée. Il ne dépose aucun cookie dans votre navigateur et ne vous identifie pas personnellement.</li>
       </UL>
       <H3>Ce que nous n&apos;utilisons <u>pas</u></H3>
       <UL>
         <li><b>Pas de reciblage&nbsp;:</b> nous n&apos;utilisons pas de cookies pour vous suivre avec des annonces sur d&apos;autres sites, et il n&apos;y a pas de publicité sur notre site.</li>
-        <li><b>Pas d&apos;autres outils&nbsp;:</b> pas de Google Analytics, pas de Facebook Pixel ni d&apos;outils d&apos;analyse externes, en dehors du pixel de mesure d&apos;OpenAI et de Vercel Web Analytics décrits ci-dessus.</li>
+        <li><b>Pas d&apos;autres outils&nbsp;:</b> pas de Google Analytics, pas de Facebook Pixel ni d&apos;outils d&apos;analyse externes, en dehors des trois outils décrits ci-dessus.</li>
         <li><b>Pas de partage avec des courtiers en données&nbsp;:</b> nous ne partageons pas vos données et ne les associons pas à des données de tiers à des fins de marketing ou de publicité.</li>
       </UL>
       <H3>Paiements</H3>

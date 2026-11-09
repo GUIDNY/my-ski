@@ -12,7 +12,11 @@
  *  - lead_created      WhatsApp click, first message to the site chat, a quote link made
  *  - checkout_started  an order was made and the customer is sent to PayPlus
  *  - order_created     PayPlus sent the customer back to /pay/success
+ *
+ * Each of these also goes to Google Ads as a conversion (lib/gads.ts), when it is set up.
  */
+
+import { gadsConversion } from "@/lib/gads";
 
 export const OAI_PIXEL_ID = process.env.NEXT_PUBLIC_OAI_PIXEL_ID || "JUva1CRVPrEnzzc2MpF3kf";
 
@@ -59,6 +63,7 @@ export function oaiLead(source: "whatsapp" | "chat" | "quote") {
     sessionStorage.setItem(key, "1");
   } catch { /* private mode: send anyway */ }
   oaiq("measure", "lead_created", { type: "customer_action" });
+  gadsConversion("lead");
 }
 
 const PENDING = "oai_pending_order";
@@ -72,6 +77,7 @@ export function oaiCheckoutStarted(orderCode: string, amount: number, currency: 
     currency: cur,
     contents: [{ id: orderCode, name, quantity: 1, amount: minor(amount), currency: cur }],
   });
+  gadsConversion("checkout", { value: amount, currency: cur, transaction_id: orderCode });
 }
 
 /* the order code is the event_id, so a refresh of the success page is not a
@@ -93,5 +99,7 @@ export function oaiOrderCreated(orderCode: string) {
     data.contents = [{ id: code, name: pending.name, quantity: 1, amount: minor(pending.amount!), currency: cur }];
   }
   oaiq("measure", "order_created", data, { event_id: `order_${code}` });
+  // Google counts one purchase per transaction_id, so a refresh is not a second sale there either
+  gadsConversion("purchase", match ? { value: pending.amount, currency: pending.currency, transaction_id: code } : { transaction_id: code });
   try { localStorage.setItem(sent, "1"); sessionStorage.removeItem(PENDING); } catch { /* ignore */ }
 }

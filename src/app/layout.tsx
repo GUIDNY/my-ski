@@ -11,6 +11,7 @@ import WhatsAppFloat from "@/components/WhatsAppFloat";
 import OpenAIPixel from "@/components/OpenAIPixel";
 import { Analytics } from "@vercel/analytics/next";
 import AnalyticsConsent from "@/components/AnalyticsConsent";
+import GoogleAdsTag from "@/components/GoogleAdsTag";
 import { SITE_LD, ldJson } from "@/lib/site";
 
 const montserrat = Montserrat({
@@ -109,6 +110,7 @@ export default function RootLayout({
         <AnalyticsConsent />
         <OpenAIPixel />
         <Analytics />
+        <GoogleAdsTag />
       </body>
     </html>
   );
