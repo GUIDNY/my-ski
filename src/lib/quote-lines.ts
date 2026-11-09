@@ -1,6 +1,6 @@
 import type { Apartment, SkiPass } from "@/types";
 import { stayBreakdown, matchingWeek, skiDaysFromNights, equipCost, type PricingRule } from "@/lib/pricing";
-import { TRANSFER_PRICE, BAGGAGE_PRICE, PASS_AREA_LABEL, liftsOpenForStay, passTier, type PassArea } from "@/lib/deal-pricing";
+import { TRANSFER_PRICE, BAGGAGE_PRICE, TROLLEY_PRICE, PASS_AREA_LABEL, liftsOpenForStay, passTier, type PassArea } from "@/lib/deal-pricing";
 import type { QuoteExtras } from "@/lib/quote-extras";
 import type { DirectFlight } from "@/lib/flight-format";
 
@@ -76,6 +76,7 @@ export function quoteLines(i: QuoteInputs) {
   if (x.flight && i.flight) {
     lines.push({ key: "flight", label: `טיסה ישירה הלוך וחזור ל${i.flight.city} × ${x.flight.qty}`, sub: `${i.flight.airline ? `${i.flight.airline} · ` : ""}${eur(i.flight.price)} לאדם`, amount: i.flight.price * x.flight.qty });
     if (x.bag) lines.push({ key: "bag", label: `מזוודה לבטן × ${x.bag.qty}`, sub: `הלוך וחזור · ${eur(BAGGAGE_PRICE)} לאדם`, amount: BAGGAGE_PRICE * x.bag.qty });
+    if (x.trolley) lines.push({ key: "trolley", label: `טרולי לתא הנוסעים × ${x.trolley.qty}`, sub: `הלוך וחזור · ${eur(TROLLEY_PRICE)} לאדם`, amount: TROLLEY_PRICE * x.trolley.qty });
   }
   if (i.cancel === "flexible") lines.push({ key: "flex", label: `ביטול גמיש × ${Math.max(i.guests || 1, 1)}`, sub: `${eur(FLEXIBLE_EXTRA)} לאדם`, amount: FLEXIBLE_EXTRA * Math.max(i.guests || 1, 1) });
   if (i.cancel === "none") lines.push({ key: "nocancel", label: "בלי אפשרות ביטול", sub: "הנחה לכל החבורה", amount: -NO_CANCEL_DISCOUNT });

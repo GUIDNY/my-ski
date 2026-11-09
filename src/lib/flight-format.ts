@@ -32,7 +32,7 @@ const WEEKDAYS = ["ראשון", "שני", "שלישי", "רביעי", "חמיש�
 export const dayLabel = (iso: string) => { const d = new Date(iso + "T12:00:00"); return `${WEEKDAYS[d.getDay()]} ${d.getDate()}.${d.getMonth() + 1}`; };
 
 /** The flight as one line for the order and the WhatsApp message: route, airline, both legs, price. */
-export function flightOrderText(f: DirectFlight, ret: ReturnLeg | null, checkin: string, checkout: string, qty: number, bag?: { qty: number; unit: number } | null): string {
+export function flightOrderText(f: DirectFlight, ret: ReturnLeg | null, checkin: string, checkout: string, qty: number, bag?: { qty: number; unit: number } | null, trolley?: { qty: number; unit: number } | null): string {
   const leg = (label: string, date: string, d: string | null, a: string | null) => {
     const dd = time24(d), aa = time24(a);
     return `${label} ${dayLabel(date)}${dd && aa ? ` ${dd}–${aa}` : ""}`;
@@ -43,5 +43,6 @@ export function flightOrderText(f: DirectFlight, ret: ReturnLeg | null, checkin:
     leg("חזור", checkout, ret?.departTime ?? null, ret?.arriveTime ?? null),
     `€${f.price} לאדם × ${qty}`,
     bag ? `מזוודה €${bag.unit} × ${bag.qty}` : null,
+    trolley ? `טרולי €${trolley.unit} × ${trolley.qty}` : null,
   ].filter(Boolean).join(" · ");
 }

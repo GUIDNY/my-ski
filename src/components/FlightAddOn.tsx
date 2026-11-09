@@ -24,6 +24,25 @@ function Stepper({ label, qty, setQty, max, total }: { label: string; qty: numbe
   );
 }
 
+type AddOn = { on: boolean; toggle: () => void; qty: number; setQty: (n: number) => void; total: number; unit: number };
+
+/** one luggage option under the flight: a checkbox row */
+function Extra({ on, toggle, icon, title, sub }: { on: boolean; toggle: () => void; icon: React.ReactNode; title: string; sub: string }) {
+  return (
+    <button type="button" role="checkbox" aria-checked={on} onClick={toggle}
+      className={`w-full flex items-start gap-3 rounded-2xl border px-4 py-3 text-start transition-colors ${on ? "border-accent bg-white" : "border-line bg-white hover:border-line-strong"}`}>
+      <span className={`mt-0.5 w-[20px] h-[20px] shrink-0 rounded-md border-2 flex items-center justify-center ${on ? "border-accent bg-accent text-white" : "border-line-strong bg-white"}`} aria-hidden="true">
+        {on && <IconCheck size={12} />}
+      </span>
+      <span className={`shrink-0 ${on ? "text-accent" : "text-muted"}`} aria-hidden="true">{icon}</span>
+      <span className="flex-1 min-w-0 flex flex-col gap-0.5">
+        <span className="font-bold text-[15px] text-ink">{title}</span>
+        <span className="text-[14px] text-muted">{sub}</span>
+      </span>
+    </button>
+  );
+}
+
 /** "הלוך  שבת 2.1" and under it "יוצאת 06:15 · נוחתת 09:40" */
 function Leg({ label, date, depart, arrive, pending }: { label: string; date: string; depart: string | null; arrive: string | null; pending?: boolean }) {
   const d = time24(depart), a = time24(arrive);
@@ -44,15 +63,17 @@ function Leg({ label, date, depart, arrive, pending }: { label: string; date: st
  * cheapest direct one of Geneva and Lyon for the dates, at its live Google
  * Flights price, with both legs spelled out. When there is no direct flight
  * the card says so and there is nothing to add. A checked bag belongs to the
- * flight, so it sits inside this card.
+ * flight, so it sits inside this card, and so does a cabin trolley (the
+ * ticket itself has only a backpack up to 8 kg).
  */
-export default function FlightAddOn({ state, ret, checkin, checkout, checked, onToggle, qty, setQty, maxQty, total, bag }: {
+export default function FlightAddOn({ state, ret, checkin, checkout, checked, onToggle, qty, setQty, maxQty, total, bag, trolley }: {
   state: DirectFlightState;
   ret: { leg: ReturnLeg | null; loading: boolean };
   checkin: string; checkout: string;
   checked: boolean; onToggle: (v: boolean) => void;
   qty: number; setQty: (n: number) => void; maxQty: number; total: number;
-  bag: { on: boolean; toggle: () => void; qty: number; setQty: (n: number) => void; total: number; unit: number };
+  bag: AddOn;
+  trolley: AddOn;
 }) {
   const f = state.status === "found" ? state.flight : null;
 
@@ -109,18 +130,13 @@ export default function FlightAddOn({ state, ret, checkin, checkout, checked, on
       {checked && (
         <div className="px-4 md:px-[18px] pb-4 flex flex-col gap-2.5">
           <Stepper label="כמה כרטיסים?" qty={qty} setQty={setQty} max={maxQty} total={total} />
-          <button type="button" role="checkbox" aria-checked={bag.on} onClick={bag.toggle}
-            className={`w-full flex items-start gap-3 rounded-2xl border px-4 py-3 text-start transition-colors ${bag.on ? "border-accent bg-white" : "border-line bg-white hover:border-line-strong"}`}>
-            <span className={`mt-0.5 w-[20px] h-[20px] shrink-0 rounded-md border-2 flex items-center justify-center ${bag.on ? "border-accent bg-accent text-white" : "border-line-strong bg-white"}`} aria-hidden="true">
-              {bag.on && <IconCheck size={12} />}
-            </span>
-            <span className={`shrink-0 ${bag.on ? "text-accent" : "text-muted"}`} aria-hidden="true"><IconBriefcase size={18} /></span>
-            <span className="flex-1 min-w-0 flex flex-col gap-0.5">
-              <span className="font-bold text-[15px] text-ink">מזוודה לבטן</span>
-              <span className="text-[14px] text-muted">הלוך וחזור · {eur(bag.unit)} לאדם{bag.on ? " · כלולה עם הטיסה, אפשר להוריד" : ""}</span>
-            </span>
-          </button>
+          <p className="text-[14px] leading-snug text-muted">בכרטיס כלול רק תיק גב עד 8 ק״ג. מזוודה לבטן או טרולי מוסיפים כאן.</p>
+          <Extra on={bag.on} toggle={bag.toggle} icon={<IconBriefcase size={18} />} title="מזוודה לבטן"
+            sub={`הלוך וחזור · ${eur(bag.unit)} לאדם${bag.on ? " · כלולה עם הטיסה, אפשר להוריד" : ""}`} />
           {bag.on && <Stepper label="כמה מזוודות?" qty={bag.qty} setQty={bag.setQty} max={maxQty} total={bag.total} />}
+          <Extra on={trolley.on} toggle={trolley.toggle} icon={<IconBriefcase size={16} />} title="טרולי לתא הנוסעים"
+            sub={`הלוך וחזור · ${eur(trolley.unit)} לאדם`} />
+          {trolley.on && <Stepper label="כמה טרולים?" qty={trolley.qty} setQty={trolley.setQty} max={maxQty} total={trolley.total} />}
         </div>
       )}
     </div>

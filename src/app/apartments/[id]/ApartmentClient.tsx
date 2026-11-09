@@ -18,7 +18,7 @@ import { codeOf, type TransferOption } from "@/lib/transfer-options";
 import FlightDetailsModal, { EMPTY_FLIGHT, flightToString, flightFilled, type Flight } from "@/components/FlightDetailsModal";
 import FlightAddOn from "@/components/FlightAddOn";
 import { useDirectFlight, useReturnLeg, time24 } from "@/lib/useFlightPrice";
-import { TRANSFER_PRICE, BAGGAGE_PRICE, LIFT_DATES, PASS_AREA_LABEL, liftsOpenForStay, packagePassArea, passTier, shortDate, type PassArea } from "@/lib/deal-pricing";
+import { TRANSFER_PRICE, BAGGAGE_PRICE, TROLLEY_PRICE, LIFT_DATES, PASS_AREA_LABEL, liftsOpenForStay, packagePassArea, passTier, shortDate, type PassArea } from "@/lib/deal-pricing";
 import { encodeExtras } from "@/lib/quote-extras";
 import SaveTripButton from "@/components/SaveTripButton";
 import { wrap, card, h1, h2, btn, field, fieldLabel, chip, badgeDark, Check, CheckList, Crumbs, PerPerson, EmptyState } from "@/components/ui";
@@ -424,6 +424,8 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
   const [bookFlightQty, setBookFlightQty] = useState(guests || 1);
   const [baggage, setBaggage] = useState(false);
   const [baggageQty, setBaggageQty] = useState(guests || 1);
+  const [trolley, setTrolley] = useState(false);   // cabin trolley, optional (the ticket has only a backpack up to 8 kg)
+  const [trolleyQty, setTrolleyQty] = useState(guests || 1);
 
   // Cancellation: "regular" (per terms) | "none" (-€100, signed) | "flexible" (+€100)
   const [cancel, setCancel] = useState<"regular" | "none" | "flexible">("regular");
@@ -478,6 +480,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
   const directFlight = direct.status === "found" ? direct.flight : null;
   const flightOn = bookFlight && !!directFlight;
   const bagOn = baggage && flightOn;
+  const trolleyOn = trolley && flightOn;
   const returnLeg = useReturnLeg(directFlight, checkin, checkout, flightOn);
   const preFlightDone = useRef(false);
   useEffect(() => {
@@ -521,10 +524,11 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
   const equipTotal      = equipment ? equipCost(skiDays) * equipQty : 0;
   const bookFlightTotal = flightOn && directFlight ? directFlight.price * bookFlightQty : 0;
   const baggageTotal    = bagOn ? BAGGAGE_PRICE * baggageQty : 0;
+  const trolleyTotal    = trolleyOn ? TROLLEY_PRICE * trolleyQty : 0;
   const flexExtra       = cancel  === "flexible" ? CANCEL_FLEX * Math.max(guests || 1, 1) : 0;
   const noCancelDiscount = cancel === "none"     ? -CANCEL_NONE : 0;
   const aiDiscount      = service === "ai"       ? -AI_DISCOUNT : 0;
-  const grandTotal      = aptTotal + skiTotal + trTotal + equipTotal + bookFlightTotal + baggageTotal + flexExtra + noCancelDiscount + aiDiscount;
+  const grandTotal      = aptTotal + skiTotal + trTotal + equipTotal + bookFlightTotal + baggageTotal + trolleyTotal + flexExtra + noCancelDiscount + aiDiscount;
   const transferDetails = transfer ? flightToString(flight) : "";
   // what the order says about the flight: both legs, the airline, the price
   const legText = (label: string, date: string, d: string | null, a: string | null) =>
@@ -536,6 +540,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
         legText("חזור", checkout, returnLeg.leg?.departTime ?? null, returnLeg.leg?.arriveTime ?? null),
         `€${directFlight.price} לאדם × ${bookFlightQty}`,
         bagOn ? `מזוודה €${BAGGAGE_PRICE} × ${baggageQty}` : null,
+        trolleyOn ? `טרולי €${TROLLEY_PRICE} × ${trolleyQty}` : null,
       ].filter(Boolean).join(" · ")
     : "";
   const flightLabel = directFlight ? `טיסה ישירה הלוך וחזור ל${directFlight.city}` : "טיסה";
@@ -552,6 +557,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
     equipment: equipment ? { qty: equipQty } : undefined,
     flight: flightOn ? { qty: bookFlightQty } : undefined,
     bag: bagOn ? { qty: baggageQty } : undefined,
+    trolley: trolleyOn ? { qty: trolleyQty } : undefined,
   });
 
   /* ── Long fallback quote URL (works without DB) ─────────── */
@@ -588,6 +594,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
       equipment ? `🎿 השכרת ציוד ל-${equipQty} אנשים (€${equipTotal})` : null,
       flightOn ? `✈️ ${bookFlightDetails} (€${bookFlightTotal})` : null,
       bagOn ? `🧳 מזוודה לבטן ל-${baggageQty} אנשים (€${baggageTotal})` : null,
+      trolleyOn ? `🧳 טרולי לתא הנוסעים ל-${trolleyQty} אנשים (€${trolleyTotal})` : null,
       cancel === "flexible" ? "✅ מדיניות ביטול גמישה" : cancel === "none" ? "🔒 ללא אפשרות ביטול" : null,
       skiOn ? `🎿 ${passLabel} ל-${skiQty} אנשים (€${skiTotal})` : null,
       service === "ai" ? "🤖 ניהול עצמאי (AI)" : null,
@@ -703,6 +710,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
     ...(equipment ? [{ label: `ציוד, ${skiDays} ימים × ${equipQty}`, value: eur(equipTotal) }] : []),
     ...(flightOn ? [{ label: `${flightLabel} × ${bookFlightQty}`, value: eur(bookFlightTotal) }] : []),
     ...(bagOn ? [{ label: `מזוודה לבטן × ${baggageQty}`, value: eur(baggageTotal) }] : []),
+    ...(trolleyOn ? [{ label: `טרולי × ${trolleyQty}`, value: eur(trolleyTotal) }] : []),
     ...(cancel === "flexible" ? [{ label: "ביטול גמיש", value: eur(flexExtra) }] : []),
     ...(cancel === "none" ? [{ label: "בלי אפשרות ביטול", value: `−${eur(CANCEL_NONE)}`, good: true }] : []),
     ...(service === "ai" ? [{ label: "הנחת שירות AI", value: `−${eur(AI_DISCOUNT)}`, good: true }] : []),
@@ -853,10 +861,14 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
               checked={flightOn}
               // a flight comes with a checked bag per ticket (Idan, 5.11.2026); unticking "מזוודה לבטן" removes it
               onToggle={v => { setBookFlight(v); if (v) { setBookFlightQty(guests || 1); setBaggage(true); setBaggageQty(guests || 1); } }}
-              qty={bookFlightQty} setQty={n => { setBaggageQty(b => (b === bookFlightQty || b > n ? n : b)); setBookFlightQty(n); }} maxQty={maxGuests} total={bookFlightTotal}
+              qty={bookFlightQty} setQty={n => { setBaggageQty(b => (b === bookFlightQty || b > n ? n : b)); setTrolleyQty(b => (b > n ? n : b)); setBookFlightQty(n); }} maxQty={maxGuests} total={bookFlightTotal}
               bag={{
                 on: bagOn, unit: BAGGAGE_PRICE, qty: baggageQty, setQty: setBaggageQty, total: baggageTotal,
                 toggle: () => { const v = !baggage; setBaggage(v); if (v) setBaggageQty(Math.min(baggageQty || guests, guests) || 1); },
+              }}
+              trolley={{
+                on: trolleyOn, unit: TROLLEY_PRICE, qty: trolleyQty, setQty: setTrolleyQty, total: trolleyTotal,
+                toggle: () => { const v = !trolley; setTrolley(v); if (v) setTrolleyQty(Math.min(trolleyQty || bookFlightQty, bookFlightQty) || 1); },
               }} />
           </Section>
 
@@ -1017,7 +1029,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
                 <CardPaymentButton apartmentId={id} apartment={apt?.name ?? ""} checkin={checkin} checkout={checkout}
                   guests={guests} nights={nights} skiPass={skiOn} transfer={transfer} equipment={equipment} cancel={cancel} service={service}
                   transferDetails={transferDetails}
-                  flight={flightOn} flightPrice={bookFlightTotal + baggageTotal} flightDetails={bookFlightDetails}
+                  flight={flightOn} flightPrice={bookFlightTotal + baggageTotal + trolleyTotal} flightDetails={bookFlightDetails}
                   grandTotal={payNow}
                   split={splitCount > 1 ? { sharesTotal: splitCount, accommodationTotal: grandTotal, shareAmount: shareAccommodation, area: "Val Thorens, Trois Vallées" } : undefined}
                   label={splitCount > 1 ? "לשלם את החלק שלכם בכרטיס" : "להזמנה ותשלום מאובטח"}

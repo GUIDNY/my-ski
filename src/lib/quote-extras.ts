@@ -3,11 +3,11 @@ import type { PassArea } from "@/lib/deal-pricing";
 /**
  * What was picked on the apartment page, carried in the quote link (?x=...)
  * so the quote opens with the same package: which ski pass and for how many,
- * how many need the transfer, equipment, the direct flight and a checked bag.
+ * how many need the transfer, equipment, the direct flight, a checked bag and a cabin trolley.
  * Only choices travel here, never prices: the quote page prices everything
  * again from the live data, the same way the apartment page does.
  *
- *   p3v4-t4-e2-f4-b4  →  3 Vallées pass ×4, transfer ×4, equipment ×2, flight ×4, bag ×4
+ *   p3v4-t4-e2-f4-b4-c2  →  3 Vallées pass ×4, transfer ×4, equipment ×2, flight ×4, bag ×4, trolley ×2
  */
 export type QuoteExtras = {
   pass?: { area: PassArea; qty: number };
@@ -16,6 +16,7 @@ export type QuoteExtras = {
   equipment?: { qty: number };
   flight?: { qty: number };
   bag?: { qty: number };
+  trolley?: { qty: number };
 };
 
 const AREA_CODE: Record<PassArea, string> = { trois_vallees: "3v", val_thorens: "vt" };
@@ -28,6 +29,7 @@ export function encodeExtras(x: QuoteExtras): string {
   if (x.equipment) parts.push(`e${clampQty(x.equipment.qty)}`);
   if (x.flight) parts.push(`f${clampQty(x.flight.qty)}`);
   if (x.flight && x.bag) parts.push(`b${clampQty(x.bag.qty)}`);
+  if (x.flight && x.trolley) parts.push(`c${clampQty(x.trolley.qty)}`);
   return parts.join("-");
 }
 
@@ -42,7 +44,8 @@ export function decodeExtras(s: string | null | undefined): QuoteExtras | null {
     else if ((m = part.match(/^e(\d{1,2})$/))) x.equipment = { qty: clampQty(Number(m[1])) };
     else if ((m = part.match(/^f(\d{1,2})$/))) x.flight = { qty: clampQty(Number(m[1])) };
     else if ((m = part.match(/^b(\d{1,2})$/))) x.bag = { qty: clampQty(Number(m[1])) };
+    else if ((m = part.match(/^c(\d{1,2})$/))) x.trolley = { qty: clampQty(Number(m[1])) };
   }
-  if (!x.flight) delete x.bag;
+  if (!x.flight) { delete x.bag; delete x.trolley; }
   return x;
 }

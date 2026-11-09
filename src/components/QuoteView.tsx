@@ -11,7 +11,7 @@ import {
 import { buildWaHref } from "@/lib/whatsapp";
 import { skiDaysFromNights, equipCost } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
-import { TRANSFER_PRICE, BAGGAGE_PRICE, LIFT_DATES, liftsOpenForStay, packagePassArea, passTier, shortDate, type PassArea } from "@/lib/deal-pricing";
+import { TRANSFER_PRICE, BAGGAGE_PRICE, TROLLEY_PRICE, LIFT_DATES, liftsOpenForStay, packagePassArea, passTier, shortDate, type PassArea } from "@/lib/deal-pricing";
 import { encodeExtras, type QuoteExtras } from "@/lib/quote-extras";
 import { quoteLines, nightsBetween, FLEXIBLE_EXTRA, NO_CANCEL_DISCOUNT, AI_DISCOUNT } from "@/lib/quote-lines";
 import { useDirectFlight, useReturnLeg } from "@/lib/useFlightPrice";
@@ -377,6 +377,8 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const [flightQty, setFlightQty] = useState(ex?.flight?.qty ?? guests);
   const [bagOn, setBagOn] = useState(!!ex?.bag);
   const [bagQty, setBagQty] = useState(ex?.bag?.qty ?? guests);
+  const [trolleyOn, setTrolleyOn] = useState(!!ex?.trolley);
+  const [trolleyQty, setTrolleyQty] = useState(ex?.trolley?.qty ?? guests);
   const [cancel, setCancel] = useState(q.cancel === "flexible" || q.cancel === "none" ? q.cancel : "regular");
   const [service, setService] = useState(q.service === "ai" ? "ai" : "human");
   const [showNoCancel, setShowNoCancel] = useState(false);
@@ -405,6 +407,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const directFlight = direct.status === "found" ? direct.flight : null;
   const flightEff = flightOn && !!directFlight;
   const bagEff = bagOn && flightEff;
+  const trolleyEff = trolleyOn && flightEff;
   const returnLeg = useReturnLeg(directFlight, checkin, checkout, flightEff);
 
   const nights = nightsBetween(checkin, checkout) || q.nights;
@@ -421,6 +424,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
     equipment: equipmentOn && skiDays > 0 ? { qty: equipQty } : undefined,
     flight: flightEff ? { qty: flightQty } : undefined,
     bag: bagEff ? { qty: bagQty } : undefined,
+    trolley: trolleyEff ? { qty: trolleyQty } : undefined,
   };
   // every line and the total, priced live, the same way the PDF prices them
   const calc = quoteLines({ apt, rules, passes, checkin, checkout, guests, extras: picked, cancel, service, flight: directFlight, fallbackAptTotal: q.aptTotal,
@@ -432,7 +436,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const cleaningFee = calc.cleaningFee;
   const baseApt = calc.aptTotal;
   const flightText = flightEff && directFlight
-    ? flightOrderText(directFlight, returnLeg.leg, checkin, checkout, flightQty, bagEff ? { qty: bagQty, unit: BAGGAGE_PRICE } : null)
+    ? flightOrderText(directFlight, returnLeg.leg, checkin, checkout, flightQty, bagEff ? { qty: bagQty, unit: BAGGAGE_PRICE } : null, trolleyEff ? { qty: trolleyQty, unit: TROLLEY_PRICE } : null)
     : "";
 
   // split payment: divide the FULL total (lodging + all add-ons) equally between payers
@@ -589,7 +593,7 @@ export default function QuoteView({ q }: { q: QuoteData }) {
   const payButton = (
     <CardPaymentButton apartmentId={apartmentId} apartment={apartment} checkin={checkin} checkout={checkout}
       guests={guests} nights={nights} skiPass={passEff} transfer={transferOn} equipment={!!picked.equipment} transferDetails={transferDetails} cancel={cancel} service={service}
-      flight={flightEff} flightPrice={amountOf("flight") + amountOf("bag")} flightDetails={flightText || undefined}
+      flight={flightEff} flightPrice={amountOf("flight") + amountOf("bag") + amountOf("trolley")} flightDetails={flightText || undefined}
       grandTotal={payNow} split={splitProp} label={payLabel}
       className={`${btn.primaryLg} w-full`} />
   );
@@ -771,8 +775,9 @@ export default function QuoteView({ q }: { q: QuoteData }) {
                 checked={flightEff}
                 // a flight comes with a checked bag per ticket (Idan, 5.11.2026); unticking "מזוודה לבטן" removes it
                 onToggle={v => { setFlightOn(v); if (v) { const n = Math.min(flightQty || guests, guests) || 1; setFlightQty(n); setBagOn(true); setBagQty(n); } }}
-                qty={flightQty} setQty={n => { setBagQty(b => (b === flightQty || b > n ? n : b)); setFlightQty(n); }} maxQty={guests} total={amountOf("flight")}
-                bag={{ on: bagEff, unit: BAGGAGE_PRICE, qty: bagQty, setQty: setBagQty, total: amountOf("bag"), toggle: () => setBagOn(v => !v) }} />
+                qty={flightQty} setQty={n => { setBagQty(b => (b === flightQty || b > n ? n : b)); setTrolleyQty(b => (b > n ? n : b)); setFlightQty(n); }} maxQty={guests} total={amountOf("flight")}
+                bag={{ on: bagEff, unit: BAGGAGE_PRICE, qty: bagQty, setQty: setBagQty, total: amountOf("bag"), toggle: () => setBagOn(v => !v) }}
+                trolley={{ on: trolleyEff, unit: TROLLEY_PRICE, qty: trolleyQty, setQty: setTrolleyQty, total: amountOf("trolley"), toggle: () => { if (!trolleyOn) setTrolleyQty(q => Math.min(q, flightQty) || 1); setTrolleyOn(v => !v); } }} />
             </div>
           </section>
 

@@ -4,6 +4,7 @@ import { skiDaysFromNights } from "@/lib/pricing";
 // Flat per-person add-ons, the same numbers the apartment page charges.
 export const TRANSFER_PRICE = 180;
 export const BAGGAGE_PRICE = 120; // one checked bag, there and back, per traveler
+export const TROLLEY_PRICE = 80; // a cabin trolley, there and back, per traveler (the ticket itself has only a backpack up to 8 kg)
 export const LA_CIME_NIGHTS = 7; // every La Cime week is a fixed Saturday-to-Saturday stay
 
 export type PassArea = "val_thorens" | "trois_vallees";
