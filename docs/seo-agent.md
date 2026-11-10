@@ -54,7 +54,6 @@ in November and December, the December weeks and New Year), then mark it done he
 and URL. Add new topic ideas from Search Console queries and real Hebrew searches.
 
 Open topics (Hebrew queries):
-- [ ] סילבסטר וחג המולד בואל טורנס (חופשת סקי בסוף דצמבר, מה פתוח, אירועי ראש השנה, מחירי פס לפי תקופה)
 - [ ] סקי בדצמבר בואל טורנס (שלג ופתיחה, מחירים זולים לפני 19.12, שבועות שקטים)
 - [ ] אוכל כשר ושבת בואל טורנס (רק מה שאפשר לאמת: סופרמרקטים, מוצרים, שבת בדירה; בלי להמציא מסעדות)
 - [ ] ביטוח נסיעות לחופשת סקי (מה לבדוק בפוליסה, Carré Neige של אתר הסקי; בלי המלצה על חברה)
@@ -70,9 +69,11 @@ Open topics (Hebrew queries):
 - [ ] גובה ושינה בגובה 2,300 מ' (מה ידוע ממקורות רפואיים מוכרים, בלי ייעוץ רפואי)
 - [ ] סקי בפורים 2027
 - [ ] נסיעה ברכב לואל טורנס (השכרת רכב בז'נבה/ליון, שרשראות שלג, חניה)
+- [ ] סקי בינואר בואל טורנס (אחרי החגים: שבועות זולים, הכי קר, שלג מבוסס)
+- [ ] EN/FR twin of the New Year guide ("val thorens new year", "nouvel an val thorens") once valthorens.com publishes the 2026 program
 
 Done:
-- (none yet)
+- 2026-11-10: סילבסטר וחג המולד בואל טורנס → https://skisharebook.com/guide/סילבסטר-וחג-המולד-בואל-טורנס
 
 ## Log (newest last, max 8 lines per day)
 - 2026-10-24: /about page live (Israeli company renting apartments in Val Thorens), home description and Organization JSON-LD updated, IndexNow 212 URLs. www.skisharebook.com has no DNS record at IONOS (Vercel side is ready): waiting on Idan.
@@ -92,3 +93,4 @@ Done:
 - 2026-11-01: Web search (US engine) "דירות בואל טורנס", "ואל טורנס חופשת סקי", "val thorens apartments to rent Israeli company", "skisharebook Val Thorens": SkiShare still not in results (Airbnb, lametayel, ynet, expedia/hotels.com, les3vallees). Chrome not connected, no Search Console. New EN/FR twins of the Hebrew packing guide: /en/guide/what-to-pack-for-a-ski-holiday and /fr/guide/que-mettre-dans-sa-valise-ski (three layers, Météo-France monthly temps already on the Hebrew guide, rent vs bring, documents/insurance, what people forget, checklist, FAQ, sources; no SkiShare equipment/transfer prices since EN/FR don't sell them), hreflang he/en/fr. IndexNow 6 URLs, sweep 828/828 200. NEXT: Search Console when Chrome is connected: /en/apartments position (was 27.1 on 10-31), request indexing for the packing/beginners/family twins and the full guide; remaining twins: groups, Courchevel/Méribel comparison.
 - 2026-11-02: Web search (US engine) "דירות בואל טורנס", "חופשת סקי בואל טורנס חברה ישראלית", "val thorens apartments to rent": SkiShare still not in results (Airbnb, lametayel, walla/mako/ynet, expedia/hotels.com, les3vallees, holidu). Chrome: two browsers connected and none selected for scheduled runs, so no Search Console. New EN/FR twins of the Hebrew comparison guide: /en/guide/val-thorens-vs-meribel-vs-courchevel and /fr/guide/val-thorens-meribel-ou-courchevel (short answer on top, table, Méribel/Courchevel/Les Menuires, blue-run day to Courchevel, 6-day pass difference €53.50 from SETAM prices, FAQ, sources; only facts on the Hebrew guide), hreflang he/en/fr. IndexNow 5 URLs, sweep 836/836 200. NEXT: Search Console once a Chrome is selected: /en/apartments position, indexing for the twins and the full guide; last twin left: groups.
 - 2026-11-03: Web search (US engine) "דירות בואל טורנס", "חופשת סקי לקבוצות ואל טורנס", "val thorens apartment rental group ski holiday": SkiShare still not in results (Airbnb, lametayel, ynet/maariv, Marriott Homes & Villas, cimalpes, ski-planet, hometogo). Chrome: two browsers connected, none selected, so no Search Console. Last twin done: /en/guide/val-thorens-ski-trip-with-friends and /fr/guide/ski-entre-amis-val-thorens (short answer, apartment by group size, beds/bathrooms/extras, peak and quiet weeks, mixed levels and pass with SETAM prices, après-ski, organiser checklist, FAQ; no Hebrew-only products like packages or split payment), hreflang he/en/fr. IndexNow 5 URLs, sweep 847/847 200. NEXT: Search Console once a Chrome is selected: /en/apartments position, indexing for all twins and the full guide; then the "ואל טורנס" head term on the full guide.
+- 2026-11-10: New guide /guide/סילבסטר-וחג-המולד-בואל-טורנס (weeks 19.12/26.12/2.1 table, French Christmas holiday 19.12-4.1, the 2025/26 Christmas and New Year program from valthorens.com labelled as last season, SETAM pass prices before/after 19.12, live weekly prices with count, same-apartment example from 23.10, December/January Météo-France temps, Super 6 + book lessons early, Shabbat part-week, booking steps, 6 FAQ, 16 sources). Linked from the Hanukkah and when-to-go guides. IndexNow 4 URLs, sweep 851/851 200. Cloud run, no Chrome, so no Search Console. The SETAM PDF could not be fetched today, so pass prices reuse the figures already sourced on the Hanukkah guide. NEXT: when valthorens.com posts the 2026/27 New Year program, update that section with the new dates; request indexing for the new guide.
