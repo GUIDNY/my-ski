@@ -19,11 +19,17 @@ and French. Main competitor: houski.co.il (also Global Ski, SkiDeal).
 - Small, safe changes. Each change must build. One topic per commit.
 
 ## Deploy
-1. Work on branch `site-redesign`. Commit as `idan guindy <idanguindy@gmail.com>`.
-2. Push. Check the preview deployment on Vercel (team team_u47XiOrlKWEV0QngyrJCKBWx,
-   project prj_sBdvefyrZfCF4c9NwToASlcKWm0q) is READY.
-3. Production: fast-forward `main` to `site-redesign` and push `main`.
-4. After it is live: `python3 -I scripts/seo/indexnow.py <changed urls>` and `bash scripts/seo/sweep.sh` (all 200).
+1. Work on a branch `seo/<date>-<topic>` off `main`. Commit as `idan guindy <idanguindy@gmail.com>`.
+2. Before merging: `npx tsc --noEmit -p .` (ignore errors only in *.test.ts files, they are old) and
+   `npx eslint` on the changed files. Both clean.
+3. Production: merge into `main` (fast-forward or a normal merge) and push `main`. Vercel deploys it.
+4. Check the build: `gh api repos/GUIDNY/my-ski/commits/<sha>/statuses` (context "Vercel"), or the
+   Vercel MCP (team team_u47XiOrlKWEV0QngyrJCKBWx, project prj_sBdvefyrZfCF4c9NwToASlcKWm0q).
+   A failure in `[next]/internal/font/google/...module.css` (module-not-found) is a known flaky
+   Google-font cache error, not your change: redeploy the same commit with the Vercel MCP
+   create_deployment (gitSource github GUIDNY/my-ski ref main, that sha, target production, forceNew 1).
+   Any other build error: fix it, or revert your commit, so main always builds.
+5. After it is live: `python3 -I scripts/seo/indexnow.py <changed urls>` and `bash scripts/seo/sweep.sh` (all 200).
 
 ## Daily menu (pick what moves the needle most, 1 to 3 items)
 - Search Console (sc-domain:skisharebook.com, via Idan's Chrome if connected):
@@ -36,6 +42,37 @@ and French. Main competitor: houski.co.il (also Global Ski, SkiDeal).
   /about, llms.txt, Organization JSON-LD, short direct answers at the top of guides.
 - Check AI answers: web search the main queries and note whether SkiShare appears.
 - Technical: Core Web Vitals, broken links, canonical/hreflang, sitemap.
+
+## New articles (the main job: one new guide per run)
+Every run publishes one new, fully sourced Hebrew guide (src/lib/guides.ts, same Guide format and
+style as the existing ones: short direct answer in the intro, tables, FAQ that matches the text,
+internal links to /packages /apartments /weekly /transfers and to related guides, `sources` for every
+fact, `published` and `updated` = today). A topic that would compete with an existing guide's main
+query is not new: improve that guide instead. When a topic also fits English/French visitors, an
+EN/FR twin can follow in a later run. Pick the most timely open topic (the season dates come first:
+in November and December, the December weeks and New Year), then mark it done here with the date
+and URL. Add new topic ideas from Search Console queries and real Hebrew searches.
+
+Open topics (Hebrew queries):
+- [ ] סילבסטר וחג המולד בואל טורנס (חופשת סקי בסוף דצמבר, מה פתוח, אירועי ראש השנה, מחירי פס לפי תקופה)
+- [ ] סקי בדצמבר בואל טורנס (שלג ופתיחה, מחירים זולים לפני 19.12, שבועות שקטים)
+- [ ] אוכל כשר ושבת בואל טורנס (רק מה שאפשר לאמת: סופרמרקטים, מוצרים, שבת בדירה; בלי להמציא מסעדות)
+- [ ] ביטוח נסיעות לחופשת סקי (מה לבדוק בפוליסה, Carré Neige של אתר הסקי; בלי המלצה על חברה)
+- [ ] שיעורי סקי בואל טורנס (בתי ספר, גילאים, קבוצה או פרטי, מתי מזמינים)
+- [ ] השכרת ציוד סקי בואל טורנס (מה כולל, מידות, קסדה, ציוד לילדים, מחיר אצלנו)
+- [ ] חופשת סקי בפברואר (חופשות בצרפת לפי אזורים, עומס ומחירים, שבועות שקטים)
+- [ ] סקי במרץ ובאפריל בואל טורנס (סוף עונה, שלג אביבי, מחירים)
+- [ ] חופשת סקי לזוגות בואל טורנס
+- [ ] סנובורד למתחילים בואל טורנס
+- [ ] מה עושים בואל טורנס חוץ מסקי (ספא, בריכה, פעילויות; רק עם מקור רשמי)
+- [ ] כמה עולה חופשת סקי בצרפת לזוג ולמשפחה (פירוט לפי מחירי האתר ומחירונים רשמיים)
+- [ ] ואל טורנס מול טין ומול לה פלאן (השוואה עובדתית)
+- [ ] גובה ושינה בגובה 2,300 מ' (מה ידוע ממקורות רפואיים מוכרים, בלי ייעוץ רפואי)
+- [ ] סקי בפורים 2027
+- [ ] נסיעה ברכב לואל טורנס (השכרת רכב בז'נבה/ליון, שרשראות שלג, חניה)
+
+Done:
+- (none yet)
 
 ## Log (newest last, max 8 lines per day)
 - 2026-10-24: /about page live (Israeli company renting apartments in Val Thorens), home description and Organization JSON-LD updated, IndexNow 212 URLs. www.skisharebook.com has no DNS record at IONOS (Vercel side is ready): waiting on Idan.
