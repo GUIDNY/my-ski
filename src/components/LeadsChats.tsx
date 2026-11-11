@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { authFetch } from "@/lib/auth-fetch";
+import EmailCustomer from "@/components/EmailCustomer";
 
 /*
  * Leads & chats: every conversation with the bot, on the site chat and on
@@ -505,7 +506,11 @@ export default function LeadsChats({ api, ordersHref, team = false, assign = fal
                 )}
 
                 <div className="rounded-xl border border-gray-200 p-3 text-sm space-y-1.5">
-                  <div className="font-bold text-gray-900">📍 מאיפה הגיע</div>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="font-bold text-gray-900">📍 מאיפה הגיע</div>
+                    <EmailCustomer name={cur.name} phone={cur.phone} link={curInfo?.quotes[0] ? `https://skisharebook.com/p/${curInfo.quotes[0].id}` : ""}
+                      className="text-xs font-bold text-blue-600 border border-blue-200 rounded-lg px-2.5 py-1 hover:bg-blue-50" />
+                  </div>
                   <div className="text-gray-700">{curInfo ? (curInfo.source ? <>{curInfo.source.src}{curInfo.source.landing ? <span className="text-xs text-gray-400"> · נחת ב-{curInfo.source.landing}</span> : null}</> : "לא ידוע (פנה לפני שהתחלנו לשמור מקור)") : "…"}</div>
                   {curInfo && curInfo.quotes.length > 0 && (
                     <div className="pt-1.5 border-t border-gray-100">
