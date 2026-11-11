@@ -6,7 +6,7 @@ import puppeteer, { type Page } from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 const CACHE_HOURS = 6;
 // What the customer sees = the real scraped price + our handling margin
@@ -90,7 +90,8 @@ function flightDetailsForResult(lines: string[], priceIdx: number): { departTime
 // no adjacency guessing, since every result on that page is nonstop by
 // definition. Only fall back to an unfiltered scrape when the nonstop
 // query itself returns nothing.
-type ScrapeResult = { price: number | null; nonstop: boolean; url: string; airline: string | null; departTime: string | null; arriveTime: string | null };
+// sure: false when the nonstop search never finished, so "no direct flight" is a guess, not a fact
+type ScrapeResult = { price: number | null; nonstop: boolean; sure?: boolean; url: string; airline: string | null; departTime: string | null; arriveTime: string | null };
 
 // A fixed 4.5s wait proved unreliable in production: caught live with real
 // data (TLV-LYS, 2027-02-13) — a genuine nonstop existed (confirmed by
@@ -105,13 +106,17 @@ type ScrapeResult = { price: number | null; nonstop: boolean; url: string; airli
 // (Oct 2026: Google no longer always renders the "N results returned"
 // marker, so a priced "round trip" row seen on two polls in a row counts as
 // loaded too.)
+// (Nov 2026: caught live again, TLV-LYS 19.12–26.12: Transavia nonstop €257 existed, but
+// Google was still "Fetching results" after 15s, so the site said "no direct flight".
+// Now up to ~30s while the page says it is still loading.)
 async function waitForResults(page: Page): Promise<string> {
   let reloaded = false;
   let sawRow = false;
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 20; i++) {
     const bodyText = await page.evaluate(() => document.body.innerText);
     if (/\d+\s+results?\s+returned|No results returned/i.test(bodyText)) return bodyText;
     if (/\nround trip\n/.test(bodyText)) { if (sawRow) return bodyText; sawRow = true; }
+    else if (i >= 9 && !/Fetching results|Loading results/i.test(bodyText)) return bodyText;
     if (!reloaded && /Oops, something went wrong/i.test(bodyText)) {
       reloaded = true;
       await page.reload({ waitUntil: "domcontentloaded", timeout: 45000 });
@@ -155,7 +160,8 @@ async function scrapePrice(outDate: string, retDate: string, origin: string, des
     await passConsent(page, nonstopUrl);
     let bodyText = await waitForResults(page);
 
-    if (!/No results returned/i.test(bodyText)) {
+    const noNonstop = /No results returned/i.test(bodyText);
+    if (!noNonstop) {
       const lines = bodyText.split("\n").map(l => l.trim());
       const result = cheapestRoundTripResult(lines);
       if (result) return { price: result.price, nonstop: true, url: nonstopUrl, ...flightDetailsForResult(lines, result.idx) };
@@ -170,7 +176,7 @@ async function scrapePrice(outDate: string, retDate: string, origin: string, des
     const lines = bodyText.split("\n").map(l => l.trim());
     const result = cheapestRoundTripResult(lines);
     const details = result ? flightDetailsForResult(lines, result.idx) : { airline: null, departTime: null, arriveTime: null };
-    return { price: result?.price ?? null, nonstop: false, url: anyUrl, ...details };
+    return { price: result?.price ?? null, nonstop: false, sure: noNonstop, url: anyUrl, ...details };
   } finally {
     await browser?.close();
   }
@@ -195,7 +201,9 @@ export async function GET(req: NextRequest) {
   // table in production has no detail columns yet) is checked again
   // and an empty answer (no price at all) means the read failed, not "no flights"
   const complete = cached && cached.price_eur !== null && (!cached.nonstop || cached.depart_time);
-  if (cached && complete && Date.now() - new Date(cached.checked_at).getTime() < CACHE_HOURS * 3600_000) {
+  // a "no direct flight" answer is checked again after an hour (the search can miss one)
+  const ttlHours = cached?.nonstop ? CACHE_HOURS : 1;
+  if (cached && complete && Date.now() - new Date(cached.checked_at).getTime() < ttlHours * 3600_000) {
     return NextResponse.json({
       price: sell(cached.price_eur), nonstop: cached.nonstop, url: cached.url,
       airline: cached.airline ?? null, departTime: cached.depart_time ?? null, arriveTime: cached.arrive_time ?? null,
@@ -204,14 +212,15 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const { price, nonstop, url, airline, departTime, arriveTime } = await scrapePrice(checkin, checkout, origin, dest);
+    const { price, nonstop, sure, url, airline, departTime, arriveTime } = await scrapePrice(checkin, checkout, origin, dest);
     const checkedAt = new Date().toISOString();
     // Caching is best-effort — a schema mismatch (e.g. a new column not
     // existing yet) must never take down the live price response below.
     // (supabase returns the error instead of throwing: a table without the
     // newer columns used to fail silently, so nothing was ever cached; then
     // the base columns are written, which the quote PDF reads)
-    if (price !== null) try {
+    // "no direct flight" when the nonstop search never finished loading: not saved, the next visitor asks again
+    if (price !== null && (nonstop || sure)) try {
       const row = { origin, dest, checkin, checkout, price_eur: price, nonstop, checked_at: checkedAt };
       const { error: fullErr } = await db.from("flight_price_cache")
         .upsert({ ...row, url, airline, depart_time: departTime, arrive_time: arriveTime }, { onConflict: "origin,dest,checkin,checkout" });

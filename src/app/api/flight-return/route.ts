@@ -6,7 +6,7 @@ import puppeteer, { type ElementHandle, type Page } from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 // Both legs of the cheapest nonstop round trip, for the quote PDF.
 //
@@ -38,9 +38,13 @@ const bodyLines = async (page: Page) => (await page.evaluate(() => document.body
 // the transient "Oops, something went wrong" page.
 async function waitForResults(page: Page): Promise<string> {
   let reloaded = false;
-  for (let i = 0; i < 8; i++) {
+  let sawRow = false;
+  // up to ~30s while Google still says it is loading (Nov 2026: 15s missed real nonstops)
+  for (let i = 0; i < 20; i++) {
     const bodyText = await page.evaluate(() => document.body.innerText);
     if (/\d+\s+results?\s+returned|No results returned/i.test(bodyText)) return bodyText;
+    if (/\nround trip\n/.test(bodyText)) { if (sawRow) return bodyText; sawRow = true; }
+    else if (i >= 9 && !/Fetching results|Loading results/i.test(bodyText)) return bodyText;
     if (!reloaded && /Oops, something went wrong/i.test(bodyText)) {
       reloaded = true;
       await page.reload({ waitUntil: "domcontentloaded", timeout: 30000 });
