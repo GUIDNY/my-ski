@@ -19,14 +19,53 @@ import { parseAirbnbCalendar, airbnbRules, type AirbnbCalendar } from "@/lib/air
 // 403 "Authorization data is wrong!", so say who we are in a browser-style UA.
 export const N8N_UA = "Mozilla/5.0 (Linux x86_64) SkiShareSite/1.0";
 
+/* the last calendar n8n gave us, kept in the database (sync_log job "airbnb_calendar") */
+const JOB = "airbnb_calendar";
+async function storedCalendar(): Promise<unknown | null> {
+  try {
+    const { createServerClient } = await import("@/lib/supabase-server");
+    const { data } = await createServerClient().from("sync_log").select("detail").eq("job", JOB)
+      .order("id", { ascending: false }).limit(1).maybeSingle();
+    return data?.detail ?? null;
+  } catch { return null; }
+}
+async function storeCalendar(raw: unknown): Promise<void> {
+  try {
+    const { createServerClient } = await import("@/lib/supabase-server");
+    const db = createServerClient();
+    const { data } = await db.from("sync_log").insert({ job: JOB, ok: true, detail: raw }).select("id").single();
+    if (data?.id) await db.from("sync_log").delete().eq("job", JOB).lt("id", Number(data.id) - 3);
+  } catch { /* the site still has the copy in its cache */ }
+}
+
+/**
+ * n8n, and when n8n fails or is slow, the last good copy from the database.
+ * Never throws while a stored copy exists: a failure is then cached like a
+ * success, so the next try at n8n is 30 minutes later. (Before, every failed
+ * background refresh was retried by the next visitor, and the apartments and
+ * search pages ask once per apartment: hundreds of calls to n8n in a minute,
+ * which choked the n8n server.)
+ */
 async function fetchAirbnbCalendar(): Promise<AirbnbCalendar> {
-  const res = await fetch(`${process.env.N8N_SITE_URL}/prices`, {
-    cache: "no-store",
-    headers: { "User-Agent": N8N_UA },
-    signal: AbortSignal.timeout(20000),
-  });
-  if (!res.ok) throw new Error(`airbnb calendar: n8n answered ${res.status}`);
-  return parseAirbnbCalendar(await res.json());
+  try {
+    const res = await fetch(`${process.env.N8N_SITE_URL}/prices`, {
+      cache: "no-store",
+      headers: { "User-Agent": N8N_UA },
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!res.ok) throw new Error(`airbnb calendar: n8n answered ${res.status}`);
+    const raw = await res.json();
+    const cal = parseAirbnbCalendar(raw);
+    await storeCalendar(raw);
+    return cal;
+  } catch (e) {
+    const stored = await storedCalendar();
+    if (stored) {
+      console.warn("airbnb calendar: n8n failed, using the stored copy:", e instanceof Error ? e.message : e);
+      return parseAirbnbCalendar(stored);
+    }
+    throw e;
+  }
 }
 
 // Shared by every instance through Next's data cache; refreshed in the
