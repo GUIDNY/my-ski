@@ -203,7 +203,9 @@ export async function GET(req: NextRequest) {
   const complete = cached && cached.price_eur !== null && (!cached.nonstop || cached.depart_time);
   // a "no direct flight" answer is checked again after an hour (the search can miss one)
   const ttlHours = cached?.nonstop ? CACHE_HOURS : 1;
-  if (cached && complete && Date.now() - new Date(cached.checked_at).getTime() < ttlHours * 3600_000) {
+  // "no direct flight" answers saved before the longer wait (12.11.2026) are not trusted at all
+  const oldGuess = cached && !cached.nonstop && cached.checked_at < "2026-11-11T23:50:00Z";
+  if (cached && complete && !oldGuess && Date.now() - new Date(cached.checked_at).getTime() < ttlHours * 3600_000) {
     return NextResponse.json({
       price: sell(cached.price_eur), nonstop: cached.nonstop, url: cached.url,
       airline: cached.airline ?? null, departTime: cached.depart_time ?? null, arriveTime: cached.arrive_time ?? null,
