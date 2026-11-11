@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase-server";
 import { checkOverbooking } from "@/lib/overbooking";
+import { reblockActiveOrders } from "@/lib/inventory";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -11,7 +12,10 @@ export async function GET(req: NextRequest) {
   if (secret && req.headers.get("authorization") !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
-  const report = await checkOverbooking(createServerClient());
+  const db = createServerClient();
+  // first close again any night an active order lost (the site and the feed Airbnb/Hostex read)
+  const reblocked = await reblockActiveOrders(db);
+  const report = await checkOverbooking(db);
   const alert = process.env.N8N_PAY_ALERT_URL;
   if (alert && report.issues.length) {
     const lines = report.issues.map(i => `• ${i.name} (${i.code}) · ${i.apartment} · פתוח באיירבנב: ${i.openDates.join(", ")}`);
@@ -27,5 +31,5 @@ export async function GET(req: NextRequest) {
       });
     } catch { /* report still returned */ }
   }
-  return NextResponse.json(report);
+  return NextResponse.json({ ...report, reblocked });
 }

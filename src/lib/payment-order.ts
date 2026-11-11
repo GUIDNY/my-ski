@@ -83,7 +83,10 @@ async function make(opts: Parameters<typeof orderFromPayment>[0]): Promise<{ cod
     total_eur: totalEur,
     amount_ils: cur === "ILS" ? opts.amount : null,
     status: "awaiting",
-    customer_name: opts.name || q?.clientName || "",
+    // a friend's share: his own name (typed on the quote, sent in the description), never the quote's customer
+    customer_name: share
+      ? (opts.description.match(/משלם: ([^·(]+)/)?.[1]?.trim() || opts.name || (q?.clientName ? `${q.clientName} (חלק של חבר)` : ""))
+      : (opts.name || q?.clientName || ""),
     customer_email: (opts.email || q?.clientEmail || "").toLowerCase(),
     customer_phone: opts.phone || q?.clientPhone || "",
     payplus_transaction_uid: opts.txUid || null,

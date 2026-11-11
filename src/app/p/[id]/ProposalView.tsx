@@ -104,6 +104,9 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
   const [notMine, setNotMine] = useState<string[]>([]);  // add-ons the person paying their own share does not take
   const [busy, setBusy] = useState<string>("");
   const [agreed, setAgreed] = useState(false);
+  // a friend paying only his share: his own name, so his payment isn't recorded under the quote's customer
+  const [payer, setPayer] = useState("");
+  const [needPayer, setNeedPayer] = useState(false);
   const [needAgree, setNeedAgree] = useState(false);
   const [payErr, setPayErr] = useState(false);
   const [pdfState, setPdfState] = useState<"" | "busy" | "link" | "error">("");
@@ -187,11 +190,13 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
   const pay = async (key: string, amount: number, currency: "EUR" | "ILS", perHead: boolean) => {
     if (busy) return;
     if (!agreed) { setNeedAgree(true); return; }
+    const who = payer.trim().slice(0, 60);
+    if (perHead && who.length < 2) { setNeedPayer(true); return; }
     setBusy(key); setPayErr(false);
     try {
       const r = await fetch("/api/payplus/create-link", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: Math.round(amount * 100) / 100, currency, name: forName || undefined, ref: pdfHref ? undefined : `p:${id}`, description: `הצעה ${number || ""}${perHead ? ` · החלק של אדם אחד${myNote ? ` (${myNote})` : ""}` : ""}${what}`.trim() }),
+        body: JSON.stringify({ amount: Math.round(amount * 100) / 100, currency, name: (perHead ? who : forName) || undefined, ref: pdfHref ? undefined : `p:${id}`, description: `הצעה ${number || ""}${perHead ? ` · החלק של אדם אחד${myNote ? ` (${myNote})` : ""} · משלם: ${who}` : ""}${what}`.trim() }),
       });
       const j = await r.json();
       if (!r.ok || !j.url) throw new Error("no link");
@@ -327,6 +332,14 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
           </span>
         </label>
         {needAgree && <p role="alert" className="text-[13px] text-danger">כדי להמשיך לתשלום יש לסמן שהתקנון מקובל עליכם.</p>}
+        {guests > 1 && (
+          <label className="flex flex-col gap-1.5">
+            <span className="text-[14px] text-body">משלמים רק את החלק שלכם? כתבו את השם שלכם</span>
+            <input value={payer} onChange={e => { setPayer(e.target.value); setNeedPayer(false); }} placeholder="שם מלא" autoComplete="name"
+              className="w-full rounded-xl border border-line px-4 min-h-[48px] text-[16px] focus:outline-none focus:border-accent" />
+            {needPayer && <span role="alert" className="text-[13px] text-danger">כדי לשלם רק את החלק שלכם, כתבו את השם שלכם, כדי שנדע מי שילם.</span>}
+          </label>
+        )}
         {payOptions.map(([key, label, amount, currency, perHead], i) => (
           <button key={key} type="button" disabled={!!busy} onClick={() => pay(key, amount, currency, perHead)} className={`${i === 0 ? btn.primary : btn.outline} w-full`}>
             {busy === key ? "פותחים תשלום מאובטח…" : label}

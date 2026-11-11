@@ -71,7 +71,13 @@ export async function blockDatesForOrder(db: SupabaseClient, order: OrderLike) {
   }
 }
 
-/** Free the dates an order had reserved (only blocks created by this order; both apartments). */
+/**
+ * Free the dates an order had reserved (only blocks created by this order; both apartments),
+ * then put back the nights that another active order still holds. A night's block carries
+ * the code of the last order that wrote it, so with several orders on the same nights (a
+ * group: every friend's payment is its own order) cancelling or deleting one used to free
+ * the nights of all of them: an approved booking open again on the site and on Airbnb.
+ */
 export async function freeDatesForOrder(db: SupabaseClient, order: OrderLike) {
   if (!order.code) return;
   const aptIds = [order.apartment_id, order.extra_apartment_id].filter(Boolean) as string[];
@@ -84,4 +90,29 @@ export async function freeDatesForOrder(db: SupabaseClient, order: OrderLike) {
         .eq("note", `הזמנה ${order.code}`);
     } catch { /* ignore */ }
   }
+  if (order.checkin && order.checkout && aptIds.length) await reblockActiveOrders(db, { apartmentIds: aptIds, from: order.checkin, to: order.checkout, except: order.code });
+}
+
+/**
+ * Block again the nights of every active order (approved / deposit held), optionally only
+ * for some apartments and dates. Idempotent; runs after a release and once a day, so a
+ * night that went missing for any reason is closed again on the site and in the feed
+ * Airbnb/Hostex read.
+ */
+export async function reblockActiveOrders(db: SupabaseClient, opts: { apartmentIds?: string[]; from?: string; to?: string; except?: string } = {}): Promise<number> {
+  const today = new Date().toISOString().slice(0, 10);
+  let q = db.from("orders").select("code, apartment_id, extra_apartment_id, checkin, checkout, status")
+    .in("status", ["approved", "hold"]).not("checkin", "is", null).not("checkout", "is", null)
+    .gt("checkout", opts.from && opts.from > today ? opts.from : today);
+  if (opts.to) q = q.lt("checkin", opts.to);
+  const { data, error } = await q;
+  if (error || !data) return 0;
+  let n = 0;
+  for (const o of data) {
+    if (opts.except && o.code === opts.except) continue;
+    if (opts.apartmentIds && ![o.apartment_id, o.extra_apartment_id].some(id => id && opts.apartmentIds!.includes(id))) continue;
+    await blockDatesForOrder(db, o);
+    n++;
+  }
+  return n;
 }

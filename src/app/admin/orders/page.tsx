@@ -92,6 +92,7 @@ export default function OrdersAdmin() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
+  const [openB, setOpenB] = useState<Record<string, boolean>>({});
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [showAdd, setShowAdd] = useState(false);
@@ -257,6 +258,24 @@ export default function OrdersAdmin() {
     load();
   };
 
+  // a group booking (each friend paid his share from the same quote): approve every share in one go
+  const approveMany = async (list: Order[]) => {
+    const todo = list.filter(o => o.status !== "approved" && o.status !== "cancelled");
+    if (!todo.length) return;
+    const charges = todo.filter(o => o.payplus_transaction_uid).length;
+    if (!confirm(`לאשר את כל ${todo.length} התשלומים של ההזמנה הקבוצתית?${charges ? `\n${charges} פיקדונות יחויבו בפועל.` : ""}`)) return;
+    let ok = 0; const errs: string[] = [];
+    for (const o of todo) {
+      setBusy(o.id);
+      const res = await authFetch("/api/payplus/capture", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ order_id: o.id }) });
+      const j = await res.json().catch(() => ({}));
+      if (res.ok) ok++; else errs.push(`${o.code}: ${j.error || "שגיאה"}`);
+    }
+    setBusy(null);
+    alert(`✓ אושרו ${ok} מתוך ${todo.length}${errs.length ? `\n\nלא אושרו:\n${errs.join("\n")}` : ""}`);
+    load();
+  };
+
   // an order paid from a quote's link: everything the quote says goes into the order (and the personal area)
   const fillFromProposal = async (o: Order) => {
     setBusy(o.id);
@@ -412,6 +431,67 @@ export default function OrdersAdmin() {
     }));
   }
   const daysTo = (d: string | null) => d && today ? Math.round((Date.parse(d) - Date.parse(today)) / 864e5) : null;
+
+  /*
+   * A group booking: friends each paid "the share of one person" from the same quote (or a
+   * split-payment group link). Every payment is its own order (each is a separate PayPlus
+   * charge), but they are one booking: shown under one header, approved together.
+   */
+  const bundleKey = (o: Order): string | null => {
+    if (o.group_id) return `g:${o.group_id}`;
+    if (!/החלק של/.test(o.apartment_name || "")) return null;
+    const prop = (o.ops && typeof o.ops.x_proposal === "string" ? o.ops.x_proposal : "") || (o.apartment_name || "").match(/SK-\d{4}-\d{3,5}/)?.[0] || "";
+    return prop ? `p:${prop}:${o.checkin || ""}` : null;
+  };
+  type Item = { head: true; key: string; list: Order[] } | { head?: false; o: Order; bkey: string | null };
+  const bundled = (list: Order[]): Item[] => {
+    const by = new Map<string, Order[]>();
+    for (const o of list) { const k = bundleKey(o); if (k) { if (!by.has(k)) by.set(k, []); by.get(k)!.push(o); } }
+    const out: Item[] = []; const seen = new Set<string>();
+    for (const o of list) {
+      const k = bundleKey(o);
+      const many = k && (by.get(k)?.length || 0) > 1;
+      if (!many) { out.push({ o, bkey: null }); continue; }
+      if (!seen.has(k!)) { seen.add(k!); out.push({ head: true, key: k!, list: by.get(k!)! }); for (const m of by.get(k!)!) out.push({ o: m, bkey: k! }); }
+    }
+    return out;
+  };
+  const bundleHead = (key: string, list: Order[]) => {
+    const live = list.filter(o => o.status !== "cancelled");
+    const paid = live.filter(o => o.status === "hold" || o.status === "approved");
+    const approved = live.filter(o => o.status === "approved").length;
+    const f = live[0] || list[0];
+    const total = Math.round(paid.reduce((t, o) => t + (Number(o.total_eur) || 0), 0));
+    const names = Array.from(new Set(live.map(o => o.customer_name).filter(Boolean)));
+    const d = daysTo(f.checkin);
+    return (
+      <div key={`h-${key}`} className="bg-violet-50/60 border border-violet-200 rounded-2xl p-5">
+        <div className="flex flex-col md:flex-row md:items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <span className="font-black text-gray-900">👥 הזמנה קבוצתית · {names.join(", ") || "לקוח/ה"}</span>
+              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-violet-100 text-violet-800">{paid.length} תשלומים{f.guests ? ` מתוך ${f.guests} אנשים` : ""}</span>
+              <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${approved === live.length ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>{approved === live.length ? "✓ כולם אושרו" : `אושרו ${approved}/${live.length}`}</span>
+              {d != null && d >= 0 && <span className="text-xs font-bold bg-gray-900 text-white px-2.5 py-1 rounded-full">{d === 0 ? "מגיעים היום" : d === 1 ? "מגיעים מחר" : `בעוד ${d} ימים`}</span>}
+            </div>
+            <p className="text-sm text-gray-600">{(f.apartment_name || "").replace(/ · החלק של אדם אחד/, "")}{f.extra_apartment_name ? ` + ${f.extra_apartment_name}` : ""} · {fmt(f.checkin)}–{fmt(f.checkout)} · {f.guests} אורחים · {f.nights} לילות</p>
+            <p className="text-xs text-gray-500 mt-0.5"><b className="text-sm text-gray-800">€{total.toLocaleString()}</b> שולם עד עכשיו{f.customer_phone ? ` · ${f.customer_phone}` : ""}</p>
+          </div>
+          <div className="flex flex-wrap gap-2 md:flex-shrink-0">
+            {approved < live.length && (
+              <button onClick={() => approveMany(live)} disabled={!!busy}
+                className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-bold text-sm px-4 py-2 rounded-xl transition">
+                {busy && live.some(o => o.id === busy) ? "מעבד…" : "אשר את כל התשלומים"}
+              </button>
+            )}
+            <button onClick={() => setOpenB(p => ({ ...p, [key]: !p[key] }))} className="border border-violet-200 text-violet-700 hover:bg-violet-100 font-bold text-sm px-3 py-2 rounded-xl transition">
+              {openB[key] ? "הסתר תשלומים ▲" : `הצג ${list.length} תשלומים ▼`}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div>
@@ -658,10 +738,13 @@ export default function OrdersAdmin() {
                 </div>
               )}
               <div className="space-y-3">
-          {g.list.map(o => {
+          {bundled(g.list).map(it => {
+            if (it.head) return bundleHead(it.key, it.list);
+            const o = it.o;
+            if (it.bkey && !openB[it.bkey]) return null;
             const st = STATUS[o.status] || STATUS.awaiting;
             return (
-              <div key={o.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+              <div key={o.id} className={`bg-white rounded-2xl border border-gray-100 shadow-sm p-5${it.bkey ? " mr-4 md:mr-8 border-r-4 border-r-violet-200" : ""}`}>
                <div className="flex flex-col md:flex-row md:items-center gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
