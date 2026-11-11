@@ -76,6 +76,8 @@ export default function LeadsChats({ api, ordersHref, team = false, assign = fal
   const [leads, setLeads] = useState<Lead[] | null>(null);
   const [sel, setSel] = useState<string | null>(null);
   const [thread, setThread] = useState<Thread | null>(null);
+  // where the customer came from, and every quote sent to him (/api/lead-info)
+  const [leadInfo, setLeadInfo] = useState<{ lead: string; source: { src: string; landing?: string } | null; quotes: { id: string; number: string; createdAt: string; title: string }[] } | null>(null);
   const [stage, setStage] = useState<string>("all");
   const [channel, setChannel] = useState<"all" | "web" | "whatsapp">("all");
   const [whose, setWhose] = useState<"all" | "mine" | "free">("all");
@@ -151,6 +153,15 @@ export default function LeadsChats({ api, ordersHref, team = false, assign = fal
   useEffect(() => { endRef.current?.scrollIntoView({ block: "end" }); }, [count, sel]);
 
   const cur = leads?.find(l => l.lead === sel) ?? null;
+  const curPhone = cur?.phone || "";
+  useEffect(() => {
+    if (!sel) return;
+    let live = true;
+    authFetch(`/api/lead-info?lead=${encodeURIComponent(sel)}${curPhone ? `&phone=${encodeURIComponent(curPhone)}` : ""}`)
+      .then(r => r.json()).then(j => { if (live && j?.ok) setLeadInfo({ lead: sel, source: j.source, quotes: j.quotes || [] }); }).catch(() => {});
+    return () => { live = false; };
+  }, [sel, curPhone]);
+  const curInfo = leadInfo && leadInfo.lead === sel ? leadInfo : null;
   const opened = useRef(false);
   useEffect(() => {
     if (opened.current || !leads) return;
@@ -492,6 +503,24 @@ export default function LeadsChats({ api, ordersHref, team = false, assign = fal
                     {quote.total && <div className="font-extrabold text-gray-900 text-lg">€{quote.total}{quote.pp ? <span className="text-xs font-normal text-gray-500"> · €{quote.pp} לאדם</span> : null}</div>}
                   </div>
                 )}
+
+                <div className="rounded-xl border border-gray-200 p-3 text-sm space-y-1.5">
+                  <div className="font-bold text-gray-900">📍 מאיפה הגיע</div>
+                  <div className="text-gray-700">{curInfo ? (curInfo.source ? <>{curInfo.source.src}{curInfo.source.landing ? <span className="text-xs text-gray-400"> · נחת ב-{curInfo.source.landing}</span> : null}</> : "לא ידוע (פנה לפני שהתחלנו לשמור מקור)") : "…"}</div>
+                  {curInfo && curInfo.quotes.length > 0 && (
+                    <div className="pt-1.5 border-t border-gray-100">
+                      <div className="font-bold text-gray-900 mb-1">📄 הצעות שנשלחו ({curInfo.quotes.length})</div>
+                      <ul className="space-y-1">
+                        {curInfo.quotes.map(q => (
+                          <li key={q.id} className="flex items-baseline justify-between gap-2">
+                            <a href={`/p/${q.id}`} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline truncate">{q.number || "הצעה"}{q.title ? ` · ${q.title}` : ""}</a>
+                            <span className="text-xs text-gray-400 shrink-0">{time(q.createdAt)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
 
                 <div className="text-xs text-gray-500 space-y-0.5">
                   <div>פנייה ראשונה: {cur.firstAt}</div>

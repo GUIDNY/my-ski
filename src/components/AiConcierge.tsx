@@ -4,6 +4,7 @@ import type { PointerEvent as ReactPointerEvent } from "react";
 import { usePathname } from "next/navigation";
 import { helperWaHref, OPEN_CHAT_EVENT } from "@/lib/helper-whatsapp";
 import { oaiLead } from "@/lib/oai-pixel";
+import { currentSource } from "@/lib/attribution";
 
 // One chat message. The helper answers in a few short messages, then the quote
 // link and apartment photos (when it made a quote or showed an apartment).
@@ -260,7 +261,7 @@ export default function AiConcierge() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sessionId, message: text, contact, image,
+          sessionId, message: text, contact, image, source: currentSource(),
           // only used by the old site bot, if the helper can't answer
           messages: transcript
             .filter(m => m.text && !(m.role === "assistant" && WELCOME.some(w => w.text === m.text)))

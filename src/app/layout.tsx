@@ -12,6 +12,7 @@ import OpenAIPixel from "@/components/OpenAIPixel";
 import { Analytics } from "@vercel/analytics/next";
 import AnalyticsConsent from "@/components/AnalyticsConsent";
 import GoogleAdsTag from "@/components/GoogleAdsTag";
+import Attribution from "@/components/Attribution";
 import { SITE_LD, ldJson } from "@/lib/site";
 
 const montserrat = Montserrat({
@@ -111,6 +112,7 @@ export default function RootLayout({
         <OpenAIPixel />
         <Analytics />
         <GoogleAdsTag />
+        <Attribution />
       </body>
     </html>
   );

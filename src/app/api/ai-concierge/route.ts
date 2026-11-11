@@ -148,6 +148,10 @@ export async function POST(req: NextRequest) {
       kind = "image";
     }
     if (text) {
+      if (body.source && typeof body.source.src === "string") {
+        const { saveLeadSource } = await import("@/lib/lead-sources");
+        await saveLeadSource(createServerClient(), `web_${body.sessionId}`, { src: body.source.src, landing: typeof body.source.landing === "string" ? body.source.landing : undefined });
+      }
       const answer = await askHelper({ sessionId: body.sessionId, text, contact: typeof body.contact === "string" ? body.contact : "", kind });
       if (answer) return NextResponse.json(answer);
     }
