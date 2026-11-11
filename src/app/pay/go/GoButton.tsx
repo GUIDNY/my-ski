@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { btn } from "@/components/ui";
+import { openPayment } from "@/lib/pay-frame";
 
 export default function GoButton({ href }: { href: string }) {
   const [agreed, setAgreed] = useState(false);
@@ -14,7 +15,7 @@ export default function GoButton({ href }: { href: string }) {
         </span>
       </label>
       {warn && <p role="alert" className="text-[14px] text-danger">כדי להמשיך לתשלום יש לסמן שהתקנון מקובל עליכם.</p>}
-      <button type="button" onClick={() => (agreed ? window.location.assign(href) : setWarn(true))} className={`${btn.primary} w-full`}>
+      <button type="button" onClick={() => (agreed ? openPayment(href) : setWarn(true))} className={`${btn.primary} w-full`}>
         להמשך לתשלום מאובטח
       </button>
     </div>

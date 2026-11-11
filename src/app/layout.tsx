@@ -13,6 +13,7 @@ import { Analytics } from "@vercel/analytics/next";
 import AnalyticsConsent from "@/components/AnalyticsConsent";
 import GoogleAdsTag from "@/components/GoogleAdsTag";
 import Attribution from "@/components/Attribution";
+import PayFrame from "@/components/PayFrame";
 import { SITE_LD, ldJson } from "@/lib/site";
 
 const montserrat = Montserrat({
@@ -113,6 +114,7 @@ export default function RootLayout({
         <Analytics />
         <GoogleAdsTag />
         <Attribution />
+        <PayFrame />
       </body>
     </html>
   );

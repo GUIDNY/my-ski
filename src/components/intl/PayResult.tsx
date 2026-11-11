@@ -7,6 +7,7 @@ import { StatusCard } from "@/components/checkout/Checkout";
 import { CONTACT_EMAIL, LAST_APARTMENT_KEY, type Lang } from "@/lib/intl/config";
 import { DICT } from "@/lib/intl/dict";
 import { oaiOrderCreated } from "@/lib/oai-pixel";
+import PayBreakOut from "@/components/PayBreakOut";
 
 /*
  * Where PayPlus sends the customer back (create-link with lang "en"/"fr").
@@ -32,6 +33,7 @@ export function PaySuccess({ lang }: { lang: Lang }) {
   }, [order, transactionUid, pageRequestUid]);
 
   return (
+    <><PayBreakOut />
     <StatusCard tone="ok" title={t.successTitle}
       actions={<>
         <Link href={`/${lang}`} className={btn.primary}>{t.backHome}</Link>
@@ -53,7 +55,7 @@ export function PaySuccess({ lang }: { lang: Lang }) {
       <p className="text-[14px] text-muted">
         {t.questions} <a href={`mailto:${CONTACT_EMAIL}${order ? `?subject=${encodeURIComponent(order.toUpperCase())}` : ""}`} className="font-bold text-accent hover:text-accent-hover wrap-anywhere">{CONTACT_EMAIL}</a>
       </p>
-    </StatusCard>
+    </StatusCard></>
   );
 }
 
@@ -66,6 +68,7 @@ export function PayFailure({ lang }: { lang: Lang }) {
   const last = useSyncExternalStore(noop, readLast, () => null);
   const back = last && last.startsWith(`/${lang}/apartments/`) ? last : null;
   return (
+    <><PayBreakOut />
     <StatusCard tone="danger" title={t.failTitle}
       actions={<>
         <Link href={back ?? `/${lang}/apartments`} className={btn.primary}>{back ? t.backToApt : t.backToApts}</Link>
@@ -73,6 +76,6 @@ export function PayFailure({ lang }: { lang: Lang }) {
       </>}>
       <p className="text-[16px] md:text-[17px] leading-relaxed text-body max-w-[460px]">{t.failText}</p>
       <p className="text-[14px] text-muted wrap-anywhere">{CONTACT_EMAIL}</p>
-    </StatusCard>
+    </StatusCard></>
   );
 }

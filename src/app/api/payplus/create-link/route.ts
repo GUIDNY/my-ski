@@ -40,8 +40,13 @@ export async function POST(req: NextRequest) {
     desc = `${desc} (€${amountEur} · שער ${sell.toFixed(3)})`;
   }
 
+  // a customer from abroad (the English/French site, or "foreign card" on a quote): the page in
+  // English, no Israeli ID field, no installments (foreign cards don't take them)
+  const foreign = b.lang === "en" || b.lang === "fr" || b.foreign === true;
   const payload: Record<string, unknown> = {
     payment_page_uid: PAGE_UID,
+    language_code: foreign ? "en" : "he",
+    ...(foreign ? { hide_identification_id: true, hide_payments_field: true } : {}),
     ...(process.env.PAYPLUS_TERMINAL_UID ? { terminal_uid: process.env.PAYPLUS_TERMINAL_UID } : {}),
     // 1 = charge now · 2 = approval/J2 (hold, captured manually later)
     charge_method: Number(process.env.PAYPLUS_CHARGE_METHOD || "1"),

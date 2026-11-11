@@ -7,6 +7,7 @@ import { PhotoGallery, Lightbox, mapLink } from "@/components/QuoteView";
 import { heroOf } from "@/components/ProposalDocument";
 import { BANK } from "@/lib/bank";
 import type { ProposalBlock, ProposalData } from "@/types";
+import { openPayment } from "@/lib/pay-frame";
 
 /*
  * A quote the bots made, as a page in the look of the site's own quote page:
@@ -106,6 +107,8 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
   const [agreed, setAgreed] = useState(false);
   // a friend paying only his share: his own name, so his payment isn't recorded under the quote's customer
   const [payer, setPayer] = useState("");
+  // paying with a card from abroad: the PayPlus page in English, without the Israeli ID field
+  const [foreign, setForeign] = useState(false);
   const [needPayer, setNeedPayer] = useState(false);
   const [needAgree, setNeedAgree] = useState(false);
   const [payErr, setPayErr] = useState(false);
@@ -196,11 +199,11 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
     try {
       const r = await fetch("/api/payplus/create-link", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: Math.round(amount * 100) / 100, currency, name: (perHead ? who : forName) || undefined, ref: pdfHref ? undefined : `p:${id}`, description: `הצעה ${number || ""}${perHead ? ` · החלק של אדם אחד${myNote ? ` (${myNote})` : ""} · משלם: ${who}` : ""}${what}`.trim() }),
+        body: JSON.stringify({ amount: Math.round(amount * 100) / 100, currency, foreign, name: (perHead ? who : forName) || undefined, ref: pdfHref ? undefined : `p:${id}`, description: `הצעה ${number || ""}${perHead ? ` · החלק של אדם אחד${myNote ? ` (${myNote})` : ""} · משלם: ${who}` : ""}${what}`.trim() }),
       });
       const j = await r.json();
       if (!r.ok || !j.url) throw new Error("no link");
-      window.location.assign(j.url);
+      openPayment(j.url); setBusy("");
     } catch { setPayErr(true); setBusy(""); }
   };
   const payOptions: [string, string, number, "EUR" | "ILS", boolean][] = [
@@ -332,6 +335,10 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
           </span>
         </label>
         {needAgree && <p role="alert" className="text-[13px] text-danger">כדי להמשיך לתשלום יש לסמן שהתקנון מקובל עליכם.</p>}
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input type="checkbox" checked={foreign} onChange={e => setForeign(e.target.checked)} className="w-5 h-5 shrink-0 accent-[#1652F0]" />
+          <span className="text-[14px] text-body">כרטיס אשראי מחו״ל · Foreign card (payment page in English)</span>
+        </label>
         {guests > 1 && (
           <label className="flex flex-col gap-1.5">
             <span className="text-[14px] text-body">משלמים רק את החלק שלכם? כתבו את השם שלכם</span>

@@ -7,6 +7,7 @@ import { DICT } from "@/lib/intl/dict";
 import { fmtDayRange, fmtEur } from "@/lib/intl/format";
 import Dialog from "../Dialog";
 import { oaiCheckoutStarted } from "@/lib/oai-pixel";
+import { openPayment } from "@/lib/pay-frame";
 
 export type Booking = {
   apartmentId: string;
@@ -86,7 +87,8 @@ export default function CheckoutDialog({ lang, booking: b, onClose, onTaken }: {
       if (link?.url) {
         oaiCheckoutStarted(code, toPay, "EUR", b.name);
         try { sessionStorage.setItem(LAST_APARTMENT_KEY, window.location.pathname + window.location.search); } catch { /* private mode */ }
-        window.location.href = link.url;
+        openPayment(link.url);
+        setBusy(false);
         return;
       }
       setErr({ text: c.errPay(code.toUpperCase()), mail: true }); setBusy(false);
