@@ -25,6 +25,7 @@ const EMPTY_NEW_ORDER = {
   stay_address: "", stay_ref: "", stay_notes: "",
   fl_airline: "", fl_pnr: "", fl_url: "", fl_out_date: "", fl_out_time: "", fl_out_no: "", fl_ret_date: "", fl_ret_time: "", fl_ret_no: "",
   fl_out_arr: "", fl_out_airport: "", fl_ret_airport: "",
+  lang: "" as "" | "he" | "en" | "fr", // "" = guessed (lib/order-lang.ts)
 };
 
 const hhmm = (ms: number, tz: string) => new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(ms));
@@ -136,6 +137,7 @@ export default function OrdersAdmin() {
       customer_name: o.customer_name || "", customer_email: o.customer_email || "", customer_phone: o.customer_phone || "",
       status: (o.status === "hold" ? "hold" : "approved"),
       ski_pass: !!o.ski_pass, transfer: !!o.transfer, equipment: !!o.equipment, transfer_details: o.transfer_details || "",
+      lang: (["he", "en", "fr"].includes(String(o.ops?.x_lang)) ? String(o.ops?.x_lang) : "") as "" | "he" | "en" | "fr",
       pass3v: !!(o.ops && o.ops.x_pass3v), flight: !!o.flight, flight_details: o.flight_details || "", flight_price: Number(o.flight_price) || 0,
       ...(() => { const st = (o.ops && typeof o.ops.x_stay === "object" && o.ops.x_stay ? o.ops.x_stay : {}) as Record<string, string>;
         return { stay_address: st.address || "", stay_ref: st.ref || "", stay_notes: st.notes || "" }; })(),
@@ -190,6 +192,7 @@ export default function OrdersAdmin() {
       flight_price: newOrder.flight && newOrder.flight_price > 0 ? newOrder.flight_price : null,
       // the ski pass area is kept in ops (x_ keys are not checklist items): the personal area shows it
       ops: { ...((editingOrder && editingOrder.ops) || {}), x_pass3v: newOrder.ski_pass && newOrder.pass3v,
+        x_lang: newOrder.lang || null, // the customer's language (null = guessed)
         // arrival details for the guest: shown in the personal area after the online check-in
         x_stay: { address: newOrder.stay_address.trim(), ref: newOrder.stay_ref.trim(), notes: newOrder.stay_notes.trim() },
         // flight check-in in the personal area + the email 24 hours before (reminders already sent are kept)
@@ -690,6 +693,18 @@ export default function OrdersAdmin() {
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 <input placeholder="אימייל" dir="ltr" value={newOrder.customer_email} onChange={e => setNewOrder(v => ({ ...v, customer_email: e.target.value }))}
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-right focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              {/* the customer's language: emails and the personal area (/my, /en/my, /fr/my) */}
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1.5">שפת הלקוח (מיילים ואזור אישי)</label>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {([["", "אוטומטי"], ["he", "עברית"], ["en", "אנגלית"], ["fr", "צרפתית"]] as const).map(([k, l]) => (
+                    <button key={k || "auto"} type="button" onClick={() => setNewOrder(v => ({ ...v, lang: k }))}
+                      className={`py-2 rounded-xl text-sm font-bold border ${newOrder.lang === k ? "border-blue-500 bg-blue-50 text-blue-700" : "border-gray-200 text-gray-500"}`}>{l}</button>
+                  ))}
+                </div>
+                {newOrder.lang === "" && <p className="text-[11px] text-gray-400 mt-1">אוטומטי: שם בלי עברית וטלפון לא ישראלי ← אנגלית, אחרת עברית</p>}
+                {newOrder.lang === "fr" && <p className="text-[11px] text-gray-400 mt-1">המייל באנגלית, האזור האישי בצרפתית</p>}
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1.5">סטטוס</label>

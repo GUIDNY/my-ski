@@ -1,5 +1,5 @@
 import { createServerClient } from "@/lib/supabase-server";
-import { orderLang } from "@/lib/order-lang";
+import { orderLang, portalUrl } from "@/lib/order-lang";
 import { blockDatesForOrder, freeDatesForOrder } from "@/lib/inventory";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/api-auth";
@@ -54,7 +54,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
               ski_pass: data.ski_pass,
               transfer: data.transfer,
               total_eur: data.total_eur,
-              portal_url: `${origin}/my?code=${data.code}`,
+              portal_url: portalUrl(origin, data),
             },
           }),
         });

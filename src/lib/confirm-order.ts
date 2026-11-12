@@ -1,6 +1,6 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { blockDatesForOrder } from "@/lib/inventory";
-import { orderLang } from "@/lib/order-lang";
+import { orderLang, portalUrl } from "@/lib/order-lang";
 
 type Info = { email?: string; name?: string; phone?: string; txUid?: string; amountIls?: number };
 
@@ -50,7 +50,7 @@ export async function confirmDepositPaid(code: string, origin: string, info: Inf
               apartment: order.apartment_name, area: order.area, checkin: order.checkin, checkout: order.checkout,
               guests: order.guests, nights: order.nights, ski_pass: order.ski_pass, transfer: order.transfer,
               equipment: order.equipment, flight: order.flight,
-              total_eur: order.total_eur, portal_url: `${origin}/my?code=${order.code}`,
+              total_eur: order.total_eur, portal_url: portalUrl(origin, order),
               share_amount: order.share_amount, shares_total: order.shares_total, split_url: splitUrl,
             },
             data: rawPayload,

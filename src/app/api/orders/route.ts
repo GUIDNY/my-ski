@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
     const c = code();
     // the English/French site says which language the customer's emails go out in
     const lang = b.lang === "en" || b.lang === "fr" ? b.lang : null;
-    const ops = { ...(couponUsed ? { x_coupon: couponUsed } : {}), ...(lang ? { lang } : {}) };
+    const ops = { ...(couponUsed ? { x_coupon: couponUsed } : {}), ...(lang ? { x_lang: lang } : {}) };
     const { data, error } = await db.from("orders").insert({ code: c, ...row, ...(Object.keys(ops).length ? { ops } : {}) }).select("code").single();
     if (!error && data) {
       if (couponUsed) { // best-effort usage counter

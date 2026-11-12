@@ -1,7 +1,7 @@
 /*
  * Which language a customer's emails go out in. The n8n email workflow writes
  * the English version when it gets lang "en" (French customers get English too).
- * 1) the order says so: ops.lang, saved when it was made on the English/French site;
+ * 1) the order says so: ops.x_lang, saved when it was made on the English/French site;
  * 2) otherwise a foreign customer is guessed: no Hebrew in the name and a phone
  *    that isn't Israeli (orders from a quote paid with a foreign card, the bot…).
  */
@@ -15,9 +15,16 @@ function israeliPhone(phone: string): boolean {
   return d.startsWith("972") || /^0[5-9]/.test(d) || (d.length === 9 && d.startsWith("5"));
 }
 
+/** The personal area in the customer's language: /my (Hebrew), /en/my or /fr/my. */
+export function portalUrl(origin: string, o: OrderLike & { code: string }): string {
+  const saved = (o.ops as { x_lang?: string } | null)?.x_lang;
+  const path = orderLang(o) === "en" ? (saved === "fr" ? "/fr/my" : "/en/my") : "/my";
+  return `${origin}${path}?code=${o.code}`;
+}
+
 export function orderLang(o: OrderLike | null | undefined): "en" | "he" {
   if (!o) return "he";
-  const saved = (o.ops as { lang?: string } | null)?.lang;
+  const saved = (o.ops as { x_lang?: string } | null)?.x_lang;
   if (saved === "en" || saved === "fr") return "en";
   if (saved === "he") return "he";
   const name = String(o.customer_name || "");
