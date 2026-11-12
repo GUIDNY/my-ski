@@ -1,4 +1,5 @@
 import { createServerClient } from "@/lib/supabase-server";
+import { orderLang } from "@/lib/order-lang";
 import { blockDatesForOrder } from "@/lib/inventory";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/api-auth";
@@ -76,7 +77,7 @@ export async function POST(req: NextRequest) {
       await fetch(hook, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          source: "capture", type: "approved",
+          source: "capture", type: "approved", lang: orderLang(updated),
           order: {
             code: updated.code, customer_name: updated.customer_name, customer_email: updated.customer_email,
             apartment: updated.apartment_name, area: updated.area, checkin: updated.checkin, checkout: updated.checkout,

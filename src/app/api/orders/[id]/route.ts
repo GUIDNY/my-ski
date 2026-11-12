@@ -1,4 +1,5 @@
 import { createServerClient } from "@/lib/supabase-server";
+import { orderLang } from "@/lib/order-lang";
 import { blockDatesForOrder, freeDatesForOrder } from "@/lib/inventory";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/api-auth";
@@ -39,6 +40,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           body: JSON.stringify({
             source: "order_approved",
             type: "approved",
+            lang: orderLang(data),
             order: {
               code: data.code,
               customer_name: data.customer_name,

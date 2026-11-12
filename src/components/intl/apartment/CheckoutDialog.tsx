@@ -65,6 +65,7 @@ export default function CheckoutDialog({ lang, booking: b, onClose, onTaken }: {
             ski_pass: false, transfer: false, equipment: false, cancel: "regular", service: "human",
             grand_total: b.total,
             customer_name: n, customer_email: e, customer_phone: p,
+            lang,
           }),
         });
         const order = await res.json().catch(() => ({}));

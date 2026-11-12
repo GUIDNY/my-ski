@@ -1,5 +1,6 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { blockDatesForOrder } from "@/lib/inventory";
+import { orderLang } from "@/lib/order-lang";
 
 type Info = { email?: string; name?: string; phone?: string; txUid?: string; amountIls?: number };
 
@@ -43,7 +44,7 @@ export async function confirmDepositPaid(code: string, origin: string, info: Inf
         await fetch(hook, {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            source: "payplus", type: "received", order_code: order.code,
+            source: "payplus", type: "received", order_code: order.code, lang: orderLang(order),
             order: {
               code: order.code, customer_email: order.customer_email, customer_name: order.customer_name,
               apartment: order.apartment_name, area: order.area, checkin: order.checkin, checkout: order.checkout,

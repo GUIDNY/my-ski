@@ -81,7 +81,10 @@ export async function POST(req: NextRequest) {
 
   for (let i = 0; i < 5; i++) {
     const c = code();
-    const { data, error } = await db.from("orders").insert({ code: c, ...row, ...(couponUsed ? { ops: { x_coupon: couponUsed } } : {}) }).select("code").single();
+    // the English/French site says which language the customer's emails go out in
+    const lang = b.lang === "en" || b.lang === "fr" ? b.lang : null;
+    const ops = { ...(couponUsed ? { x_coupon: couponUsed } : {}), ...(lang ? { lang } : {}) };
+    const { data, error } = await db.from("orders").insert({ code: c, ...row, ...(Object.keys(ops).length ? { ops } : {}) }).select("code").single();
     if (!error && data) {
       if (couponUsed) { // best-effort usage counter
         try { const all = await readCoupons(db); const i = all.findIndex(x => normCode(x.code) === couponUsed!.code); if (i >= 0) { all[i].uses = (Number(all[i].uses) || 0) + 1; await saveCoupons(db, all); } } catch { /* counter only */ }
