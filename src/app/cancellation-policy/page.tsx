@@ -4,7 +4,7 @@ import { pageMeta } from "@/lib/page-meta";
 
 export const metadata = pageMeta({
   title: "מדיניות ביטול: חופשת סקי בואל טורנס | SkiShare",
-  description: "מדיניות הביטול של SkiShare: ביטול רגיל, ביטול גמיש, או מחיר מוזל בלי אפשרות ביטול, ומה קורה במצב חירום או מלחמה.",
+  description: "מדיניות הביטול של SkiShare: ביטול רגיל, ביטוח מלחמה, או מחיר מוזל בלי אפשרות ביטול, ומה קורה במצב חירום או מלחמה.",
   path: "/cancellation-policy",
 });
 
@@ -35,20 +35,20 @@ export default function CancellationPolicy() {
 
         <section className="rounded-card border-2 border-ok/40 bg-white p-5 md:p-6">
           <div className="flex flex-wrap items-center gap-2 mb-3">
-            <h2 className="font-display text-[21px] md:text-[23px] font-bold text-ink">מדיניות גמישה</h2>
+            <h2 className="font-display text-[21px] md:text-[23px] font-bold text-ink">ביטוח מלחמה</h2>
             <span className="text-[13px] bg-ok-soft text-ok-text px-2.5 py-0.5 rounded-full font-bold"><span dir="ltr">+€100</span>/אדם</span>
           </div>
           <ul className="flex flex-col gap-2 text-[16px] text-body">
-            <Item ok>ביטול עד 48 שעות לפני הגעה — 80% החזר</Item>
-            <Item ok>שינוי תאריכים בתשלום הפרש מחיר בלבד</Item>
-            <Item ok={false}>ביטול פחות מ-48 שעות לפני — אין החזר</Item>
+            <Item ok>הטיסה מנתב״ג בוטלה (מלחמה, סגירת שמיים, ביטולי טיסות): מקבלים בחזרה את כל מחיר החופשה</Item>
+            <Item ok={false}>החלטתם לא לטוס והטיסה יצאה כרגיל: הביטוח לא מכסה, וחלה מדיניות הביטול הרגילה</Item>
+            <Item ok={false}>דמי הביטוח עצמם (€100 לאדם) לא מוחזרים</Item>
             <Item ok={false}>לא ניתן לשלב עם שירות AI בלבד</Item>
           </ul>
         </section>
 
         <div className="rounded-card bg-warn-soft border border-warn/25 p-5 text-[15px] md:text-[16px] text-body">
           <div className="font-bold text-warn mb-1">הערה חשובה</div>
-          מדיניות ביטול גמישה כוללת שירות אנושי מלא — לא ניתן לשלבה עם שירות AI בלבד. לשאלות נוספות: <a href="mailto:skishareteam@gmail.com">skishareteam@gmail.com</a>
+          ביטוח מלחמה כולל שירות אנושי מלא — לא ניתן לשלבה עם שירות AI בלבד. לשאלות נוספות: <a href="mailto:skishareteam@gmail.com">skishareteam@gmail.com</a>
         </div>
 
         <Link href="/emergency-policy" className="rounded-card border border-accent/25 bg-accent-soft/60 p-5 flex flex-col gap-1 hover:border-accent/50 transition-colors">

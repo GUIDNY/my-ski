@@ -33,7 +33,7 @@ const TOPICS = [
   { id: "stay", title: "דירות ואירוח" },
   { id: "pass", title: "סקי פס" },
   { id: "during", title: "מקרה שבו כבר נמצאים בחופשה" },
-  { id: "insurance", title: "ביטוח ביטול" },
+  { id: "insurance", title: "ביטוח מלחמה" },
 ];
 
 function PolicyCard({ id, icon, title, badge, children }: { id: string; icon: React.ReactNode; title: string; badge: string; children: React.ReactNode }) {
@@ -206,7 +206,7 @@ export default function EmergencyPolicyPage() {
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="rounded-[18px] border border-line p-5 flex flex-col gap-2">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-bold text-ink text-[16px]">ללא ביטוח ביטול</span>
+                  <span className="font-bold text-ink text-[16px]">ללא ביטוח מלחמה</span>
                   <span className="px-2.5 py-0.5 rounded-full bg-soft text-muted text-[13px] font-bold">ברירת מחדל</span>
                 </div>
                 <div className="font-display text-[28px] font-extrabold text-ink"><span dir="ltr">−€50</span> <span className="text-[14px] font-medium text-muted">חיסכון</span></div>
@@ -218,14 +218,25 @@ export default function EmergencyPolicyPage() {
               <div className="rounded-[18px] border-2 border-accent bg-accent-soft/40 p-5 flex flex-col gap-2 relative">
                 <span className="absolute -top-3 right-4 bg-accent text-white text-[12px] font-bold px-3 py-1 rounded-full">מומלץ</span>
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-ink text-[16px]">עם ביטוח ביטול</span>
+                  <span className="font-bold text-ink text-[16px]">עם ביטוח מלחמה</span>
                   <span className="text-ok"><IcoCheck size={16} /></span>
                 </div>
                 <div className="font-display text-[28px] font-extrabold text-accent"><span dir="ltr">+€100</span> <span className="text-[14px] font-medium text-muted">לאדם</span></div>
                 <p className="text-[15px] text-body leading-relaxed">
-                  <strong className="text-ink">החזר מלא מובטח</strong>{" "}במקרה של מצב חריג — גם אם הספקים בחו&quot;ל לא יחזירו.
+                  <strong className="text-ink">כל מחיר החופשה חוזר אליכם</strong>{" "}אם הטיסה מנתב״ג בוטלה בגלל מלחמה או מצב חירום, גם אם הספקים בחו&quot;ל לא יחזירו.
                 </p>
               </div>
+            </div>
+
+            {/* the terms of the war insurance (Idan, 12.11.2026) */}
+            <div className="mt-6 rounded-[18px] bg-soft p-5">
+              <h3 className="font-bold text-ink text-[17px] mb-3">תקנון ביטוח המלחמה</h3>
+              <ol className="list-decimal ps-5 flex flex-col gap-2 text-[15px] text-body leading-relaxed">
+                <li><strong className="text-ink">מה מכוסה:</strong> ביטול של הטיסה שלכם מנתב״ג בגלל מלחמה או מצב חירום, למשל סגירת השמיים או ביטולי טיסות של חברות התעופה. במקרה כזה מחזירים לכם את כל מחיר החופשה.</li>
+                <li><strong className="text-ink">מה לא מכוסה:</strong> ביטול מרצון. אם החלטתם לא לטוס, מכל סיבה שהיא, והטיסה יצאה כרגיל, הביטוח לא מכסה את זה, וחלה מדיניות הביטולים הרגילה.</li>
+                <li><strong className="text-ink">דמי הביטוח לא מוחזרים:</strong> הביטוח הוא מוצר משלים, ו-€100 לאדם שמשלמים עליו לא חוזרים. לדוגמה: חופשה של €1,400 לאדם, ועם הביטוח שילמתם €1,500. אם הטיסה בוטלה, תקבלו בחזרה €1,400 לאדם.</li>
+                <li><strong className="text-ink">ההחזר:</strong> לאמצעי התשלום שבו שילמתם.</li>
+              </ol>
             </div>
             <p className="text-[14px] text-muted mt-4">אם לא בטוחים מה מתאים לכם, פשוט תשאלו אותנו.</p>
           </section>
