@@ -104,7 +104,10 @@ export async function transferOptions(p: {
     });
   }
   options.sort((a, b) => (a.kind === b.kind ? 0 : a.kind === "shared" ? -1 : 1) || Number(b.fits) - Number(a.fits) || Number(a.onRequest) - Number(b.onRequest) || a.total - b.total);
-  const best = options.find(o => o.fits && !o.onRequest) ?? options.find(o => !o.onRequest) ?? null;
+  // a car the office confirms by hand ("on request") is still a real price: when every option is
+  // on request (WinteRide does that for whole periods), the cheapest one that fits is still the best,
+  // instead of no transfer at all (12.11: quotes asked "with transfer" went out without it)
+  const best = options.find(o => o.fits && !o.onRequest) ?? options.find(o => !o.onRequest) ?? options.find(o => o.fits) ?? options[0] ?? null;
   const travel = legs.find(q => q.travel)?.travel;
   return { ok: options.length > 0, airport, options, best: best?.key ?? null, driveMinutes: travel?.drive_minutes ?? null, km: travel?.km ?? null, legs: { out, ret }, sharedReason };
 }
