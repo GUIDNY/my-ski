@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
   const foreign = b.lang === "en" || b.lang === "fr" || b.foreign === true;
   const payload: Record<string, unknown> = {
     payment_page_uid: PAGE_UID,
-    language_code: foreign ? "en" : "he",
+    language_code: b.lang === "fr" ? "fr" : foreign ? "en" : "he",
     ...(foreign ? { hide_identification_id: true, hide_payments_field: true } : {}),
     ...(process.env.PAYPLUS_TERMINAL_UID ? { terminal_uid: process.env.PAYPLUS_TERMINAL_UID } : {}),
     // 1 = charge now · 2 = approval/J2 (hold, captured manually later)
