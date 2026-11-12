@@ -23,16 +23,18 @@ export async function POST(req: NextRequest) {
     const BASE = process.env.PAYPLUS_BASE_URL || "https://restapi.payplus.co.il";
     const amount = Number(order.amount_ils) > 0 ? Number(order.amount_ils) : undefined;
     try {
-      const res = await fetch(`${BASE}/api/v1.0/Transactions/ChargeByTransactionUID`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "api-key": process.env.PAYPLUS_API_KEY || "",
-          "secret-key": process.env.PAYPLUS_SECRET_KEY || "",
-        },
-        body: JSON.stringify({ transaction_uid: order.payplus_transaction_uid, ...(amount ? { amount } : {}) }),
-      });
-      const j = await res.json();
+      // the deposit was held on the new terminal or (before the switch) on the old one: try each
+      const { allKeys } = await import("@/lib/payplus-keys");
+      let j: { results?: { status?: string; message?: string } } | null = null;
+      for (const k of allKeys()) {
+        const res = await fetch(`${BASE}/api/v1.0/Transactions/ChargeByTransactionUID`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "api-key": k.apiKey, "secret-key": k.secret },
+          body: JSON.stringify({ transaction_uid: order.payplus_transaction_uid, ...(amount ? { amount } : {}) }),
+        });
+        j = await res.json().catch(() => null);
+        if (j?.results?.status === "success") break;
+      }
       if (j?.results?.status !== "success") {
         return NextResponse.json({ error: j?.results?.message || "PayPlus charge failed", raw: j }, { status: 400 });
       }

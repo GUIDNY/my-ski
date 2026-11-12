@@ -1,6 +1,7 @@
 import { getEurToIls, SELL_MARKUP } from "@/lib/fx";
 import { NextRequest, NextResponse } from "next/server";
 import { landingUrl } from "@/lib/pay-landing";
+import { activeKeys } from "@/lib/payplus-keys";
 
 /**
  * Creates a PayPlus hosted payment-page link and returns its URL.
@@ -10,9 +11,10 @@ import { landingUrl } from "@/lib/pay-landing";
  * PAYPLUS_PAGE_UID, PAYPLUS_BASE_URL, PAYPLUS_CURRENCY, EUR_ILS_MARKUP.
  */
 export async function POST(req: NextRequest) {
-  const API_KEY = process.env.PAYPLUS_API_KEY;
-  const SECRET = process.env.PAYPLUS_SECRET_KEY;
-  const PAGE_UID = process.env.PAYPLUS_PAGE_UID;
+  const keys = activeKeys();
+  const API_KEY = keys?.apiKey;
+  const SECRET = keys?.secret;
+  const PAGE_UID = keys?.pageUid;
   const BASE = process.env.PAYPLUS_BASE_URL || "https://restapi.payplus.co.il";
   if (!API_KEY || !SECRET) return NextResponse.json({ error: "PayPlus keys missing" }, { status: 500 });
   if (!PAGE_UID) return NextResponse.json({ error: "PAYPLUS_PAGE_UID not set" }, { status: 500 });
@@ -47,7 +49,7 @@ export async function POST(req: NextRequest) {
     payment_page_uid: PAGE_UID,
     language_code: b.lang === "fr" ? "fr" : foreign ? "en" : "he",
     ...(foreign ? { hide_identification_id: true, hide_payments_field: true } : {}),
-    ...(process.env.PAYPLUS_TERMINAL_UID ? { terminal_uid: process.env.PAYPLUS_TERMINAL_UID } : {}),
+    ...(keys?.terminalUid ? { terminal_uid: keys.terminalUid } : {}),
     // 1 = charge now · 2 = approval/J2 (hold, captured manually later)
     charge_method: Number(process.env.PAYPLUS_CHARGE_METHOD || "1"),
     amount,

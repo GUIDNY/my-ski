@@ -17,6 +17,8 @@ import crypto from "crypto";
  *    and carry this order's code (more_info_1, set in create-link).
  */
 
+import { allKeys } from "@/lib/payplus-keys";
+
 const BASE = () => process.env.PAYPLUS_BASE_URL || "https://restapi.payplus.co.il";
 
 function sameText(a: string, b: string): boolean {
@@ -26,12 +28,12 @@ function sameText(a: string, b: string): boolean {
 
 /** True when the `hash` header is PayPlus's signature of this body. */
 export function payplusSignatureOk(rawBody: string, parsed: unknown, hashHeader: string | null): boolean {
-  const secret = process.env.PAYPLUS_SECRET_KEY;
+  const secrets = allKeys().map(k => k.secret);
   const hash = (hashHeader || "").trim();
-  if (!secret || !hash || !rawBody) return false;
+  if (!secrets.length || !hash || !rawBody) return false;
   const messages = [rawBody];
   try { const s = JSON.stringify(parsed); if (s && s !== rawBody) messages.push(s); } catch { /* not JSON */ }
-  return messages.some(m => sameText(crypto.createHmac("sha256", secret).update(m).digest("base64"), hash));
+  return secrets.some(secret => messages.some(m => sameText(crypto.createHmac("sha256", secret).update(m).digest("base64"), hash)));
 }
 
 type Tx = Record<string, unknown>;
@@ -65,32 +67,38 @@ export function txApproved(tx: Tx): boolean {
  */
 export async function payplusPaymentApproved(opts: { orderCode: string; transactionUid?: string; pageRequestUid?: string }):
   Promise<{ ok: boolean; reason: string; tx?: Tx }> {
-  const API_KEY = process.env.PAYPLUS_API_KEY, SECRET = process.env.PAYPLUS_SECRET_KEY;
+  const sets = allKeys();
   const code = opts.orderCode.trim().toLowerCase();
-  if (!API_KEY || !SECRET) return { ok: false, reason: "no PayPlus keys" };
+  if (!sets.length) return { ok: false, reason: "no PayPlus keys" };
   if (!code) return { ok: false, reason: "no order code" };
   const body = opts.transactionUid ? { transaction_uid: opts.transactionUid }
     : opts.pageRequestUid ? { payment_request_uid: opts.pageRequestUid } : null;
   if (!body) return { ok: false, reason: "no transaction or page uid to check" };
-  try {
-    const res = await fetch(`${BASE()}/api/v1.0/PaymentPages/ipn`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: JSON.stringify({ api_key: API_KEY, secret_key: SECRET }),
-        "api-key": API_KEY,
-        "secret-key": SECRET,
-      },
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(15000),
-    });
-    const json = await res.json().catch(() => null);
-    const txs = findTransactions(json);
-    const mine = txs.filter(t => txOrderCode(t) === code);
-    const approved = mine.find(txApproved);
-    if (approved) return { ok: true, reason: "approved by PayPlus", tx: approved };
-    return { ok: false, reason: !txs.length ? `PayPlus answered ${res.status} without a transaction` : !mine.length ? "transaction is for another order" : "transaction not approved" };
-  } catch (e) {
-    return { ok: false, reason: "PayPlus check failed: " + (e instanceof Error ? e.message : "error") };
+  // the payment may be on the new terminal or (made before the switch) on the old one
+  let last = { ok: false, reason: "PayPlus check failed" } as { ok: boolean; reason: string; tx?: Tx };
+  for (const k of sets) {
+    try {
+      const res = await fetch(`${BASE()}/api/v1.0/PaymentPages/ipn`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: JSON.stringify({ api_key: k.apiKey, secret_key: k.secret }),
+          "api-key": k.apiKey,
+          "secret-key": k.secret,
+        },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(15000),
+      });
+      const json = await res.json().catch(() => null);
+      const txs = findTransactions(json);
+      const mine = txs.filter(t => txOrderCode(t) === code);
+      const approved = mine.find(txApproved);
+      if (approved) return { ok: true, reason: "approved by PayPlus", tx: approved };
+      last = { ok: false, reason: !txs.length ? `PayPlus answered ${res.status} without a transaction` : !mine.length ? "transaction is for another order" : "transaction not approved" };
+      if (mine.length) return last; // found on this terminal, just not approved
+    } catch (e) {
+      last = { ok: false, reason: "PayPlus check failed: " + (e instanceof Error ? e.message : "error") };
+    }
   }
+  return last;
 }
