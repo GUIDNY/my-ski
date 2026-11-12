@@ -14,11 +14,17 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { silent, ...body } = await req.json();
 
   // read the current status first so we only act on real transitions
-  const { data: prev } = await db.from("orders").select("status, ops").eq("id", id).single();
+  const { data: prev } = await db.from("orders").select("*").eq("id", id).single();
   // ops from the admin screen can be older than the row (the guest did the online check-in
   // meanwhile): keys missing from the admin's copy are kept, never dropped
   if (body.ops && typeof body.ops === "object") body.ops = { ...((prev?.ops as Record<string, unknown>) || {}), ...body.ops };
+  // an edit that moves an active order (apartment or dates): free its old nights here, in the
+  // same request. The admin screen used to do it with a "cancelled" PATCH first and the edit
+  // second, so when the second call failed the order was left cancelled.
+  const moves = ["apartment_id", "extra_apartment_id", "checkin", "checkout"].some(k => k in body && body[k] !== prev?.[k]);
+  if (prev && moves && (prev.status === "approved" || prev.status === "hold")) await freeDatesForOrder(db, prev);
   const { data, error } = await db.from("orders").update(body).eq("id", id).select().single();
+  if (error && prev && moves && (prev.status === "approved" || prev.status === "hold")) await blockDatesForOrder(db, prev);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   // inventory: cancel → free dates · approve/hold → reserve dates

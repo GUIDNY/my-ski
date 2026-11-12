@@ -221,10 +221,10 @@ export default function OrdersAdmin() {
         // blocking only reacts to a status PATCH, and re-blocking under the
         // NEW apartment/dates in the same request wouldn't clear the old
         // ones), then update the fields and re-block under the new values.
-        if (editingOrder.status === "approved" || editingOrder.status === "hold") {
-          await authFetch(`/api/orders/${editingOrder.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "cancelled", silent: true }) });
-        }
-        await authFetch(`/api/orders/${editingOrder.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...fields, status: newOrder.status, silent: true }) });
+        // one request: the server frees the old nights itself when the apartment or dates move
+        // (it used to be a "cancelled" PATCH then the edit, and a failed edit left the order cancelled)
+        const res = await authFetch(`/api/orders/${editingOrder.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...fields, status: newOrder.status, silent: true }) });
+        if (!res.ok) { const j = await res.json().catch(() => ({})); alert("שמירת השינויים נכשלה: " + (j.error || res.status)); return; }
       } else {
         const post = (force: boolean) => authFetch("/api/orders", {
           method: "POST",
@@ -393,7 +393,8 @@ export default function OrdersAdmin() {
 
   const setStatus = async (o: Order, status: string) => {
     setBusy(o.id);
-    await authFetch(`/api/orders/${o.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
+    const res = await authFetch(`/api/orders/${o.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
+    if (!res.ok) { const j = await res.json().catch(() => ({})); alert("לא נשמר: " + (j.error || res.status)); }
     setBusy(null); load();
   };
 

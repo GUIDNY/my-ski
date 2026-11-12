@@ -1,7 +1,8 @@
-import { createServerClient } from "@/lib/supabase-server";
+"use client";
+import { useEffect, useState } from "react";
+import { authFetch } from "@/lib/auth-fetch";
+import AdminGate from "@/components/AdminGate";
 import { IconCalendar, IconCheck, IconBus } from "@/components/Icons";
-
-export const dynamic = "force-dynamic";
 
 const fmt = (s: string | null) => (s ? new Date(s + "T12:00:00").toLocaleDateString("he-IL", { day: "numeric", month: "short" }) : "—");
 const daysUntil = (s: string | null) => { if (!s) return null; return Math.ceil((new Date(s + "T12:00:00").getTime() - Date.now()) / 86400000); };
@@ -12,15 +13,26 @@ type Ord = {
   guests: number; nights: number; total_eur: number; status: string;
   transfer: boolean; payplus_transaction_uid: string | null; ops: Record<string, boolean> | null;
 };
+type Dash = { aptCount: number; seasonCount: number; orders: Ord[] };
 
-export default async function AdminDashboard() {
-  const db = createServerClient();
-  const [{ count: aptCount }, { count: seasonCount }, { data: ordersRaw }] = await Promise.all([
-    db.from("apartments").select("*", { count: "exact", head: true }),
-    db.from("season_rentals").select("*", { count: "exact", head: true }),
-    db.from("orders").select("id, code, customer_name, customer_email, apartment_name, checkin, checkout, guests, nights, total_eur, status, transfer, payplus_transaction_uid, ops").order("created_at", { ascending: false }),
-  ]);
-  const orders = (ordersRaw ?? []) as Ord[];
+export default function AdminDashboardPage() {
+  return <AdminGate><AdminDashboard /></AdminGate>;
+}
+
+function AdminDashboard() {
+  // the numbers come from an admin-only API (they used to be rendered on the server for anyone)
+  const [dash, setDash] = useState<Dash | null>(null);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    authFetch("/api/admin/dashboard")
+      .then(r => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d: Dash) => setDash(d))
+      .catch(() => setFailed(true));
+  }, []);
+  if (failed) return <div className="p-10 text-center text-gray-500">לא הצלחנו לטעון את הדשבורד</div>;
+  if (!dash) return <div className="p-10 text-center text-gray-400">טוען…</div>;
+  const { aptCount, seasonCount } = dash;
+  const orders = dash.orders;
 
   const holds = orders.filter(o => o.status === "hold");
   const leads = orders.filter(o => o.status === "awaiting");
