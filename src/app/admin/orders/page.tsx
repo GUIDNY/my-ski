@@ -169,7 +169,7 @@ export default function OrdersAdmin() {
   const load = async () => {
     setLoading(true);
     const r = await authFetch("/api/orders");
-    setOrders(await r.json());
+    { const j = await r.json().catch(() => null); setOrders(Array.isArray(j) ? j : []); } // a 401 (logged out) is not a list
     setToday(new Date().toISOString().slice(0, 10));
     setLoading(false);
   };
