@@ -90,6 +90,14 @@ function ApartmentPicker({ apartments, value, onChange, label, excludeId }: {
   );
 }
 
+/* a share of a group booking: the same split group, or "the share of one person" of the same quote and dates */
+function shareKey(o: { group_id?: string | null; apartment_name?: string | null; checkin?: string | null; ops?: Record<string, unknown> | null }): string | null {
+  if (o.group_id) return `g:${o.group_id}`;
+  if (!/החלק של/.test(o.apartment_name || "")) return null;
+  const prop = (o.ops && typeof o.ops.x_proposal === "string" ? o.ops.x_proposal : "") || (o.apartment_name || "").match(/SK-\d{4}-\d{3,5}/)?.[0] || "";
+  return prop ? `p:${prop}:${o.checkin || ""}` : null;
+}
+
 export default function OrdersAdmin() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -413,9 +421,17 @@ export default function OrdersAdmin() {
   const isPast = (o: Order) => !!today && !!(o.checkout || o.checkin) && String(o.checkout || o.checkin) < today;
   const inRange = orders.filter(o => range === "all" ? true : range === "past" ? isPast(o) : !isPast(o));
   const needle = q.trim().toLowerCase();
+  // one booking number for a group (friends who each paid their share): the first payment's code
+  const groupNo = new Map<string, string>();
+  for (const o of [...orders].sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)))) {
+    const k = shareKey(o); if (!k) continue;
+    const fixed = o.ops && typeof o.ops.x_group === "string" ? o.ops.x_group : "";
+    if (fixed) groupNo.set(k, fixed); else if (!groupNo.has(k)) groupNo.set(k, o.code);
+  }
+  const groupOf = (o: Order) => { const k = shareKey(o); return k ? groupNo.get(k) || "" : ""; };
   const visible = inRange.filter(o =>
     (statusF === "all" || o.status === statusF) &&
-    (!needle || [o.customer_name, o.code, o.apartment_name, o.extra_apartment_name, o.customer_phone, o.customer_email]
+    (!needle || [o.customer_name, o.code, groupOf(o), o.apartment_name, o.extra_apartment_name, o.customer_phone, o.customer_email]
       .some(v => String(v ?? "").toLowerCase().includes(needle))));
   const countOf = (k: string) => k === "all" ? inRange.length : inRange.filter(o => o.status === k).length;
   const HE_M = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
@@ -441,12 +457,7 @@ export default function OrdersAdmin() {
    * split-payment group link). Every payment is its own order (each is a separate PayPlus
    * charge), but they are one booking: shown under one header, approved together.
    */
-  const bundleKey = (o: Order): string | null => {
-    if (o.group_id) return `g:${o.group_id}`;
-    if (!/החלק של/.test(o.apartment_name || "")) return null;
-    const prop = (o.ops && typeof o.ops.x_proposal === "string" ? o.ops.x_proposal : "") || (o.apartment_name || "").match(/SK-\d{4}-\d{3,5}/)?.[0] || "";
-    return prop ? `p:${prop}:${o.checkin || ""}` : null;
-  };
+  const bundleKey = shareKey;
   type Item = { head: true; key: string; list: Order[] } | { head?: false; o: Order; bkey: string | null };
   const bundled = (list: Order[]): Item[] => {
     const by = new Map<string, Order[]>();
@@ -474,6 +485,7 @@ export default function OrdersAdmin() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">
               <span className="font-black text-gray-900">👥 הזמנה קבוצתית · {names.join(", ") || "לקוח/ה"}</span>
+              {groupNo.get(key) && <span className="text-xs font-mono font-bold bg-white border border-violet-200 text-violet-800 px-2 py-0.5 rounded">מספר הזמנה: {groupNo.get(key)!.toUpperCase()}</span>}
               <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-violet-100 text-violet-800">{paid.length} תשלומים{f.guests ? ` מתוך ${f.guests} אנשים` : ""}</span>
               <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${approved === live.length ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>{approved === live.length ? "✓ כולם אושרו" : `אושרו ${approved}/${live.length}`}</span>
               {d != null && d >= 0 && <span className="text-xs font-bold bg-gray-900 text-white px-2.5 py-1 rounded-full">{d === 0 ? "מגיעים היום" : d === 1 ? "מגיעים מחר" : `בעוד ${d} ימים`}</span>}
@@ -766,7 +778,7 @@ export default function OrdersAdmin() {
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <span className="font-black text-gray-900">{o.customer_name || "לקוח/ה"}</span>
                     <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${st.cls}`}>{st.label}</span>
-                    <span className="text-xs font-mono bg-gray-100 text-gray-500 px-2 py-0.5 rounded">קוד: {o.code}</span>
+                    <span className="text-xs font-mono bg-gray-100 text-gray-500 px-2 py-0.5 rounded">{it.bkey ? "קוד תשלום" : "קוד"}: {o.code}</span>
                     {(() => { const d = daysTo(o.checkin); return d != null && d >= 0 && o.status !== "cancelled"
                       ? <span className="text-xs font-bold bg-gray-900 text-white px-2.5 py-1 rounded-full">{d === 0 ? "מגיעים היום" : d === 1 ? "מגיעים מחר" : `בעוד ${d} ימים`}</span>
                       : null; })()}

@@ -33,6 +33,20 @@ function fromProposal(data: unknown): { apt?: string; checkin?: string; checkout
   };
 }
 
+/*
+ * Friends who each pay their share of the same quote are one booking: every payment is its
+ * own order (its own PayPlus charge), and they all carry the first payment's code as the
+ * booking number (ops.x_group), shown on the group in the admin.
+ */
+async function groupNumber(db: ReturnType<typeof createServerClient>, proposalNumber: string, checkin: string | null): Promise<string | null> {
+  let q = db.from("orders").select("code, ops, apartment_name, created_at").ilike("apartment_name", `%${proposalNumber}%החלק של%`);
+  if (checkin) q = q.eq("checkin", checkin);
+  const { data } = await q.order("created_at", { ascending: true }).limit(20);
+  if (!data?.length) return null; // the first payment: its own code is the booking number
+  const fixed = data.map(o => (o.ops as { x_group?: string } | null)?.x_group).find(Boolean);
+  return fixed || data[0].code;
+}
+
 export async function orderFromPayment(opts: {
   ref: string; txUid: string; description: string; amount: number; currency: string;
   name: string; email: string; phone: string; pageUid?: string;
@@ -78,7 +92,9 @@ async function make(opts: Parameters<typeof orderFromPayment>[0]): Promise<{ cod
     ski_pass: q?.ski_pass ?? false, transfer: q?.transfer ?? false, equipment: q?.equipment ?? false, flight: q?.flight ?? false,
     transfer_details: q?.transfer_details ?? null,
     flight_details: q?.flight_details ?? null,
-    ops: q?.ops ?? null,
+    ops: share && proposal?.proposal_number
+      ? { ...((q?.ops as Record<string, unknown> | null) ?? {}), x_proposal: proposal.proposal_number, x_group: await groupNumber(db, proposal.proposal_number, checkin) }
+      : (q?.ops ?? null),
     cancel: "none", service: "human",
     total_eur: totalEur,
     amount_ils: cur === "ILS" ? opts.amount : null,
