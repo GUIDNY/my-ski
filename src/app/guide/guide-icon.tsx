@@ -24,13 +24,15 @@ const PATHS: Record<string, React.ReactNode> = {
   map: <><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z" /><path d="M9 3v15M15 6v15" /></>,
   // a graduation cap (the semester break)
   cap: <><path d="M2 9l10-5 10 5-10 5z" /><path d="M6 11v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5" /><path d="M22 9v6" /></>,
+  // a shield with a check mark (insurance)
+  shield: <><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z" /><path d="M9 12l2 2 4-4" /></>,
   // a snowflake (weather and snow)
   snowflake: <><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7" /><path d="M9.5 3.5L12 6l2.5-2.5M9.5 20.5L12 18l2.5 2.5" /><path d="M3.6 10.2l3.4-.9-.9-3.4M20.4 13.8l-3.4.9.9 3.4M3.6 13.8l3.4.9-.9 3.4M20.4 10.2l-3.4-.9.9-3.4" /></>,
 };
 
 const BY_EMOJI: Record<string, string> = {
   "🏔️": "mountain", "📅": "calendar", "✈️": "plane", "🎫": "ticket", "👨‍👩‍👧‍👦": "family",
-  "🍻": "glass", "🏠": "home", "☀️": "sun", "⛷️": "route", "⚖️": "compare", "👥": "group", "🎒": "bag", "🎿": "skis", "🕎": "menorah", "🌤️": "cloudSun", "💰": "coins", "🗺️": "map", "❄️": "snowflake", "🎓": "cap",
+  "🍻": "glass", "🏠": "home", "☀️": "sun", "⛷️": "route", "⚖️": "compare", "👥": "group", "🎒": "bag", "🎿": "skis", "🕎": "menorah", "🌤️": "cloudSun", "💰": "coins", "🗺️": "map", "❄️": "snowflake", "🎓": "cap", "🛡️": "shield",
 };
 
 export default function GuideIcon({ emoji, size = 24 }: { emoji: string; size?: number }) {
