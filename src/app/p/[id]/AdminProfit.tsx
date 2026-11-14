@@ -26,11 +26,11 @@ export default function AdminProfit({ id }: { id: string }) {
           {d.lines.map((l, i) => (
             <div key={i} className="flex justify-between gap-3 py-0.5 text-[13px]">
               <span className="text-gray-300 truncate">{l.label}</span>
-              <span className={l.profit == null ? "text-gray-500" : "font-bold text-emerald-400"}>{l.profit == null ? "?" : f(l.profit)}</span>
+              <span className={l.profit == null ? "text-gray-500" : l.profit < 0 ? "font-bold text-red-400" : "font-bold text-emerald-400"}>{l.profit == null ? "?" : f(l.profit)}</span>
             </div>
           ))}
           <div className="flex justify-between gap-3 border-t border-gray-700 mt-2 pt-2 font-black">
-            <span>סה״כ רווח</span><span className="text-emerald-400">{f(d.totalProfit)}</span>
+            <span>סה״כ רווח</span><span className={d.totalProfit < 0 ? "text-red-400" : "text-emerald-400"}>{f(d.totalProfit)}</span>
           </div>
           {d.share && (
             <div className="flex justify-between gap-3 mt-1 font-black text-amber-300">
@@ -50,7 +50,7 @@ export default function AdminProfit({ id }: { id: string }) {
           )}
         </div>
       ) : (
-        <button onClick={() => setOpen(true)} className="bg-gray-900 text-emerald-400 font-black rounded-full shadow-xl px-4 py-2 text-sm">💰 {f(d.totalProfit)}{d.share ? ` · שלך ${f(d.share.amount)}` : ""}</button>
+        <button onClick={() => setOpen(true)} className={`bg-gray-900 ${d.totalProfit < 0 ? "text-red-400" : "text-emerald-400"} font-black rounded-full shadow-xl px-4 py-2 text-sm`}>💰 {f(d.totalProfit)}{d.share ? ` · שלך ${f(d.share.amount)}` : ""}</button>
       )}
     </div>
   );

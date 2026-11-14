@@ -51,7 +51,7 @@ export default function SellerQuotes() {
                 <td className="p-3"><div className="font-bold">{x.client || "—"}</div>
                   {x.phone && <a href={`https://wa.me/${x.phone}`} target="_blank" rel="noreferrer" className="text-xs text-green-700 hover:underline" dir="ltr">{showPhone(x.phone)}</a>}</td>
                 <td className="p-3 font-bold tabular-nums">{x.total ? eur(x.total) : "—"}</td>
-                <td className="p-3 tabular-nums">{x.profit == null ? <span className="text-xs text-gray-400">לא ידוע</span> : <b className="text-emerald-700">{eur(x.profit)}</b>}</td>
+                <td className="p-3 tabular-nums">{x.profit == null ? <span className="text-xs text-gray-400">לא ידוע</span> : <b className={x.profit < 0 ? "text-red-600" : "text-emerald-700"}>{eur(x.profit)}</b>}</td>
                 {rate ? <td className="p-3 font-extrabold text-amber-700 tabular-nums">{x.share == null ? "—" : eur(x.share)}</td> : null}
                 <td className="p-3"><a href={`/p/${x.id}`} target="_blank" rel="noreferrer" className="text-sm font-bold text-blue-600 hover:underline">פתח</a></td>
               </tr>
