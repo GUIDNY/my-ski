@@ -29,7 +29,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     await page.evaluateOnNewDocument(() => {
       localStorage.setItem("skishare_cookie_consent", "1");
     });
-    await page.goto(`${origin}/admin/proposals/${id}/print`, {
+    // the customer's choices on the quote page (lib/proposal-choices), printed into the PDF
+    const c = (req.nextUrl.searchParams.get("c") || "").slice(0, 300);
+    await page.goto(`${origin}/admin/proposals/${id}/print${c ? `?c=${encodeURIComponent(c)}` : ""}`, {
       waitUntil: "networkidle0",
       timeout: 45000,
     });

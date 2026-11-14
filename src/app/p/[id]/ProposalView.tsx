@@ -4,6 +4,7 @@ import Link from "next/link";
 import CouponCorner from "@/components/CouponCorner";
 import { wrap, card, btn, h1, chip, Crumbs, Check } from "@/components/ui";
 import { PhotoGallery, Lightbox, mapLink } from "@/components/QuoteView";
+import { encodeChoices } from "@/lib/proposal-choices";
 import { heroOf } from "@/components/ProposalDocument";
 import { BANK } from "@/lib/bank";
 import type { ProposalBlock, ProposalData } from "@/types";
@@ -159,7 +160,9 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
   const kinds = new Set(lines.filter(l => !off.includes(l.i)).map(l => l.kind).filter(Boolean) as string[]);
   if (addEquip) kinds.add("equipment");
   const inc: [string, string, boolean][] = [["apartment", "דירה", true], ...(["skipass", "transfer", "equipment", "flight"] as const).map(k => [k, KIND_LABEL[k], kinds.has(k)] as [string, string, boolean])];
-  const pdf = pdfHref || `/api/proposals/${id}/pdf`;
+  // the PDF is printed with the customer's choices (items taken out, how many people, equipment added)
+  const choiceParam = changed ? encodeChoices({ off, qty, eq: addEquip ? Math.min(Math.max(equipQty, 1), guests) : 0 }) : "";
+  const pdf = pdfHref || `/api/proposals/${id}/pdf${choiceParam ? `?c=${encodeURIComponent(choiceParam)}` : ""}`;
 
   const main = data.sections
     .filter(s => s.heading !== "תנאים" && s.heading !== "תשלום")

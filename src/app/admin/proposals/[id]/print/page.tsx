@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
+import { applyChoices, decodeChoices } from "@/lib/proposal-choices";
 import ProposalDocument, { PROPOSAL_CSS } from "@/components/ProposalDocument";
 import { DEMO_PROPOSAL } from "@/lib/proposal-demo";
 import type { ProposalData } from "@/types";
@@ -11,7 +12,9 @@ export default function ProposalPrintPage() {
   const isDemo = id === "demo";
   const [loaded, setLoaded] = useState<ProposalData | null>(null);
   const [notFound, setNotFound] = useState(false);
-  const data = isDemo ? DEMO_PROPOSAL : loaded;
+  const choices = decodeChoices(useSearchParams().get("c"));
+  const raw = isDemo ? DEMO_PROPOSAL : loaded;
+  const data = raw && choices ? applyChoices(raw, choices, `https://skisharebook.com/p/${id}`) : raw;
 
   useEffect(() => {
     if (isDemo) return;
