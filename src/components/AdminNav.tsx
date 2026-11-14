@@ -40,6 +40,7 @@ const links = [
   { href: "/admin/hostel", label: "הוסטל מאיירהופן", icon: <IconHome size={18} /> },
   { href: "/admin/chats", label: "לידים וצ׳אטים", icon: <IconChat size={18} /> },
   { href: "/admin/proposals", label: "הצעות מחיר (PDF)", icon: <IconDoc size={18} /> },
+  { href: "/admin/quote-builder", label: "בונה הצעות (קבוצות)", icon: <IconDoc size={18} /> },
   { href: "/admin/orders", label: "הזמנות ותשלומים", icon: <IconCalendar size={18} /> },
   { href: "/seller", label: "אנשי מכירות", icon: <IconBriefcase size={18} /> },
   { href: "/seller/assign", label: "חלוקת לידים", icon: <IconChat size={18} /> },

@@ -118,7 +118,7 @@ function FlightToggle({ on, setOn, flight, hasDates }: { on: boolean; setOn: (v:
 }
 
 /* ── Guests stepper ───────────────────────────────────────── */
-function Stepper({ value, onChange, min = 1, max = 12 }: { value: number; onChange: (n: number) => void; min?: number; max?: number }) {
+function Stepper({ value, onChange, min = 1, max = 30 }: { value: number; onChange: (n: number) => void; min?: number; max?: number }) {
   const b = "w-10 h-10 rounded-full border border-line-strong flex items-center justify-center text-ink text-[18px] leading-none hover:border-ink transition-colors disabled:opacity-40 disabled:hover:border-line-strong";
   return (
     <div className="flex items-center gap-2" role="group" aria-label="כמה אתם">
@@ -426,6 +426,8 @@ function SearchPage() {
 
   // No single apartment is big enough → suggest combinations of two
   const maxSingleCap = available.length ? Math.max(...available.map(capacity)) : 0;
+  // more people than any one apartment or any pair takes: the chat bot combines 3+ apartments
+  const bigGroup = guests > maxSingleCap;
   const combos = (fits.length === 0 && guests > maxSingleCap)
     ? available.flatMap((a, i) => available.slice(i + 1)
         .filter(b => capacity(a) + capacity(b) >= guests)
@@ -651,8 +653,8 @@ function SearchPage() {
             </div>
           ) : shown.length === 0 ? (
             <EmptyState
-              title={fits.length > 0 ? "אין דירות מהסוג הזה לתאריכים האלה" : `לא מצאנו דירה פנויה${guests > 1 ? ` ל-${guests} אנשים` : ""}`}
-              text={fits.length > 0 ? "אפשר לראות את כל הסוגים, או לנסות תאריכים אחרים." : "נסו תאריכים אחרים, או תכתבו לעוזר שלנו ונמצא לכם משהו מתאים."}
+              title={fits.length > 0 ? "אין דירות מהסוג הזה לתאריכים האלה" : bigGroup ? `קבוצה של ${guests}? נחבר לכם כמה דירות יחד` : `לא מצאנו דירה פנויה${guests > 1 ? ` ל-${guests} אנשים` : ""}`}
+              text={fits.length > 0 ? "אפשר לראות את כל הסוגים, או לנסות תאריכים אחרים." : bigGroup ? "לקבוצות גדולות אנחנו משלבים 3 דירות ויותר, קרובות אחת לשנייה. תכתבו לעוזר שלנו כמה אתם ומתי, ותקבלו הצעה מלאה עם סקי פס, ציוד והסעה תוך דקה." : "נסו תאריכים אחרים, או תכתבו לעוזר שלנו ונמצא לכם משהו מתאים."}
               action={<>
                 {kind !== "all" && fits.length > 0 && (
                   <button type="button" onClick={() => setKind("all")} className={btn.outline}>לכל הדירות</button>

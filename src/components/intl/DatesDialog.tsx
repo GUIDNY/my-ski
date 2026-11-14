@@ -9,7 +9,7 @@ import Stepper from "./Stepper";
 
 /** "When are you coming?": the calendar, optionally the number of guests, and Apply. */
 export default function DatesDialog({
-  lang, min, max, checkin, checkout, guests, showGuests = false, maxGuests = 12, allowEmpty = false,
+  lang, min, max, checkin, checkout, guests, showGuests = false, maxGuests = 30, allowEmpty = false,
   applyLabel, onApply, onClose,
 }: {
   lang: Lang; min: string; max: string; checkin: string; checkout: string; guests: number;

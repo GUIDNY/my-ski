@@ -246,7 +246,7 @@ export default function WeeklyBrowser({
             <div className="flex items-center gap-2" role="group" aria-label="כמה אתם">
               <button type="button" className={stepBtn} onClick={() => setGuests(g => Math.max(1, g - 1))} disabled={guests <= 1} aria-label="פחות אנשים">−</button>
               <span className="w-6 text-center font-bold text-[17px] text-ink" aria-live="polite">{guests}</span>
-              <button type="button" className={stepBtn} onClick={() => setGuests(g => Math.min(12, g + 1))} disabled={guests >= 12} aria-label="עוד אנשים">+</button>
+              <button type="button" className={stepBtn} onClick={() => setGuests(g => Math.min(30, g + 1))} disabled={guests >= 30} aria-label="עוד אנשים">+</button>
             </div>
           </div>
 

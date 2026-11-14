@@ -212,7 +212,7 @@ export default function SearchWidget({ initialDeal = "apartment", flat = false }
           <div className="flex items-center gap-3">
             <button type="button" aria-label="פחות אנשים" onClick={() => setGuests(g => Math.max(1, g - 1))} className={stepBtn}>−</button>
             <span className="font-bold text-[17px] text-[#0B1B33] w-6 text-center" aria-live="polite">{guests}</span>
-            <button type="button" aria-label="יותר אנשים" onClick={() => setGuests(g => Math.min(12, g + 1))} className={stepBtn}>+</button>
+            <button type="button" aria-label="יותר אנשים" onClick={() => setGuests(g => Math.min(30, g + 1))} className={stepBtn}>+</button>
           </div>
         </div>
 
