@@ -35,6 +35,9 @@ function QuoteBuilder() {
   const [equipment, setEquipment] = useState(true);
   const [transfer, setTransfer] = useState(true);
   const [flights, setFlights] = useState(false);
+  const [skiDays, setSkiDays] = useState(0); // 0 = nights - 1
+  const [outAirport, setOutAirport] = useState("");
+  const [retAirport, setRetAirport] = useState("");
   const [airport, setAirport] = useState("");
   const [clientName, setClientName] = useState("");
   const [phone, setPhone] = useState("");
@@ -73,7 +76,8 @@ function QuoteBuilder() {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "create", checkin, checkout, guests, pick: picked,
-          skipass, skiArea: threeValleys ? "trois_vallees" : "val_thorens", equipment, transfer, flights, airport: flights ? airport : "",
+          skipass, skiDays, skiArea: threeValleys ? "trois_vallees" : "val_thorens", equipment, transfer, flights,
+          airport: flights ? airport : outAirport, returnAirport: transfer ? retAirport : "",
           clientName, contact: phone, lang,
         }),
       });
@@ -161,8 +165,22 @@ function QuoteBuilder() {
             <div className="flex flex-col gap-2 text-sm border-t border-gray-100 pt-4">
               <label className="flex items-center gap-2"><input type="checkbox" checked={skipass} onChange={e => setSkipass(e.target.checked)} className="accent-blue-600" /> סקי פס</label>
               {skipass && <label className="flex items-center gap-2 mr-6 text-gray-600"><input type="checkbox" checked={threeValleys} onChange={e => setThreeValleys(e.target.checked)} className="accent-blue-600" /> שלושת העמקים</label>}
+              {(skipass || equipment) && (
+                <label className="flex items-center gap-2 mr-6 text-gray-600">ימי סקי
+                  <select className="border border-gray-200 rounded-lg px-2 py-1 text-sm" value={skiDays} onChange={e => setSkiDays(Number(e.target.value))}>
+                    <option value={0}>אוטומטי ({Math.max(nights - 1, 0)})</option>
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map(n => <option key={n} value={n}>{n}</option>)}
+                  </select>
+                </label>
+              )}
               <label className="flex items-center gap-2"><input type="checkbox" checked={equipment} onChange={e => setEquipment(e.target.checked)} className="accent-blue-600" /> ציוד סקי</label>
               <label className="flex items-center gap-2"><input type="checkbox" checked={transfer} onChange={e => setTransfer(e.target.checked)} className="accent-blue-600" /> הסעה משדה התעופה</label>
+              {transfer && !flights && (
+                <div className="mr-6 grid grid-cols-2 gap-2 text-gray-600">
+                  <label className="text-xs">הלוך מ-<select className={input} value={outAirport} onChange={e => setOutAirport(e.target.value)}><option value="">ז׳נבה</option><option value="LYS">ליון</option></select></label>
+                  <label className="text-xs">חזור ל-<select className={input} value={retAirport} onChange={e => setRetAirport(e.target.value)}><option value="">אותו שדה</option><option value="GVA">ז׳נבה</option><option value="LYS">ליון</option></select></label>
+                </div>
+              )}
               <label className="flex items-center gap-2"><input type="checkbox" checked={flights} onChange={e => setFlights(e.target.checked)} className="accent-blue-600" /> טיסות ישירות</label>
               {flights && (
                 <select className={input} value={airport} onChange={e => setAirport(e.target.value)}>
