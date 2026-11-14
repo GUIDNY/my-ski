@@ -38,6 +38,7 @@ function QuoteBuilder() {
   const [skiDays, setSkiDays] = useState(0); // 0 = nights - 1
   const [outAirport, setOutAirport] = useState("");
   const [retAirport, setRetAirport] = useState("");
+  const [transferTotal, setTransferTotal] = useState(""); // empty = live price
   const [airport, setAirport] = useState("");
   const [clientName, setClientName] = useState("");
   const [phone, setPhone] = useState("");
@@ -77,7 +78,7 @@ function QuoteBuilder() {
         body: JSON.stringify({
           action: "create", checkin, checkout, guests, pick: picked,
           skipass, skiDays, skiArea: threeValleys ? "trois_vallees" : "val_thorens", equipment, transfer, flights,
-          airport: flights ? airport : outAirport, returnAirport: transfer ? retAirport : "",
+          airport: flights ? airport : outAirport, returnAirport: transfer ? retAirport : "", transferTotal: transfer ? Number(transferTotal) || 0 : 0,
           clientName, contact: phone, lang,
         }),
       });
@@ -178,6 +179,7 @@ function QuoteBuilder() {
               {transfer && !flights && (
                 <div className="mr-6 grid grid-cols-2 gap-2 text-gray-600">
                   <label className="text-xs">הלוך מ-<select className={input} value={outAirport} onChange={e => setOutAirport(e.target.value)}><option value="">ז׳נבה</option><option value="LYS">ליון</option></select></label>
+                  <label className="text-xs col-span-2">מחיר לכל הקבוצה (ריק = מחיר אוטומטי)<input type="number" min={0} className={input} placeholder="€" value={transferTotal} onChange={e => setTransferTotal(e.target.value)} /></label>
                   <label className="text-xs">חזור ל-<select className={input} value={retAirport} onChange={e => setRetAirport(e.target.value)}><option value="">אותו שדה</option><option value="GVA">ז׳נבה</option><option value="LYS">ליון</option></select></label>
                 </div>
               )}
