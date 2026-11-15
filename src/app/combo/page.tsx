@@ -155,6 +155,7 @@ function ComboInner() {
   }, [preFlight, directFlight, guests]);
   const [transfer, setTransfer] = useState(false);
   const [equipment, setEquipment] = useState(false);
+  const [equipQty, setEquipQty] = useState(guests || 1);
   const [showTransfer, setShowTransfer] = useState(false);
   const [flight, setFlight] = useState<Flight>(EMPTY_FLIGHT);
   const [trPick, setTrPick] = useState<TransferOption | null>(null);
@@ -201,7 +202,7 @@ function ComboInner() {
   const totalB = stayB ? stayB.total : Number(b.price_per_night);
   const cleaningFee = (stayA ? stayA.fee : 0) + (stayB ? stayB.fee : 0);
   const trTotal = transfer ? (trPick ? trPick.total : TRANSFER_PRICE) : 0;
-  const equipTotal = equipment ? equipCost(skiDays) : 0;
+  const equipTotal = equipment ? equipCost(skiDays) * equipQty : 0;
   const flexExtra = cancel === "flexible" ? CANCEL_FLEX * Math.max(guests || 1, 1) : 0;
   const noCancelDiscount = cancel === "none" ? -CANCEL_NONE : 0;
   const aiDiscount = service === "ai" ? -AI_DISCOUNT : 0;
@@ -248,7 +249,7 @@ function ComboInner() {
     intro: "היי! אשמח לפרטים על חבילה משולבת של שתי דירות 🎿",
     lines: [
       `דירות: ${comboName}`, `תאריכים: ${fmt(checkin)}–${fmt(checkout)}`, `${guests} אורחים · ${nights} לילות`,
-      skiOn ? `🎿 ${passLabel} ל-${skiQty} אנשים (€${skiTotal})` : "", flightOn ? `✈️ ${flightDetails} (€${bookFlightTotal})` : "", bagOn ? `🧳 מזוודה ל-${baggageQty} אנשים (€${baggageTotal})` : "", trolleyOn ? `🧳 טרולי ל-${trolleyQty} אנשים (€${trolleyTotal})` : "", transfer ? `🚐 כולל הסעה${trPick ? `: ${trPick.name} (€${trPick.total})` : ""}${transferDetails ? ` (${transferDetails})` : ""}` : "", equipment ? `🎿 כולל השכרת ציוד (€${equipTotal})` : "",
+      skiOn ? `🎿 ${passLabel} ל-${skiQty} אנשים (€${skiTotal})` : "", flightOn ? `✈️ ${flightDetails} (€${bookFlightTotal})` : "", bagOn ? `🧳 מזוודה ל-${baggageQty} אנשים (€${baggageTotal})` : "", trolleyOn ? `🧳 טרולי ל-${trolleyQty} אנשים (€${trolleyTotal})` : "", transfer ? `🚐 כולל הסעה${trPick ? `: ${trPick.name} (€${trPick.total})` : ""}${transferDetails ? ` (${transferDetails})` : ""}` : "", equipment ? `🎿 כולל השכרת ציוד ל-${equipQty} אנשים (€${equipTotal})` : "",
       cancel === "flexible" ? "✅ מדיניות ביטול גמישה" : cancel === "none" ? "🔒 ללא אפשרות ביטול" : "", service === "ai" ? "🤖 ניהול עצמאי (AI)" : "",
     ].filter(Boolean),
     total,
@@ -310,9 +311,18 @@ function ComboInner() {
                   <span className="text-[13px] text-muted shrink-0">הגעה וחזור</span>
                 </button>
               )}
-              <OptionCard type="checkbox" selected={equipment} onSelect={() => setEquipment(!equipment)}
+              <OptionCard type="checkbox" selected={equipment} onSelect={() => { const v = !equipment; setEquipment(v); if (v) setEquipQty(guests || 1); }}
                 icon={<IconSkis size={20} />} title="השכרת ציוד סקי או סנובורד" sub="€30 ליום · €120 לשבוע · +€20 לכל יום נוסף"
-                price={skiDays > 0 ? `+€${equipCost(skiDays)}` : "החל מ-€30"} />
+                price={skiDays > 0 ? `€${equipCost(skiDays)} לאדם` : "החל מ-€30"} />
+              {equipment && (
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white border border-line px-4 py-2.5">
+                  <span className="text-[15px] font-medium text-ink">כמה אנשים צריכים ציוד?</span>
+                  <div className="flex items-center gap-3">
+                    <Stepper value={equipQty} onChange={setEquipQty} max={maxGuests} label="כמות ציוד" />
+                    <span className="min-w-[68px] text-left font-bold text-[15px] text-ink">{eur(equipTotal)}</span>
+                  </div>
+                </div>
+              )}
               <FlightAddOn state={direct} ret={returnLeg} checkin={checkin} checkout={checkout}
                 checked={flightOn}
                 onToggle={v => { setBookFlight(v); if (v) { setBookFlightQty(guests || 1); setBaggage(true); setBaggageQty(guests || 1); } }}
@@ -403,7 +413,7 @@ function ComboInner() {
               <SumRow label={a.name} value={`€${totalA.toLocaleString()}`} />
               <SumRow label={b.name} value={`€${totalB.toLocaleString()}`} />
               {transfer && <SumRow label="הסעה הלוך וחזור" value={`€${trTotal}`} />}
-              {equipment && <SumRow label={`השכרת ציוד · ${skiDays} ימים`} value={`€${equipTotal.toLocaleString()}`} />}
+              {equipment && <SumRow label={`השכרת ציוד · ${skiDays} ימים × ${equipQty}`} value={`€${equipTotal.toLocaleString()}`} />}
               {skiOn && <SumRow label={`${passLabel} × ${skiQty}`} value={eur(skiTotal)} />}
               {flightOn && directFlight && <SumRow label={`טיסה ישירה ל${directFlight.city} × ${bookFlightQty}`} value={eur(bookFlightTotal)} />}
               {bagOn && <SumRow label={`מזוודה לבטן × ${baggageQty}`} value={eur(baggageTotal)} />}
