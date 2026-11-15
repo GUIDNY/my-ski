@@ -1,15 +1,18 @@
 "use client";
 import SkiLoader from "@/components/SkiLoader";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import type { Apartment } from "@/types";
+import type { Apartment, SkiPass } from "@/types";
 import { stayBreakdown, skiDaysFromNights, equipCost } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
 import CardPaymentButton from "@/components/CardPaymentButton";
 import SaveTripButton from "@/components/SaveTripButton";
 import TransferChooser from "@/components/TransferChooser";
 import type { TransferOption } from "@/lib/transfer-options";
+import FlightAddOn from "@/components/FlightAddOn";
+import { useDirectFlight, useReturnLeg, time24 } from "@/lib/useFlightPrice";
+import { BAGGAGE_PRICE, TROLLEY_PRICE, LIFT_DATES, PASS_AREA_LABEL, liftsOpenForStay, packagePassArea, passTier, shortDate, type PassArea } from "@/lib/deal-pricing";
 import FlightDetailsModal, { EMPTY_FLIGHT, flightToString, flightFilled, type Flight } from "@/components/FlightDetailsModal";
 import { buildWaHref } from "@/lib/whatsapp";
 import { IconUser, IconBed, IconWhatsApp, IconSkis, IconBus, IconPlane, IconShield, IconBot, IconCalendar, IconUsers, IconChevronLeft, IconInfo } from "@/components/Icons";
@@ -19,7 +22,18 @@ import { FormSection, OptionCard, Tag, SumRow, TrustList, MobileBar, IcoLink, Ic
 const HE = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 const fmt = (s: string) => { if (!s) return ""; const d = new Date(s + "T12:00:00"); return `${d.getDate()} ${HE[d.getMonth()]} ${d.getFullYear()}`; };
 const fmtShort = (s: string) => { if (!s) return ""; const d = new Date(s + "T12:00:00"); return `${d.getDate()} ב${HE[d.getMonth()]}`; };
-const fmtSky = (s: string) => { if (!s) return ""; const d = new Date(s); return `${String(d.getFullYear()).slice(2)}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`; };
+const eur = (n: number) => `€${Math.round(n).toLocaleString("en-US")}`;
+
+function Stepper({ value, onChange, max, label }: { value: number; onChange: (n: number) => void; max: number; label: string }) {
+  const b = "w-10 h-10 rounded-full border border-line-strong bg-white text-ink text-[20px] leading-none flex items-center justify-center transition-colors hover:border-ink disabled:opacity-35 disabled:hover:border-line-strong";
+  return (
+    <div className="flex items-center gap-1.5" role="group" aria-label={label}>
+      <button type="button" className={b} onClick={() => onChange(Math.max(1, value - 1))} disabled={value <= 1} aria-label="פחות">−</button>
+      <span className="w-8 text-center font-display font-bold text-[18px] text-ink" aria-live="polite">{value}</span>
+      <button type="button" className={b} onClick={() => onChange(Math.min(max, value + 1))} disabled={value >= max} aria-label="עוד">+</button>
+    </div>
+  );
+}
 const capacity = (a: Apartment) => a.max_guests || a.beds * 2 || 2;
 const TRANSFER_PRICE = 180;
 const CANCEL_FLEX = 100; // flexible cancellation surcharge (flat)
@@ -116,7 +130,29 @@ function ComboInner() {
   const [rulesA, setRulesA] = useState<PricingRule[]>([]);
   const [rulesB, setRulesB] = useState<PricingRule[]>([]);
   const [loading, setLoading] = useState(true);
+  const [passes, setPasses] = useState<SkiPass[]>([]);
   const [skiPass, setSkiPass] = useState(false);
+  const [skiArea, setSkiArea] = useState<PassArea>(packagePassArea(checkin, checkout) ?? "val_thorens");
+  const [skiQty, setSkiQty] = useState(guests || 1);
+  const [bookFlight, setBookFlight] = useState(false);
+  const [bookFlightQty, setBookFlightQty] = useState(guests || 1);
+  const [baggage, setBaggage] = useState(false);
+  const [baggageQty, setBaggageQty] = useState(guests || 1);
+  const [trolley, setTrolley] = useState(false);
+  const [trolleyQty, setTrolleyQty] = useState(guests || 1);
+  const direct = useDirectFlight(checkin, checkout);
+  const directFlight = direct.status === "found" ? direct.flight : null;
+  const flightOn = bookFlight && !!directFlight;
+  const bagOn = baggage && flightOn;
+  const trolleyOn = trolley && flightOn;
+  const returnLeg = useReturnLeg(directFlight, checkin, checkout, flightOn);
+  const preFlightDone = useRef(false);
+  const preFlight = params.get("flight") === "1";
+  useEffect(() => {
+    if (!preFlight || preFlightDone.current || !directFlight) return;
+    preFlightDone.current = true;
+    setBookFlight(true); setBookFlightQty(guests || 1); setBaggage(true); setBaggageQty(guests || 1);
+  }, [preFlight, directFlight, guests]);
   const [transfer, setTransfer] = useState(false);
   const [equipment, setEquipment] = useState(false);
   const [showTransfer, setShowTransfer] = useState(false);
@@ -130,6 +166,10 @@ function ComboInner() {
   const [showAiInfo, setShowAiInfo] = useState(false);
   const [showBreakdown, setShowBreakdown] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/ski-passes").then(r => r.json()).then(d => { if (Array.isArray(d)) setPasses(d); }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     Promise.all([
@@ -165,22 +205,50 @@ function ComboInner() {
   const flexExtra = cancel === "flexible" ? CANCEL_FLEX * Math.max(guests || 1, 1) : 0;
   const noCancelDiscount = cancel === "none" ? -CANCEL_NONE : 0;
   const aiDiscount = service === "ai" ? -AI_DISCOUNT : 0;
-  const total = totalA + totalB + trTotal + equipTotal + flexExtra + noCancelDiscount + aiDiscount;   // ski pass: price coming soon → not charged
+  const passOpen = (area: PassArea) => liftsOpenForStay(area, checkin, checkout);
+  const tierFor = (area: PassArea) => passTier(passes, area, skiDays);
+  const skiTier = tierFor(skiArea);
+  const skiOn = skiPass && passOpen(skiArea) && !!skiTier;
+  const skiTotal = skiOn && skiTier ? skiTier.price * skiQty : 0;
+  const bookFlightTotal = flightOn && directFlight ? directFlight.price * bookFlightQty : 0;
+  const baggageTotal = bagOn ? BAGGAGE_PRICE * baggageQty : 0;
+  const trolleyTotal = trolleyOn ? TROLLEY_PRICE * trolleyQty : 0;
+  const total = totalA + totalB + skiTotal + trTotal + equipTotal + bookFlightTotal + baggageTotal + trolleyTotal + flexExtra + noCancelDiscount + aiDiscount;
+  const passLabel = `סקי פס ${PASS_AREA_LABEL[skiArea]}${skiTier ? `, ${skiTier.duration_days} ימים` : ""}`;
+  const legText = (label: string, date: string, d: string | null, a: string | null) => `${label} ${fmt(date)}${d && a ? ` ${time24(d)}–${time24(a)}` : ""}`;
+  const flightDetails = flightOn && directFlight
+    ? [
+        `טיסה ישירה הלוך וחזור TLV⇄${directFlight.airport}${directFlight.airline ? ` (${directFlight.airline})` : ""}`,
+        legText("הלוך", checkin, directFlight.departTime, directFlight.arriveTime),
+        legText("חזור", checkout, returnLeg.leg?.departTime ?? null, returnLeg.leg?.arriveTime ?? null),
+        `€${directFlight.price} לאדם × ${bookFlightQty}`,
+        bagOn ? `מזוודה €${BAGGAGE_PRICE} × ${baggageQty}` : null,
+        trolleyOn ? `טרולי €${TROLLEY_PRICE} × ${trolleyQty}` : null,
+      ].filter(Boolean).join(" · ")
+    : "";
+  const choosePass = (area: PassArea) => {
+    if (!passOpen(area)) return;
+    if (skiOn && skiArea === area) { setSkiPass(false); return; }
+    setSkiArea(area);
+    if (!skiOn) { setSkiPass(true); setSkiQty(Math.min(skiQty || 1, guests) || 1); }
+  };
+  const passPrice = (area: PassArea) => {
+    if (!passOpen(area)) return `סגור בתאריכים האלה · פתוח ${shortDate(LIFT_DATES[area][0])}–${shortDate(LIFT_DATES[area][1])}`;
+    const t = tierFor(area);
+    return t ? `${eur(t.price)} לאדם · ${t.duration_days} ימים` : undefined;
+  };
+  const maxGuests = Math.max(guests, 1);
   const transferDetails = transfer ? flightToString(flight) : "";
   const comboName = `${a.name} + ${b.name}`;
   const avgNightly = nights > 0 ? Math.round((totalA + totalB - cleaningFee) / nights) : Number(a.price_per_night) + Number(b.price_per_night);
   const breakdown = stayA && stayB && checkin && checkout
     ? stayA.nights.map((n, i) => ({ date: n.date, price: n.price + (stayB.nights[i]?.price ?? 0) }))
     : [] as { date: Date; price: number }[];
-  const skyscannerUrl = checkin && checkout
-    ? `https://www.skyscanner.co.il/transport/flights/tlv/gva/${fmtSky(checkin)}/${fmtSky(checkout)}/?adultsv2=${guests}&cabinclass=economy&childrenv2=&rtn=1`
-    : `https://www.skyscanner.co.il/transport/flights/tlv/gva/`;
-
   const wa = buildWaHref({
     intro: "היי! אשמח לפרטים על חבילה משולבת של שתי דירות 🎿",
     lines: [
       `דירות: ${comboName}`, `תאריכים: ${fmt(checkin)}–${fmt(checkout)}`, `${guests} אורחים · ${nights} לילות`,
-      skiPass ? "🎿 גם סקי פס" : "", transfer ? `🚐 כולל הסעה${trPick ? `: ${trPick.name} (€${trPick.total})` : ""}${transferDetails ? ` (${transferDetails})` : ""}` : "", equipment ? `🎿 כולל השכרת ציוד (€${equipTotal})` : "",
+      skiOn ? `🎿 ${passLabel} ל-${skiQty} אנשים (€${skiTotal})` : "", flightOn ? `✈️ ${flightDetails} (€${bookFlightTotal})` : "", bagOn ? `🧳 מזוודה ל-${baggageQty} אנשים (€${baggageTotal})` : "", trolleyOn ? `🧳 טרולי ל-${trolleyQty} אנשים (€${trolleyTotal})` : "", transfer ? `🚐 כולל הסעה${trPick ? `: ${trPick.name} (€${trPick.total})` : ""}${transferDetails ? ` (${transferDetails})` : ""}` : "", equipment ? `🎿 כולל השכרת ציוד (€${equipTotal})` : "",
       cancel === "flexible" ? "✅ מדיניות ביטול גמישה" : cancel === "none" ? "🔒 ללא אפשרות ביטול" : "", service === "ai" ? "🤖 ניהול עצמאי (AI)" : "",
     ].filter(Boolean),
     total,
@@ -210,15 +278,26 @@ function ComboInner() {
 
           <FormSection title="תוספות" sub="מוסיפים לחבילה רק מה שצריך">
             <div className="flex flex-col gap-2.5">
-              <OptionCard type="checkbox" disabled selected={skiPass} onSelect={() => setSkiPass(!skiPass)}
-                icon={<IconSkis size={20} />} title="סקי פס לשלושת העמקים" badge={<Tag tone="accent">בקרוב</Tag>}
-                sub="600 ק״מ מסלולים לכל הרמות, איסוף עצמאי מהמכונה" />
+              <OptionCard type="checkbox" selected={skiOn && skiArea === "trois_vallees"} onSelect={() => choosePass("trois_vallees")} disabled={!passOpen("trois_vallees")}
+                icon={<IconSkis size={20} />} title="סקי פס שלושת העמקים" sub="600 ק״מ מסלולים, איסוף עצמאי מהמכונה" price={passPrice("trois_vallees")} />
+              <OptionCard type="checkbox" selected={skiOn && skiArea === "val_thorens"} onSelect={() => choosePass("val_thorens")} disabled={!passOpen("val_thorens")}
+                icon={<IconSkis size={20} />} title="סקי פס ואל טורנס ואורל" sub="המסלולים של הכפר עצמו" price={passPrice("val_thorens")} />
+              {skiOn && (
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white border border-line px-4 py-2.5">
+                  <span className="text-[15px] font-medium text-ink">כמה אנשים צריכים סקי פס?</span>
+                  <div className="flex items-center gap-3">
+                    <Stepper value={skiQty} onChange={setSkiQty} max={maxGuests} label="כמות סקי פס" />
+                    <span className="min-w-[68px] text-left font-bold text-[15px] text-ink">{eur(skiTotal)}</span>
+                  </div>
+                </div>
+              )}
               <OptionCard type="checkbox" selected={transfer} onSelect={() => setTransfer(!transfer)}
                 icon={<IconBus size={20} />} title="הסעה משדה התעופה" sub={trPick ? `${trPick.name} · לכל הקבוצה` : "רכב פרטי או שאטל משותף, לפי הטיסה"}
                 price={transfer && trPick ? `€${trPick.total}` : "להוספה"} />
               {transfer && (
                 <TransferChooser pax={guests || 1} outDate={flight.arrDate || checkin} retDate={flight.retDate || checkout}
                   outFlight={flight.arrFlight} retFlight={flight.retFlight}
+                  airport={flightOn && directFlight ? directFlight.airport : null}
                   value={trPick?.key ?? null} onChange={setTrPick} onFlightClick={() => setShowTransfer(true)} />
               )}
               {transfer && (
@@ -234,17 +313,14 @@ function ComboInner() {
               <OptionCard type="checkbox" selected={equipment} onSelect={() => setEquipment(!equipment)}
                 icon={<IconSkis size={20} />} title="השכרת ציוד סקי או סנובורד" sub="€30 ליום · €120 לשבוע · +€20 לכל יום נוסף"
                 price={skiDays > 0 ? `+€${equipCost(skiDays)}` : "החל מ-€30"} />
-              <a href={skyscannerUrl} target="_blank" rel="noopener noreferrer"
-                className="flex items-center justify-between gap-3 rounded-[18px] border border-dashed border-line-strong bg-[#FBFCFE] hover:border-ink px-4 py-3.5 transition-colors">
-                <span className="flex items-start gap-3 min-w-0">
-                  <span className="text-muted mt-0.5"><IconPlane size={20} /></span>
-                  <span className="min-w-0">
-                    <span className="block font-bold text-[16px] text-ink">טיסה לז&apos;נבה (GVA)</span>
-                    <span className="block text-[14px] text-muted">מתל אביב · {checkin ? fmt(checkin) : "בחרו תאריך"} · כשעתיים וחצי נסיעה לואל טורנס</span>
-                  </span>
-                </span>
-                <span className="text-[14px] font-bold text-accent shrink-0">Skyscanner ←</span>
-              </a>
+              <FlightAddOn state={direct} ret={returnLeg} checkin={checkin} checkout={checkout}
+                checked={flightOn}
+                onToggle={v => { setBookFlight(v); if (v) { setBookFlightQty(guests || 1); setBaggage(true); setBaggageQty(guests || 1); } }}
+                qty={bookFlightQty} setQty={n => { setBaggageQty(b => (b === bookFlightQty || b > n ? n : b)); setTrolleyQty(b => (b > n ? n : b)); setBookFlightQty(n); }} maxQty={maxGuests} total={bookFlightTotal}
+                bag={{ on: bagOn, unit: BAGGAGE_PRICE, qty: baggageQty, setQty: setBaggageQty, total: baggageTotal,
+                  toggle: () => { const v = !baggage; setBaggage(v); if (v) setBaggageQty(Math.min(baggageQty || guests, guests) || 1); } }}
+                trolley={{ on: trolleyOn, unit: TROLLEY_PRICE, qty: trolleyQty, setQty: setTrolleyQty, total: trolleyTotal,
+                  toggle: () => { const v = !trolley; setTrolley(v); if (v) setTrolleyQty(Math.min(trolleyQty || bookFlightQty, bookFlightQty) || 1); } }} />
             </div>
           </FormSection>
 
@@ -328,7 +404,10 @@ function ComboInner() {
               <SumRow label={b.name} value={`€${totalB.toLocaleString()}`} />
               {transfer && <SumRow label="הסעה הלוך וחזור" value={`€${trTotal}`} />}
               {equipment && <SumRow label={`השכרת ציוד · ${skiDays} ימים`} value={`€${equipTotal.toLocaleString()}`} />}
-              {skiPass && <SumRow label="סקי פס" value="מחיר בקרוב" tone="warn" />}
+              {skiOn && <SumRow label={`${passLabel} × ${skiQty}`} value={eur(skiTotal)} />}
+              {flightOn && directFlight && <SumRow label={`טיסה ישירה ל${directFlight.city} × ${bookFlightQty}`} value={eur(bookFlightTotal)} />}
+              {bagOn && <SumRow label={`מזוודה לבטן × ${baggageQty}`} value={eur(baggageTotal)} />}
+              {trolleyOn && <SumRow label={`טרולי × ${trolleyQty}`} value={eur(trolleyTotal)} />}
               {cancel === "flexible" && <SumRow label="ביטול גמיש" value={`€${flexExtra.toLocaleString()}`} />}
               {cancel === "none" && <SumRow label="ללא אפשרות ביטול" value={`−€${CANCEL_NONE.toLocaleString()}`} tone="ok" />}
               {service === "ai" && <SumRow label="הנחת ניהול עצמאי (AI)" value={`−€${AI_DISCOUNT.toLocaleString()}`} tone="ok" />}
@@ -343,7 +422,8 @@ function ComboInner() {
               apartmentId={a.id} apartment={comboName}
               extraApartmentId={b.id} extraApartmentName={b.name}
               checkin={checkin} checkout={checkout} guests={guests} nights={nights}
-              skiPass={skiPass} transfer={transfer} equipment={equipment} transferDetails={transferDetails} grandTotal={total} cancel={cancel} service={service}
+              skiPass={skiOn} transfer={transfer} equipment={equipment} transferDetails={transferDetails}
+              flight={flightOn} flightPrice={bookFlightTotal + baggageTotal + trolleyTotal} flightDetails={flightDetails} grandTotal={total} cancel={cancel} service={service}
               className={`${btn.primaryLg} w-full`}
               label="תשלום מאובטח בכרטיס" />
             <a href={wa} target="_blank" rel="noopener noreferrer" className={`${btn.outline} w-full`}>
