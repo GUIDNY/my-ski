@@ -14,7 +14,7 @@ export const GADS_ID = (process.env.NEXT_PUBLIC_GADS_ID || "AW-11403117194").tri
 const LABEL = {
   purchase: (process.env.NEXT_PUBLIC_GADS_PURCHASE_LABEL || "RjpNCPqqpbUdEIqFt70q").trim(),
   checkout: (process.env.NEXT_PUBLIC_GADS_CHECKOUT_LABEL || "").trim(),
-  lead: (process.env.NEXT_PUBLIC_GADS_LEAD_LABEL || "").trim(),
+  lead: (process.env.NEXT_PUBLIC_GADS_LEAD_LABEL || "Z3lfCNG-9LgdEIqFt70q").trim(),
 };
 
 type Gtag = (...args: unknown[]) => void;
