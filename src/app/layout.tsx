@@ -12,6 +12,7 @@ import OpenAIPixel from "@/components/OpenAIPixel";
 import { Analytics } from "@vercel/analytics/next";
 import AnalyticsConsent from "@/components/AnalyticsConsent";
 import GoogleAdsTag from "@/components/GoogleAdsTag";
+import ClarityTag from "@/components/ClarityTag";
 import Attribution from "@/components/Attribution";
 import PayFrame from "@/components/PayFrame";
 import { SITE_LD, ldJson } from "@/lib/site";
@@ -113,6 +114,7 @@ export default function RootLayout({
         <OpenAIPixel />
         <Analytics />
         <GoogleAdsTag />
+        <ClarityTag />
         <Attribution />
         <PayFrame />
       </body>
