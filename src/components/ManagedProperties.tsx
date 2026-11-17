@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { authFetch } from "@/lib/auth-fetch";
+import PaymentsSchedule from "@/components/PaymentsSchedule";
 
 type Payment = {
   id: string; property_id: string; label: string; month: string | null;
@@ -57,7 +58,7 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
-  const [view, setView] = useState<"cards" | "list">("cards");
+  const [view, setView] = useState<"cards" | "list" | "schedule">("cards");
   const [payModal, setPayModal] = useState<Prop | null>(null);
   const [showMonths, setShowMonths] = useState(false);
   const emptyForm = (): Partial<Prop> => ({ kind, name: "", image: null, airbnb_open: false, revenue: 0, expenses: 0 });
@@ -134,6 +135,8 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
           <div className="flex bg-gray-100 rounded-xl p-1">
             <button onClick={() => setView("cards")} title="כרטיסיות"
               className={`px-3 py-1.5 rounded-lg text-sm font-bold transition ${view === "cards" ? "bg-white text-blue-600 shadow-sm" : "text-gray-400"}`}>▦<span className="hidden sm:inline"> כרטיסיות</span></button>
+            <button onClick={() => setView("schedule")} title="מה לשלם ומתי"
+              className={`px-3 py-1.5 rounded-lg text-sm font-bold transition ${view === "schedule" ? "bg-white text-blue-600 shadow-sm" : "text-gray-400"}`}>💰<span className="hidden sm:inline"> מה לשלם ומתי</span></button>
             <button onClick={() => setView("list")} title="רשימה"
               className={`px-3 py-1.5 rounded-lg text-sm font-bold transition ${view === "list" ? "bg-white text-blue-600 shadow-sm" : "text-gray-400"}`}>☰<span className="hidden sm:inline"> רשימה</span></button>
           </div>
@@ -195,7 +198,9 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
           עדיין אין דירות. לחץ/י "הוסף דירה" כדי להתחיל.
         </div>
       ) : (
-        view === "list" ? (
+        view === "schedule" ? (
+          <PaymentsSchedule rows={rows} onChange={load} />
+        ) : view === "list" ? (
         <div className="space-y-2.5">
           {rows.map(p => {
             const pl = profit(p); const pt = payTotals(p);
