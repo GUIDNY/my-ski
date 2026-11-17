@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { authFetch } from "@/lib/auth-fetch";
-import PaymentsSchedule from "@/components/PaymentsSchedule";
+import PaymentsSchedule, { MonthDetails, monthBuckets } from "@/components/PaymentsSchedule";
 
 type Payment = {
   id: string; property_id: string; label: string; month: string | null;
@@ -61,6 +61,7 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
   const [view, setView] = useState<"cards" | "list" | "schedule">("cards");
   const [payModal, setPayModal] = useState<Prop | null>(null);
   const [showMonths, setShowMonths] = useState(false);
+  const [monthOpen, setMonthOpen] = useState<string | null>(null);
   const emptyForm = (): Partial<Prop> => ({ kind, name: "", image: null, airbnb_open: false, revenue: 0, expenses: 0 });
   const [form, setForm] = useState<Partial<Prop>>(emptyForm());
   const [saving, setSaving] = useState(false);
@@ -106,21 +107,8 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
     payPaid: rows.reduce((s, p) => s + p.payments.filter(x => x.paid).reduce((a, x) => a + (Number(x.amount) || 0), 0), 0),
     payDeposit: rows.reduce((s, p) => s + p.payments.filter(x => x.kind === "deposit").reduce((a, x) => a + (Number(x.amount) || 0), 0), 0),
   };
-  // payments by month — season order (Dec→May); everything before December
-  // (incl. no-month signing payments) is grouped into one "טרום עונה" bucket.
-  const allPays = rows.flatMap(p => p.payments);
-  const bucketOf = (pays: Payment[]) => ({
-    total: pays.reduce((a, x) => a + (Number(x.amount) || 0), 0),
-    paid: pays.filter(x => x.paid).reduce((a, x) => a + (Number(x.amount) || 0), 0),
-    count: pays.length,
-  });
-  const PRE_SEASON = new Set(["יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר"]);
-  const SEASON_ORDER = ["דצמבר", "ינואר", "פברואר", "מרץ", "אפריל", "מאי"];
-  const preSeasonPays = allPays.filter(x => !x.month || PRE_SEASON.has(x.month));
-  const byMonth = [
-    ...(preSeasonPays.length ? [{ month: "טרום עונה", ...bucketOf(preSeasonPays) }] : []),
-    ...SEASON_ORDER.map(m => ({ month: m, ...bucketOf(allPays.filter(x => x.month === m)) })).filter(b => b.count > 0),
-  ];
+  // payments by month: the same grouping as the "what to pay and when" tab
+  const byMonth = monthBuckets(rows.flatMap(prop => prop.payments.map(pay => ({ pay, prop }))));
   const modalProp = payModal ? rows.find(r => r.id === payModal.id) ?? payModal : null;
 
   return (
@@ -175,15 +163,12 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
                 <p className="text-sm text-gray-400">עדיין לא נרשמו תשלומים.</p>
               ) : (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                  {byMonth.map(m => {
-                    const pre = m.month === "טרום עונה";
-                    return (
-                      <div key={m.month} className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 ${pre ? "bg-indigo-50 border border-indigo-100" : "bg-gray-50"}`}>
-                        <span className={`text-sm font-bold ${pre ? "text-indigo-700" : "text-gray-700"}`}>{pre ? "🎿 טרום עונה" : m.month}</span>
-                        <span className="text-sm"><b className={m.paid >= m.total ? "text-emerald-600" : "text-gray-800"}>{money(m.paid)}</b><span className="text-gray-400"> / {money(m.total)}</span>{m.paid < m.total && <b className="text-red-500 text-xs"> · חסר {money(m.total - m.paid)}</b>}</span>
-                      </div>
-                    );
-                  })}
+                  {byMonth.map(m => (
+                    <button key={m.key} type="button" onClick={() => setMonthOpen(m.key)} className="flex items-center justify-between rounded-xl px-3.5 py-2.5 bg-gray-50 hover:bg-blue-50 transition text-right">
+                      <span className="text-sm font-bold text-gray-700">{m.title}</span>
+                      <span className="text-sm"><b className={m.left === 0 ? "text-emerald-600" : "text-gray-800"}>{money(m.paid)}</b><span className="text-gray-400"> / {money(m.total)}</span>{m.left > 0 && <b className="text-red-500 text-xs"> · חסר {money(m.left)}</b>}</span>
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
@@ -352,6 +337,10 @@ export default function ManagedProperties({ kind }: { kind: "seasonal" | "agency
             </div>
           </div>
         </div>
+      )}
+
+      {monthOpen && byMonth.find(b => b.key === monthOpen) && (
+        <MonthDetails bucket={byMonth.find(b => b.key === monthOpen)!} onClose={() => setMonthOpen(null)} onChange={load} />
       )}
 
       {/* Payments management popup */}
