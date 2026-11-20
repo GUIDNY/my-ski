@@ -33,6 +33,8 @@ const PATHS: Record<string, React.ReactNode> = {
   board: <g transform="rotate(35 12 12)"><rect x="9" y="2" width="6" height="20" rx="3" /><path d="M9 8h6M9 16h6" /></g>,
   // a car (driving to the resort)
   car: <><path d="M5 16V11l2-5h10l2 5v5" /><path d="M3 16h18v3H3z" /><path d="M5 11h14" /><circle cx="7.5" cy="19" r="1.5" /><circle cx="16.5" cy="19" r="1.5" /></>,
+  // two candles (Shabbat and kosher food)
+  candles: <><path d="M8 21V11h3v10M13 21V11h3v10" /><path d="M5 21h14" /><path d="M9.5 8.5c-1-1 0-2.5 0-3.5 1 1 1 2.5 0 3.5zM14.5 8.5c-1-1 0-2.5 0-3.5 1 1 1 2.5 0 3.5z" /></>,
   // a crescent moon (sleep and altitude)
   moon: <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" />,
   // a heart (couples)
@@ -42,7 +44,7 @@ const PATHS: Record<string, React.ReactNode> = {
 
 const BY_EMOJI: Record<string, string> = {
   "🏔️": "mountain", "📅": "calendar", "✈️": "plane", "🎫": "ticket", "👨‍👩‍👧‍👦": "family",
-  "🍻": "glass", "🏠": "home", "☀️": "sun", "⛷️": "route", "⚖️": "compare", "👥": "group", "🎒": "bag", "🎿": "skis", "🕎": "menorah", "🌤️": "cloudSun", "💰": "coins", "🗺️": "map", "❄️": "snowflake", "🎓": "cap", "🛡️": "shield", "💑": "heart", "🛷": "sled", "🏂": "board", "🚗": "car", "🌙": "moon",
+  "🍻": "glass", "🏠": "home", "☀️": "sun", "⛷️": "route", "⚖️": "compare", "👥": "group", "🎒": "bag", "🎿": "skis", "🕎": "menorah", "🌤️": "cloudSun", "💰": "coins", "🗺️": "map", "❄️": "snowflake", "🎓": "cap", "🛡️": "shield", "💑": "heart", "🛷": "sled", "🏂": "board", "🚗": "car", "🌙": "moon", "🕯️": "candles",
 };
 
 export default function GuideIcon({ emoji, size = 24 }: { emoji: string; size?: number }) {
