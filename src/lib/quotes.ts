@@ -53,3 +53,13 @@ export function quoteChoices(q: Record<string, unknown>, id: string, x: string |
     guests: String(guests), cancel: String(q.cancel || "regular"), service: String(q.service || "human"), x: xx, q: id,
   };
 }
+
+/** "2 חדרים — 2 חדרים קרוב למסלולים — ALT003" → "2 חדרים קרוב למסלולים" (agency listings carry a code and a room type) */
+export function shortName(name: string) {
+  const parts = name.split(/\s+[—–-]\s+/).map(p => p.trim()).filter(Boolean);
+  if (parts.length < 2) return name.trim();
+  const words = parts.filter(p => !/^[A-Z]{1,5}\d{1,5}[A-Z]?$/.test(p));
+  const best = words.filter(p => !words.some(o => o !== p && o.includes(p))).sort((a, b) => b.length - a.length)[0];
+  return best || name.trim();
+}
+

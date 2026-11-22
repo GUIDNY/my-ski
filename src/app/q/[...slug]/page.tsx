@@ -4,7 +4,7 @@ import ProposalView from "@/app/p/[id]/ProposalView";
 import AdminProfitBadge from "@/components/AdminProfitBadge";
 import { createServerClient } from "@/lib/supabase-server";
 import { buildSiteProposal } from "@/lib/site-proposal";
-import { quoteChoices } from "@/lib/quotes";
+import { quoteChoices, shortName } from "@/lib/quotes";
 
 type Props = {
   params: Promise<{ slug: string[] }>;
@@ -26,7 +26,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     const { data: q } = await createServerClient().from("quotes").select("apartment_name,checkin,checkout,guests").eq("id", id).maybeSingle();
     if (q) {
       const dm = (iso: string) => { const d = new Date(iso + "T12:00:00"); return `${d.getDate()}.${d.getMonth() + 1}`; };
-      title = `הצעת מחיר: ${q.apartment_name}`;
+      title = `הצעת מחיר: ${String(q.apartment_name || "").split(" + ").map(shortName).join(" + ")}`;
       description = `ואל טורנס · ${q.checkin && q.checkout ? `${dm(q.checkin)}–${dm(q.checkout)} · ` : ""}${q.guests} אנשים · דירה, סקי פס, הסעה וציוד`;
     }
   }
