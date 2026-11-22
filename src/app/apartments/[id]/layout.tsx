@@ -26,7 +26,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     title: `${name}${code ? ` (${code})` : ""} | SkiShare`,
     description: aptMetaDescription(apt),
     path: `/apartments/${id}`,
-    image: apt.images?.[0] ?? null,
+    // the preview card: the apartment's photo, name, size and price (lib/og-card)
+    image: `/api/og/apt/${id}`,
     imageAlt: name,
     // the English and French pages exist only for apartments on offer
     ...(apt.available ? { languages: alternatesFor(`/apartments/${id}`) } : {}),

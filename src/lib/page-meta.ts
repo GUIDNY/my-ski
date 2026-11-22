@@ -20,9 +20,10 @@ export function pageMeta(o: {
   languages?: Record<string, string>;
 }): Metadata {
   const url = siteUrl(o.path);
+  // no image of its own: the page's preview card (/api/og/page, lib/og-card), drawn for its path
   const images = o.image
     ? [{ url: o.image, alt: o.imageAlt ?? o.title }]
-    : [{ url: "/og.jpg", width: 1200, height: 630, alt: o.imageAlt ?? o.title }];
+    : [{ url: `/api/og/page?path=${encodeURIComponent(o.path)}`, width: 1200, height: 630, type: "image/jpeg", alt: o.imageAlt ?? o.title }];
   return {
     title: { absolute: o.title },
     description: o.description,

@@ -63,13 +63,13 @@ export const metadata: Metadata = {
     title: "SkiShare: חופשת סקי בואל טורנס",
     description: "דירות לחבר'ה ולזוגות בואל טורנס, ומוסיפים סקי פס, הסעה וציוד.",
     locale: "he_IL",
-    images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "SkiShare · Val Thorens" }],
+    images: [{ url: "/api/og/page?path=%2F", width: 1200, height: 630, type: "image/jpeg", alt: "SkiShare · Val Thorens" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "SkiShare: חופשת סקי בואל טורנס",
     description: "דירות לחבר'ה ולזוגות בואל טורנס, ומוסיפים סקי פס, הסעה וציוד.",
-    images: ["/og.jpg"],
+    images: ["/api/og/page?path=%2F"],
   },
   // iOS Smart App Banner — Safari shows "Open in app" if installed, else App Store
   itunes: { appId: "6782095727" },
