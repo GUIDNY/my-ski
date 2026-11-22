@@ -12,7 +12,7 @@ export const maxDuration = 30;
 const ALL = ["דירה", "סקי פס", "הסעה", "ציוד", "טיסה"];
 const CARDS: Record<string, OgCard> = {
   "/": { photos: ["/hero-ski.jpg"], kicker: "חופשת סקי בואל טורנס", title: "דירות לחבר'ה, סקי פס והסעה", facts: "מזמינים באתר, בעברית · כל אחד משלם את החלק שלו", included: ALL },
-  "/transfers": { photos: ["/view.jpg"], kicker: "הסעות לואל טורנס", title: "מז'נבה או מליון עד דלת הדירה", facts: "הלוך וחזור · רכב פרטי או שאטל", price: { big: "€180", unit: "לאדם", sub: "הלוך וחזור, בהזמנה עם דירה" } },
+  "/transfers": { photos: ["/view.jpg"], kicker: "הסעות לואל טורנס", title: "מז'נבה או מליון עד דלת הדירה", facts: "הלוך וחזור · רכב פרטי או שאטל · מזמינים באתר, בעברית", included: ["עד הדלת", "הלוך וחזור", "נהג מקצועי"] },
   "/packages": { photos: ["/chalet-interior.jpg"], kicker: "חבילות סקי · עונת 2026/27", title: "שבוע בואל טורנס: דירה, סקי פס והסעה", facts: "מחיר לאדם לזוג, ל-4 ול-6", included: ["דירה", "סקי פס", "הסעה"] },
   "/weekly": { photos: ["/hero-ski.jpg"], kicker: "שבת עד שבת · עונת 2026/27", title: "דירות בואל טורנס לכל שבוע בעונה", facts: "רואים מה פנוי ובכמה, ומזמינים באתר", included: ALL },
   "/apartments": { photos: ["/view.jpg"], kicker: "דירות בואל טורנס", title: "דירות לחבר'ה, לזוגות ולמשפחות", facts: "מזוג ועד קבוצות · ליד המסלולים", included: ALL },
