@@ -109,18 +109,25 @@ type ScrapeResult = { price: number | null; nonstop: boolean; sure?: boolean; ur
 // (Nov 2026: caught live again, TLV-LYS 19.12–26.12: Transavia nonstop €257 existed, but
 // Google was still "Fetching results" after 15s, so the site said "no direct flight".
 // Now up to ~30s while the page says it is still loading.)
+// (22.11.2026: caught live, TLV-LYS and TLV-GVA 16–23.3.2027 — Google's "Oops, something went
+// wrong" page ALSO carries the line "No results returned", so it was read as "no direct flight" and
+// cached, while a real Chrome showed 2 nonstops to Lyon from €343. "Oops" is now checked first:
+// reload up to twice, and a page that still says Oops is never read as "no results".)
 async function waitForResults(page: Page): Promise<string> {
-  let reloaded = false;
+  let reloads = 0;
   let sawRow = false;
   for (let i = 0; i < 20; i++) {
     const bodyText = await page.evaluate(() => document.body.innerText);
+    if (/Oops, something went wrong/i.test(bodyText)) {
+      if (reloads >= 2) return bodyText;
+      reloads++;
+      await page.reload({ waitUntil: "domcontentloaded", timeout: 45000 });
+      await new Promise(r => setTimeout(r, 1500));
+      continue;
+    }
     if (/\d+\s+results?\s+returned|No results returned/i.test(bodyText)) return bodyText;
     if (/\nround trip\n/.test(bodyText)) { if (sawRow) return bodyText; sawRow = true; }
     else if (i >= 9 && !/Fetching results|Loading results/i.test(bodyText)) return bodyText;
-    if (!reloaded && /Oops, something went wrong/i.test(bodyText)) {
-      reloaded = true;
-      await page.reload({ waitUntil: "domcontentloaded", timeout: 45000 });
-    }
     await new Promise(r => setTimeout(r, 1500));
   }
   return await page.evaluate(() => document.body.innerText);
@@ -160,7 +167,8 @@ async function scrapePrice(outDate: string, retDate: string, origin: string, des
     await passConsent(page, nonstopUrl);
     let bodyText = await waitForResults(page);
 
-    const noNonstop = /No results returned/i.test(bodyText);
+    // "No results returned" is a fact only on a page that loaded (not on Google's "Oops" page)
+    const noNonstop = /No results returned/i.test(bodyText) && !/Oops, something went wrong/i.test(bodyText);
     if (!noNonstop) {
       const lines = bodyText.split("\n").map(l => l.trim());
       const result = cheapestRoundTripResult(lines);
@@ -174,6 +182,18 @@ async function scrapePrice(outDate: string, retDate: string, origin: string, des
     bodyText = await waitForResults(page);
     if (!/\nround trip\n/.test(bodyText)) console.warn("flight-price: no results read", page.url().slice(0, 80), bodyText.slice(0, 200).replace(/\n/g, " | "));
     const lines = bodyText.split("\n").map(l => l.trim());
+    // the nonstop search didn't load: a direct flight may still be in these results, read from
+    // its row (the line right after "round trip" starts with "Nonstop" in the compact layout)
+    if (!noNonstop) {
+      let direct: { price: number; idx: number } | null = null;
+      for (let i = 0; i < lines.length - 2; i++) {
+        if (lines[i + 1] !== "round trip" || !/^Nonstop/i.test(lines[i + 2])) continue;
+        const m = lines[i].match(/^€\s?([\d,]+)$/);
+        const price = m ? parseInt(m[1].replace(/,/g, ""), 10) : NaN;
+        if (Number.isFinite(price) && (!direct || price < direct.price)) direct = { price, idx: i };
+      }
+      if (direct) return { price: direct.price, nonstop: true, url: nonstopUrl, ...flightDetailsForResult(lines, direct.idx) };
+    }
     const result = cheapestRoundTripResult(lines);
     const details = result ? flightDetailsForResult(lines, result.idx) : { airline: null, departTime: null, arriveTime: null };
     return { price: result?.price ?? null, nonstop: false, sure: noNonstop, url: anyUrl, ...details };
