@@ -20,6 +20,8 @@ export function pageMeta(o: {
   languages?: Record<string, string>;
 }): Metadata {
   const url = siteUrl(o.path);
+  // the link preview (WhatsApp, Facebook) shows no prices (Idan, 23.11): sentences with a price are left out there
+  const share = shareText(o.description);
   // no image of its own: the page's preview card (/api/og/page, lib/og-card), drawn for its path
   const images = o.image
     ? [{ url: o.image, alt: o.imageAlt ?? o.title }]
@@ -34,15 +36,21 @@ export function pageMeta(o: {
       locale: "he_IL",
       url,
       title: o.title,
-      description: o.description,
+      description: share,
       images,
     },
     twitter: {
       card: "summary_large_image",
       title: o.title,
-      description: o.description,
+      description: share,
       images: images.map(i => i.url),
     },
     ...(o.noindex ? { robots: { index: false, follow: true } } : {}),
   };
+}
+
+/** a description without its sentences that name a price (€ / ₪), for link previews */
+export function shareText(d: string) {
+  const kept = d.split(/(?<=[.!?])\s+/).filter(x => !/[€₪]|\d+\s*(?:יורו|אירו|ש"ח)/.test(x));
+  return kept.join(" ").trim() || d.replace(/[^.,]*[€₪][^.,]*[.,]?/g, "").replace(/\s+/g, " ").trim();
 }

@@ -9,12 +9,12 @@ import type { ProposalData } from "@/types";
 /*
  * The link preview card every page shares (what WhatsApp, iMessage and Facebook show under a link):
  * photos on the left fading into a dark panel with the white logo, a kicker, a title, a line of
- * facts, what's included, and a white price card. 1200×630 JPEG (WhatsApp drops heavy images).
+ * facts, what's included, and a white button at the bottom (no prices: Idan, 23.11). 1200×630 JPEG (WhatsApp drops heavy images).
  * Satori has no bidi and wraps left to right, so Hebrew lines are wrapped here first and every
  * line is reversed on its own (rtlLines).
  */
 
-const NAVY = "#0B1B33", SKY = "#A9C2EA", ACCENT = "#3D7BFF", MUTED = "#51627F";
+const NAVY = "#0B1B33", SKY = "#A9C2EA", ACCENT = "#3D7BFF";
 const W = 1200, H = 630, PHOTOS = 760;
 
 /** one line for Satori: the words in reverse order, the letters of Hebrew words reversed */
@@ -81,7 +81,8 @@ export type OgCard = {
   title: string;
   facts?: string;
   included?: string[];
-  price?: { big: string; unit?: string; sub?: string } | null;
+  /** the white button at the bottom (the site's address when not given) */
+  cta?: string;
 };
 
 export async function ogCard(c: OgCard, cacheSeconds = 3600): Promise<Response> {
@@ -136,15 +137,10 @@ export async function ogCard(c: OgCard, cacheSeconds = 3600): Promise<Response> 
               </div>
             )}
           </div>
-          {c.price && (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", background: "white", borderRadius: 24, padding: "18px 28px 16px", color: NAVY }}>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
-                {c.price.unit && <div style={{ fontSize: 28, fontWeight: 500, color: MUTED }}>{rtl(c.price.unit)}</div>}
-                <div style={{ fontSize: 76, fontWeight: 800, lineHeight: 1 }}>{c.price.big}</div>
-              </div>
-              {c.price.sub && <div style={{ display: "flex", fontSize: 21, fontWeight: 500, color: MUTED, marginTop: 4 }}>{rtlLines(c.price.sub, 21, textW, 1)[0]}</div>}
-            </div>
-          )}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, background: "white", borderRadius: 999, padding: "14px 28px", color: NAVY, fontSize: 26, fontWeight: 800 }}>
+            <div style={{ display: "flex" }}>←</div>
+            <div style={{ display: "flex" }}>{c.cta ? rtl(c.cta) : "skisharebook.com"}</div>
+          </div>
         </div>
       </div>
     ),
@@ -156,7 +152,7 @@ export async function ogCard(c: OgCard, cacheSeconds = 3600): Promise<Response> 
 
 const INCLUDED: Record<string, string> = { apartment: "דירה", skipass: "סקי פס", transfer: "הסעה", equipment: "ציוד", flight: "טיסה" };
 
-/** a quote (site /q, bot /p, the two-apartment page): its photos, names, dates and price per person */
+/** a quote (site /q, bot /p, the two-apartment page): its photos, names, dates and what's included */
 export function proposalCard(data: ProposalData, kicker = "הצעת מחיר אישית · ואל טורנס"): OgCard {
   const blocks = data.sections.flatMap(s => s.blocks);
   const own = blocks.filter((b): b is Extract<typeof b, { type: "gallery" }> => b.type === "gallery" && !!b.caption);
@@ -174,6 +170,6 @@ export function proposalCard(data: ProposalData, kicker = "הצעת מחיר א�
     facts: [chips[0], chips[1]?.startsWith("שבוע שלם") ? "7 לילות" : chips[1], chips[2]].filter(Boolean).join(" · "),
     // just "דירה" says nothing: the list shows only when something comes with it
     included: keys.length > 1 ? keys.map(k => INCLUDED[k]).filter(Boolean) : [],
-    price: hero.perPerson ? { big: hero.perPerson, unit: "לאדם", sub: hero.total ? `סה״כ ${hero.total} לכל החבורה` : undefined } : null,
+    cta: "להצעה המלאה",
   };
 }

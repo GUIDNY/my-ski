@@ -13,10 +13,10 @@ const ALL = ["דירה", "סקי פס", "הסעה", "ציוד", "טיסה"];
 const CARDS: Record<string, OgCard> = {
   "/": { photos: ["/hero-ski.jpg"], kicker: "חופשת סקי בואל טורנס", title: "דירות לחבר'ה, סקי פס והסעה", facts: "מזמינים באתר, בעברית · כל אחד משלם את החלק שלו", included: ALL },
   "/transfers": { photos: ["/view.jpg"], kicker: "הסעות לואל טורנס", title: "מז'נבה או מליון עד דלת הדירה", facts: "רכב פרטי או שאטל · מזמינים באתר, בעברית", included: ["עד הדלת", "הלוך וחזור", "נהג מקצועי"] },
-  "/packages": { photos: ["/chalet-interior.jpg"], kicker: "חבילות סקי · עונת 2026/27", title: "שבוע בואל טורנס: דירה, סקי פס והסעה", facts: "מחיר לאדם לזוג, ל-4 ול-6", included: ["דירה", "סקי פס", "הסעה"] },
-  "/weekly": { photos: ["/hero-ski.jpg"], kicker: "שבת עד שבת · עונת 2026/27", title: "דירות בואל טורנס לכל שבוע בעונה", facts: "רואים מה פנוי ובכמה, ומזמינים באתר", included: ALL },
+  "/packages": { photos: ["/chalet-interior.jpg"], kicker: "חבילות סקי · עונת 2026/27", title: "שבוע בואל טורנס: דירה, סקי פס והסעה", facts: "לזוג, ל-4 ול-6 · שבת עד שבת", included: ["דירה", "סקי פס", "הסעה"] },
+  "/weekly": { photos: ["/hero-ski.jpg"], kicker: "שבת עד שבת · עונת 2026/27", title: "דירות בואל טורנס לכל שבוע בעונה", facts: "רואים מה פנוי בכל שבוע, ומזמינים באתר", included: ALL },
   "/apartments": { photos: ["/view.jpg"], kicker: "דירות בואל טורנס", title: "דירות לחבר'ה, לזוגות ולמשפחות", facts: "מזוג ועד קבוצות · ליד המסלולים", included: ALL },
-  "/search": { photos: ["/chalet-interior.jpg"], kicker: "חבילת סקי לפי תאריכים", title: "בוחרים תאריכים ורואים מה פנוי ובכמה", facts: "מחיר לאדם, עם סקי פס, הסעה וציוד", included: ALL },
+  "/search": { photos: ["/chalet-interior.jpg"], kicker: "חבילת סקי לפי תאריכים", title: "בוחרים תאריכים ורואים מה פנוי", facts: "עם סקי פס, הסעה וציוד, הכל באתר", included: ALL },
   "/seasonaires": { photos: ["/view.jpg"], kicker: "סיזונרים · ואל טורנס", title: "דירות לעונה שלמה", facts: "דיור לטווח ארוך, קהילה ישראלית ועזרה בעבודה" },
   "/guide": { photos: ["/hero-ski.jpg"], kicker: "המדריך לואל טורנס", title: "כל מה שצריך לדעת לפני חופשת סקי", facts: "עונה, מחירים, הגעה ולינה · 2026/27" },
   "/val-thorens-weather": { photos: ["/hero-ski.jpg"], kicker: "תחזית ואל טורנס", title: "מזג אוויר ושלג ל-10 ימים", facts: "בכפר ובראש ההר · מתעדכן כל חצי שעה" },
