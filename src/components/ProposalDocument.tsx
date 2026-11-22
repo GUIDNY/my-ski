@@ -174,7 +174,8 @@ function Block({ block, link }: { block: ProposalBlock; link?: string }) {
     case "gallery":
       return (
         <div className="gallery">
-          {block.urls.map((url, i) => (
+          {/* an apartment's own photos (a two-apartment quote): three in print, the rest are on the web page */}
+          {(block.caption ? block.urls.slice(0, 3) : block.urls).map((url, i) => (
             // eslint-disable-next-line @next/next/no-img-element
             <img key={i} src={url} alt={block.caption ? `${block.caption} ${i + 1}` : `תמונה ${i + 1}`} />
           ))}

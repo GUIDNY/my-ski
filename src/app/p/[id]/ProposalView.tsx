@@ -99,6 +99,8 @@ function BlockView({ b }: { b: ProposalBlock }) {
 export default function ProposalView({ id, data, number, clientName, pdfHref }: { id: string; data: ProposalData; number: string | null; clientName: string | null; pdfHref?: string }) {
   const [imgIdx, setImgIdx] = useState(0);
   const [lightbox, setLightbox] = useState<number | null>(null);
+  // a quote for two apartments: a button per apartment opens that apartment's photos
+  const [aptBox, setAptBox] = useState<{ g: number; idx: number | null }>({ g: 0, idx: null });
   const [showBank, setShowBank] = useState(false);
   const [off, setOff] = useState<number[]>([]);          // rows taken out
   const [addEquip, setAddEquip] = useState(false);
@@ -123,6 +125,7 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
   const h = heroOf(data);
   const blocks = data.sections.flatMap(s => s.blocks);
   const imgs = Array.from(new Set([...(h.image ? [h.image] : []), ...blocks.flatMap(b => (b.type === "gallery" ? b.urls : []))]));
+  const aptGalleries = blocks.filter((b): b is Extract<ProposalBlock, { type: "gallery" }> => b.type === "gallery" && !!b.caption && b.urls.length > 0);
   const table = blocks.find((b): b is Extract<ProposalBlock, { type: "table" }> => b.type === "table");
   const allText = JSON.stringify(data.sections) + " " + (data.subtitle || "") + " " + h.chips.join(" ");
   const guests = h.guests || Number(allText.match(/(\d+)\s*(?:אנשים|אורחים)/)?.[1]) || Number(allText.match(/"מספר אורחים","(\d+)"/)?.[1]) || 1;
@@ -421,6 +424,18 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
         {imgs.length > 0 && (
           <div className="mt-5 md:mt-6">
             <PhotoGallery imgs={imgs} name={data.title} idx={Math.min(imgIdx, imgs.length - 1)} setIdx={setImgIdx} onOpen={setLightbox} />
+            {aptGalleries.length > 1 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {aptGalleries.map((g, gi) => (
+                  <button key={gi} type="button" onClick={() => setAptBox({ g: gi, idx: 0 })}
+                    className="inline-flex items-center gap-2 min-h-[44px] px-4 rounded-xl border border-line hover:border-line-strong bg-white text-ink text-[15px] font-bold transition-colors">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={g.urls[0]} alt="" className="w-8 h-8 rounded-md object-cover" />
+                    התמונות של {g.caption} <span className="text-muted font-medium">({g.urls.length})</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -494,6 +509,10 @@ export default function ProposalView({ id, data, number, clientName, pdfHref }: 
       {!repl && <CouponCorner total={total} description={data.title || "חופשת סקי בוואל טורנס"} />}
 
       <Lightbox imgs={imgs} index={lightbox} setIndex={setLightbox} name={data.title} />
+      {aptGalleries[aptBox.g] && (
+        <Lightbox imgs={aptGalleries[aptBox.g].urls} index={aptBox.idx} name={aptGalleries[aptBox.g].caption || data.title}
+          setIndex={fn => setAptBox(v => ({ ...v, idx: fn(v.idx) }))} />
+      )}
     </div>
   );
 }

@@ -118,7 +118,9 @@ export async function buildSiteProposal(one: (k: string) => string): Promise<{ d
         ...(b ? [["מתאימות", `עד ${(a.max_guests || 0) + (b.max_guests || 0)} אנשים`] as [string, string]] : a.max_guests ? [["מתאימה", `עד ${a.max_guests} אנשים`] as [string, string]] : []),
       ] },
       // both apartments in the photos: the first one's main photo, then two of the second one, then the rest by turns
-      ...(b ? [{ type: "gallery", urls: (() => { const ia = (a.images ?? []).slice(0, 6), ib = (b.images ?? []).slice(0, 6); const rest = Array.from({ length: 6 }, (_, i) => [ia[i + 1], ib[i + 2]]).flat().filter(Boolean) as string[]; return [ia[0], ib[0], ib[1], ...rest].filter(Boolean) as string[]; })() } as ProposalBlock] : a.images?.length ? [{ type: "gallery", urls: a.images.slice(0, 3) } as ProposalBlock] : []),
+      ...(b ? [{ type: "gallery", urls: (() => { const ia = (a.images ?? []).slice(0, 6), ib = (b.images ?? []).slice(0, 6); const rest = Array.from({ length: 6 }, (_, i) => [ia[i + 1], ib[i + 2]]).flat().filter(Boolean) as string[]; return [ia[0], ib[0], ib[1], ...rest].filter(Boolean) as string[]; })() } as ProposalBlock,
+        // each apartment's own photos, opened from its own button on the quote page
+        ...[a, b].filter(x => x.images?.length).map(x => ({ type: "gallery", urls: (x.images ?? []).slice(0, 30), caption: x.name } as ProposalBlock))] : a.images?.length ? [{ type: "gallery", urls: a.images.slice(0, 3) } as ProposalBlock] : []),
       ...(a.description ? describe(a.description) : []),
     ],
   });
