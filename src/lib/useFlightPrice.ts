@@ -27,14 +27,20 @@ const str = (v: unknown) => (typeof v === "string" && v ? v : null);
 export function useFlightPrice(origin: string, dest: string, checkin: string, checkout: string): FlightPriceState {
   const key = checkin && checkout ? `${origin}|${dest}|${checkin}|${checkout}` : "";
   const [result, setResult] = useState<{ key: string; state: FlightPriceState }>({ key: "", state: EMPTY });
+  // a failed check (Google refused the server) is asked once more before giving up, so one
+  // airport that wasn't checked doesn't leave only the other one's (maybe pricier) flight
+  const [attempt, setAttempt] = useState<{ key: string; n: number }>({ key: "", n: 0 });
+  const tries = attempt.key === key ? attempt.n : 0;
 
   useEffect(() => {
     if (!key) return;
     let cancelled = false;
+    const retry = () => { if (!cancelled && tries < 1) { setTimeout(() => { if (!cancelled) setAttempt({ key, n: tries + 1 }); }, 4000); return true; } return false; };
     fetch(`/api/flight-price?origin=${origin}&dest=${dest}&checkin=${checkin}&checkout=${checkout}`)
       .then(r => r.json())
       .then(d => {
         if (cancelled) return;
+        if (typeof d.price !== "number" && d.error && retry()) return;
         setResult({ key, state: {
           price: typeof d.price === "number" ? d.price : null,
           nonstop: !!d.nonstop,
@@ -46,9 +52,9 @@ export function useFlightPrice(origin: string, dest: string, checkin: string, ch
           failed: typeof d.price !== "number" && !!d.error,
         } });
       })
-      .catch(() => { if (!cancelled) setResult({ key, state: { ...EMPTY, failed: true } }); });
+      .catch(() => { if (!cancelled && !retry()) setResult({ key, state: { ...EMPTY, failed: true } }); });
     return () => { cancelled = true; };
-  }, [key, origin, dest, checkin, checkout]);
+  }, [key, tries, origin, dest, checkin, checkout]);
 
   if (!key) return EMPTY;
   return result.key === key ? result.state : { ...EMPTY, loading: true };

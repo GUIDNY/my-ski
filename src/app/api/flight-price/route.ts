@@ -255,6 +255,8 @@ export async function GET(req: NextRequest) {
     } catch (cacheErr) {
       console.error("flight-price cache write failed", cacheErr);
     }
+    // Google answered nothing readable (its "Oops" page): say the check failed, not "no direct flight"
+    if (price === null) return NextResponse.json({ price: null, error: "לא הצלחנו לבדוק מחיר טיסה כרגע" }, { status: 200 });
     // a direct flight found: the CDN keeps this answer for 6 hours (per dates and airport),
     // so the next visitor gets it at once; a "no direct flight" isn't kept (the search can miss one)
     return NextResponse.json({ price: sell(price), nonstop, url, airline, departTime, arriveTime, checkedAt, cached: false },
