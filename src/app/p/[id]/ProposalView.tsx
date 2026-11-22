@@ -27,7 +27,9 @@ const equipCost = (days: number) => (days <= 0 ? 0 : days <= 6 ? Math.min(30 * d
 
 type Kind = "equipment" | "transfer" | "skipass" | "flight" | "bag" | null;
 const kindOf = (label: string): Kind =>
-  /לינה|דירה/.test(label) ? null
+  // a line that starts with "הסעה" is the transfer even when it says "עד הדירה"
+  /^[^\u0590-\u05FFA-Za-z0-9]*הסעה/.test(label) ? "transfer"
+    : /לינה|דירה/.test(label) ? null
     : /ציוד/.test(label) ? "equipment"
     : /הסעה/.test(label) ? "transfer"
     : /סקי פס/.test(label) ? "skipass"

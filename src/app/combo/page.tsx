@@ -499,16 +499,16 @@ function ComboInner() {
             </a>
             <div className="grid grid-cols-3 gap-2">
               <button type="button" onClick={handleSendQuote} disabled={creatingQuote}
-                className={`${btn.outline} px-3 text-[14px] disabled:opacity-45`}>
+                className="flex items-center justify-center gap-1.5 min-h-[46px] px-2 rounded-xl border border-line hover:border-line-strong bg-white text-ink text-[14px] font-bold transition-colors whitespace-nowrap disabled:opacity-45">
                 {creatingQuote ? "רגע…" : "הצעת מחיר"}
               </button>
               <button type="button" onClick={() => { navigator.clipboard?.writeText("https://skisharebook.com" + window.location.pathname + window.location.search); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-                className={`${btn.outline} px-3 text-[14px]`} aria-live="polite">
-                <IcoLink size={16} /> {copied ? "הקישור הועתק" : "העתקת קישור"}
+                className="flex items-center justify-center gap-1.5 min-h-[46px] px-2 rounded-xl border border-line hover:border-line-strong bg-white text-ink text-[14px] font-bold transition-colors whitespace-nowrap" aria-live="polite">
+                <IcoLink size={16} /> {copied ? "הועתק" : "שיתוף"}
               </button>
               <SaveTripButton apartmentId={a.id} extraApartmentId={b.id} checkin={checkin} checkout={checkout} guests={guests}
                 label="שמירה"
-                className={`${btn.outline} px-3 text-[14px]`} />
+                className="flex items-center justify-center gap-1.5 min-h-[46px] px-2 rounded-xl border border-line hover:border-line-strong bg-white text-ink text-[14px] font-bold transition-colors whitespace-nowrap" />
             </div>
             <TrustList items={[
               "הזמנה אחת לשתי הדירות",

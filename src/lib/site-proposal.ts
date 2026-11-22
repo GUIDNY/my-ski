@@ -117,7 +117,8 @@ export async function buildSiteProposal(one: (k: string) => string): Promise<{ d
         ...(!b && a.sqm ? [["גודל", `${a.sqm} מ"ר`] as [string, string]] : []),
         ...(b ? [["מתאימות", `עד ${(a.max_guests || 0) + (b.max_guests || 0)} אנשים`] as [string, string]] : a.max_guests ? [["מתאימה", `עד ${a.max_guests} אנשים`] as [string, string]] : []),
       ] },
-      ...(b ? [{ type: "gallery", urls: [...(a.images ?? []).slice(0, 2), ...(b.images ?? []).slice(0, 2)] } as ProposalBlock] : a.images?.length ? [{ type: "gallery", urls: a.images.slice(0, 3) } as ProposalBlock] : []),
+      // both apartments in the photos: the first one's main photo, then two of the second one, then the rest by turns
+      ...(b ? [{ type: "gallery", urls: (() => { const ia = (a.images ?? []).slice(0, 6), ib = (b.images ?? []).slice(0, 6); const rest = Array.from({ length: 6 }, (_, i) => [ia[i + 1], ib[i + 2]]).flat().filter(Boolean) as string[]; return [ia[0], ib[0], ib[1], ...rest].filter(Boolean) as string[]; })() } as ProposalBlock] : a.images?.length ? [{ type: "gallery", urls: a.images.slice(0, 3) } as ProposalBlock] : []),
       ...(a.description ? describe(a.description) : []),
     ],
   });
