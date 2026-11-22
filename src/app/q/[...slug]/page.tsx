@@ -4,7 +4,7 @@ import ProposalView from "@/app/p/[id]/ProposalView";
 import AdminProfitBadge from "@/components/AdminProfitBadge";
 import { createServerClient } from "@/lib/supabase-server";
 import { buildSiteProposal } from "@/lib/site-proposal";
-import { encodeExtras } from "@/lib/quote-extras";
+import { quoteChoices } from "@/lib/quotes";
 
 type Props = {
   params: Promise<{ slug: string[] }>;
@@ -20,8 +20,22 @@ const extrasOf = (sp: Record<string, string | string[] | undefined>) => (typeof 
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const id = idOf((await params).slug);
   const x = extrasOf(await searchParams);
+  // the link preview (WhatsApp, iMessage): the apartments' photos, dates and price, drawn by /api/og/q/<id>
+  let title = "הצעת מחיר — SkiShare", description = "הצעת מחיר אישית לחופשת סקי בואל טורנס";
+  if (/^[a-z0-9]{4,12}$/i.test(id)) {
+    const { data: q } = await createServerClient().from("quotes").select("apartment_name,checkin,checkout,guests").eq("id", id).maybeSingle();
+    if (q) {
+      const dm = (iso: string) => { const d = new Date(iso + "T12:00:00"); return `${d.getDate()}.${d.getMonth() + 1}`; };
+      title = `הצעת מחיר: ${q.apartment_name}`;
+      description = `ואל טורנס · ${q.checkin && q.checkout ? `${dm(q.checkin)}–${dm(q.checkout)} · ` : ""}${q.guests} אנשים · דירה, סקי פס, הסעה וציוד`;
+    }
+  }
+  const og = `https://skisharebook.com/api/og/q/${encodeURIComponent(id)}${x ? `?x=${x}` : ""}`;
   return {
-    title: "הצעת מחיר — SkiShare",
+    title,
+    description,
+    openGraph: { title, description, images: [{ url: og, width: 1200, height: 630, type: "image/jpeg" }], type: "website", siteName: "SkiShare", locale: "he_IL" },
+    twitter: { card: "summary_large_image", title, description, images: [og] },
     robots: { index: false, follow: false },
     itunes: { appId: "6782095727", appArgument: `https://skisharebook.com/q/${encodeURIComponent(id)}${x ? `?x=${x}` : ""}` },
   };
@@ -37,16 +51,7 @@ export default async function ShortQuotePage({ params, searchParams }: Props) {
   const db = createServerClient();
   const { data: q } = await db.from("quotes").select("*").eq("id", id).maybeSingle();
   if (!q) notFound();
-  const guests = Number(q.guests) || 2;
-  const x = extrasOf(await searchParams) ?? encodeExtras({
-    ...(q.ski_pass ? { pass: { area: "val_thorens" as const, qty: guests } } : {}),
-    ...(q.transfer ? { transfer: { qty: guests } } : {}),
-    ...(q.equipment ? { equipment: { qty: guests } } : {}),
-  });
-  const choices: Record<string, string> = {
-    apartment_id: String(q.apartment_id || ""), apartment_id2: String(q.extra_apartment_id || ""), checkin: String(q.checkin || ""), checkout: String(q.checkout || ""),
-    guests: String(guests), cancel: String(q.cancel || "regular"), service: String(q.service || "human"), x, q: id,
-  };
+  const choices = quoteChoices(q, id, extrasOf(await searchParams));
   const r = await buildSiteProposal(k => choices[k] || "");
   if (!r) notFound();
   const pdfHref = `/api/quote-pdf?${new URLSearchParams({ ...Object.fromEntries(Object.entries(choices).filter(([, v]) => v)), name: String(q.apartment_name || "") }).toString()}`;

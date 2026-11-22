@@ -1,3 +1,4 @@
+import { encodeExtras } from "@/lib/quote-extras";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 // short id: 6 chars, no ambiguous characters (no 0/O/1/l/I)
@@ -37,4 +38,18 @@ export async function createQuote(db: SupabaseClient, row: QuoteRow): Promise<{ 
     if (error && !/duplicate key|unique/i.test(error.message)) return { error: error.message };
   }
   return { error: "could not allocate id" };
+}
+
+/** the choices a stored quote row (+ the ?x of its link) carries, for buildSiteProposal */
+export function quoteChoices(q: Record<string, unknown>, id: string, x: string | null): Record<string, string> {
+  const guests = Number(q.guests) || 2;
+  const xx = x ?? encodeExtras({
+    ...(q.ski_pass ? { pass: { area: "val_thorens" as const, qty: guests } } : {}),
+    ...(q.transfer ? { transfer: { qty: guests } } : {}),
+    ...(q.equipment ? { equipment: { qty: guests } } : {}),
+  });
+  return {
+    apartment_id: String(q.apartment_id || ""), apartment_id2: String(q.extra_apartment_id || ""), checkin: String(q.checkin || ""), checkout: String(q.checkout || ""),
+    guests: String(guests), cancel: String(q.cancel || "regular"), service: String(q.service || "human"), x: xx, q: id,
+  };
 }
