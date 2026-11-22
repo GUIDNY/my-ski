@@ -9,6 +9,7 @@ export async function POST(req: NextRequest) {
   const row = {
     apartment_id:   b.apartment_id ?? null,
     apartment_name: b.apartment ?? "",
+    ...(typeof b.extra_apartment_id === "string" && /^[0-9a-f-]{36}$/i.test(b.extra_apartment_id) ? { extra_apartment_id: b.extra_apartment_id } : {}),
     checkin:        b.checkin || null,
     checkout:       b.checkout || null,
     guests:         Number(b.guests ?? 2),

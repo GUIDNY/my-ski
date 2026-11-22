@@ -29,7 +29,7 @@ function useSettled<T>(v: T, ms = 700): T {
 }
 
 const CLASS_HE: Record<string, string> = {
-  sedan: "רכב פרטי (סדאן)", minivan: "מיניוואן", van: "ואן", "Premium minivan": "מיניוואן פרימיום",
+  private: "הסעה פרטית", sedan: "רכב פרטי (סדאן)", minivan: "מיניוואן", van: "ואן", "Premium minivan": "מיניוואן פרימיום",
   minibus: "מיניבוס", coach: "אוטובוס",
 };
 const classLabel = (c: string) => { const m = c.match(/^(\d+)\s*[×x]\s*(.+)$/); return m ? `${m[1]} × ${CLASS_HE[m[2]] ?? m[2]}` : CLASS_HE[c] ?? c; };

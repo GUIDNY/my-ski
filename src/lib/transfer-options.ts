@@ -35,13 +35,13 @@ export type TransferAnswer = {
 };
 
 export const CLASS_HE: Record<string, string> = {
-  sedan: "רכב פרטי (סדאן)", minivan: "מיניוואן", van: "ואן", "Premium minivan": "מיניוואן פרימיום",
+  private: "הסעה פרטית", sedan: "רכב פרטי (סדאן)", minivan: "מיניוואן", van: "ואן", "Premium minivan": "מיניוואן פרימיום",
   minibus: "מיניבוס", coach: "אוטובוס",
 };
 
 /** short codes for the quote link (?x=t4mvg): the class a customer picked */
 export const CLASS_CODE: Record<string, string> = {
-  shared: "sh", sedan: "se", minivan: "mv", van: "va", "Premium minivan": "pm", minibus: "mb", coach: "co",
+  shared: "sh", private: "fx", sedan: "se", minivan: "mv", van: "va", "Premium minivan": "pm", minibus: "mb", coach: "co",
 };
 export const codeOf = (o: Pick<TransferOption, "className">) => CLASS_CODE[o.className] ?? "";
 export const byCode = (a: TransferAnswer, code?: string) => (code ? a.options.find(o => codeOf(o) === code) : undefined);
@@ -51,6 +51,30 @@ export const classHe = (c: string) => { const m = c.match(/^(\d+)\s*[×x]\s*(.+)
 
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 const flightNo = (v?: string | null) => { const s = String(v || "").toUpperCase().replace(/\s+/g, ""); return /^[A-Z0-9]{2}\d{1,4}$/.test(s) ? s : undefined; };
+
+/*
+ * Fixed price while Winteride can't price (its API key is out, 22.11): a private
+ * transfer at €180 per person both ways, or €630 for the whole group from 5
+ * people. One way is half. The office books the car by hand.
+ */
+export const FIXED_PER_PERSON = 180;
+export const FIXED_GROUP = 630;
+export const FIXED_GROUP_FROM = 5;
+export function fixedTransferTotal(pax: number, legs = 2) {
+  const both = pax >= FIXED_GROUP_FROM ? FIXED_GROUP : FIXED_PER_PERSON * pax;
+  return Math.round((both * Math.min(2, Math.max(1, legs))) / 2);
+}
+function fixedAnswer(empty: TransferAnswer, pax: number, legs: number): TransferAnswer {
+  const total = fixedTransferTotal(pax, legs);
+  return {
+    ...empty, ok: true, best: "fixed", sharedReason: null,
+    options: [{
+      key: "fixed", kind: "private", name: "הסעה פרטית מהשדה עד הדירה", className: "private",
+      total, perPerson: Math.round(total / pax), maxPax: null, maxBags: null,
+      fits: true, onRequest: false, seatsLeft: null,
+    }],
+  };
+}
 
 export async function transferOptions(p: {
   airport?: string; outDate?: string | null; retDate?: string | null;
@@ -70,7 +94,7 @@ export async function transferOptions(p: {
     getQuote({ airport_code: airport, resort_slug: "val-thorens", date, pax, out_direction: dir, flight_no: fl, luggage, ski }).catch(() => null);
   const outFl = flightNo(p.outFlight), retFl = flightNo(p.retFlight);
   const [qo, qr] = await Promise.all([out ? ask(out, "arrival", outFl) : null, ret ? ask(ret, "departure", retFl) : null]);
-  if ((out && !qo) || (ret && !qr)) return empty;
+  if ((out && !qo) || (ret && !qr)) return fixedAnswer(empty, pax, (out ? 1 : 0) + (ret ? 1 : 0));
   const legs = [qo, qr].filter(Boolean) as WinterideQuote[];
 
   const options: TransferOption[] = [];

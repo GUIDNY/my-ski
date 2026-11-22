@@ -10,6 +10,8 @@ function shortId(len = 6) {
 
 export type QuoteRow = {
   apartment_id: string | null;
+  /** the second apartment of a two-apartment booking (/combo) */
+  extra_apartment_id?: string | null;
   apartment_name: string;
   checkin: string | null;
   checkout: string | null;

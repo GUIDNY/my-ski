@@ -34,6 +34,8 @@ function describe(desc: string): ProposalBlock[] {
 
 export async function buildSiteProposal(one: (k: string) => string): Promise<{ data: ProposalData; payUrl: string; guests: number; profitHints: { aptTotal: number; nights: number; flightQty: number } } | null> {
   const apartmentId = one("apartment_id");
+  // a two-apartment booking (/combo): the second apartment is priced the same way and added
+  const apartmentId2 = /^[0-9a-f-]{36}$/i.test(one("apartment_id2")) && one("apartment_id2") !== apartmentId ? one("apartment_id2") : "";
   const checkin = one("checkin"), checkout = one("checkout");
   const guests = Math.min(Math.max(parseInt(one("guests")) || 2, 1), 40);
   const cancel = ["regular", "flexible", "none"].includes(one("cancel")) ? one("cancel") : "regular";
@@ -50,12 +52,17 @@ export async function buildSiteProposal(one: (k: string) => string): Promise<{ d
   const db = createServerClient();
   const [{ data: apt }, rulesMap, { data: passes }, { data: flights }] = await Promise.all([
     db.from("apartments").select("*").eq("id", apartmentId).maybeSingle(),
-    rulesWithAirbnb(db, [apartmentId]),
+    rulesWithAirbnb(db, apartmentId2 ? [apartmentId, apartmentId2] : [apartmentId]),
     db.from("ski_passes").select("*").eq("available", true),
     db.from("flight_price_cache").select("*").eq("origin", "TLV").in("dest", ["GVA", "LYS"]).eq("checkin", checkin).eq("checkout", checkout),
   ]);
   if (!apt) return null;
   const a = apt as Apartment;
+  let b: Apartment | null = null;
+  if (apartmentId2) {
+    const { data: apt2 } = await db.from("apartments").select("*").eq("id", apartmentId2).maybeSingle();
+    b = (apt2 as Apartment | null) ?? null;
+  }
 
   // the cheapest direct flight the site found for these dates (the cache /api/flight-price fills)
   const direct: DirectFlight | null = ((flights ?? []) as { dest: FlightAirport; price_eur: number | null; nonstop: boolean; airline?: string | null; url?: string | null; depart_time?: string | null; arrive_time?: string | null }[])
@@ -74,11 +81,23 @@ export async function buildSiteProposal(one: (k: string) => string): Promise<{ d
     apt: a, rules: rulesMap?.get(apartmentId) ?? [], passes: (passes ?? []) as SkiPass[],
     checkin, checkout, guests, extras, cancel, service, flight: direct, transferPick,
   });
+  if (b) {
+    // the second apartment's stay, right after the first one's, both named
+    const cb = quoteLines({ apt: b, rules: rulesMap?.get(b.id) ?? [], passes: [], checkin, checkout, guests, extras: {}, cancel: "regular", service: "human", flight: null });
+    const stayB = cb.lines[0];
+    calc.lines[0] = { ...calc.lines[0], label: `${a.name}: ${calc.lines[0].label}` };
+    calc.lines.splice(1, 0, { ...stayB, key: "stay2", label: `${b.name}: ${stayB.label}` });
+    calc.aptTotal += cb.aptTotal;
+    calc.total += stayB.amount;
+    calc.perPerson = Math.round(calc.total / Math.max(guests, 1));
+  }
   const flightLine = calc.lines.find(l => l.key === "flight");
 
   const nameSlug = a.name.trim().replace(/\s+/g, "-").replace(/[/?#&]/g, "");
   const code = Object.keys(extras).length ? new URLSearchParams({ x: one("x") }).toString() : "";
-  const payUrl = quoteId
+  const payUrl = b
+    ? `${SITE}/combo?a=${a.id}&b=${b.id}&checkin=${checkin}&checkout=${checkout}&guests=${guests}`
+    : quoteId
     ? `${SITE}/q/${encodeURIComponent(nameSlug)}/${quoteId}${code ? `?${code}` : ""}`
     : `${SITE}/apartments/${a.id}?checkin=${checkin}&checkout=${checkout}&guests=${guests}`;
   const today = new Date();
@@ -86,19 +105,19 @@ export async function buildSiteProposal(one: (k: string) => string): Promise<{ d
 
   const sections: ProposalSection[] = [];
   sections.push({
-    heading: "הדירה",
+    heading: b ? "הדירות" : "הדירה",
     blocks: [
       { type: "kv", rows: [
-        ["דירה", a.name],
+        ...(b ? [["דירות", `${a.name} + ${b.name}`] as [string, string]] : [["דירה", a.name] as [string, string]]),
         ["מקום", "ואל טורנס, צרפת"],
         ["כניסה", dayDate(checkin)],
         ["יציאה", dayDate(checkout)],
         ["לילות", calc.weekly ? "7 (שבת עד שבת)" : String(calc.nights)],
         ["אנשים", String(guests)],
-        ...(a.sqm ? [["גודל", `${a.sqm} מ"ר`] as [string, string]] : []),
-        ...(a.max_guests ? [["מתאימה", `עד ${a.max_guests} אנשים`] as [string, string]] : []),
+        ...(!b && a.sqm ? [["גודל", `${a.sqm} מ"ר`] as [string, string]] : []),
+        ...(b ? [["מתאימות", `עד ${(a.max_guests || 0) + (b.max_guests || 0)} אנשים`] as [string, string]] : a.max_guests ? [["מתאימה", `עד ${a.max_guests} אנשים`] as [string, string]] : []),
       ] },
-      ...(a.images?.length ? [{ type: "gallery", urls: a.images.slice(0, 3) } as ProposalBlock] : []),
+      ...(b ? [{ type: "gallery", urls: [...(a.images ?? []).slice(0, 2), ...(b.images ?? []).slice(0, 2)] } as ProposalBlock] : a.images?.length ? [{ type: "gallery", urls: a.images.slice(0, 3) } as ProposalBlock] : []),
       ...(a.description ? describe(a.description) : []),
     ],
   });
@@ -157,7 +176,7 @@ export async function buildSiteProposal(one: (k: string) => string): Promise<{ d
       payUrl,
       validUntil: `${valid.getDate()}.${valid.getMonth() + 1}.${valid.getFullYear()}`,
     },
-    title: a.name,
+    title: b ? `${a.name} + ${b.name}` : a.name,
     subtitle: `ואל טורנס · ${calc.weekly ? "שבוע שלם" : `${calc.nights} לילות`} · ${guests} ${guests === 1 ? "אדם" : "אנשים"}${quoteId ? ` · הצעה \u2068${quoteId}\u2069` : ""}`,
     intro: `הצעת מחיר אישית לחופשה בואל טורנס, ${longDate(checkin)} עד ${longDate(checkout)}. כל המחירים באירו, לפי מה שבחרתם באתר.`,
     sections,

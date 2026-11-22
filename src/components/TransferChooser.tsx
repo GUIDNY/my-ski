@@ -90,7 +90,7 @@ export default function TransferChooser({ pax, outDate, retDate, outFlight, retF
                     {o.onRequest && <span className="ms-2 text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-soft text-muted align-middle">באישור ידני</span>}
                   </span>
                   <span className={`text-[13px] ${o.fits ? "text-muted" : "text-warn"}`}>
-                    {o.kind === "shared" ? `מושב לכל נוסע, לפי הטיסה${o.seatsLeft != null && o.seatsLeft < 8 ? ` · נשארו ${o.seatsLeft} מקומות` : ""}` : `עד ${o.maxPax} נוסעים · עד ${o.maxBags} תיקים${o.fits ? "" : " · קטן לכמות התיקים"}`}
+                    {o.key === "fixed" ? (pax >= 5 ? "מחיר קבוע לכל הקבוצה, הלוך וחזור" : "מחיר קבוע לאדם, הלוך וחזור, עד דלת הדירה") : o.kind === "shared" ? `מושב לכל נוסע, לפי הטיסה${o.seatsLeft != null && o.seatsLeft < 8 ? ` · נשארו ${o.seatsLeft} מקומות` : ""}` : `עד ${o.maxPax} נוסעים · עד ${o.maxBags} תיקים${o.fits ? "" : " · קטן לכמות התיקים"}`}
                   </span>
                 </span>
                 <span className="flex flex-col items-end shrink-0">

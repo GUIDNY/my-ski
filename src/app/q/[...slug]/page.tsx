@@ -44,7 +44,7 @@ export default async function ShortQuotePage({ params, searchParams }: Props) {
     ...(q.equipment ? { equipment: { qty: guests } } : {}),
   });
   const choices: Record<string, string> = {
-    apartment_id: String(q.apartment_id || ""), checkin: String(q.checkin || ""), checkout: String(q.checkout || ""),
+    apartment_id: String(q.apartment_id || ""), apartment_id2: String(q.extra_apartment_id || ""), checkin: String(q.checkin || ""), checkout: String(q.checkout || ""),
     guests: String(guests), cancel: String(q.cancel || "regular"), service: String(q.service || "human"), x, q: id,
   };
   const r = await buildSiteProposal(k => choices[k] || "");

@@ -15,6 +15,8 @@ import { useDirectFlight, useReturnLeg, time24 } from "@/lib/useFlightPrice";
 import { BAGGAGE_PRICE, TROLLEY_PRICE, LIFT_DATES, PASS_AREA_LABEL, liftsOpenForStay, packagePassArea, passTier, shortDate, type PassArea } from "@/lib/deal-pricing";
 import FlightDetailsModal, { EMPTY_FLIGHT, flightToString, flightFilled, type Flight } from "@/components/FlightDetailsModal";
 import { buildWaHref } from "@/lib/whatsapp";
+import { encodeExtras } from "@/lib/quote-extras";
+import { codeOf } from "@/lib/transfer-options";
 import { IconUser, IconBed, IconWhatsApp, IconSkis, IconBus, IconPlane, IconShield, IconBot, IconCalendar, IconUsers, IconChevronLeft, IconInfo } from "@/components/Icons";
 import { btn, card, chip, wrap, EmptyState, PageTop, Check } from "@/components/ui";
 import { FormSection, OptionCard, Tag, SumRow, TrustList, MobileBar, IcoLink, IcoX } from "@/components/checkout/Checkout";
@@ -167,6 +169,10 @@ function ComboInner() {
   const [showAiInfo, setShowAiInfo] = useState(false);
   const [showBreakdown, setShowBreakdown] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [splitCount, setSplitCount] = useState(1);
+  const [creatingQuote, setCreatingQuote] = useState(false);
+  const [quoteUrl, setQuoteUrl] = useState<string | null>(null);
+  const [qCopied, setQCopied] = useState(false);
 
   useEffect(() => {
     fetch("/api/ski-passes").then(r => r.json()).then(d => { if (Array.isArray(d)) setPasses(d); }).catch(() => {});
@@ -227,6 +233,39 @@ function ComboInner() {
         trolleyOn ? `טרולי €${TROLLEY_PRICE} × ${trolleyQty}` : null,
       ].filter(Boolean).join(" · ")
     : "";
+  // split: the FULL total (both apartments + all add-ons) divided equally between payers
+  const payers = Math.min(splitCount, Math.max(guests, 1));
+  const shareAmount = Math.round(total / payers);
+  const payNow = payers > 1 ? shareAmount : total;
+  const comboExtras = encodeExtras({
+    ...(skiOn ? { pass: { area: skiArea, qty: skiQty } } : {}),
+    ...(transfer ? { transfer: { qty: guests || 1, ...(trPick ? { kind: codeOf(trPick) || undefined } : {}) } } : {}),
+    ...(equipment ? { equipment: { qty: equipQty } } : {}),
+    ...(flightOn ? { flight: { qty: bookFlightQty } } : {}),
+    ...(bagOn ? { bag: { qty: baggageQty } } : {}),
+    ...(trolleyOn ? { trolley: { qty: trolleyQty } } : {}),
+  });
+  const handleSendQuote = async () => {
+    setCreatingQuote(true);
+    const slug = `${a.name}-${b.name}`.trim().replace(/\s+/g, "-").replace(/[/?#&+]/g, "");
+    try {
+      const res = await fetch("/api/quotes", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          apartment_id: a.id, extra_apartment_id: b.id, apartment: `${a.name} + ${b.name}`,
+          checkin, checkout, guests, nights, ski_pass: skiOn, transfer, equipment, cancel, service,
+          apt_total: totalA + totalB, grand_total: total,
+        }),
+      });
+      if (!res.ok) throw new Error("quote");
+      const { id: shortId } = await res.json();
+      setQuoteUrl(`https://skisharebook.com/q/${encodeURIComponent(slug)}/${shortId}${comboExtras ? `?x=${comboExtras}` : ""}`);
+    } catch {
+      setQuoteUrl("https://skisharebook.com" + window.location.pathname + window.location.search);
+    } finally {
+      setCreatingQuote(false);
+    }
+  };
   const choosePass = (area: PassArea) => {
     if (!passOpen(area)) return;
     if (skiOn && skiArea === area) { setSkiPass(false); return; }
@@ -428,18 +467,41 @@ function ComboInner() {
             </div>
             <p className="text-[13px] text-muted leading-relaxed">ייתכנו עמלות נוספות (למשל עמלת סליקת אשראי של 1.9%). המחירים ביורו, והחיוב בשקלים לפי שער ההמרה.</p>
 
+            {guests > 1 && (
+              <div className="rounded-2xl bg-soft px-4 py-3 flex flex-col gap-3">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-bold text-[15px] text-ink">כמה משלמים?</span>
+                  <Stepper value={payers} onChange={setSplitCount} max={guests} label="כמה משלמים" />
+                </div>
+                {payers > 1 && (
+                  <div className="rounded-xl bg-white border border-line px-3.5 py-3 text-[14px]">
+                    <div className="flex justify-between font-bold text-ink text-[15px]">
+                      <span>החלק שלכם לתשלום עכשיו</span>
+                      <span>{eur(payNow)}</span>
+                    </div>
+                    <p className="text-muted mt-1 leading-relaxed">הסה&quot;כ ({eur(total)}) מתחלק שווה ל-{payers}. אחרי התשלום תקבלו קישור לשלוח לחברים.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
             <CardPaymentButton
               apartmentId={a.id} apartment={comboName}
               extraApartmentId={b.id} extraApartmentName={b.name}
               checkin={checkin} checkout={checkout} guests={guests} nights={nights}
               skiPass={skiOn} transfer={transfer} equipment={equipment} transferDetails={transferDetails}
-              flight={flightOn} flightPrice={bookFlightTotal + baggageTotal + trolleyTotal} flightDetails={flightDetails} grandTotal={total} cancel={cancel} service={service}
+              flight={flightOn} flightPrice={bookFlightTotal + baggageTotal + trolleyTotal} flightDetails={flightDetails} grandTotal={payNow} cancel={cancel} service={service}
+              split={payers > 1 ? { sharesTotal: payers, accommodationTotal: total, shareAmount, area: "Val Thorens, Trois Vallées" } : undefined}
               className={`${btn.primaryLg} w-full`}
-              label="תשלום מאובטח בכרטיס" />
+              label={payers > 1 ? "לשלם את החלק שלכם בכרטיס" : "תשלום מאובטח בכרטיס"} />
             <a href={wa} target="_blank" rel="noopener noreferrer" className={`${btn.outline} w-full`}>
               <span className="text-[#128C4B]"><IconWhatsApp size={18} /></span> תיאום בוואטסאפ
             </a>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
+              <button type="button" onClick={handleSendQuote} disabled={creatingQuote}
+                className={`${btn.outline} px-3 text-[14px] disabled:opacity-45`}>
+                {creatingQuote ? "רגע…" : "הצעת מחיר"}
+              </button>
               <button type="button" onClick={() => { navigator.clipboard?.writeText("https://skisharebook.com" + window.location.pathname + window.location.search); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
                 className={`${btn.outline} px-3 text-[14px]`} aria-live="polite">
                 <IcoLink size={16} /> {copied ? "הקישור הועתק" : "העתקת קישור"}
@@ -450,6 +512,7 @@ function ComboInner() {
             </div>
             <TrustList items={[
               "הזמנה אחת לשתי הדירות",
+              "כל אחד יכול לשלם את החלק שלו",
               "תשלום מאובטח דרך PayPlus",
               "אפשר לבחור ביטול גמיש",
             ]} />
@@ -464,6 +527,24 @@ function ComboInner() {
         </div>
         <button type="button" onClick={goToSummary} className={`${btn.primary} flex-1`}>להזמנה</button>
       </MobileBar>
+
+      {quoteUrl && (
+        <Dialog title="הצעת המחיר מוכנה" onClose={() => setQuoteUrl(null)}>
+          <div className="flex flex-col gap-3">
+            <p className="text-[14px] text-muted">הצעה לשתי הדירות יחד, עם כל מה שבחרתם. אפשר לשלוח אותה לחברים.</p>
+            <div className="flex gap-2">
+              <input readOnly value={quoteUrl} dir="ltr" className="w-full min-h-[48px] rounded-xl border border-line-strong px-3 text-[14px] text-right bg-soft min-w-0" onFocus={e => e.currentTarget.select()} />
+              <button type="button" onClick={() => { navigator.clipboard?.writeText(quoteUrl); setQCopied(true); setTimeout(() => setQCopied(false), 2000); }} className={`${btn.primary} px-5 shrink-0`}>
+                {qCopied ? "הועתק" : "העתקה"}
+              </button>
+            </div>
+            <a href={`https://wa.me/?text=${encodeURIComponent(`הצעת מחיר ל-${a.name} + ${b.name} 🎿\n${quoteUrl}`)}`} target="_blank" rel="noopener noreferrer" className={`${btn.outline} w-full`}>
+              <span className="text-[#128C4B]"><IconWhatsApp size={18} /></span> שליחה בוואטסאפ
+            </a>
+            <a href={quoteUrl} target="_blank" rel="noopener noreferrer" className={`${btn.outline} w-full`}>לפתוח</a>
+          </div>
+        </Dialog>
+      )}
 
       {/* Transfer flight details */}
       <FlightDetailsModal open={showTransfer} onClose={() => setShowTransfer(false)} value={flight} onChange={setFlight} />
