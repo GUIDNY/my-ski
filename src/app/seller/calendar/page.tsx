@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { authFetch } from "@/lib/auth-fetch";
 
 /*
@@ -37,19 +37,21 @@ export default function CalendarPage() {
   const [loading, setLoading] = useState(true);
   const days = 35;
 
+  const seq = useRef(0); // only the latest request may paint (typing a date fires one per digit)
   const fetchCal = useCallback((f: string) => {
+    const my = ++seq.current;
     authFetch(`/api/seller/calendar?days=${days}${f ? `&from=${f}` : ""}`)
       .then(r => r.json())
-      .then(j => { if (!j?.ok) throw new Error(j?.error || "שגיאה"); setData(j); setFrom(j.from); })
-      .catch(e => setErr(e instanceof Error ? e.message : "שגיאה"))
-      .finally(() => setLoading(false));
+      .then(j => { if (my !== seq.current) return; if (!j?.ok) throw new Error(j?.error || "שגיאה"); setData(j); setFrom(j.from); })
+      .catch(e => { if (my === seq.current) setErr(e instanceof Error ? e.message : "שגיאה"); })
+      .finally(() => { if (my === seq.current) setLoading(false); });
   }, []);
   useEffect(() => { fetchCal(""); }, [fetchCal]);
   const load = (f: string) => { setLoading(true); setErr(""); fetchCal(f); };
 
   const shift = (n: number) => from && load(iso(t(from) + n * DAY));
   const goToday = () => load("");
-  const goDate = (d: string) => d && load(iso(t(d) - 3 * DAY));
+  const goDate = (d: string) => { if (/^20\d\d-\d\d-\d\d$/.test(d)) load(iso(t(d) - 3 * DAY)); };
 
   const dates = useMemo(() => data ? Array.from({ length: data.days }, (_, i) => iso(t(data.from) + i * DAY)) : [], [data]);
 
