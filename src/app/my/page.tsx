@@ -386,6 +386,7 @@ function OrderModal({ o, onClose }: { o: OrderView; onClose: () => void }) {
             <span className="text-[15px] font-bold text-ink">{o.group ? "החלק שלכם" : approved ? "סה״כ ששולם" : "סה״כ ההזמנה"}</span>
             <span className="font-display font-extrabold text-[26px] text-ink">{eur(o.total_eur)}</span>
           </div>
+          {o.group && <GroupProgress group={o.group} />}
           {o.proposalId && (
             <a href={`/p/${o.proposalId}`} target="_blank" rel="noopener noreferrer" className={`${btn.outline} w-full min-h-[44px]`}>ההצעה המלאה, עם כל הפרטים</a>
           )}

@@ -52,7 +52,8 @@ export async function POST(req: NextRequest) {
     if (hit) {
       couponUsed = { code: hit.coupon.code, discount: hit.discount };
       row.total_eur = Math.max(0, row.total_eur - hit.discount);
-      if (row.share_amount != null && Number(b.shares_total) > 0) row.share_amount = Math.max(0, Math.round(row.total_eur / Number(b.shares_total)));
+      // in a split payment the order IS this payer's share, so the coupon comes off their share
+      if (row.share_amount != null) row.share_amount = Math.max(0, row.share_amount - hit.discount);
     }
   }
   // Refuse orders for nights that are already taken (Airbnb/Hostex iCal,
