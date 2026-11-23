@@ -17,6 +17,7 @@
  */
 
 import { gadsConversion } from "@/lib/gads";
+import { metaCheckout, metaLead, metaPurchase } from "@/lib/meta-pixel";
 
 export const OAI_PIXEL_ID = process.env.NEXT_PUBLIC_OAI_PIXEL_ID || "JUva1CRVPrEnzzc2MpF3kf";
 
@@ -64,6 +65,7 @@ export function oaiLead(source: "whatsapp" | "chat" | "quote") {
   } catch { /* private mode: send anyway */ }
   oaiq("measure", "lead_created", { type: "customer_action" });
   gadsConversion("lead");
+  metaLead(source);
 }
 
 const PENDING = "oai_pending_order";
@@ -78,6 +80,7 @@ export function oaiCheckoutStarted(orderCode: string, amount: number, currency: 
     contents: [{ id: orderCode, name, quantity: 1, amount: minor(amount), currency: cur }],
   });
   gadsConversion("checkout", { value: amount, currency: cur, transaction_id: orderCode });
+  metaCheckout(orderCode, amount, cur);
 }
 
 /* the order code is the event_id, so a refresh of the success page is not a
@@ -101,5 +104,6 @@ export function oaiOrderCreated(orderCode: string) {
   oaiq("measure", "order_created", data, { event_id: `order_${code}` });
   // Google counts one purchase per transaction_id, so a refresh is not a second sale there either
   gadsConversion("purchase", match ? { value: pending.amount, currency: pending.currency, transaction_id: code } : { transaction_id: code });
+  metaPurchase(code, match ? pending.amount : undefined, pending.currency);
   try { localStorage.setItem(sent, "1"); sessionStorage.removeItem(PENDING); } catch { /* ignore */ }
 }

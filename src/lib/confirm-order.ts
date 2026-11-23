@@ -1,5 +1,6 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { blockDatesForOrder } from "@/lib/inventory";
+import { sendMetaEvent } from "@/lib/meta-capi";
 import { orderLang, portalUrl } from "@/lib/order-lang";
 
 type Info = { email?: string; name?: string; phone?: string; txUid?: string; amountIls?: number };
@@ -30,6 +31,13 @@ export async function confirmDepositPaid(code: string, origin: string, info: Inf
   }
 
   if (sendEmail) {
+    // Meta Conversions API Purchase; event_id matches the browser pixel's (order_<code>). Quiet without META_CAPI_TOKEN.
+    const ils = info.amountIls && info.amountIls > 0 ? info.amountIls : 0;
+    await sendMetaEvent({
+      event: "Purchase", eventId: `order_${order.code}`, url: `${origin}/pay/success?order=${order.code}`,
+      value: ils || Number(order.total_eur) || undefined, currency: ils ? "ILS" : "EUR", contentIds: [String(order.code)],
+      email: order.customer_email, phone: order.customer_phone, name: order.customer_name,
+    });
     await blockDatesForOrder(db, order);
     const hook = process.env.N8N_WEBHOOK_URL;
     if (hook) {

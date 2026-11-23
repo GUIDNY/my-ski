@@ -11,6 +11,7 @@ import WhatsAppFloat from "@/components/WhatsAppFloat";
 import OpenAIPixel from "@/components/OpenAIPixel";
 import { Analytics } from "@vercel/analytics/next";
 import AnalyticsConsent from "@/components/AnalyticsConsent";
+import MetaPixel from "@/components/MetaPixel";
 import GoogleAdsTag from "@/components/GoogleAdsTag";
 import ClarityTag from "@/components/ClarityTag";
 import Attribution from "@/components/Attribution";
@@ -114,6 +115,7 @@ export default function RootLayout({
         <OpenAIPixel />
         <Analytics />
         <GoogleAdsTag />
+        <MetaPixel />
         <ClarityTag />
         <Attribution />
         <PayFrame />
