@@ -4,7 +4,7 @@
  * after the cookie consent. components/MetaPixel.tsx loads the base code.
  *
  * NEXT_PUBLIC_META_PIXEL_ID (public, not a secret) is the dataset id from Events Manager.
- * Without it nothing loads and nothing is sent.
+ * Built-in fallback: the existing dataset 792481999983799.
  * The server side (lib/meta-capi.ts) additionally needs META_CAPI_TOKEN.
  *
  * Browser and server send the same event_id so Meta counts each event once:
@@ -13,7 +13,7 @@
  */
 import { oaiAllowed } from "@/lib/oai-pixel";
 
-export const META_PIXEL_ID = (process.env.NEXT_PUBLIC_META_PIXEL_ID || "").trim();
+export const META_PIXEL_ID = (process.env.NEXT_PUBLIC_META_PIXEL_ID || "792481999983799").trim();
 
 type Fbq = (...args: unknown[]) => void;
 

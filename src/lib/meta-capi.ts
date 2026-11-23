@@ -6,7 +6,7 @@ import { createHash } from "crypto";
  * (NEXT_PUBLIC_META_PIXEL_ID). Without either it does nothing, quietly.
  * event_id matches the browser pixel (lib/meta-pixel.ts) so Meta de-duplicates.
  */
-const PIXEL = (process.env.NEXT_PUBLIC_META_PIXEL_ID || "").trim();
+const PIXEL = (process.env.NEXT_PUBLIC_META_PIXEL_ID || "792481999983799").trim();
 const sha = (v?: string | null) => {
   const s = (v || "").trim().toLowerCase();
   return s ? createHash("sha256").update(s).digest("hex") : undefined;
