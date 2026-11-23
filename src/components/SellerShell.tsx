@@ -10,6 +10,7 @@ import { authFetch } from "@/lib/auth-fetch";
  */
 const LINKS = [
   { href: "/seller", label: "דשבורד", icon: "▦" },
+  { href: "/seller/calendar", label: "לוח הזמנות", icon: "📅" },
   { href: "/seller/chats", label: "לידים וצ׳אטים", icon: "💬" },
   { href: "/seller/quotes", label: "הצעות מחיר", icon: "📄" },
   { href: "/seller/orders", label: "הזמנות ורווח", icon: "💶" },
