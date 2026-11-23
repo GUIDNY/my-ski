@@ -6,7 +6,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  * listing (from its ical_sources import URL). Read by the n8n workflow "Hostex ← site orders".
  */
 export type HostexStay = {
-  key: string;            // stable id of the Hostex reservation, e.g. "c9tnvr-fadf" or "g080d82a26d-fadf"
+  key: string;            // stable id of the Hostex reservation, e.g. "d2703090323-fadf" or "g080d82a26d-fadf"
   apartment_id: string;
   listing_id: string;     // Airbnb listing id → Hostex property
   checkin: string;
@@ -44,12 +44,14 @@ export async function hostexStays(db: SupabaseClient, onlyApartments?: string[])
   if (error) return null;
   const byKey = new Map<string, HostexStay>();
   for (const o of data ?? []) {
-    const base = o.group_id ? "g" + String(o.group_id).replace(/-/g, "").slice(0, 10) : String(o.code);
+    const ci = String(o.checkin).slice(0, 10), co = String(o.checkout).slice(0, 10);
+    // a split-payment group is one stay; so are older per-person shares without a group (same
+    // apartment, same dates: the site never sells the same nights twice)
+    const base = o.group_id ? "g" + String(o.group_id).replace(/-/g, "").slice(0, 10) : "d" + ci.replace(/-/g, "").slice(2) + co.replace(/-/g, "").slice(4);
     for (const apt of [o.apartment_id, o.extra_apartment_id]) {
       if (!apt || !listings[apt]) continue;
       if (onlyApartments && !onlyApartments.includes(apt)) continue;
       const key = `${base}-${String(apt).slice(0, 4)}`;
-      const ci = String(o.checkin).slice(0, 10), co = String(o.checkout).slice(0, 10);
       const cur = byKey.get(key);
       if (!cur) {
         byKey.set(key, { key, apartment_id: apt, listing_id: listings[apt], checkin: ci, checkout: co, guests: Number(o.guests) || 1, codes: [String(o.code)], name: String(o.customer_name || "").trim() });
