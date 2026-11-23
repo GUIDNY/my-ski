@@ -69,9 +69,9 @@ export default function CalendarPage() {
           <p className="text-gray-500 text-sm mt-0.5">כל הדירות: הזמנות Airbnb והזמנות האתר. לצפייה בלבד.</p>
         </div>
         <div className="flex items-center gap-2" dir="ltr">
-          <button onClick={() => shift(-7)} className="px-3 py-2 rounded-xl bg-white border border-gray-200 text-sm font-bold hover:border-gray-300">‹ שבוע</button>
+          <button onClick={() => shift(-7)} dir="rtl" className="px-3 py-2 rounded-xl bg-white border border-gray-200 text-sm font-bold hover:border-gray-300">« שבוע קודם</button>
           <button onClick={goToday} className="px-3 py-2 rounded-xl bg-white border border-gray-200 text-sm font-bold hover:border-gray-300">היום</button>
-          <button onClick={() => shift(7)} className="px-3 py-2 rounded-xl bg-white border border-gray-200 text-sm font-bold hover:border-gray-300">שבוע ›</button>
+          <button onClick={() => shift(7)} dir="rtl" className="px-3 py-2 rounded-xl bg-white border border-gray-200 text-sm font-bold hover:border-gray-300">שבוע הבא »</button>
           <input type="date" onChange={e => goDate(e.target.value)} className="px-2 py-1.5 rounded-xl bg-white border border-gray-200 text-sm" aria-label="קפיצה לתאריך" />
         </div>
       </div>
