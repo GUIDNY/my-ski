@@ -329,8 +329,8 @@ function Month({ data, rows, apt, ym, today, onBar, onDay }: { data: Data; rows:
                 </div>
                 {one ? (
                   b0 ? (
-                    <div className={`mt-1 rounded-lg px-1.5 py-1 text-[10px] md:text-xs font-bold leading-tight ${barClass(b0)} ${b0.start === d || wd(d) === 0 ? "" : "opacity-90"}`}>
-                      <div className="truncate" dir="auto">{b0.start === d || wd(d) === 0 || d === first ? b0.title : "·"}</div>
+                    <div className={`mt-1 px-1.5 py-1 text-[10px] md:text-xs font-bold leading-tight ${barClass(b0)} ${b0.start === d ? "rounded-r-lg -ml-1 md:-ml-2" : add(d, 1) === b0.end ? "rounded-l-lg -mr-1 md:-mr-2" : "-mx-1 md:-mx-2"} ${b0.start === d && add(d, 1) === b0.end ? "rounded-lg mx-0 md:mx-0" : ""}`}>
+                      <div className="truncate" dir="auto">{b0.start === d || wd(d) === 0 || d === first ? b0.title : " "}</div>
                       {b0.start === d && <div className="text-[9px] md:text-[10px] opacity-90">מגיע · {diff(b0.start, b0.end)} לילות</div>}
                     </div>
                   ) : (
