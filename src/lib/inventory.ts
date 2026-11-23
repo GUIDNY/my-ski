@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getAirbnbCalendar } from "@/lib/airbnb-calendar";
 import { airbnbClosedApartments } from "@/lib/airbnb-rules";
+import { pushHostexSync } from "@/lib/hostex-sync";
 
 type OrderLike = {
   apartment_id?: string | null;
@@ -68,29 +69,10 @@ export async function blockDatesForOrder(db: SupabaseClient, order: OrderLike, o
   })));
   if (rows.length) {
     try { await db.from("availability_blocks").upsert(rows, { onConflict: "apartment_id,date" }); } catch { /* ignore */ }
-    if (opts.syncHostex !== false) await syncHostex(aptIds);
+    if (opts.syncHostex !== false) await pushHostexSync(db, aptIds);
   }
 }
 
-/**
- * Ask n8n to bring Hostex (and so Airbnb) in line with the site right away, without waiting for
- * Hostex to re-read our iCal feed (that can take hours). The payload is only a trigger: n8n reads
- * the real nights from /api/hostex-sync, closes the order nights still open in Hostex, and
- * reopens only nights it closed itself that no active order or manual block holds any more.
- * Never throws and never blocks the caller for more than a few seconds.
- */
-export async function syncHostex(apartmentIds: (string | null | undefined)[]) {
-  const ids = [...new Set(apartmentIds.filter(Boolean) as string[])];
-  if (!ids.length) return;
-  const url = process.env.HOSTEX_SYNC_WEBHOOK_URL || "https://n8n.skisharebook.com/webhook/skishare-hostex-sync";
-  try {
-    await fetch(url, {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ apartment_ids: ids }),
-      signal: AbortSignal.timeout(5000),
-    });
-  } catch { /* the daily n8n sweep catches anything missed */ }
-}
 
 /**
  * Free the dates an order had reserved (only blocks created by this order; both apartments),
@@ -112,7 +94,7 @@ export async function freeDatesForOrder(db: SupabaseClient, order: OrderLike) {
     } catch { /* ignore */ }
   }
   if (order.checkin && order.checkout && aptIds.length) await reblockActiveOrders(db, { apartmentIds: aptIds, from: order.checkin, to: order.checkout, except: order.code });
-  await syncHostex(aptIds);
+  await pushHostexSync(db, aptIds);
 }
 
 /**
@@ -136,6 +118,6 @@ export async function reblockActiveOrders(db: SupabaseClient, opts: { apartmentI
     await blockDatesForOrder(db, o, { syncHostex: false });
     n++;
   }
-  // no Hostex call per order here: a release syncs once itself, and n8n sweeps all apartments daily
+  // no Hostex push per order here: a release pushes once itself, and n8n catches up every 20 minutes
   return n;
 }
