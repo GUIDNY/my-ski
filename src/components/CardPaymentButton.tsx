@@ -37,7 +37,8 @@ const labelCls = "block text-[14px] font-bold text-ink mb-1.5";
 
 export default function CardPaymentButton(p: Props) {
   // a quiet coupon line: only who has a code will look for it
-  const [couponOpen, setCouponOpen] = useState(false);
+  // in a split payment (friends paying from the shared link) the field is open, so nobody misses it
+  const [couponOpen, setCouponOpen] = useState(!!p.split);
   const [couponCode, setCouponCode] = useState("");
   const [couponBusy, setCouponBusy] = useState(false);
   const [couponErr, setCouponErr] = useState("");
@@ -215,14 +216,17 @@ export default function CardPaymentButton(p: Props) {
               {/* the quiet coupon entry */}
               {!applied && (
                 couponOpen ? (
+                  <div>
+                  {p.split && <label htmlFor="coupon-code" className={labelCls}>קוד קופון</label>}
                   <div className="flex items-center gap-2">
-                    <input value={couponCode} onChange={e => setCouponCode(e.target.value)} placeholder="קוד קופון" dir="ltr"
+                    <input id="coupon-code" value={couponCode} onChange={e => setCouponCode(e.target.value)} placeholder={p.split ? "אם יש לכם קוד" : "קוד קופון"} dir="ltr"
                       onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); applyCoupon(); } }}
                       className="flex-1 min-h-[42px] rounded-xl border border-line-strong bg-white px-3 text-[15px] text-left focus:outline-none focus:border-accent" />
                     <button type="button" onClick={applyCoupon} disabled={couponBusy}
                       className="min-h-[42px] rounded-xl border border-line-strong px-4 text-[14px] font-bold text-body hover:border-ink disabled:opacity-50">
                       {couponBusy ? "בודק…" : "החלה"}
                     </button>
+                  </div>
                   </div>
                 ) : (
                   <button type="button" onClick={() => setCouponOpen(true)}
