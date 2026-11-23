@@ -61,6 +61,24 @@ export default function CalendarPage() {
 
   const clashes = data?.bars.filter(b => b.clash) ?? [];
 
+  // overlapping stays (a clash) go on separate lines of their row, so none hides another
+  const lanes = useMemo(() => {
+    const lane: Record<string, number> = {}, count: Record<string, number> = {};
+    if (!data) return { lane, count };
+    const byRow = new Map<string, Bar[]>();
+    for (const b of data.bars) byRow.set(b.row, [...(byRow.get(b.row) || []), b]);
+    for (const [row, list] of byRow) {
+      const ends: string[] = [];
+      for (const b of list.slice().sort((a, c) => a.start.localeCompare(c.start))) {
+        let i = ends.findIndex(e => e <= b.start);
+        if (i < 0) { i = ends.length; ends.push(b.end); } else ends[i] = b.end;
+        lane[b.id] = i;
+      }
+      count[row] = Math.max(1, ends.length);
+    }
+    return { lane, count };
+  }, [data]);
+
   return (
     <div className="p-4 md:p-8">
       <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -128,7 +146,7 @@ export default function CalendarPage() {
             </div>
             {/* rows */}
             {data.rows.map(row => (
-              <div key={row.id} className="flex border-b border-gray-50 relative" style={{ height: H }}>
+              <div key={row.id} className="flex border-b border-gray-50 relative" style={{ height: H * (lanes.count[row.id] || 1) }}>
                 <div style={{ width: NAME_W }} className="shrink-0 sticky left-0 z-10 bg-white px-3 flex items-center text-sm font-semibold text-gray-800 border-r border-gray-100 truncate" title={row.title}>
                   {row.title}{!row.hostex && <span className="mr-1 ml-1 text-[10px] text-gray-400 font-normal">(אתר)</span>}
                 </div>
@@ -150,8 +168,8 @@ export default function CalendarPage() {
                   ].filter(Boolean).join("\n");
                   return (
                     <div key={b.id} title={tip}
-                      className={`absolute top-1 rounded-md px-1.5 overflow-hidden whitespace-nowrap leading-tight ${color} ${hold}`}
-                      style={{ left, width, height: H - 8, zIndex: 5 }}>
+                      className={`absolute rounded-md px-1.5 overflow-hidden whitespace-nowrap leading-tight ${color} ${hold}`}
+                      style={{ left, width, top: 4 + H * (lanes.lane[b.id] || 0), height: H - 8, zIndex: 5 }}>
                       <div className="text-[12px] font-bold truncate" dir="auto">{b.clash ? "⚠ " : ""}{b.source === "site" ? "SkiShare · " : ""}{b.title}</div>
                       <div className="text-[10px] opacity-90 truncate" dir="auto">
                         {b.source === "site" ? `אתר · ${b.codes?.join(", ")}` : b.channel} · {nights} לילות
