@@ -16,6 +16,8 @@ const PATHS: Record<string, React.ReactNode> = {
   group: <><circle cx="12" cy="7.5" r="2.5" /><circle cx="5.5" cy="9.5" r="2" /><circle cx="18.5" cy="9.5" r="2" /><path d="M7.5 19a4.5 4.5 0 0 1 9 0" /><path d="M2 18a3.5 3.5 0 0 1 5.2-3" /><path d="M22 18a3.5 3.5 0 0 0-5.2-3" /></>,
   // a Hanukkah menorah: the middle stem, two pairs of arms, a flame on each
   menorah: <><path d="M12 6v13M8 21h8M12 19v2" /><path d="M5 8v3a7 7 0 0 0 14 0V8" /><path d="M8.5 8v3a3.5 3.5 0 0 0 7 0V8" /><path d="M5 4.5v1M8.5 4.5v1M12 2.5v1M15.5 4.5v1M19 4.5v1" /></>,
+  // a spring tulip (April)
+  tulip: <><path d="M12 13v8" /><path d="M7 5l2.5 2.5L12 4l2.5 3.5L17 5v4a5 5 0 0 1-10 0z" /><path d="M12 18c-1.8-1.8-4-2.2-6-1.2 1.2 2 3.6 2.8 6 1.2zM12 18c1.8-1.8 4-2.2 6-1.2-1.2 2-3.6 2.8-6 1.2z" /></>,
   // the spring sun behind a cloud (Pesach)
   cloudSun: <><path d="M12 2v2M4.93 4.93l1.41 1.41M20 12h2M19.07 4.93l-1.41 1.41" /><path d="M15.95 12.65a4 4 0 0 0-5.93-4.13" /><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6z" /></>,
   // a stack of coins (a cheaper ski week)
@@ -44,7 +46,7 @@ const PATHS: Record<string, React.ReactNode> = {
 
 const BY_EMOJI: Record<string, string> = {
   "🏔️": "mountain", "📅": "calendar", "✈️": "plane", "🎫": "ticket", "👨‍👩‍👧‍👦": "family",
-  "🍻": "glass", "🏠": "home", "☀️": "sun", "⛷️": "route", "⚖️": "compare", "👥": "group", "🎒": "bag", "🎿": "skis", "🕎": "menorah", "🌤️": "cloudSun", "💰": "coins", "🗺️": "map", "❄️": "snowflake", "🎓": "cap", "🛡️": "shield", "💑": "heart", "🛷": "sled", "🏂": "board", "🚗": "car", "🌙": "moon", "🕯️": "candles",
+  "🍻": "glass", "🏠": "home", "☀️": "sun", "⛷️": "route", "⚖️": "compare", "👥": "group", "🎒": "bag", "🎿": "skis", "🕎": "menorah", "🌤️": "cloudSun", "💰": "coins", "🗺️": "map", "❄️": "snowflake", "🎓": "cap", "🛡️": "shield", "💑": "heart", "🛷": "sled", "🏂": "board", "🚗": "car", "🌙": "moon", "🕯️": "candles", "🌷": "tulip",
 };
 
 export default function GuideIcon({ emoji, size = 24 }: { emoji: string; size?: number }) {
