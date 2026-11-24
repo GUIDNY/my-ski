@@ -12,7 +12,7 @@ import { PAY_METHODS } from "@/lib/morning";
 
 type Receipt = { manual?: boolean; number?: string; url?: string; name?: string; amount?: number; currency?: string; at?: string };
 type Booking = { id: string; label: string; due_date: string | null; month: string | null; amount: number; paid: boolean; note: string | null; receipt?: Receipt | null };
-type RcForm = { b: Booking; name: string; amount: string; currency: "EUR" | "ILS"; method: string };
+type RcForm = { b: Booking | null; name: string; amount: string; currency: "EUR" | "ILS"; method: string; description: string };
 type Hostel = { id: string; name: string; expenses: number; payments: Booking[] };
 
 const NAME = "הוסטל מאיירהופן";
@@ -29,6 +29,7 @@ export default function HostelAdmin() {
   const [busy, setBusy] = useState(false);
   const [exp, setExp] = useState<string | null>(null);
   const [rc, setRc] = useState<RcForm | null>(null);
+  const [manualReceipts, setManualReceipts] = useState<Booking[]>([]);
   const [rcBusy, setRcBusy] = useState<"" | "draft" | "issue">("");
 
   const load = useCallback(async () => {
@@ -47,6 +48,7 @@ export default function HostelAdmin() {
     }
     setErr("");
     setH({ ...row!, payments: (row!.payments || []).filter(p => (p as { kind?: string }).kind === "booking") });
+    setManualReceipts((row!.payments || []).filter(p => (p as { kind?: string }).kind === "receipt"));
   }, []);
   useEffect(() => { load(); }, [load]);
 
@@ -78,16 +80,18 @@ export default function HostelAdmin() {
     load();
   };
   // receipts in morning: a draft (no number) or a real receipt (recorded on the booking)
-  const openReceipt = (b: Booking) => setRc({ b, name: b.label, amount: String(b.amount || ""), currency: "EUR", method: "transfer" });
+  const openReceipt = (b: Booking) => setRc({ b, name: b.label, amount: String(b.amount || ""), currency: "EUR", method: "transfer", description: "" });
+  const openManual = () => setRc({ b: null, name: "", amount: "", currency: "EUR", method: "transfer", description: "לינה בהוסטל במאיירהופן" });
   const receipt = async (mode: "draft" | "issue") => {
     if (!rc) return;
+    if (!rc.b && !rc.name.trim()) { alert("קודם למלא על שם מי הקבלה"); return; }
     if (!(Number(rc.amount) > 0)) { alert("קודם למלא סכום"); return; }
     const sign = rc.currency === "EUR" ? "€" : "₪";
     if (mode === "issue" && !confirm(`להפיק קבלה אמיתית במורנינג?\n\nעל שם: ${rc.name}\nסכום: ${sign}${Number(rc.amount).toLocaleString()}\n\nזה מסמך רשמי עם מספר (לא טיוטה). לא נשלח ללקוח שום מייל.`)) return;
     setRcBusy(mode);
     const r = await authFetch("/api/admin/receipts/hostel", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ payment_id: rc.b.id, mode, clientName: rc.name, amount: Number(rc.amount), currency: rc.currency, payMethod: rc.method }),
+      body: JSON.stringify({ ...(rc.b ? { payment_id: rc.b.id } : { property_id: h?.id, description: rc.description }), mode, clientName: rc.name, amount: Number(rc.amount), currency: rc.currency, payMethod: rc.method }),
     });
     const j = await r.json().catch(() => ({}));
     setRcBusy("");
@@ -96,7 +100,7 @@ export default function HostelAdmin() {
     setRc(null); load();
   };
   const markReceipt = async () => {
-    if (!rc) return;
+    if (!rc?.b) return;
     await patch(rc.b, { receipt: { manual: true, at: new Date().toISOString() } });
     setRc(null);
   };
@@ -139,7 +143,10 @@ export default function HostelAdmin() {
       </div>
 
       {/* ── Bookings ── */}
-      <h2 className="text-lg font-bold text-gray-900 mb-3">הזמנות</h2>
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <h2 className="text-lg font-bold text-gray-900">הזמנות</h2>
+        <button type="button" onClick={openManual} disabled={!h} className="px-4 h-10 rounded-xl border border-blue-200 bg-blue-50 text-blue-700 text-sm font-bold hover:bg-blue-100 disabled:opacity-50">🧾 קבלה ידנית</button>
+      </div>
       <div className="rounded-2xl border border-gray-200 bg-white p-4 mb-4 grid grid-cols-2 md:grid-cols-6 gap-2 items-end">
         <label className="col-span-2 md:col-span-2 text-xs text-gray-500">שם<input value={nb.label} onChange={e => setNb(v => ({ ...v, label: e.target.value }))} className={inputCls} /></label>
         <label className="text-xs text-gray-500">הגעה<input type="date" value={nb.due_date} onChange={e => setNb(v => ({ ...v, due_date: e.target.value }))} className={inputCls} /></label>
@@ -187,12 +194,30 @@ export default function HostelAdmin() {
         </div>
       )}
 
+      {/* ── Manual receipts (not tied to a booking) ── */}
+      {manualReceipts.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-lg font-bold text-gray-900 mb-3">קבלות ידניות</h2>
+          <div className="rounded-2xl border border-gray-200 bg-white divide-y divide-gray-100">
+            {manualReceipts.map(m => (
+              <div key={m.id} className="p-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+                <span className="font-bold text-gray-900">{m.label}</span>
+                <span className="tabular-nums font-bold">{m.receipt?.currency === "ILS" ? "₪" : "€"}{Number(m.amount || 0).toLocaleString("en-US")}</span>
+                <span className="text-gray-500">{m.note}</span>
+                <span className="text-gray-400">{day(m.receipt?.at?.slice(0, 10) ?? null)}</span>
+                <span className="text-xs font-bold text-green-700">✓ קבלה {m.receipt?.number || ""}{m.receipt?.url && <a href={m.receipt.url} target="_blank" rel="noreferrer" className="mr-1 underline">צפייה</a>}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ── Receipt ── */}
       {rc && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-end md:items-center justify-center" onClick={() => !rcBusy && setRc(null)}>
           <div className="w-full md:max-w-md bg-white rounded-t-2xl md:rounded-2xl p-5" onClick={e => e.stopPropagation()} dir="rtl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-gray-900">קבלה · {rc.b.label}</h3>
+              <h3 className="text-lg font-bold text-gray-900">{rc.b ? `קבלה · ${rc.b.label}` : "קבלה ידנית"}</h3>
               <button type="button" onClick={() => setRc(null)} className="text-gray-400 text-xl leading-none" aria-label="סגירה">×</button>
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -203,6 +228,7 @@ export default function HostelAdmin() {
                   <option value="EUR">€ יורו</option><option value="ILS">₪ שקל</option>
                 </select>
               </label>
+              {!rc.b && <label className="col-span-2 text-xs text-gray-500">על מה (יופיע בקבלה)<input value={rc.description} onChange={e => setRc({ ...rc, description: e.target.value })} className={inputCls} /></label>}
               <label className="col-span-2 text-xs text-gray-500">איך שילם/ה
                 <select value={rc.method} onChange={e => setRc({ ...rc, method: e.target.value })} className={inputCls}>
                   {PAY_METHODS.map(m => <option key={m.key} value={m.key}>{m.label}</option>)}
@@ -212,7 +238,7 @@ export default function HostelAdmin() {
             <div className="mt-4 flex flex-col gap-2">
               <button type="button" onClick={() => receipt("issue")} disabled={!!rcBusy} className="h-11 rounded-xl bg-blue-600 text-white text-sm font-bold disabled:opacity-50">{rcBusy === "issue" ? "מפיק…" : "הפקת קבלה במורנינג"}</button>
               <button type="button" onClick={() => receipt("draft")} disabled={!!rcBusy} className="h-11 rounded-xl border border-gray-200 text-sm font-bold text-gray-700 disabled:opacity-50">{rcBusy === "draft" ? "שומר…" : "טיוטה במורנינג (בלי מספר)"}</button>
-              <button type="button" onClick={markReceipt} disabled={!!rcBusy} className="text-xs font-bold text-gray-500 hover:underline">כבר הוצאתי קבלה בחוץ, רק לסמן</button>
+              {rc.b && <button type="button" onClick={markReceipt} disabled={!!rcBusy} className="text-xs font-bold text-gray-500 hover:underline">כבר הוצאתי קבלה בחוץ, רק לסמן</button>}
             </div>
           </div>
         </div>
