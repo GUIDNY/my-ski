@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { authFetch } from "@/lib/auth-fetch";
+import { PAY_METHODS } from "@/lib/morning";
 
 /*
  * The hostel in Mayrhofen: its expenses, its bookings, and the balance
@@ -9,7 +10,9 @@ import { authFetch } from "@/lib/auth-fetch";
  * (kind "booking": label = name, due_date = arrival, month = departure).
  */
 
-type Booking = { id: string; label: string; due_date: string | null; month: string | null; amount: number; paid: boolean; note: string | null };
+type Receipt = { manual?: boolean; number?: string; url?: string; name?: string; amount?: number; currency?: string; at?: string };
+type Booking = { id: string; label: string; due_date: string | null; month: string | null; amount: number; paid: boolean; note: string | null; receipt?: Receipt | null };
+type RcForm = { b: Booking; name: string; amount: string; currency: "EUR" | "ILS"; method: string };
 type Hostel = { id: string; name: string; expenses: number; payments: Booking[] };
 
 const NAME = "הוסטל מאיירהופן";
@@ -25,6 +28,8 @@ export default function HostelAdmin() {
   const [nb, setNb] = useState(EMPTY);
   const [busy, setBusy] = useState(false);
   const [exp, setExp] = useState<string | null>(null);
+  const [rc, setRc] = useState<RcForm | null>(null);
+  const [rcBusy, setRcBusy] = useState<"" | "draft" | "issue">("");
 
   const load = useCallback(async () => {
     const r = await authFetch("/api/managed-properties?kind=hostel");
@@ -72,6 +77,30 @@ export default function HostelAdmin() {
     await authFetch(`/api/property-payments/${b.id}`, { method: "DELETE" });
     load();
   };
+  // receipts in morning: a draft (no number) or a real receipt (recorded on the booking)
+  const openReceipt = (b: Booking) => setRc({ b, name: b.label, amount: String(b.amount || ""), currency: "EUR", method: "transfer" });
+  const receipt = async (mode: "draft" | "issue") => {
+    if (!rc) return;
+    if (!(Number(rc.amount) > 0)) { alert("קודם למלא סכום"); return; }
+    const sign = rc.currency === "EUR" ? "€" : "₪";
+    if (mode === "issue" && !confirm(`להפיק קבלה אמיתית במורנינג?\n\nעל שם: ${rc.name}\nסכום: ${sign}${Number(rc.amount).toLocaleString()}\n\nזה מסמך רשמי עם מספר (לא טיוטה). לא נשלח ללקוח שום מייל.`)) return;
+    setRcBusy(mode);
+    const r = await authFetch("/api/admin/receipts/hostel", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ payment_id: rc.b.id, mode, clientName: rc.name, amount: Number(rc.amount), currency: rc.currency, payMethod: rc.method }),
+    });
+    const j = await r.json().catch(() => ({}));
+    setRcBusy("");
+    if (!r.ok) { alert(`${mode === "issue" ? "ההפקה נכשלה" : "לא הצלחתי לשמור טיוטה במורנינג"}: ${j.error || "שגיאה"}`); return; }
+    if (mode === "draft") { if (j.draftUrl) window.open(j.draftUrl, "_blank"); return; }
+    setRc(null); load();
+  };
+  const markReceipt = async () => {
+    if (!rc) return;
+    await patch(rc.b, { receipt: { manual: true, at: new Date().toISOString() } });
+    setRc(null);
+  };
+
   const saveExpenses = async () => {
     if (!h || exp === null) return;
     await authFetch(`/api/managed-properties/${h.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ expenses: Number(exp) || 0 }) });
@@ -126,7 +155,7 @@ export default function HostelAdmin() {
         <div className="rounded-2xl border border-gray-200 bg-white overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-gray-500 text-xs">
-              <tr><th className="text-right p-3">שם</th><th className="text-right p-3">תאריכים</th><th className="text-right p-3">סכום</th><th className="text-right p-3">שולם</th><th className="text-right p-3">הערה</th><th className="p-3"></th></tr>
+              <tr><th className="text-right p-3">שם</th><th className="text-right p-3">תאריכים</th><th className="text-right p-3">סכום</th><th className="text-right p-3">שולם</th><th className="text-right p-3">קבלה</th><th className="text-right p-3">הערה</th><th className="p-3"></th></tr>
             </thead>
             <tbody>
               {bookings.map(b => (
@@ -138,12 +167,54 @@ export default function HostelAdmin() {
                     <button type="button" onClick={() => patch(b, { paid: !b.paid, paid_date: !b.paid ? new Date().toISOString().slice(0, 10) : null })}
                       className={`px-3 py-1 rounded-full text-xs font-bold ${b.paid ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>{b.paid ? "שולם" : "ממתין"}</button>
                   </td>
+                  <td className="p-3 whitespace-nowrap">
+                    {b.receipt ? (
+                      <span className="text-xs font-bold text-green-700">
+                        ✓ {b.receipt.manual ? "סומן ידנית" : `קבלה ${b.receipt.number || ""}`}
+                        {b.receipt.url && <a href={b.receipt.url} target="_blank" rel="noreferrer" className="mr-1 underline">צפייה</a>}
+                        {b.receipt.manual && <button type="button" onClick={() => patch(b, { receipt: null })} className="mr-1 text-gray-400 hover:underline">ביטול</button>}
+                      </span>
+                    ) : (
+                      <button type="button" onClick={() => openReceipt(b)} className="px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 hover:bg-blue-100">+ קבלה</button>
+                    )}
+                  </td>
                   <td className="p-3 text-gray-500">{b.note}</td>
                   <td className="p-3 text-left"><button type="button" onClick={() => remove(b)} className="text-xs font-bold text-red-600 hover:underline">מחיקה</button></td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* ── Receipt ── */}
+      {rc && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-end md:items-center justify-center" onClick={() => !rcBusy && setRc(null)}>
+          <div className="w-full md:max-w-md bg-white rounded-t-2xl md:rounded-2xl p-5" onClick={e => e.stopPropagation()} dir="rtl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gray-900">קבלה · {rc.b.label}</h3>
+              <button type="button" onClick={() => setRc(null)} className="text-gray-400 text-xl leading-none" aria-label="סגירה">×</button>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <label className="col-span-2 text-xs text-gray-500">על שם<input value={rc.name} onChange={e => setRc({ ...rc, name: e.target.value })} className={inputCls} /></label>
+              <label className="text-xs text-gray-500">סכום<input type="number" value={rc.amount} onChange={e => setRc({ ...rc, amount: e.target.value })} className={inputCls} /></label>
+              <label className="text-xs text-gray-500">מטבע
+                <select value={rc.currency} onChange={e => setRc({ ...rc, currency: e.target.value as "EUR" | "ILS" })} className={inputCls}>
+                  <option value="EUR">€ יורו</option><option value="ILS">₪ שקל</option>
+                </select>
+              </label>
+              <label className="col-span-2 text-xs text-gray-500">איך שילם/ה
+                <select value={rc.method} onChange={e => setRc({ ...rc, method: e.target.value })} className={inputCls}>
+                  {PAY_METHODS.map(m => <option key={m.key} value={m.key}>{m.label}</option>)}
+                </select>
+              </label>
+            </div>
+            <div className="mt-4 flex flex-col gap-2">
+              <button type="button" onClick={() => receipt("issue")} disabled={!!rcBusy} className="h-11 rounded-xl bg-blue-600 text-white text-sm font-bold disabled:opacity-50">{rcBusy === "issue" ? "מפיק…" : "הפקת קבלה במורנינג"}</button>
+              <button type="button" onClick={() => receipt("draft")} disabled={!!rcBusy} className="h-11 rounded-xl border border-gray-200 text-sm font-bold text-gray-700 disabled:opacity-50">{rcBusy === "draft" ? "שומר…" : "טיוטה במורנינג (בלי מספר)"}</button>
+              <button type="button" onClick={markReceipt} disabled={!!rcBusy} className="text-xs font-bold text-gray-500 hover:underline">כבר הוצאתי קבלה בחוץ, רק לסמן</button>
+            </div>
+          </div>
         </div>
       )}
     </div>
