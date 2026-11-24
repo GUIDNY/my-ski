@@ -24,6 +24,7 @@ export type Quote =
       checkin: string; checkout: string; nights: number;
       nightly: { date: string; price: number }[];
       fee: number;     // cleaning, once per stay (0 for site-priced stays)
+      shortStay: number; // the short-stay fee (under 4 nights), else 0
       total: number;
       avg: number;     // per night without the cleaning, as the Hebrew page shows it
       airbnb: boolean;
@@ -46,8 +47,8 @@ export function quoteFor(apt: PriceApt, rules: PricingRule[], checkin: string, c
   const nightly = b.nights.map(n => ({ date: isoOf(n.date), price: n.price }));
   const nights = nightly.length;
   return {
-    kind: "nights", checkin, checkout, nights, nightly, fee: b.fee, total: b.total,
-    avg: nights ? Math.round((b.total - b.fee) / nights) : 0, airbnb: b.source === "airbnb",
+    kind: "nights", checkin, checkout, nights, nightly, fee: b.fee, shortStay: b.shortStay, total: b.total,
+    avg: nights ? Math.round((b.total - b.fee - b.shortStay) / nights) : 0, airbnb: b.source === "airbnb",
   };
 }
 

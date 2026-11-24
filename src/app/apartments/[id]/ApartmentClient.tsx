@@ -518,8 +518,9 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
   /* Per-night breakdown for the collapsible panel (+ the stay's cleaning fee) */
   const breakdown = stay ? stay.nights : [];
   const cleaningFee = stay ? stay.fee : 0;
+  const shortStayFee = stay ? stay.shortStay : 0; // under 4 nights (lib/pricing)
 
-  const avgNightlyPrice = breakdown.length > 0 ? Math.round((aptTotal - cleaningFee) / nights) : basePrice;
+  const avgNightlyPrice = breakdown.length > 0 ? Math.round((aptTotal - cleaningFee - shortStayFee) / nights) : basePrice;
   const skiTotal        = skiOn && skiTier ? skiTier.price * skiQty : 0;
   // add-ons are per-person: price × number of people who need each add-on
   const trTotal         = transfer ? (trPick ? trPick.total : TRANSFER_PRICE * transferQty) : 0;
@@ -706,7 +707,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
 
   /* the lines of the price, as computed above */
   const lines: { label: string; value: string; good?: boolean }[] = [
-    { label: weekMatch ? "לינה, שבת עד שבת" : `לינה, ${nights} לילות${cleaningFee > 0 ? ", כולל ניקיון" : ""}`, value: eur(aptTotal) },
+    { label: weekMatch ? "לינה, שבת עד שבת" : `לינה, ${nights} ${nights === 1 ? "לילה" : "לילות"}${cleaningFee > 0 ? ", כולל ניקיון" : ""}${shortStayFee > 0 ? `, כולל ${eur(shortStayFee)} שהייה קצרה` : ""}`, value: eur(aptTotal) },
     ...(skiOn ? [{ label: `${passLabel} × ${skiQty}`, value: eur(skiTotal) }] : []),
     ...(transfer ? [{ label: trPick ? `הסעה: ${trPick.name}` : `הסעה הלוך וחזור × ${transferQty}`, value: eur(trTotal) }] : []),
     ...(equipment ? [{ label: `ציוד, ${skiDays} ימים × ${equipQty}`, value: eur(equipTotal) }] : []),
@@ -954,6 +955,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
                       <span className="text-body text-[14px]">
                         {eur(avgNightlyPrice)} {breakdown.length > 1 ? "ללילה בממוצע" : "ללילה"}
                         {cleaningFee > 0 && <span className="text-muted"> · ניקיון {eur(cleaningFee)}</span>}
+                        {shortStayFee > 0 && <span className="text-muted"> · שהייה קצרה {eur(shortStayFee)}</span>}
                       </span>
                       <button type="button" onClick={() => setShowBreakdown(v => !v)} aria-expanded={showBreakdown}
                         className={`${btn.link} text-[14px] shrink-0 min-h-[36px]`}>
@@ -976,6 +978,12 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
                             <span className="font-bold text-ink">{eur(cleaningFee)}</span>
                           </div>
                         )}
+                        {shortStayFee > 0 && (
+                          <div className="flex justify-between items-center px-3.5 py-2 border-t border-line">
+                            <span className="text-muted">תוספת שהייה קצרה (פחות מ-4 לילות)</span>
+                            <span className="font-bold text-ink">{eur(shortStayFee)}</span>
+                          </div>
+                        )}
                         {breakdown.length > 1 && (
                           <div className="flex justify-between items-center px-3.5 py-2 bg-soft border-t border-line font-bold">
                             <span className="text-body">ממוצע ללילה</span>
@@ -985,6 +993,11 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
                       </div>
                     )}
                   </div>
+                )}
+                {shortStayFee > 0 && (
+                  <p className="text-[14px] text-warn bg-warn-soft rounded-xl px-3.5 py-2.5 -mt-1">
+                    מינימום הזמנה באתר הוא 4 לילות. אפשר להזמין גם פחות, בתוספת חד-פעמית של {eur(shortStayFee)} לשהייה קצרה (כבר כלולה במחיר).
+                  </p>
                 )}
                 {weekMatch && nights < 7 && (
                   <p className="text-[14px] text-muted -mt-1">המחיר קבוע לשבוע מלא, גם אם נשארים פחות לילות.</p>

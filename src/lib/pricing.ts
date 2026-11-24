@@ -106,10 +106,19 @@ export function getEffectivePrice(date: Date, basePrice: number, rules: PricingR
   return n.airbnb ? Math.round(n.price) : n.price;
 }
 
+/**
+ * The site's minimum stay is 4 nights. A shorter stay can still be booked,
+ * for a one-time short-stay fee (Idan, 24.11.2026).
+ */
+export const MIN_NIGHTS = 4;
+export const SHORT_STAY_FEE = 100;
+export const shortStayFee = (nights: number) => nights > 0 && nights < MIN_NIGHTS ? SHORT_STAY_FEE : 0;
+
 export type StayBreakdown = {
   nights: { date: Date; price: number }[];
   fee: number;               // Airbnb cleaning, once per stay (0 for site-priced stays)
-  total: number;
+  shortStay: number;         // the short-stay fee (under MIN_NIGHTS nights), else 0
+  total: number;             // nights + fee + shortStay
   source: "airbnb" | "site";
 };
 
@@ -128,6 +137,7 @@ export function stayBreakdown(checkin: string, checkout: string, basePrice: numb
     const end = new Date(checkout + "T12:00:00");
     for (let d = new Date(checkin + "T12:00:00"); d < end; d.setDate(d.getDate() + 1)) dates.push(new Date(d));
   }
+  const shortStay = shortStayFee(dates.length);
   const calendar = rules.filter(isAirbnb);
   const onCalendar = dates.length > 0 && calendar.length > 0
     && dates.every(d => nightPrice(d, basePrice, calendar).airbnb);
@@ -136,13 +146,13 @@ export function stayBreakdown(checkin: string, checkout: string, basePrice: numb
     const feeRule = calendar.find(r => r.type === "stay_fee");
     const nights = dates.map((date, i) => ({ date, price: Math.round(priced[i].price) }));
     const shown = nights.reduce((s, n) => s + n.price, 0);
-    if (!feeRule) return { nights, fee: 0, total: shown, source: "airbnb" };
+    if (!feeRule) return { nights, fee: 0, shortStay, total: shown + shortStay, source: "airbnb" };
     const total = Math.round(priced.reduce((s, p) => s + p.price, 0) + feeRule.price);
-    return { nights, fee: total - shown, total, source: "airbnb" };
+    return { nights, fee: total - shown, shortStay, total: total + shortStay, source: "airbnb" };
   }
   const siteRules = rules.filter(r => !isAirbnb(r));
   const nights = dates.map(date => ({ date, price: nightPrice(date, basePrice, siteRules).price }));
-  return { nights, fee: 0, total: nights.reduce((s, n) => s + n.price, 0), source: "site" };
+  return { nights, fee: 0, shortStay, total: nights.reduce((s, n) => s + n.price, 0) + shortStay, source: "site" };
 }
 
 export function calcTotalForRange(checkin: string, checkout: string, basePrice: number, rules: PricingRule[]): number {

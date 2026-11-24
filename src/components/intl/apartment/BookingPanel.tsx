@@ -101,7 +101,7 @@ export default function BookingPanel({ lang, todayIso, apt, rules, rulesOk, from
   const toCard = () => document.getElementById("book")?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   const fee = stay ? cardFeeFor(stay.total) : 0;
-  const nightsSum = stay && stay.kind === "nights" ? stay.total - stay.fee : 0;
+  const nightsSum = stay && stay.kind === "nights" ? stay.total - stay.fee - stay.shortStay : 0;
 
   /* ── what the card says above the button ── */
   let note: { tone: "muted" | "warn" | "danger"; text: string } | null = null;
@@ -230,6 +230,8 @@ export default function BookingPanel({ lang, todayIso, apt, rules, rulesOk, from
                     </div>
                   )}
                   {stay.fee > 0 && line(b.cleaning, fmtEur(stay.fee, lang))}
+                  {stay.shortStay > 0 && line(b.shortStay, fmtEur(stay.shortStay, lang))}
+                  {stay.shortStay > 0 && <p className="text-[13px] text-muted">{b.shortStayNote}</p>}
                 </>
               ) : (
                 line(b.weekLine(fmtDayRange(stay.checkin, stay.checkout, lang)), fmtEur(stay.total, lang))

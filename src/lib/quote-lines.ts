@@ -49,11 +49,12 @@ export function quoteLines(i: QuoteInputs) {
     ? stayBreakdown(i.checkin, i.checkout, Number(i.apt.price_per_night || 0), i.rules) : null;
   const aptTotal = week ? week.price : stay ? stay.total : (i.fallbackAptTotal ?? 0);
   const cleaningFee = stay?.fee ?? 0;
+  const shortStay = stay?.shortStay ?? 0;
 
   const lines: QuoteLine[] = [{
     key: "stay",
     label: week ? "לינה, שבוע שלם (שבת עד שבת)" : `לינה, ${nights} ${nights === 1 ? "לילה" : "לילות"}${cleaningFee > 0 ? ", כולל ניקיון" : ""}`,
-    sub: stay && nights > 0 ? `${eur(Math.round((aptTotal - cleaningFee) / nights))} בממוצע ללילה${cleaningFee > 0 ? ` + ${eur(cleaningFee)} ניקיון` : ""}` : undefined,
+    sub: stay && nights > 0 ? `${eur(Math.round((aptTotal - cleaningFee - shortStay) / nights))} בממוצע ללילה${cleaningFee > 0 ? ` + ${eur(cleaningFee)} ניקיון` : ""}${shortStay > 0 ? ` + ${eur(shortStay)} תוספת שהייה קצרה (פחות מ-4 לילות)` : ""}` : undefined,
     amount: aptTotal,
   }];
 
