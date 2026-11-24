@@ -1,4 +1,5 @@
 "use client";
+import { aptPath } from "@/lib/apartment-url";
 import SkiLoader from "@/components/SkiLoader";
 import { Suspense, useEffect, useState, useRef } from "react";
 import type { ReactNode } from "react";
@@ -249,7 +250,7 @@ function ApartmentCard({ apt, checkin, checkout, guests, rules, fromNightPrice, 
   const query = q.toString();
 
   return (
-    <Link href={`/apartments/${apt.id}${query ? `?${query}` : ""}`}
+    <Link href={`${aptPath(apt)}${query ? `?${query}` : ""}`}
       className={`${card} group overflow-hidden flex flex-col hover:border-line-strong transition-colors`}>
       <div className="relative h-[210px] bg-soft-2 overflow-hidden shrink-0">
         {/* eslint-disable-next-line @next/next/no-img-element */}

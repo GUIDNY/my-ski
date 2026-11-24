@@ -1,3 +1,4 @@
+import { aptPath } from "@/lib/apartment-url";
 import type { MetadataRoute } from "next";
 import { createServerClient } from "@/lib/supabase-server";
 import { GUIDES } from "@/lib/guides";
@@ -84,13 +85,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let apartmentEntries: MetadataRoute.Sitemap = [];
   try {
     const db = createServerClient();
-    const { data } = await db.from("apartments").select("id").eq("available", true);
+    const { data } = await db.from("apartments").select("id, name, type, max_guests").eq("available", true);
     apartmentEntries = (data ?? []).flatMap(a => {
-      const alternates = { languages: alternatesFor(`/apartments/${a.id}`) };
+      const p = aptPath(a);
+      const alternates = { languages: alternatesFor(p) };
       return [
-        { url: siteUrl(`/apartments/${a.id}`), changeFrequency: "daily" as const, priority: 0.8, alternates },
-        { url: siteUrl(`/en/apartments/${a.id}`), changeFrequency: "daily" as const, priority: 0.7, alternates },
-        { url: siteUrl(`/fr/apartments/${a.id}`), changeFrequency: "daily" as const, priority: 0.7, alternates },
+        { url: siteUrl(p), changeFrequency: "daily" as const, priority: 0.8, alternates },
+        { url: siteUrl(`/en${p}`), changeFrequency: "daily" as const, priority: 0.7, alternates },
+        { url: siteUrl(`/fr${p}`), changeFrequency: "daily" as const, priority: 0.7, alternates },
       ];
     });
   } catch {

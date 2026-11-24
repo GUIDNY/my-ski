@@ -1,3 +1,4 @@
+import { aptPath } from "@/lib/apartment-url";
 import Link from "next/link";
 import type { Apartment, SkiPass } from "@/types";
 import { wrap, card, h2, btn } from "@/components/ui";
@@ -147,7 +148,7 @@ export default function ApartmentsGuide({ apartments, passes }: { apartments: Ap
       mainEntity: {
         "@type": "ItemList",
         numberOfItems: apartments.length,
-        itemListElement: apartments.map((a, i) => ({ "@type": "ListItem", position: i + 1, url: `${SITE}/apartments/${a.id}`, name: aptDisplayName(a) })),
+        itemListElement: apartments.map((a, i) => ({ "@type": "ListItem", position: i + 1, url: `${SITE}${aptPath(a)}`, name: aptDisplayName(a) })),
       },
     },
     faqLd(faq),
@@ -195,7 +196,7 @@ export default function ApartmentsGuide({ apartments, passes }: { apartments: Ap
                 <div className="flex flex-col gap-2.5">
                   <h3 className="font-display font-bold text-[19px] md:text-[21px] text-ink">אותה דירה לאורך העונה</h3>
                   <p className={p}>
-                    <Link href={`/apartments/${sample.id}`} className="font-bold text-accent hover:text-accent-hover">{aptDisplayName(sample)}</Link>, המחיר לשבוע לפי שבת הכניסה:
+                    <Link href={aptPath(sample)} className="font-bold text-accent hover:text-accent-hover">{aptDisplayName(sample)}</Link>, המחיר לשבוע לפי שבת הכניסה:
                   </p>
                   <ul className="flex flex-wrap gap-2" aria-label="מחיר לשבוע לפי שבת הכניסה">
                     {sampleWeeks.map(w => (
@@ -212,7 +213,7 @@ export default function ApartmentsGuide({ apartments, passes }: { apartments: Ap
               {group && (
                 <p className={p}>
                   <b className="text-ink">כמה זה יוצא לאדם:</b> מחלקים את מחיר הדירה בכמה שאתם. למשל,{" "}
-                  <Link href={`/apartments/${group.apt.id}`} className="font-bold text-accent hover:text-accent-hover">{aptDisplayName(group.apt)}</Link>{" "}
+                  <Link href={aptPath(group.apt)} className="font-bold text-accent hover:text-accent-hover">{aptDisplayName(group.apt)}</Link>{" "}
                   עולה {eur(group.price)} בשבוע של {dmy(group.week)}. ל-{group.apt.max_guests} אנשים זה כ-{eur(group.pp)} לאדם לשבוע, לפני סקי פס והסעה.
                 </p>
               )}

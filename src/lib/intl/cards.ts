@@ -16,6 +16,7 @@ import { searchQuery, type SearchState } from "./search";
 
 export type ListItem = {
   id: string;
+  path: string;                   // the address segment (lib/apartment-url)
   kind: "own" | "agency";
   name: string;
   meta: string;
@@ -74,7 +75,7 @@ export function cardsFor(o: {
     if (search.guestsSet && it.maxGuests && search.guests > it.maxGuests) continue;
     if (search.hasDates && takenSet.has(it.id)) continue;
     const priceApt = { id: it.id, source: it.kind === "agency" ? "la_cime" : null, price_per_night: it.price_per_night, available_weeks: it.weeks };
-    const base = `/${lang}/apartments/${it.id}`;
+    const base = `/${lang}/apartments/${it.path}`;
     // the plain listing links to the clean apartment URL; a search carries its dates and guests along
     let href = search.guestsSet ? `${base}${searchQuery({ guests: search.guests })}` : base;
     let price: CardPrice = { text: t.priceOnPage };

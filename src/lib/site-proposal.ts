@@ -1,3 +1,4 @@
+import { aptPath } from "@/lib/apartment-url";
 /*
  * A site quote (apartment + the add-ons picked on the site) as ProposalData,
  * priced on the server from live data with quoteLines(), the same way the
@@ -99,7 +100,7 @@ export async function buildSiteProposal(one: (k: string) => string): Promise<{ d
     ? `${SITE}/combo?a=${a.id}&b=${b.id}&checkin=${checkin}&checkout=${checkout}&guests=${guests}`
     : quoteId
     ? `${SITE}/q/${encodeURIComponent(nameSlug)}/${quoteId}${code ? `?${code}` : ""}`
-    : `${SITE}/apartments/${a.id}?checkin=${checkin}&checkout=${checkout}&guests=${guests}`;
+    : `${SITE}${aptPath(a)}?checkin=${checkin}&checkout=${checkout}&guests=${guests}`;
   const today = new Date();
   const issued = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}`;
 

@@ -4,6 +4,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
+import { aptIdOf } from "@/lib/apartment-url";
 import type { Apartment, SkiPass } from "@/types";
 import { stayBreakdown, matchingWeek, skiDaysFromNights, equipCost } from "@/lib/pricing";
 import type { PricingRule } from "@/lib/pricing";
@@ -368,7 +369,8 @@ function Modal({ title, onClose, children }: { title: ReactNode; onClose: () => 
 type Initial = { initialApt: Apartment; initialRules: PricingRule[]; initialPasses: SkiPass[] };
 
 function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
-  const { id }     = useParams<{ id: string }>();
+  const { id: segment } = useParams<{ id: string }>();
+  const id         = aptIdOf(decodeURIComponent(segment)) ?? segment;
   const params     = useSearchParams();
   const router     = useRouter();
   const checkin    = params.get("checkin")  ?? "";
@@ -639,7 +641,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
     const p = new URLSearchParams(params.toString());
     p.set("checkin", ci); p.set("checkout", co); p.set("guests", String(g));
     setEditDates(false);
-    router.replace(`/apartments/${id}?${p.toString()}`, { scroll: false });
+    router.replace(`/apartments/${segment}?${p.toString()}`, { scroll: false });
   };
   const toSummary = (openDates = false) => {
     if (openDates) setEditDates(true);

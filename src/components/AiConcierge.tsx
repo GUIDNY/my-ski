@@ -337,7 +337,7 @@ export default function AiConcierge() {
         style={{ boxShadow: "0 10px 28px rgba(11,27,51,0.28)" }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/helper.jpg" alt="" className="w-full h-full rounded-full object-cover" />
+        <img src="/helper.jpg" alt="נציגת SkiShare" className="w-full h-full rounded-full object-cover" />
         <span className="absolute -top-1 -right-1 bg-ok text-white text-[10px] font-extrabold rounded-full px-1.5 py-0.5 border-2 border-white leading-none">AI</span>
       </button>
 
@@ -364,7 +364,7 @@ export default function AiConcierge() {
             <div className="flex items-center gap-3 px-4 pb-3.5 pt-1.5 md:pt-4 border-b border-line">
               <span className="relative shrink-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/helper.jpg" alt="" className="w-11 h-11 rounded-full object-cover" />
+                <img src="/helper.jpg" alt="נציגת SkiShare" className="w-11 h-11 rounded-full object-cover" />
                 <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-ok border-2 border-white" aria-hidden="true" />
               </span>
               <div className="flex-1 min-w-0">

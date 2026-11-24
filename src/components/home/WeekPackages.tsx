@@ -1,3 +1,4 @@
+import { aptPath } from "@/lib/apartment-url";
 import Link from "next/link";
 import { aptShortName, aptParts, withListedSize } from "@/lib/apartment-display";
 import { createServerClient } from "@/lib/supabase-server";
@@ -89,7 +90,7 @@ async function loadPackages(): Promise<{ label: string; cards: Card[] } | null> 
       return {
         id: a.id, name: aptShortName(a), img: a.images?.[0] ?? "/hero-ski.jpg", ownApartment: a.source !== "la_cime", meta,
         // the apartment page opens with the same package (3V pass, transfer, gear) as this card's price
-        href: `/apartments/${a.id}?checkin=${checkin}&checkout=${checkout}&guests=${GUESTS}&pass=trois_vallees&transfer=1&equip=1`,
+        href: `${aptPath(a)}?checkin=${checkin}&checkout=${checkout}&guests=${GUESTS}&pass=trois_vallees&transfer=1&equip=1`,
         perPerson: Math.round(total / GUESTS), total,
       };
     };

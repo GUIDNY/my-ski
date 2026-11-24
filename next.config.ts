@@ -27,6 +27,8 @@ const nextConfig: NextConfig = {
   async redirects() {
     const FULL_GUIDE = "/guide/" + encodeURIComponent("המדריך-המלא-לואל-טורנס");
     return [
+      // www.skisharebook.com is the same site: one address for search engines
+      { source: "/:path*", has: [{ type: "host", value: "www.skisharebook.com" }], destination: "https://skisharebook.com/:path*", permanent: true },
       { source: "/home", destination: "/", permanent: true },
       { source: "/PrivacyPolicy", destination: "/privacy", permanent: true },
       { source: "/termsandconditions", destination: "/terms", permanent: true },

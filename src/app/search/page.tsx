@@ -1,4 +1,5 @@
 "use client";
+import { aptPath } from "@/lib/apartment-url";
 import { aptDisplayName, aptShortName, aptKind, aptParts, aptSqm, forWho } from "@/lib/apartment-display";
 import SkiLoader from "@/components/SkiLoader";
 import { Suspense, useEffect, useState, useRef } from "react";
@@ -183,7 +184,7 @@ function AptCard({ apt, nights, checkin, checkout, guests, deal, rules, badge, e
   const pkgTotal = dealReady ? Math.round(total + (extras!.perPerson + flightPP) * guests) : 0;
 
   return (
-    <Link href={`/apartments/${apt.id}?${query}`}
+    <Link href={`${aptPath(apt)}?${query}`}
       className={`${card} group overflow-hidden flex flex-col sm:flex-row hover:border-line-strong transition-colors`}>
       {/* photo */}
       <div className="relative sm:w-[300px] lg:w-[320px] shrink-0 h-[210px] sm:h-auto sm:min-h-[230px] bg-soft-2 overflow-hidden">

@@ -2,7 +2,8 @@ import { SITE, ORG_ID, VAL_THORENS, ldJson } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
+import { aptIdOf, aptSegment } from "@/lib/apartment-url";
 import { Check, chip, h1, h2, wrap } from "@/components/ui";
 import type { PricingRule } from "@/lib/pricing";
 import { aptText, amenitiesOf, isAgency, typeWorthShowing } from "@/lib/intl/apartment-text";
@@ -29,8 +30,8 @@ import ReadMore from "./ReadMore";
 
 const FALLBACK_IMAGES = ["/apt1.jpg", "/apt2.jpg", "/apt3.jpg"];
 
-export async function apartmentMetadata(lang: Lang, id: string): Promise<Metadata> {
-  const apt = await getApartment(id);
+export async function apartmentMetadata(lang: Lang, segment: string): Promise<Metadata> {
+  const apt = await getApartment(aptIdOf(decodeURIComponent(segment)) ?? "");
   if (!apt) notFound();
   const t = DICT[lang];
   const text = aptText(apt, lang);
@@ -40,16 +41,19 @@ export async function apartmentMetadata(lang: Lang, id: string): Promise<Metadat
     apt.sqm ? t.common.sqm(Number(apt.sqm)) : "",
     isAgency(apt) ? t.common.agencyApt.toLowerCase() : t.common.ourApt.toLowerCase(),
   ].filter(Boolean).join(", ");
-  return pageMetadata(lang, `/apartments/${apt.id}`, {
+  return pageMetadata(lang, `/apartments/${aptSegment(apt)}`, {
     title: t.meta.aptTitle(`${text.name}${text.code ? ` (${text.code})` : ""}`),
     description: t.meta.aptDesc(text.name, facts),
     image: apt.images?.[0] ?? null,
   });
 }
 
-export default async function ApartmentPage({ lang, id }: { lang: Lang; id: string }) {
-  const apt = await getApartment(id);
+export default async function ApartmentPage({ lang, id: segment }: { lang: Lang; id: string }) {
+  const apt = await getApartment(aptIdOf(decodeURIComponent(segment)) ?? "");
   if (!apt) notFound();
+  // the bare id (old links) or an outdated readable part: the current address, for good
+  // (a static page: the dates and guests in the query are read in the browser, so they go along)
+  if (decodeURIComponent(segment) !== aptSegment(apt)) permanentRedirect(`/${lang}/apartments/${aptSegment(apt)}`);
 
   const t = DICT[lang];
   const today = todayIso();
@@ -92,7 +96,7 @@ export default async function ApartmentPage({ lang, id }: { lang: Lang; id: stri
   const plain = parseSearch({}, today);
 
   // what the page is about, for search engines and AI answers: only facts shown on the page
-  const url = `${SITE}/${lang}/apartments/${apt.id}`;
+  const url = `${SITE}/${lang}/apartments/${aptSegment(apt)}`;
   const prices = agency ? weeks.map(w => w.price) : [];
   const ld = [{
     "@context": "https://schema.org",

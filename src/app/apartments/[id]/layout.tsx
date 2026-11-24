@@ -5,10 +5,11 @@ import { pageMeta } from "@/lib/page-meta";
 import { aptDisplayName, aptMetaDescription, aptParts, withListedSize } from "@/lib/apartment-display";
 import { alternatesFor } from "@/lib/intl/metadata";
 import type { Apartment } from "@/types";
+import { aptIdOf, aptSegment } from "@/lib/apartment-url";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
-  const { id } = await params;
-  if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
+  const id = aptIdOf(decodeURIComponent((await params).id));
+  if (!id) notFound();
   const db = createServerClient();
   const { data } = await db.from("apartments")
     .select("name, type, price_per_night, images, max_guests, sqm, source, available_weeks, available, description")
@@ -20,17 +21,18 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   if (!apt) notFound();
 
   const name = aptDisplayName(apt);
+  const path = `/apartments/${aptSegment({ ...apt, id })}`;
   const { code } = aptParts(apt);
   return pageMeta({
     // the agency's code keeps titles of look-alike studios apart
     title: `${name}${code ? ` (${code})` : ""} | SkiShare`,
     description: aptMetaDescription(apt),
-    path: `/apartments/${id}`,
+    path,
     // the preview card: the apartment's photo, name, size and price (lib/og-card)
     image: `/api/og/apt/${id}`,
     imageAlt: name,
     // the English and French pages exist only for apartments on offer
-    ...(apt.available ? { languages: alternatesFor(`/apartments/${id}`) } : {}),
+    ...(apt.available ? { languages: alternatesFor(path) } : {}),
   });
 }
 

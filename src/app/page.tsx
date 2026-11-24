@@ -232,7 +232,7 @@ export default function Home() {
           <div aria-hidden="true" className="flex-[1_1_380px] min-w-0 bg-white rounded-[26px] p-5 md:p-[22px] flex flex-col gap-2.5 text-[#0B1B33]">
             <div className="flex items-center gap-2.5 pb-3 border-b border-[#E3E9F2]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/helper.jpg" alt="" className="w-9 h-9 rounded-full object-cover" />
+              <img src="/helper.jpg" alt="נציגת SkiShare" className="w-9 h-9 rounded-full object-cover" />
               <div>
                 <div className="font-bold">SkiShare</div>
                 <div className="text-[13px] text-[#51607A]">עוזר דיגיטלי · עונה תוך שניות</div>

@@ -16,7 +16,7 @@ import { ORG_ID, SITE, VT_ID, WEBSITE_ID, breadcrumbLd, faqLd, ldJson } from "@/
  * real text on the page that answers "apartments in Val Thorens".
  */
 export default function ApartmentsInfo({ lang, weekPrices, apartments }: {
-  lang: Lang; weekPrices: WeekPrices | null; apartments: { id: string; name: string }[];
+  lang: Lang; weekPrices: WeekPrices | null; apartments: { id: string; path: string; name: string }[];
 }) {
   const d = DICT[lang];
   const t = d.guides;
@@ -36,7 +36,7 @@ export default function ApartmentsInfo({ lang, weekPrices, apartments }: {
       mainEntity: {
         "@type": "ItemList",
         numberOfItems: apartments.length,
-        itemListElement: apartments.map((a, i) => ({ "@type": "ListItem", position: i + 1, url: `${SITE}/${lang}/apartments/${a.id}`, name: a.name })),
+        itemListElement: apartments.map((a, i) => ({ "@type": "ListItem", position: i + 1, url: `${SITE}/${lang}/apartments/${a.path}`, name: a.name })),
       },
     },
     faqLd(t.aptsFaq),

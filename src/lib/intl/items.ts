@@ -1,3 +1,4 @@
+import { aptSegment } from "@/lib/apartment-url";
 import type { PricingRule } from "@/lib/pricing";
 import { placeOf, bedroomsOf } from "@/lib/residences";
 import { aptText, amenitiesOf, isAgency, typeWorthShowing } from "./apartment-text";
@@ -23,6 +24,7 @@ export function buildItems(lang: Lang, apartments: PublicApartment[], rules: Rec
     const pl = placeOf(a), b = bedroomsOf(a);
     return {
       id: a.id,
+      path: aptSegment(a),
       kind: agency ? "agency" : "own",
       name: text.name,
       meta: meta || t.valThorens,

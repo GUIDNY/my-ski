@@ -1,4 +1,5 @@
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
+import { aptIdOf, aptSegment, queryOf } from "@/lib/apartment-url";
 import { createServerClient } from "@/lib/supabase-server";
 import { rulesWithAirbnb } from "@/lib/airbnb-calendar";
 import { PUBLIC_APARTMENT_COLUMNS } from "@/lib/apartment-fields";
@@ -19,9 +20,10 @@ type Props = {
  * only the loading screen). The booking parts run in the browser on top.
  */
 export default async function ApartmentPage({ params, searchParams }: Props) {
-  const { id } = await params;
-  await searchParams; // the booking parts read the dates and guests from the address
-  if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
+  const { id: segment } = await params;
+  const sp = await searchParams; // the booking parts read the dates and guests from the address
+  const id = aptIdOf(decodeURIComponent(segment));
+  if (!id) notFound();
   const db = createServerClient();
   const [{ data: apt }, rules, { data: passes }] = await Promise.all([
     db.from("apartments").select(PUBLIC_APARTMENT_COLUMNS).eq("id", id).maybeSingle(),
@@ -30,7 +32,10 @@ export default async function ApartmentPage({ params, searchParams }: Props) {
   ]);
   if (!apt) notFound();
   const a = withListedSize(apt as unknown as Apartment);
-  const url = `https://skisharebook.com/apartments/${id}`;
+  // the bare id (old links) or an outdated readable part: the current address, for good
+  const seg = aptSegment(a);
+  if (decodeURIComponent(segment) !== seg) permanentRedirect(`/apartments/${seg}${queryOf(sp)}`);
+  const url = `https://skisharebook.com/apartments/${seg}`;
   const name = aptDisplayName(a);
   // what the page is about, for search engines and AI answers (only facts from the listing)
   const plain = (t: string) => t.replace(/[\p{Extended_Pictographic}\u{FE0F}\u{200D}]/gu, "").replace(/\s+/g, " ").trim();
@@ -67,7 +72,7 @@ export default async function ApartmentPage({ params, searchParams }: Props) {
     availability: "https://schema.org/InStock",
     description: "שבוע שלם משבת לשבת, לדירה כולה",
   }] : []),
-  breadcrumbLd([["דף הבית", "/"], ["דירות בואל טורנס", "/apartments"], [aptShortName(a), `/apartments/${id}`]]),
+  breadcrumbLd([["דף הבית", "/"], ["דירות בואל טורנס", "/apartments"], [aptShortName(a), `/apartments/${seg}`]]),
   ];
   return (
     <>

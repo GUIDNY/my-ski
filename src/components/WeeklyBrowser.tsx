@@ -1,4 +1,5 @@
 "use client";
+import { aptPath } from "@/lib/apartment-url";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
@@ -337,7 +338,7 @@ export default function WeeklyBrowser({
           {shownList.map(({ apt, price }, i) => {
             const pp = perPerson(price, selected!);
             const total = groupTotal(price, selected!);
-            const href = `/apartments/${apt.id}?${new URLSearchParams({
+            const href = `${aptPath(apt)}?${new URLSearchParams({
               checkin: selected!,
               checkout: range!.checkoutIso,
               guests: String(guests),
