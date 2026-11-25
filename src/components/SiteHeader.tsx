@@ -20,6 +20,7 @@ const NAV = [
   { href: "/apartments", label: "דירות", active: (p: string) => p.startsWith("/apartments") },
   { href: "/weekly", label: "שבת עד שבת", active: (p: string) => p.startsWith("/weekly") },
   { href: "/transfers", label: "הסעות", active: (p: string) => p.startsWith("/transfers") },
+  { href: "/equipment", label: "ציוד", active: (p: string) => p.startsWith("/equipment") },
   { href: "/guide", label: "ואל טורנס", active: (p: string) => p.startsWith("/guide") },
   { href: "/seasonaires", label: "סיזיונרים", active: (p: string) => p.startsWith("/seasonaires") },
 ];

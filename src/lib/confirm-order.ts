@@ -2,6 +2,7 @@ import { createServerClient } from "@/lib/supabase-server";
 import { blockDatesForOrder } from "@/lib/inventory";
 import { sendMetaEvent } from "@/lib/meta-capi";
 import { orderLang, portalUrl } from "@/lib/order-lang";
+import { gearOf, sendGearEmail } from "@/lib/gear-email";
 
 type Info = { email?: string; name?: string; phone?: string; txUid?: string; amountIls?: number };
 
@@ -38,6 +39,8 @@ export async function confirmDepositPaid(code: string, origin: string, info: Inf
       value: ils || Number(order.total_eur) || undefined, currency: ils ? "ILS" : "EUR", contentIds: [String(order.code)],
       email: order.customer_email, phone: order.customer_phone, name: order.customer_name,
     });
+    // an equipment-only order gets its own English email (show it at the shop), not the booking one
+    if (gearOf(order)) { await sendGearEmail(order, origin, true); return { changed: sendEmail, order }; }
     await blockDatesForOrder(db, order);
     const hook = process.env.N8N_WEBHOOK_URL;
     if (hook) {

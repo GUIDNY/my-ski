@@ -844,6 +844,14 @@ export default function OrdersAdmin() {
                     <button onClick={() => fillFromProposal(o)} disabled={busy === o.id} className="border border-violet-200 text-violet-700 hover:bg-violet-50 font-medium text-sm px-3 py-2 rounded-xl transition">השלם מההצעה</button>
                   )}
                   <button onClick={() => openPayments(o)} className="border border-teal-200 text-teal-700 hover:bg-teal-50 font-medium text-sm px-3 py-2 rounded-xl transition">💳 קבלות ותשלומים</button>
+                  {o.ops && typeof o.ops.x_gear === "object" && (
+                    <button onClick={async () => {
+                      if (!confirm(`לשלוח שוב את מייל הציוד ל-${o.customer_email || "הלקוח"}?`)) return;
+                      const r = await authFetch("/api/gear/email", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: o.id }) });
+                      const j = await r.json().catch(() => ({}));
+                      alert(r.ok ? "✓ נשלח" : `לא נשלח: ${j.error || r.status}`);
+                    }} className="border border-sky-200 text-sky-700 hover:bg-sky-50 font-medium text-sm px-3 py-2 rounded-xl transition">🎿 מייל ציוד</button>
+                  )}
                   <button onClick={() => openExpenses(o)} className="border border-red-200 text-red-700 hover:bg-red-50 font-medium text-sm px-3 py-2 rounded-xl transition">💸 הוצאות</button>
                   <EmailCustomer to={o.customer_email || ""} name={o.customer_name || ""} phone={o.customer_phone || ""} />
                   <button onClick={() => startEdit(o)} className="border border-gray-200 text-blue-600 hover:bg-blue-50 font-medium text-sm px-3 py-2 rounded-xl transition">עריכה</button>

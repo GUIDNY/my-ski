@@ -2,6 +2,7 @@ import { createServerClient } from "@/lib/supabase-server";
 import { couponDiscount, normCode, readCoupons, saveCoupons } from "@/lib/coupons";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/api-auth";
+import { cleanGear } from "@/lib/gear";
 
 const ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789";
 const code = (n = 6) => Array.from({ length: n }, () => ALPHABET[Math.floor(Math.random() * ALPHABET.length)]).join("");
@@ -84,7 +85,9 @@ export async function POST(req: NextRequest) {
     const c = code();
     // the English/French site says which language the customer's emails go out in
     const lang = b.lang === "en" || b.lang === "fr" ? b.lang : null;
-    const ops = { ...(couponUsed ? { x_coupon: couponUsed } : {}), ...(lang ? { x_lang: lang } : {}) };
+    // an equipment-only order (/equipment) keeps who rents what in ops.x_gear
+    const gear = b.gear ? cleanGear(b.gear) : null;
+    const ops = { ...(couponUsed ? { x_coupon: couponUsed } : {}), ...(lang ? { x_lang: lang } : {}), ...(gear ? { x_gear: gear } : {}) };
     const { data, error } = await db.from("orders").insert({ code: c, ...row, ...(Object.keys(ops).length ? { ops } : {}) }).select("code").single();
     if (!error && data) {
       if (couponUsed) { // best-effort usage counter
