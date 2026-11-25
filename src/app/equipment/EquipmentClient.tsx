@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import CardPaymentButton from "@/components/CardPaymentButton";
+import { IconSkiPair, IconSnowboard, IconHelmet } from "@/components/GearIcons";
 import { wrap, card, h2, btn, field, fieldLabel } from "@/components/ui";
 import { equipCost } from "@/lib/pricing";
 import { GEAR_SHOP, HELMET_PRICE, gearDays, personCost, type GearKind, type GearPerson } from "@/lib/gear";
@@ -64,7 +65,7 @@ export default function EquipmentClient() {
   if (done) return (
     <div className={`${wrap} py-12 md:py-20 flex justify-center`}>
       <div className={`${card} w-full max-w-[560px] p-7 md:p-9 text-center flex flex-col items-center gap-3`} role="status">
-        <span className="text-[44px]" aria-hidden="true">🏂</span>
+        <span className="w-16 h-16 rounded-full bg-accent-soft text-accent flex items-center justify-center"><IconSnowboard size={34} /></span>
         <h1 className="font-display font-bold text-[28px] text-ink">סגרנו! הציוד מחכה לכם</h1>
         <p className="text-[16px] text-body">קוד הזמנה <b className="font-mono tracking-widest">{done.code.toUpperCase()}</b> · {eur(done.total)}</p>
         <p className="text-[16px] text-body leading-relaxed">
@@ -81,12 +82,12 @@ export default function EquipmentClient() {
         {/* dates */}
         <section id="gear-dates" className="flex flex-col gap-3">
           <h2 className={h2}>מתי אתם על ההר?</h2>
-          <div className="grid grid-cols-2 gap-3 max-w-[520px]">
+          <div className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-3 max-w-[520px]">
             <label><span className={fieldLabel}>יום ראשון של גלישה</span>
-              <input type="date" className={field} min={today()} value={from} onChange={e => { setFrom(e.target.value); if (to && e.target.value > to) setTo(""); }} />
+              <input type="date" className={`${field} min-w-0 appearance-none`} min={today()} value={from} onChange={e => { setFrom(e.target.value); if (to && e.target.value > to) setTo(""); }} />
             </label>
             <label><span className={fieldLabel}>יום אחרון של גלישה</span>
-              <input type="date" className={field} min={from || today()} value={to} onChange={e => setTo(e.target.value)} />
+              <input type="date" className={`${field} min-w-0 appearance-none`} min={from || today()} value={to} onChange={e => setTo(e.target.value)} />
             </label>
           </div>
           {from && (
@@ -120,7 +121,7 @@ export default function EquipmentClient() {
                   {(["ski", "snowboard"] as GearKind[]).map(k => (
                     <button key={k} type="button" onClick={() => set(i, "kind", k)} aria-pressed={p.kind === k}
                       className={`rounded-2xl border-2 px-4 py-3 text-start transition-colors ${p.kind === k ? "border-accent bg-accent-soft" : "border-line bg-white hover:border-line-strong"}`}>
-                      <span className="block text-[24px] leading-none" aria-hidden="true">{k === "ski" ? "⛷️" : "🏂"}</span>
+                      <span className={`block ${p.kind === k ? "text-accent" : "text-muted"}`}>{k === "ski" ? <IconSkiPair size={30} /> : <IconSnowboard size={30} />}</span>
                       <span className="block font-bold text-[16px] text-ink mt-1.5">{k === "ski" ? "סקי" : "סנובורד"}</span>
                       <span className="block text-[13px] text-muted">כולל נעליים</span>
                     </button>
@@ -133,7 +134,7 @@ export default function EquipmentClient() {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <label className="flex items-center gap-2.5 cursor-pointer min-h-[40px]">
                     <input type="checkbox" className="w-5 h-5 accent-accent" checked={!!p.helmet} onChange={e => set(i, "helmet", e.target.checked)} />
-                    <span className="text-[15px] text-ink font-bold">⛑️ קסדה</span>
+                    <span className="text-[15px] text-ink font-bold flex items-center gap-1.5"><IconHelmet size={20} className="text-muted" /> קסדה</span>
                     <span className="text-[14px] text-muted">+€{HELMET_PRICE} לכל התקופה</span>
                   </label>
                   {days > 0 && <span className="text-[15px] text-muted">לגולש: <b className="text-ink">{eur(personCost(days, p))}</b></span>}

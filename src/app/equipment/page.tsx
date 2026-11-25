@@ -1,6 +1,7 @@
 import { pageMeta } from "@/lib/page-meta";
 import { wrap, h1, h2 } from "@/components/ui";
 import { GEAR_SHOP } from "@/lib/gear";
+import { IconSnowboard, IconBoot, IconPin, IconStar, IconSkiPair } from "@/components/GearIcons";
 import EquipmentClient from "./EquipmentClient";
 
 export const metadata = pageMeta({
@@ -14,7 +15,7 @@ export default function EquipmentPage() {
   return (
     <div dir="rtl" className="bg-[#F7FAFD] min-h-screen">
       <header className={`${wrap} pt-10 md:pt-14 pb-8 md:pb-10 flex flex-col gap-3`}>
-        <span className="sticker self-start text-[14px]">🏂 סקי או סנובורד? אנחנו לא שופטים</span>
+        <span className="sticker self-start text-[14px]">סקי או סנובורד? אנחנו לא שופטים</span>
         <h1 className={h1}>השכרת ציוד בואל טורנס</h1>
         <div className="flex items-center gap-3 text-[15px] text-muted">
           <span>בשיתוף</span>
@@ -51,9 +52,9 @@ export default function EquipmentPage() {
               Caron Skishop היא חנות עצמאית בלב ואל טורנס, שמתמחה בפרירייד ופריסטייל. ציוד איכותי במחיר טוב, בחבילות הפרימיום מגלשיים וסנובורדים חדשים מהעונה, וצוות שבאמת עוזר לבחור. אנחנו עובדים איתם בשותפות, וכל מה שהזמנתם אצלנו מחכה לכם שם מוכן.
             </p>
             <ul className="flex flex-col gap-1.5 text-[15px] text-ink">
-              <li>⭐ 4.7 בגוגל, יותר מ-160 ביקורות</li>
-              <li>📍 <span dir="ltr">{GEAR_SHOP.address}</span></li>
-              <li>🎿 סקי, סנובורד, נעליים וקסדות</li>
+              <li className="flex items-center gap-2"><IconStar /> 4.7 בגוגל, יותר מ-160 ביקורות</li>
+              <li className="flex items-center gap-2"><IconPin size={18} className="text-muted shrink-0" /> <span dir="ltr">{GEAR_SHOP.address}</span></li>
+              <li className="flex items-center gap-2"><IconSkiPair size={18} className="text-muted shrink-0" /> סקי, סנובורד, נעליים וקסדות</li>
             </ul>
             <a href={GEAR_SHOP.maps} target="_blank" rel="noopener noreferrer" className="font-bold text-accent hover:text-accent-hover self-start">לחנות במפה ←</a>
           </div>
@@ -76,7 +77,7 @@ export default function EquipmentPage() {
         {/* more of the shop's gear: snowboards and boots */}
         <div className={`${wrap} pb-14 md:pb-20 flex flex-col gap-8`}>
           <div className="flex flex-col gap-3">
-            <h3 className="font-display font-bold text-[20px] md:text-[22px] text-ink">🏂 סנובורדים</h3>
+            <h3 className="font-display font-bold text-[20px] md:text-[22px] text-ink flex items-center gap-2"><IconSnowboard size={24} className="text-accent" /> סנובורדים</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
               {["board-classic-2.jpg", "board-classic-3.jpg", "board-classic-4.jpg", "board-premium-1.jpg", "board-premium-2.jpg", "board-premium-3.jpg"].map((f, i) => (
                 <div key={f} className="bg-white rounded-[16px] border border-line p-3 shadow-[0_8px_24px_rgba(11,27,51,0.06)] transition-transform duration-300 hover:-translate-y-1 hover:rotate-[-1deg]">
@@ -88,7 +89,7 @@ export default function EquipmentPage() {
             </div>
           </div>
           <div className="flex flex-col gap-3">
-            <h3 className="font-display font-bold text-[20px] md:text-[22px] text-ink">👢 נעליים, כלולות במחיר</h3>
+            <h3 className="font-display font-bold text-[20px] md:text-[22px] text-ink flex items-center gap-2"><IconBoot size={24} className="text-accent" /> נעליים, כלולות במחיר</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
               {["boots-premium.jpg", "boots-edge.jpg"].map(f => (
                 <div key={f} className="bg-white rounded-[16px] border border-line p-4 flex items-center justify-center shadow-[0_8px_24px_rgba(11,27,51,0.06)]">
