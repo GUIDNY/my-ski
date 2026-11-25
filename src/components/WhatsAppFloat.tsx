@@ -15,7 +15,7 @@ import { helperWaHref } from "@/lib/helper-whatsapp";
 
 const HIDE = ["/admin", "/seller", "/quote", "/q", "/en", "/fr", "/auth", "/p"]; // quote pages have their own WhatsApp button
 // pages with their own sticky bar at the bottom of a phone screen
-const PHONE_HIDE = [/^\/apartments\/[^/]+/, /^\/pay\//, /^\/split\//, /^\/q\//, /^\/offer\//, /^\/quote/, /^\/book/, /^\/combo/];
+const PHONE_HIDE = [/^\/transfers/, /^\/equipment/, /^\/apartments\/[^/]+/, /^\/pay\//, /^\/split\//, /^\/q\//, /^\/offer\//, /^\/quote/, /^\/book/, /^\/combo/];
 const SEEN_KEY = "skishare-wa-bubble";
 
 const IcoWa = ({ size = 26 }: { size?: number }) => (

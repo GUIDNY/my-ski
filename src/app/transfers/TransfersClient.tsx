@@ -681,7 +681,7 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
                   <span className="text-[15px] text-muted">סה״כ</span>
                   <span className="font-display font-extrabold text-[36px] leading-none text-ink">{datesSet && (isShared || hasLivePrice) ? `€${totalPrice}` : "—"}</span>
                 </div>
-                <span className="self-end text-[13px] text-muted">{passengers > 1 ? `€${Math.round(totalPrice / passengers)} לאדם · ` : ""}<span className={`font-bold ${isShared || isMixed || hasLivePrice ? "text-ok-text" : "text-warn"}`}>{quoting ? "בודקים מחיר…" : isShared || isMixed || hasLivePrice ? "מחיר חי" : "מחיר משוער"}</span></span>
+                <span className="self-end text-[13px] text-muted">{passengers > 1 && datesSet && (isShared || hasLivePrice) ? `€${Math.round(totalPrice / passengers)} לאדם · ` : ""}<span className={`font-bold ${isShared || isMixed || hasLivePrice ? "text-ok-text" : "text-warn"}`}>{quoting ? "בודקים מחיר…" : isShared || isMixed || hasLivePrice ? "מחיר חי" : "מחיר משוער"}</span></span>
               </div>
 
               <div className="hidden lg:flex flex-col gap-2">
@@ -699,8 +699,10 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
         style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))", boxShadow: "0 -8px 24px rgba(11,27,51,0.08)" }}>
         <div className="flex items-center gap-3">
           <div className="shrink-0 flex flex-col">
-            <span className="text-[12px] text-muted leading-tight">{datesSet && (isShared || hasLivePrice) ? "סה״כ" : "סה״כ"}</span>
-            <span className="font-display font-extrabold text-[24px] leading-none text-ink">{datesSet && (isShared || hasLivePrice) ? `€${totalPrice}` : "—"}</span>
+            {datesSet && (isShared || hasLivePrice) ? <>
+              <span className="text-[12px] text-muted leading-tight">סה״כ{passengers > 1 ? ` · €${Math.round(totalPrice / passengers)} לאדם` : ""}</span>
+              <span className="font-display font-extrabold text-[24px] leading-none text-ink">€{totalPrice}</span>
+            </> : <span className="text-[13px] text-muted leading-tight max-w-[110px]">{quoting ? "בודקים מחיר…" : "בוחרים תאריך ורואים מחיר"}</span>}
           </div>
           <div className="flex-1">{submitButton}</div>
         </div>
