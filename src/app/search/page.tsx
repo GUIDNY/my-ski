@@ -139,7 +139,7 @@ function DealToggle({ value, onChange }: { value: "full" | ""; onChange: (v: "fu
     </button>
   );
   return (
-    <div className="flex gap-1 p-1 rounded-xl border border-line-strong bg-white" role="group" aria-label="מה בא לכם?">
+    <div className="flex gap-1 p-1 rounded-xl border border-line-strong bg-white" role="group" aria-label="סוג החופשה">
       {opt("full", "דיל שלם")}
       {opt("", "רק דירה")}
     </div>
@@ -189,7 +189,7 @@ function AptCard({ apt, nights, checkin, checkout, guests, deal, rules, badge, e
       {/* photo */}
       <div className="relative sm:w-[300px] lg:w-[320px] shrink-0 h-[210px] sm:h-auto sm:min-h-[230px] bg-soft-2 overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img {...cardImage(apt.images?.[0], "/hero-ski.jpg")} alt={aptDisplayName(apt)} loading="lazy"
+        <img {...cardImage(apt.images?.[0], "/balcony-vt.webp")} alt={aptDisplayName(apt)} loading="lazy" onError={e => { const i = e.currentTarget; if (!i.dataset.fb) { i.dataset.fb = "1"; i.removeAttribute("srcset"); i.src = "/balcony-vt.webp"; } }}
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
         <span className={`absolute top-3.5 right-3.5 ${badgeLight}`}>{isAgency(apt) ? "שבת עד שבת" : "כניסה בכל יום"}</span>
         {badge && <span className={`absolute bottom-3.5 right-3.5 ${badgeDark}`}>{badge}</span>}
@@ -278,9 +278,9 @@ function ComboCard({ a, b, total, cap, checkin, checkout, guests, nights }: {
     <Link href={`/combo?${query}`} className={`${card} group overflow-hidden flex flex-col sm:flex-row hover:border-line-strong transition-colors`}>
       <div className="relative sm:w-[300px] lg:w-[320px] shrink-0 h-[190px] sm:h-auto sm:min-h-[210px] flex bg-soft-2">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img {...cardImage(a.images?.[0], "/hero-ski.jpg")} alt={aptDisplayName(a)} loading="lazy" className="w-1/2 h-full object-cover" />
+        <img {...cardImage(a.images?.[0], "/balcony-vt.webp")} alt={aptDisplayName(a)} loading="lazy" onError={e => { const i = e.currentTarget; if (!i.dataset.fb) { i.dataset.fb = "1"; i.removeAttribute("srcset"); i.src = "/balcony-vt.webp"; } }} className="w-1/2 h-full object-cover" />
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img {...cardImage(b.images?.[0], "/hero-ski.jpg")} alt={aptDisplayName(b)} loading="lazy" className="w-1/2 h-full object-cover border-r-2 border-white" />
+        <img {...cardImage(b.images?.[0], "/balcony-vt.webp")} alt={aptDisplayName(b)} loading="lazy" onError={e => { const i = e.currentTarget; if (!i.dataset.fb) { i.dataset.fb = "1"; i.removeAttribute("srcset"); i.src = "/balcony-vt.webp"; } }} className="w-1/2 h-full object-cover border-r-2 border-white" />
         <span className={`absolute top-3.5 right-3.5 ${badgeDark}`}>שתי דירות יחד</span>
       </div>
       <div className="flex-1 min-w-0 p-5 md:p-6 flex flex-col md:flex-row gap-5 justify-between">
@@ -421,7 +421,12 @@ function SearchPage() {
       ? calcTotalForRange(checkin, checkout, Number(a.price_per_night), rulesMap[a.id] ?? [])
       : Number(a.price_per_night) * Math.max(nights, 1);
   };
-  const shown = sort === "price" ? [...filtered].sort((x, y) => priceFor(x) - priceFor(y)) : filtered;
+  // "recommended": our own apartments first, and among them the ones the size
+  // of the group before ones much bigger (4 people shouldn't open on a flat for 8)
+  const fitRank = (a: Apartment) => (isAgency(a) ? 2 : 0) + (capacity(a) - guests >= 3 ? 1 : 0);
+  const shown = sort === "price"
+    ? [...filtered].sort((x, y) => priceFor(x) - priceFor(y))
+    : [...filtered].sort((x, y) => fitRank(x) - fitRank(y));
   const cheapestId = shown.length > 1 && checkin && checkout
     ? shown.reduce((best, a) => (priceFor(a) < priceFor(best) ? a : best), shown[0]).id : "";
 

@@ -1,31 +1,29 @@
 "use client";
 
-const flakes = Array.from({ length: 70 }, (_, i) => ({
+/*
+ * Gentle falling snow over a photo. Each flake is two layers, so the fall and
+ * the side-to-side sway don't fight over one transform. Off for visitors who
+ * ask for less motion (globals.css).
+ */
+const flakes = Array.from({ length: 60 }, (_, i) => ({
   id: i,
   left: (i * 17.3) % 100,
-  delay: (i * 0.37) % 12,
-  duration: 8 + (i * 0.23) % 10,
+  delay: -((i * 0.83) % 14),
+  duration: 9 + ((i * 0.37) % 9),
   size: 2 + (i % 4),
-  opacity: 0.2 + (i % 5) * 0.12,
+  opacity: 0.35 + (i % 5) * 0.12,
   swayDuration: 3 + (i % 4),
 }));
 
 export default function Snow() {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
-      {flakes.map((f) => (
-        <div
-          key={f.id}
-          className="absolute rounded-full bg-white"
-          style={{
-            left: `${f.left}%`,
-            top: "-10px",
-            width: f.size,
-            height: f.size,
-            opacity: f.opacity,
-            animation: `snowfall ${f.duration}s ${f.delay}s linear infinite, sway ${f.swayDuration}s ${f.delay}s ease-in-out infinite`,
-          }}
-        />
+    <div aria-hidden="true" className="snow absolute inset-0 overflow-hidden pointer-events-none z-[5]">
+      {flakes.map(f => (
+        <div key={f.id} className="snow-fall absolute top-0"
+          style={{ left: `${f.left}%`, animationDuration: `${f.duration}s`, animationDelay: `${f.delay}s` }}>
+          <div className="snow-sway rounded-full bg-white"
+            style={{ width: f.size, height: f.size, opacity: f.opacity, animationDuration: `${f.swayDuration}s`, boxShadow: "0 0 4px rgba(255,255,255,.8)" }} />
+        </div>
       ))}
     </div>
   );

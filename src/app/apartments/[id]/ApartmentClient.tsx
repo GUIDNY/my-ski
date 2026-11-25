@@ -352,7 +352,7 @@ function Modal({ title, onClose, children }: { title: ReactNode; onClose: () => 
   return (
     <div dir="rtl" className="fixed inset-0 z-[95] bg-ink/55 flex items-end sm:items-center justify-center sm:p-4" onClick={onClose}>
       <div role="dialog" aria-modal="true" aria-label={typeof title === "string" ? title : undefined}
-        className="bg-white w-full sm:max-w-md rounded-t-[24px] sm:rounded-card p-5 sm:p-6 max-h-[90dvh] overflow-y-auto"
+        className="bg-white w-full sm:max-w-[540px] rounded-t-[24px] sm:rounded-card p-5 sm:p-6 max-h-[90dvh] overflow-y-auto"
         style={{ paddingBottom: "max(20px, env(safe-area-inset-bottom))" }}
         onClick={e => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-3 mb-3">
@@ -1029,6 +1029,9 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
                       <span className="font-bold text-[15px] text-ink">כמה משלמים?</span>
                       <Stepper value={splitCount} onChange={setSplitCount} max={guests} label="כמה משלמים" />
                     </div>
+                    {splitCount === 1 && (
+                      <p className="text-[13px] text-muted leading-relaxed -mt-1">כרגע אחד משלם על כל הקבוצה ({eur(grandTotal)}). רוצים שכל אחד ישלם את החלק שלו? הגדילו את המספר.</p>
+                    )}
                     {splitCount > 1 && (
                       <div className="rounded-xl bg-white border border-line px-3.5 py-3 text-[14px]">
                         <div className="flex justify-between font-bold text-ink text-[15px]">
@@ -1081,6 +1084,10 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
             </div>
 
             <CheckList className="text-[14px] text-body gap-1.5" items={[
+              <a key="g" href="https://www.google.com/search?q=%D7%A1%D7%A7%D7%99+%D7%A9%D7%A8+SkiShare+%D7%91%D7%99%D7%A7%D7%95%D7%A8%D7%95%D7%AA" target="_blank" rel="noopener noreferrer" className="font-bold text-ink hover:text-accent transition-colors">
+                <span className="text-[#E8A317]">★</span> 4.9 בגוגל · 67 ביקורות של לקוחות
+              </a>,
+              "מזמינים ישירות מאיתנו, בלי מתווכים",
               "כל אחד יכול לשלם את החלק שלו",
               "אפשר לבחור ביטול גמיש",
               <a key="wa" href={waBookHref} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 font-bold text-ink hover:text-accent transition-colors">

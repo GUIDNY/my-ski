@@ -218,7 +218,7 @@ export default function SearchWidget({ initialDeal = "apartment", flat = false }
 
         {/* What */}
         <div className="flex flex-col justify-center gap-1.5 rounded-2xl border border-[#E3E9F2] px-4 py-3 min-h-[64px]">
-          <span className="text-[13px] font-bold text-[#51607A]">מה בא לכם?</span>
+          <span className="text-[13px] font-bold text-[#51607A]">סוג החופשה</span>
           <div className="grid grid-cols-2 gap-1.5" role="group" aria-label="סוג החיפוש">
             <button type="button" aria-pressed={dealMode === "full"} onClick={() => setDealMode("full")} className={pill(dealMode === "full")}>דיל שלם</button>
             <button type="button" aria-pressed={dealMode === "apartment"} onClick={() => setDealMode("apartment")} className={pill(dealMode === "apartment")}>רק דירה</button>

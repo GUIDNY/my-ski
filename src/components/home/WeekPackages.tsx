@@ -119,7 +119,7 @@ export default async function WeekPackages() {
   const data = await loadPackages().catch(() => null);
   if (!data) return null;
   return (
-    <section className="max-w-[1240px] mx-auto px-5 md:px-6 py-14 md:py-20">
+    <section className="max-w-[1240px] mx-auto px-5 md:px-6 py-10 md:py-14">
       <div className="flex flex-wrap items-end justify-between gap-4 mb-7 md:mb-9">
         <div className="flex flex-col gap-2">
           <h2 className="font-display text-[28px] md:text-[40px] font-bold tracking-tight text-[#0B1B33]">חבילות סקי לשבוע {data.label}</h2>
@@ -154,7 +154,7 @@ export default async function WeekPackages() {
                 </div>
                 <div className="text-[14px] text-[#51607A]">{eur(c.total)} לכל החבורה</div>
               </div>
-              <Link href={c.href} className="mt-1.5 flex items-center justify-center min-h-[48px] rounded-[14px] bg-[#1652F0] hover:bg-[#0E3FC2] text-white font-bold text-[17px] transition-colors">לחבילה</Link>
+              <Link href={c.href} className="mt-1.5 flex items-center justify-center min-h-[48px] rounded-[14px] bg-[#1652F0] hover:bg-[#0E3FC2] text-white font-bold text-[17px] transition-colors">לפרטים ולהזמנה</Link>
             </div>
           </article>
         ))}
@@ -165,7 +165,7 @@ export default async function WeekPackages() {
 
 export function WeekPackagesSkeleton() {
   return (
-    <section className="max-w-[1240px] mx-auto px-5 md:px-6 py-14 md:py-20" aria-busy="true" aria-label="טוען חבילות">
+    <section className="max-w-[1240px] mx-auto px-5 md:px-6 py-10 md:py-14" aria-busy="true" aria-label="טוען חבילות">
       <div className="h-10 w-72 rounded-xl bg-[#EEF2F7] mb-8" />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
         {[0, 1, 2, 3].map(i => (
