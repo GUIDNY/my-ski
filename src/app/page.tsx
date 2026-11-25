@@ -156,7 +156,7 @@ export default function Home() {
             <source srcSet="/team-vt.webp" type="image/webp" />
             <img src="/team-vt.jpg" alt="שני הבעלים של SkiShare ברכבל בואל טורנס, עם מעילי SkiShare" loading="lazy" className="w-full h-[300px] md:h-[440px] object-cover block rounded-[3px]" />
           </picture>
-          <span className="sticker absolute -top-4 -left-3 md:-left-5 text-[15px] md:text-[17px]">4 עונות על ההר 🏂</span>
+          <span className="sticker absolute -top-4 -left-3 md:-left-5 text-[15px] md:text-[17px]">Since 2022 🏂</span>
         </figure>
         <div className="flex-[1_1_380px] min-w-0 flex flex-col gap-4" data-reveal data-reveal-delay="1">
           <h2 className="font-display text-[28px] md:text-[40px] font-bold tracking-tight leading-tight">נעים להכיר, אנחנו <span className="marker">SkiShare</span></h2>
