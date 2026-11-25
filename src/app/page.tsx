@@ -145,6 +145,26 @@ export default function Home() {
         <WeekPackages />
       </Suspense>
 
+      {/* ── Who we are: the two owners, on the mountain ─── */}
+      <section className="max-w-[1240px] mx-auto px-5 md:px-6 py-10 md:py-14 flex flex-wrap gap-8 md:gap-14 items-center">
+        <figure className="flex-[1_1_520px] min-w-0 photo-zoom rounded-[18px]" data-reveal>
+          <picture>
+            <source srcSet="/team-vt.webp" type="image/webp" />
+            <img src="/team-vt.jpg" alt="שני הבעלים של SkiShare ברכבל בואל טורנס, עם מעילי SkiShare" loading="lazy" className="w-full h-[300px] md:h-[440px] object-cover block" />
+          </picture>
+        </figure>
+        <div className="flex-[1_1_380px] min-w-0 flex flex-col gap-4" data-reveal data-reveal-delay="1">
+          <h2 className="font-display text-[28px] md:text-[40px] font-bold tracking-tight leading-tight">נעים להכיר, אנחנו SkiShare</h2>
+          <p className="text-[16px] md:text-[18px] leading-[1.7] text-[#3D4B63]">
+            שני חברים, הבעלים של SkiShare, שעושים את העונה בואל טורנס. הדירות שלנו, ואנחנו מכירים כל אחת מהן: מכינים אותן לפני שאתם מגיעים, ממליצים על מסלולים ועל מקומות לאכול, ונשארים זמינים בוואטסאפ לאורך כל החופשה.
+          </p>
+          <p className="text-[16px] md:text-[18px] leading-[1.7] text-[#3D4B63]">אין מוקד ואין מתווך. מי שעונה לכם הוא מי שנמצא פה על ההר.</p>
+          <a href={waHref} target="_blank" rel="noopener noreferrer" className="self-start inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1EBE5A] text-[#06301A] rounded-[14px] px-6 min-h-[52px] font-bold text-[16px] md:text-[17px] transition-colors mt-1">
+            לכתוב לנו ישירות בוואטסאפ
+          </a>
+        </div>
+      </section>
+
       {/* ── What's included: a real apartment, and a plain list ── */}
       <section className="max-w-[1240px] mx-auto px-5 md:px-6 py-10 md:py-14 flex flex-wrap gap-8 md:gap-14 items-center">
         <div className="flex-[1_1_440px] min-w-0" data-reveal>
