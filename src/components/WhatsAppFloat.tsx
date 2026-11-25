@@ -5,7 +5,9 @@ import { helperWaHref } from "@/lib/helper-whatsapp";
 
 /*
  * "דברו איתנו בוואטסאפ": a floating WhatsApp button on every Hebrew page,
- * bottom left (the site chat bubble is bottom right on the computer).
+ * bottom left (the site chat bubble is bottom right on the computer). A
+ * round button that opens up to its words under the pointer, so it never
+ * covers the page's own text.
  * A few seconds in, once per visit, a small bubble says that we answer
  * right away; it can be closed. Phone: a round button only, and not on the
  * pages with a sticky price or pay bar at the bottom.
@@ -54,9 +56,9 @@ export default function WhatsAppFloat() {
       )}
       <a href={href} target="_blank" rel="noopener noreferrer" onClick={close}
         aria-label="דברו איתנו בוואטסאפ"
-        className="pointer-events-auto group inline-flex items-center gap-2.5 h-[56px] md:h-[54px] w-[56px] md:w-auto justify-center md:px-5 rounded-full bg-[#25D366] hover:bg-[#1EBE5A] text-white font-bold text-[16px] shadow-[0_8px_24px_rgba(37,211,102,0.45)] transition-[transform,background-color] hover:scale-[1.03] active:scale-95">
+        className="pointer-events-auto group inline-flex items-center gap-2.5 h-[56px] w-[56px] md:hover:w-auto justify-center md:hover:px-5 rounded-full bg-[#25D366] hover:bg-[#1EBE5A] text-white font-bold text-[16px] shadow-[0_8px_24px_rgba(37,211,102,0.45)] transition-[transform,background-color] hover:scale-[1.03] active:scale-95">
         <IcoWa />
-        <span className="hidden md:inline">דברו איתנו בוואטסאפ</span>
+        <span className="hidden md:group-hover:inline whitespace-nowrap">דברו איתנו בוואטסאפ</span>
       </a>
     </div>
   );
