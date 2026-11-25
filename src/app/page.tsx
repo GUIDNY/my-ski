@@ -26,40 +26,40 @@ export const revalidate = 600;
 const ico = (path: React.ReactNode, size = 22) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{path}</svg>
 );
-const IcoHome = () => ico(<><path d="M3 11l9-7 9 7" /><path d="M5 10v10h14V10" /></>);
-const IcoTag = () => ico(<><path d="M3 12V4h8l10 10-8 8z" /><circle cx="7.5" cy="7.5" r="1.5" /></>);
 const IcoChat = ({ size = 22 }: { size?: number }) => ico(<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z" />, size);
-const IcoSplit = () => ico(<><circle cx="8" cy="9" r="3" /><circle cx="16" cy="9" r="3" /><path d="M2 20a6 6 0 0 1 12 0" /><path d="M10 20a6 6 0 0 1 12 0" /></>);
-const IcoBed = () => ico(<><path d="M3 18V6" /><path d="M3 14h18v4" /><path d="M21 14v-3a3 3 0 0 0-3-3h-7v6" /><circle cx="7" cy="11" r="2" /></>, 26);
-const IcoTicket = () => ico(<><path d="M4 8a2 2 0 0 0 2-2h12a2 2 0 0 0 2 2v8a2 2 0 0 0-2 2H6a2 2 0 0 0-2-2z" /><path d="M12 7v2M12 11v2M12 15v2" /></>, 26);
-const IcoVan = () => ico(<><rect x="3" y="6" width="18" height="10" rx="2" /><path d="M3 11h18" /><circle cx="7.5" cy="18" r="1.5" /><circle cx="16.5" cy="18" r="1.5" /></>, 26);
-const IcoSkis = () => ico(<><path d="M7 3l5 18" /><path d="M17 3l-5 18" /><path d="M4 19h5" /><path d="M15 19h5" /></>, 26);
-const IcoPlane = () => ico(<path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z" />, 26);
 const IcoShield = () => ico(<><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z" /><path d="M9 12l2 2 4-4" /></>, 20);
-const IcoUser = () => ico(<><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>);
 
 /* ── Content ───────────────────────────────────────────────── */
 const trust = [
-  { icon: <IcoHome />, title: "דירות לחבר'ה ולקבוצות", text: "דירות שלנו בואל טורנס, מזוג ועד 7 בדירה" },
-  { icon: <IcoTag />, title: "חופשה בהרכבה", text: "דירה, ומוסיפים רק מה שצריך" },
-  { icon: <IcoSplit />, title: "כל אחד משלם את החלק שלו", text: "קישור תשלום נפרד לכל אחד מהחבורה" },
-  { icon: <IcoUser />, title: "אזור אישי", text: "ההזמנות והחופשות ששמרתם, במקום אחד" },
+  { title: "הדירות שלנו", text: "בואל טורנס, מזוג ועד 7 בדירה" },
+  { title: "מוסיפים רק מה שצריך", text: "סקי פס, הסעה, ציוד" },
+  { title: "כל אחד משלם את החלק שלו", text: "קישור תשלום נפרד לכל אחד" },
+  { title: "עונים בוואטסאפ", text: "גם באמצע החופשה" },
 ];
 
 // "build your own trip": the apartment is the base, everything else is picked
 const included = [
-  { icon: <IcoBed />, title: "הדירה", text: "דירות שלנו בואל טורנס, לחבורה או לזוג. ניקיון כלול במחיר", badge: "הבסיס", kind: "base", link: { href: "/apartments", label: "דירות בואל טורנס" } },
-  { icon: <IcoTicket />, title: "סקי פס", text: "ואל טורנס, או כל 600 הק\"מ של שלושת העמקים", badge: "לבחירה", kind: "pick", link: { href: "/guide/מחיר-סקי-פס-ואל-טורנס", label: "מחירי סקי פס" } },
-  { icon: <IcoVan />, title: "הסעה מהשדה", text: "שאטל ישיר עד הדירה, הלוך וחזור", badge: "לבחירה", kind: "pick", link: { href: "/transfers", label: "הסעות" } },
-  { icon: <IcoSkis />, title: "ציוד", text: "סקי או סנובורד לכל ימי הגלישה", badge: "לבחירה", kind: "pick", link: null },
-  { icon: <IcoPlane />, title: "טיסה ישירה", text: "רק כשיש ישירה מתל אביב בתאריכים שלכם, במחיר האמיתי", badge: "כשיש ישירה", kind: "flight", link: { href: "/guide/איך-מגיעים-לואל-טורנס-מישראל", label: "איך מגיעים" } },
+  { title: "הדירה", text: "דירות שלנו בואל טורנס, לחבורה או לזוג. ניקיון כלול במחיר.", badge: "הבסיס", link: { href: "/apartments", label: "לדירות" } },
+  { title: "סקי פס", text: "ואל טורנס, או כל 600 הק\"מ של שלושת העמקים.", badge: "אם רוצים", link: { href: "/guide/מחיר-סקי-פס-ואל-טורנס", label: "מחירים" } },
+  { title: "הסעה מהשדה", text: "שאטל ישיר עד הדירה, הלוך וחזור.", badge: "אם רוצים", link: { href: "/transfers", label: "הסעות" } },
+  { title: "ציוד", text: "סקי או סנובורד לכל ימי הגלישה.", badge: "אם רוצים", link: null },
+  { title: "טיסה ישירה", text: "רק כשיש ישירה מתל אביב בתאריכים שלכם, במחיר האמיתי.", badge: "כשיש", link: { href: "/guide/איך-מגיעים-לואל-טורנס-מישראל", label: "איך מגיעים" } },
+];
+
+// Real guest reviews of our apartments on Airbnb (5 stars, 2026), freely
+// translated. Only real reviews go here, never made-up ones.
+const AIRBNB_REVIEWS_URL = "https://www.airbnb.com/rooms/1258565407005573291/reviews";
+const reviews = [
+  { name: "Lauren", from: "מילאנו", when: "מרץ 2026", text: "הדירה הייתה מושלמת לסופ\"ש סקי. סקי-אין סקי-אאוט, לא יכול להיות יותר נוח. מיקום מעולה, קרוב לברים ולמסעדות, והנוף מהמרפסת מקסים. תודה על סופ\"ש מושלם בואל טורנס!" },
+  { name: "Aleix", from: "", when: "מרץ 2026", text: "שהות טובה מאוד. הדירה נקייה, מטופחת ובדיוק כמו בתיאור. המארח היה נחמד וענה מהר, אז הצ'ק-אין והשהות עברו חלק. ממליץ." },
+  { name: "Brice", from: "", when: "מרץ 2026", text: "הדירה כמו בתיאור, באזור שקט של ואל טורנס, מאובזרת ונוחה." },
 ];
 
 const resortFacts = [
   { value: "2,300 מ'", label: "גובה הכפר" },
   { value: "600 ק\"מ", label: "מסלולים בשלושת העמקים" },
   { value: "נובמבר–מאי", label: "עונת הסקי" },
-  { value: "ז'נבה · ליון · שאמברי", label: "שדות התעופה הקרובים", small: true },
+  { value: "ז'נבה · ליון · שאמברי", label: "שדות התעופה הקרובים" },
 ];
 
 const steps = [
@@ -93,22 +93,20 @@ export default function Home() {
       {/* ── HERO ─────────────────────────────────────────── */}
       <section className="relative flex items-center min-h-[560px] md:min-h-[620px]">
         {/* WebP (a third of the JPEG), a portrait crop on phones, fetched first: the largest paint */}
+        {/* a real photo: sunset over Val Thorens from the balcony of one of our apartments (Glaciers) */}
         <picture>
-          <source media="(max-width: 767px)" srcSet="/hero-ski-m.webp" type="image/webp" />
-          <source srcSet="/hero-ski.webp" type="image/webp" />
-          <img src="/hero-ski.jpg" alt="פסגות מושלגות באלפים מעל ים של עננים בשקיעה" fetchPriority="high" className="absolute inset-0 w-full h-full object-cover object-center" />
+          <source media="(max-width: 767px)" srcSet="/hero-vt-m.webp" type="image/webp" />
+          <source srcSet="/hero-vt.webp" type="image/webp" />
+          <img src="/hero-vt.jpg" alt="שקיעה מעל ואל טורנס, מהמרפסת של אחת הדירות שלנו" fetchPriority="high" className="absolute inset-0 w-full h-full object-cover object-[center_40%]" />
         </picture>
-        <div className="absolute inset-0" style={{ background: "rgba(8,18,38,0.46)" }} />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(10,14,32,0.30) 0%, rgba(10,14,32,0.50) 55%, rgba(10,14,32,0.70) 100%)" }} />
+        <span className="absolute bottom-3 left-4 z-10 text-[12px] md:text-[13px] text-white/75">צולם מהמרפסת של אחת הדירות שלנו</span>
         <div className="relative z-10 w-full max-w-[1100px] mx-auto px-4 pt-12 pb-14 md:pt-16 md:pb-20 flex flex-col items-center gap-5 md:gap-6 text-center">
-          <span className="rounded-full px-4 py-1.5 text-[14px] md:text-[15px] font-medium text-white"
-            style={{ background: "rgba(255,255,255,0.16)", border: "1px solid rgba(255,255,255,0.32)" }}>
-            עונת 2026/27 פתוחה להזמנות
-          </span>
           <h1 className="font-display font-extrabold text-white text-[42px] leading-[1.08] md:text-[68px] md:leading-[1.05] tracking-tight" style={{ textWrap: "balance" }}>
             חופשת סקי בואל טורנס
           </h1>
           <p className="text-[17px] md:text-[23px] leading-relaxed text-[#F1F5FB] max-w-[720px]">
-            דירה, סקי פס, הסעה וציוד. הכל בחבילה אחת, במחיר אחד.
+            הדירות שלנו בואל טורנס, ואיתן סקי פס, הסעה וציוד. מחיר אחד, וכל אחד משלם את החלק שלו.
           </p>
           <SearchWidget />
           <OpenChatButton className="inline-flex items-center gap-2.5 rounded-full bg-white/95 hover:bg-white text-[#0B1B33] px-5 py-2.5 text-[15px] md:text-[16px] font-medium min-h-[44px] transition-colors">
@@ -121,14 +119,11 @@ export default function Home() {
 
       {/* ── Why us ───────────────────────────────────────── */}
       <section aria-label="למה SkiShare" className="bg-[#F4F7FB] border-b border-[#E3E9F2]">
-        <div className="max-w-[1240px] mx-auto px-5 md:px-6 py-6 md:py-8 grid grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
+        <div className="max-w-[1240px] mx-auto px-5 md:px-6 py-5 md:py-6 grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4">
           {trust.map(t => (
-            <div key={t.title} className="flex gap-3.5 items-start">
-              <span className="shrink-0 w-11 h-11 rounded-xl bg-white border border-[#E3E9F2] flex items-center justify-center text-[#1652F0]">{t.icon}</span>
-              <div>
-                <div className="font-bold text-[15px] md:text-[17px]">{t.title}</div>
-                <div className="text-[13px] md:text-[15px] text-[#51607A] mt-0.5">{t.text}</div>
-              </div>
+            <div key={t.title} className="border-r-2 border-[#1652F0] pr-3">
+              <div className="font-bold text-[15px] md:text-[17px]">{t.title}</div>
+              <div className="text-[13px] md:text-[15px] text-[#51607A]">{t.text}</div>
             </div>
           ))}
         </div>
@@ -142,27 +137,29 @@ export default function Home() {
         </div>
       </Link>
 
-      {/* ── What's included ──────────────────────────────── */}
-      <section className="max-w-[1240px] mx-auto px-5 md:px-6 pt-16 md:pt-24 pb-4 md:pb-8">
-        <div className="flex flex-col gap-2 mb-7 md:mb-9">
+      {/* ── What's included: a real apartment, and a plain list ── */}
+      <section className="max-w-[1240px] mx-auto px-5 md:px-6 pt-14 md:pt-20 pb-4 md:pb-8 flex flex-wrap gap-8 md:gap-14 items-center">
+        <div className="flex-[1_1_440px] min-w-0">
           <h2 className="font-display text-[28px] md:text-[40px] font-bold tracking-tight">בונים את החופשה שלכם</h2>
-          <p className="text-[16px] md:text-[18px] text-[#51607A]">מתחילים מהדירה ומוסיפים רק מה שצריך. המחיר לאדם מתעדכן מיד, וכל אחד משלם את החלק שלו.</p>
+          <p className="text-[16px] md:text-[18px] text-[#51607A] mt-2 mb-5 md:mb-6">מתחילים מהדירה ומוסיפים רק מה שצריך. המחיר לאדם מתעדכן מיד.</p>
+          <ul className="border-t border-[#E3E9F2]">
+            {included.map(i => (
+              <li key={i.title} className="flex items-baseline gap-4 py-3.5 md:py-4 border-b border-[#E3E9F2]">
+                <span className="w-[74px] shrink-0 text-[13px] md:text-[14px] font-bold text-[#1652F0]">{i.badge}</span>
+                <span className="flex-1 min-w-0">
+                  <span className="font-bold text-[17px] md:text-[19px]">{i.title}</span>
+                  <span className="block text-[14px] md:text-[16px] leading-relaxed text-[#51607A]">{i.text}</span>
+                </span>
+                {i.link && <Link href={i.link.href} className="shrink-0 text-[14px] md:text-[15px] font-bold text-[#1652F0] hover:text-[#0F3FC2]">{i.link.label} ←</Link>}
+              </li>
+            ))}
+          </ul>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 md:gap-[18px]">
-          {included.map(i => (
-            <div key={i.title} className={`rounded-[20px] p-5 md:p-6 flex flex-col gap-3 ${
-              i.kind === "base" ? "border-2 border-[#1652F0] bg-[#F7F9FF]" : i.kind === "flight" ? "border border-dashed border-[#CBD5E3] bg-[#FBFCFE]" : "border border-[#E3E9F2]"}`}>
-              <span className={`w-[52px] h-[52px] rounded-2xl flex items-center justify-center ${i.kind === "flight" ? "bg-[#FFF1E8] text-[#C2410C]" : "bg-[#EEF3FF] text-[#1652F0]"}`}>{i.icon}</span>
-              <div className="font-bold text-[17px] md:text-[19px]">{i.title}</div>
-              <div className="text-[14px] md:text-[15px] leading-relaxed text-[#51607A]">{i.text}</div>
-              {i.link && <Link href={i.link.href} className="text-[14px] md:text-[15px] font-bold text-[#1652F0] hover:text-[#0F3FC2]">{i.link.label}</Link>}
-              <span className={`self-start rounded-full px-3 py-1 text-[13px] font-bold mt-auto ${
-                i.kind === "base" ? "bg-[#1652F0] text-white" : i.kind === "flight" ? "bg-[#FFF1E8] text-[#B33A06]" : "bg-[#E7F6EE] text-[#0F6B45]"}`}>
-                {i.badge}
-              </span>
-            </div>
-          ))}
-        </div>
+        <figure className="flex-[1_1_340px] min-w-0 max-w-[460px] mx-auto">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/apt-living.webp" alt="הסלון באחת הדירות שלנו בואל טורנס, עם נוף להרים" loading="lazy" className="w-full h-[380px] md:h-[520px] object-cover rounded-[18px] block" />
+          <figcaption className="text-[13px] text-[#51607A] mt-2">נבס 163, אחת הדירות שלנו. צילום שלנו, לא תמונת מאגר.</figcaption>
+        </figure>
       </section>
 
       {/* ── Packages for a real upcoming week ────────────── */}
@@ -170,27 +167,42 @@ export default function Home() {
         <WeekPackages />
       </Suspense>
 
+      {/* ── Real reviews from our guests on Airbnb ───────── */}
+      <section className="max-w-[1240px] mx-auto px-5 md:px-6 py-14 md:py-20">
+        <h2 className="font-display text-[28px] md:text-[40px] font-bold tracking-tight">מה אורחים כתבו עלינו</h2>
+        <p className="text-[16px] md:text-[18px] text-[#51607A] mt-2 mb-7 md:mb-9">ביקורות אמיתיות מ-Airbnb על הדירות שלנו. אנחנו מארחים בואל טורנס כבר שלוש עונות.</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
+          {reviews.map(rv => (
+            <blockquote key={rv.name} className="flex flex-col gap-3">
+              <span className="text-[#E8A317] text-[18px] tracking-[2px]" aria-label="5 כוכבים">★★★★★</span>
+              <p className="text-[17px] md:text-[18px] leading-[1.6] text-ink">&ldquo;{rv.text}&rdquo;</p>
+              <footer className="text-[14px] text-[#51607A]"><b className="text-ink">{rv.name}</b>{rv.from ? `, ${rv.from}` : ""} · {rv.when}</footer>
+            </blockquote>
+          ))}
+        </div>
+        <p className="mt-8 text-[13px] text-[#51607A]">תרגום חופשי מאנגלית ומצרפתית. <a href={AIRBNB_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="font-bold text-[#1652F0]">לכל הביקורות ב-Airbnb ←</a></p>
+      </section>
+
       {/* ── The resort ───────────────────────────────────── */}
       <section className="bg-[#F4F7FB]">
         <div className="max-w-[1240px] mx-auto px-5 md:px-6 py-16 md:py-24 flex flex-wrap gap-10 md:gap-14 items-center">
           <div className="flex-[1_1_480px] min-w-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/view.jpg" alt="הכפר ואל טורנס בשלג מול ההרים" loading="lazy" className="w-full h-[280px] md:h-[440px] object-cover rounded-[26px] block" />
+            <img src="/balcony-vt.webp" alt="ואל טורנס מהמרפסת של אחת הדירות שלנו" loading="lazy" className="w-full h-[280px] md:h-[440px] object-cover rounded-[18px] block" />
           </div>
           <div className="flex-[1_1_420px] min-w-0 flex flex-col gap-4 md:gap-[18px]">
-            <span className="text-[15px] font-bold text-[#1652F0]">היעד</span>
             <h2 className="font-display text-[28px] md:text-[40px] font-bold leading-tight tracking-tight">ואל טורנס, כפר הסקי הגבוה באירופה</h2>
             <p className="text-[16px] md:text-[18px] leading-[1.65] text-[#3D4B63]">
               כפר ב-2,300 מטר עם שלג טוב לאורך כל העונה, ויציאה ישר למסלולים של שלושת העמקים. מתאים למתחילים, למשפחות ולמי שבא לרוץ כל היום.
             </p>
-            <div className="grid grid-cols-2 gap-3 md:gap-3.5 mt-1">
+            <dl className="grid grid-cols-2 gap-x-6 gap-y-3 mt-1 border-t border-[#D9E1EC] pt-4">
               {resortFacts.map(f => (
-                <div key={f.label} className="bg-white border border-[#E3E9F2] rounded-[18px] p-4 md:p-[18px]">
-                  <div className={`font-display font-extrabold ${f.small ? "text-[18px] md:text-[22px] leading-snug" : "text-[24px] md:text-[28px]"}`}>{f.value}</div>
-                  <div className="text-[14px] md:text-[15px] text-[#51607A]">{f.label}</div>
+                <div key={f.label}>
+                  <dt className="text-[13px] md:text-[14px] text-[#51607A]">{f.label}</dt>
+                  <dd className="font-bold text-[16px] md:text-[18px]">{f.value}</dd>
                 </div>
               ))}
-            </div>
+            </dl>
             <Link href="/guide/המדריך-המלא-לואל-טורנס" className="font-bold text-[16px] md:text-[17px] text-[#1652F0] hover:text-[#0E3FC2]">המדריך המלא לואל טורנס ←</Link>
           </div>
         </div>
