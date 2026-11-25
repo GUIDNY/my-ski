@@ -3,12 +3,12 @@ import { useState } from "react";
 import CardPaymentButton from "@/components/CardPaymentButton";
 import { wrap, card, h2, btn, field, fieldLabel } from "@/components/ui";
 import { equipCost } from "@/lib/pricing";
-import { GEAR_SHOP, gearDays, type GearKind, type GearPerson } from "@/lib/gear";
+import { GEAR_SHOP, HELMET_PRICE, gearDays, personCost, type GearKind, type GearPerson } from "@/lib/gear";
 
 const eur = (n: number) => `€${Math.round(n).toLocaleString("en-US")}`;
 const today = () => new Date().toISOString().slice(0, 10);
 const nextDay = (iso: string) => new Date(Date.parse(iso + "T12:00:00Z") + 864e5).toISOString().slice(0, 10);
-const blank = (kind: GearKind = "ski"): GearPerson => ({ name: "", kind, height: "", weight: "", shoe: "" });
+const blank = (kind: GearKind = "ski"): GearPerson => ({ name: "", kind, height: "", weight: "", shoe: "", helmet: false });
 
 /*
  * Rent skis or a snowboard from us, for anyone in Val Thorens: the dates, one
@@ -28,7 +28,7 @@ export default function EquipmentClient() {
   const days = gearDays(from, to);
   const ready = people.filter(p => p.name.trim());
   const perPerson = days > 0 ? equipCost(days) : 0;
-  const total = perPerson * ready.length;
+  const total = days > 0 ? ready.reduce((t, p) => t + personCost(days, p), 0) : 0;
   const gear = { from, to, people: ready };
   const missing = [
     days < 1 && "תאריכים",
@@ -36,7 +36,7 @@ export default function EquipmentClient() {
     ready.some(p => !/^[A-Za-z][A-Za-z .'-]*$/.test(p.name.trim())) && "שמות באותיות באנגלית",
   ].filter(Boolean) as string[];
 
-  const set = (i: number, k: keyof GearPerson, v: string) =>
+  const set = (i: number, k: keyof GearPerson, v: string | boolean) =>
     setPeople(ps => ps.map((p, j) => (j === i ? { ...p, [k]: v } : p)));
 
   const orderLater = async () => {
@@ -115,6 +115,11 @@ export default function EquipmentClient() {
                   <label><span className={fieldLabel}>משקל (ק״ג)</span><input className={field} inputMode="numeric" value={p.weight} onChange={e => set(i, "weight", e.target.value.replace(/\D/g, ""))} /></label>
                   <label><span className={fieldLabel}>מידת נעל (EU)</span><input className={field} inputMode="decimal" value={p.shoe} onChange={e => set(i, "shoe", e.target.value.replace(/[^\d.]/g, ""))} /></label>
                 </div>
+                <label className="flex items-center gap-2.5 cursor-pointer self-start min-h-[40px]">
+                  <input type="checkbox" className="w-5 h-5 accent-accent" checked={!!p.helmet} onChange={e => set(i, "helmet", e.target.checked)} />
+                  <span className="text-[15px] text-ink font-bold">⛑️ להוסיף קסדה</span>
+                  <span className="text-[14px] text-muted">+€{HELMET_PRICE} לכל התקופה</span>
+                </label>
               </div>
             ))}
           </div>
@@ -129,14 +134,14 @@ export default function EquipmentClient() {
         <h2 className="font-display font-bold text-[21px] text-ink">כמה יוצא לנו?</h2>
         <div className="flex flex-col gap-1.5 text-[15px]">
           {ready.length ? ready.map((p, i) => (
-            <div key={i} className="flex justify-between gap-3"><span className="text-body" dir="auto">{p.name} · {p.kind === "ski" ? "סקי" : "סנובורד"}</span><span className="font-bold">{days ? eur(perPerson) : "—"}</span></div>
+            <div key={i} className="flex justify-between gap-3"><span className="text-body" dir="auto">{p.name} · {p.kind === "ski" ? "סקי" : "סנובורד"}{p.helmet ? " + קסדה" : ""}</span><span className="font-bold">{days ? eur(personCost(days, p)) : "—"}</span></div>
           )) : <p className="text-muted">הוסיפו שמות ותאריכים, והמחיר יופיע כאן.</p>}
         </div>
         <div className="flex justify-between items-baseline border-t border-line pt-3">
           <span className="text-muted">סה״כ</span>
           <span className="font-display font-extrabold text-[30px] text-ink">{total ? eur(total) : "—"}</span>
         </div>
-        <p className="text-[13px] text-muted leading-relaxed">€30 ליום, €120 ל-6 ימים, ועוד €20 לכל יום נוסף. לאדם. מגלשיים או סנובורד, כולל נעליים.</p>
+        <p className="text-[13px] text-muted leading-relaxed">€30 ליום, €120 ל-6 ימים, ועוד €20 לכל יום נוסף. לאדם. מגלשיים או סנובורד, כולל נעליים. קסדה €{HELMET_PRICE} נוספים. לא כולל ביטוח על הציוד.</p>
         <div className="rounded-2xl bg-soft px-4 py-3 text-[14px] text-body leading-relaxed">
           📍 הציוד מחכה לכם ב-<a href={GEAR_SHOP.maps} target="_blank" rel="noopener noreferrer" className="font-bold text-ink underline">{GEAR_SHOP.name}</a> בואל טורנס. מגיעים, מראים את מייל ההזמנה, ויוצאים לגלוש.
         </div>

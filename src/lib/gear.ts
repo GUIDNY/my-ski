@@ -4,8 +4,11 @@ import { equipCost } from "./pricing";
  * Ski / snowboard rental ordered on its own (/equipment), open to anyone in
  * Val Thorens. The gear waits at Caron Skishop: the customer shows the order
  * email there. Priced like the add-on on an apartment: €30 a day, €120 for 6
- * days, €20 for every day after that, per person (lib/pricing equipCost).
+ * days, €20 for every day after that, per person (lib/pricing equipCost),
+ * boots included; a helmet is €10 more for the whole rental. Insurance on the
+ * gear is not included.
  */
+export const HELMET_PRICE = 10;
 
 export const GEAR_SHOP = {
   name: "Caron Skishop",
@@ -14,7 +17,7 @@ export const GEAR_SHOP = {
 };
 
 export type GearKind = "ski" | "snowboard";
-export type GearPerson = { name: string; kind: GearKind; height: string; weight: string; shoe: string };
+export type GearPerson = { name: string; kind: GearKind; height: string; weight: string; shoe: string; helmet?: boolean };
 export type GearOrder = { from: string; to: string; days: number; people: GearPerson[]; shop: string };
 
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
@@ -26,7 +29,9 @@ export function gearDays(from: string, to: string): number {
   return Math.round((Date.parse(to + "T12:00:00Z") - Date.parse(from + "T12:00:00Z")) / 864e5) + 1;
 }
 
-export const gearTotal = (days: number, people: number) => equipCost(days) * people;
+/** one person's price for the whole rental */
+export const personCost = (days: number, p: Pick<GearPerson, "helmet">) => equipCost(days) + (p.helmet ? HELMET_PRICE : 0);
+export const gearTotal = (g: Pick<GearOrder, "days" | "people">) => g.people.reduce((t, p) => t + personCost(g.days, p), 0);
 
 /** what the browser sent, cleaned; null when it isn't a usable order */
 export function cleanGear(raw: unknown): GearOrder | null {
@@ -39,6 +44,7 @@ export function cleanGear(raw: unknown): GearOrder | null {
     name: clip(p?.name, 60),
     kind: (p?.kind === "snowboard" ? "snowboard" : "ski") as GearKind,
     height: clip(p?.height, 5), weight: clip(p?.weight, 5), shoe: clip(p?.shoe, 5),
+    helmet: p?.helmet === true,
   })).filter(p => p.name);
   if (!people.length) return null;
   return { from, to, days, people, shop: GEAR_SHOP.name };

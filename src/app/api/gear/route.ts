@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     apartment_id: null, apartment_name: gearTitle(gear), area: "Val Thorens",
     checkin: gear.from, checkout: nextDay(gear.to), guests: gear.people.length, nights: gear.days,
     ski_pass: false, transfer: false, equipment: true, flight: false, cancel: "none", service: "human",
-    total_eur: gearTotal(gear.days, gear.people.length),
+    total_eur: gearTotal(gear),
     customer_name: name, customer_email: email, customer_phone: phone,
     ops: { x_gear: gear, x_pay_later: true },
   };
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
         method: "POST", headers: { "Content-Type": "application/json" }, signal: AbortSignal.timeout(5000),
         body: JSON.stringify({
           amount: 0, currency: "EUR", fromLink: false, order: saved.code, name, phone, email,
-          description: `הזמנת ציוד חדשה (עוד לא שולם, €${row.total_eur}): ${gear.people.map(p => `${p.name} ${p.kind === "ski" ? "סקי" : "סנובורד"}`).join(", ")} · ${gear.from} עד ${gear.to}`,
+          description: `הזמנת ציוד חדשה (עוד לא שולם, €${row.total_eur}): ${gear.people.map(p => `${p.name} ${p.kind === "ski" ? "סקי" : "סנובורד"}${p.helmet ? " + קסדה" : ""}`).join(", ")} · ${gear.from} עד ${gear.to}`,
         }),
       });
     } catch { /* the order is saved either way */ }
