@@ -111,10 +111,15 @@ body {
 @media (hover: hover) { .photo-zoom:hover img { transform: scale(1.05); } }
 
 /* ── personality ─────────────────────────────────────────────── */
+/* a lavender highlighter stroke under a word in a heading */
+.marker {
+  background: linear-gradient(transparent 60%, #D9CCFF 60%, #D9CCFF 90%, transparent 90%);
+  padding: 0 .12em; border-radius: 3px;
+}
 /* a tilted sticker, like the ones on a snowboard */
 .sticker {
   display: inline-flex; align-items: center; gap: .35em;
-  background: #fff; color: #0B1B33; font-weight: 800;
+  background: #6C4CF5; color: #fff; font-weight: 800;
   border-radius: 999px; padding: .35em .9em;
   box-shadow: 0 6px 18px rgba(11,27,51,.18);
   transform: rotate(-5deg); transition: transform .3s cubic-bezier(.3,1.6,.5,1);

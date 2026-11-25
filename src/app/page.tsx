@@ -159,7 +159,7 @@ export default function Home() {
           <span className="sticker absolute -top-4 -left-3 md:-left-5 text-[15px] md:text-[17px]">4 עונות על ההר 🏂</span>
         </figure>
         <div className="flex-[1_1_380px] min-w-0 flex flex-col gap-4" data-reveal data-reveal-delay="1">
-          <h2 className="font-display text-[28px] md:text-[40px] font-bold tracking-tight leading-tight">נעים להכיר, אנחנו SkiShare</h2>
+          <h2 className="font-display text-[28px] md:text-[40px] font-bold tracking-tight leading-tight">נעים להכיר, אנחנו <span className="marker">SkiShare</span></h2>
           <p className="text-[16px] md:text-[18px] leading-[1.7] text-[#3D4B63]">
             את SkiShare הקמנו לפני ארבע שנים כדי לגרום לכם לחייך על ההר, ומאז זו המטרה שלנו. אנחנו משתדלים להביא לכם את הדירות הכי טובות, נוחות ומשתלמות, ולארגן לכם את כל החופשה מקצה לקצה.
           </p>
@@ -173,7 +173,7 @@ export default function Home() {
       {/* ── What's included: a real apartment, and a plain list ── */}
       <section className="max-w-[1240px] mx-auto px-5 md:px-6 py-10 md:py-14 flex flex-wrap gap-8 md:gap-14 items-center">
         <div className="flex-[1_1_440px] min-w-0" data-reveal>
-          <h2 className="font-display text-[28px] md:text-[40px] font-bold tracking-tight">בונים את החופשה שלכם</h2>
+          <h2 className="font-display text-[28px] md:text-[40px] font-bold tracking-tight">בונים את החופשה <span className="marker">שלכם</span></h2>
           <p className="text-[16px] md:text-[18px] text-[#51607A] mt-2 mb-5 md:mb-6">מתחילים מהדירה ומוסיפים רק מה שצריך. המחיר לאדם מתעדכן מיד.</p>
           <ul className="border-t border-[#E3E9F2]">
             {included.map(i => (
@@ -199,7 +199,7 @@ export default function Home() {
       <section className="max-w-[1240px] mx-auto px-5 md:px-6 py-10 md:py-14">
         <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3 mb-7 md:mb-9" data-reveal>
           <div>
-            <h2 className="font-display text-[28px] md:text-[40px] font-bold tracking-tight">מה כתבו עלינו בגוגל</h2>
+            <h2 className="font-display text-[28px] md:text-[40px] font-bold tracking-tight">מה כתבו עלינו <span className="marker">בגוגל</span></h2>
             <p className="text-[16px] md:text-[18px] text-[#51607A] mt-2">ביקורות אמיתיות של לקוחות שנסעו איתנו.</p>
           </div>
           <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:opacity-80">
