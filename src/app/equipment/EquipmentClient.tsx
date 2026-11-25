@@ -136,7 +136,7 @@ export default function EquipmentClient() {
           <span className="text-muted">סה״כ</span>
           <span className="font-display font-extrabold text-[30px] text-ink">{total ? eur(total) : "—"}</span>
         </div>
-        <p className="text-[13px] text-muted leading-relaxed">€30 ליום, €120 ל-6 ימים, ועוד €20 לכל יום נוסף. לאדם. סקי או סנובורד.</p>
+        <p className="text-[13px] text-muted leading-relaxed">€30 ליום, €120 ל-6 ימים, ועוד €20 לכל יום נוסף. לאדם. מגלשיים או סנובורד, כולל נעליים.</p>
         <div className="rounded-2xl bg-soft px-4 py-3 text-[14px] text-body leading-relaxed">
           📍 הציוד מחכה לכם ב-<a href={GEAR_SHOP.maps} target="_blank" rel="noopener noreferrer" className="font-bold text-ink underline">{GEAR_SHOP.name}</a> בואל טורנס. מגיעים, מראים את מייל ההזמנה, ויוצאים לגלוש.
         </div>

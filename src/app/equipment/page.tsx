@@ -4,7 +4,7 @@ import EquipmentClient from "./EquipmentClient";
 
 export const metadata = pageMeta({
   title: "השכרת ציוד סקי וסנובורד בואל טורנס | SkiShare",
-  description: "סקי או סנובורד בואל טורנס: €30 ליום, €120 לשבוע. מזמינים באתר, והציוד מחכה לכם מוכן ב-Caron Skishop.",
+  description: "סקי או סנובורד כולל נעליים בואל טורנס: €30 ליום, €120 לשבוע. מזמינים באתר, והציוד מחכה לכם מוכן ב-Caron Skishop.",
   path: "/equipment",
 });
 
@@ -16,7 +16,7 @@ export default function EquipmentPage() {
         <span className="sticker self-start text-[14px]">🏂 סקי או סנובורד? אנחנו לא שופטים</span>
         <h1 className={h1}>השכרת ציוד בואל טורנס</h1>
         <p className="text-[17px] md:text-[19px] text-body max-w-[720px] leading-relaxed">
-          מזמינים פה, והציוד מחכה לכם מוכן ב-Caron Skishop בכפר. מגיעים, מראים את מייל ההזמנה, ויוצאים לגלוש. פתוח לכל מי שבואל טורנס, גם אם אתם לא גרים אצלנו.
+          מגלשיים או סנובורד, כולל נעליים. מזמינים פה, והציוד מחכה לכם מוכן ב-Caron Skishop בכפר. מגיעים, מראים את מייל ההזמנה, ויוצאים לגלוש. פתוח לכל מי שבואל טורנס, גם אם אתם לא גרים אצלנו.
         </p>
       </header>
       <EquipmentClient />

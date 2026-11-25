@@ -854,7 +854,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
           <Section id="gear" title="ציוד" sub="סקי או סנובורד? אנחנו לא שופטים.">
             <OptionCard kind="check" checked={equipment} icon={<IconSkis size={20} />}
               onSelect={() => { const v = !equipment; setEquipment(v); if (v) setEquipQty(guests || 1); }}
-              title="סקי או סנובורד לכל ימי הגלישה" sub="€30 ליום, €120 לשבוע, ועוד €20 לכל יום נוסף. לאדם."
+              title="סקי או סנובורד לכל ימי הגלישה, כולל נעליים" sub="€30 ליום, €120 לשבוע, ועוד €20 לכל יום נוסף. לאדם."
               price={skiDays > 0 ? `${eur(equipCost(skiDays))} לאדם${hasDates ? ` · ${skiDays} ימים` : ""}${guests > 1 ? ` · ${eur(equipCost(skiDays) * guests)} לכל הקבוצה` : ""}` : "מ-€30 לאדם"}>
               <QtyRow label="כמה אנשים צריכים ציוד?" qty={equipQty} setQty={setEquipQty} max={maxGuests} total={equipTotal} />
             </OptionCard>
