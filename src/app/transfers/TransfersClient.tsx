@@ -78,7 +78,7 @@ function DateField({ id, label, value, onChange, min }: { id: string; label: str
       <label htmlFor={id} className={fieldLabel}>{label}</label>
       <div className="relative min-w-0">
         <div className={`${field} flex items-center justify-between gap-2 pointer-events-none ${value ? "text-ink" : "text-muted"}`} aria-hidden="true">
-          <span className="truncate">{value ? fmtDate(value) + " " + value.slice(0, 4) : "בחרו תאריך"}</span>
+          <span className="truncate">{value ? fmtDate(value) : "בחרו תאריך"}</span>
           <span className="text-accent shrink-0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg></span>
         </div>
         <input id={id} type="date" value={value} min={min} onChange={e => onChange(e.target.value)}
@@ -442,15 +442,18 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
   const cheapestFit = cars.find(x => x.fit && !x.c.on_request && x.total != null);
   const datesSet = (direction === "return" || !!outDate) && (direction === "outbound" || !!retDate);
   const sharedPP = Math.round(sharedCents / 100 / passengers);
-  const stepper = (label: string, v: number, set: (n: number) => void, min: number, max: number) => (
-    <div className="flex flex-col">
-      <span className={fieldLabel}>{label}</span>
-      <div className="flex items-center justify-between gap-1 border border-line-strong rounded-xl p-1" role="group" aria-label={label}>
+  const stepper = (label: string, help: string, v: number, set: (n: number) => void, min: number, max: number) => (
+    <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-stretch sm:gap-0 border-b border-line last:border-b-0 sm:border-b-0 py-2.5 sm:py-0">
+      <span className="flex flex-col min-w-0">
+        <span className={`${fieldLabel} !mb-0 sm:!mb-1.5`}>{label}</span>
+        <span className="text-[13px] text-muted sm:hidden">{help}</span>
+      </span>
+      <div className="flex items-center justify-between gap-1 border border-line-strong rounded-xl p-1 shrink-0 w-[132px] sm:w-auto" role="group" aria-label={label}>
         <button type="button" onClick={() => set(Math.max(min, v - 1))} disabled={v <= min} aria-label={`${label}: פחות`}
-          className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-soft flex items-center justify-center text-[20px] font-bold text-ink hover:bg-soft-2 transition-colors disabled:opacity-35">−</button>
+          className="w-10 h-10 rounded-lg bg-soft flex items-center justify-center text-[20px] font-bold text-ink hover:bg-soft-2 transition-colors disabled:opacity-35">−</button>
         <span className="font-display font-extrabold text-ink text-[18px] min-w-[22px] text-center" aria-live="polite">{v}</span>
         <button type="button" onClick={() => set(Math.min(max, v + 1))} disabled={v >= max} aria-label={`${label}: עוד`}
-          className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-soft flex items-center justify-center text-[20px] font-bold text-ink hover:bg-soft-2 transition-colors disabled:opacity-35">+</button>
+          className="w-10 h-10 rounded-lg bg-soft flex items-center justify-center text-[20px] font-bold text-ink hover:bg-soft-2 transition-colors disabled:opacity-35">+</button>
       </div>
     </div>
   );
@@ -524,14 +527,17 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
                 {direction !== "return" && <DateField id="d-out" label="הגעה לואל טורנס" value={outDate} onChange={setOutDate} min={new Date().toISOString().slice(0, 10)} />}
                 {direction !== "outbound" && <DateField id="d-ret" label="חזרה לשדה" value={retDate} onChange={setRetDate} min={outDate || new Date().toISOString().slice(0, 10)} />}
               </div>
-              <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                {stepper("נוסעים", passengers, setPassengers, 1, 20)}
-                {stepper("מזוודות", luggage, setLuggage, 0, 30)}
-                {stepper("ציוד סקי", ski, setSki, 0, 30)}
+              {direction === "both" && outDate && retDate && retDate > outDate && (
+                <p className="text-[14px] text-muted -mt-2">{Math.round((Date.parse(retDate) - Date.parse(outDate)) / 864e5)} לילות על ההר · הלוך וחזור</p>
+              )}
+              <div className="grid grid-cols-1 sm:grid-cols-3 sm:gap-3">
+                {stepper("נוסעים", "כמה חבר'ה נוסעים?", passengers, setPassengers, 1, 20)}
+                {stepper("מזוודות", "מזוודות גדולות לבגאז'", luggage, setLuggage, 0, 30)}
+                {stepper("ציוד סקי", "תיק סקי או סנובורד", ski, setSki, 0, 30)}
               </div>
             </Step>
 
-            <Step n={2} title="בחרו הסעה">
+            <Step n={2} title="בוחרים איך עולים לכפר">
               {!datesSet ? (
                 <p className="text-[15px] text-muted bg-soft rounded-xl px-4 py-3.5">בוחרים תאריך למעלה, וכאן מופיעים כל הרכבים והשאטל במחיר חי.</p>
               ) : quoting && !availableClasses.length ? (
@@ -591,7 +597,7 @@ export default function TransfersClient({ initial }: { initial: TransferInitial 
               {driveText && <p className="text-[14px] text-muted">הדרך: {driveText}, עד דלת הדירה בואל טורנס.</p>}
             </Step>
 
-            <Step n={3} title={noFlight ? "מתי לאסוף" : "פרטי הטיסה והאיסוף"}>
+            <Step n={3} title={noFlight ? "מתי לאסוף" : "פרטי הטיסות, כדי שנחכה לכם בזמן"}>
               <p className="text-[14px] text-muted -mt-1">עם מספר הטיסה אנחנו ממלאים את השעה לבד, בודקים אם יש שאטל משותף, והנהג עוקב אחרי עיכובים. אין טיסה בכיוון מסוים? מסמנים &quot;בלי טיסה&quot; ומוסיפים מאיפה לאסוף.</p>
               {(direction === "outbound" || direction === "both") && (
                 <FlightLeg id="out" title={outNoFlight ? "הלוך · לואל טורנס" : "טיסת הלוך · נחיתה בשדה"}
