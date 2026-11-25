@@ -7,6 +7,7 @@ import { GEAR_SHOP, HELMET_PRICE, gearDays, personCost, type GearKind, type Gear
 
 const eur = (n: number) => `€${Math.round(n).toLocaleString("en-US")}`;
 const today = () => new Date().toISOString().slice(0, 10);
+const addDays = (iso: string, n: number) => new Date(Date.parse(iso + "T12:00:00Z") + n * 864e5).toISOString().slice(0, 10);
 const nextDay = (iso: string) => new Date(Date.parse(iso + "T12:00:00Z") + 864e5).toISOString().slice(0, 10);
 const blank = (kind: GearKind = "ski"): GearPerson => ({ name: "", kind, helmet: false });
 
@@ -18,7 +19,7 @@ const blank = (kind: GearKind = "ski"): GearPerson => ({ name: "", kind, helmet:
 export default function EquipmentClient() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  const [people, setPeople] = useState<GearPerson[]>([blank(), blank("snowboard")]);
+  const [people, setPeople] = useState<GearPerson[]>([blank()]);
   const [later, setLater] = useState(false);
   const [contact, setContact] = useState({ name: "", email: "", phone: "" });
   const [busy, setBusy] = useState(false);
@@ -35,6 +36,10 @@ export default function EquipmentClient() {
     !ready.length && "שם של לפחות אדם אחד (באנגלית)",
     ready.some(p => !/^[A-Za-z][A-Za-z .'-]*$/.test(p.name.trim())) && "שמות באותיות באנגלית",
   ].filter(Boolean) as string[];
+
+  const namesBad = ready.some(p => !/^[A-Za-z][A-Za-z .'-]*$/.test(p.name.trim()));
+  const nextStep = days < 1 ? { label: "בחרו תאריכי גלישה", go: "gear-dates" } : (!ready.length || namesBad) ? { label: "השלימו את שמות הגולשים", go: "gear-people" } : null;
+  const goTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "center" });
 
   const set = (i: number, k: keyof GearPerson, v: string | boolean) =>
     setPeople(ps => ps.map((p, j) => (j === i ? { ...p, [k]: v } : p)));
@@ -74,8 +79,8 @@ export default function EquipmentClient() {
     <div className={`${wrap} pb-16 md:pb-24 grid lg:grid-cols-[1fr_380px] gap-8 lg:gap-10 items-start`}>
       <div className="flex flex-col gap-8">
         {/* dates */}
-        <section className="flex flex-col gap-3">
-          <h2 className={h2}>מתי גולשים?</h2>
+        <section id="gear-dates" className="flex flex-col gap-3">
+          <h2 className={h2}>מתי אתם על ההר?</h2>
           <div className="grid grid-cols-2 gap-3 max-w-[520px]">
             <label><span className={fieldLabel}>יום ראשון של גלישה</span>
               <input type="date" className={field} min={today()} value={from} onChange={e => { setFrom(e.target.value); if (to && e.target.value > to) setTo(""); }} />
@@ -84,49 +89,66 @@ export default function EquipmentClient() {
               <input type="date" className={field} min={from || today()} value={to} onChange={e => setTo(e.target.value)} />
             </label>
           </div>
-          {days > 0 && <p className="text-[15px] text-muted">{days} ימי גלישה · {eur(perPerson)} לאדם</p>}
+          {from && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[14px] text-muted">כמה ימים?</span>
+              {[1, 3, 5, 6, 7].map(n => (
+                <button key={n} type="button" onClick={() => setTo(addDays(from, n - 1))} aria-pressed={days === n}
+                  className={`min-h-[40px] px-3.5 rounded-full border text-[14px] font-bold transition-colors ${days === n ? "border-ink bg-ink text-white" : "border-line-strong bg-white text-body hover:border-ink"}`}>
+                  {n === 1 ? "יום אחד" : `${n} ימים`}
+                </button>
+              ))}
+            </div>
+          )}
+          {days > 0 && <p className="text-[15px] text-ink"><b>{days} ימי גלישה</b> · {eur(perPerson)} לגולש, כולל נעליים</p>}
         </section>
 
         {/* people */}
-        <section className="flex flex-col gap-3">
+        <section id="gear-people" className="flex flex-col gap-3">
           <h2 className={h2}>מי גולש?</h2>
           <p className="text-[15px] text-muted -mt-1">שם באנגלית, כמו שיופיע בחנות. את המידות מתאימים במקום.</p>
           <div className="flex flex-col gap-3">
             {people.map((p, i) => (
-              <div key={i} className={`${card} p-4 md:p-5 flex flex-col gap-3`}>
-                <div className="flex flex-wrap items-end gap-3">
-                  <label className="flex-1 min-w-[200px]"><span className={fieldLabel}>שם באנגלית</span>
-                    <input className={field} dir="ltr" placeholder="Full name" value={p.name} onChange={e => set(i, "name", e.target.value)} />
-                  </label>
-                  <div className="flex rounded-xl border border-line-strong overflow-hidden" role="group" aria-label="סוג ציוד">
-                    {(["ski", "snowboard"] as GearKind[]).map(k => (
-                      <button key={k} type="button" onClick={() => set(i, "kind", k)} aria-pressed={p.kind === k}
-                        className={`min-h-[48px] px-4 text-[15px] font-bold transition-colors ${p.kind === k ? "bg-ink text-white" : "bg-white text-body hover:bg-soft"}`}>
-                        {k === "ski" ? "⛷️ סקי" : "🏂 סנובורד"}
-                      </button>
-                    ))}
-                  </div>
+              <div key={i} className={`${card} p-4 md:p-5 flex flex-col gap-3.5`}>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-display font-bold text-[18px] text-ink">גולש {i + 1}</span>
                   {people.length > 1 && (
-                    <button type="button" onClick={() => setPeople(ps => ps.filter((_, j) => j !== i))} className="min-h-[48px] px-2 text-muted hover:text-danger text-[14px]">הסרה</button>
+                    <button type="button" onClick={() => setPeople(ps => ps.filter((_, j) => j !== i))} className="text-muted hover:text-danger text-[14px] px-1">הסרה</button>
                   )}
                 </div>
-                <label className="flex items-center gap-2.5 cursor-pointer self-start min-h-[40px]">
-                  <input type="checkbox" className="w-5 h-5 accent-accent" checked={!!p.helmet} onChange={e => set(i, "helmet", e.target.checked)} />
-                  <span className="text-[15px] text-ink font-bold">⛑️ להוסיף קסדה</span>
-                  <span className="text-[14px] text-muted">+€{HELMET_PRICE} לכל התקופה</span>
+                <div className="grid grid-cols-2 gap-2.5" role="group" aria-label="על מה גולשים">
+                  {(["ski", "snowboard"] as GearKind[]).map(k => (
+                    <button key={k} type="button" onClick={() => set(i, "kind", k)} aria-pressed={p.kind === k}
+                      className={`rounded-2xl border-2 px-4 py-3 text-start transition-colors ${p.kind === k ? "border-accent bg-accent-soft" : "border-line bg-white hover:border-line-strong"}`}>
+                      <span className="block text-[24px] leading-none" aria-hidden="true">{k === "ski" ? "⛷️" : "🏂"}</span>
+                      <span className="block font-bold text-[16px] text-ink mt-1.5">{k === "ski" ? "סקי" : "סנובורד"}</span>
+                      <span className="block text-[13px] text-muted">כולל נעליים</span>
+                    </button>
+                  ))}
+                </div>
+                <label><span className={fieldLabel}>שם מלא באנגלית</span>
+                  <input className={field} dir="ltr" placeholder="Full name" value={p.name} onChange={e => set(i, "name", e.target.value)} />
                 </label>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <label className="flex items-center gap-2.5 cursor-pointer min-h-[40px]">
+                    <input type="checkbox" className="w-5 h-5 accent-accent" checked={!!p.helmet} onChange={e => set(i, "helmet", e.target.checked)} />
+                    <span className="text-[15px] text-ink font-bold">⛑️ קסדה</span>
+                    <span className="text-[14px] text-muted">+€{HELMET_PRICE} לכל התקופה</span>
+                  </label>
+                  {days > 0 && <span className="text-[15px] text-muted">לגולש: <b className="text-ink">{eur(personCost(days, p))}</b></span>}
+                </div>
               </div>
             ))}
           </div>
           {people.length < 20 && (
-            <button type="button" onClick={() => setPeople(ps => [...ps, blank()])} className={`${btn.pill} self-start`}>+ עוד גולש</button>
+            <button type="button" onClick={() => setPeople(ps => [...ps, blank()])} className={`${btn.pill} self-start`}>+ מצרפים עוד חבר</button>
           )}
         </section>
       </div>
 
       {/* summary + pay */}
       <aside className={`${card} p-5 md:p-6 flex flex-col gap-4 lg:sticky lg:top-24`}>
-        <h2 className="font-display font-bold text-[21px] text-ink">כמה יוצא לנו?</h2>
+        <h2 className="font-display font-bold text-[21px] text-ink">כמה יוצא לחבר&apos;ה?</h2>
         <div className="flex flex-col gap-1.5 text-[15px]">
           {ready.length ? ready.map((p, i) => (
             <div key={i} className="flex justify-between gap-3"><span className="text-body" dir="auto">{p.name} · {p.kind === "ski" ? "סקי" : "סנובורד"}{p.helmet ? " + קסדה" : ""}</span><span className="font-bold">{days ? eur(personCost(days, p)) : "—"}</span></div>
@@ -136,7 +158,14 @@ export default function EquipmentClient() {
           <span className="text-muted">סה״כ</span>
           <span className="font-display font-extrabold text-[30px] text-ink">{total ? eur(total) : "—"}</span>
         </div>
-        <p className="text-[13px] text-muted leading-relaxed">€30 ליום, €120 ל-6 ימים, ועוד €20 לכל יום נוסף. לאדם. מגלשיים או סנובורד, כולל נעליים. קסדה €{HELMET_PRICE} נוספים. לא כולל ביטוח על הציוד.</p>
+        <table className="w-full text-[14px]">
+          <tbody className="divide-y divide-line">
+            {[["יום אחד", "€30"], ["2–3 ימים", "€30 ליום"], ["4–6 ימים", "€120"], ["כל יום אחרי 6", "+€20"], ["קסדה לכל התקופה", `+€${HELMET_PRICE}`], ["נעליים", "כלולות"]].map(([k, v]) => (
+              <tr key={k}><td className="py-1.5 text-muted">{k}</td><td className="py-1.5 text-end font-bold text-ink">{v}</td></tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="text-[12px] text-muted -mt-2">מחיר לגולש, מגלשיים או סנובורד. ביטוח ציוד לא כלול.</p>
         <a href={GEAR_SHOP.maps} target="_blank" rel="noopener noreferrer" className="rounded-2xl bg-soft hover:bg-soft-2 transition-colors px-4 py-3.5 flex flex-col gap-2 text-[14px] text-body leading-relaxed">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={GEAR_SHOP.logo} alt={GEAR_SHOP.name} width={176} height={35} className="h-[35px] w-auto self-start" />
@@ -145,29 +174,32 @@ export default function EquipmentClient() {
           <span className="font-bold text-accent">לחנות במפה ←</span>
         </a>
 
-        <div className="flex rounded-xl border border-line-strong overflow-hidden" role="group" aria-label="איך משלמים">
-          <button type="button" onClick={() => setLater(false)} aria-pressed={!later} className={`flex-1 min-h-[46px] text-[15px] font-bold ${!later ? "bg-ink text-white" : "bg-white text-body"}`}>משלמים עכשיו</button>
-          <button type="button" onClick={() => setLater(true)} aria-pressed={later} className={`flex-1 min-h-[46px] text-[15px] font-bold ${later ? "bg-ink text-white" : "bg-white text-body"}`}>משלמים אחר כך</button>
+        <div className="flex flex-col gap-2" role="radiogroup" aria-label="איך בא לכם לשלם?">
+          <span className="font-bold text-[15px] text-ink">איך בא לכם לשלם?</span>
+          {[{ v: false, t: "משלמים עכשיו בכרטיס", d: "תשלום מאובטח, והמייל לחנות יוצא מיד" }, { v: true, t: "מזמינים עכשיו, משלמים אחר כך", d: "שולחים לכם קישור תשלום בוואטסאפ לפני שמגיעים לחנות" }].map(o => (
+            <button key={o.t} type="button" role="radio" aria-checked={later === o.v} onClick={() => setLater(o.v)}
+              className={`rounded-2xl border-2 px-3.5 py-2.5 text-start transition-colors ${later === o.v ? "border-accent bg-accent-soft" : "border-line bg-white hover:border-line-strong"}`}>
+              <span className="block font-bold text-[15px] text-ink">{o.t}</span>
+              <span className="block text-[13px] text-muted">{o.d}</span>
+            </button>
+          ))}
         </div>
 
-        {!later ? (
-          missing.length ? (
-            <button type="button" disabled className={`${btn.primaryLg} w-full opacity-50 cursor-not-allowed`}>יאללה, מזמינים ציוד</button>
-          ) : (
-            <CardPaymentButton apartment={`השכרת ציוד · ${GEAR_SHOP.name}`} checkin={from} checkout={nextDay(to)}
-              guests={ready.length} nights={days} equipment grandTotal={total} gear={gear}
-              label="יאללה, מזמינים ציוד" className={`${btn.primaryLg} w-full`} />
-          )
+        {nextStep ? (
+          <button type="button" onClick={() => goTo(nextStep.go)} className={`${btn.primaryLg} w-full`}>{nextStep.label}</button>
+        ) : !later ? (
+          <CardPaymentButton apartment={`השכרת ציוד · ${GEAR_SHOP.name}`} checkin={from} checkout={nextDay(to)}
+            guests={ready.length} nights={days} equipment grandTotal={total} gear={gear}
+            label="המשך לתשלום מאובטח" className={`${btn.primaryLg} w-full`} />
         ) : (
           <div className="flex flex-col gap-2.5">
             <input className={field} placeholder="השם שלכם" value={contact.name} onChange={e => setContact(c => ({ ...c, name: e.target.value }))} />
             <input className={field} type="email" dir="ltr" placeholder="Email" value={contact.email} onChange={e => setContact(c => ({ ...c, email: e.target.value }))} />
             <input className={field} type="tel" dir="ltr" placeholder="Phone (WhatsApp)" value={contact.phone} onChange={e => setContact(c => ({ ...c, phone: e.target.value }))} />
-            <button type="button" onClick={orderLater} disabled={busy} className={`${btn.primaryLg} w-full disabled:opacity-60`}>{busy ? "שולחים…" : "יאללה, מזמינים ציוד"}</button>
-            <p className="text-[13px] text-muted">את התשלום נסגור איתכם בוואטסאפ לפני שמגיעים לחנות.</p>
+            <button type="button" onClick={orderLater} disabled={busy} className={`${btn.primaryLg} w-full disabled:opacity-60`}>{busy ? "מסדרים לכם ציוד…" : "יאללה, שריינו לי ציוד"}</button>
+            <p className="text-[13px] text-muted">לתשלום עכשיו: €0. נשלח לכם קישור תשלום בוואטסאפ לפני שמגיעים לחנות.</p>
           </div>
         )}
-        {missing.length > 0 && <p className="text-[13px] text-muted">כדי להזמין חסר: {missing.join(", ")}</p>}
         {err && <p className="text-[14px] text-danger font-bold">{err}</p>}
       </aside>
     </div>

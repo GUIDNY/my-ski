@@ -21,9 +21,22 @@ export default function EquipmentPage() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/caron-skishop.svg" alt="Caron Skishop" width={200} height={40} className="h-[40px] w-auto" />
         </div>
-        <p className="text-[17px] md:text-[19px] text-body max-w-[720px] leading-relaxed">
-          מגלשיים או סנובורד, כולל נעליים. מזמינים פה, והציוד מחכה לכם מוכן ב-Caron Skishop בכפר. מגיעים, מראים את מייל ההזמנה, ויוצאים לגלוש. פתוח לכל מי שבואל טורנס, גם אם אתם לא גרים אצלנו.
-        </p>
+        <div className="flex flex-wrap items-end gap-x-10 gap-y-5 mt-1">
+          <p className="flex-[1_1_420px] text-[17px] md:text-[19px] text-body leading-relaxed">
+            הציוד מחכה לכם על ההר. מזמינים פה, אוספים מוכן ב-Caron Skishop בכפר, מראים את מייל ההזמנה ויוצאים לגלוש. לא חייבים לגור אצלנו כדי ליהנות מהמחיר.
+          </p>
+          <div className="flex items-center gap-5 bg-white border border-line rounded-[20px] px-5 py-4 shadow-[0_10px_30px_rgba(11,27,51,0.06)]">
+            <div>
+              <div className="font-display font-extrabold text-[40px] leading-none text-ink">€120</div>
+              <div className="text-[14px] text-muted mt-1">ל-6 ימי גלישה, לגולש</div>
+            </div>
+            <ul className="flex flex-col gap-1 text-[14px] text-ink">
+              <li>✓ נעליים כלולות</li>
+              <li>✓ מזמינים מראש, אוספים בכפר</li>
+              <li>✓ אפשר לשלם אחר כך</li>
+            </ul>
+          </div>
+        </div>
       </header>
       <EquipmentClient />
 
@@ -50,7 +63,6 @@ export default function EquipmentPage() {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img key={f} src={`/caron/${f}`} alt="מגלשיים להשכרה ב-Caron Skishop" loading="lazy" className="w-full h-auto transition-transform duration-500 hover:translate-x-2" style={{ transform: `rotate(${i % 2 ? 0.8 : -0.8}deg)` }} />
               ))}
-              <p className="text-[12px] text-muted text-center">דוגמאות מהציוד בחנות. התמונות להמחשה.</p>
             </div>
             <div className="flex items-center justify-center gap-6 md:gap-8 opacity-70">
               {["volkl.png", "faction.png", "nitro.png"].map(f => (
@@ -59,6 +71,34 @@ export default function EquipmentPage() {
               ))}
             </div>
           </div>
+        </div>
+
+        {/* more of the shop's gear: snowboards and boots */}
+        <div className={`${wrap} pb-14 md:pb-20 flex flex-col gap-8`}>
+          <div className="flex flex-col gap-3">
+            <h3 className="font-display font-bold text-[20px] md:text-[22px] text-ink">🏂 סנובורדים</h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+              {["board-classic-2.jpg", "board-classic-3.jpg", "board-classic-4.jpg", "board-premium-1.jpg", "board-premium-2.jpg", "board-premium-3.jpg"].map((f, i) => (
+                <div key={f} className="bg-white rounded-[16px] border border-line p-3 shadow-[0_8px_24px_rgba(11,27,51,0.06)] transition-transform duration-300 hover:-translate-y-1 hover:rotate-[-1deg]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={`/caron/${f}`} alt={i < 3 ? "סנובורד קלאסי להשכרה" : "סנובורד פרימיום להשכרה"} loading="lazy" className="w-full h-auto" />
+                  <div className="text-[13px] font-bold text-muted mt-1.5">{i < 3 ? "קלאסי" : "פרימיום"}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col gap-3">
+            <h3 className="font-display font-bold text-[20px] md:text-[22px] text-ink">👢 נעליים, כלולות במחיר</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+              {["boots-premium.jpg", "boots-edge.jpg"].map(f => (
+                <div key={f} className="bg-white rounded-[16px] border border-line p-4 flex items-center justify-center shadow-[0_8px_24px_rgba(11,27,51,0.06)]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={`/caron/${f}`} alt="נעלי סקי להשכרה ב-Caron Skishop" loading="lazy" className="max-h-[170px] w-auto" />
+                </div>
+              ))}
+            </div>
+          </div>
+          <p className="text-[12px] text-muted">דוגמאות מהציוד בחנות. התמונות להמחשה, והציוד בפועל לפי המלאי והמידות שלכם.</p>
         </div>
       </section>
     </div>
