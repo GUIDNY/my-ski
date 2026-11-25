@@ -34,11 +34,11 @@ export default function EquipmentClient() {
   const missing = [
     days < 1 && "תאריכים",
     !ready.length && "שם של לפחות אדם אחד (באנגלית)",
-    ready.some(p => !/^[A-Za-z][A-Za-z .'-]*$/.test(p.name.trim())) && "שמות באותיות באנגלית",
   ].filter(Boolean) as string[];
 
-  const namesBad = ready.some(p => !/^[A-Za-z][A-Za-z .'-]*$/.test(p.name.trim()));
-  const nextStep = days < 1 ? { label: "בחרו תאריכי גלישה", go: "gear-dates" } : (!ready.length || namesBad) ? { label: "השלימו את שמות הגולשים", go: "gear-people" } : null;
+  // any language goes; English is only a recommendation (the shop reads the email)
+  const latin = (n: string) => /^[A-Za-z][A-Za-z .'-]*$/.test(n.trim());
+  const nextStep = days < 1 ? { label: "בחרו תאריכי גלישה", go: "gear-dates" } : !ready.length ? { label: "כתבו את שם הגולש", go: "gear-people" } : null;
   const goTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "center" });
 
   const set = (i: number, k: keyof GearPerson, v: string | boolean) =>
@@ -127,7 +127,8 @@ export default function EquipmentClient() {
                   ))}
                 </div>
                 <label><span className={fieldLabel}>שם מלא באנגלית</span>
-                  <input className={field} dir="ltr" placeholder="Full name" value={p.name} onChange={e => set(i, "name", e.target.value)} />
+                  <input className={field} dir="auto" placeholder="Full name" value={p.name} onChange={e => set(i, "name", e.target.value)} />
+                  {p.name.trim() && !latin(p.name) && <span className="block text-[13px] text-muted mt-1">אפשר גם ככה. אם תכתבו באנגלית, בחנות יזהו אתכם מהר יותר.</span>}
                 </label>
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <label className="flex items-center gap-2.5 cursor-pointer min-h-[40px]">
