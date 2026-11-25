@@ -310,6 +310,35 @@ export default function OrdersAdmin() {
   const [payRows, setPayRows] = useState<PayRow[]>([]);
   const [payBusy, setPayBusy] = useState<number | null>(null);
 
+  // ===== money per order: income = the receipts (what was really paid), expenses, profit =====
+  // ILS amounts count in euros at today's Bank of Israel rate
+  const [fxRate, setFxRate] = useState(3.9);
+  useEffect(() => { fetch("/api/fx").then(r => r.json()).then(j => { if (Number(j?.rate) > 0) setFxRate(Number(j.rate)); }).catch(() => {}); }, []);
+  const toEur = (amount: unknown, currency: unknown) => { const a = Number(amount) || 0; return currency === "EUR" ? a : a / fxRate; };
+  type ExpRow = { label: string; amount: string; currency: "ILS" | "EUR" };
+  const receiptRows = (o: Order) => (Array.isArray(o.ops?.x_payments) ? (o.ops!.x_payments as { amount?: string; currency?: string; receipt?: unknown }[]) : [])
+    .filter(x => x.receipt && Number(x.amount) > 0);
+  const hasReceipts = (o: Order) => receiptRows(o).length > 0;
+  /** the order's income: the sum of its receipts; until there is one, the order's price */
+  const incomeOf = (o: Order) => hasReceipts(o)
+    ? receiptRows(o).reduce((t, x) => t + toEur(x.amount, x.currency), 0)
+    : Number(o.total_eur) || 0;
+  const expRowsOf = (o: Order) => Array.isArray(o.ops?.x_expenses) ? (o.ops!.x_expenses as ExpRow[]) : [];
+  const expensesOf = (o: Order) => expRowsOf(o).reduce((t, x) => t + toEur(x.amount, x.currency), 0);
+  const eur0 = (n: number) => `€${Math.round(n).toLocaleString()}`;
+  const [expOrder, setExpOrder] = useState<Order | null>(null);
+  const [expRows, setExpRows] = useState<ExpRow[]>([]);
+  const EXP_KINDS = ["בעל הדירה / לינה", "ניקיון", "מצעים", "הסעה", "סקי פס", "ציוד", "טיסה", "עמלת סליקה", "אחר"];
+  const openExpenses = (o: Order) => { const rows = expRowsOf(o); setExpRows(rows.length ? rows : [{ label: "", amount: "", currency: "EUR" }]); setExpOrder(o); };
+  const saveExpenses = async (rows: ExpRow[]) => {
+    if (!expOrder) return;
+    const clean = rows.filter(x => x.label.trim() || Number(x.amount) > 0);
+    const ops = { ...(expOrder.ops || {}), x_expenses: clean };
+    setOrders(prev => prev.map(x => x.id === expOrder.id ? { ...x, ops } : x));
+    setExpOrder(prev => prev ? { ...prev, ops } : prev);
+    await authFetch(`/api/orders/${expOrder.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ops: { x_expenses: clean } }) });
+  };
+
   // ── בדיקת אובר-בוקינג: all site-order nights must be closed on Airbnb ──
   type ObReport = { calendar: boolean; checked: number; covered: number; issues: { code: string; name: string; apartment: string; checkin: string; checkout: string; openDates: string[] }[] };
   const [obBusy, setObBusy] = useState(false);
@@ -436,8 +465,13 @@ export default function OrdersAdmin() {
       .some(v => String(v ?? "").toLowerCase().includes(needle))));
   const countOf = (k: string) => k === "all" ? inRange.length : inRange.filter(o => o.status === k).length;
   const HE_M = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
-  const sumOf = (list: Order[]) => Math.round(list.filter(o => o.status !== "cancelled").reduce((t, o) => t + (Number(o.total_eur) || 0), 0));
-  let groups: { label: string; list: Order[]; sum: number }[];
+  const sumOf = (list: Order[]) => {
+    const live = list.filter(o => o.status !== "cancelled");
+    const income = live.reduce((t, o) => t + incomeOf(o), 0);
+    const expenses = live.reduce((t, o) => t + expensesOf(o), 0);
+    return { income, expenses, profit: income - expenses };
+  };
+  let groups: { label: string; list: Order[]; sum: ReturnType<typeof sumOf> }[];
   if (sort === "new") {
     const list = [...visible].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
     groups = [{ label: "", list, sum: sumOf(list) }];
@@ -477,7 +511,7 @@ export default function OrdersAdmin() {
     const paid = live.filter(o => o.status === "hold" || o.status === "approved");
     const approved = live.filter(o => o.status === "approved").length;
     const f = live[0] || list[0];
-    const total = Math.round(paid.reduce((t, o) => t + (Number(o.total_eur) || 0), 0));
+    const total = Math.round(paid.reduce((t, o) => t + incomeOf(o), 0));
     const names = Array.from(new Set(live.map(o => o.customer_name).filter(Boolean)));
     const d = daysTo(f.checkin);
     return (
@@ -763,7 +797,10 @@ export default function OrdersAdmin() {
               {g.label && (
                 <div className="flex items-baseline justify-between gap-3 mb-2.5 px-1">
                   <h2 className="text-lg font-black text-gray-900">{g.label}</h2>
-                  <span className="text-sm text-gray-500">{g.list.length === 1 ? "הזמנה אחת" : `${g.list.length} הזמנות`} · €{g.sum.toLocaleString()}</span>
+                  <span className="text-sm text-gray-500">
+                    {g.list.length === 1 ? "הזמנה אחת" : `${g.list.length} הזמנות`} · הכנסות <b className="text-gray-800">{eur0(g.sum.income)}</b>
+                    {g.sum.expenses > 0 && <> · הוצאות <b className="text-red-600">{eur0(g.sum.expenses)}</b> · רווח <b className={g.sum.profit >= 0 ? "text-emerald-700" : "text-red-600"}>{eur0(g.sum.profit)}</b></>}
+                  </span>
                 </div>
               )}
               <div className="space-y-3">
@@ -786,7 +823,9 @@ export default function OrdersAdmin() {
                   </div>
                   <p className="text-sm text-gray-600">{o.apartment_name} · {fmt(o.checkin)}–{fmt(o.checkout)} · {o.guests} אורחים · {o.nights} לילות</p>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    <b className="text-sm text-gray-800">€{Number(o.total_eur).toLocaleString()}</b>
+                    <b className="text-sm text-gray-800">{eur0(incomeOf(o))}</b>
+                    {hasReceipts(o) && <span className="text-emerald-700"> לפי קבלות{Math.round(incomeOf(o)) !== Math.round(Number(o.total_eur) || 0) ? ` (בהזמנה €${Number(o.total_eur).toLocaleString()})` : ""}</span>}
+                    {expensesOf(o) > 0 && <> · הוצאות <span className="text-red-600 font-bold">{eur0(expensesOf(o))}</span> · רווח <span className={`font-bold ${incomeOf(o) - expensesOf(o) >= 0 ? "text-emerald-700" : "text-red-600"}`}>{eur0(incomeOf(o) - expensesOf(o))}</span></>}
                     {o.customer_email && <> · {o.customer_email}</>}
                     {o.customer_phone && <> · {o.customer_phone}</>}
                   </p>
@@ -805,6 +844,7 @@ export default function OrdersAdmin() {
                     <button onClick={() => fillFromProposal(o)} disabled={busy === o.id} className="border border-violet-200 text-violet-700 hover:bg-violet-50 font-medium text-sm px-3 py-2 rounded-xl transition">השלם מההצעה</button>
                   )}
                   <button onClick={() => openPayments(o)} className="border border-teal-200 text-teal-700 hover:bg-teal-50 font-medium text-sm px-3 py-2 rounded-xl transition">💳 קבלות ותשלומים</button>
+                  <button onClick={() => openExpenses(o)} className="border border-red-200 text-red-700 hover:bg-red-50 font-medium text-sm px-3 py-2 rounded-xl transition">💸 הוצאות</button>
                   <EmailCustomer to={o.customer_email || ""} name={o.customer_name || ""} phone={o.customer_phone || ""} />
                   <button onClick={() => startEdit(o)} className="border border-gray-200 text-blue-600 hover:bg-blue-50 font-medium text-sm px-3 py-2 rounded-xl transition">עריכה</button>
                   <button onClick={() => remove(o)} className="text-red-500 hover:text-red-700 text-sm px-2">🗑</button>
@@ -966,6 +1006,55 @@ export default function OrdersAdmin() {
           </div>
         </div>
       )}
+
+      {/* הוצאות — מה ההזמנה עלתה לנו (בעל הדירה, ניקיון, הסעה…), כדי לראות רווח */}
+      {expOrder && (() => {
+        const income = incomeOf(expOrder);
+        const spent = expRows.reduce((t, x) => t + toEur(x.amount, x.currency), 0);
+        return (
+          <div className="fixed inset-0 z-50 bg-black/40 flex items-end md:items-center justify-center p-0 md:p-6" onClick={() => { saveExpenses(expRows); setExpOrder(null); }}>
+            <div className="bg-white w-full md:max-w-xl rounded-t-3xl md:rounded-3xl p-5 md:p-7 max-h-[92vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div>
+                  <h3 className="text-lg font-black text-gray-900">💸 הוצאות</h3>
+                  <p className="text-sm text-gray-500">{expOrder.customer_name} · קוד {expOrder.code}</p>
+                </div>
+                <button onClick={() => { saveExpenses(expRows); setExpOrder(null); }} className="text-gray-400 hover:text-gray-600 text-xl leading-none px-2">✕</button>
+              </div>
+              <div className="space-y-2">
+                {expRows.map((r, i) => (
+                  <div key={i} className="flex flex-wrap items-center gap-2 border border-gray-100 rounded-2xl p-2.5 bg-gray-50/60">
+                    <input list="exp-kinds" value={r.label} placeholder="על מה? (ניקיון, הסעה…)"
+                      onChange={e => setExpRows(rows => rows.map((x, j) => j === i ? { ...x, label: e.target.value } : x))} onBlur={() => saveExpenses(expRows)}
+                      className="flex-1 min-w-[140px] rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-red-300" />
+                    <div className="flex items-center rounded-xl border border-gray-200 bg-white overflow-hidden">
+                      <input value={r.amount} inputMode="decimal" placeholder="סכום"
+                        onChange={e => setExpRows(rows => rows.map((x, j) => j === i ? { ...x, amount: e.target.value } : x))} onBlur={() => saveExpenses(expRows)}
+                        className="w-24 px-3 py-2 text-sm font-bold focus:outline-none" />
+                      <select value={r.currency} onChange={e => { const rows = expRows.map((x, j) => j === i ? { ...x, currency: (e.target.value === "ILS" ? "ILS" : "EUR") as "ILS" | "EUR" } : x); setExpRows(rows); saveExpenses(rows); }}
+                        className="px-1.5 py-2 text-xs font-bold text-gray-500 bg-gray-50 border-r border-gray-200 cursor-pointer focus:outline-none">
+                        <option value="EUR">€</option>
+                        <option value="ILS">₪</option>
+                      </select>
+                    </div>
+                    <button onClick={() => { const rows = expRows.filter((_, j) => j !== i); setExpRows(rows); saveExpenses(rows); }}
+                      className="text-gray-300 hover:text-red-500 text-sm px-1" title="הסרה">✕</button>
+                  </div>
+                ))}
+                <datalist id="exp-kinds">{EXP_KINDS.map(k => <option key={k} value={k} />)}</datalist>
+              </div>
+              <button onClick={() => setExpRows(rows => [...rows, { label: "", amount: "", currency: "EUR" }])}
+                className="mt-3 text-sm font-bold text-red-700 hover:text-red-900">+ הוספת הוצאה</button>
+              <div className="mt-4 rounded-2xl bg-gray-50 px-4 py-3 text-sm space-y-1">
+                <div className="flex justify-between"><span className="text-gray-500">הכנסות{hasReceipts(expOrder) ? " (לפי קבלות)" : " (מחיר ההזמנה)"}</span><b>{eur0(income)}</b></div>
+                <div className="flex justify-between"><span className="text-gray-500">הוצאות</span><b className="text-red-600">{eur0(spent)}</b></div>
+                <div className="flex justify-between border-t border-gray-200 pt-1"><span className="font-bold">רווח</span><b className={income - spent >= 0 ? "text-emerald-700" : "text-red-600"}>{eur0(income - spent)}</b></div>
+                <p className="text-xs text-gray-400 pt-1">סכומים בשקלים מחושבים ביורו לפי השער היציג של היום ({fxRate.toFixed(2)}).</p>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
