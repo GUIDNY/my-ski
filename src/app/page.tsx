@@ -50,7 +50,7 @@ const included = [
 // Real Google reviews of SkiShare ("סקי שר", 4.9 from 67), quoted from Google,
 // shortened. Only real reviews go here, never made-up ones.
 const GOOGLE_RATING = { stars: "4.9", count: 67 };
-const GOOGLE_REVIEWS_URL = "https://www.google.com/search?q=%D7%A1%D7%A7%D7%99+%D7%A9%D7%A8+SkiShare+%D7%91%D7%99%D7%A7%D7%95%D7%A8%D7%95%D7%AA";
+const GOOGLE_REVIEWS_URL = "https://maps.google.com/?cid=941453451527916176";
 const reviews = [
   { name: "אורי פ.", text: "חברה מקצוענים. היינו שלושה שבועות בדירה בואל טורנס ופשוט נהנינו מכל רגע. מיקום במרכז העיירה, דקה הליכה מהמסלולים, הברים והמסעדות. ליווי מדהים, טיפלו בכל מה שהיינו צריכים. ממליץ בחום." },
   { name: "רון ג.", text: "סגרנו חופשה עם הצוות ופשוט חווינו חוויה מושלמת! השירות היה אישי ומדויק, הדירה נקייה ומדהימה. ממליץ בחום לכל מי שמחפש חופשת סקי מושלמת." },

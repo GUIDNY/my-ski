@@ -1085,7 +1085,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
             </div>
 
             <CheckList className="text-[14px] text-body gap-1.5" items={[
-              <a key="g" href="https://www.google.com/search?q=%D7%A1%D7%A7%D7%99+%D7%A9%D7%A8+SkiShare+%D7%91%D7%99%D7%A7%D7%95%D7%A8%D7%95%D7%AA" target="_blank" rel="noopener noreferrer" className="font-bold text-ink hover:text-accent transition-colors">
+              <a key="g" href="https://maps.google.com/?cid=941453451527916176" target="_blank" rel="noopener noreferrer" className="font-bold text-ink hover:text-accent transition-colors">
                 <span className="text-[#E8A317]">★</span> 4.9 בגוגל · 67 ביקורות של לקוחות
               </a>,
               "מזמינים ישירות מאיתנו, בלי מתווכים",
