@@ -13,11 +13,13 @@ export const HELMET_PRICE = 10;
 export const GEAR_SHOP = {
   name: "Caron Skishop",
   area: "Val Thorens",
-  maps: "https://www.google.com/maps/search/?api=1&query=Caron+Skishop+Val+Thorens",
+  address: "Immeuble Les Olympiades, Rue de Caron, 73440 Val Thorens",
+  maps: "https://www.google.com/maps/search/?api=1&query=Caron+Ski+Shop+Les+Olympiades+Rue+de+Caron+Val+Thorens",
+  logo: "/caron-skishop.svg",
 };
 
 export type GearKind = "ski" | "snowboard";
-export type GearPerson = { name: string; kind: GearKind; height: string; weight: string; shoe: string; helmet?: boolean };
+export type GearPerson = { name: string; kind: GearKind; helmet?: boolean };
 export type GearOrder = { from: string; to: string; days: number; people: GearPerson[]; shop: string };
 
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
@@ -43,7 +45,6 @@ export function cleanGear(raw: unknown): GearOrder | null {
   const people = g.people.slice(0, 20).map(p => ({
     name: clip(p?.name, 60),
     kind: (p?.kind === "snowboard" ? "snowboard" : "ski") as GearKind,
-    height: clip(p?.height, 5), weight: clip(p?.weight, 5), shoe: clip(p?.shoe, 5),
     helmet: p?.helmet === true,
   })).filter(p => p.name);
   if (!people.length) return null;

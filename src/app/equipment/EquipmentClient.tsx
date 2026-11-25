@@ -8,11 +8,11 @@ import { GEAR_SHOP, HELMET_PRICE, gearDays, personCost, type GearKind, type Gear
 const eur = (n: number) => `€${Math.round(n).toLocaleString("en-US")}`;
 const today = () => new Date().toISOString().slice(0, 10);
 const nextDay = (iso: string) => new Date(Date.parse(iso + "T12:00:00Z") + 864e5).toISOString().slice(0, 10);
-const blank = (kind: GearKind = "ski"): GearPerson => ({ name: "", kind, height: "", weight: "", shoe: "", helmet: false });
+const blank = (kind: GearKind = "ski"): GearPerson => ({ name: "", kind, helmet: false });
 
 /*
  * Rent skis or a snowboard from us, for anyone in Val Thorens: the dates, one
- * row per person (name in English, as the shop sees it, and sizes), then pay
+ * row per person (name in English, as the shop sees it), then pay
  * by card now or order now and pay later. The gear waits at Caron Skishop.
  */
 export default function EquipmentClient() {
@@ -90,7 +90,7 @@ export default function EquipmentClient() {
         {/* people */}
         <section className="flex flex-col gap-3">
           <h2 className={h2}>מי גולש?</h2>
-          <p className="text-[15px] text-muted -mt-1">שם באנגלית, כמו שיופיע בחנות. את המידות צריך כדי שהציוד יחכה מוכן.</p>
+          <p className="text-[15px] text-muted -mt-1">שם באנגלית, כמו שיופיע בחנות. את המידות מתאימים במקום.</p>
           <div className="flex flex-col gap-3">
             {people.map((p, i) => (
               <div key={i} className={`${card} p-4 md:p-5 flex flex-col gap-3`}>
@@ -109,11 +109,6 @@ export default function EquipmentClient() {
                   {people.length > 1 && (
                     <button type="button" onClick={() => setPeople(ps => ps.filter((_, j) => j !== i))} className="min-h-[48px] px-2 text-muted hover:text-danger text-[14px]">הסרה</button>
                   )}
-                </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <label><span className={fieldLabel}>גובה (ס״מ)</span><input className={field} inputMode="numeric" value={p.height} onChange={e => set(i, "height", e.target.value.replace(/\D/g, ""))} /></label>
-                  <label><span className={fieldLabel}>משקל (ק״ג)</span><input className={field} inputMode="numeric" value={p.weight} onChange={e => set(i, "weight", e.target.value.replace(/\D/g, ""))} /></label>
-                  <label><span className={fieldLabel}>מידת נעל (EU)</span><input className={field} inputMode="decimal" value={p.shoe} onChange={e => set(i, "shoe", e.target.value.replace(/[^\d.]/g, ""))} /></label>
                 </div>
                 <label className="flex items-center gap-2.5 cursor-pointer self-start min-h-[40px]">
                   <input type="checkbox" className="w-5 h-5 accent-accent" checked={!!p.helmet} onChange={e => set(i, "helmet", e.target.checked)} />
@@ -142,9 +137,13 @@ export default function EquipmentClient() {
           <span className="font-display font-extrabold text-[30px] text-ink">{total ? eur(total) : "—"}</span>
         </div>
         <p className="text-[13px] text-muted leading-relaxed">€30 ליום, €120 ל-6 ימים, ועוד €20 לכל יום נוסף. לאדם. מגלשיים או סנובורד, כולל נעליים. קסדה €{HELMET_PRICE} נוספים. לא כולל ביטוח על הציוד.</p>
-        <div className="rounded-2xl bg-soft px-4 py-3 text-[14px] text-body leading-relaxed">
-          📍 הציוד מחכה לכם ב-<a href={GEAR_SHOP.maps} target="_blank" rel="noopener noreferrer" className="font-bold text-ink underline">{GEAR_SHOP.name}</a> בואל טורנס. מגיעים, מראים את מייל ההזמנה, ויוצאים לגלוש.
-        </div>
+        <a href={GEAR_SHOP.maps} target="_blank" rel="noopener noreferrer" className="rounded-2xl bg-soft hover:bg-soft-2 transition-colors px-4 py-3.5 flex flex-col gap-2 text-[14px] text-body leading-relaxed">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={GEAR_SHOP.logo} alt={GEAR_SHOP.name} width={176} height={35} className="h-[35px] w-auto self-start" />
+          <span>הציוד מחכה לכם מוכן בחנות. מגיעים, מראים את מייל ההזמנה, ויוצאים לגלוש.</span>
+          <span className="text-[13px] text-muted" dir="ltr">{GEAR_SHOP.address}</span>
+          <span className="font-bold text-accent">לחנות במפה ←</span>
+        </a>
 
         <div className="flex rounded-xl border border-line-strong overflow-hidden" role="group" aria-label="איך משלמים">
           <button type="button" onClick={() => setLater(false)} aria-pressed={!later} className={`flex-1 min-h-[46px] text-[15px] font-bold ${!later ? "bg-ink text-white" : "bg-white text-body"}`}>משלמים עכשיו</button>

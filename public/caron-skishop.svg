@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 44" role="img" aria-label="Caron Skishop">
+  <!-- the mark: a red-orange block with a blue mountain and its snow -->
+  <rect x="0" y="4" width="56" height="36" fill="#E8553E"/>
+  <path d="M0 40 L0 30 L14 22 L22 25 L33 13 L40 18 L47 16 L56 24 L56 40 Z" fill="#1F3B8C"/>
+  <path d="M22 25 L33 13 L40 18 L36 19 L33 17 L28 24 Z M40 18 L47 16 L52 20 L47 19 L44 21 Z M0 30 L14 22 L18 24 L12 25 L4 30 Z" fill="#fff"/>
+  <!-- the words -->
+  <text x="64" y="23" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#2B2F36" letter-spacing="0.5">CARON</text>
+  <text x="65" y="40" font-family="Arial, Helvetica, sans-serif" font-size="13.5" font-weight="700" fill="#6B7280" letter-spacing="2.2">SKISHOP</text>
+</svg>

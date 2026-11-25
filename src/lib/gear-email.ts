@@ -28,7 +28,9 @@ export async function sendGearEmail(order: Order, origin: string, paid: boolean)
           customer_phone: order.customer_phone, total_eur: order.total_eur, paid,
           logo: `${origin}/skishare-logo.png`,
         },
-        gear: { ...gear, shop: GEAR_SHOP.name, shop_area: GEAR_SHOP.area, shop_maps: GEAR_SHOP.maps },
+        gear: { ...gear, shop: GEAR_SHOP.name, shop_area: GEAR_SHOP.area, shop_address: GEAR_SHOP.address, shop_maps: GEAR_SHOP.maps,
+          // e-mail apps don't show SVG: the shop's own PNG logo
+          shop_logo: `${origin}/caron/caron-logo-wide.png` },
       }),
     });
     return r.ok;
