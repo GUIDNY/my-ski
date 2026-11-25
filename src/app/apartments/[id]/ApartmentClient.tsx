@@ -107,7 +107,7 @@ function OptionCard({ kind, checked, onSelect, title, sub, price, icon, badge, c
   disabled?: boolean;
 }) {
   return (
-    <div className={`rounded-[18px] border transition-colors ${disabled ? "border-dashed border-line-strong bg-[#FBFCFE] opacity-75" : checked ? "border-accent ring-1 ring-accent bg-accent-soft/50" : "border-line bg-white hover:border-line-strong"}`}>
+    <div className={`rounded-[18px] border transition-colors ${checked && !disabled ? "card-pop" : ""} ${disabled ? "border-dashed border-line-strong bg-[#FBFCFE] opacity-75" : checked ? "border-accent ring-1 ring-accent bg-accent-soft/50" : "border-line bg-white hover:border-line-strong"}`}>
       <button type="button" role={kind === "radio" ? "radio" : "checkbox"} aria-checked={checked} onClick={onSelect} disabled={disabled}
         className="w-full flex items-start gap-3.5 p-4 md:p-[18px] text-start rounded-[18px] disabled:cursor-not-allowed">
         {kind === "radio" ? (
@@ -695,7 +695,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
     if (!passOpen(area)) return `סגור בתאריכים האלה · פתוח ${shortDate(LIFT_DATES[area][0])}–${shortDate(LIFT_DATES[area][1])}`;
     const t = tierFor(area);
     // per person, and for the whole group when there is one
-    return t ? `${eur(t.price)} לאדם · ${t.duration_days} ימים${guests > 1 ? ` · ${eur(t.price * guests)} ל-${guests}` : ""}` : undefined;
+    return t ? `${eur(t.price)} לאדם · ${t.duration_days} ימים${guests > 1 ? ` · ${eur(t.price * guests)} לכל הקבוצה` : ""}` : undefined;
   };
   const anyAddOn = skiOn || transfer || equipment || flightOn;
   const canBook = hasDates && !laCimeNoMatch && !datesTaken;
@@ -816,7 +816,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
           </Section>
 
           <Section id="pass" title={hasDates && skiDays > 0 ? `סקי פס ל-${skiDays} ימי גלישה` : "סקי פס"}
-            sub="בוחרים אחד, או מדלגים. את הסקי פס אוספים בעצמכם מהמכונה בכפר.">
+            sub="כל ההר מחכה לכם. בוחרים אחד, או מדלגים. את הסקי פס אוספים בעצמכם מהמכונה בכפר.">
             <div role="group" aria-label="סקי פס" className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <OptionCard kind="check" checked={skiOn && skiArea === "trois_vallees"} onSelect={() => choosePass("trois_vallees")}
                 disabled={!passOpen("trois_vallees")}
@@ -830,7 +830,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
             )}
           </Section>
 
-          <Section id="transfer" title="הסעה">
+          <Section id="transfer" title="הסעה" sub="מהמטוס ישר לשלג. אנחנו דואגים שתגיעו עד הדלת של הדירה.">
             <OptionCard kind="check" checked={transfer} icon={<IconBus size={20} />}
               onSelect={() => { const v = !transfer; setTransfer(v); if (v) setTransferQty(Math.min(transferQty || 1, guests) || 1); }}
               title="הסעה משדה התעופה עד הדירה" sub={trPick ? `${trPick.name} · ${eur(trPick.total)} לכל הקבוצה` : "רכב פרטי או שאטל משותף, לפי הטיסה"}>
@@ -851,11 +851,11 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
             </OptionCard>
           </Section>
 
-          <Section id="gear" title="ציוד">
+          <Section id="gear" title="ציוד" sub="סקי או סנובורד? אנחנו לא שופטים.">
             <OptionCard kind="check" checked={equipment} icon={<IconSkis size={20} />}
               onSelect={() => { const v = !equipment; setEquipment(v); if (v) setEquipQty(guests || 1); }}
               title="סקי או סנובורד לכל ימי הגלישה" sub="€30 ליום, €120 לשבוע, ועוד €20 לכל יום נוסף. לאדם."
-              price={skiDays > 0 ? `${eur(equipCost(skiDays))} לאדם${hasDates ? ` · ${skiDays} ימים` : ""}${guests > 1 ? ` · ${eur(equipCost(skiDays) * guests)} ל-${guests}` : ""}` : "מ-€30 לאדם"}>
+              price={skiDays > 0 ? `${eur(equipCost(skiDays))} לאדם${hasDates ? ` · ${skiDays} ימים` : ""}${guests > 1 ? ` · ${eur(equipCost(skiDays) * guests)} לכל הקבוצה` : ""}` : "מ-€30 לאדם"}>
               <QtyRow label="כמה אנשים צריכים ציוד?" qty={equipQty} setQty={setEquipQty} max={maxGuests} total={equipTotal} />
             </OptionCard>
           </Section>
@@ -885,7 +885,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
                 <OptionCard kind="radio" checked={cancel === "none"} onSelect={() => setShowNoCancel(true)} icon={<IconShield size={20} />}
                   title="בלי אפשרות ביטול" sub="מחיר מוזל. אי אפשר לבטל, ואין החזר כספי." price={`${eur(CANCEL_NONE)} הנחה לכל החבורה`} />
                 <OptionCard kind="radio" checked={cancel === "flexible"} onSelect={() => setCancel("flexible")} icon={<IconShield size={20} />}
-                  title="ביטול גמיש" sub="80% החזר עד שבוע לפני, 50% עד 24 שעות לפני ההמראה, ואחר כך אין החזר." price={`תוספת ${eur(CANCEL_FLEX)} לאדם${guests > 1 ? ` · ${eur(CANCEL_FLEX * guests)} ל-${guests}` : ""}`} />
+                  title="ביטול גמיש" sub="80% החזר עד שבוע לפני, 50% עד 24 שעות לפני ההמראה, ואחר כך אין החזר." price={`תוספת ${eur(CANCEL_FLEX)} לאדם${guests > 1 ? ` · ${eur(CANCEL_FLEX * guests)} לכל הקבוצה` : ""}`} />
               </div>
               <a href="/terms" target="_blank" rel="noopener noreferrer" className={`${btn.link} text-[15px] w-fit`}>מדיניות הביטולים בתקנון</a>
             </div>
@@ -928,7 +928,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
             {/* title, dates and guests */}
             {(editDates || !hasDates || laCimeNoMatch || datesTaken) ? (
               <div className="flex flex-col gap-3">
-                <span className="font-display font-bold text-[20px] text-ink">{anyAddOn ? "סיכום החופשה שלכם" : "המחיר שלכם"}</span>
+                <span className="font-display font-bold text-[20px] text-ink">{anyAddOn ? "סיכום החופשה שלכם" : "כמה יוצא לנו?"}</span>
                 {!hasDates && <p className="text-[15px] font-bold text-ink -mt-1">{agency ? "בחרו שבוע, ונראה לכם את המחיר המדויק." : "בחרו תאריכים, ונראה לכם את המחיר המדויק."}</p>}
                 {hasDates && laCimeNoMatch && <p className="text-[15px] text-warn font-bold -mt-1">הדירה הזו מושכרת שבת עד שבת. התאריכים שבחרתם לא נופלים בשבוע פנוי, אז בחרו אחד מהשבועות.</p>}
                 {datesTaken && !editDates && <p className="text-[15px] text-danger font-bold -mt-1">הדירה כבר תפוסה בחלק מהתאריכים האלה. אפשר לבחור תאריכים אחרים.</p>}
@@ -940,7 +940,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
             ) : (
               <div className="flex items-start justify-between gap-3">
                 <div className="flex flex-col gap-1 min-w-0">
-                  <span className="font-display font-bold text-[20px] text-ink">{anyAddOn ? "סיכום החופשה שלכם" : "המחיר שלכם"}</span>
+                  <span className="font-display font-bold text-[20px] text-ink">{anyAddOn ? "סיכום החופשה שלכם" : "כמה יוצא לנו?"}</span>
                   <span className="text-[14px] text-muted">{datesLine} · {guests} {guests === 1 ? "אדם" : "אנשים"}{weekMatch ? " · שבת עד שבת" : ""}</span>
                 </div>
                 <button type="button" onClick={() => setEditDates(true)} className={`${btn.link} text-[15px] min-h-[40px] shrink-0`}>שינוי</button>
@@ -1051,7 +1051,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
                   flight={flightOn} flightPrice={bookFlightTotal + baggageTotal + trolleyTotal} flightDetails={bookFlightDetails}
                   grandTotal={payNow}
                   split={splitCount > 1 ? { sharesTotal: splitCount, accommodationTotal: grandTotal, shareAmount: shareAccommodation, area: "Val Thorens, Trois Vallées" } : undefined}
-                  label={splitCount > 1 ? "לשלם את החלק שלכם בכרטיס" : "להזמנה ותשלום מאובטח"}
+                  label={splitCount > 1 ? "לשלם את החלק שלכם בכרטיס" : "יאללה, סוגרים חופשה"}
                   className={`${btn.primaryLg} w-full`} />
               </>
             )}

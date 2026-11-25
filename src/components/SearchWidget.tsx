@@ -227,7 +227,7 @@ export default function SearchWidget({ initialDeal = "apartment", flat = false }
 
         <button type="submit"
           className="rounded-2xl bg-[#1652F0] hover:bg-[#0E3FC2] active:scale-[0.98] text-white font-bold text-[18px] md:text-[19px] px-7 min-h-[56px] md:min-h-[64px] flex items-center justify-center gap-2 transition-all">
-          {dealMode === "full" ? "מצאו לי חבילה" : "מצאו לי דירה"}
+          {dealMode === "full" ? "יאללה, מוצאים חבילה" : "יאללה, מוצאים דירה"}
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" /></svg>
         </button>
       </form>

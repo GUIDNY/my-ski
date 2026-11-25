@@ -122,14 +122,14 @@ export default async function WeekPackages() {
     <section className="max-w-[1240px] mx-auto px-5 md:px-6 py-10 md:py-14">
       <div className="flex flex-wrap items-end justify-between gap-4 mb-7 md:mb-9">
         <div className="flex flex-col gap-2">
-          <h2 className="font-display text-[28px] md:text-[40px] font-bold tracking-tight text-[#0B1B33]">חבילות סקי לשבוע {data.label}</h2>
+          <h2 className="font-display text-[28px] md:text-[40px] font-bold tracking-tight text-[#0B1B33]">מי בא <span className="marker">לשלג?</span> חבילות ל-{data.label}</h2>
           <p className="text-[15px] md:text-[17px] text-[#51607A]">לדוגמה ל-4 מבוגרים: 7 לילות, סקי פס לשלושת העמקים, הסעה מהשדה וציוד. בחרו תאריכים אחרים בחיפוש למעלה.</p>
         </div>
         <Link href="/packages" className="font-bold text-[16px] md:text-[17px] text-[#1652F0] hover:text-[#0E3FC2]">מחיר חבילה לכל שבוע ←</Link>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
         {data.cards.map((c, i) => (
-          <article key={c.id} className="bg-white border border-[#E3E9F2] rounded-[22px] overflow-hidden flex flex-col">
+          <article key={c.id} className="bg-white border border-[#E3E9F2] rounded-[22px] overflow-hidden flex flex-col shadow-[0_10px_30px_rgba(11,27,51,0.06)] transition-transform duration-300 hover:-translate-y-1.5 hover:rotate-[-0.6deg]">
             <div className="relative h-[210px]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img {...cardImage(c.img, "/hero-ski.jpg")} alt={c.name} loading="lazy" className="w-full h-full object-cover" />
@@ -157,7 +157,7 @@ export default async function WeekPackages() {
                 </div>
                 <div className="text-[14px] text-[#51607A]">{eur(c.total)} לכל החבורה</div>
               </div>
-              <Link href={c.href} className="mt-1.5 flex items-center justify-center min-h-[48px] rounded-[14px] bg-[#1652F0] hover:bg-[#0E3FC2] text-white font-bold text-[17px] transition-colors">לפרטים ולהזמנה</Link>
+              <Link href={c.href} className="mt-1.5 flex items-center justify-center min-h-[48px] rounded-[14px] bg-[#1652F0] hover:bg-[#0E3FC2] text-white font-bold text-[17px] transition-colors">בואו לראות את הדירה</Link>
             </div>
           </article>
         ))}
