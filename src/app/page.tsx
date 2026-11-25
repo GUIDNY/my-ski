@@ -156,9 +156,9 @@ export default function Home() {
         <div className="flex-[1_1_380px] min-w-0 flex flex-col gap-4" data-reveal data-reveal-delay="1">
           <h2 className="font-display text-[28px] md:text-[40px] font-bold tracking-tight leading-tight">נעים להכיר, אנחנו SkiShare</h2>
           <p className="text-[16px] md:text-[18px] leading-[1.7] text-[#3D4B63]">
-            שני חברים, הבעלים של SkiShare, שעושים את העונה בואל טורנס. הדירות שלנו, ואנחנו מכירים כל אחת מהן: מכינים אותן לפני שאתם מגיעים, ממליצים על מסלולים ועל מקומות לאכול, ונשארים זמינים בוואטסאפ לאורך כל החופשה.
+            את SkiShare הקמנו לפני ארבע שנים כדי לגרום לכם לחייך על ההר, ומאז זו המטרה שלנו. אנחנו משתדלים להביא לכם את הדירות הכי טובות, נוחות ומשתלמות, ולארגן לכם את כל החופשה מקצה לקצה.
           </p>
-          <p className="text-[16px] md:text-[18px] leading-[1.7] text-[#3D4B63]">אין מוקד ואין מתווך. מי שעונה לכם הוא מי שנמצא פה על ההר.</p>
+          <p className="text-[16px] md:text-[18px] leading-[1.7] text-[#3D4B63]">כל מה שתצטרכו לעשות זה להגיע, לחייך ולגלוש. מחכים לכם!</p>
           <a href={waHref} target="_blank" rel="noopener noreferrer" className="self-start inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1EBE5A] text-[#06301A] rounded-[14px] px-6 min-h-[52px] font-bold text-[16px] md:text-[17px] transition-colors mt-1">
             לכתוב לנו ישירות בוואטסאפ
           </a>

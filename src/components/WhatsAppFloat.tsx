@@ -37,6 +37,9 @@ export default function WhatsAppFloat() {
   }, []);
 
   if (HIDE.some(h => p === h || p.startsWith(h + "/"))) return null;
+  // the apartment page's price box has its own WhatsApp link, and the button
+  // and its bubble would sit on top of that box on a computer
+  if (/^\/apartments\/[^/]+/.test(p)) return null;
   const phoneHidden = PHONE_HIDE.some(re => re.test(p));
   const close = () => {
     setBubble(false);

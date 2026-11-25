@@ -144,13 +144,16 @@ export default async function WeekPackages() {
               <h3 className="font-display text-[21px] font-bold text-[#0B1B33]">{c.name}</h3>
               <div className="text-[15px] text-[#51607A]">ואל טורנס · {c.meta}</div>
               <ul className="flex flex-col gap-1.5 text-[15px] text-[#0B1B33]">
+                <li className="flex items-center gap-2"><Check />7 לילות בדירה</li>
                 <li className="flex items-center gap-2"><Check />סקי פס לשלושת העמקים</li>
-                <li className="flex items-center gap-2"><Check />הסעה וציוד לכולם</li>
+                <li className="flex items-center gap-2"><Check />הסעה הלוך וחזור מהשדה</li>
+                <li className="flex items-center gap-2"><Check />ציוד סקי או סנובורד</li>
+                <li className="flex items-center gap-2 text-[#51607A]"><span className="w-4 text-center text-[14px]" aria-hidden="true">✕</span>טיסות לא כלולות</li>
               </ul>
               <div className="mt-auto pt-3.5 border-t border-[#E3E9F2]">
                 <div className="flex items-baseline gap-1.5">
                   <span className="font-display font-extrabold text-[30px] text-[#0B1B33]">{eur(c.perPerson)}</span>
-                  <span className="text-[15px] text-[#51607A]">לאדם</span>
+                  <span className="text-[15px] text-[#51607A]">לאדם, ב-{GUESTS} אנשים</span>
                 </div>
                 <div className="text-[14px] text-[#51607A]">{eur(c.total)} לכל החבורה</div>
               </div>

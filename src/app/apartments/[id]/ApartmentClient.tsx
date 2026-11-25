@@ -694,7 +694,8 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
   const passPrice = (area: PassArea) => {
     if (!passOpen(area)) return `סגור בתאריכים האלה · פתוח ${shortDate(LIFT_DATES[area][0])}–${shortDate(LIFT_DATES[area][1])}`;
     const t = tierFor(area);
-    return t ? `${eur(t.price)} לאדם · ${t.duration_days} ימים` : undefined;
+    // per person, and for the whole group when there is one
+    return t ? `${eur(t.price)} לאדם · ${t.duration_days} ימים${guests > 1 ? ` · ${eur(t.price * guests)} ל-${guests}` : ""}` : undefined;
   };
   const anyAddOn = skiOn || transfer || equipment || flightOn;
   const canBook = hasDates && !laCimeNoMatch && !datesTaken;
@@ -854,7 +855,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
             <OptionCard kind="check" checked={equipment} icon={<IconSkis size={20} />}
               onSelect={() => { const v = !equipment; setEquipment(v); if (v) setEquipQty(guests || 1); }}
               title="סקי או סנובורד לכל ימי הגלישה" sub="€30 ליום, €120 לשבוע, ועוד €20 לכל יום נוסף. לאדם."
-              price={skiDays > 0 ? `${eur(equipCost(skiDays))} לאדם${hasDates ? ` · ${skiDays} ימים` : ""}` : "מ-€30 לאדם"}>
+              price={skiDays > 0 ? `${eur(equipCost(skiDays))} לאדם${hasDates ? ` · ${skiDays} ימים` : ""}${guests > 1 ? ` · ${eur(equipCost(skiDays) * guests)} ל-${guests}` : ""}` : "מ-€30 לאדם"}>
               <QtyRow label="כמה אנשים צריכים ציוד?" qty={equipQty} setQty={setEquipQty} max={maxGuests} total={equipTotal} />
             </OptionCard>
           </Section>
@@ -884,7 +885,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
                 <OptionCard kind="radio" checked={cancel === "none"} onSelect={() => setShowNoCancel(true)} icon={<IconShield size={20} />}
                   title="בלי אפשרות ביטול" sub="מחיר מוזל. אי אפשר לבטל, ואין החזר כספי." price={`${eur(CANCEL_NONE)} הנחה לכל החבורה`} />
                 <OptionCard kind="radio" checked={cancel === "flexible"} onSelect={() => setCancel("flexible")} icon={<IconShield size={20} />}
-                  title="ביטול גמיש" sub="80% החזר עד שבוע לפני, 50% עד 24 שעות לפני ההמראה, ואחר כך אין החזר." price={`תוספת ${eur(CANCEL_FLEX)} לאדם`} />
+                  title="ביטול גמיש" sub="80% החזר עד שבוע לפני, 50% עד 24 שעות לפני ההמראה, ואחר כך אין החזר." price={`תוספת ${eur(CANCEL_FLEX)} לאדם${guests > 1 ? ` · ${eur(CANCEL_FLEX * guests)} ל-${guests}` : ""}`} />
               </div>
               <a href="/terms" target="_blank" rel="noopener noreferrer" className={`${btn.link} text-[15px] w-fit`}>מדיניות הביטולים בתקנון</a>
             </div>
@@ -927,7 +928,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
             {/* title, dates and guests */}
             {(editDates || !hasDates || laCimeNoMatch || datesTaken) ? (
               <div className="flex flex-col gap-3">
-                <span className="font-display font-bold text-[20px] text-ink">{anyAddOn ? "החבילה שלכם" : "המחיר שלכם"}</span>
+                <span className="font-display font-bold text-[20px] text-ink">{anyAddOn ? "סיכום החופשה שלכם" : "המחיר שלכם"}</span>
                 {!hasDates && <p className="text-[15px] font-bold text-ink -mt-1">{agency ? "בחרו שבוע, ונראה לכם את המחיר המדויק." : "בחרו תאריכים, ונראה לכם את המחיר המדויק."}</p>}
                 {hasDates && laCimeNoMatch && <p className="text-[15px] text-warn font-bold -mt-1">הדירה הזו מושכרת שבת עד שבת. התאריכים שבחרתם לא נופלים בשבוע פנוי, אז בחרו אחד מהשבועות.</p>}
                 {datesTaken && !editDates && <p className="text-[15px] text-danger font-bold -mt-1">הדירה כבר תפוסה בחלק מהתאריכים האלה. אפשר לבחור תאריכים אחרים.</p>}
@@ -939,7 +940,7 @@ function ApartmentPage({ initialApt, initialRules, initialPasses }: Initial) {
             ) : (
               <div className="flex items-start justify-between gap-3">
                 <div className="flex flex-col gap-1 min-w-0">
-                  <span className="font-display font-bold text-[20px] text-ink">{anyAddOn ? "החבילה שלכם" : "המחיר שלכם"}</span>
+                  <span className="font-display font-bold text-[20px] text-ink">{anyAddOn ? "סיכום החופשה שלכם" : "המחיר שלכם"}</span>
                   <span className="text-[14px] text-muted">{datesLine} · {guests} {guests === 1 ? "אדם" : "אנשים"}{weekMatch ? " · שבת עד שבת" : ""}</span>
                 </div>
                 <button type="button" onClick={() => setEditDates(true)} className={`${btn.link} text-[15px] min-h-[40px] shrink-0`}>שינוי</button>
