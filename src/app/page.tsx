@@ -84,12 +84,12 @@ const faqLd = {
 export default function Home() {
   const waHref = helperWaHref();
   return (
-    <div className="bg-white text-ink" dir="rtl">
+    <div className="bg-white text-ink overflow-x-clip" dir="rtl">
       <RevealOnScroll />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
 
       {/* ── HERO ─────────────────────────────────────────── */}
-      <section className="relative flex items-center min-h-[560px] md:min-h-[620px]">
+      <section className="relative overflow-hidden flex items-center min-h-[560px] md:min-h-[620px]">
         {/* WebP (a third of the JPEG), a portrait crop on phones, fetched first: the largest paint */}
         {/* Val Thorens, photo by Joan Oger on Unsplash (Unsplash License, free to use) */}
         <picture>
