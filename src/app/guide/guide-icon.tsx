@@ -45,12 +45,14 @@ const PATHS: Record<string, React.ReactNode> = {
   elder: <><circle cx="9.5" cy="4.5" r="2" /><path d="M9.5 7v6.5L7.5 21M9.5 13.5l2.5 7.5" /><path d="M9.5 9l4.5 3" /><path d="M14 12.5V21M14 12.5a1.8 1.8 0 0 1 3.6 0" /></>,
   // a warning triangle (off-piste and avalanche danger)
   warning: <><path d="M12 3 2 20h20z" /><path d="M12 10v4.5M12 17.2v.3" /></>,
+  // a clock (lift opening hours)
+  clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
   snowflake: <><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7" /><path d="M9.5 3.5L12 6l2.5-2.5M9.5 20.5L12 18l2.5 2.5" /><path d="M3.6 10.2l3.4-.9-.9-3.4M20.4 13.8l-3.4.9.9 3.4M3.6 13.8l3.4.9-.9 3.4M20.4 10.2l-3.4-.9.9-3.4" /></>,
 };
 
 const BY_EMOJI: Record<string, string> = {
   "🏔️": "mountain", "📅": "calendar", "✈️": "plane", "🎫": "ticket", "👨‍👩‍👧‍👦": "family",
-  "🍻": "glass", "🏠": "home", "☀️": "sun", "⛷️": "route", "⚖️": "compare", "👥": "group", "🎒": "bag", "🎿": "skis", "🕎": "menorah", "🌤️": "cloudSun", "💰": "coins", "🗺️": "map", "❄️": "snowflake", "🎓": "cap", "🛡️": "shield", "💑": "heart", "🛷": "sled", "🏂": "board", "🚗": "car", "🌙": "moon", "🕯️": "candles", "🌷": "tulip", "🧓": "elder", "⚠️": "warning",
+  "🍻": "glass", "🏠": "home", "☀️": "sun", "⛷️": "route", "⚖️": "compare", "👥": "group", "🎒": "bag", "🎿": "skis", "🕎": "menorah", "🌤️": "cloudSun", "💰": "coins", "🗺️": "map", "❄️": "snowflake", "🎓": "cap", "🛡️": "shield", "💑": "heart", "🛷": "sled", "🏂": "board", "🚗": "car", "🌙": "moon", "🕯️": "candles", "🌷": "tulip", "🧓": "elder", "⚠️": "warning", "⏰": "clock",
 };
 
 export default function GuideIcon({ emoji, size = 24 }: { emoji: string; size?: number }) {
